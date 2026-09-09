@@ -139,6 +139,27 @@ async function main() {
     // A technician may request a part but must not reach purchasing approval.
     { path: '/parts', as: 'technician', expect: [], redirects: true },
 
+    // Money and admin.
+    {
+      path: '/invoices',
+      as: 'owner',
+      expect: ['Invoices', 'Outstanding', 'INV-1042', 'Ahmed Hassan'],
+    },
+    { path: '/payments', as: 'owner', expect: ['Payments', 'How you were paid', 'Taken today'] },
+    {
+      path: '/reports',
+      as: 'owner',
+      expect: ['Operational reports', 'Passport coverage', 'Technicians', 'Clocked time'],
+    },
+    {
+      path: '/settings',
+      as: 'owner',
+      expect: ['Settings', 'Hillside Motors', 'Tax rates', 'Inspection templates'],
+    },
+    { path: '/audit', as: 'owner', expect: ['Audit log', 'immutable at the database level'] },
+    // A bookkeeper reaches the money pages but not the diary.
+    { path: '/invoices', as: 'bookkeeper', expect: ['Invoices'] },
+
     // Role segregation: a technician reaching a workshop URL is redirected.
     { path: '/dashboard', as: 'technician', expect: [], redirects: true },
     { path: '/dashboard', as: 'anon', expect: [], redirects: true },

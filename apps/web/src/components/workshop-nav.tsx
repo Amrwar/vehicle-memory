@@ -54,13 +54,8 @@ const GROUPS: Group[] = [
       { href: '/purchasing', label: 'Purchasing', permission: 'purchase:request' },
     ],
   },
-  {
-    label: 'Finance',
-    items: [
-      { href: '/ledger', label: 'Ledger', permission: 'ledger:read' },
-      { href: '/financials', label: 'Financials', permission: 'report:financial' },
-    ],
-  },
+  // Finance (ledger, financial statements) is Phase 3. The group returns when
+  // the pages exist; a sidebar entry that 404s is worse than an absent one.
   {
     label: 'Admin',
     items: [
