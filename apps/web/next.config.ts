@@ -12,8 +12,6 @@ const config: NextConfig = {
 
   typedRoutes: false,
 
-  eslint: { ignoreDuringBuilds: true },
-
   async headers() {
     return [
       {

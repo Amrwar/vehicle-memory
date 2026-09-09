@@ -192,8 +192,12 @@ jobs:
 
       - name: Check for committed secrets
         run: |
+          # Values that declare themselves placeholders are filtered out rather
+          # than excluding whole files, so a real secret committed to the
+          # Dockerfile would still be caught.
           if git grep -nIE '(AUTH_SECRET|LEDGER_CHAIN_SALT|PUBLIC_LINK_SECRET)=[A-Za-z0-9+/_-]{16,}' \
-               -- ':!.env.example' ':!.github/workflows'; then
+               -- ':!.env.example' ':!.github/workflows' \
+             | grep -viE 'placeholder|replace-me|build-time'; then
             echo "::error::A secret appears to be committed."
             exit 1
           fi
