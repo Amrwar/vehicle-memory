@@ -117,9 +117,7 @@ describe('balance enforcement', () => {
 
   it('rejects a line carrying both a debit and a credit', () => {
     expect(() =>
-      assertBalanced(
-        entry([{ accountCode: '1000', debit: gbp('10.00'), credit: gbp('10.00') }]),
-      ),
+      assertBalanced(entry([{ accountCode: '1000', debit: gbp('10.00'), credit: gbp('10.00') }])),
     ).toThrow(/debit and a credit/);
   });
 
@@ -193,8 +191,12 @@ describe('parts consumed', () => {
       cost: gbp('498.00'),
       at: new Date(),
     });
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.COGS_PARTS)!.debit)).toBe('498.00');
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.STOCK)!.credit)).toBe('498.00');
+    expect(
+      toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.COGS_PARTS)!.debit),
+    ).toBe('498.00');
+    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.STOCK)!.credit)).toBe(
+      '498.00',
+    );
   });
 });
 
@@ -249,9 +251,15 @@ describe('goods received', () => {
       receivedAt: new Date(),
     });
 
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.STOCK)!.debit)).toBe('498.00');
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.TAX_RECEIVABLE)!.debit)).toBe('99.60');
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.PAYABLE)!.credit)).toBe('597.60');
+    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.STOCK)!.debit)).toBe(
+      '498.00',
+    );
+    expect(
+      toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.TAX_RECEIVABLE)!.debit),
+    ).toBe('99.60');
+    expect(
+      toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.PAYABLE)!.credit),
+    ).toBe('597.60');
   });
 
   it('clears the payable when the bill is paid', () => {
@@ -304,8 +312,12 @@ describe('credit note', () => {
       issuedAt: new Date(),
     });
 
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.PARTS_REVENUE)!.debit)).toBe('410.00');
-    expect(toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.RECEIVABLE)!.credit)).toBe('492.00');
+    expect(
+      toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.PARTS_REVENUE)!.debit),
+    ).toBe('410.00');
+    expect(
+      toDecimalString(posted.lines.find((l) => l.accountCode === ACCOUNT.RECEIVABLE)!.credit),
+    ).toBe('492.00');
   });
 });
 
@@ -496,10 +508,34 @@ describe('ageing', () => {
   it('totals each bucket and flags what is worth chasing today', () => {
     const analysis = ageAnalysis(
       [
-        { id: '1', reference: 'INV-1', partyName: 'A', outstanding: gbp('100.00'), dueAt: daysBefore(-2) },
-        { id: '2', reference: 'INV-2', partyName: 'B', outstanding: gbp('200.00'), dueAt: daysBefore(20) },
-        { id: '3', reference: 'INV-3', partyName: 'C', outstanding: gbp('300.00'), dueAt: daysBefore(70) },
-        { id: '4', reference: 'INV-4', partyName: 'D', outstanding: gbp('400.00'), dueAt: daysBefore(200) },
+        {
+          id: '1',
+          reference: 'INV-1',
+          partyName: 'A',
+          outstanding: gbp('100.00'),
+          dueAt: daysBefore(-2),
+        },
+        {
+          id: '2',
+          reference: 'INV-2',
+          partyName: 'B',
+          outstanding: gbp('200.00'),
+          dueAt: daysBefore(20),
+        },
+        {
+          id: '3',
+          reference: 'INV-3',
+          partyName: 'C',
+          outstanding: gbp('300.00'),
+          dueAt: daysBefore(70),
+        },
+        {
+          id: '4',
+          reference: 'INV-4',
+          partyName: 'D',
+          outstanding: gbp('400.00'),
+          dueAt: daysBefore(200),
+        },
       ],
       asOf,
     );
@@ -514,8 +550,20 @@ describe('ageing', () => {
   it('lists the oldest debt first', () => {
     const analysis = ageAnalysis(
       [
-        { id: '1', reference: 'A', partyName: 'A', outstanding: gbp('10.00'), dueAt: daysBefore(5) },
-        { id: '2', reference: 'B', partyName: 'B', outstanding: gbp('10.00'), dueAt: daysBefore(90) },
+        {
+          id: '1',
+          reference: 'A',
+          partyName: 'A',
+          outstanding: gbp('10.00'),
+          dueAt: daysBefore(5),
+        },
+        {
+          id: '2',
+          reference: 'B',
+          partyName: 'B',
+          outstanding: gbp('10.00'),
+          dueAt: daysBefore(90),
+        },
       ],
       asOf,
     );

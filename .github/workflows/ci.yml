@@ -47,6 +47,12 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # Colour is not a matter of taste here. This resolves the design tokens
+      # through their var() chains and measures every pair a component puts
+      # together, in both themes, against WCAG AA.
+      - name: Contrast, both themes
+        run: npm run audit:theme
+
   # -------------------------------------------------------------------------
   # Domain tests. No database: packages/core imports nothing (ADR-0003).
   # -------------------------------------------------------------------------
@@ -125,6 +131,11 @@ jobs:
         run: |
           npm run db:seed
           npx tsx infra/scripts/verify-inventory.ts
+
+      # A ledger that does not balance is worse than no ledger, because every
+      # figure derived from it still looks like a number.
+      - name: Verify the books balance
+        run: npx tsx infra/scripts/verify-ledger.ts
 
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.

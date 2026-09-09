@@ -91,9 +91,7 @@ export async function postEntry(
     });
 
     const byCode = new Map(accounts.map((account) => [account.code, account.id]));
-    const missing = draft.lines
-      .map((line) => line.accountCode)
-      .filter((code) => !byCode.has(code));
+    const missing = draft.lines.map((line) => line.accountCode).filter((code) => !byCode.has(code));
 
     if (missing.length > 0) {
       throw new LedgerError(

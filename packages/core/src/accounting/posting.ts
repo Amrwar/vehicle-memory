@@ -140,10 +140,7 @@ export interface InvoicePostingInput {
  */
 export function postInvoiceIssued(input: InvoicePostingInput): JournalEntryDraft {
   const currency = input.labourNet.currency;
-  const receivable = add(
-    add(add(input.labourNet, input.partsNet), input.feeNet),
-    input.taxTotal,
-  );
+  const receivable = add(add(add(input.labourNet, input.partsNet), input.feeNet), input.taxTotal);
 
   return finalise({
     reference: input.invoiceNumber,
@@ -190,13 +187,7 @@ export function postPartsConsumed(input: {
    --------------------------------------------------------------------------- */
 
 export type PaymentMethod =
-  | 'CASH'
-  | 'CARD'
-  | 'BANK_TRANSFER'
-  | 'ONLINE'
-  | 'CHEQUE'
-  | 'ACCOUNT'
-  | 'OTHER';
+  'CASH' | 'CARD' | 'BANK_TRANSFER' | 'ONLINE' | 'CHEQUE' | 'ACCOUNT' | 'OTHER';
 
 /** Cash goes to the cash account; everything else lands in the bank. */
 export function accountForMethod(method: PaymentMethod): string {
@@ -339,10 +330,7 @@ export function postCreditNote(input: {
   reason: string;
   issuedAt: Date;
 }): JournalEntryDraft {
-  const receivable = add(
-    add(add(input.labourNet, input.partsNet), input.feeNet),
-    input.taxTotal,
-  );
+  const receivable = add(add(add(input.labourNet, input.partsNet), input.feeNet), input.taxTotal);
 
   return finalise({
     reference: input.number,
@@ -410,10 +398,7 @@ export interface JobProfit {
 
 export function jobProfit(input: JobProfitInput): JobProfit {
   const currency = input.currency ?? input.labourRevenue.currency;
-  const revenue = sum(
-    [input.labourRevenue, input.partsRevenue, input.feeRevenue],
-    currency,
-  );
+  const revenue = sum([input.labourRevenue, input.partsRevenue, input.feeRevenue], currency);
   const grossProfit = subtract(subtract(revenue, input.partsCost), input.labourCost);
 
   return {

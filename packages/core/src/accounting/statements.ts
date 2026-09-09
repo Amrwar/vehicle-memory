@@ -71,15 +71,18 @@ export function trialBalance(
   const rows = [...byAccount.values()]
     .map((row) => ({
       ...row,
-      balance: money(
-        signedBalance(row.accountType, row.debit.minor, row.credit.minor),
-        currency,
-      ),
+      balance: money(signedBalance(row.accountType, row.debit.minor, row.credit.minor), currency),
     }))
     .sort((a, b) => a.accountCode.localeCompare(b.accountCode));
 
-  const totalDebits = sum(rows.map((row) => row.debit), currency);
-  const totalCredits = sum(rows.map((row) => row.credit), currency);
+  const totalDebits = sum(
+    rows.map((row) => row.debit),
+    currency,
+  );
+  const totalCredits = sum(
+    rows.map((row) => row.credit),
+    currency,
+  );
 
   return {
     rows,
@@ -135,9 +138,18 @@ export function profitAndLoss(
   const costOfSales = expenses.filter((row) => isCostOfSales(row.accountCode)).map(toLine);
   const overheads = expenses.filter((row) => !isCostOfSales(row.accountCode)).map(toLine);
 
-  const totalRevenue = sum(revenue.map((line) => line.amount), currency);
-  const totalCostOfSales = sum(costOfSales.map((line) => line.amount), currency);
-  const totalOverheads = sum(overheads.map((line) => line.amount), currency);
+  const totalRevenue = sum(
+    revenue.map((line) => line.amount),
+    currency,
+  );
+  const totalCostOfSales = sum(
+    costOfSales.map((line) => line.amount),
+    currency,
+  );
+  const totalOverheads = sum(
+    overheads.map((line) => line.amount),
+    currency,
+  );
 
   const grossProfit = subtract(totalRevenue, totalCostOfSales);
   const netProfit = subtract(grossProfit, totalOverheads);
@@ -193,13 +205,25 @@ export function balanceSheet(
   const liabilities = balance.rows.filter((row) => row.accountType === 'LIABILITY').map(toLine);
   const equity = balance.rows.filter((row) => row.accountType === 'EQUITY').map(toLine);
 
-  const totalAssets = sum(assets.map((line) => line.amount), currency);
-  const totalLiabilities = sum(liabilities.map((line) => line.amount), currency);
+  const totalAssets = sum(
+    assets.map((line) => line.amount),
+    currency,
+  );
+  const totalLiabilities = sum(
+    liabilities.map((line) => line.amount),
+    currency,
+  );
 
   // Profit earned but not yet closed to retained earnings still belongs to the
   // owners, so it counts as equity. Omitting it is the usual reason a balance
   // sheet fails to balance before period close.
-  const totalEquity = add(sum(equity.map((line) => line.amount), currency), pl.netProfit);
+  const totalEquity = add(
+    sum(
+      equity.map((line) => line.amount),
+      currency,
+    ),
+    pl.netProfit,
+  );
 
   const difference = subtract(totalAssets, add(totalLiabilities, totalEquity));
 
@@ -295,10 +319,7 @@ export interface TaxReturn {
   owed: boolean;
 }
 
-export function taxReturn(
-  lines: readonly PostedLine[],
-  currency: Currency = 'GBP',
-): TaxReturn {
+export function taxReturn(lines: readonly PostedLine[], currency: Currency = 'GBP'): TaxReturn {
   const balance = trialBalance(lines, currency);
 
   const outputTax =
@@ -312,11 +333,7 @@ export function taxReturn(
 }
 
 /** Filters lines to a period, for a statement covering a date range. */
-export function withinPeriod(
-  lines: readonly PostedLine[],
-  from: Date,
-  to: Date,
-): PostedLine[] {
+export function withinPeriod(lines: readonly PostedLine[], from: Date, to: Date): PostedLine[] {
   return lines.filter((line) => line.postedAt >= from && line.postedAt <= to);
 }
 
