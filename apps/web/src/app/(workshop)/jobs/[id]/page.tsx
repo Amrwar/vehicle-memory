@@ -2,6 +2,8 @@ import {
   calculateTotals,
   humanise,
   type JobStatus,
+  jobProfit,
+  money,
   progressFor,
   summarise,
   toneFor,
@@ -34,7 +36,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { requireSession } from '@/lib/guard';
+import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +61,7 @@ export async function generateMetadata({
  */
 export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { db } = await requireSession('job:read');
+  const { db, user } = await requireSession('job:read');
 
   const job = await db.job.findUnique({
     where: { id },
@@ -136,6 +138,41 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const invoice = job.invoices[0];
 
   const clockedMinutes = job.timeEntries.reduce((total, entry) => total + (entry.minutes ?? 0), 0);
+
+  // Profitability. FR-613.
+  //
+  // Labour cost comes from clocked time at each technician's own rate, not
+  // from an average: the whole point of the figure is to show when a job was
+  // quoted at one skill level and done at another. Parts cost is the weighted
+  // average carried on the line, which is what the stock was actually worth.
+  const labourCostMinor = job.timeEntries.reduce(
+    (total, entry) =>
+      total + Math.round(((entry.minutes ?? 0) / 60) * Number(entry.costRate ?? 0) * 100),
+    0,
+  );
+
+  const netOf = (kind: 'LABOUR' | 'PART' | 'FEE') =>
+    lines.reduce(
+      (total, line, index) => (line.kind === kind ? total + totals.lines[index]!.net.minor : total),
+      0,
+    );
+
+  const partsCostMinor = job.partLines.reduce(
+    (total, line) => total + Math.round(Number(line.quantity) * Number(line.unitCost) * 100),
+    0,
+  );
+
+  const profit = jobProfit({
+    labourRevenue: money(netOf('LABOUR')),
+    partsRevenue: money(netOf('PART')),
+    feeRevenue: money(netOf('FEE')),
+    partsCost: money(partsCostMinor),
+    labourCost: money(labourCostMinor),
+  });
+
+  // A service advisor discussing price with a customer should not have the
+  // margin on screen. It is the owner's number, not the counter's.
+  const showsProfit = can(user.role, 'report:financial');
 
   const findings = inspection
     ? summarise(
@@ -611,6 +648,71 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
                     <span className="text-(--text-soft)">{check.checkedBy.name}</span>
                   </div>
                 ))}
+              </CardBody>
+            </Card>
+          ) : null}
+
+          {showsProfit ? (
+            <Card>
+              <CardHeader
+                title="Profitability"
+                description="Clocked time at cost, parts at what the stock was worth"
+              />
+              <CardBody className="grid gap-2 text-[13px]">
+                <div className="flex justify-between">
+                  <span className="text-(--text-faint)">Revenue, net of tax</span>
+                  <Money amount={toNumber(profit.revenue)} />
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-(--text-faint)">Parts at cost</span>
+                  <span className="tabular text-(--text-soft)">
+                    &minus;
+                    <Money amount={toNumber(profit.partsCost)} />
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-(--text-faint)">
+                    Labour at cost
+                    <span className="ml-1 text-[11px]">
+                      {(clockedMinutes / 60).toFixed(1)}h clocked
+                    </span>
+                  </span>
+                  <span className="tabular text-(--text-soft)">
+                    &minus;
+                    <Money amount={toNumber(profit.labourCost)} />
+                  </span>
+                </div>
+
+                <div className="mt-1 flex items-baseline justify-between border-t border-(--border) pt-2">
+                  <span className="font-medium">Gross profit</span>
+                  <span className="text-right">
+                    <Money
+                      amount={toNumber(profit.grossProfit)}
+                      className={`font-display text-[20px] font-semibold ${
+                        profit.grossProfit.minor < 0 ? 'text-(--danger)' : 'text-(--brand-text)'
+                      }`}
+                    />
+                    {profit.marginPct === null ? null : (
+                      <span className="tabular block text-[11px] text-(--text-faint)">
+                        {profit.marginPct}% margin
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                {profit.partsMarginPct !== null ? (
+                  <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
+                    Parts alone returned {profit.partsMarginPct}%. This is where margin leaks
+                    quietly: a discount given at the counter never shows up in the labour figure.
+                  </p>
+                ) : null}
+
+                {clockedMinutes === 0 ? (
+                  <p className="rounded-(--radius-sm) bg-(--warning-soft) px-2.5 py-2 text-[12px] leading-relaxed text-(--warning)">
+                    No time has been clocked against this job, so labour cost is zero and this
+                    margin is flattering. Treat it as revenue less parts, nothing more.
+                  </p>
+                ) : null}
               </CardBody>
             </Card>
           ) : null}

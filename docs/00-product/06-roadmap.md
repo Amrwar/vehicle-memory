@@ -97,6 +97,18 @@ The exact postings for every event are specified in
 **Why third.** You cannot post what has not happened. Phases 1 and 2 create the
 transactions; this phase gives them their financial consequence.
 
+**Status.** The ledger is built and posting. Chart of accounts, double-entry
+enforced in the database, automatic posting from seven operational events,
+fiscal periods with a closed-period guard, trial balance, profit and loss,
+balance sheet, aged debtors and creditors, VAT position, and job
+profitability. `npm run verify:ledger` proves both statements balance and that
+the aged debtors report ties to the receivable account.
+
+Still open in this phase: bank accounts and reconciliation, expense capture,
+period close, and the accountant's sign-off named in the exit criteria. The
+sign-off is the one that cannot be automated, and it is the one that decides
+whether any of this is trusted.
+
 ### Phase 3.5 — Accounting integrations
 
 **Weeks 27–30, overlapping.** Xero and QuickBooks synchronisation, once there

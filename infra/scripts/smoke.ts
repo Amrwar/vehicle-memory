@@ -23,6 +23,8 @@ interface Check {
   expect: string[];
   /** Expect a redirect away rather than a rendered page. */
   redirects?: boolean;
+  /** Text that must NOT appear. Used for figures a role should never see. */
+  absent?: string[];
 }
 
 async function sessionFor(email: string): Promise<string> {
@@ -80,7 +82,16 @@ async function main() {
         'Front pads',
         'Estimate v1',
         'Waiting on the customer',
+        'Profitability',
+        'Labour at cost',
       ],
+    },
+    // The same job, seen from the counter: no margin on screen.
+    {
+      path: `/jobs/${job.id}`,
+      as: 'advisor',
+      expect: ['Brake system repair', 'Progress'],
+      absent: ['Profitability', 'Gross profit'],
     },
     {
       path: '/customers',
@@ -160,6 +171,41 @@ async function main() {
     // A bookkeeper reaches the money pages but not the diary.
     { path: '/invoices', as: 'bookkeeper', expect: ['Invoices'] },
 
+    // Phase 3: the ledger. "Balanced" is the assertion that matters — every
+    // other figure on these pages is derived from postings that balance.
+    {
+      path: '/ledger',
+      as: 'bookkeeper',
+      expect: [
+        'General ledger',
+        'Trial balance',
+        'Balanced',
+        'Accounts receivable',
+        'Stock on hand',
+      ],
+    },
+    {
+      path: '/ledger?view=journal',
+      as: 'bookkeeper',
+      expect: ['Journal', 'INV-1042', 'Opening balances brought forward', 'from Invoice'],
+    },
+    {
+      path: '/financials',
+      as: 'owner',
+      expect: [
+        'Financial statements',
+        'Profit and loss',
+        'Balance sheet',
+        'Gross profit',
+        'Aged debtors',
+        'INV-1036',
+        'Balanced',
+      ],
+    },
+    { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
+    // An advisor sees jobs but never a margin.
+    { path: '/ledger', as: 'advisor', expect: [], redirects: true },
+
     // Role segregation: a technician reaching a workshop URL is redirected.
     { path: '/dashboard', as: 'technician', expect: [], redirects: true },
     { path: '/dashboard', as: 'anon', expect: [], redirects: true },
@@ -193,6 +239,13 @@ async function main() {
 
     const html = await response.text();
     const missing = check.expect.filter((needle) => !html.includes(needle));
+    const leaked = (check.absent ?? []).filter((needle) => html.includes(needle));
+
+    if (leaked.length > 0) {
+      console.error(`  FAIL  ${check.as.padEnd(11)} ${check.path} leaked: ${leaked.join(', ')}`);
+      failures += 1;
+      continue;
+    }
 
     if (missing.length === 0) {
       console.info(

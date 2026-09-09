@@ -7,6 +7,50 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 3 - Finance and ERP.**
+
+- Chart of accounts, eighteen accounts transcribed from the accounting model
+  document so the specification and the code stay identical
+- General ledger with double-entry enforced in the database, not merely in
+  the application: a line that is both a debit and a credit is refused by a
+  check constraint, and an entry whose lines do not balance is refused by a
+  deferred constraint trigger at commit
+- Automatic posting from operational events: invoice issued, parts consumed,
+  payment received, goods received, supplier bill paid, stock adjustment,
+  credit note. Revenue splits by kind, tax posts separately, and a deposit is
+  a liability until the work is invoiced rather than revenue on receipt.
+- Posting is idempotent on the source document. The outbox is at-least-once,
+  so a redelivered event must not double-count revenue.
+- Stock is debited on goods receipt rather than on the supplier's invoice.
+  Those two dates are often weeks apart and the shelf is the truth.
+- Fiscal periods, with a closed period refusing new postings
+- Trial balance, profit and loss, balance sheet, aged debtors and creditors,
+  and a VAT position, all derived from posted lines at request time rather
+  than stored, so a statement cannot drift from the entries behind it
+- Job profitability from clocked time at each technician's own cost rate and
+  parts at weighted average cost, visible to the roles that carry financial
+  permission and to nobody else
+- 50 further domain tests, and a ledger check that proves both statements
+  balance, that every entry balances individually, that the aged debtors
+  report ties to the receivable account, and that the database still refuses
+  the two violations it is supposed to refuse
+
+**Both themes, and speed.**
+
+- A light/dark/system theme control on every surface, with the choice replayed
+  before first paint so there is no flash
+- A contrast audit that resolves the design tokens through their var() chains
+  and measures thirty-three real pairs in both themes. It found seven failures
+  that looked fine on screen, including the primary button's hover state at
+  3.37:1 in dark and the warning colour at 4.03:1 in light. All pairs now
+  clear WCAG AA.
+- Route-level loading states, so a click changes the screen on the next frame
+  instead of after the server responds
+- Fonts self-hosted through next/font, removing a render-blocking third-party
+  stylesheet from every page load
+- Median warm server response across the workshop pages fell from 276ms to
+  192ms
+
 **Phase 2 - Inventory and Procurement.**
 
 - Parts catalogue with categories, warehouses, bins and stock levels

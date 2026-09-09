@@ -1,6 +1,6 @@
 # Traceability Matrix
 
-Every Phase 1 requirement traced from statement to implementation to test. A
+Every shipped requirement traced from statement to implementation to test. A
 requirement with no test is not a requirement, it is a hope.
 
 **How to use this.** When a requirement changes, this table names everything
@@ -122,6 +122,29 @@ recorded · **Planned** in a later phase.
 | FR-1107 | —     | `SupplierBill`               | `matchBill()`         | `inventory.test.ts`   | Done       |
 | FR-1108 | —     | `PurchaseRequest.jobId`      | shortfall path        | `verify-inventory.ts` | Done       |
 
+## Finance and ledger
+
+| Req     | Story | Schema                           | Implementation              | Test                 | Status |
+| ------- | ----- | -------------------------------- | --------------------------- | -------------------- | ------ |
+| FR-1201 | —     | `Account`                        | `STANDARD_CHART`            | `accounting.test.ts` | Done   |
+| FR-1202 | —     | `JournalEntry`, `JournalLine`    | `postEntry()`               | `verify-ledger.ts`   | Done   |
+| FR-1203 | —     | `journal_lines_balance`          | deferred constraint trigger | `verify-ledger.ts`   | Done   |
+| FR-1204 | —     | `journal_lines_debit_xor_credit` | check constraint            | `verify-ledger.ts`   | Done   |
+| FR-1205 | —     | `JournalEntry.sourceType`        | posting rules               | `accounting.test.ts` | Done   |
+| FR-1206 | —     | —                                | `trialBalance()`            | `accounting.test.ts` | Done   |
+| FR-1207 | —     | —                                | `profitAndLoss()`           | `accounting.test.ts` | Done   |
+| FR-1208 | —     | —                                | `balanceSheet()`            | `accounting.test.ts` | Done   |
+| FR-1209 | —     | `Invoice`, `SupplierBill`        | `ageAnalysis()`             | `verify-ledger.ts`   | Done   |
+| FR-1210 | —     | `TaxRate`                        | `taxReturn()`               | `accounting.test.ts` | Done   |
+| FR-1211 | —     | `FiscalPeriod.isClosed`          | `postEntry()` period guard  | `verify-ledger.ts`   | Done   |
+| FR-1212 | —     | `JournalEntry.reversesId`        | `reverse()`                 | `accounting.test.ts` | Done   |
+| FR-613  | —     | `TimeEntry.costRate`             | `jobProfit()`               | `smoke.ts`           | Done   |
+
+Bank reconciliation, expense capture and period close are the remainder of
+Phase 3 and are not yet built. They are absent from this table rather than
+listed as planned, because a matrix that lists intentions stops being a record
+of what is true.
+
 ---
 
 ## Coverage summary
@@ -136,7 +159,8 @@ recorded · **Planned** in a later phase.
 | Invoice and payment       | 8                       | 8       | 8              |
 | Portal, dashboard, notify | 14                      | 14      | 11             |
 | Inventory and procurement | 18                      | 18      | 18             |
-| **Total**                 | **110**                 | **110** | **105 (95%)**  |
+| Finance and ledger        | 13                      | 13      | 13             |
+| **Total**                 | **123**                 | **123** | **118 (96%)**  |
 
 The five without automated coverage are visual and interaction concerns
 verified by usability testing rather than assertion. They are named in the
