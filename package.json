@@ -2,7 +2,7 @@
   "name": "carnet",
   "version": "0.1.0",
   "private": true,
-  "description": "Carnet — a portable vehicle history that follows the car, with a workshop management and ERP platform built on top of it.",
+  "description": "Carnet \u2014 a portable vehicle history that follows the car, with a workshop management and ERP platform built on top of it.",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0",
@@ -29,6 +29,7 @@
     "verify:integrity": "tsx infra/scripts/verify-integrity.ts",
     "verify:inventory": "tsx infra/scripts/verify-inventory.ts",
     "verify:ledger": "tsx infra/scripts/verify-ledger.ts",
+    "verify:signup": "tsx infra/scripts/verify-signup.ts",
     "smoke": "tsx infra/scripts/smoke.ts",
     "timings": "tsx infra/scripts/timings.ts",
     "db:generate": "npm run generate --workspace=@carnet/db",

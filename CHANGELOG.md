@@ -7,6 +7,43 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 4.5 - The front door.**
+
+- A marketing home page written for somebody who runs a workshop and has ten
+  minutes: what breaks today, what the passport does about it, what the system
+  covers, what it costs, how to start
+- Published pricing, priced per bay rather than per user. Charging per seat
+  bills a workshop for giving its own staff access, which pushes people into
+  sharing a login and makes every record say the wrong person did the work.
+  Staff accounts are unlimited on every tier.
+- Plan definitions live in `packages/core/src/billing/plans.ts` and are what
+  the pricing page renders and what the application enforces. A price list kept
+  separately from the limits it describes drifts within a month, and the first
+  person to notice is a customer promised something the system refuses to do.
+- Sign-up creates an organisation, not an account. The workshop, a location
+  with bays, VAT rates, job types, document sequences, a parts store, the owner
+  membership and an employee record are created in one transaction. A
+  half-created workshop is unrecoverable for the person it happens to: they can
+  sign in, see a broken shell, and cannot retry because their email is taken.
+- 41 further domain tests, and `verify-signup.ts` which creates a workshop
+  against a real database, asserts every piece of it, and removes it again
+
+**Fixed.**
+
+- Sign out has been returning 404 since Phase 1. The route file sat at
+  `src/app/apps/web/src/app/api/sign-out/`, created by a mkdir with a full path,
+  so it served a URL nothing posted to. Every sign-out form pointed at
+  `/api/sign-out`, which did not exist.
+- The audit log's immutability trigger made erasure impossible. Both of its
+  foreign keys are declared ON DELETE SET NULL, and a SET NULL cascade is an
+  UPDATE, which the trigger refused. Since every organisation is audited on
+  creation, no organisation and no user could ever be deleted. The trigger now
+  permits exactly the update a cascade performs, clearing a reference to a
+  deleted party, and still refuses everything else including DELETE. What
+  happened is still unrewritable; who it happened to can now be erased.
+- The inventory check assumed a single warehouse. Once the demo had two sites
+  it was measuring a store it had never written to.
+
 **Phase 3 - Finance and ERP.**
 
 - Chart of accounts, eighteen accounts transcribed from the accounting model

@@ -1,0 +1,198 @@
+import {
+  type PlanId,
+  planFor,
+  type SignupInput,
+  type SignupProblem,
+  trialEndsOn,
+  uniqueSlug,
+  validateSignup,
+} from '@carnet/core';
+import { prisma } from '@carnet/db';
+
+import { hashPassword } from './auth';
+
+/**
+ * Opening a workshop.
+ *
+ * The first object created is the organisation, not the person. Everything in
+ * this system hangs off an organisation, so an account that exists without one
+ * is a row with nowhere to live, and every query that assumes tenancy has to
+ * learn about the exception.
+ *
+ * Everything below happens in one transaction. A half-created workshop, with a
+ * user but no membership or a location but no tax rate, is worse than a failed
+ * sign-up: the person can sign in, sees a broken shell, and cannot try again
+ * because their email is taken.
+ */
+
+export interface SignupOutcome {
+  ok: boolean;
+  problems: SignupProblem[];
+  orgSlug?: string;
+  /** Present on success. The caller starts the session, so this function can
+   *  be exercised outside a request. Anything that needs `cookies()` cannot be
+   *  tested against a real database, and this is the one path where a
+   *  half-created workshop is unrecoverable for the person it happens to. */
+  userId?: string;
+}
+
+/**
+ * A new workshop needs enough furniture to take a booking on day one.
+ *
+ * Not a blank slate. A workshop that signs up and finds no tax rate, no job
+ * types and no bays has to do configuration before it can do work, and most
+ * people abandon at exactly that point. These are defaults to edit, not
+ * decisions made for them.
+ */
+const DEFAULT_JOB_TYPES = [
+  { name: 'Major service', colour: '#1f6167', defaultHours: 3, requiresQualityCheck: true },
+  { name: 'Interim service', colour: '#2f7a80', defaultHours: 1.5, requiresQualityCheck: false },
+  { name: 'Brake repair', colour: '#973030', defaultHours: 3, requiresQualityCheck: true },
+  { name: 'Diagnostics', colour: '#9a6d24', defaultHours: 1, requiresQualityCheck: false },
+  { name: 'Tyres', colour: '#1f5f8b', defaultHours: 1, requiresQualityCheck: false },
+  { name: 'MOT preparation', colour: '#2c6e4b', defaultHours: 1, requiresQualityCheck: false },
+];
+
+export async function createWorkshop(
+  input: SignupInput,
+  options: { plan?: PlanId; acceptConsumerEmail?: boolean } = {},
+): Promise<SignupOutcome> {
+  const problems = validateSignup(input);
+
+  // The consumer-email complaint is advice, not a refusal. Plenty of small
+  // garages genuinely run on a free address, and blocking them would be
+  // choosing a tidy database over a real customer.
+  const blocking = options.acceptConsumerEmail
+    ? problems.filter((problem) => !problem.message.includes('personal address'))
+    : problems;
+
+  if (blocking.length > 0) return { ok: false, problems: blocking };
+
+  const email = input.email.trim().toLowerCase();
+
+  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (existing) {
+    return {
+      ok: false,
+      problems: [
+        {
+          field: 'email',
+          message: 'There is already an account on that address. Sign in instead.',
+        },
+      ],
+    };
+  }
+
+  const taken = new Set(
+    (await prisma.organization.findMany({ select: { slug: true } })).map((org) => org.slug),
+  );
+
+  const slug = uniqueSlug(input.workshopName, taken);
+  const plan = planFor(options.plan ?? 'CORE').id;
+  const passwordHash = await hashPassword(input.password);
+
+  const userId = await prisma.$transaction(async (tx) => {
+    const org = await tx.organization.create({
+      data: {
+        slug,
+        name: input.workshopName.trim(),
+        email,
+        phone: input.phone?.trim() || null,
+        plan,
+        locations: {
+          create: {
+            name: `${input.workshopName.trim()} — main`,
+            code: 'MAIN',
+            isDefault: true,
+            dailyCapacityHours: 32,
+            bays: {
+              create: Array.from({ length: 2 }, (_, index) => ({
+                name: `Bay ${index + 1}`,
+                code: `B${index + 1}`,
+                sortOrder: index + 1,
+              })),
+            },
+          },
+        },
+        taxRates: {
+          create: [
+            { name: 'VAT 20%', rate: 20, isDefault: true },
+            { name: 'Zero rated', rate: 0 },
+          ],
+        },
+        jobTypes: { create: DEFAULT_JOB_TYPES },
+        sequences: {
+          create: [
+            { kind: 'JOB', next: 1 },
+            { kind: 'INVOICE', prefix: 'INV-', next: 1 },
+            { kind: 'ESTIMATE', prefix: 'EST-', next: 1 },
+          ],
+        },
+      },
+      include: { locations: true },
+    });
+
+    const location = org.locations[0]!;
+
+    // A store, so parts have somewhere to be from the first receipt.
+    await tx.warehouse.create({
+      data: {
+        orgId: org.id,
+        locationId: location.id,
+        name: 'Main store',
+        code: 'MAIN',
+        isDefault: true,
+      },
+    });
+
+    const user = await tx.user.create({
+      data: {
+        email,
+        name: input.contactName.trim(),
+        passwordHash,
+        // Verification is a later step, not a gate on getting started. A
+        // workshop that cannot look around until it finds an email is a
+        // workshop that goes back to the spreadsheet.
+        emailVerifiedAt: null,
+        memberships: {
+          create: { orgId: org.id, role: 'OWNER', locationId: location.id },
+        },
+      },
+    });
+
+    // The person signing up is also an employee, so their own time costs
+    // something from day one rather than being invisible until somebody
+    // notices the labour figures are too good.
+    await tx.employee.create({
+      data: {
+        orgId: org.id,
+        userId: user.id,
+        locationId: location.id,
+        reference: 'EMP-001',
+        displayName: input.contactName.trim(),
+        jobTitle: 'Owner',
+        startedOn: new Date(),
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        orgId: org.id,
+        actorUserId: user.id,
+        action: 'org.created',
+        entityType: 'Organization',
+        entityId: org.id,
+        after: {
+          slug,
+          plan,
+          sites: input.sites,
+          trialEndsOn: trialEndsOn().toISOString(),
+        } as never,
+      },
+    });
+
+    return user.id;
+  });
+
+  return { ok: true, problems: [], orgSlug: slug, userId };
+}

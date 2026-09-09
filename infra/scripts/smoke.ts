@@ -76,6 +76,37 @@ async function main() {
 
   const checks: Check[] = [
     { path: '/login', as: 'anon', expect: ['Sign in', 'The history should belong to the car'] },
+
+    // The front door. Public, indexed, and the only pages a stranger meets.
+    {
+      path: '/',
+      as: 'anon',
+      expect: [
+        'The history should belong to the car',
+        'A record the vehicle keeps',
+        'Start a 30-day trial',
+        'Priced per bay',
+      ],
+    },
+    {
+      path: '/pricing',
+      as: 'anon',
+      expect: ['Per bay, per month', 'Core', 'Complete', 'Group', 'Staff accounts', 'No limit'],
+    },
+    {
+      path: '/pricing?billing=monthly',
+      as: 'anon',
+      expect: ['Billed monthly'],
+    },
+    {
+      path: '/signup',
+      as: 'anon',
+      expect: ['Open your workshop', 'You are opening a workshop, not an account', 'Workshop name'],
+    },
+    // The plan carries through from the pricing page.
+    { path: '/signup?plan=group', as: 'anon', expect: ['30 days on Group'] },
+    // Signed in, the front door offers the workshop rather than a trial.
+    { path: '/', as: 'owner', expect: ['Open workshop'] },
     {
       path: '/dashboard',
       as: 'owner',

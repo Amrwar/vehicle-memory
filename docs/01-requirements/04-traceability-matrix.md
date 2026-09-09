@@ -145,6 +145,39 @@ Phase 3 and are not yet built. They are absent from this table rather than
 listed as planned, because a matrix that lists intentions stops being a record
 of what is true.
 
+## People and multi-site
+
+| Req     | Story | Schema                            | Implementation              | Test                | Status |
+| ------- | ----- | --------------------------------- | --------------------------- | ------------------- | ------ |
+| FR-1601 | —     | `Employee`                        | `/people`                   | `smoke.ts`          | Done   |
+| FR-1602 | —     | `PayRate`, `pay_rates_no_overlap` | `rateOn()`, `costOfHours()` | `people.test.ts`    | Done   |
+| FR-1603 | —     | `AttendanceRecord`                | `attendedMinutes()`         | `people.test.ts`    | Done   |
+| FR-1604 | —     | —                                 | `productivityFor()`         | `people.test.ts`    | Done   |
+| FR-1605 | —     | `timesheets_paid_are_final`       | `assertTimesheetTransition` | `people.test.ts`    | Done   |
+| FR-1606 | —     | `Absence`                         | `/people/[id]`              | `smoke.ts`          | Done   |
+| FR-1607 | —     | `Certification`                   | `expiringCertifications()`  | `smoke.ts`          | Done   |
+| FR-1608 | —     | `CommissionScheme`, bands         | `calculateCommission()`     | `people.test.ts`    | Done   |
+| FR-1701 | —     | `Membership.locationId`           | `scopeFor()`                | `multisite.test.ts` | Done   |
+| FR-1702 | —     | `StockTransfer`, `_lines`         | `/transfers`                | `multisite.test.ts` | Done   |
+| FR-1703 | —     | —                                 | `consolidate()`             | `multisite.test.ts` | Done   |
+| FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
+| FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
+
+## Front door and billing
+
+| Req     | Story | Schema         | Implementation                     | Test               | Status |
+| ------- | ----- | -------------- | ---------------------------------- | ------------------ | ------ |
+| FR-1801 | —     | —              | `/` marketing home                 | `smoke.ts`         | Done   |
+| FR-1802 | —     | —              | `/pricing`, rendered from `PLANS`  | `smoke.ts`         | Done   |
+| FR-1803 | —     | `Organization` | `createWorkshop()`                 | `verify-signup.ts` | Done   |
+| FR-1804 | —     | `OrgPlan`      | `assertFeature()`, `assertUsage()` | `billing.test.ts`  | Done   |
+| FR-1805 | —     | `AuditLog`     | `org.created` on sign-up           | `verify-signup.ts` | Done   |
+| FR-1806 | —     | `audit_logs`   | erasure permitted, rewrite refused | `verify-signup.ts` | Done   |
+
+Payment collection is deliberately absent: the trial takes no card, and taking
+one is Phase 4.7 alongside point of sale. A billing page that collects card
+details without a provider behind it would be worse than not having one.
+
 ---
 
 ## Coverage summary
@@ -160,7 +193,9 @@ of what is true.
 | Portal, dashboard, notify | 14                      | 14      | 11             |
 | Inventory and procurement | 18                      | 18      | 18             |
 | Finance and ledger        | 13                      | 13      | 13             |
-| **Total**                 | **123**                 | **123** | **118 (96%)**  |
+| People and multi-site     | 13                      | 13      | 13             |
+| Front door and billing    | 6                       | 6       | 6              |
+| **Total**                 | **142**                 | **142** | **137 (96%)**  |
 
 The five without automated coverage are visual and interaction concerns
 verified by usability testing rather than assertion. They are named in the

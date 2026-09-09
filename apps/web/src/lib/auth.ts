@@ -119,26 +119,48 @@ export async function signIn(email: string, password: string): Promise<SignInRes
 
   const membership = user.memberships[0];
 
+  await startSession(user.id, { ip, userAgent });
+  await recordAttempt(email, ip, true);
+
+  return {
+    ok: true,
+    role: (membership?.role ?? 'CUSTOMER') as Role,
+    orgId: membership?.orgId ?? null,
+  };
+}
+
+/**
+ * Issues a session and sets the cookie.
+ *
+ * One place, used by signing in and by signing up. Two copies of this drift,
+ * and the copy that drifts is the one nobody looks at: a sign-up path that
+ * quietly sets a cookie without the secure flag, or with the wrong expiry, is
+ * not something a test notices.
+ */
+export async function startSession(
+  userId: string,
+  context: { ip?: string | null; userAgent?: string | null } = {},
+): Promise<void> {
+  const membership = await prisma.membership.findFirst({
+    where: { userId, isActive: true },
+    select: { orgId: true },
+  });
+
   const { token, tokenHash } = issueToken();
   const expiresAt = new Date(Date.now() + env().SESSION_TTL_HOURS * 3_600_000);
 
   await prisma.session.create({
     data: {
       tokenHash,
-      userId: user.id,
+      userId,
       orgId: membership?.orgId ?? null,
       expiresAt,
-      ip,
-      userAgent,
+      ip: context.ip ?? null,
+      userAgent: context.userAgent ?? null,
     },
   });
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { lastLoginAt: new Date() },
-  });
-
-  await recordAttempt(email, ip, true);
+  await prisma.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
 
   const store = await cookies();
   store.set(COOKIE, token, {
@@ -148,12 +170,6 @@ export async function signIn(email: string, password: string): Promise<SignInRes
     path: '/',
     expires: expiresAt,
   });
-
-  return {
-    ok: true,
-    role: (membership?.role ?? 'CUSTOMER') as Role,
-    orgId: membership?.orgId ?? null,
-  };
 }
 
 export async function signOut(): Promise<void> {

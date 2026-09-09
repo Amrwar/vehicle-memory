@@ -18,6 +18,24 @@ of them is out, regardless of how good an idea it is.
 H2 is the one that matters most. **If technicians do not record, the passport
 is empty, and without the passport this is just another workshop system.**
 
+## 2a. Where the product stands against this document
+
+The MVP defined below was delivered, and four further phases have shipped on
+top of it: inventory and procurement, the double-entry ledger and financial
+statements, people and multi-site, and the public front door with published
+pricing and organisation-creating sign-up.
+
+That means most of this document is now a record of what was decided rather
+than a plan for what to build. It is kept because the reasoning is still the
+reasoning, and because the hypotheses in section 2 have not yet been answered:
+nothing here has been in front of a real workshop for four weeks. Building more
+does not settle H1, H2 or H3, and it is worth being honest that shipping five
+phases is evidence of effort rather than evidence of fit.
+
+[Coverage map](08-coverage-map.md) lists every capability and its actual state.
+
+---
+
 ## 3. In scope for MVP
 
 ### 3.1 Foundation

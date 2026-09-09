@@ -190,6 +190,33 @@ because every record in the system hangs off the organisation.
 
 ---
 
+## Phase 4.6 — Administration and the customer's journey
+
+**Weeks 31–36.**
+
+|           |                                                                                                       |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| **Entry** | Sign-up creates a workshop, so there is something to invite a colleague into.                         |
+| **Exit**  | A customer books, chooses, confirms and is kept informed without a member of staff touching anything. |
+
+**Scope, administration.** Inviting a colleague by email, accepting an
+invitation, changing somebody's role, moving somebody between sites, and
+deactivating a leaver without deleting their history. Today all of that takes a
+database write, which means in practice a workshop cannot add its second user.
+
+**Scope, the customer's journey.** The booking flow end to end: choose a
+service, choose the vehicle, choose a slot the diary genuinely has free, get a
+confirmation, then get told when the work moves. Plus a screen showing which
+service reminders are due and why, because a reminder engine nobody can inspect
+is indistinguishable from one that has quietly stopped.
+
+**Why these two together.** They are the same missing idea from two sides.
+Everything built so far assumes somebody is already inside the system and knows
+what they are doing. This phase is about the people who are not: the new hire
+who needs an account, and the customer who wants a Tuesday.
+
+---
+
 ## Phase 4.7 — Counter sales, reporting and the gaps
 
 **Weeks 33–40, overlapping Phase 4.**
@@ -213,6 +240,27 @@ is not. A counter sale has no job to hang costs on, so parts consumption, the
 ledger posting and the stock movement all have to work without the anchor the
 rest of the system is built around. Getting it wrong shows up as stock that
 drifts and a till that does not balance.
+
+---
+
+## Phase 4.8 — Expenses, banking and close
+
+**Weeks 37–40.**
+
+|           |                                                                 |
+| --------- | --------------------------------------------------------------- |
+| **Entry** | The ledger has been posting real work for a full quarter.       |
+| **Exit**  | A quarter can be closed, and the closed figures match the bank. |
+
+**Scope.** Expense capture with receipts and approval. Bank accounts, imported
+statements, and reconciliation against posted entries. Fiscal period close, with
+the guard that already refuses postings into a closed period. Payroll export in
+a format a provider accepts.
+
+**Why this completes Phase 3 rather than extending it.** The ledger balances
+today, and it balances against itself. Reconciliation is what makes it balance
+against reality: until the bank agrees, a trial balance only proves the
+arithmetic was consistent, not that it was right.
 
 ---
 
@@ -258,11 +306,16 @@ means when they say a product feels unfinished.
 | **Entry** | Phase 1 flows stable under real load. Portal adoption above 40%.                                           |
 | **Exit**  | A service reminder can lead to a booking, a job and an invoice with no staff action until the car arrives. |
 
-**Scope.** Online self-service booking with real capacity checking. Automated
-service reminders driven by both elapsed time and projected mileage. The
-workflow automation engine: trigger, condition, action. SMS and email campaign
-handling with consent management. Point of sale for counter sales. Native
+**Scope.** The workflow automation engine: trigger, condition, action. CRM
+proper, which is the part that does not exist in any form today: customer
+segments, campaigns with consent held per channel, retention cohorts, and
+lifetime value by customer and by vehicle. Reminders driven by both elapsed
+time and projected mileage, feeding the booking flow built in Phase 4.6. Native
 mobile technician app if the web version has proven insufficient.
+
+Self-service booking and point of sale moved earlier, to Phases 4.6 and 4.7,
+because both turned out to be things a workshop needs before it needs
+automation.
 
 The loop this closes:
 

@@ -40,6 +40,15 @@ Rationale for the shape:
 will never pay and generate support load. Instead, a 30-day trial with full
 Complete functionality and real onboarding help.
 
+**These figures are enforced, not described.** The table above is transcribed
+into `packages/core/src/billing/plans.ts`, which is what the pricing page
+renders and what the application checks when a workshop reaches a limit. The
+two are asserted equal by `billing.test.ts`: a six-bay workshop pays £234 on
+Core and £414 on Complete, and the test fails if either figure moves without
+this document moving with it. A price list maintained separately from the
+limits it describes drifts within a month, and the first person to notice is a
+customer who was promised something the system refuses to do.
+
 ## 3. Passport pricing
 
 **Free forever for the vehicle owner.** Always. An owner reading and sharing

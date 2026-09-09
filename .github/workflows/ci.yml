@@ -137,6 +137,12 @@ jobs:
       - name: Verify the books balance
         run: npx tsx infra/scripts/verify-ledger.ts
 
+      # Signing up creates a workshop, not a loose account. A half-created
+      # organisation is unrecoverable for the person it happens to, and this
+      # also exercises erasure: an audited party must still be deletable.
+      - name: Verify sign-up creates a complete workshop
+        run: npx tsx infra/scripts/verify-signup.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

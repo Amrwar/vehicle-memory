@@ -29,8 +29,9 @@ Read in this order if you are new to the project.
 | [Market & competition](00-product/03-market-and-competition.md) | Competitive landscape and the feature matrix vs. MechanicDesk      |
 | [Personas](00-product/04-personas.md)                           | The six people this software is for, and what each one needs       |
 | [MVP definition](00-product/05-mvp-definition.md)               | Exactly what is in and out of the first shippable release          |
-| [Roadmap](00-product/06-roadmap.md)                             | Phases 1–6 with entry and exit criteria                            |
+| [Roadmap](00-product/06-roadmap.md)                             | Phases 1 to 6, with entry and exit criteria                        |
 | [Business model](00-product/07-business-model.md)               | Pricing, unit economics, the data revenue-share                    |
+| [Coverage map](00-product/08-coverage-map.md)                   | Every capability, and whether somebody can actually do it          |
 
 ### 1. Requirements — what it must do
 

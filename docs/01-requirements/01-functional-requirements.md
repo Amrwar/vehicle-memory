@@ -234,6 +234,40 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1406 | Every report MUST be exportable as CSV.                                                                             | 1     |
 | FR-1407 | The system MUST report passport coverage: vehicles with events, events per vehicle, share of jobs producing events. | 1     |
 
+## FR-1600 — People and payroll
+
+| Ref     | Requirement                                                                                                                                 | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-1601 | The system MUST hold an employment record separate from the login account, so a leaver's history survives their account being disabled.     | 4     |
+| FR-1602 | Pay rates MUST be effective-dated. Changing a rate MUST NOT alter the cost of work already recorded.                                        | 4     |
+| FR-1603 | The system MUST record attendance separately from time booked to jobs.                                                                      | 4     |
+| FR-1604 | The system MUST report utilisation, efficiency and productivity together, and MUST NOT present any one of them alone.                       | 4     |
+| FR-1605 | Timesheets MUST require approval, and a paid timesheet MUST be immutable.                                                                   | 4     |
+| FR-1606 | The system MUST record absence by type against an entitlement.                                                                              | 4     |
+| FR-1607 | The system MUST hold qualifications with expiry dates and MUST surface those that have lapsed or are close to lapsing.                      | 4     |
+| FR-1608 | Commission schemes MUST support a basis, a threshold, a guarantee and marginal bands, and MUST be able to withhold until the customer pays. | 4     |
+
+## FR-1700 — Multi-site
+
+| Ref     | Requirement                                                                                                                               | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-1701 | A membership MAY be scoped to one site; a membership without a site MUST see the whole group.                                             | 4     |
+| FR-1702 | Stock transfers MUST track sent, received and in-transit separately, and in-transit stock MUST be counted in the group's inventory value. | 4     |
+| FR-1703 | Consolidated reporting MUST be computed from underlying quantities, never by averaging site percentages.                                  | 4     |
+| FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
+| FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
+
+## FR-1800 — Front door and billing
+
+| Ref     | Requirement                                                                                                                           | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-1801 | The system MUST present a public page explaining what it does, indexable and usable on a phone.                                       | 4.5   |
+| FR-1802 | Pricing MUST be published, and the published figures MUST be the same definitions the application enforces.                           | 4.5   |
+| FR-1803 | Signing up MUST create an organisation with its owner, in one transaction, with enough configuration to take a booking immediately.   | 4.5   |
+| FR-1804 | Plan limits and features MUST be enforced where the feature is used, and a refusal MUST name the plan that would allow it.            | 4.5   |
+| FR-1805 | Creating an organisation MUST be recorded in the audit log.                                                                           | 4.5   |
+| FR-1806 | An organisation or user that has been audited MUST still be deletable, and the audit record MUST survive detached rather than edited. | 4.5   |
+
 ## FR-1500 — Notifications and automation
 
 | ID      | Requirement                                                                                                            | Phase |
