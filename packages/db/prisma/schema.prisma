@@ -1,0 +1,2008 @@
+// ---------------------------------------------------------------------------
+// Carnet — data model
+//
+// Five bounded contexts, documented in docs/02-design/01-domain-model.md:
+//   IDENTITY   organisations, users, access, audit      (cross-cutting)
+//   PASSPORT   vehicles and their permanent history     (GLOBAL, not tenant-scoped)
+//   WORKSHOP   customers, bookings, jobs, inspections   (tenant-scoped)
+//   INVENTORY  parts, stock, suppliers, purchasing      (tenant-scoped, Phase 2)
+//   FINANCE    invoices, payments, ledger               (tenant-scoped, Phase 3)
+//
+// The load-bearing decision: PASSPORT models are NOT tenant-scoped. A vehicle
+// is serviced by a workshop, never owned by one. See ADR-0004.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+// Connection URL lives in prisma.config.ts (Prisma 7 moved it out of the
+// schema). The runtime client receives a driver adapter; see src/client.ts.
+datasource db {
+  provider = "postgresql"
+}
+
+// ===========================================================================
+// IDENTITY
+// ===========================================================================
+
+model Organization {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  legalName    String?
+  taxNumber    String?
+  email        String?
+  phone        String?
+  website      String?
+  baseCurrency String   @default("GBP")
+  timezone     String   @default("Europe/London")
+  locale       String   @default("en-GB")
+  plan         OrgPlan  @default(CORE)
+  logoUrl      String?
+  // Work exceeding an approved estimate by more than this fraction needs
+  // re-approval. FR-812.
+  reapprovalThresholdPct Decimal @default(10.0) @db.Decimal(5, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  locations           Location[]
+  memberships         Membership[]
+  customers           Customer[]
+  bookings            Booking[]
+  jobs                Job[]
+  jobTypes            JobType[]
+  tags                Tag[]
+  serviceItems        ServiceItem[]
+  inspectionTemplates InspectionTemplate[]
+  estimates           Estimate[]
+  invoices            Invoice[]
+  payments            Payment[]
+  creditNotes         CreditNote[]
+  taxRates            TaxRate[]
+  sequences           DocumentSequence[]
+  messages            MessageLog[]
+  auditLogs           AuditLog[]
+  vehicleAccess       VehicleAccessGrant[]
+  recordedEvents      VehicleEvent[]
+  odometerReadings    OdometerReading[]
+  serviceSchedules    ServiceSchedule[]
+  productCategories   ProductCategory[]
+  products            Product[]
+  warehouses          Warehouse[]
+  stockMovements      StockMovement[]
+  suppliers           Supplier[]
+  purchaseRequests    PurchaseRequest[]
+  purchaseOrders      PurchaseOrder[]
+  supplierBills       SupplierBill[]
+  accounts            Account[]
+  fiscalPeriods       FiscalPeriod[]
+  journalEntries      JournalEntry[]
+
+  @@index([isActive])
+  @@map("organizations")
+}
+
+enum OrgPlan {
+  CORE
+  COMPLETE
+  GROUP
+}
+
+model Location {
+  id           String   @id @default(cuid())
+  orgId        String
+  name         String
+  code         String
+  addressLine1 String?
+  addressLine2 String?
+  locality     String?
+  region       String?
+  postcode     String?
+  country      String   @default("GB")
+  phone        String?
+  timezone     String?
+  // Total technician hours the site can absorb per day. FR-509.
+  dailyCapacityHours Decimal @default(40.0) @db.Decimal(6, 2)
+  isDefault    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  bays        Bay[]
+  bookings    Booking[]
+  jobs        Job[]
+  memberships Membership[]
+  warehouses  Warehouse[]
+
+  @@unique([orgId, code])
+  @@index([orgId, isActive])
+  @@map("locations")
+}
+
+model Bay {
+  id         String   @id @default(cuid())
+  locationId String
+  name       String
+  code       String
+  sortOrder  Int      @default(0)
+  // A lift bay cannot take a truck; a diagnostic bay needs the scan tool.
+  capability String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  location Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  jobs     Job[]
+
+  @@unique([locationId, code])
+  @@index([locationId, isActive])
+  @@map("bays")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  name            String
+  phone           String?
+  avatarUrl       String?
+  locale          String    @default("en-GB")
+  isActive        Boolean   @default(true)
+  emailVerifiedAt DateTime?
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  memberships       Membership[]
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  jobsCreated       Job[]              @relation("JobCreatedBy")
+  jobTechnicians    JobTechnician[]
+  jobStatusEvents   JobStatusEvent[]
+  jobNotes          JobNote[]
+  jobAttachments    JobAttachment[]
+  jobTasksDone      JobTask[]
+  jobFollowUps      JobFollowUp[]
+  timeEntries       TimeEntry[]
+  qualityChecks     QualityCheck[]
+  inspections       Inspection[]
+  estimatesCreated  Estimate[]
+  paymentsRecorded  Payment[]
+  bookingTechnician Booking[]
+  // Passport
+  ownedVehicles     VehicleOwnership[]
+  vehicleAccess     VehicleAccessGrant[]
+  vehicleEvents     VehicleEvent[]
+  passportShares    PassportShare[]
+  // Portal identity: a customer record in a workshop may point at this user
+  customerProfiles  Customer[]
+  purchaseApprovals PurchaseRequest[]  @relation("PurchaseApprovedBy")
+
+  @@index([isActive])
+  @@map("users")
+}
+
+/// A user's membership of one organisation, carrying their role there.
+model Membership {
+  id         String   @id @default(cuid())
+  userId     String
+  orgId      String
+  role       Role
+  locationId String?
+  isActive   Boolean  @default(true)
+  // Charge-out rate used for labour cost when this member clocks time.
+  costRate   Decimal? @db.Decimal(10, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, orgId])
+  @@index([orgId, role, isActive])
+  @@map("memberships")
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  SERVICE_ADVISOR
+  TECHNICIAN
+  BOOKKEEPER
+  CUSTOMER
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  orgId     String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Rate-limiting evidence for authentication. FR-110.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String?
+  succeeded Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@map("login_attempts")
+}
+
+/// Immutable record of every state-changing action. FR-109.
+model AuditLog {
+  id          String   @id @default(cuid())
+  orgId       String?
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String
+  before      Json?
+  after       Json?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  org   Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  actor User?         @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+/// Transactional outbox. Domain events are written in the same transaction as
+/// the state change, then dispatched by the worker. At-least-once, so every
+/// handler must be idempotent. ADR-0007.
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  orgId       String?
+  type        String
+  payload     Json
+  availableAt DateTime  @default(now())
+  processedAt DateTime?
+  attempts    Int       @default(0)
+  lastError   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([processedAt, availableAt])
+  @@map("outbox_events")
+}
+
+// ===========================================================================
+// PASSPORT  —  global, not tenant-scoped
+// ===========================================================================
+
+/// A physical vehicle. Exists independently of any owner or workshop.
+/// Globally unique by VIN. ADR-0004.
+model Vehicle {
+  id                    String    @id @default(cuid())
+  vin                   String    @unique
+  vinValid              Boolean   @default(true)
+  registration          String?
+  registrationRegion    String?
+  registrationExpiresAt DateTime?
+  make                  String?
+  model                 String?
+  variant               String?
+  year                  Int?
+  engineCode            String?
+  engineCapacityCc      Int?
+  fuelType              FuelType?
+  transmission          Transmission?
+  bodyType              String?
+  driveType             String?
+  colour                String?
+  seats                 Int?
+  firstRegisteredAt     DateTime?
+
+  /// Denormalised chain head: the hash of the most recent event. Lets us
+  /// append without reading the whole chain. FR-403.
+  chainHead    String?
+  eventCount   Int    @default(0)
+  lastOdometerKm Int?
+  lastOdometerAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events           VehicleEvent[]
+  ownerships       VehicleOwnership[]
+  odometerReadings OdometerReading[]
+  accessGrants     VehicleAccessGrant[]
+  shares           PassportShare[]
+  recalls          VehicleRecall[]
+  bookings         Booking[]
+  jobs             Job[]
+  serviceSchedules ServiceSchedule[]
+
+  @@index([registration])
+  @@index([make, model, year])
+  @@map("vehicles")
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  PLUGIN_HYBRID
+  ELECTRIC
+  LPG
+  HYDROGEN
+  OTHER
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+  CVT
+  DCT
+  OTHER
+}
+
+/// One immutable fact about a vehicle. APPEND ONLY.
+/// There is no update path in the application. Corrections append a
+/// superseding event. FR-401, FR-406.
+model VehicleEvent {
+  id        String @id @default(cuid())
+  vehicleId String
+  /// Position in this vehicle's chain, starting at 1.
+  sequence  Int
+
+  type         VehicleEventType
+  occurredAt   DateTime
+  recordedAt   DateTime         @default(now())
+  verification VerificationLevel @default(WORKSHOP_RECORDED)
+
+  title      String
+  summary    String?
+  /// Type-specific structured detail. Shape per type is documented in
+  /// docs/02-design/02-data-model.md section 4.
+  payload    Json
+  odometerKm Int?
+
+  recordedByOrgId  String?
+  recordedByUserId String?
+  /// Soft link to the job that produced this event. Nullable because events
+  /// also arrive from owners and authorities.
+  jobRef           String?
+
+  /// Hash chain. hash = H(salt | vehicleId | sequence | type | occurredAt |
+  /// canonical(payload) | prevHash). FR-403.
+  hash     String
+  prevHash String?
+
+  supersedesId String? @unique
+  supersededById String? @unique
+
+  vehicle      Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  recordedByOrg Organization? @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
+  recordedByUser User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  supersedes   VehicleEvent? @relation("EventSupersession", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy VehicleEvent? @relation("EventSupersession")
+  attachments  VehicleEventAttachment[]
+
+  @@unique([vehicleId, sequence])
+  @@index([vehicleId, occurredAt(sort: Desc)])
+  @@index([vehicleId, type])
+  @@index([recordedByOrgId])
+  @@map("vehicle_events")
+}
+
+enum VehicleEventType {
+  OWNERSHIP_TRANSFER
+  REGISTRATION_CHANGE
+  MILEAGE_READING
+  SERVICE
+  REPAIR
+  PART_FITTED
+  INSPECTION
+  TIRE
+  ACCIDENT
+  RECALL_NOTICE
+  RECALL_PERFORMED
+  MODIFICATION
+  MAINTENANCE
+  IMPORT
+  WRITE_OFF
+  NOTE
+}
+
+/// How much weight a reader should give an event. FR-407.
+enum VerificationLevel {
+  SELF_REPORTED     // the owner said so
+  WORKSHOP_RECORDED // a workshop entered it during work
+  WORKSHOP_VERIFIED // a workshop entered it with photographic evidence
+  AUTHORITY         // a registry, manufacturer or insurer supplied it
+}
+
+model VehicleEventAttachment {
+  id        String   @id @default(cuid())
+  eventId   String
+  kind      AttachmentKind @default(PHOTO)
+  url       String
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  caption   String?
+  createdAt DateTime @default(now())
+
+  event VehicleEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("vehicle_event_attachments")
+}
+
+enum AttachmentKind {
+  PHOTO
+  DOCUMENT
+  REPORT
+  VIDEO
+}
+
+/// Who held the vehicle, and when. At most one open row per vehicle. V5.
+model VehicleOwnership {
+  id         String    @id @default(cuid())
+  vehicleId  String
+  /// Portal identity of the owner, when they have an account.
+  ownerUserId String?
+  /// Display name, kept even when no account exists and after erasure.
+  ownerName  String?
+  ownerKind  OwnerKind @default(PRIVATE)
+  startedAt  DateTime
+  endedAt    DateTime?
+  source     String?
+  createdAt  DateTime  @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  owner   User?   @relation(fields: [ownerUserId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, startedAt])
+  @@index([ownerUserId])
+  @@map("vehicle_ownerships")
+}
+
+enum OwnerKind {
+  PRIVATE
+  COMPANY
+  FLEET
+  DEALER
+  FINANCE
+}
+
+/// Every odometer reading ever taken, including implausible ones.
+/// An impossible reading is evidence, not an error. FR-307, invariant V7.
+model OdometerReading {
+  id         String   @id @default(cuid())
+  vehicleId  String
+  km         Int
+  readAt     DateTime
+  source     OdometerSource @default(WORKSHOP)
+  anomaly    OdometerAnomaly @default(NONE)
+  jobRef     String?
+  recordedByOrgId String?
+  createdAt  DateTime @default(now())
+
+  vehicle Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  org     Organization? @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, readAt(sort: Desc)])
+  @@index([anomaly])
+  @@map("odometer_readings")
+}
+
+enum OdometerSource {
+  WORKSHOP
+  OWNER
+  INSPECTION
+  AUTHORITY
+  TELEMATICS
+}
+
+enum OdometerAnomaly {
+  NONE
+  DECREASE
+  IMPLAUSIBLE_RATE
+}
+
+/// A workshop's or person's right to read or write a vehicle's passport.
+/// A workshop earns write access by servicing the vehicle. FR-409.
+model VehicleAccessGrant {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  orgId       String?
+  userId      String?
+  scope       AccessScope @default(READ)
+  reason      GrantReason @default(SERVICED)
+  grantedAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  /// A previous owner may read only the period they owned the vehicle. FR-412.
+  visibleFrom DateTime?
+  visibleTo   DateTime?
+
+  vehicle Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  org     Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user    User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([vehicleId, orgId])
+  @@index([vehicleId, userId])
+  @@map("vehicle_access_grants")
+}
+
+enum AccessScope {
+  READ
+  WRITE
+  OWNER
+}
+
+enum GrantReason {
+  OWNED
+  SERVICED
+  OWNER_GRANTED
+  PROSPECTIVE_BUYER
+  AUTHORITY
+}
+
+/// An anonymous, expiring, revocable link to one vehicle's passport. FR-409.
+model PassportShare {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  tokenHash   String    @unique
+  label       String?
+  createdByUserId String?
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  openCount   Int       @default(0)
+  lastOpenedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  accesses  PassportShareAccess[]
+
+  @@index([vehicleId])
+  @@map("passport_shares")
+}
+
+/// Every read of a shared passport, visible to the owner. FR-410.
+model PassportShareAccess {
+  id        String   @id @default(cuid())
+  shareId   String
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  share PassportShare @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  @@index([shareId, createdAt])
+  @@map("passport_share_accesses")
+}
+
+model Recall {
+  id           String   @id @default(cuid())
+  campaignRef  String   @unique
+  manufacturer String
+  title        String
+  description  String?
+  severity     RecallSeverity @default(STANDARD)
+  issuedAt     DateTime
+  createdAt    DateTime @default(now())
+
+  vehicles VehicleRecall[]
+
+  @@index([manufacturer])
+  @@map("recalls")
+}
+
+enum RecallSeverity {
+  STANDARD
+  SAFETY
+  CRITICAL
+}
+
+model VehicleRecall {
+  id                String   @id @default(cuid())
+  vehicleId         String
+  recallId          String
+  status            RecallStatus @default(OPEN)
+  completedAt       DateTime?
+  completedByOrgId  String?
+  createdAt         DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  recall  Recall  @relation(fields: [recallId], references: [id], onDelete: Cascade)
+
+  @@unique([vehicleId, recallId])
+  @@index([status])
+  @@map("vehicle_recalls")
+}
+
+enum RecallStatus {
+  OPEN
+  COMPLETED
+  NOT_APPLICABLE
+}
+
+// ===========================================================================
+// WORKSHOP  —  tenant-scoped
+// ===========================================================================
+
+model Customer {
+  id           String       @id @default(cuid())
+  orgId        String
+  kind         CustomerKind @default(INDIVIDUAL)
+  displayName  String
+  firstName    String?
+  lastName     String?
+  companyName  String?
+  taxNumber    String?
+  email        String?
+  mobile       String?
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  locality     String?
+  region       String?
+  postcode     String?
+  country      String       @default("GB")
+  sourceOfBusiness String?
+  notes        String?
+  marketingEmailConsent Boolean @default(false)
+  marketingSmsConsent   Boolean @default(false)
+  /// Portal login, when the customer has one.
+  portalUserId String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  portalUser User?        @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  bookings   Booking[]
+  jobs       Job[]         @relation("JobCustomer")
+  billedJobs Job[]         @relation("JobBillTo")
+  invoices   Invoice[]
+  payments   Payment[]
+
+  @@index([orgId, isActive])
+  @@index([orgId, mobile])
+  @@index([orgId, email])
+  @@index([orgId, displayName])
+  @@map("customers")
+}
+
+enum CustomerKind {
+  INDIVIDUAL
+  COMPANY
+}
+
+model JobType {
+  id                  String  @id @default(cuid())
+  orgId               String
+  name                String
+  colour              String  @default("#2a41d8")
+  requiresQualityCheck Boolean @default(false)
+  defaultHours        Decimal? @db.Decimal(6, 2)
+  sortOrder           Int     @default(0)
+  isActive            Boolean @default(true)
+
+  org  Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  jobs JobJobType[]
+
+  @@unique([orgId, name])
+  @@map("job_types")
+}
+
+model Tag {
+  id     String @id @default(cuid())
+  orgId  String
+  name   String
+  colour String @default("#6b7488")
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  jobs JobTag[]
+
+  @@unique([orgId, name])
+  @@map("tags")
+}
+
+/// Catalogue of standard services with book times. FR-615.
+model ServiceItem {
+  id          String   @id @default(cuid())
+  orgId       String
+  code        String
+  name        String
+  description String?
+  category    String?
+  defaultHours Decimal @default(1.0) @db.Decimal(6, 2)
+  defaultPrice Decimal @default(0) @db.Decimal(12, 2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, code])
+  @@map("service_items")
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  orgId        String
+  locationId   String
+  customerId   String
+  vehicleId    String
+  bayId        String?
+  technicianId String?
+  status       BookingStatus @default(SCHEDULED)
+  startAt      DateTime
+  endAt        DateTime
+  estimatedHours Decimal     @default(1.0) @db.Decimal(6, 2)
+  description  String
+  notes        String?
+  source       BookingSource @default(PHONE)
+  jobId        String?       @unique
+  reminderSentAt DateTime?
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+  cancelReason String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location   Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bay        Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
+  technician User?        @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+  job        Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, startAt])
+  @@index([locationId, startAt])
+  @@index([bayId, startAt])
+  @@index([technicianId, startAt])
+  @@index([status])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  SCHEDULED
+  CONFIRMED
+  ARRIVED
+  CONVERTED
+  NO_SHOW
+  CANCELLED
+}
+
+enum BookingSource {
+  PHONE
+  WALK_IN
+  PORTAL
+  ONLINE
+  RECALL
+  REMINDER
+}
+
+/// The central aggregate. Everything in the workshop hangs off the Job.
+model Job {
+  id             String    @id @default(cuid())
+  orgId          String
+  locationId     String
+  /// Per-organisation sequential job number.
+  number         Int
+  customerId     String
+  vehicleId      String
+  bayId          String?
+  billToCustomerId String?
+  status         JobStatus @default(DRAFT)
+
+  shortDescription String
+  details          String?
+  diagnosis        String?
+  customerOrderNumber String?
+  sourceOfBusiness String?
+
+  odometerInKm   Int?
+  odometerOutKm  Int?
+  estimatedHours Decimal? @db.Decimal(6, 2)
+
+  receivedAt  DateTime?
+  promisedAt  DateTime?
+  pickUpAt    DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  invoicedAt  DateTime?
+  cancelledAt DateTime?
+  cancelReason String?
+
+  courtesyVehicleNote String?
+  createdByUserId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location   Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  customer   Customer     @relation("JobCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  billTo     Customer?    @relation("JobBillTo", fields: [billToCustomerId], references: [id], onDelete: SetNull)
+  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bay        Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
+  createdBy  User?        @relation("JobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  booking      Booking?
+  technicians  JobTechnician[]
+  jobTypes     JobJobType[]
+  tags         JobTag[]
+  statusEvents JobStatusEvent[]
+  tasks        JobTask[]
+  labourLines  JobLabourLine[]
+  partLines    JobPartLine[]
+  feeLines     JobFeeLine[]
+  notes        JobNote[]
+  attachments  JobAttachment[]
+  timeEntries  TimeEntry[]
+  qualityChecks QualityCheck[]
+  followUps    JobFollowUp[]
+  inspections  Inspection[]
+  estimates    Estimate[]
+  invoices     Invoice[]
+  purchaseRequests PurchaseRequest[]
+
+  @@unique([orgId, number])
+  @@index([orgId, status])
+  @@index([orgId, createdAt(sort: Desc)])
+  @@index([vehicleId])
+  @@index([customerId])
+  @@index([locationId, status])
+  @@map("jobs")
+}
+
+/// FR-603. Transitions enforced in packages/core/src/job/lifecycle.ts.
+enum JobStatus {
+  DRAFT
+  BOOKED
+  RECEIVED
+  INSPECTING
+  DIAGNOSED
+  ESTIMATED
+  AWAITING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  QUALITY_CHECK
+  COMPLETED
+  INVOICED
+  PAID
+  CANCELLED
+}
+
+model JobTechnician {
+  id        String  @id @default(cuid())
+  jobId     String
+  userId    String
+  isPrimary Boolean @default(false)
+
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@index([userId])
+  @@map("job_technicians")
+}
+
+model JobJobType {
+  jobId     String
+  jobTypeId String
+
+  job     Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobType JobType @relation(fields: [jobTypeId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, jobTypeId])
+  @@map("job_job_types")
+}
+
+model JobTag {
+  jobId String
+  tagId String
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, tagId])
+  @@map("job_tags")
+}
+
+/// The progress trail shown on the job screen. FR-604.
+model JobStatusEvent {
+  id          String     @id @default(cuid())
+  jobId       String
+  fromStatus  JobStatus?
+  toStatus    JobStatus
+  actorUserId String?
+  note        String?
+  createdAt   DateTime   @default(now())
+
+  job   Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([jobId, createdAt])
+  @@map("job_status_events")
+}
+
+model JobTask {
+  id           String    @id @default(cuid())
+  jobId        String
+  title        String
+  detail       String?
+  sortOrder    Int       @default(0)
+  isDone       Boolean   @default(false)
+  doneByUserId String?
+  doneAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  job    Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  doneBy User? @relation(fields: [doneByUserId], references: [id], onDelete: SetNull)
+
+  @@index([jobId, sortOrder])
+  @@map("job_tasks")
+}
+
+/// Charged time. Distinct from TimeEntry, which is worked time. See the
+/// ubiquitous language in docs/02-design/01-domain-model.md section 2.
+model JobLabourLine {
+  id          String  @id @default(cuid())
+  jobId       String
+  description String
+  hours       Decimal @db.Decimal(8, 2)
+  rate        Decimal @db.Decimal(10, 2)
+  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  taxRateId   String?
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+
+  job     Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
+  @@map("job_labour_lines")
+}
+
+model JobPartLine {
+  id          String  @id @default(cuid())
+  jobId       String
+  productId   String?
+  partNumber  String?
+  description String
+  quantity    Decimal @default(1) @db.Decimal(10, 3)
+  unitCost    Decimal @default(0) @db.Decimal(12, 4)
+  unitPrice   Decimal @default(0) @db.Decimal(12, 2)
+  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  taxRateId   String?
+  status      PartLineStatus @default(REQUESTED)
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+
+  job     Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+  reservations StockReservation[]
+
+  @@index([jobId])
+  @@map("job_part_lines")
+}
+
+enum PartLineStatus {
+  REQUESTED
+  RESERVED
+  ON_ORDER
+  FITTED
+  RETURNED
+}
+
+model JobFeeLine {
+  id          String  @id @default(cuid())
+  jobId       String
+  description String
+  amount      Decimal @db.Decimal(12, 2)
+  taxRateId   String?
+  sortOrder   Int     @default(0)
+
+  job     Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
+  @@map("job_fee_lines")
+}
+
+model JobNote {
+  id              String   @id @default(cuid())
+  jobId           String
+  authorUserId    String?
+  body            String
+  isCustomerVisible Boolean @default(false)
+  createdAt       DateTime @default(now())
+
+  job    Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  author User? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([jobId, createdAt])
+  @@map("job_notes")
+}
+
+model JobAttachment {
+  id             String   @id @default(cuid())
+  jobId          String
+  kind           AttachmentKind @default(PHOTO)
+  url            String
+  filename       String
+  mimeType       String
+  sizeBytes      Int
+  caption        String?
+  isCustomerVisible Boolean @default(true)
+  uploadedByUserId String?
+  createdAt      DateTime @default(now())
+
+  job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  uploadedBy User? @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
+  @@map("job_attachments")
+}
+
+/// Worked time, used for labour cost. Distinct from JobLabourLine.
+/// A technician has at most one open entry. Invariant J5.
+model TimeEntry {
+  id         String    @id @default(cuid())
+  jobId      String
+  userId     String
+  startedAt  DateTime
+  endedAt    DateTime?
+  minutes    Int?
+  costRate   Decimal?  @db.Decimal(10, 2)
+  note       String?
+  autoClosed Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([userId, startedAt])
+  @@map("time_entries")
+}
+
+model QualityCheck {
+  id            String   @id @default(cuid())
+  jobId         String
+  checkedByUserId String
+  passed        Boolean
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  job       Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  checkedBy User @relation(fields: [checkedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("quality_checks")
+}
+
+model JobFollowUp {
+  id               String    @id @default(cuid())
+  jobId            String
+  dueAt            DateTime
+  assignedToUserId String?
+  note             String
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  assignedTo User? @relation(fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  @@index([dueAt, completedAt])
+  @@map("job_follow_ups")
+}
+
+// ===========================================================================
+// INSPECTION
+// ===========================================================================
+
+model InspectionTemplate {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  sections    InspectionTemplateSection[]
+  inspections Inspection[]
+
+  @@unique([orgId, name])
+  @@map("inspection_templates")
+}
+
+model InspectionTemplateSection {
+  id         String @id @default(cuid())
+  templateId String
+  name       String
+  sortOrder  Int    @default(0)
+
+  template InspectionTemplate       @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  items    InspectionTemplateItem[]
+
+  @@index([templateId, sortOrder])
+  @@map("inspection_template_sections")
+}
+
+model InspectionTemplateItem {
+  id        String @id @default(cuid())
+  sectionId String
+  name      String
+  guidance  String?
+  measurementType MeasurementType @default(NONE)
+  position  WheelPosition?
+  sortOrder Int    @default(0)
+
+  section InspectionTemplateSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  results InspectionResult[]
+
+  @@index([sectionId, sortOrder])
+  @@map("inspection_template_items")
+}
+
+/// Structured measurements rather than prose, so wear is trackable. FR-709.
+enum MeasurementType {
+  NONE
+  TREAD_DEPTH_MM
+  PAD_THICKNESS_MM
+  DISC_THICKNESS_MM
+  PERCENT
+  VOLTAGE
+  PRESSURE_BAR
+  TEMPERATURE_C
+  MM
+}
+
+enum WheelPosition {
+  FRONT_LEFT
+  FRONT_RIGHT
+  REAR_LEFT
+  REAR_RIGHT
+  SPARE
+}
+
+model Inspection {
+  id               String           @id @default(cuid())
+  jobId            String
+  templateId       String?
+  status           InspectionStatus @default(DRAFT)
+  performedByUserId String?
+  startedAt        DateTime         @default(now())
+  completedAt      DateTime?
+  notes            String?
+  passCount        Int              @default(0)
+  advisoryCount    Int              @default(0)
+  criticalCount    Int              @default(0)
+
+  job         Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  template    InspectionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  performedBy User?               @relation(fields: [performedByUserId], references: [id], onDelete: SetNull)
+  results     InspectionResult[]
+
+  @@index([jobId])
+  @@map("inspections")
+}
+
+enum InspectionStatus {
+  DRAFT
+  COMPLETED
+}
+
+model InspectionResult {
+  id             String   @id @default(cuid())
+  inspectionId   String
+  templateItemId String?
+  sectionName    String
+  itemName       String
+  severity       Severity @default(NOT_CHECKED)
+  note           String?
+  measurementValue Decimal? @db.Decimal(10, 2)
+  measurementType  MeasurementType @default(NONE)
+  position       WheelPosition?
+  recommendedAction String?
+  estimatedCost  Decimal? @db.Decimal(12, 2)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  inspection   Inspection              @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  templateItem InspectionTemplateItem? @relation(fields: [templateItemId], references: [id], onDelete: SetNull)
+  photos       InspectionPhoto[]
+  estimateLines EstimateLine[]
+
+  @@index([inspectionId, sortOrder])
+  @@index([severity])
+  @@map("inspection_results")
+}
+
+/// FR-702. Traffic-light severity, never conveyed by colour alone (NFR-603).
+enum Severity {
+  PASS
+  ADVISORY
+  CRITICAL
+  NOT_CHECKED
+}
+
+model InspectionPhoto {
+  id        String   @id @default(cuid())
+  resultId  String
+  url       String
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  caption   String?
+  createdAt DateTime @default(now())
+
+  result InspectionResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@index([resultId])
+  @@map("inspection_photos")
+}
+
+// ===========================================================================
+// ESTIMATE AND APPROVAL
+// ===========================================================================
+
+model Estimate {
+  id            String         @id @default(cuid())
+  orgId         String
+  jobId         String
+  version       Int            @default(1)
+  status        EstimateStatus @default(DRAFT)
+  currency      String         @default("GBP")
+  subtotal      Decimal        @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal        @default(0) @db.Decimal(12, 2)
+  taxTotal      Decimal        @default(0) @db.Decimal(12, 2)
+  total         Decimal        @default(0) @db.Decimal(12, 2)
+  notes         String?
+  validUntil    DateTime?
+  sentAt        DateTime?
+  decidedAt     DateTime?
+  supersedesId  String?        @unique
+  createdByUserId String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job        Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdBy  User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  supersedes Estimate?    @relation("EstimateVersions", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy Estimate?  @relation("EstimateVersions")
+  lines      EstimateLine[]
+  shares     EstimateShare[]
+  approvals  EstimateApproval[]
+
+  @@unique([jobId, version])
+  @@index([orgId, status])
+  @@map("estimates")
+}
+
+enum EstimateStatus {
+  DRAFT
+  SENT
+  APPROVED
+  PARTIALLY_APPROVED
+  DECLINED
+  EXPIRED
+  SUPERSEDED
+}
+
+model EstimateLine {
+  id          String       @id @default(cuid())
+  estimateId  String
+  kind        LineKind     @default(LABOUR)
+  description String
+  detail      String?
+  quantity    Decimal      @default(1) @db.Decimal(10, 3)
+  unitPrice   Decimal      @default(0) @db.Decimal(12, 2)
+  unitCost    Decimal      @default(0) @db.Decimal(12, 4)
+  discountPct Decimal      @default(0) @db.Decimal(5, 2)
+  taxRateId   String?
+  lineTotal   Decimal      @default(0) @db.Decimal(12, 2)
+  decision    LineDecision @default(PENDING)
+  isOptional  Boolean      @default(false)
+  sortOrder   Int          @default(0)
+  inspectionResultId String?
+
+  estimate         Estimate          @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  taxRate          TaxRate?          @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+  inspectionResult InspectionResult? @relation(fields: [inspectionResultId], references: [id], onDelete: SetNull)
+
+  @@index([estimateId, sortOrder])
+  @@map("estimate_lines")
+}
+
+enum LineKind {
+  LABOUR
+  PART
+  FEE
+  DISCOUNT
+}
+
+/// FR-806. Customers may accept some lines and decline others.
+enum LineDecision {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+/// The secure link sent to the customer. Unguessable, expiring, revocable.
+model EstimateShare {
+  id         String    @id @default(cuid())
+  estimateId String
+  tokenHash  String    @unique
+  channel    MessageChannel
+  sentTo     String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  openedAt   DateTime?
+  openCount  Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  estimate Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+
+  @@index([estimateId])
+  @@map("estimate_shares")
+}
+
+/// The recorded customer decision. Immutable evidence. FR-807.
+model EstimateApproval {
+  id             String       @id @default(cuid())
+  estimateId     String
+  decision       LineDecision
+  approvedTotal  Decimal      @db.Decimal(12, 2)
+  declinedTotal  Decimal      @default(0) @db.Decimal(12, 2)
+  approvedByName String?
+  ip             String?
+  userAgent      String?
+  note           String?
+  createdAt      DateTime     @default(now())
+
+  estimate Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+
+  @@index([estimateId])
+  @@map("estimate_approvals")
+}
+
+// ===========================================================================
+// FINANCE
+// ===========================================================================
+
+model TaxRate {
+  id        String  @id @default(cuid())
+  orgId     String
+  name      String
+  rate      Decimal @db.Decimal(6, 3)
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  org           Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  labourLines   JobLabourLine[]
+  partLines     JobPartLine[]
+  feeLines      JobFeeLine[]
+  estimateLines EstimateLine[]
+  invoiceLines  InvoiceLine[]
+
+  @@unique([orgId, name])
+  @@map("tax_rates")
+}
+
+/// Gapless per-organisation document numbering. A database sequence would
+/// leave gaps on rollback, which is not acceptable for tax documents. FR-902.
+model DocumentSequence {
+  id     String       @id @default(cuid())
+  orgId  String
+  kind   SequenceKind
+  prefix String       @default("")
+  next   Int          @default(1)
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, kind])
+  @@map("document_sequences")
+}
+
+enum SequenceKind {
+  JOB
+  ESTIMATE
+  INVOICE
+  CREDIT_NOTE
+  PURCHASE_ORDER
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  orgId         String
+  number        String
+  jobId         String?
+  customerId    String
+  status        InvoiceStatus @default(DRAFT)
+  currency      String        @default("GBP")
+  subtotal      Decimal       @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal       @default(0) @db.Decimal(12, 2)
+  taxTotal      Decimal       @default(0) @db.Decimal(12, 2)
+  total         Decimal       @default(0) @db.Decimal(12, 2)
+  amountPaid    Decimal       @default(0) @db.Decimal(12, 2)
+  issuedAt      DateTime?
+  dueAt         DateTime?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job      Job?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  customer Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lines    InvoiceLine[]
+  payments Payment[]
+  creditNotes CreditNote[]
+
+  @@unique([orgId, number])
+  @@index([orgId, status])
+  @@index([customerId])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PART_PAID
+  PAID
+  OVERDUE
+  VOID
+}
+
+model InvoiceLine {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  kind        LineKind @default(LABOUR)
+  description String
+  quantity    Decimal  @default(1) @db.Decimal(10, 3)
+  unitPrice   Decimal  @default(0) @db.Decimal(12, 2)
+  unitCost    Decimal  @default(0) @db.Decimal(12, 4)
+  discountPct Decimal  @default(0) @db.Decimal(5, 2)
+  taxRateId   String?
+  taxAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  lineTotal   Decimal  @default(0) @db.Decimal(12, 2)
+  sortOrder   Int      @default(0)
+
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId, sortOrder])
+  @@map("invoice_lines")
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  orgId        String
+  invoiceId    String?
+  customerId   String
+  amount       Decimal       @db.Decimal(12, 2)
+  method       PaymentMethod @default(CARD)
+  reference    String?
+  receivedAt   DateTime      @default(now())
+  notes        String?
+  recordedByUserId String?
+  createdAt    DateTime      @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invoice    Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recordedBy User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, receivedAt])
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  ONLINE
+  CHEQUE
+  ACCOUNT
+  OTHER
+}
+
+/// An issued invoice is immutable. Corrections are credit notes. FR-907.
+model CreditNote {
+  id        String   @id @default(cuid())
+  orgId     String
+  number    String
+  invoiceId String
+  amount    Decimal  @db.Decimal(12, 2)
+  reason    String
+  issuedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invoice Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, number])
+  @@map("credit_notes")
+}
+
+// ===========================================================================
+// COMMUNICATION AND SCHEDULING
+// ===========================================================================
+
+model MessageLog {
+  id          String         @id @default(cuid())
+  orgId       String
+  channel     MessageChannel
+  toAddress   String
+  subject     String?
+  body        String
+  status      MessageStatus  @default(QUEUED)
+  provider    String?
+  providerRef String?
+  error       String?
+  relatedType String?
+  relatedId   String?
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([relatedType, relatedId])
+  @@map("message_logs")
+}
+
+enum MessageChannel {
+  EMAIL
+  SMS
+  PORTAL
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  SUPPRESSED
+}
+
+/// Next service due, by date and by projected mileage. FR-1504.
+model ServiceSchedule {
+  id               String   @id @default(cuid())
+  orgId            String?
+  vehicleId        String
+  name             String
+  intervalMonths   Int?
+  intervalKm       Int?
+  lastPerformedAt  DateTime?
+  lastPerformedKm  Int?
+  dueAt            DateTime?
+  dueKm            Int?
+  reminderSentAt   DateTime?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  org     Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vehicle Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([dueAt, isActive])
+  @@map("service_schedules")
+}
+
+// ===========================================================================
+// INVENTORY  —  Phase 2. Schema present now so migrations stay additive.
+// ===========================================================================
+
+model ProductCategory {
+  id       String  @id @default(cuid())
+  orgId    String
+  name     String
+  parentId String?
+
+  org      Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  parent   ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductCategory[] @relation("CategoryTree")
+  products Product[]
+
+  @@unique([orgId, name])
+  @@map("product_categories")
+}
+
+model Product {
+  id            String  @id @default(cuid())
+  orgId         String
+  categoryId    String?
+  partNumber    String
+  name          String
+  description   String?
+  brand         String?
+  unit          String  @default("each")
+  costPrice     Decimal @default(0) @db.Decimal(12, 4)
+  sellPrice     Decimal @default(0) @db.Decimal(12, 2)
+  reorderPoint  Decimal @default(0) @db.Decimal(12, 3)
+  reorderQty    Decimal @default(0) @db.Decimal(12, 3)
+  barcode       String?
+  isStocked     Boolean @default(true)
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  org          Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category     ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  stockLevels  StockLevel[]
+  movements    StockMovement[]
+  reservations StockReservation[]
+  jobPartLines JobPartLine[]
+  poLines      PurchaseOrderLine[]
+
+  @@unique([orgId, partNumber])
+  @@index([orgId, isActive])
+  @@map("products")
+}
+
+model Warehouse {
+  id         String  @id @default(cuid())
+  orgId      String
+  locationId String?
+  name       String
+  code       String
+  isDefault  Boolean @default(false)
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location    Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  stockLevels StockLevel[]
+  movements   StockMovement[]
+  reservations StockReservation[]
+
+  @@unique([orgId, code])
+  @@map("warehouses")
+}
+
+model StockLevel {
+  id          String  @id @default(cuid())
+  productId   String
+  warehouseId String
+  onHand      Decimal @default(0) @db.Decimal(12, 3)
+  reserved    Decimal @default(0) @db.Decimal(12, 3)
+  /// Weighted average cost. FR-1005.
+  avgCost     Decimal @default(0) @db.Decimal(12, 4)
+  binLocation String?
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+  @@map("stock_levels")
+}
+
+model StockMovement {
+  id          String       @id @default(cuid())
+  orgId       String
+  productId   String
+  warehouseId String
+  type        MovementType
+  quantity    Decimal      @db.Decimal(12, 3)
+  unitCost    Decimal      @default(0) @db.Decimal(12, 4)
+  balanceAfter Decimal     @default(0) @db.Decimal(12, 3)
+  referenceType String?
+  referenceId   String?
+  reason      String?
+  createdAt   DateTime     @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse Warehouse    @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+  @@index([orgId, createdAt])
+  @@map("stock_movements")
+}
+
+enum MovementType {
+  RECEIPT
+  ISSUE
+  ADJUSTMENT
+  TRANSFER_IN
+  TRANSFER_OUT
+  RETURN
+  STOCKTAKE
+}
+
+model StockReservation {
+  id            String   @id @default(cuid())
+  productId     String
+  warehouseId   String
+  jobPartLineId String?
+  quantity      Decimal  @db.Decimal(12, 3)
+  releasedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse    @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  jobPartLine JobPartLine? @relation(fields: [jobPartLineId], references: [id], onDelete: Cascade)
+
+  @@index([productId, releasedAt])
+  @@map("stock_reservations")
+}
+
+model Supplier {
+  id           String  @id @default(cuid())
+  orgId        String
+  name         String
+  accountRef   String?
+  email        String?
+  phone        String?
+  addressLine1 String?
+  locality     String?
+  postcode     String?
+  paymentTermsDays Int  @default(30)
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+
+  org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  purchaseOrders PurchaseOrder[]
+  bills          SupplierBill[]
+
+  @@unique([orgId, name])
+  @@map("suppliers")
+}
+
+model PurchaseRequest {
+  id           String        @id @default(cuid())
+  orgId        String
+  jobId        String?
+  requestedByUserId String?
+  status       PurchaseRequestStatus @default(PENDING)
+  notes        String?
+  approvedByUserId String?
+  approvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job        Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  approvedBy User?        @relation("PurchaseApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  orders     PurchaseOrder[]
+
+  @@index([orgId, status])
+  @@map("purchase_requests")
+}
+
+enum PurchaseRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ORDERED
+}
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  orgId       String
+  number      String
+  supplierId  String
+  requestId   String?
+  status      PurchaseOrderStatus @default(DRAFT)
+  expectedAt  DateTime?
+  subtotal    Decimal  @default(0) @db.Decimal(12, 2)
+  taxTotal    Decimal  @default(0) @db.Decimal(12, 2)
+  total       Decimal  @default(0) @db.Decimal(12, 2)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org      Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier Supplier         @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  request  PurchaseRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  lines    PurchaseOrderLine[]
+  receipts GoodsReceipt[]
+  bills    SupplierBill[]
+
+  @@unique([orgId, number])
+  @@index([orgId, status])
+  @@map("purchase_orders")
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SENT
+  PART_RECEIVED
+  RECEIVED
+  BILLED
+  CANCELLED
+}
+
+model PurchaseOrderLine {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String?
+  description String
+  quantity    Decimal @db.Decimal(12, 3)
+  received    Decimal @default(0) @db.Decimal(12, 3)
+  unitCost    Decimal @default(0) @db.Decimal(12, 4)
+  sortOrder   Int     @default(0)
+
+  order    PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  receiptLines GoodsReceiptLine[]
+
+  @@index([orderId])
+  @@map("purchase_order_lines")
+}
+
+model GoodsReceipt {
+  id         String   @id @default(cuid())
+  orderId    String
+  receivedAt DateTime @default(now())
+  reference  String?
+  notes      String?
+
+  order PurchaseOrder      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lines GoodsReceiptLine[]
+
+  @@index([orderId])
+  @@map("goods_receipts")
+}
+
+model GoodsReceiptLine {
+  id         String  @id @default(cuid())
+  receiptId  String
+  orderLineId String
+  quantity   Decimal @db.Decimal(12, 3)
+  unitCost   Decimal @default(0) @db.Decimal(12, 4)
+
+  receipt   GoodsReceipt      @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  orderLine PurchaseOrderLine @relation(fields: [orderLineId], references: [id], onDelete: Cascade)
+
+  @@index([receiptId])
+  @@map("goods_receipt_lines")
+}
+
+model SupplierBill {
+  id         String   @id @default(cuid())
+  orgId      String
+  supplierId String
+  orderId    String?
+  reference  String
+  status     BillStatus @default(AWAITING)
+  subtotal   Decimal  @default(0) @db.Decimal(12, 2)
+  taxTotal   Decimal  @default(0) @db.Decimal(12, 2)
+  total      Decimal  @default(0) @db.Decimal(12, 2)
+  amountPaid Decimal  @default(0) @db.Decimal(12, 2)
+  billedAt   DateTime
+  dueAt      DateTime?
+  createdAt  DateTime @default(now())
+
+  org      Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  order    PurchaseOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, reference])
+  @@index([orgId, status])
+  @@map("supplier_bills")
+}
+
+enum BillStatus {
+  AWAITING
+  APPROVED
+  PART_PAID
+  PAID
+  DISPUTED
+}
+
+// ===========================================================================
+// ACCOUNTING  —  Phase 3. Schema present now so migrations stay additive.
+// ===========================================================================
+
+model Account {
+  id       String      @id @default(cuid())
+  orgId    String
+  code     String
+  name     String
+  type     AccountType
+  parentId String?
+  isActive Boolean     @default(true)
+
+  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  parent   Account?      @relation("AccountTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Account[]     @relation("AccountTree")
+  lines    JournalLine[]
+
+  @@unique([orgId, code])
+  @@index([orgId, type])
+  @@map("accounts")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model FiscalPeriod {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  startsAt  DateTime
+  endsAt    DateTime
+  isClosed  Boolean  @default(false)
+  closedAt  DateTime?
+
+  org     Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  entries JournalEntry[]
+
+  @@unique([orgId, name])
+  @@index([orgId, startsAt])
+  @@map("fiscal_periods")
+}
+
+/// Every entry must balance. An unbalanced entry is rejected. FR-1202.
+model JournalEntry {
+  id          String   @id @default(cuid())
+  orgId       String
+  periodId    String?
+  reference   String
+  description String
+  postedAt    DateTime @default(now())
+  /// The operational document that caused this posting. FR-1205.
+  sourceType  String?
+  sourceId    String?
+  isReversal  Boolean  @default(false)
+  reversesId  String?  @unique
+  createdAt   DateTime @default(now())
+
+  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  period   FiscalPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
+  reverses JournalEntry? @relation("EntryReversal", fields: [reversesId], references: [id], onDelete: SetNull)
+  reversedBy JournalEntry? @relation("EntryReversal")
+  lines    JournalLine[]
+
+  @@index([orgId, postedAt])
+  @@index([sourceType, sourceId])
+  @@map("journal_entries")
+}
+
+model JournalLine {
+  id        String  @id @default(cuid())
+  entryId   String
+  accountId String
+  debit     Decimal @default(0) @db.Decimal(14, 2)
+  credit    Decimal @default(0) @db.Decimal(14, 2)
+  memo      String?
+  sortOrder Int     @default(0)
+
+  entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([entryId])
+  @@index([accountId])
+  @@map("journal_lines")
+}

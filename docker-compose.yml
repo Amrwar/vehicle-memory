@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------------------
+# Carnet — local development stack.
+#   docker compose up -d          start postgres + redis + mailpit
+#   docker compose --profile app up   also build and run the web app
+# ---------------------------------------------------------------------------
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: carnet-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: carnet
+      POSTGRES_PASSWORD: carnet
+      POSTGRES_DB: carnet
+      # Deterministic collation so ORDER BY behaves identically everywhere.
+      POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en-GB --encoding=UTF8'
+    ports:
+      - '5432:5432'
+    volumes:
+      - carnet-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U carnet -d carnet']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: carnet-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6379:6379'
+    volumes:
+      - carnet-redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Catches every outbound email in development so nothing reaches a real
+  # customer by accident. UI on http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: carnet-mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    environment:
+      MP_MAX_MESSAGES: 500
+
+  web:
+    profiles: ['app']
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    container_name: carnet-web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://carnet:carnet@postgres:5432/carnet?schema=public
+      REDIS_URL: redis://redis:6379
+      APP_URL: http://localhost:3000
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+
+volumes:
+  carnet-pgdata:
+  carnet-redisdata:
