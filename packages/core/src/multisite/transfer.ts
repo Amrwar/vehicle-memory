@@ -159,7 +159,13 @@ export function assertDispatchable(
    Receipt
    --------------------------------------------------------------------------- */
 
-export interface ReceiptLine {
+/**
+ * Named for transfers specifically: the procurement module has its own
+ * ReceiptLine for goods arriving from a supplier, and the two are different
+ * shapes. One barrel exporting both under one name is a compile error, and
+ * silently picking a winner would be worse.
+ */
+export interface TransferReceiptLine {
   productId: string;
   quantity: number;
 }
@@ -181,7 +187,7 @@ export interface ReceiptOutcome {
  */
 export function applyTransferReceipt(
   transfer: StockTransfer,
-  received: readonly ReceiptLine[],
+  received: readonly TransferReceiptLine[],
   options: { closeShort?: boolean } = {},
 ): ReceiptOutcome {
   if (transfer.status !== 'IN_TRANSIT' && transfer.status !== 'PART_RECEIVED') {

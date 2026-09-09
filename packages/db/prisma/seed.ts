@@ -1319,6 +1319,38 @@ async function main() {
     },
   });
 
+  // A second site. The group is deliberately lopsided: Bradford is a third of
+  // the size, runs at half the productivity, and is the site an owner would
+  // actually be worried about. A demo where both branches look the same hides
+  // the reason the consolidated view exists.
+  const bradford = await prisma.location.create({
+    data: {
+      orgId: org.id,
+      name: 'Bradford Lane',
+      code: 'BL2',
+      addressLine1: '8 Bradford Lane',
+      locality: 'Stockport',
+      region: 'Greater Manchester',
+      postcode: 'SK1 4AA',
+      dailyCapacityHours: 16,
+      bays: {
+        create: [
+          { name: 'Bay 1 — Lift', code: 'BL-B1', sortOrder: 1, capability: 'two-post lift' },
+          { name: 'Bay 2 — General', code: 'BL-B2', sortOrder: 2 },
+        ],
+      },
+    },
+  });
+
+  const bradfordStore = await prisma.warehouse.create({
+    data: {
+      orgId: org.id,
+      locationId: bradford.id,
+      name: 'Bradford store',
+      code: 'BRAD',
+    },
+  });
+
   const [brakeCategory, serviceCategory, consumables] = await Promise.all(
     ['Braking', 'Service parts', 'Consumables'].map((name) =>
       prisma.productCategory.create({ data: { orgId: org.id, name } }),
@@ -1780,6 +1812,27 @@ async function main() {
     }),
   });
 
+  /* --- people ------------------------------------------------------------- */
+
+  await seedPeople(org.id, {
+    locationId: location.id,
+    bradfordId: bradford.id,
+    ahmedId: ahmed!.id,
+    saraId: sara!.id,
+    johnId: john!.id,
+    mikeId: mike!.id,
+    fatimaId: fatima!.id,
+  });
+
+  /* --- stock on the road --------------------------------------------------- */
+
+  await seedTransfers(org.id, {
+    fromWarehouseId: warehouse.id,
+    toWarehouseId: bradfordStore.id,
+    products,
+    dispatchedByUserId: ahmed!.id,
+  });
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -2090,6 +2143,433 @@ async function seedLedger(
       at: day(-3, 16, 0),
     }),
   );
+}
+
+/**
+ * Employees, their pay history, and a fortnight of attendance.
+ *
+ * Pay rates are seeded with real history rather than a single current figure,
+ * because the whole point of dating them is that last year's jobs keep last
+ * year's cost. A demo with one open-ended rate per person would demonstrate
+ * nothing.
+ *
+ * Attendance is deliberately imperfect: one technician has a shift left open
+ * overnight, which is the most common real data problem in a workshop and the
+ * one the productivity page has to survive.
+ */
+async function seedPeople(
+  orgId: string,
+  refs: {
+    locationId: string;
+    bradfordId: string;
+    ahmedId: string;
+    saraId: string;
+    johnId: string;
+    mikeId: string;
+    fatimaId: string;
+  },
+) {
+  const year = new Date().getFullYear();
+
+  const people = [
+    {
+      userId: refs.johnId,
+      reference: 'EMP-001',
+      displayName: 'John Adeyemi',
+      jobTitle: 'Senior technician',
+      locationId: refs.locationId,
+      startedOn: new Date(year - 6, 2, 1),
+      weeklyMinutes: 2400,
+      rates: [
+        { from: new Date(year - 6, 2, 1), to: new Date(year - 1, 3, 1), cost: 31, charge: 85 },
+        { from: new Date(year - 1, 3, 1), to: new Date(year, 3, 1), cost: 35, charge: 92 },
+        { from: new Date(year, 3, 1), to: null, cost: 38, charge: 95 },
+      ],
+      certifications: [
+        {
+          name: 'MOT tester, class 4',
+          authority: 'DVSA',
+          reference: 'MT-338217',
+          issuedOn: new Date(year - 3, 5, 14),
+          // Expires inside the warning window, which is the point.
+          expiresOn: day(41),
+        },
+        {
+          name: 'Air conditioning, F-Gas category 1',
+          authority: 'City & Guilds',
+          issuedOn: new Date(year - 4, 8, 2),
+          expiresOn: new Date(year + 3, 8, 2),
+        },
+      ],
+    },
+    {
+      userId: refs.mikeId,
+      reference: 'EMP-002',
+      displayName: 'Mike Sowande',
+      jobTitle: 'Technician',
+      locationId: refs.locationId,
+      startedOn: new Date(year - 2, 8, 15),
+      weeklyMinutes: 2400,
+      rates: [
+        { from: new Date(year - 2, 8, 15), to: new Date(year, 3, 1), cost: 30, charge: 85 },
+        { from: new Date(year, 3, 1), to: null, cost: 34, charge: 92 },
+      ],
+      certifications: [
+        {
+          name: 'Hybrid and electric vehicle, level 3',
+          authority: 'IMI',
+          issuedOn: new Date(year - 1, 1, 20),
+          expiresOn: new Date(year + 2, 1, 20),
+        },
+      ],
+    },
+    {
+      userId: refs.saraId,
+      reference: 'EMP-003',
+      displayName: 'Sara Whitfield',
+      jobTitle: 'Service advisor',
+      locationId: refs.locationId,
+      startedOn: new Date(year - 4, 0, 8),
+      weeklyMinutes: 2250,
+      rates: [{ from: new Date(year - 4, 0, 8), to: null, cost: 24, charge: 0 }],
+      certifications: [],
+    },
+    {
+      userId: null,
+      reference: 'EMP-004',
+      displayName: 'Priya Raman',
+      jobTitle: 'Technician, Bradford',
+      locationId: refs.bradfordId,
+      startedOn: new Date(year - 1, 5, 3),
+      weeklyMinutes: 2400,
+      rates: [{ from: new Date(year - 1, 5, 3), to: null, cost: 29, charge: 85 }],
+      certifications: [
+        {
+          name: 'MOT tester, class 4',
+          authority: 'DVSA',
+          reference: 'MT-401993',
+          issuedOn: new Date(year - 1, 6, 1),
+          // Already lapsed. Work is being signed off that legally cannot be.
+          expiresOn: day(-12),
+        },
+      ],
+    },
+    {
+      userId: refs.fatimaId,
+      reference: 'EMP-005',
+      displayName: 'Fatima Rahal',
+      jobTitle: 'Bookkeeper',
+      locationId: refs.locationId,
+      startedOn: new Date(year - 3, 10, 1),
+      weeklyMinutes: 1500,
+      rates: [{ from: new Date(year - 3, 10, 1), to: null, cost: 27, charge: 0 }],
+      certifications: [],
+    },
+  ];
+
+  const employees = new Map<string, string>();
+
+  for (const person of people) {
+    const employee = await prisma.employee.create({
+      data: {
+        orgId,
+        userId: person.userId,
+        locationId: person.locationId,
+        reference: person.reference,
+        displayName: person.displayName,
+        jobTitle: person.jobTitle,
+        startedOn: person.startedOn,
+        weeklyMinutes: person.weeklyMinutes,
+        payRates: {
+          create: person.rates.map((rate) => ({
+            orgId,
+            costPerHour: rate.cost,
+            chargePerHour: rate.charge,
+            effectiveFrom: rate.from,
+            effectiveTo: rate.to,
+          })),
+        },
+        certifications: {
+          create: person.certifications.map((certification) => ({
+            orgId,
+            name: certification.name,
+            authority: certification.authority,
+            reference: 'reference' in certification ? certification.reference : null,
+            issuedOn: certification.issuedOn,
+            expiresOn: certification.expiresOn,
+          })),
+        },
+      },
+    });
+
+    employees.set(person.reference, employee.id);
+  }
+
+  // Two working weeks of attendance for the technicians. Weekends skipped.
+  const shifts: {
+    employeeId: string;
+    locationId: string;
+    startedAt: Date;
+    endedAt: Date | null;
+    breakMinutes: number;
+  }[] = [];
+
+  for (let offset = -13; offset <= -1; offset += 1) {
+    const date = day(offset, 8, 0);
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+    shifts.push(
+      {
+        employeeId: employees.get('EMP-001')!,
+        locationId: refs.locationId,
+        startedAt: day(offset, 8, 0),
+        endedAt: day(offset, 17, 0),
+        breakMinutes: 45,
+      },
+      {
+        employeeId: employees.get('EMP-002')!,
+        locationId: refs.locationId,
+        startedAt: day(offset, 8, 30),
+        endedAt: day(offset, 17, 0),
+        breakMinutes: 45,
+      },
+      {
+        employeeId: employees.get('EMP-004')!,
+        locationId: refs.bradfordId,
+        startedAt: day(offset, 9, 0),
+        endedAt: day(offset, 17, 0),
+        breakMinutes: 30,
+      },
+    );
+  }
+
+  await prisma.attendanceRecord.createMany({
+    data: shifts.map((shift) => ({ orgId, ...shift })),
+  });
+
+  // One shift left open. The single most common real attendance problem, and
+  // the productivity page has to survive it rather than report a 19-hour day
+  // as a triumph.
+  await prisma.attendanceRecord.create({
+    data: {
+      orgId,
+      employeeId: employees.get('EMP-002')!,
+      locationId: refs.locationId,
+      startedAt: day(0, 8, 15),
+      endedAt: null,
+      breakMinutes: 0,
+      note: 'Clocked in this morning.',
+    },
+  });
+
+  await prisma.absence.createMany({
+    data: [
+      {
+        orgId,
+        employeeId: employees.get('EMP-001')!,
+        type: 'HOLIDAY',
+        startsOn: day(21),
+        endsOn: day(28),
+        days: 5,
+        approved: true,
+        note: 'Booked in January.',
+      },
+      {
+        orgId,
+        employeeId: employees.get('EMP-004')!,
+        type: 'SICK',
+        startsOn: day(-4),
+        endsOn: day(-3),
+        days: 2,
+        approved: true,
+      },
+    ],
+  });
+
+  // Two schemes, on deliberately different bases, so the page can show that
+  // the basis is the decision and the rate is the detail.
+  const labourScheme = await prisma.commissionScheme.create({
+    data: {
+      orgId,
+      name: 'Technician, labour profit',
+      basis: 'LABOUR_PROFIT',
+      threshold: 500,
+      guarantee: 0,
+      paidOnSettlement: true,
+      bands: {
+        create: [
+          { fromAmount: 0, rate: 8, sortOrder: 1 },
+          { fromAmount: 2000, rate: 12, sortOrder: 2 },
+        ],
+      },
+    },
+  });
+
+  await prisma.commissionScheme.create({
+    data: {
+      orgId,
+      name: 'Advisor, parts margin',
+      basis: 'PARTS_PROFIT',
+      threshold: 0,
+      guarantee: 150,
+      paidOnSettlement: false,
+      bands: { create: [{ fromAmount: 0, rate: 5, sortOrder: 1 }] },
+    },
+  });
+
+  const lastMonthEnd = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
+  const lastMonthStart = new Date(lastMonthEnd.getFullYear(), lastMonthEnd.getMonth(), 1);
+
+  await prisma.commissionAward.createMany({
+    data: [
+      {
+        orgId,
+        employeeId: employees.get('EMP-001')!,
+        schemeId: labourScheme.id,
+        periodStart: lastMonthStart,
+        periodEnd: lastMonthEnd,
+        basisTotal: 3140,
+        earned: 289.2,
+        jobCount: 22,
+        withheldCount: 3,
+      },
+      {
+        orgId,
+        employeeId: employees.get('EMP-002')!,
+        schemeId: labourScheme.id,
+        periodStart: lastMonthStart,
+        periodEnd: lastMonthEnd,
+        basisTotal: 1820,
+        earned: 105.6,
+        jobCount: 17,
+        withheldCount: 1,
+      },
+    ],
+  });
+
+  // Timesheets for the fortnight just gone. One already paid, so the
+  // immutability trigger has something real to protect.
+  await prisma.timesheet.createMany({
+    data: [
+      {
+        orgId,
+        employeeId: employees.get('EMP-001')!,
+        periodStart: day(-13, 0, 0),
+        periodEnd: day(-7, 23, 59),
+        status: 'PAID',
+        ordinaryMinutes: 2400,
+        overtimeMinutes: 75,
+        ordinaryPay: 1520,
+        overtimePay: 71.25,
+        gross: 1591.25,
+        paidAt: day(-6),
+      },
+      {
+        orgId,
+        employeeId: employees.get('EMP-002')!,
+        periodStart: day(-13, 0, 0),
+        periodEnd: day(-7, 23, 59),
+        status: 'APPROVED',
+        ordinaryMinutes: 2325,
+        overtimeMinutes: 0,
+        ordinaryPay: 1317.5,
+        overtimePay: 0,
+        gross: 1317.5,
+        approvedAt: day(-6),
+      },
+    ],
+  });
+}
+
+/**
+ * A transfer that has left Hillside and not reached Bradford.
+ *
+ * Seeded mid-flight on purpose: the in-transit state is the one that is easy
+ * to get wrong and impossible to notice, because both sites' figures look
+ * plausible while the stock is nowhere.
+ */
+async function seedTransfers(
+  orgId: string,
+  refs: {
+    fromWarehouseId: string;
+    toWarehouseId: string;
+    products: { id: string; partNumber: string }[];
+    dispatchedByUserId: string;
+  },
+) {
+  const pads = refs.products.find((product) => product.partNumber === 'BP-4471');
+  const filter = refs.products.find((product) => product.partNumber === '04152-YZZA1');
+  if (!pads || !filter) return;
+
+  const transfer = await prisma.stockTransfer.create({
+    data: {
+      orgId,
+      reference: 'TRF-0007',
+      fromWarehouseId: refs.fromWarehouseId,
+      toWarehouseId: refs.toWarehouseId,
+      status: 'IN_TRANSIT',
+      dispatchedAt: day(-2, 14, 30),
+      dispatchedByUserId: refs.dispatchedByUserId,
+      note: 'Bradford ran short before the weekend.',
+      lines: {
+        create: [
+          { productId: pads.id, quantity: 4, received: 0, unitCost: 42.5, sortOrder: 1 },
+          { productId: filter.id, quantity: 6, received: 0, unitCost: 8.0, sortOrder: 2 },
+        ],
+      },
+    },
+  });
+
+  // The stock genuinely left. Without these movements the origin's balance
+  // would still show parts that are sitting in a van.
+  for (const line of [
+    { productId: pads.id, quantity: 4, unitCost: 42.5 },
+    { productId: filter.id, quantity: 6, unitCost: 8.0 },
+  ]) {
+    const level = await prisma.stockLevel.findFirst({
+      where: { productId: line.productId, warehouseId: refs.fromWarehouseId },
+    });
+    if (!level) continue;
+
+    const balanceAfter = Number(level.onHand) - line.quantity;
+
+    await prisma.stockLevel.update({
+      where: { id: level.id },
+      data: { onHand: balanceAfter },
+    });
+
+    await prisma.stockMovement.create({
+      data: {
+        orgId,
+        productId: line.productId,
+        warehouseId: refs.fromWarehouseId,
+        type: 'TRANSFER_OUT',
+        quantity: -line.quantity,
+        unitCost: line.unitCost,
+        balanceAfter,
+        referenceType: 'StockTransfer',
+        referenceId: transfer.id,
+        reason: 'Sent on TRF-0007',
+      },
+    });
+  }
+
+  // One that arrived last week, so the page shows a finished journey too.
+  await prisma.stockTransfer.create({
+    data: {
+      orgId,
+      reference: 'TRF-0006',
+      fromWarehouseId: refs.fromWarehouseId,
+      toWarehouseId: refs.toWarehouseId,
+      status: 'RECEIVED',
+      dispatchedAt: day(-9, 11, 0),
+      receivedAt: day(-9, 16, 20),
+      dispatchedByUserId: refs.dispatchedByUserId,
+      lines: {
+        create: [{ productId: filter.id, quantity: 10, received: 10, unitCost: 8.0, sortOrder: 1 }],
+      },
+    },
+  });
 }
 
 async function appendChain(
