@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from './cn.js';
+import { cn } from './cn';
 
 /* ===========================================================================
    Data display.
@@ -23,7 +23,7 @@ export function TableWrap({
   return (
     <div
       className={cn(
-        'scroll-x rounded-[--radius-lg] border border-[--border] bg-[--surface]',
+        'scroll-x rounded-(--radius-lg) border border-(--border) bg-(--surface)',
         className,
       )}
     >
@@ -45,9 +45,9 @@ export function Th({
     <th
       scope="col"
       className={cn(
-        'sticky top-0 z-10 whitespace-nowrap border-b border-[--border] bg-[--surface-sunk]',
+        'sticky top-0 z-10 whitespace-nowrap border-b border-(--border) bg-(--surface-sunk)',
         'px-3 py-2 text-left font-mono text-[10px] font-semibold uppercase tracking-wider',
-        'text-[--text-faint]',
+        'text-(--text-faint)',
         numeric && 'text-right',
         className,
       )}
@@ -64,7 +64,7 @@ export function Td({
   return (
     <td
       className={cn(
-        'border-b border-[--border] px-3 py-2 align-middle',
+        'border-b border-(--border) px-3 py-2 align-middle',
         numeric && 'text-right tabular',
         className,
       )}
@@ -82,7 +82,7 @@ export function Tr({
     <tr
       className={cn(
         'last:[&>td]:border-b-0',
-        interactive && 'cursor-pointer transition-colors hover:bg-[--surface-sunk]',
+        interactive && 'cursor-pointer transition-colors hover:bg-(--surface-sunk)',
         className,
       )}
       {...props}
@@ -110,8 +110,8 @@ export function StatTile({
   return (
     <div
       className={cn(
-        'flex flex-col gap-1 bg-[--surface] p-4 transition-colors',
-        'group-hover:bg-[--surface-sunk]',
+        'flex flex-col gap-1 bg-(--surface) p-4 transition-colors',
+        'group-hover:bg-(--surface-sunk)',
         className,
       )}
     >
@@ -119,15 +119,15 @@ export function StatTile({
       <span
         className={cn(
           'font-display text-[28px] font-semibold leading-none tabular',
-          tone === 'brand' && 'text-[--brand-text]',
-          tone === 'warning' && 'text-[--warning]',
-          tone === 'danger' && 'text-[--danger]',
-          tone === 'success' && 'text-[--success]',
+          tone === 'brand' && 'text-(--brand-text)',
+          tone === 'warning' && 'text-(--warning)',
+          tone === 'danger' && 'text-(--danger)',
+          tone === 'success' && 'text-(--success)',
         )}
       >
         {value}
       </span>
-      {note ? <span className="text-[12px] text-[--text-faint]">{note}</span> : null}
+      {note ? <span className="text-[12px] text-(--text-faint)">{note}</span> : null}
     </div>
   );
 }
@@ -146,7 +146,7 @@ export function StatRow({
   return (
     <div
       className={cn(
-        'grid gap-px overflow-hidden rounded-[--radius-lg] border border-[--border] bg-[--border]',
+        'grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border)',
         'grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))]',
         className,
       )}
@@ -180,7 +180,7 @@ export function KeyValue({
         <div key={item.label} className="min-w-0">
           <dt className="eyebrow mb-0.5">{item.label}</dt>
           <dd className="text-[13px] leading-snug break-words">
-            {item.value ?? <span className="text-[--text-faint]">Not recorded</span>}
+            {item.value ?? <span className="text-(--text-faint)">Not recorded</span>}
           </dd>
         </div>
       ))}
@@ -206,17 +206,17 @@ export function UtilisationBar({
   const pct = capacityHours > 0 ? Math.min(100, (bookedHours / capacityHours) * 100) : 0;
 
   const colour = {
-    empty: 'bg-[--border-strong]',
-    light: 'bg-[--info]',
-    healthy: 'bg-[--success]',
-    full: 'bg-[--warning]',
-    over: 'bg-[--danger]',
+    empty: 'bg-(--border-strong)',
+    light: 'bg-(--info)',
+    healthy: 'bg-(--success)',
+    full: 'bg-(--warning)',
+    over: 'bg-(--danger)',
   }[state];
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <div
-        className="h-1.5 flex-1 overflow-hidden rounded-full bg-[--surface-sunk]"
+        className="h-1.5 flex-1 overflow-hidden rounded-full bg-(--surface-sunk)"
         role="meter"
         aria-valuenow={Math.round(bookedHours)}
         aria-valuemin={0}
@@ -225,7 +225,7 @@ export function UtilisationBar({
       >
         <div className={cn('h-full rounded-full', colour)} style={{ width: `${pct}%` }} />
       </div>
-      <span className="datum shrink-0 text-[11px] text-[--text-faint]">
+      <span className="datum shrink-0 text-[11px] text-(--text-faint)">
         {bookedHours.toFixed(1)}/{capacityHours.toFixed(0)}h
       </span>
     </div>
@@ -242,7 +242,7 @@ export function TabStrip({
 }) {
   return (
     <div
-      className={cn('scroll-x -mb-px flex gap-1 border-b border-[--border]', className)}
+      className={cn('scroll-x -mb-px flex gap-1 border-b border-(--border)', className)}
       role="tablist"
     >
       {children}
@@ -262,8 +262,8 @@ export function Tab({
       className={cn(
         'whitespace-nowrap border-b-2 px-3 py-2 text-[13px] font-medium transition-colors',
         active
-          ? 'border-[--brand] text-[--text]'
-          : 'border-transparent text-[--text-faint] hover:text-[--text]',
+          ? 'border-(--brand) text-(--text)'
+          : 'border-transparent text-(--text-faint) hover:text-(--text)',
         className,
       )}
       {...props}

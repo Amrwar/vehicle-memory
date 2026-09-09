@@ -1,0 +1,64 @@
+import { z } from 'zod';
+
+/**
+ * Environment validation.
+ *
+ * Parsed once, at startup, so a missing secret fails the boot with a message
+ * naming the variable rather than failing the first request that happens to
+ * need it, at 4pm, in production.
+ */
+const schema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  APP_URL: z.string().url().default('http://localhost:3000'),
+  APP_NAME: z.string().default('Carnet'),
+
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+
+  AUTH_SECRET: z
+    .string()
+    .min(32, 'AUTH_SECRET must be at least 32 characters. Generate: openssl rand -base64 48'),
+  SESSION_TTL_HOURS: z.coerce.number().int().positive().default(12),
+
+  PUBLIC_LINK_SECRET: z.string().min(32, 'PUBLIC_LINK_SECRET must be at least 32 characters'),
+
+  LEDGER_CHAIN_SALT: z
+    .string()
+    .min(16, 'LEDGER_CHAIN_SALT must be at least 16 characters and must never be rotated'),
+
+  MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
+  SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
+  MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),
+
+  LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
+
+  FEATURE_CUSTOMER_PORTAL: z.coerce.boolean().default(true),
+  FEATURE_VEHICLE_PASSPORT: z.coerce.boolean().default(true),
+  FEATURE_INVENTORY: z.coerce.boolean().default(false),
+  FEATURE_ACCOUNTING: z.coerce.boolean().default(false),
+});
+
+export type Env = z.infer<typeof schema>;
+
+let cached: Env | undefined;
+
+export function env(): Env {
+  if (cached) return cached;
+
+  const parsed = schema.safeParse(process.env);
+
+  if (!parsed.success) {
+    const problems = parsed.error.issues
+      .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+      .join('\n');
+
+    throw new Error(
+      `Environment is not configured correctly:\n${problems}\n\n` +
+        'Copy .env.example to .env and fill in the missing values.',
+    );
+  }
+
+  cached = parsed.data;
+  return cached;
+}
+
+export const isProduction = (): boolean => env().NODE_ENV === 'production';

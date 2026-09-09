@@ -1,2 +1,2 @@
-export * from './vin.js';
-export * from './mileage.js';
+export * from './vin';
+export * from './mileage';

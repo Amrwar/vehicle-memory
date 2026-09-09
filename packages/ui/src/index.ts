@@ -1,4 +1,4 @@
-export { cn } from './cn.js';
-export * from './primitives.js';
-export * from './data.js';
-export * from './domain.js';
+export { cn } from './cn';
+export * from './primitives';
+export * from './data';
+export * from './domain';

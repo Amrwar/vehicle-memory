@@ -8,7 +8,7 @@ import {
   type ScheduledItem,
   suggestSlots,
   utilisationFor,
-} from './capacity.js';
+} from './capacity';
 
 const at = (hour: number, day = 12): Date => new Date(2026, 8, day, hour, 0, 0, 0);
 

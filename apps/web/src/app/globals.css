@@ -1,0 +1,11 @@
+@import '@carnet/ui/styles.css';
+
+/*
+ * Tailwind v4 detects source files relative to the project it is invoked from,
+ * which here is apps/web. The design system lives in a workspace package
+ * outside that tree, so its class names would never be seen and its utilities
+ * would silently not be generated. Declaring the source explicitly is what
+ * makes the shared components actually styled.
+ */
+@source "../../../../packages/ui/src";
+@source "../../../../packages/core/src";

@@ -1,5 +1,5 @@
-import { prisma } from './client.js';
-import type { PrismaClient } from './generated/client/index.js';
+import { prisma } from './client';
+import type { PrismaClient } from './generated/client/index';
 
 /**
  * Tenant isolation.

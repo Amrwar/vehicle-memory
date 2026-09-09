@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculateTotals } from '../pricing/totals.js';
+import { calculateTotals } from '../pricing/totals';
 import {
   actionable,
   describeFinding,
@@ -11,7 +11,7 @@ import {
   summarise,
   TREAD_ADVISORY_MM,
   TREAD_CRITICAL_MM,
-} from './to-estimate.js';
+} from './to-estimate';
 
 const FINDINGS: Finding[] = [
   { id: 'f1', sectionName: 'Brakes', itemName: 'Front pads', severity: 'CRITICAL',

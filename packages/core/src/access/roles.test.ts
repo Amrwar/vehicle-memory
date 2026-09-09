@@ -11,7 +11,7 @@ import {
   permissionsFor,
   ROLES,
   surfaceFor,
-} from './roles.js';
+} from './roles';
 
 describe('deny by default', () => {
   it('refuses when there is no role', () => {

@@ -10,7 +10,7 @@ import {
   subtract,
   sum,
   zero,
-} from '../shared/money.js';
+} from '../shared/money';
 
 /**
  * Document totals for estimates, jobs and invoices.

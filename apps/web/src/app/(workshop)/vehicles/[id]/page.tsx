@@ -1,0 +1,357 @@
+import {
+  averageKmPerDay,
+  humanise,
+  humaniseEventType,
+  projectServiceDue,
+  toneFor,
+  type JobStatus,
+  type VehicleEventType,
+} from '@carnet/core';
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  ChainFingerprint,
+  EmptyState,
+  KeyValue,
+  Mileage,
+  PageHeader,
+  Registration,
+  TimelineEntry,
+  Vin,
+} from '@carnet/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { prisma } from '@carnet/db';
+import { requireSession } from '@/lib/guard';
+import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
+
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const vehicle = await prisma.vehicle.findUnique({
+    where: { id },
+    select: { make: true, model: true, registration: true },
+  });
+  return {
+    title: vehicle
+      ? `${vehicle.make} ${vehicle.model} ${vehicle.registration ?? ''}`.trim()
+      : 'Vehicle',
+  };
+}
+
+/**
+ * The vehicle passport, seen from inside a workshop.
+ *
+ * Note what is happening here: the vehicle is fetched from the global Prisma
+ * client, not the tenant-scoped one, because a vehicle is not owned by a
+ * workshop (ADR-0004). Access is checked explicitly instead.
+ */
+export default async function VehiclePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const { db, orgId } = await requireSession('vehicle:read');
+
+  const permitted = await orgCanReadVehicle(orgId, id);
+  if (!permitted) notFound();
+
+  const vehicle = await prisma.vehicle.findUnique({
+    where: { id },
+    include: {
+      events: {
+        orderBy: { sequence: 'desc' },
+        include: { recordedByOrg: { select: { name: true } } },
+      },
+      ownerships: { orderBy: { startedAt: 'desc' } },
+      odometerReadings: { orderBy: { readAt: 'desc' }, take: 40 },
+      recalls: { include: { recall: true } },
+      serviceSchedules: { where: { isActive: true } },
+    },
+  });
+
+  if (!vehicle) notFound();
+
+  const [jobs, verification] = await Promise.all([
+    db.job.findMany({
+      where: { vehicleId: id },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: { customer: { select: { displayName: true } } },
+    }),
+    verifyVehicleChain(id),
+  ]);
+
+  const kmPerDay = averageKmPerDay(
+    vehicle.odometerReadings
+      .filter((reading) => reading.anomaly === 'NONE')
+      .map((reading) => ({ km: reading.km, readAt: reading.readAt })),
+  );
+
+  const schedule = vehicle.serviceSchedules[0];
+  const due = schedule
+    ? projectServiceDue({
+        lastPerformedAt: schedule.lastPerformedAt,
+        lastPerformedKm: schedule.lastPerformedKm,
+        intervalMonths: schedule.intervalMonths,
+        intervalKm: schedule.intervalKm,
+        currentKm: vehicle.lastOdometerKm,
+        kmPerDay,
+      })
+    : null;
+
+  const currentOwner = vehicle.ownerships.find((o) => o.endedAt === null);
+  const openRecalls = vehicle.recalls.filter((r) => r.status === 'OPEN');
+
+  // Group the timeline by year: twenty years of history is unreadable as one
+  // flat list, and a reader thinks in "what happened in 2024".
+  const byYear = new Map<number, typeof vehicle.events>();
+  for (const event of vehicle.events) {
+    const year = event.occurredAt.getFullYear();
+    const bucket = byYear.get(year) ?? [];
+    bucket.push(event);
+    byYear.set(year, bucket);
+  }
+
+  return (
+    <>
+      <PageHeader
+        eyebrow="Vehicle passport"
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            {vehicle.year} {vehicle.make} {vehicle.model}
+            {vehicle.registration ? (
+              <Registration value={vehicle.registration} className="text-[15px]" />
+            ) : null}
+          </span>
+        }
+        description={vehicle.variant ?? undefined}
+        actions={
+          <>
+            <Button>Share history</Button>
+            <Link href={`/jobs/new?vehicle=${vehicle.id}`}>
+              <Button variant="primary">New job</Button>
+            </Link>
+          </>
+        }
+      />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid gap-5">
+          <Card>
+            <CardHeader
+              title="Identity"
+              action={
+                <ChainFingerprint
+                  head={vehicle.chainHead}
+                  verified={verification.valid}
+                />
+              }
+            />
+            <CardBody>
+              <KeyValue
+                columns={3}
+                items={[
+                  { label: 'VIN', value: <Vin value={vehicle.vin} /> },
+                  { label: 'Registration', value: vehicle.registration },
+                  { label: 'Engine', value: vehicle.engineCode },
+                  { label: 'Fuel', value: vehicle.fuelType?.toLowerCase() },
+                  { label: 'Transmission', value: vehicle.transmission?.toLowerCase() },
+                  { label: 'Body', value: vehicle.bodyType },
+                  { label: 'Colour', value: vehicle.colour },
+                  {
+                    label: 'Odometer',
+                    value: <Mileage km={vehicle.lastOdometerKm} />,
+                  },
+                  {
+                    label: 'Average use',
+                    value: kmPerDay ? `${Math.round(kmPerDay * 30).toLocaleString()} km/month` : null,
+                  },
+                  {
+                    label: 'Current owner',
+                    value: currentOwner?.ownerName,
+                  },
+                  {
+                    label: 'Owners on record',
+                    value: vehicle.ownerships.length || null,
+                  },
+                  {
+                    label: 'Events on record',
+                    value: vehicle.eventCount,
+                  },
+                ]}
+              />
+
+              {!verification.valid ? (
+                <div className="mt-4 rounded-(--radius-md) border border-(--danger) bg-(--danger-soft) px-3 py-2.5 text-[13px] text-(--danger)">
+                  <p className="font-semibold">Integrity check failed</p>
+                  <p className="mt-0.5">
+                    The chain diverges at entry {verification.failedAt.sequence} (
+                    {verification.failedAt.reason.toLowerCase().replace('_', ' ')}). Entries
+                    before that point are unaffected.
+                  </p>
+                </div>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="History"
+              description={`${vehicle.eventCount} entries, oldest first at the bottom`}
+            />
+
+            {vehicle.events.length === 0 ? (
+              <EmptyState
+                title="No history yet"
+                description="Entries appear here automatically when a job on this vehicle is completed."
+              />
+            ) : (
+              <CardBody className="pt-2">
+                {[...byYear.entries()]
+                  .sort(([a], [b]) => b - a)
+                  .map(([year, events]) => (
+                    <section key={year} className="mb-6 last:mb-0">
+                      <h3 className="datum mb-3 text-[13px] font-semibold text-(--text-faint)">
+                        {year}
+                      </h3>
+                      <ul>
+                        {events.map((event) => (
+                          <TimelineEntry
+                            key={event.id}
+                            event={{
+                              id: event.id,
+                              type: event.type,
+                              typeLabel: humaniseEventType(event.type as VehicleEventType),
+                              title: event.title,
+                              summary: event.summary,
+                              occurredAt: event.occurredAt,
+                              odometerKm: event.odometerKm,
+                              verification: event.verification,
+                              recordedBy: event.recordedByOrg?.name ?? null,
+                              superseded: event.supersededById !== null,
+                            }}
+                          />
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+              </CardBody>
+            )}
+          </Card>
+        </div>
+
+        <aside className="grid content-start gap-5">
+          {openRecalls.length > 0 ? (
+            <Card className="border-(--danger)">
+              <CardHeader title="Open recalls" />
+              <ul className="divide-y divide-(--border)">
+                {openRecalls.map((item) => (
+                  <li key={item.id} className="px-4 py-3">
+                    <p className="text-[13px] font-medium">{item.recall.title}</p>
+                    <p className="datum mt-0.5 text-[11px] text-(--text-faint)">
+                      {item.recall.campaignRef} · {item.recall.manufacturer}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
+          {due ? (
+            <Card>
+              <CardHeader title="Next service" />
+              <CardBody className="grid gap-2 text-[13px]">
+                {due.dueKm ? (
+                  <div className="flex justify-between">
+                    <span className="text-(--text-faint)">Due at</span>
+                    <span className="tabular">{due.dueKm.toLocaleString()} km</span>
+                  </div>
+                ) : null}
+                {due.kmRemaining !== null ? (
+                  <div className="flex justify-between">
+                    <span className="text-(--text-faint)">Remaining</span>
+                    <span className="tabular">{due.kmRemaining.toLocaleString()} km</span>
+                  </div>
+                ) : null}
+                {due.projectedDueAt ? (
+                  <div className="flex justify-between">
+                    <span className="text-(--text-faint)">Projected</span>
+                    <span className="datum">
+                      {due.projectedDueAt.toLocaleDateString('en-GB', {
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                ) : null}
+                {due.isOverdue ? (
+                  <Badge tone="danger" dot className="mt-1 w-fit">
+                    Overdue
+                  </Badge>
+                ) : null}
+              </CardBody>
+            </Card>
+          ) : null}
+
+          <Card>
+            <CardHeader title="Jobs at this workshop" />
+            {jobs.length === 0 ? (
+              <CardBody className="text-[13px] text-(--text-faint)">
+                This vehicle has not been worked on here.
+              </CardBody>
+            ) : (
+              <ul className="divide-y divide-(--border)">
+                {jobs.map((job) => (
+                  <li key={job.id} className="px-4 py-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={`/jobs/${job.id}`}
+                        className="datum text-[12px] font-medium hover:underline"
+                      >
+                        #{job.number}
+                      </Link>
+                      <Badge tone={toneFor(job.status as JobStatus)} size="sm">
+                        {humanise(job.status as JobStatus)}
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 truncate text-[12px] text-(--text-soft)">
+                      {job.shortDescription}
+                    </p>
+                    <p className="datum text-[11px] text-(--text-faint)">
+                      {job.createdAt.toLocaleDateString('en-GB')}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader title="Ownership" />
+            <ul className="divide-y divide-(--border)">
+              {vehicle.ownerships.map((ownership) => (
+                <li key={ownership.id} className="px-4 py-2.5 text-[13px]">
+                  <p className="font-medium">{ownership.ownerName ?? 'Unnamed owner'}</p>
+                  <p className="datum text-[11px] text-(--text-faint)">
+                    {ownership.startedAt.toLocaleDateString('en-GB')} —{' '}
+                    {ownership.endedAt
+                      ? ownership.endedAt.toLocaleDateString('en-GB')
+                      : 'present'}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </aside>
+      </div>
+    </>
+  );
+}

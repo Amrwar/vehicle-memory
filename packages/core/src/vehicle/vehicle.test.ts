@@ -5,7 +5,7 @@ import {
   averageKmPerDay,
   projectServiceDue,
   type Reading,
-} from './mileage.js';
+} from './mileage';
 import {
   computeCheckDigit,
   formatVin,
@@ -14,7 +14,7 @@ import {
   validateVin,
   verifyCheckDigit,
   worldManufacturerId,
-} from './vin.js';
+} from './vin';
 
 // A VIN with a known-correct check digit, from the ISO 3779 worked example.
 const VALID_VIN = '1M8GDM9AXKP042788';

@@ -8,7 +8,7 @@ import {
   fingerprint,
   hashesEqual,
   verifyChain,
-} from './chain.js';
+} from './chain';
 
 const SALT = 'test-salt-do-not-use-in-production';
 

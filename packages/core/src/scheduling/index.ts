@@ -1,1 +1,1 @@
-export * from './capacity.js';
+export * from './capacity';

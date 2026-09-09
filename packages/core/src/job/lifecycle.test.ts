@@ -11,7 +11,7 @@ import {
   type JobStatus,
   progressFor,
   toneFor,
-} from './lifecycle.js';
+} from './lifecycle';
 
 describe('permitted transitions', () => {
   it('walks the happy path from received to paid', () => {

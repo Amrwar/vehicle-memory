@@ -1,4 +1,4 @@
-import type { PriceableLine } from '../pricing/totals.js';
+import type { PriceableLine } from '../pricing/totals';
 
 /**
  * Turning inspection findings into estimate lines.

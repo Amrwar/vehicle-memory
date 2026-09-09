@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
-import { cn } from './cn.js';
+import { cn } from './cn';
 
 /* ===========================================================================
    Button
@@ -15,25 +15,25 @@ const button = cva(
     variants: {
       variant: {
         primary:
-          'bg-[--brand] text-[--text-inverse] hover:bg-[--brand-hover] ' +
-          'dark:text-[--color-slate-950]',
+          'bg-(--brand) text-(--text-inverse) hover:bg-(--brand-hover) ' +
+          'dark:text-(--color-slate-950)',
         secondary:
-          'bg-[--surface] text-[--text] border border-[--border-strong] ' +
-          'hover:bg-[--surface-sunk]',
-        ghost: 'text-[--text-soft] hover:bg-[--surface-sunk] hover:text-[--text]',
-        danger: 'bg-[--danger] text-white hover:brightness-110',
+          'bg-(--surface) text-(--text) border border-(--border-strong) ' +
+          'hover:bg-(--surface-sunk)',
+        ghost: 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
+        danger: 'bg-(--danger) text-white hover:brightness-110',
         accent:
-          'bg-[--accent] text-white hover:brightness-110 dark:text-[--color-slate-950]',
-        link: 'text-[--brand-text] underline underline-offset-2 hover:opacity-80',
+          'bg-(--accent) text-white hover:brightness-110 dark:text-(--color-slate-950)',
+        link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',
       },
       size: {
-        sm: 'h-8 px-2.5 text-[13px] rounded-[--radius-sm]',
-        md: 'h-9 px-3.5 text-[13px] rounded-[--radius-md]',
-        lg: 'h-11 px-5 text-[15px] rounded-[--radius-md]',
+        sm: 'h-8 px-2.5 text-[13px] rounded-(--radius-sm)',
+        md: 'h-9 px-3.5 text-[13px] rounded-(--radius-md)',
+        lg: 'h-11 px-5 text-[15px] rounded-(--radius-md)',
         /* Shop floor: 48px minimum, gloves on. NFR-605. */
-        touch: 'min-h-[--touch] px-5 text-[15px] rounded-[--radius-md]',
-        icon: 'h-9 w-9 rounded-[--radius-md]',
-        'icon-touch': 'h-[--touch] w-[--touch] rounded-[--radius-md]',
+        touch: 'min-h-(--touch) px-5 text-[15px] rounded-(--radius-md)',
+        icon: 'h-9 w-9 rounded-(--radius-md)',
+        'icon-touch': 'h-(--touch) w-(--touch) rounded-(--radius-md)',
       },
       block: { true: 'w-full', false: '' },
     },
@@ -65,17 +65,17 @@ Button.displayName = 'Button';
 
 const badge = cva(
   'inline-flex items-center gap-1.5 font-medium whitespace-nowrap ' +
-    'rounded-[--radius-xs] border',
+    'rounded-(--radius-xs) border',
   {
     variants: {
       tone: {
-        neutral: 'bg-[--surface-sunk] text-[--text-soft] border-[--border]',
-        brand: 'bg-[--brand-soft] text-[--brand-text] border-[--brand-soft]',
-        accent: 'bg-[--accent-soft] text-[--accent-text] border-[--accent-soft]',
-        success: 'bg-[--success-soft] text-[--success] border-[--success-soft]',
-        warning: 'bg-[--warning-soft] text-[--warning] border-[--warning-soft]',
-        danger: 'bg-[--danger-soft] text-[--danger] border-[--danger-soft]',
-        info: 'bg-[--info-soft] text-[--info] border-[--info-soft]',
+        neutral: 'bg-(--surface-sunk) text-(--text-soft) border-(--border)',
+        brand: 'bg-(--brand-soft) text-(--brand-text) border-(--brand-soft)',
+        accent: 'bg-(--accent-soft) text-(--accent-text) border-(--accent-soft)',
+        success: 'bg-(--success-soft) text-(--success) border-(--success-soft)',
+        warning: 'bg-(--warning-soft) text-(--warning) border-(--warning-soft)',
+        danger: 'bg-(--danger-soft) text-(--danger) border-(--danger-soft)',
+        info: 'bg-(--info-soft) text-(--info) border-(--info-soft)',
       },
       size: {
         sm: 'px-1.5 py-0.5 text-[10px] tracking-wide uppercase font-mono',
@@ -118,7 +118,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-[--surface] border border-[--border] rounded-[--radius-lg]',
+        'bg-(--surface) border border-(--border) rounded-(--radius-lg)',
         className,
       )}
       {...props}
@@ -140,7 +140,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'flex items-start justify-between gap-3 px-4 py-3 border-b border-[--border]',
+        'flex items-start justify-between gap-3 px-4 py-3 border-b border-(--border)',
         className,
       )}
       {...props}
@@ -150,7 +150,7 @@ export function CardHeader({
           <h2 className="text-[15px] font-semibold leading-tight truncate">{title}</h2>
         ) : null}
         {description ? (
-          <p className="text-[12px] text-[--text-faint] mt-0.5">{description}</p>
+          <p className="text-[12px] text-(--text-faint) mt-0.5">{description}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -167,10 +167,10 @@ export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivEl
    =========================================================================== */
 
 const control =
-  'w-full bg-[--surface] text-[--text] border border-[--border-strong] ' +
-  'rounded-[--radius-md] px-3 text-[13px] placeholder:text-[--text-faint] ' +
-  'transition-colors focus:border-[--brand] disabled:opacity-60 ' +
-  'disabled:bg-[--surface-sunk]';
+  'w-full bg-(--surface) text-(--text) border border-(--border-strong) ' +
+  'rounded-(--radius-md) px-3 text-[13px] placeholder:text-(--text-faint) ' +
+  'transition-colors focus:border-(--brand) disabled:opacity-60 ' +
+  'disabled:bg-(--surface-sunk)';
 
 export const Input = React.forwardRef<
   HTMLInputElement,
@@ -181,8 +181,8 @@ export const Input = React.forwardRef<
     aria-invalid={invalid || undefined}
     className={cn(
       control,
-      touch ? 'min-h-[--touch] text-[15px]' : 'h-9',
-      invalid && 'border-[--danger]',
+      touch ? 'min-h-(--touch) text-[15px]' : 'h-9',
+      invalid && 'border-(--danger)',
       className,
     )}
     {...props}
@@ -198,7 +198,7 @@ export const Textarea = React.forwardRef<
     ref={ref}
     rows={rows}
     aria-invalid={invalid || undefined}
-    className={cn(control, 'py-2 leading-relaxed', invalid && 'border-[--danger]', className)}
+    className={cn(control, 'py-2 leading-relaxed', invalid && 'border-(--danger)', className)}
     {...props}
   />
 ));
@@ -210,7 +210,7 @@ export const Select = React.forwardRef<
 >(({ className, touch, ...props }, ref) => (
   <select
     ref={ref}
-    className={cn(control, touch ? 'min-h-[--touch] text-[15px]' : 'h-9', 'pr-8', className)}
+    className={cn(control, touch ? 'min-h-(--touch) text-[15px]' : 'h-9', 'pr-8', className)}
     {...props}
   />
 ));
@@ -235,19 +235,19 @@ export function Field({
 }) {
   return (
     <div className={cn('grid gap-1.5', className)}>
-      <label htmlFor={htmlFor} className="text-[12px] font-medium text-[--text-soft]">
+      <label htmlFor={htmlFor} className="text-[12px] font-medium text-(--text-soft)">
         {label}
         {required ? (
-          <span className="text-[--danger] ml-0.5" aria-hidden>
+          <span className="text-(--danger) ml-0.5" aria-hidden>
             *
           </span>
         ) : null}
       </label>
       {children}
       {error ? (
-        <p className="text-[12px] text-[--danger]">{error}</p>
+        <p className="text-[12px] text-(--danger)">{error}</p>
       ) : hint ? (
-        <p className="text-[12px] text-[--text-faint]">{hint}</p>
+        <p className="text-[12px] text-(--text-faint)">{hint}</p>
       ) : null}
     </div>
   );
@@ -269,23 +269,23 @@ export function Alert({
   className?: string;
 }) {
   const tones = {
-    info: 'bg-[--info-soft] border-[--info] text-[--info]',
-    success: 'bg-[--success-soft] border-[--success] text-[--success]',
-    warning: 'bg-[--warning-soft] border-[--warning] text-[--warning]',
-    danger: 'bg-[--danger-soft] border-[--danger] text-[--danger]',
+    info: 'bg-(--info-soft) border-(--info) text-(--info)',
+    success: 'bg-(--success-soft) border-(--success) text-(--success)',
+    warning: 'bg-(--warning-soft) border-(--warning) text-(--warning)',
+    danger: 'bg-(--danger-soft) border-(--danger) text-(--danger)',
   } as const;
 
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
       className={cn(
-        'border-l-[3px] rounded-r-[--radius-sm] px-3.5 py-2.5 text-[13px]',
+        'border-l-[3px] rounded-r-(--radius-sm) px-3.5 py-2.5 text-[13px]',
         tones[tone],
         className,
       )}
     >
       {title ? <p className="font-semibold mb-0.5">{title}</p> : null}
-      {children ? <div className="text-[--text-soft]">{children}</div> : null}
+      {children ? <div className="text-(--text-soft)">{children}</div> : null}
     </div>
   );
 }
@@ -305,7 +305,7 @@ export function EmptyState({
     <div className={cn('text-center px-6 py-12', className)}>
       <p className="font-display text-[15px] font-semibold">{title}</p>
       {description ? (
-        <p className="text-[13px] text-[--text-faint] mt-1 max-w-sm mx-auto">{description}</p>
+        <p className="text-[13px] text-(--text-faint) mt-1 max-w-sm mx-auto">{description}</p>
       ) : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
@@ -332,7 +332,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-end justify-between gap-3 pb-4 mb-5 border-b border-[--border]',
+        'flex flex-wrap items-end justify-between gap-3 pb-4 mb-5 border-b border-(--border)',
         className,
       )}
     >
@@ -340,7 +340,7 @@ export function PageHeader({
         {eyebrow ? <p className="eyebrow mb-1">{eyebrow}</p> : null}
         <h1 className="text-[22px] font-semibold leading-tight">{title}</h1>
         {description ? (
-          <p className="text-[13px] text-[--text-faint] mt-1">{description}</p>
+          <p className="text-[13px] text-(--text-faint) mt-1">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex items-center gap-2 shrink-0">{actions}</div> : null}
@@ -349,5 +349,5 @@ export function PageHeader({
 }
 
 export function Divider({ className }: { className?: string }) {
-  return <hr className={cn('border-0 border-t border-[--border]', className)} />;
+  return <hr className={cn('border-0 border-t border-(--border)', className)} />;
 }

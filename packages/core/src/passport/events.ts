@@ -1,4 +1,4 @@
-import type { ChainableEvent } from './chain.js';
+import type { ChainableEvent } from './chain';
 
 /**
  * Building passport events from workshop work.

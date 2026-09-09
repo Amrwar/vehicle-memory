@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Badge } from './primitives.js';
-import { cn } from './cn.js';
+import { Badge } from './primitives';
+import { cn } from './cn';
 
 /* ===========================================================================
    Domain-aware display components.
@@ -31,7 +31,7 @@ export function Vin({
       : normalised;
 
   return (
-    <span className={cn('datum text-[--text-soft]', className)} title={normalised}>
+    <span className={cn('datum text-(--text-soft)', className)} title={normalised}>
       {display}
     </span>
   );
@@ -46,8 +46,8 @@ export function Registration({ value, className }: { value: string; className?: 
   return (
     <span
       className={cn(
-        'datum inline-flex items-center rounded-[--radius-xs] border',
-        'border-[--border-strong] bg-[--surface-sunk] px-1.5 py-px',
+        'datum inline-flex items-center rounded-(--radius-xs) border',
+        'border-(--border-strong) bg-(--surface-sunk) px-1.5 py-px',
         'text-[12px] font-semibold uppercase tracking-wider',
         className,
       )}
@@ -77,8 +77,8 @@ export function Money({
     <span
       className={cn(
         'tabular',
-        signed && amount < 0 && 'text-[--danger]',
-        signed && amount > 0 && 'text-[--success]',
+        signed && amount < 0 && 'text-(--danger)',
+        signed && amount > 0 && 'text-(--success)',
         className,
       )}
     >
@@ -100,7 +100,7 @@ export function Mileage({
   className?: string;
 }) {
   if (km === null || km === undefined) {
-    return <span className={cn('text-[--text-faint]', className)}>Not recorded</span>;
+    return <span className={cn('text-(--text-faint)', className)}>Not recorded</span>;
   }
 
   const flagged = anomaly && anomaly !== 'NONE';
@@ -176,12 +176,12 @@ export function SeveritySummary({
           <span
             key={severity}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-[--radius-sm] px-2 py-1',
+              'inline-flex items-center gap-1.5 rounded-(--radius-sm) px-2 py-1',
               'text-[12px] font-medium',
-              meta.tone === 'danger' && 'bg-[--danger-soft] text-[--danger]',
-              meta.tone === 'warning' && 'bg-[--warning-soft] text-[--warning]',
-              meta.tone === 'success' && 'bg-[--success-soft] text-[--success]',
-              meta.tone === 'neutral' && 'bg-[--surface-sunk] text-[--text-soft]',
+              meta.tone === 'danger' && 'bg-(--danger-soft) text-(--danger)',
+              meta.tone === 'warning' && 'bg-(--warning-soft) text-(--warning)',
+              meta.tone === 'success' && 'bg-(--success-soft) text-(--success)',
+              meta.tone === 'neutral' && 'bg-(--surface-sunk) text-(--text-soft)',
             )}
           >
             <span aria-hidden className="datum text-[13px] leading-none">
@@ -223,7 +223,7 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
                 aria-hidden
                 className={cn(
                   'absolute left-[7px] top-[18px] bottom-0 w-px',
-                  stage.state === 'done' ? 'bg-[--success]' : 'bg-[--border]',
+                  stage.state === 'done' ? 'bg-(--success)' : 'bg-(--border)',
                 )}
               />
             ) : null}
@@ -233,12 +233,12 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
               className={cn(
                 'relative z-10 mt-1 grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full border-2 text-[9px] font-bold',
                 stage.state === 'done' &&
-                  'border-[--success] bg-[--success] text-white',
+                  'border-(--success) bg-(--success) text-white',
                 stage.state === 'current' &&
-                  'border-[--brand] bg-[--surface] ring-4 ring-[--brand-soft]',
-                stage.state === 'upcoming' && 'border-[--border-strong] bg-[--surface]',
+                  'border-(--brand) bg-(--surface) ring-4 ring-(--brand-soft)',
+                stage.state === 'upcoming' && 'border-(--border-strong) bg-(--surface)',
                 stage.state === 'skipped' &&
-                  'border-dashed border-[--border-strong] bg-[--surface]',
+                  'border-dashed border-(--border-strong) bg-(--surface)',
               )}
             >
               {stage.state === 'done' ? '✓' : ''}
@@ -247,10 +247,10 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
             <span
               className={cn(
                 'text-[13px] leading-tight pt-px',
-                stage.state === 'current' && 'font-semibold text-[--text]',
-                stage.state === 'done' && 'text-[--text-soft]',
-                stage.state === 'upcoming' && 'text-[--text-faint]',
-                stage.state === 'skipped' && 'text-[--text-faint] line-through decoration-1',
+                stage.state === 'current' && 'font-semibold text-(--text)',
+                stage.state === 'done' && 'text-(--text-soft)',
+                stage.state === 'upcoming' && 'text-(--text-faint)',
+                stage.state === 'skipped' && 'text-(--text-faint) line-through decoration-1',
               )}
             >
               {stage.label}
@@ -344,16 +344,16 @@ export function TimelineEntry({
         className,
       )}
     >
-      <span aria-hidden className="absolute left-[5px] top-4 bottom-0 w-px bg-[--border]" />
+      <span aria-hidden className="absolute left-[5px] top-4 bottom-0 w-px bg-(--border)" />
 
       <span
         aria-hidden
         className={cn(
-          'relative z-10 mt-1.5 h-[11px] w-[11px] rounded-full border-2 border-[--surface]',
-          event.verification === 'WORKSHOP_VERIFIED' && 'bg-[--success]',
-          event.verification === 'WORKSHOP_RECORDED' && 'bg-[--info]',
-          event.verification === 'AUTHORITY' && 'bg-[--accent]',
-          event.verification === 'SELF_REPORTED' && 'bg-[--border-strong]',
+          'relative z-10 mt-1.5 h-[11px] w-[11px] rounded-full border-2 border-(--surface)',
+          event.verification === 'WORKSHOP_VERIFIED' && 'bg-(--success)',
+          event.verification === 'WORKSHOP_RECORDED' && 'bg-(--info)',
+          event.verification === 'AUTHORITY' && 'bg-(--accent)',
+          event.verification === 'SELF_REPORTED' && 'bg-(--border-strong)',
         )}
       />
 
@@ -362,7 +362,7 @@ export function TimelineEntry({
           <span className="eyebrow">{event.typeLabel}</span>
           <time
             dateTime={date.toISOString()}
-            className="datum text-[11px] text-[--text-faint]"
+            className="datum text-[11px] text-(--text-faint)"
           >
             {date.toLocaleDateString(locale, {
               day: 'numeric',
@@ -371,7 +371,7 @@ export function TimelineEntry({
             })}
           </time>
           {event.odometerKm != null ? (
-            <span className="datum text-[11px] text-[--text-faint]">
+            <span className="datum text-[11px] text-(--text-faint)">
               {event.odometerKm.toLocaleString(locale)} km
             </span>
           ) : null}
@@ -385,13 +385,13 @@ export function TimelineEntry({
         <p className="text-[14px] font-medium leading-snug mt-1">{event.title}</p>
 
         {event.summary ? (
-          <p className="text-[13px] text-[--text-soft] leading-snug mt-0.5">{event.summary}</p>
+          <p className="text-[13px] text-(--text-soft) leading-snug mt-0.5">{event.summary}</p>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-2 mt-1.5">
           <VerificationBadge level={event.verification} />
           {event.recordedBy ? (
-            <span className="text-[12px] text-[--text-faint]">{event.recordedBy}</span>
+            <span className="text-[12px] text-(--text-faint)">{event.recordedBy}</span>
           ) : null}
         </div>
       </div>
@@ -417,10 +417,10 @@ export function ChainFingerprint({
   return (
     <div
       className={cn(
-        'flex items-center gap-2.5 rounded-[--radius-md] border px-3 py-2',
+        'flex items-center gap-2.5 rounded-(--radius-md) border px-3 py-2',
         verified
-          ? 'border-[--success] bg-[--success-soft]'
-          : 'border-[--danger] bg-[--danger-soft]',
+          ? 'border-(--success) bg-(--success-soft)'
+          : 'border-(--danger) bg-(--danger-soft)',
         className,
       )}
     >
@@ -428,7 +428,7 @@ export function ChainFingerprint({
         aria-hidden
         className={cn(
           'grid h-6 w-6 place-items-center rounded-full text-[13px] font-bold text-white',
-          verified ? 'bg-[--success]' : 'bg-[--danger]',
+          verified ? 'bg-(--success)' : 'bg-(--danger)',
         )}
       >
         {verified ? '✓' : '!'}
@@ -437,12 +437,12 @@ export function ChainFingerprint({
         <p
           className={cn(
             'text-[12px] font-semibold leading-tight',
-            verified ? 'text-[--success]' : 'text-[--danger]',
+            verified ? 'text-(--success)' : 'text-(--danger)',
           )}
         >
           {verified ? 'History intact' : 'History integrity check failed'}
         </p>
-        <p className="datum text-[11px] text-[--text-faint] leading-tight">
+        <p className="datum text-[11px] text-(--text-faint) leading-tight">
           Chain {short}
         </p>
       </div>

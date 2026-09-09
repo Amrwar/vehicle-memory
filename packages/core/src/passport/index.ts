@@ -1,2 +1,2 @@
-export * from './chain.js';
-export * from './events.js';
+export * from './chain';
+export * from './events';

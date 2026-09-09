@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { fromDecimal, money, sum, toDecimalString } from '../shared/money.js';
+import { fromDecimal, money, sum, toDecimalString } from '../shared/money';
 import {
   applyDocumentDiscount,
   calculateLine,
@@ -8,7 +8,7 @@ import {
   calculateTotals,
   needsReapproval,
   type PriceableLine,
-} from './totals.js';
+} from './totals';
 
 // The brake job from the product documentation, so the numbers in the docs
 // and the numbers the code produces are the same numbers.

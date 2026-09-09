@@ -17,7 +17,7 @@ import {
   toDecimalString,
   toNumber,
   zero,
-} from './money.js';
+} from './money';
 
 describe('money construction', () => {
   it('rejects fractional minor units', () => {

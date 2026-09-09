@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { chainEvent, verifyChain, type ChainedEvent } from './chain.js';
+import { chainEvent, verifyChain, type ChainedEvent } from './chain';
 import {
   type CompletedJobInput,
   describeVerification,
@@ -8,7 +8,7 @@ import {
   humaniseEventType,
   mileageEvent,
   ownershipTransferEvent,
-} from './events.js';
+} from './events';
 
 const SALT = 'test-salt';
 
