@@ -244,6 +244,20 @@ async function main() {
       ],
     },
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
+    // Phase 4.8: expenses, banking and close.
+    {
+      path: '/expenses',
+      as: 'owner',
+      expect: ['Expenses', 'Tax to reclaim', 'Owed to staff', 'Record an expense'],
+    },
+    {
+      path: '/banking',
+      as: 'bookkeeper',
+      expect: ['Banking and close', 'Where this stands', 'Suggested matches', 'Closing the period'],
+    },
+    // A workshop on Core has no ledger, so no banking either.
+    { path: '/expenses', as: 'advisor', expect: [], redirectsTo: '/dashboard?denied=' },
+
     // Phase 4.7: counter sales, reporting and the gaps.
     {
       path: '/counter',

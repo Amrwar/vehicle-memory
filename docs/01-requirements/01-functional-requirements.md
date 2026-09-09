@@ -257,6 +257,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2100 — Expenses, banking and period close
+
+| Ref     | Requirement                                                                                                                 | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2101 | The system MUST record expenses with a category, a receipt and an approver, and MUST separate reclaimable input tax.        | 4.8   |
+| FR-2102 | Nobody MUST be able to approve their own expense claim, and an expense MUST NOT post until it is approved.                  | 4.8   |
+| FR-2103 | The system MUST reconcile a bank statement against the ledger, and every suggested match MUST carry its reasoning.          | 4.8   |
+| FR-2104 | Only exact matches MUST be offered for acceptance without review, and one ledger entry MUST NOT settle two statement lines. | 4.8   |
+| FR-2105 | A fiscal period MUST refuse to close while anything that would change its figures is outstanding.                           | 4.8   |
+| FR-2106 | An expense paid personally MUST be recorded as owed back rather than as money leaving the bank.                             | 4.8   |
+
 ## FR-2000 — Counter sales and business reporting
 
 | Ref     | Requirement                                                                                                                | Phase |

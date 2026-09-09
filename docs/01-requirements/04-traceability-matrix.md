@@ -163,6 +163,21 @@ of what is true.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Expenses, banking and period close
+
+| Req     | Story | Schema                                     | Implementation       | Test                | Status |
+| ------- | ----- | ------------------------------------------ | -------------------- | ------------------- | ------ |
+| FR-2101 | —     | `Expense`, `expenses_tax_within_net`       | `recordExpense()`    | `verify-banking.ts` | Done   |
+| FR-2102 | —     | `expenses_no_self_approval` trigger        | `assertApprovable()` | `banking.test.ts`   | Done   |
+| FR-2103 | —     | `BankStatement`, `BankStatementLine`       | `suggestMatches()`   | `banking.test.ts`   | Done   |
+| FR-2104 | —     | `bank_statement_lines_one_match_per_entry` | `autoApplicable()`   | `verify-banking.ts` | Done   |
+| FR-2105 | —     | `FiscalPeriod.isClosed`                    | `closeChecks()`      | `banking.test.ts`   | Done   |
+| FR-2106 | —     | `Expense.paidFrom`                         | `postExpense()`      | `banking.test.ts`   | Done   |
+
+Payroll export remains open. It needs a target format, and inventing one
+before a workshop names the provider they use would produce a file nobody
+accepts.
+
 ## Counter sales and business reporting
 
 | Req     | Story | Schema                             | Implementation           | Test                | Status |

@@ -48,6 +48,8 @@ export type NavIconName =
   | 'business'
   | 'counter'
   | 'estimates'
+  | 'expenses'
+  | 'banking'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
@@ -196,6 +198,19 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M4.6 2.8h7.2l3.6 3.6v10.8H4.6z" />
       <path d="M11.8 2.8v3.6h3.6" />
       <path d="M7.2 10.4h5.6M7.2 13.4h3.6" />
+    </>
+  ),
+  expenses: (
+    <>
+      <path d="M5 2.8h10v14.4l-2-1.4-1.6 1.4-1.4-1.4-1.6 1.4-1.4-1.4-2 1.4z" />
+      <path d="M8 6.6h4M8 9.8h4M8 13h2.4" />
+    </>
+  ),
+  banking: (
+    <>
+      <path d="M2.8 7.6 10 3.4l7.2 4.2" />
+      <path d="M4.4 8.6v6.6M8 8.6v6.6M12 8.6v6.6M15.6 8.6v6.6" />
+      <path d="M2.6 16.8h14.8" />
     </>
   ),
   audit: (

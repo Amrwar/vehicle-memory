@@ -153,6 +153,11 @@ jobs:
       - name: Verify a counter sale moves stock and posts to the ledger
         run: npx tsx infra/scripts/verify-counter.ts
 
+      # A trial balance that balances proves the arithmetic was consistent,
+      # not that it was right. Reconciliation is what makes it right.
+      - name: Verify the bank reconciles and a period can close
+        run: npx tsx infra/scripts/verify-banking.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

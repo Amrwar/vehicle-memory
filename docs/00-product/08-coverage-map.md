@@ -65,8 +65,8 @@ being specific about the gaps rather than generous about the ticks.
 
 ## What this leaves
 
-Three rows above are not fully built. They fall into two groups, plus one
-that is waiting on a third party:
+Two rows above are not fully built, and both are waiting on a third party
+rather than on work:
 
 Phase 4.6 is done: inviting a colleague, changing a role, the reminders
 screen, and the booking flow a customer actually walks.
@@ -74,9 +74,8 @@ screen, and the booking flow a customer actually walks.
 Phase 4.7 is done apart from taking a card payment, which is waiting on a
 provider: point of sale, the estimates list, business reporting and CSV export.
 
-**Phase 4.8 — Expenses, banking and close.** The rest of Phase 3: expense
-capture, bank accounts and reconciliation, fiscal period close, and a payroll
-export.
+Phase 4.8 is done apart from the payroll export, which is waiting on a named
+provider format: expense capture, bank reconciliation and period close.
 
 **Phase 5 — Customer lifecycle.** CRM proper: segments, campaigns with consent,
 retention and lifetime value, and the automation engine that connects a

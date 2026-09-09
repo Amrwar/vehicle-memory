@@ -113,6 +113,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
     type: 'EXPENSE',
     purpose: 'Shrinkage and stocktake variance',
   },
+  {
+    code: '6300',
+    name: 'General overheads',
+    type: 'EXPENSE',
+    purpose: 'Insurance, marketing, subscriptions, professional fees, everything else',
+  },
 ] as const;
 
 /** Codes referenced by the posting rules, named rather than sprinkled inline. */
@@ -135,6 +141,7 @@ export const ACCOUNT = {
   WAGES: '6000',
   PREMISES: '6100',
   STOCK_ADJUSTMENT: '6200',
+  OVERHEADS: '6300',
 } as const;
 
 const BY_CODE = new Map(STANDARD_CHART.map((account) => [account.code, account]));

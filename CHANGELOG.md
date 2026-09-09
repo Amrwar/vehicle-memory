@@ -7,6 +7,36 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 4.8 - Expenses, banking and the close.**
+
+- `/expenses`: money out that is not a supplier bill. These were hand-written
+  journal entries until now, which works exactly as long as the person writing
+  them knows double-entry. Everybody else guesses or stops recording them, and
+  a profit figure missing its overheads is worse than no profit figure.
+- Input tax is posted to its own account so it can be reclaimed. Putting the
+  gross into overheads is the commonest mistake in a small set of books and it
+  overstates costs by a fifth, every month, invisibly.
+- An expense posts on approval, not on entry, because an expense nobody has
+  agreed to is not yet a cost. Nobody can approve their own claim, enforced by
+  a database trigger as well as in the domain: a control that lives in one code
+  path stays a control only until somebody adds a second path.
+- An expense somebody paid personally credits a liability rather than the bank,
+  because the business owes them until it pays them back.
+- `/banking`: reconciliation against a statement. Every suggested match carries
+  its reasoning, and only exact ones are offered for one-click acceptance. A
+  rule that pairs too eagerly does more damage than one that matches nothing,
+  because a wrong match is invisible: both sides tick and the balance agrees.
+  One ledger entry can never settle two statement lines.
+- Period close, with checks. The blocking ones are where closing would make a
+  wrong number permanent: an unbalanced trial balance, completed work still
+  unbilled, a till still open. The rest warn, because a workshop that always
+  has one stray bank charge should still be able to close its quarter.
+- 47 further domain tests and `verify-banking.ts`. 555 tests in total.
+
+The reason this completes Phase 3 rather than extending it: the ledger already
+balanced against itself, which proves the arithmetic was consistent. Until the
+bank agrees, a set of books is a well-formed opinion.
+
 **Phase 4.7 - Counter sales, reporting and the gaps.**
 
 - `/counter`: a sale with no job behind it. One screen, one submit, because a

@@ -92,6 +92,8 @@ model Organization {
   invitations         Invitation[]
   counterSales        CounterSale[]
   tillSessions        TillSession[]
+  expenses            Expense[]
+  bankAccounts        BankAccount[]
 
   @@index([isActive])
   @@map("organizations")
@@ -133,6 +135,7 @@ model Location {
   attendance  AttendanceRecord[]
   counterSales CounterSale[]
   tillSessions TillSession[]
+  expenses     Expense[]
 
   @@unique([orgId, code])
   @@index([orgId, isActive])
@@ -202,6 +205,7 @@ model User {
   invitationsSent     Invitation[]    @relation("InvitationSender")
   counterSales        CounterSale[]   @relation("CounterSaleSeller")
   tillSessions        TillSession[]   @relation("TillOperator")
+  expensesApproved    Expense[]       @relation("ExpenseApprover")
   timesheetApprovals  Timesheet[]     @relation("TimesheetApprover")
   transfersDispatched StockTransfer[] @relation("TransferDispatcher")
   transfersReceived   StockTransfer[] @relation("TransferReceiver")
@@ -2083,6 +2087,7 @@ model Employee {
   absences         Absence[]
   certifications   Certification[]
   commissionAwards CommissionAward[]
+  expenseClaims    Expense[]         @relation("ExpenseClaimant")
 
   @@unique([orgId, reference])
   @@index([orgId, isActive])
@@ -2515,4 +2520,140 @@ model TillSession {
 
   @@index([orgId, openedAt])
   @@map("till_sessions")
+}
+
+/* ===========================================================================
+   EXPENSES AND BANKING — Phase 4.8
+
+   The ledger balances against itself. Reconciliation is what makes it balance
+   against reality: until the bank agrees, a trial balance proves the
+   arithmetic was consistent, not that it was right.
+   =========================================================================== */
+
+enum ExpenseCategory {
+  PREMISES
+  UTILITIES
+  INSURANCE
+  VEHICLE
+  EQUIPMENT
+  CONSUMABLES
+  MARKETING
+  PROFESSIONAL
+  TRAINING
+  SUBSCRIPTIONS
+  OTHER
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum PaidFrom {
+  BANK
+  CASH
+  PERSONAL
+  CARD
+}
+
+/// Money out that is not a supplier bill. Until this existed these were
+/// hand-written journal entries, which works exactly as long as the person
+/// writing them knows double-entry.
+model Expense {
+  id          String          @id @default(cuid())
+  orgId       String
+  locationId  String?
+  reference   String
+  category    ExpenseCategory
+  status      ExpenseStatus   @default(DRAFT)
+  supplier    String
+  description String?
+  net         Decimal         @db.Decimal(12, 2)
+  tax         Decimal         @default(0) @db.Decimal(12, 2)
+  incurredAt  DateTime
+  paidFrom    PaidFrom        @default(BANK)
+  /// A photograph or PDF. Required above a threshold, because an overhead
+  /// figure built on remembered amounts cannot be defended to anybody.
+  receiptUrl  String?
+  /// Set when somebody spent their own money and is owed it back.
+  claimedByEmployeeId String?
+  approvedByUserId    String?
+  approvedAt  DateTime?
+  paidAt      DateTime?
+  rejectedReason String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location   Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  claimedBy  Employee?    @relation("ExpenseClaimant", fields: [claimedByEmployeeId], references: [id], onDelete: SetNull)
+  approvedBy User?        @relation("ExpenseApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, reference])
+  @@index([orgId, status])
+  @@index([orgId, incurredAt])
+  @@map("expenses")
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  orgId         String
+  name          String
+  /// Last four digits only. The full number is never needed here and storing
+  /// it turns a workshop database into something worth stealing.
+  last4         String?
+  sortCode      String?
+  /// Which ledger account this maps to, so a reconciliation knows what to
+  /// compare against.
+  accountCode   String   @default("1000")
+  currency      String   @default("GBP")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  org        Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  statements BankStatement[]
+
+  @@unique([orgId, name])
+  @@map("bank_accounts")
+}
+
+model BankStatement {
+  id             String   @id @default(cuid())
+  bankAccountId  String
+  startsOn       DateTime
+  endsOn         DateTime
+  openingBalance Decimal  @db.Decimal(14, 2)
+  closingBalance Decimal  @db.Decimal(14, 2)
+  importedAt     DateTime @default(now())
+
+  account BankAccount         @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  lines   BankStatementLine[]
+
+  @@index([bankAccountId, startsOn])
+  @@map("bank_statements")
+}
+
+model BankStatementLine {
+  id          String   @id @default(cuid())
+  statementId String
+  postedOn    DateTime
+  description String
+  reference   String?
+  /// Positive is money in, negative is money out.
+  amount      Decimal  @db.Decimal(14, 2)
+  /// The journal entry this was matched to, once somebody accepted it.
+  matchedEntryId String?
+  matchedAt   DateTime?
+  /// How the match was arrived at, kept so a reviewer can see the reasoning
+  /// rather than only the result.
+  matchReason String?
+
+  statement BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@index([statementId, postedOn])
+  @@index([matchedEntryId])
+  @@map("bank_statement_lines")
 }

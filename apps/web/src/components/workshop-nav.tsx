@@ -99,6 +99,8 @@ const GROUPS: Group[] = [
     label: 'Finance',
     items: [
       { href: '/ledger', label: 'Ledger', icon: 'ledger', permission: 'ledger:read' },
+      { href: '/expenses', label: 'Expenses', icon: 'expenses', permission: 'report:financial' },
+      { href: '/banking', label: 'Banking', icon: 'banking', permission: 'ledger:read' },
       {
         href: '/financials',
         label: 'Statements',

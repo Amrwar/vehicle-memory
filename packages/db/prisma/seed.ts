@@ -1835,6 +1835,10 @@ async function main() {
     dispatchedByUserId: ahmed!.id,
   });
 
+  /* --- the bank, and what it disagrees with -------------------------------- */
+
+  await seedBanking(org.id, ahmed!.id);
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -2574,6 +2578,128 @@ async function seedTransfers(
         create: [{ productId: cabin.id, quantity: 10, received: 10, unitCost: 10.8, sortOrder: 1 }],
       },
     },
+  });
+}
+
+/**
+ * A bank account and a statement that does not quite agree with the ledger.
+ *
+ * Deliberately not reconciled. An account that already balances demonstrates
+ * nothing: the whole point of the page is the three cases a real statement
+ * always has, which are a payment the bank has seen, a payment it has not seen
+ * yet, and a charge nobody recorded.
+ */
+async function seedBanking(orgId: string, ownerUserId: string) {
+  const account = await prisma.bankAccount.create({
+    data: {
+      orgId,
+      name: 'Business current account',
+      last4: '4417',
+      sortCode: '20-45-63',
+      accountCode: '1000',
+    },
+  });
+
+  const statement = await prisma.bankStatement.create({
+    data: {
+      bankAccountId: account.id,
+      startsOn: day(-30, 0, 0),
+      endsOn: day(-1, 23, 59),
+      openingBalance: 41_200.0,
+      closingBalance: 44_318.4,
+    },
+  });
+
+  await prisma.bankStatementLine.createMany({
+    data: [
+      // Matches a real payment on reference and amount, so it should be
+      // suggested as exact.
+      {
+        statementId: statement.id,
+        postedOn: day(-6, 16, 30),
+        description: 'BACS CREDIT PAY-1042',
+        reference: 'PAY-1042',
+        amount: 283.8,
+      },
+      // Matches on amount and date but carries no reference, so it can only
+      // ever be a likely match and needs somebody to look.
+      {
+        statementId: statement.id,
+        postedOn: day(-8, 9, 15),
+        description: 'DD HILLSIDE ESTATES',
+        reference: null,
+        amount: -1450.0,
+      },
+      // Nothing in the ledger corresponds to these. They are the reason a
+      // reconciliation exists: a charge and a direct debit nobody recorded.
+      {
+        statementId: statement.id,
+        postedOn: day(-4, 6, 0),
+        description: 'ACCOUNT FEE',
+        reference: null,
+        amount: -14.5,
+      },
+      {
+        statementId: statement.id,
+        postedOn: day(-3, 6, 0),
+        description: 'DD TRADE INSURANCE',
+        reference: null,
+        amount: -186.25,
+      },
+    ],
+  });
+
+  // Expenses, including one somebody paid for themselves and is owed back,
+  // and one over the receipt threshold with nothing attached.
+  const employee = await prisma.employee.findFirst({ where: { orgId, reference: 'EMP-002' } });
+
+  await prisma.expense.createMany({
+    data: [
+      {
+        orgId,
+        reference: 'EXP-0001',
+        category: 'INSURANCE',
+        status: 'APPROVED',
+        supplier: 'Trade Insurance Services',
+        description: 'Annual combined policy',
+        net: 2_240.0,
+        tax: 0,
+        incurredAt: day(-3, 6, 0),
+        paidFrom: 'BANK',
+        receiptUrl: 'receipt-on-file',
+        approvedByUserId: ownerUserId,
+        approvedAt: day(-3, 9, 0),
+      },
+      {
+        orgId,
+        reference: 'EXP-0002',
+        category: 'SUBSCRIPTIONS',
+        status: 'SUBMITTED',
+        supplier: 'Technical data provider',
+        description: 'Monthly subscription',
+        net: 89.0,
+        tax: 17.8,
+        incurredAt: day(-5, 10, 0),
+        paidFrom: 'CARD',
+        receiptUrl: 'receipt-on-file',
+      },
+      {
+        orgId,
+        reference: 'EXP-0003',
+        category: 'EQUIPMENT',
+        status: 'SUBMITTED',
+        supplier: 'Local factor',
+        description: 'Torque wrench, bought on the way in',
+        net: 74.0,
+        tax: 14.8,
+        incurredAt: day(-2, 8, 30),
+        paidFrom: 'PERSONAL',
+        claimedByEmployeeId: employee?.id ?? null,
+        // No receipt, deliberately: over the threshold, so the page has
+        // something real to complain about.
+        receiptUrl: null,
+      },
+    ],
   });
 }
 

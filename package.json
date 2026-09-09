@@ -32,6 +32,7 @@
     "verify:signup": "tsx infra/scripts/verify-signup.ts",
     "verify:team": "tsx infra/scripts/verify-team.ts",
     "verify:counter": "tsx infra/scripts/verify-counter.ts",
+    "verify:banking": "tsx infra/scripts/verify-banking.ts",
     "smoke": "tsx infra/scripts/smoke.ts",
     "timings": "tsx infra/scripts/timings.ts",
     "db:generate": "npm run generate --workspace=@carnet/db",
