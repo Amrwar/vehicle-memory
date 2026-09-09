@@ -302,7 +302,37 @@ async function main() {
     { path: '/dashboard', as: 'anon', expect: [], redirects: true },
   ];
 
+  // The plan gate. Demoted to Core, the ledger must show the wall rather than
+  // the ledger; restored afterwards so the rest of the run is unaffected. A
+  // published price with nothing behind it is a promise the system cannot keep,
+  // so this is checked against a real organisation rather than in a unit test.
+  const org = await prisma.organization.findFirstOrThrow({ where: { slug: 'hillside-motors' } });
+  await prisma.organization.update({ where: { id: org.id }, data: { plan: 'CORE' } });
+
+  let planWallHtml = '';
+  try {
+    const response = await fetch(`${BASE}/ledger`, {
+      headers: { cookie: `carnet_session=${tokens.bookkeeper}` },
+    });
+    planWallHtml = await response.text();
+  } finally {
+    await prisma.organization.update({ where: { id: org.id }, data: { plan: org.plan } });
+  }
+
   let failures = 0;
+
+  for (const [label, present] of [
+    ['names what was hit', 'general ledger'],
+    ['names the plan that clears it', 'Complete'],
+    ['names the price', 'per bay per month'],
+    ['does not leak the ledger', null],
+  ] as const) {
+    const ok =
+      present === null ? !planWallHtml.includes('Trial balance') : planWallHtml.includes(present);
+
+    console.info(`  ${ok ? 'ok  ' : 'FAIL'}  plan wall on Core: ${label}`);
+    if (!ok) failures += 1;
+  }
 
   for (const check of checks) {
     const token = tokens[check.as as keyof typeof tokens];

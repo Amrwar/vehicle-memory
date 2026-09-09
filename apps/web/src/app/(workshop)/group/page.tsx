@@ -19,7 +19,8 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 import { groupPerformance, inTransitNow } from '@/lib/transfers';
 
 export const metadata: Metadata = { title: 'Group' };
@@ -38,7 +39,12 @@ export default async function GroupPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const { orgId } = await requireSession('report:financial');
+  const { orgId, plan } = await requireSession('report:financial');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'multiSite')) {
+    return <PlanWall feature="multiSite" plan={plan} />;
+  }
   const { range } = await searchParams;
 
   const now = new Date();

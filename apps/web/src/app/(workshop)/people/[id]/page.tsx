@@ -21,7 +21,8 @@ import { notFound } from 'next/navigation';
 
 import { prisma } from '@carnet/db';
 
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 import { commissionFor, draftTimesheet, teamProductivity } from '@/lib/people';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +49,12 @@ export async function generateMetadata({
  * single editable number cannot express that.
  */
 export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
-  const { orgId } = await requireSession('people:read');
+  const { orgId, plan } = await requireSession('people:read');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'payroll')) {
+    return <PlanWall feature="payroll" plan={plan} />;
+  }
   const { id } = await params;
 
   const employee = await prisma.employee.findFirst({

@@ -21,7 +21,8 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 import { expiringCertifications, onSiteNow, teamProductivity } from '@/lib/people';
 
 export const metadata: Metadata = { title: 'People' };
@@ -43,7 +44,12 @@ export default async function PeoplePage({
 }: {
   searchParams: Promise<{ days?: string; site?: string }>;
 }) {
-  const { orgId } = await requireSession('people:read');
+  const { orgId, plan } = await requireSession('people:read');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'payroll')) {
+    return <PlanWall feature="payroll" plan={plan} />;
+  }
   const { days, site } = await searchParams;
   const window = Math.max(1, Number(days ?? 14) || 14);
 

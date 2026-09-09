@@ -1,9 +1,13 @@
 import { forOrg, prisma } from '@carnet/db';
 import {
   assertCan,
+  type FeatureKey,
   ForbiddenError,
+  hasFeature,
   landingPathFor,
   type Permission,
+  type PlanId,
+  planFor,
   type Role,
 } from '@carnet/core';
 import { headers } from 'next/headers';
@@ -25,6 +29,8 @@ export interface Session {
   orgId: string;
   /** Prisma client with the tenant filter already applied. */
   db: ReturnType<typeof forOrg>;
+  /** The organisation's plan, for the pages that a plan gates. */
+  plan: PlanId;
 }
 
 /** Requires a signed-in user attached to an organisation. */
@@ -56,7 +62,24 @@ export async function requireSession(permission?: Permission): Promise<Session> 
     }
   }
 
-  return { user, orgId: user.orgId, db: forOrg(user.orgId) };
+  return {
+    user,
+    orgId: user.orgId,
+    db: forOrg(user.orgId),
+    plan: planFor(user.orgPlan ?? 'CORE').id,
+  };
+}
+
+/**
+ * Whether the organisation's plan includes a feature.
+ *
+ * Separate from `can()`, because role and plan are different questions. A
+ * manager on Core genuinely has permission to read a ledger; their workshop
+ * has not bought one. Conflating the two produces the wrong message on the
+ * wall, which is the whole reason somebody gets stuck.
+ */
+export function planIncludes(plan: PlanId, feature: FeatureKey): boolean {
+  return hasFeature(plan, feature);
 }
 
 /** Requires a signed-in user of any kind, including a portal customer. */

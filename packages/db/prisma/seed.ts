@@ -73,7 +73,9 @@ async function main() {
       taxNumber: 'GB412987334',
       email: 'workshop@hillsidemotors.test',
       phone: '0161 496 0114',
-      plan: 'COMPLETE',
+      // Two sites, so Group. The plan gate is real: on Complete this
+      // workshop would correctly be shown the wall on its own group pages.
+      plan: 'GROUP',
       locations: {
         create: {
           name: 'Hillside Road',

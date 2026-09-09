@@ -19,7 +19,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { can } from '@/lib/guard';
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Purchasing' };
 export const dynamic = 'force-dynamic';
@@ -41,7 +42,12 @@ const ORDER_TONE = {
  * is a technician waiting.
  */
 export default async function PurchasingPage() {
-  const { db, user } = await requireSession('purchase:request');
+  const { db, user, plan } = await requireSession('purchase:request');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'purchasing')) {
+    return <PlanWall feature="purchasing" plan={plan} />;
+  }
   const mayApprove = can(user.role, 'purchase:approve');
 
   const [requests, orders, bills] = await Promise.all([

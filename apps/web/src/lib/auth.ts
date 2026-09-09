@@ -198,6 +198,8 @@ export interface CurrentUser {
   orgId: string | null;
   orgName: string | null;
   orgSlug: string | null;
+  /** The organisation's plan, so a page can gate on it without a second query. */
+  orgPlan: string | null;
   locationId: string | null;
   sessionId: string;
 }
@@ -218,7 +220,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
         include: {
           memberships: {
             where: { isActive: true },
-            include: { org: { select: { id: true, name: true, slug: true } } },
+            include: { org: { select: { id: true, name: true, slug: true, plan: true } } },
           },
         },
       },
@@ -239,6 +241,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
     orgId: membership?.orgId ?? null,
     orgName: membership?.org.name ?? null,
     orgSlug: membership?.org.slug ?? null,
+    orgPlan: membership?.org.plan ?? null,
     locationId: membership?.locationId ?? null,
     sessionId: session.id,
   };

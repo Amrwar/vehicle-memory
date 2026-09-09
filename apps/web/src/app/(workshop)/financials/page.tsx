@@ -30,7 +30,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { openPayables, openReceivables, postedLines } from '@/lib/accounting';
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Financial statements' };
 export const dynamic = 'force-dynamic';
@@ -85,7 +86,12 @@ export default async function FinancialsPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const { orgId } = await requireSession('report:financial');
+  const { orgId, plan } = await requireSession('report:financial');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'statements')) {
+    return <PlanWall feature="statements" plan={plan} />;
+  }
   const { range } = await searchParams;
   const key: RangeKey = range === 'month' || range === 'quarter' ? range : 'year';
   const period = rangeFor(key);

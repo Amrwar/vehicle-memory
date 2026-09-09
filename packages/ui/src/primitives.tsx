@@ -331,10 +331,14 @@ export function PageHeader({
     >
       <div className="min-w-0">
         {eyebrow ? <p className="eyebrow mb-1">{eyebrow}</p> : null}
-        <h1 className="text-[22px] font-semibold leading-tight">{title}</h1>
+        <h1 className="font-display text-[20px] sm:text-[22px] font-semibold leading-tight">
+          {title}
+        </h1>
         {description ? <p className="text-[13px] text-(--text-faint) mt-1">{description}</p> : null}
       </div>
-      {actions ? <div className="flex items-center gap-2 shrink-0">{actions}</div> : null}
+      {/* Wraps rather than overflowing. Several pages put six controls here,
+          which on a phone is two rows, not a horizontal scrollbar. */}
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 }

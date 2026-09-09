@@ -22,7 +22,8 @@ import Link from 'next/link';
 import { prisma } from '@carnet/db';
 
 import { postedLines } from '@/lib/accounting';
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Ledger' };
 export const dynamic = 'force-dynamic';
@@ -41,7 +42,12 @@ export default async function LedgerPage({
 }: {
   searchParams: Promise<{ view?: string; account?: string }>;
 }) {
-  const { orgId } = await requireSession('ledger:read');
+  const { orgId, plan } = await requireSession('ledger:read');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'ledger')) {
+    return <PlanWall feature="ledger" plan={plan} />;
+  }
   const { view, account } = await searchParams;
   const tab = view === 'journal' ? 'journal' : 'trial';
 

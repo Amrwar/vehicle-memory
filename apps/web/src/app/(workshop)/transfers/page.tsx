@@ -19,7 +19,8 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 
-import { requireSession } from '@/lib/guard';
+import { PlanWall } from '@/components/plan-wall';
+import { planIncludes, requireSession } from '@/lib/guard';
 import { inTransitNow, transferSuggestions } from '@/lib/transfers';
 
 export const metadata: Metadata = { title: 'Transfers' };
@@ -33,7 +34,12 @@ export const dynamic = 'force-dynamic';
  * shelf. Every other view in the system would show it as missing.
  */
 export default async function TransfersPage() {
-  const { orgId } = await requireSession('inventory:read');
+  const { orgId, plan } = await requireSession('inventory:read');
+
+  // Role says they may look; the plan says whether the workshop bought it.
+  if (!planIncludes(plan, 'transfers')) {
+    return <PlanWall feature="transfers" plan={plan} />;
+  }
 
   const [inFlight, suggestions, recent] = await Promise.all([
     inTransitNow(orgId),
