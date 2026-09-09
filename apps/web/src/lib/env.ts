@@ -19,7 +19,12 @@ const schema = z.object({
     .min(32, 'AUTH_SECRET must be at least 32 characters. Generate: openssl rand -base64 48'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().default(12),
 
-  PUBLIC_LINK_SECRET: z.string().min(32, 'PUBLIC_LINK_SECRET must be at least 32 characters'),
+  // Share and estimate-approval links are capability URLs: 32 random bytes,
+  // stored only as a SHA-256 digest. The token is the credential, so there is
+  // no signing secret to configure. If links ever become HMAC-signed, the
+  // secret introduced for it must not start with PUBLIC_ — several frameworks
+  // reserve that prefix for client-exposed values, and Vercel refuses to keep
+  // such a variable secret.
 
   LEDGER_CHAIN_SALT: z
     .string()

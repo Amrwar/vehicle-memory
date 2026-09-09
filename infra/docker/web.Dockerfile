@@ -44,7 +44,6 @@ ENV NODE_ENV=production
 # only so environment validation passes during the build.
 ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
 ENV AUTH_SECRET=build-time-placeholder-value-at-least-32-chars
-ENV PUBLIC_LINK_SECRET=build-time-placeholder-value-at-least-32-chars
 ENV LEDGER_CHAIN_SALT=build-time-placeholder
 
 RUN npm run build --workspace=@carnet/web

@@ -74,7 +74,6 @@ app, the worker and Postgres together. Simpler to operate, weaker at previews.
    | `DATABASE_URL`        | Neon pooled connection string |
    | `DIRECT_DATABASE_URL` | Neon direct connection string |
    | `AUTH_SECRET`         | `openssl rand -base64 48`     |
-   | `PUBLIC_LINK_SECRET`  | `openssl rand -base64 48`     |
    | `LEDGER_CHAIN_SALT`   | `openssl rand -base64 32`     |
    | `APP_URL`             | Your deployment URL           |
    | `NODE_ENV`            | `production`                  |
@@ -144,7 +143,6 @@ inspection photograph belongs to a vehicle whose owner controls disclosure.
 | `DATABASE_URL`        | Nothing works                                               |
 | `DIRECT_DATABASE_URL` | Migrations hang against a pooled provider                   |
 | `AUTH_SECRET`         | Sessions cannot be verified; everyone is signed out         |
-| `PUBLIC_LINK_SECRET`  | Share and approval links break                              |
 | `LEDGER_CHAIN_SALT`   | **Every vehicle's history fails verification, permanently** |
 | `APP_URL`             | Links in emails and SMS point at the wrong host             |
 

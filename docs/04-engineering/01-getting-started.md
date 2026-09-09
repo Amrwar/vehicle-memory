@@ -25,7 +25,6 @@ npm install
 # Secrets. Generate real values for the three placeholders.
 cp .env.example .env
 #   AUTH_SECRET          openssl rand -base64 48
-#   PUBLIC_LINK_SECRET   openssl rand -base64 48
 #   LEDGER_CHAIN_SALT    openssl rand -base64 32   <- never rotate this
 cp .env packages/db/.env
 cp .env apps/web/.env

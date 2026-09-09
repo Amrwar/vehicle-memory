@@ -14,7 +14,6 @@ env:
   NODE_VERSION: '22'
   # Test-only values. Real secrets never appear in a workflow file.
   AUTH_SECRET: ci-auth-secret-value-at-least-32-characters-long
-  PUBLIC_LINK_SECRET: ci-public-link-secret-at-least-32-characters-long
   LEDGER_CHAIN_SALT: ci-ledger-chain-salt-value
   DATABASE_URL: postgresql://carnet:carnet@localhost:5432/carnet_test?schema=public
 
@@ -202,7 +201,7 @@ jobs:
           # Values that declare themselves placeholders are filtered out rather
           # than excluding whole files, so a real secret committed to the
           # Dockerfile would still be caught.
-          if git grep -nIE '(AUTH_SECRET|LEDGER_CHAIN_SALT|PUBLIC_LINK_SECRET)=[A-Za-z0-9+/_-]{16,}' \
+          if git grep -nIE '(AUTH_SECRET|LEDGER_CHAIN_SALT)=[A-Za-z0-9+/_-]{16,}' \
                -- ':!.env.example' ':!.github/workflows' \
              | grep -viE 'placeholder|replace-me|build-time'; then
             echo "::error::A secret appears to be committed."
