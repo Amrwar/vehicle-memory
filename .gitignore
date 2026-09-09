@@ -51,3 +51,6 @@ apps/web/public/uploads/
 
 .vercel
 .env*
+
+# Word and Excel lock files, created while a document is open.
+~$*
