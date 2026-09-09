@@ -41,9 +41,18 @@ function near(label: string, actual: number, expected: number, tolerance = 0.005
   }
 }
 
-async function levelFor(partNumber: string) {
+/**
+ * Stock at the main store specifically.
+ *
+ * Not "the first level for this product": once the organisation had a second
+ * site, that returned whichever row the planner happened to hand back, and
+ * every assertion below started measuring a warehouse it had never written to.
+ */
+async function levelFor(partNumber: string, warehouseId: string) {
   const product = await prisma.product.findFirstOrThrow({ where: { partNumber } });
-  const level = await prisma.stockLevel.findFirstOrThrow({ where: { productId: product.id } });
+  const level = await prisma.stockLevel.findFirstOrThrow({
+    where: { productId: product.id, warehouseId },
+  });
   return {
     product,
     onHand: Number(level.onHand),
@@ -54,13 +63,16 @@ async function levelFor(partNumber: string) {
 
 async function main() {
   const org = await prisma.organization.findFirstOrThrow({ where: { slug: 'hillside-motors' } });
-  const warehouse = await prisma.warehouse.findFirstOrThrow({ where: { orgId: org.id } });
+  // Named, not first. The group has more than one store.
+  const warehouse = await prisma.warehouse.findFirstOrThrow({
+    where: { orgId: org.id, code: 'MAIN' },
+  });
 
   /* --- weighted average cost on receipt --------------------------------- */
 
   console.info('--- booking in a delivery at a different price ---');
 
-  const before = await levelFor('34116864059'); // BMW discs: 1 on hand at 61.50
+  const before = await levelFor('34116864059', warehouse.id); // BMW discs: 1 on hand at 61.50
   check('discs on hand before', before.onHand, 1);
   near('discs average cost before', before.avgCost, 61.5);
 
@@ -82,7 +94,7 @@ async function main() {
 
   check('receipt accepted', result.ok, true);
 
-  const after = await levelFor('34116864059');
+  const after = await levelFor('34116864059', warehouse.id);
   check('discs on hand after', after.onHand, 5);
 
   // (1 x 61.50 + 4 x 70.00) / 5 = 68.30
@@ -111,14 +123,14 @@ async function main() {
   check('over-receipt refused', over.ok, false);
   console.info(`  ok     reason: ${over.problems[0]}`);
 
-  const unchanged = await levelFor('34116864059');
+  const unchanged = await levelFor('34116864059', warehouse.id);
   check('stock unchanged after refusal', unchanged.onHand, 5);
 
   /* --- reservation with a shortfall raises a purchase request ----------- */
 
   console.info('\n--- reserving more than is available ---');
 
-  const battery = await levelFor('BAT-090-AGM'); // 3 on hand, none reserved
+  const battery = await levelFor('BAT-090-AGM', warehouse.id); // 3 on hand, none reserved
   check('batteries available', battery.onHand - battery.reserved, 3);
 
   const job = await prisma.job.findFirstOrThrow({ where: { number: 10_482 } });
@@ -152,7 +164,7 @@ async function main() {
   const requestsAfter = await prisma.purchaseRequest.count({ where: { orgId: org.id } });
   check('a purchase request was raised for the shortfall', requestsAfter - requestsBefore, 1);
 
-  const afterReserve = await levelFor('BAT-090-AGM');
+  const afterReserve = await levelFor('BAT-090-AGM', warehouse.id);
   check('reserved figure updated', afterReserve.reserved, 3);
   check('on hand untouched by a reservation', afterReserve.onHand, 3);
 
@@ -183,7 +195,7 @@ async function main() {
   check('nothing reserved', denied.reserved, 0);
   check('status is unavailable', denied.status, 'UNAVAILABLE');
 
-  const finalLevel = await levelFor('BAT-090-AGM');
+  const finalLevel = await levelFor('BAT-090-AGM', warehouse.id);
   check('reserved did not exceed on hand', finalLevel.reserved <= finalLevel.onHand, true);
 
   console.info(
