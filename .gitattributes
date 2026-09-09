@@ -18,3 +18,6 @@
 
 package-lock.json  linguist-generated=true -diff
 packages/db/src/generated/**  linguist-generated=true -diff
+
+# Word/PDF deliverable
+docs/Carnet-Business-Case.docx binary
