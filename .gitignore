@@ -43,3 +43,11 @@ apps/web/public/uploads/
 
 # TypeScript project references
 *.tsbuildinfo
+
+.vercel
+.env*
+# ...but the template must stay in the repository.
+!.env.example
+
+.vercel
+.env*
