@@ -1,5 +1,11 @@
 import { forOrg, prisma } from '@carnet/db';
-import { assertCan, landingPathFor, type Permission, type Role } from '@carnet/core';
+import {
+  assertCan,
+  ForbiddenError,
+  landingPathFor,
+  type Permission,
+  type Role,
+} from '@carnet/core';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -35,7 +41,19 @@ export async function requireSession(permission?: Permission): Promise<Session> 
   }
 
   if (permission) {
-    assertCan(user.role, permission);
+    try {
+      assertCan(user.role, permission);
+    } catch (error) {
+      if (!(error instanceof ForbiddenError)) throw error;
+
+      // Reachable only by typing a URL: the navigation already filters by
+      // permission. Throwing here would stream a 200 with a stack trace
+      // behind it, because the loading boundary has already flushed. Sending
+      // the person to their own surface with a reason is the same principle
+      // as ADR-0009 — the answer to "wrong screen" is the right screen, not
+      // an error.
+      redirect(`${landingPathFor(user.role)}?denied=${encodeURIComponent(permission)}`);
+    }
   }
 
   return { user, orgId: user.orgId, db: forOrg(user.orgId) };

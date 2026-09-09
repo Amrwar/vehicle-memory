@@ -263,3 +263,54 @@ export function landingPathFor(role: Role): string {
       return '/dashboard';
   }
 }
+
+/**
+ * A permission, said the way a person would say it.
+ *
+ * "ledger:read" is a fact about the code. "access to the general ledger" is
+ * what somebody types into a message asking their manager for it.
+ */
+export function humanisePermission(permission: string): string {
+  const [area, action] = permission.split(':');
+
+  const areas: Record<string, string> = {
+    diary: 'the booking diary',
+    customer: 'customer records',
+    vehicle: 'vehicle records',
+    job: 'jobs',
+    inspection: 'inspections',
+    estimate: 'estimates',
+    invoice: 'invoices',
+    payment: 'payments',
+    timeentry: 'time entries',
+    qualitycheck: 'quality checks',
+    report: 'reporting',
+    ledger: 'the general ledger',
+    inventory: 'the parts catalogue',
+    purchase: 'purchasing',
+    passport: 'the vehicle passport',
+    settings: 'settings',
+    audit: 'the audit log',
+    org: 'the organisation',
+    user: 'user accounts',
+  };
+
+  const subject = areas[area ?? ''] ?? area ?? permission;
+
+  switch (action) {
+    case 'read':
+      return `permission to view ${subject}`;
+    case 'write':
+      return `permission to change ${subject}`;
+    case 'financial':
+      return 'permission to see financial reporting';
+    case 'operational':
+      return 'permission to see operational reporting';
+    case 'approve':
+      return `permission to approve ${subject}`;
+    case 'send':
+      return `permission to send ${subject}`;
+    default:
+      return `the ${permission} permission`;
+  }
+}

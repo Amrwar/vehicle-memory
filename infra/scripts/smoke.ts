@@ -203,8 +203,10 @@ async function main() {
       ],
     },
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
-    // An advisor sees jobs but never a margin.
+    // An advisor typing the ledger URL is sent back to their own surface with
+    // a reason, rather than shown a stack trace behind a 200.
     { path: '/ledger', as: 'advisor', expect: [], redirects: true },
+    { path: '/dashboard?denied=ledger%3Aread', as: 'advisor', expect: ['general ledger'] },
 
     // Role segregation: a technician reaching a workshop URL is redirected.
     { path: '/dashboard', as: 'technician', expect: [], redirects: true },
