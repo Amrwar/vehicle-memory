@@ -29,7 +29,11 @@ const parsed = Object.fromEntries(
 );
 
 const names = Object.keys(parsed).join(', ');
-console.info(`Loaded ${Object.keys(parsed).length} variable(s) from ${envFile}: ${names}`);
+// stderr, not stdout. This wrapper is routinely used around commands whose
+// stdout is redirected into a file — `prisma migrate diff > migration.sql`
+// being the one that bites — and a friendly log line on stdout ends up inside
+// the artefact as a syntax error nobody expects to find there.
+console.error(`Loaded ${Object.keys(parsed).length} variable(s) from ${envFile}: ${names}`);
 
 const child = spawn(command, args, {
   stdio: 'inherit',
