@@ -244,6 +244,28 @@ async function main() {
       ],
     },
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
+    // Phase 4.7: counter sales, reporting and the gaps.
+    {
+      path: '/counter',
+      as: 'owner',
+      expect: ['Over the counter', 'New sale', 'Taken today', 'Recent sales'],
+    },
+    {
+      path: '/reports/business',
+      as: 'owner',
+      expect: [
+        'Business reports',
+        'Revenue by service type',
+        'Parts profitability',
+        'Where the work comes from',
+      ],
+    },
+    {
+      path: '/estimates',
+      as: 'advisor',
+      expect: ['Estimates', 'Waiting on a customer', 'Value waiting'],
+    },
+
     // Phase 4.6: administration and the customer's journey.
     {
       path: '/settings/team',
@@ -342,7 +364,32 @@ async function main() {
     await prisma.organization.update({ where: { id: org.id }, data: { plan: org.plan } });
   }
 
+  // CSV export. FR-1406, promised since Phase 1. Checked for the escaping
+  // that keeps a spreadsheet from eating the data: a byte order mark, a part
+  // number that keeps its leading zero, and CRLF endings.
+  const csvResponse = await fetch(`${BASE}/api/reports/parts?range=year`, {
+    headers: { cookie: `carnet_session=${tokens.owner}` },
+  });
+  // Read as bytes. text() decodes UTF-8 and strips a leading byte order mark,
+  // so decoding first would hide the very thing being asserted.
+  const csvBytes = new Uint8Array(await csvResponse.arrayBuffer());
+  const csvBody = new TextDecoder('utf-8', { ignoreBOM: true }).decode(csvBytes);
+
   let failures = 0;
+
+  for (const [label, passed] of [
+    [
+      'downloads as an attachment',
+      (csvResponse.headers.get('content-disposition') ?? '').includes('attachment'),
+    ],
+    ['is not cached', csvResponse.headers.get('cache-control') === 'no-store'],
+    ['opens as UTF-8', csvBytes[0] === 0xef && csvBytes[1] === 0xbb && csvBytes[2] === 0xbf],
+    ['uses CRLF endings', csvBody.includes(String.fromCharCode(13, 10))],
+    ['keeps a part number literal', csvBody.includes('="')],
+  ] as const) {
+    console.info(`  ${passed ? 'ok  ' : 'FAIL'}  csv export: ${label}`);
+    if (!passed) failures += 1;
+  }
 
   for (const [label, present] of [
     ['names what was hit', 'general ledger'],

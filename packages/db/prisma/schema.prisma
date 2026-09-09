@@ -90,6 +90,8 @@ model Organization {
   commissionAwards    CommissionAward[]
   stockTransfers      StockTransfer[]
   invitations         Invitation[]
+  counterSales        CounterSale[]
+  tillSessions        TillSession[]
 
   @@index([isActive])
   @@map("organizations")
@@ -129,6 +131,8 @@ model Location {
   warehouses  Warehouse[]
   employees   Employee[]
   attendance  AttendanceRecord[]
+  counterSales CounterSale[]
+  tillSessions TillSession[]
 
   @@unique([orgId, code])
   @@index([orgId, isActive])
@@ -196,6 +200,8 @@ model User {
   // Phase 4
   employeeRecord      Employee?
   invitationsSent     Invitation[]    @relation("InvitationSender")
+  counterSales        CounterSale[]   @relation("CounterSaleSeller")
+  tillSessions        TillSession[]   @relation("TillOperator")
   timesheetApprovals  Timesheet[]     @relation("TimesheetApprover")
   transfersDispatched StockTransfer[] @relation("TransferDispatcher")
   transfersReceived   StockTransfer[] @relation("TransferReceiver")
@@ -696,6 +702,7 @@ model Customer {
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   portalUser User?        @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
   bookings   Booking[]
+  counterSales CounterSale[]
   jobs       Job[]         @relation("JobCustomer")
   billedJobs Job[]         @relation("JobBillTo")
   invoices   Invoice[]
@@ -1427,6 +1434,7 @@ model TaxRate {
   feeLines      JobFeeLine[]
   estimateLines EstimateLine[]
   invoiceLines  InvoiceLine[]
+  saleLines     CounterSaleLine[]
 
   @@unique([orgId, name])
   @@map("tax_rates")
@@ -1453,6 +1461,7 @@ enum SequenceKind {
   INVOICE
   CREDIT_NOTE
   PURCHASE_ORDER
+  COUNTER_SALE
 }
 
 model Invoice {
@@ -1680,6 +1689,7 @@ model Product {
   jobPartLines JobPartLine[]
   poLines      PurchaseOrderLine[]
   transferLines StockTransferLine[]
+  saleLines     CounterSaleLine[]
 
   @@unique([orgId, partNumber])
   @@index([orgId, isActive])
@@ -2375,4 +2385,134 @@ model Invitation {
   @@index([orgId, acceptedAt])
   @@index([email])
   @@map("invitations")
+}
+
+/* ===========================================================================
+   COUNTER SALES — Phase 4.7
+
+   A sale with no job behind it. Somebody wants a bulb, pays, and leaves.
+
+   The three things a job normally anchors have to work without it: the ledger
+   posting, the stock movement and the cost. Cash and card are recorded
+   separately because they arrive on different days, and a bank reconciliation
+   that cannot tell them apart is not a reconciliation.
+   =========================================================================== */
+
+enum CounterSaleStatus {
+  OPEN
+  PAID
+  REFUNDED
+  VOID
+}
+
+enum TenderKind {
+  CASH
+  CARD
+  ACCOUNT
+}
+
+model CounterSale {
+  id           String            @id @default(cuid())
+  orgId        String
+  locationId   String?
+  /// Optional. Most counter sales are to somebody who never gives a name.
+  customerId   String?
+  reference    String
+  status       CounterSaleStatus @default(OPEN)
+  soldByUserId String?
+  tillSessionId String?
+  subtotal     Decimal           @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal          @default(0) @db.Decimal(12, 2)
+  taxTotal     Decimal           @default(0) @db.Decimal(12, 2)
+  total        Decimal           @default(0) @db.Decimal(12, 2)
+  /// Weighted average cost of everything on the sale, at the moment of sale.
+  costTotal    Decimal           @default(0) @db.Decimal(12, 2)
+  changeGiven  Decimal           @default(0) @db.Decimal(12, 2)
+  refundedTotal Decimal          @default(0) @db.Decimal(12, 2)
+  /// Set when this sale reverses another. A refund is never loose cash.
+  refundsSaleId String?
+  note         String?
+  soldAt       DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  org         Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location    Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  customer    Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  soldBy      User?              @relation("CounterSaleSeller", fields: [soldByUserId], references: [id], onDelete: SetNull)
+  tillSession TillSession?       @relation(fields: [tillSessionId], references: [id], onDelete: SetNull)
+  refundsSale CounterSale?       @relation("SaleRefund", fields: [refundsSaleId], references: [id], onDelete: SetNull)
+  refundedBy  CounterSale[]      @relation("SaleRefund")
+  lines       CounterSaleLine[]
+  tenders     CounterSaleTender[]
+
+  @@unique([orgId, reference])
+  @@index([orgId, status])
+  @@index([orgId, soldAt])
+  @@map("counter_sales")
+}
+
+model CounterSaleLine {
+  id          String  @id @default(cuid())
+  saleId      String
+  /// Null for a one-off item or a service with nothing on the shelf.
+  productId   String?
+  kind        LineKind
+  description String
+  quantity    Decimal @db.Decimal(12, 3)
+  unitPrice   Decimal @db.Decimal(12, 2)
+  /// Weighted average at the moment of sale, frozen here. Recomputing later
+  /// would change what a sale in March cost when a delivery arrives in June.
+  unitCost    Decimal @default(0) @db.Decimal(12, 4)
+  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  taxRateId   String?
+  taxAmount   Decimal @default(0) @db.Decimal(12, 2)
+  lineTotal   Decimal @default(0) @db.Decimal(12, 2)
+  sortOrder   Int     @default(0)
+
+  sale    CounterSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product?    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  taxRate TaxRate?    @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("counter_sale_lines")
+}
+
+model CounterSaleTender {
+  id        String     @id @default(cuid())
+  saleId    String
+  kind      TenderKind
+  amount    Decimal    @db.Decimal(12, 2)
+  reference String?
+  createdAt DateTime   @default(now())
+
+  sale CounterSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+  @@map("counter_sale_tenders")
+}
+
+/// A day at the till. Opened with a float, closed with a count, and the
+/// variance between the two is reported rather than absorbed.
+model TillSession {
+  id             String    @id @default(cuid())
+  orgId          String
+  locationId     String?
+  openedByUserId String?
+  openingFloat   Decimal   @default(0) @db.Decimal(12, 2)
+  countedCash    Decimal?  @db.Decimal(12, 2)
+  /// Cash taken out during the day: a supplier paid in cash, a float lifted.
+  paidOut        Decimal   @default(0) @db.Decimal(12, 2)
+  openedAt       DateTime  @default(now())
+  closedAt       DateTime?
+  note           String?
+
+  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location Location?     @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  openedBy User?         @relation("TillOperator", fields: [openedByUserId], references: [id], onDelete: SetNull)
+  sales    CounterSale[]
+
+  @@index([orgId, openedAt])
+  @@map("till_sessions")
 }

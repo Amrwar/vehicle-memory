@@ -257,6 +257,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2000 — Counter sales and business reporting
+
+| Ref     | Requirement                                                                                                                | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2001 | The system MUST support a sale with no job, no vehicle and no customer record.                                             | 4.7   |
+| FR-2002 | A counter sale MUST move stock, recognise cost and post to the ledger as one operation.                                    | 4.7   |
+| FR-2003 | Cash and card MUST be recorded separately, and the till MUST report its variance rather than absorbing it.                 | 4.7   |
+| FR-2004 | The system MUST list estimates awaiting a customer's answer, ordered by how long they have waited.                         | 4.7   |
+| FR-2005 | The system MUST report revenue by service type, with cost, so busy-and-unprofitable work is visible.                       | 4.7   |
+| FR-2006 | The system MUST report parts profitability and MUST surface parts being sold below cost.                                   | 4.7   |
+| FR-2007 | The system MUST report customer retention against each customer's own visit rhythm, not a fixed interval.                  | 4.7   |
+| FR-2008 | The system MUST report source of business by conversion, not only by volume.                                               | 4.7   |
+| FR-2009 | Every export MUST defuse spreadsheet formula injection, preserve leading zeros, and write dates no locale can reinterpret. | 4.7   |
+
 ## FR-1900 — Administration and the customer's journey
 
 | Ref     | Requirement                                                                                                                  | Phase |

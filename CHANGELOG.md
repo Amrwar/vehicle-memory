@@ -7,6 +7,34 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 4.7 - Counter sales, reporting and the gaps.**
+
+- `/counter`: a sale with no job behind it. One screen, one submit, because a
+  counter queue is not a service desk. Behind that submit the stock leaves the
+  shelf, cost is recognised and the ledger is posted, all of which a job would
+  normally have anchored.
+- Cash and card post to different accounts, since they arrive on different
+  days. The till reports its variance rather than absorbing it: a drawer that
+  agrees with itself every evening is a formality, not a control.
+- Counter sales get their own gapless numbering. Sharing the invoice sequence
+  would leave gaps in it, and a gap in an invoice sequence is the first thing
+  an auditor asks about.
+- `/estimates`: the ones nobody has answered, ordered by how long they have
+  waited. An unanswered estimate is a bay that will be empty next week, and it
+  is invisible from the job screen because nobody opens a job that is not
+  moving.
+- `/reports/business`: revenue by service type with cost, so busy-and-
+  unprofitable work shows; parts profitability with loss-making lines first;
+  retention measured against each customer's own rhythm rather than a fixed
+  interval; and source of business by conversion rather than volume.
+- CSV export on every report, which FR-1406 has promised since Phase 1. The
+  rules that matter are about what spreadsheets do to CSV: a leading zero on a
+  part number is deleted, a value starting with = or + or - or @ is executed as
+  a formula, and a date is reinterpreted by the reader's locale. The second is
+  a real attack on the workshop exporting its own customer list.
+- 40 further domain tests and `verify-counter.ts`, which sells a real part and
+  then checks the shelf, the accounts and the drawer.
+
 **Phase 4.6 - Administration and the customer's journey.**
 
 - `/settings/team`: invite a colleague, change a role, move somebody between

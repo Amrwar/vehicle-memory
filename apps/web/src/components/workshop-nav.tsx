@@ -61,9 +61,17 @@ const GROUPS: Group[] = [
   {
     label: 'Money',
     items: [
+      { href: '/estimates', label: 'Estimates', icon: 'estimates', permission: 'estimate:read' },
       { href: '/invoices', label: 'Invoices', icon: 'invoices', permission: 'invoice:read' },
       { href: '/payments', label: 'Payments', icon: 'payments', permission: 'payment:read' },
       { href: '/reports', label: 'Reports', icon: 'reports', permission: 'report:operational' },
+      {
+        href: '/reports/business',
+        label: 'Business',
+        icon: 'business',
+        permission: 'report:operational',
+      },
+      { href: '/counter', label: 'Counter', icon: 'counter', permission: 'invoice:write' },
     ],
   },
   {

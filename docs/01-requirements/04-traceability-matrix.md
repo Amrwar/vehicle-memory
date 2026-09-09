@@ -163,6 +163,25 @@ of what is true.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Counter sales and business reporting
+
+| Req     | Story | Schema                             | Implementation           | Test                | Status |
+| ------- | ----- | ---------------------------------- | ------------------------ | ------------------- | ------ |
+| FR-2001 | —     | `CounterSale`, `CounterSaleLine`   | `/counter`               | `verify-counter.ts` | Done   |
+| FR-2002 | —     | `StockMovement`, `JournalEntry`    | `completeSale()`         | `verify-counter.ts` | Done   |
+| FR-2003 | —     | `CounterSaleTender`, `TillSession` | `countTill()`            | `pos.test.ts`       | Done   |
+| FR-2004 | —     | `Estimate.sentAt`                  | `/estimates`             | `smoke.ts`          | Done   |
+| FR-2005 | —     | —                                  | `revenueByServiceType()` | `smoke.ts`          | Done   |
+| FR-2006 | —     | —                                  | `partsProfitability()`   | `smoke.ts`          | Done   |
+| FR-2007 | —     | —                                  | `retention()`            | `smoke.ts`          | Done   |
+| FR-2008 | —     | `Booking.source`                   | `bySource()`             | `smoke.ts`          | Done   |
+| FR-2009 | —     | —                                  | `toCsv()`, `csvField()`  | `pos.test.ts`       | Done   |
+| FR-1406 | —     | —                                  | `/api/reports/[report]`  | `smoke.ts`          | Done   |
+
+Online card payment (FR-1309) remains absent. It needs a payment provider, and
+a page that collects card details with nothing behind it would be worse than
+not having one.
+
 ## Administration and the customer's journey
 
 | Req     | Story | Schema                              | Implementation          | Test             | Status |

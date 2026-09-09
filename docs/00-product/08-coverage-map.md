@@ -30,21 +30,21 @@ being specific about the gaps rather than generous about the ticks.
 
 ## Workshop side
 
-| Capability        | Status  | Where it is                                                                                                                                               |
-| ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Calendar          | Built   | `/diary`, bay lanes with per-day capacity.                                                                                                                |
-| Customers         | Built   | `/customers`, with vehicles, history and balance.                                                                                                         |
-| Vehicles          | Built   | `/vehicles`, with the passport, ownership and odometer history.                                                                                           |
-| Work orders       | Built   | `/jobs`, fourteen statuses with guarded transitions.                                                                                                      |
-| Technicians       | Built   | `/people`, attendance, pay history, productivity.                                                                                                         |
-| Job cards         | Built   | `/shop`, the technician's own tablet surface.                                                                                                             |
-| Parts             | Built   | `/parts`, weighted average cost, reservations, reorder.                                                                                                   |
-| Inventory         | Built   | Stock levels, movements, stocktakes, transfers between sites.                                                                                             |
-| Suppliers         | Built   | `/suppliers`, with bills and three-way match.                                                                                                             |
-| Quotes            | Partial | Estimates are built and approved on the job. There is no standalone estimates list, which is where a workshop chases the ones nobody answered. Phase 4.7. |
-| Invoices          | Built   | `/invoices`, gapless numbering, credit notes.                                                                                                             |
-| Payments          | Built   | `/payments`, with allocation and aged debt.                                                                                                               |
-| Service reminders | Built   | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner.                                                           |
+| Capability        | Status | Where it is                                                                                     |
+| ----------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| Calendar          | Built  | `/diary`, bay lanes with per-day capacity.                                                      |
+| Customers         | Built  | `/customers`, with vehicles, history and balance.                                               |
+| Vehicles          | Built  | `/vehicles`, with the passport, ownership and odometer history.                                 |
+| Work orders       | Built  | `/jobs`, fourteen statuses with guarded transitions.                                            |
+| Technicians       | Built  | `/people`, attendance, pay history, productivity.                                               |
+| Job cards         | Built  | `/shop`, the technician's own tablet surface.                                                   |
+| Parts             | Built  | `/parts`, weighted average cost, reservations, reorder.                                         |
+| Inventory         | Built  | Stock levels, movements, stocktakes, transfers between sites.                                   |
+| Suppliers         | Built  | `/suppliers`, with bills and three-way match.                                                   |
+| Quotes            | Built  | `/estimates`, ordered by how long somebody has been waiting rather than by value.               |
+| Invoices          | Built  | `/invoices`, gapless numbering, credit notes.                                                   |
+| Payments          | Built  | `/payments`, with allocation and aged debt.                                                     |
+| Service reminders | Built  | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner. |
 
 ## ERP and business side
 
@@ -65,15 +65,14 @@ being specific about the gaps rather than generous about the ticks.
 
 ## What this leaves
 
-Five rows above are not fully built. They fall into three groups, and each
-group is a phase rather than a backlog:
+Three rows above are not fully built. They fall into two groups, plus one
+that is waiting on a third party:
 
 Phase 4.6 is done: inviting a colleague, changing a role, the reminders
 screen, and the booking flow a customer actually walks.
 
-**Phase 4.7 — Counter sales, reporting and the gaps.** Point of sale, the
-estimates list, the reports a workshop runs on a Monday, CSV export, and taking
-a card payment.
+Phase 4.7 is done apart from taking a card payment, which is waiting on a
+provider: point of sale, the estimates list, business reporting and CSV export.
 
 **Phase 4.8 — Expenses, banking and close.** The rest of Phase 3: expense
 capture, bank accounts and reconciliation, fiscal period close, and a payroll

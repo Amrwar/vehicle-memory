@@ -148,6 +148,11 @@ jobs:
       - name: Verify inviting, changing and removing people
         run: npx tsx infra/scripts/verify-team.ts
 
+      # A counter sale has no job to anchor the stock movement, the cost or
+      # the ledger posting, so all three have to happen on their own.
+      - name: Verify a counter sale moves stock and posts to the ledger
+        run: npx tsx infra/scripts/verify-counter.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

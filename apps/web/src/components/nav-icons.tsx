@@ -45,6 +45,9 @@ export type NavIconName =
   | 'settings'
   | 'reminders'
   | 'team'
+  | 'business'
+  | 'counter'
+  | 'estimates'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
@@ -172,6 +175,27 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <circle cx="7.4" cy="7" r="2.6" />
       <path d="M2.8 16.4a4.6 4.6 0 0 1 9.2 0" />
       <path d="M13 4.8a2.4 2.4 0 0 1 0 4.4M17.2 16.4a4.4 4.4 0 0 0-2.2-3.5" />
+    </>
+  ),
+  business: (
+    <>
+      <path d="M3.2 15.4 7.6 11l3 3 6.2-6.4" />
+      <path d="M12.6 7.6h4.2v4.2" />
+      <path d="M3.2 17.6h13.6" />
+    </>
+  ),
+  counter: (
+    <>
+      <rect x="2.6" y="7.6" width="14.8" height="4" rx="1.2" />
+      <path d="M4.2 11.6v5.2h11.6v-5.2" />
+      <path d="M8 11.6v2.4h4v-2.4M6.6 7.6 8.4 3.4h3.2l1.8 4.2" />
+    </>
+  ),
+  estimates: (
+    <>
+      <path d="M4.6 2.8h7.2l3.6 3.6v10.8H4.6z" />
+      <path d="M11.8 2.8v3.6h3.6" />
+      <path d="M7.2 10.4h5.6M7.2 13.4h3.6" />
     </>
   ),
   audit: (
