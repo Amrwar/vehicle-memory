@@ -120,6 +120,13 @@ jobs:
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 
+      - name: Verify inventory arithmetic
+        # Reseeds first: verify-integrity leaves an account row behind, and the
+        # inventory check asserts on exact opening balances.
+        run: |
+          npm run db:seed
+          npx tsx infra/scripts/verify-inventory.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -35,7 +35,7 @@ export default async function PartsPage({
 }: {
   searchParams: Promise<{ q?: string; view?: string }>;
 }) {
-  const { db, orgId } = await requireSession('inventory:read');
+  const { db } = await requireSession('inventory:read');
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
   const lowOnly = params.view === 'low';

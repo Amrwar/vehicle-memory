@@ -7,6 +7,27 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 2 - Inventory and Procurement.**
+
+- Parts catalogue with categories, warehouses, bins and stock levels
+- Weighted average cost, recalculated on every receipt. Receiving into a
+  negative balance takes the receipt cost rather than averaging against a
+  quantity that cannot meaningfully be averaged.
+- Reservation separates on-hand from available, so the same set of brake pads
+  cannot be promised to two jobs. Partial reservation is supported, because
+  taking the three you have and ordering the fourth is what a workshop does.
+- A shortfall raises a purchase request automatically, linked to the job
+- Reorder suggestions derived from observed usage, lead time and outstanding
+  orders, each reported with an explicit confidence level
+- Purchase requests with an approval threshold, keeping request and approve as
+  separate permissions
+- Purchase orders, partial goods receipt, over-receipt refused
+- Three-way match of supplier bills against order and receipt, distinguishing a
+  price variance from being billed for goods that never arrived
+- Stock adjustments with a mandatory reason, and stocktakes with variance
+- 67 further domain tests, and an inventory flow check asserting the arithmetic
+  against a real database
+
 **Phase 1 - Workshop Core.**
 
 - Multi-tenant foundation with six roles, deny-by-default permissions, and an

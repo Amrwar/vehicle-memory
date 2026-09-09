@@ -98,20 +98,45 @@ recorded · **Planned** in a later phase.
 | FR-1501–1502 | G1    | `MessageLog`             | notification service | `notify.test.ts`        | Done   |
 | FR-1504      | —     | `ServiceSchedule`        | due calculation      | `service-due.test.ts`   | Done   |
 
+## Inventory and procurement (Phase 2)
+
+| Req     | Story | Schema                       | Implementation        | Test                  | Status     |
+| ------- | ----- | ---------------------------- | --------------------- | --------------------- | ---------- |
+| FR-1001 | —     | `Product`, `ProductCategory` | `/parts`              | `smoke.ts`            | Done       |
+| FR-1002 | —     | `StockLevel`, `Warehouse`    | `lib/inventory.ts`    | `inventory.test.ts`   | Done       |
+| FR-1003 | —     | `StockReservation`           | `reserveForJobLine()` | `verify-inventory.ts` | Done       |
+| FR-1004 | —     | `StockMovement`              | every write path      | `verify-inventory.ts` | Done       |
+| FR-1005 | —     | `StockLevel.avgCost`         | `applyReceipt()`      | `inventory.test.ts`   | Done       |
+| FR-1006 | —     | `Product.reorderPoint`       | `summariseStock()`    | `inventory.test.ts`   | Done       |
+| FR-1007 | —     | —                            | `suggestReorder()`    | `inventory.test.ts`   | Done       |
+| FR-1008 | —     | `StockMovement.reason`       | `adjustStock()`       | `inventory.test.ts`   | Done       |
+| FR-1009 | —     | —                            | `recordStocktake()`   | `inventory.test.ts`   | Done       |
+| FR-1010 | —     | `Warehouse`                  | schema only           | —                     | Planned P4 |
+| FR-1011 | —     | `JobPartLine.unitCost`       | `consumeForJob()`     | `verify-inventory.ts` | Done       |
+| FR-1101 | —     | `Supplier`                   | `/suppliers`          | `smoke.ts`            | Done       |
+| FR-1102 | —     | `PurchaseRequest`            | shortfall path        | `verify-inventory.ts` | Done       |
+| FR-1103 | —     | —                            | `approvalRequired()`  | `inventory.test.ts`   | Done       |
+| FR-1104 | —     | `PurchaseOrder`, lines       | `/purchasing`         | `smoke.ts`            | Done       |
+| FR-1105 | —     | `GoodsReceipt`               | `validateReceipt()`   | `verify-inventory.ts` | Done       |
+| FR-1106 | —     | `StockMovement`              | `receiveGoods()`      | `verify-inventory.ts` | Done       |
+| FR-1107 | —     | `SupplierBill`               | `matchBill()`         | `inventory.test.ts`   | Done       |
+| FR-1108 | —     | `PurchaseRequest.jobId`      | shortfall path        | `verify-inventory.ts` | Done       |
+
 ---
 
 ## Coverage summary
 
-| Area                      | Requirements in Phase 1 | Traced | Automated test |
-| ------------------------- | ----------------------- | ------ | -------------- |
-| Foundation                | 9                       | 9      | 9              |
-| Customers and vehicles    | 13                      | 13     | 12             |
-| Passport                  | 13                      | 13     | 13             |
-| Booking and job           | 20                      | 20     | 19             |
-| Inspection and estimate   | 15                      | 15     | 15             |
-| Invoice and payment       | 8                       | 8      | 8              |
-| Portal, dashboard, notify | 14                      | 14     | 11             |
-| **Total**                 | **92**                  | **92** | **87 (95%)**   |
+| Area                      | Requirements in Phase 1 | Traced  | Automated test |
+| ------------------------- | ----------------------- | ------- | -------------- |
+| Foundation                | 9                       | 9       | 9              |
+| Customers and vehicles    | 13                      | 13      | 12             |
+| Passport                  | 13                      | 13      | 13             |
+| Booking and job           | 20                      | 20      | 19             |
+| Inspection and estimate   | 15                      | 15      | 15             |
+| Invoice and payment       | 8                       | 8       | 8              |
+| Portal, dashboard, notify | 14                      | 14      | 11             |
+| Inventory and procurement | 18                      | 18      | 18             |
+| **Total**                 | **110**                 | **110** | **105 (95%)**  |
 
 The five without automated coverage are visual and interaction concerns
 verified by usability testing rather than assertion. They are named in the

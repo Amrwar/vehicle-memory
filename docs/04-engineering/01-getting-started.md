@@ -64,7 +64,8 @@ impossible odometer reading so the fraud-detection path is on screen.
 ```bash
 npm test                                      # 192 domain tests
 npx tsx infra/scripts/verify-integrity.ts     # chain + database invariants
-npx tsx infra/scripts/smoke.ts                # 13 routes across 5 roles
+npx tsx infra/scripts/smoke.ts                # 19 routes across 5 roles
+npx tsx infra/scripts/verify-inventory.ts     # stock arithmetic, end to end
 ```
 
 `verify-integrity` is worth running once by hand. It does not check that the

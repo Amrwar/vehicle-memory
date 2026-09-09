@@ -93,9 +93,20 @@ Full instructions, including troubleshooting, are in
 - Four interface surfaces: workshop, shop floor, customer portal, public
   passport
 
-Phases 2 to 6 (inventory, ERP, multi-site, automation, intelligence) are
-specified in the [roadmap](docs/00-product/06-roadmap.md), and their tables are
-already in the first migration so later migrations stay additive.
+**Phase 2, Inventory and Procurement, is also implemented.**
+
+- Parts catalogue, warehouses, bins, stock levels and movements
+- Weighted average cost, recalculated on every receipt
+- Reservation against available stock rather than on-hand, with partial
+  reservation and an automatic purchase request for the shortfall
+- Reorder suggestions from observed usage, lead time and outstanding orders,
+  each reported with its own confidence
+- Purchase requests with an approval threshold, orders, partial receiving
+- Three-way match of supplier bills against what was ordered and what arrived
+
+Phases 3 to 6 (ERP, multi-site, automation, intelligence) are specified in the
+[roadmap](docs/00-product/06-roadmap.md), and their tables are already in the
+first migration so later migrations stay additive.
 
 ## The two decisions everything rests on
 
@@ -122,7 +133,7 @@ unbalanced journal — and fails the build if any succeeds.
 
 ```
 packages/db      Prisma schema, migrations, seed, tenant-scoped client
-packages/core    domain logic. Imports nothing. 192 tests, under half a second.
+packages/core    domain logic. Imports nothing. 259 tests, under half a second.
 packages/ui      design system: tokens and components
 apps/web         Next.js: all four interface surfaces
 apps/worker      outbox dispatch, chain audit, reminders
@@ -136,12 +147,13 @@ changes.
 
 ## Verification
 
-| Command                                     | What it proves                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| `npm test`                                  | 192 domain tests. 92.7% statements, 85.1% branches.                       |
-| `npx tsx infra/scripts/verify-integrity.ts` | Chains verify; the database refuses every attempt to violate an invariant |
-| `npx tsx infra/scripts/smoke.ts`            | 13 routes render real content across five roles, including role redirects |
-| `npm run verify`                            | Everything CI runs                                                        |
+| Command                                     | What it proves                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `npm test`                                  | 259 domain tests, including 67 for inventory and procurement.                                   |
+| `npx tsx infra/scripts/verify-integrity.ts` | Chains verify; the database refuses every attempt to violate an invariant                       |
+| `npx tsx infra/scripts/smoke.ts`            | 19 routes render real content across five roles, including role redirects                       |
+| `npx tsx infra/scripts/verify-inventory.ts` | Weighted average cost, over-receipt refusal and reservation arithmetic, against a real database |
+| `npm run verify`                            | Everything CI runs                                                                              |
 
 ## Documentation
 

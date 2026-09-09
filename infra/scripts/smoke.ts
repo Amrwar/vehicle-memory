@@ -59,6 +59,8 @@ async function main() {
   const customer = await prisma.customer.findFirstOrThrow({
     where: { displayName: 'Maria Okonkwo' },
   });
+  const product = await prisma.product.findFirstOrThrow({ where: { partNumber: '04152-YZZA1' } });
+  const order = await prisma.purchaseOrder.findFirstOrThrow({ where: { number: 'PO-2041' } });
 
   const checks: Check[] = [
     { path: '/login', as: 'anon', expect: ['Sign in', 'The history should belong to the car'] },
@@ -112,6 +114,31 @@ async function main() {
       as: 'customer',
       expect: ['My vehicles', 'Needs your approval', 'Review and decide'],
     },
+    // Phase 2: inventory and procurement.
+    {
+      path: '/parts',
+      as: 'advisor',
+      expect: ['Parts', 'Stock value', 'Below reorder point', 'Issued more than recorded'],
+    },
+    {
+      path: `/parts/${product.id}`,
+      as: 'owner',
+      expect: ['Oil filter', 'Movements', 'Reorder', 'Weighted average cost'],
+    },
+    {
+      path: '/purchasing',
+      as: 'owner',
+      expect: ['Purchasing', 'Purchase requests', 'PO-2041', 'Bills to query'],
+    },
+    {
+      path: `/purchasing/${order.id}`,
+      as: 'owner',
+      expect: ['PO-2041', 'Book in delivery', 'Outstanding', 'Pennine Motor Factors'],
+    },
+    { path: '/suppliers', as: 'owner', expect: ['Suppliers', 'Pennine Motor Factors', 'disputed'] },
+    // A technician may request a part but must not reach purchasing approval.
+    { path: '/parts', as: 'technician', expect: [], redirects: true },
+
     // Role segregation: a technician reaching a workshop URL is redirected.
     { path: '/dashboard', as: 'technician', expect: [], redirects: true },
     { path: '/dashboard', as: 'anon', expect: [], redirects: true },
