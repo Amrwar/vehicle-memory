@@ -46,8 +46,43 @@ function createClient(): PrismaClient {
   });
 }
 
-export const prisma: PrismaClient = globalForPrisma.carnetPrisma ?? createClient();
+function resolveClient(): PrismaClient {
+  const existing = globalForPrisma.carnetPrisma;
+  if (existing) return existing;
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.carnetPrisma = prisma;
+  const client = createClient();
+
+  // Cached in every environment, not only development. A serverless invocation
+  // reuses the module between requests, and building a new pool per request
+  // exhausts Postgres connections within minutes.
+  globalForPrisma.carnetPrisma = client;
+  return client;
 }
+
+/**
+ * Constructed on first use rather than at import.
+ *
+ * `next build` walks the module graph to collect page data, which imports this
+ * file. Creating the client there would make the build depend on a database
+ * URL that only the running application needs, and the build fails on any host
+ * where the variable is set at runtime rather than at build time — Vercel, for
+ * one.
+ *
+ * The proxy keeps the ergonomics of a plain client: `prisma.job.findMany()`
+ * works exactly as before, and the connection is opened the first time
+ * something actually asks for data.
+ */
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, property, receiver) {
+    const client = resolveClient();
+    const value = Reflect.get(client, property, receiver);
+    // Methods must keep their binding: prisma.$transaction(...) relies on it.
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+  has(_target, property) {
+    return Reflect.has(resolveClient(), property);
+  },
+  getPrototypeOf() {
+    return Reflect.getPrototypeOf(resolveClient());
+  },
+});

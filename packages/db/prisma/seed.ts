@@ -32,25 +32,16 @@ const yearsAgo = (years: number, month = 5, dayOfMonth = 12): Date =>
 async function main() {
   console.info('Seeding Carnet demo data...');
 
-  // Order matters: children before parents.
-  await prisma.$transaction([
-    prisma.passportShareAccess.deleteMany(),
-    prisma.passportShare.deleteMany(),
-    prisma.vehicleEventAttachment.deleteMany(),
-    prisma.vehicleEvent.deleteMany(),
-    prisma.odometerReading.deleteMany(),
-    prisma.vehicleAccessGrant.deleteMany(),
-    prisma.vehicleRecall.deleteMany(),
-    prisma.recall.deleteMany(),
-    prisma.vehicleOwnership.deleteMany(),
-    prisma.serviceSchedule.deleteMany(),
-    prisma.auditLog.deleteMany(),
-    prisma.loginAttempt.deleteMany(),
-    prisma.session.deleteMany(),
-    prisma.organization.deleteMany(),
-    prisma.vehicle.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
+  // TRUNCATE rather than deleteMany. The append-only trigger on
+  // vehicle_events refuses DELETE, by design, so a second seed run would fail
+  // against a populated database. TRUNCATE does not fire row-level triggers,
+  // and CASCADE reaches every dependent table from these three roots.
+  await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE
+      "organizations", "vehicles", "users",
+      "recalls", "login_attempts", "outbox_events"
+    RESTART IDENTITY CASCADE
+  `);
 
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
@@ -1298,6 +1289,379 @@ async function main() {
     ],
   });
 
+  /* --- inventory and procurement (Phase 2) -------------------------------- */
+
+  const warehouse = await prisma.warehouse.create({
+    data: {
+      orgId: org.id,
+      locationId: location.id,
+      name: 'Main store',
+      code: 'MAIN',
+      isDefault: true,
+    },
+  });
+
+  const [brakeCategory, serviceCategory, consumables] = await Promise.all(
+    ['Braking', 'Service parts', 'Consumables'].map((name) =>
+      prisma.productCategory.create({ data: { orgId: org.id, name } }),
+    ),
+  );
+
+  // Deliberately mixed: one part comfortably in stock, one below its reorder
+  // point with nothing on order, one short with a delivery already inbound,
+  // and one that has been over-issued. The parts screen should make the
+  // difference between those obvious at a glance.
+  const productSpecs = [
+    {
+      partNumber: '34116794300',
+      name: 'BMW front brake pad set',
+      brand: 'BMW',
+      categoryId: brakeCategory!.id,
+      costPrice: 63.0,
+      sellPrice: 105.0,
+      reorderPoint: 4,
+      reorderQty: 8,
+      onHand: 6,
+      reserved: 1,
+      avgCost: 63.0,
+    },
+    {
+      partNumber: '34116864059',
+      name: 'BMW front brake discs (pair)',
+      brand: 'BMW',
+      categoryId: brakeCategory!.id,
+      costPrice: 61.5,
+      sellPrice: 102.5,
+      reorderPoint: 4,
+      reorderQty: 8,
+      onHand: 1,
+      reserved: 1,
+      avgCost: 61.5,
+    },
+    {
+      partNumber: 'TOY-0W20-5L',
+      name: 'Engine oil 0W-20, 5L',
+      brand: 'Toyota',
+      categoryId: serviceCategory!.id,
+      costPrice: 28.0,
+      sellPrice: 52.0,
+      reorderPoint: 10,
+      reorderQty: 20,
+      onHand: 24,
+      reserved: 0,
+      avgCost: 27.4,
+    },
+    {
+      partNumber: '04152-YZZA1',
+      name: 'Oil filter',
+      brand: 'Toyota',
+      categoryId: serviceCategory!.id,
+      costPrice: 8.0,
+      sellPrice: 18.0,
+      reorderPoint: 12,
+      reorderQty: 30,
+      onHand: 5,
+      reserved: 0,
+      avgCost: 8.1,
+    },
+    {
+      partNumber: '87139-0D070',
+      name: 'Cabin filter',
+      brand: 'Toyota',
+      categoryId: serviceCategory!.id,
+      costPrice: 11.0,
+      sellPrice: 24.0,
+      reorderPoint: 8,
+      reorderQty: 20,
+      onHand: 14,
+      reserved: 0,
+      avgCost: 10.8,
+    },
+    {
+      partNumber: 'BAT-090-AGM',
+      name: 'Battery 90Ah AGM',
+      brand: 'Varta',
+      categoryId: consumables!.id,
+      costPrice: 151.0,
+      sellPrice: 240.0,
+      reorderPoint: 2,
+      reorderQty: 4,
+      onHand: 3,
+      reserved: 0,
+      avgCost: 149.5,
+    },
+    {
+      partNumber: 'BRK-FLUID-1L',
+      name: 'Brake fluid DOT 4, 1L',
+      brand: 'Comma',
+      categoryId: consumables!.id,
+      costPrice: 6.2,
+      sellPrice: 14.0,
+      reorderPoint: 10,
+      reorderQty: 24,
+      onHand: -2,
+      reserved: 0,
+      avgCost: 6.2,
+    },
+  ];
+
+  const products = [];
+  for (const spec of productSpecs) {
+    const { onHand, reserved, avgCost, ...productData } = spec;
+    const product = await prisma.product.create({ data: { orgId: org.id, ...productData } });
+
+    await prisma.stockLevel.create({
+      data: {
+        productId: product.id,
+        warehouseId: warehouse.id,
+        onHand,
+        reserved,
+        avgCost,
+        binLocation: `A${products.length + 1}`,
+      },
+    });
+
+    // A receipt in the past, so weighted average cost has a provenance.
+    await prisma.stockMovement.create({
+      data: {
+        orgId: org.id,
+        productId: product.id,
+        warehouseId: warehouse.id,
+        type: 'RECEIPT',
+        quantity: Math.max(1, onHand + reserved),
+        unitCost: avgCost,
+        balanceAfter: onHand,
+        reason: 'Opening balance',
+        createdAt: day(-120),
+      },
+    });
+
+    products.push(product);
+  }
+
+  // Issue history, so the reorder suggestion has a usage rate to work from
+  // rather than guessing.
+  const oilFilter = products.find((product) => product.partNumber === '04152-YZZA1')!;
+  const brakeFluid = products.find((product) => product.partNumber === 'BRK-FLUID-1L')!;
+
+  for (let week = 16; week >= 1; week -= 1) {
+    await prisma.stockMovement.create({
+      data: {
+        orgId: org.id,
+        productId: oilFilter.id,
+        warehouseId: warehouse.id,
+        type: 'ISSUE',
+        quantity: -2,
+        unitCost: 8.1,
+        balanceAfter: 5,
+        referenceType: 'Job',
+        reason: 'Fitted on job',
+        createdAt: day(-week * 7),
+      },
+    });
+  }
+
+  for (let week = 12; week >= 1; week -= 2) {
+    await prisma.stockMovement.create({
+      data: {
+        orgId: org.id,
+        productId: brakeFluid.id,
+        warehouseId: warehouse.id,
+        type: 'ISSUE',
+        quantity: -1,
+        unitCost: 6.2,
+        balanceAfter: -2,
+        referenceType: 'Job',
+        reason: 'Fitted on job',
+        createdAt: day(-week * 7),
+      },
+    });
+  }
+
+  const [euroCarParts, toyotaFactors] = await Promise.all([
+    prisma.supplier.create({
+      data: {
+        orgId: org.id,
+        name: 'Pennine Motor Factors',
+        accountRef: 'HIL-4471',
+        email: 'trade@penninefactors.test',
+        phone: '0161 480 2211',
+        addressLine1: 'Unit 7, Broadstone Mill',
+        locality: 'Stockport',
+        postcode: 'SK5 7DL',
+        paymentTermsDays: 30,
+      },
+    }),
+    prisma.supplier.create({
+      data: {
+        orgId: org.id,
+        name: 'Northern OE Supply',
+        accountRef: 'NOE-1180',
+        email: 'orders@northernoe.test',
+        paymentTermsDays: 14,
+      },
+    }),
+  ]);
+
+  // A part-received order: two lines ordered, one delivered. The receiving
+  // screen has something real to book in.
+  const brakePads = products.find((product) => product.partNumber === '34116794300')!;
+  const brakeDiscs = products.find((product) => product.partNumber === '34116864059')!;
+
+  const openOrder = await prisma.purchaseOrder.create({
+    data: {
+      orgId: org.id,
+      number: 'PO-2041',
+      supplierId: euroCarParts.id,
+      status: 'PART_RECEIVED',
+      expectedAt: day(2),
+      subtotal: 498.0,
+      taxTotal: 99.6,
+      total: 597.6,
+      notes: 'For job 10482. Discs still outstanding.',
+      lines: {
+        create: [
+          {
+            productId: brakePads.id,
+            description: 'BMW front brake pad set',
+            quantity: 4,
+            received: 4,
+            unitCost: 63.0,
+            sortOrder: 1,
+          },
+          {
+            productId: brakeDiscs.id,
+            description: 'BMW front brake discs (pair)',
+            quantity: 4,
+            received: 0,
+            unitCost: 61.5,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+    include: { lines: true },
+  });
+
+  await prisma.goodsReceipt.create({
+    data: {
+      orderId: openOrder.id,
+      reference: 'DN-88210',
+      receivedAt: day(-1),
+      lines: {
+        create: [{ orderLineId: openOrder.lines[0]!.id, quantity: 4, unitCost: 63.0 }],
+      },
+    },
+  });
+
+  // A pending request above the approval threshold, so the purchasing screen
+  // shows the separation of duty working.
+  await prisma.purchaseRequest.create({
+    data: {
+      orgId: org.id,
+      jobId: brakeJob.id,
+      requestedByUserId: john!.id,
+      status: 'PENDING',
+      notes: '2 x Brake fluid DOT 4, 1L (BRK-FLUID-1L) short for a job.',
+    },
+  });
+
+  await prisma.purchaseRequest.create({
+    data: {
+      orgId: org.id,
+      requestedByUserId: sara!.id,
+      approvedByUserId: ahmed!.id,
+      approvedAt: day(-3),
+      status: 'ORDERED',
+      notes: 'Routine restock of service filters.',
+    },
+  });
+
+  // A fully received order that has been billed, and one bill that does not
+  // reconcile, so the three-way match has something to flag.
+  const closedOrder = await prisma.purchaseOrder.create({
+    data: {
+      orgId: org.id,
+      number: 'PO-2038',
+      supplierId: toyotaFactors.id,
+      status: 'BILLED',
+      expectedAt: day(-10),
+      subtotal: 268.0,
+      taxTotal: 53.6,
+      total: 321.6,
+      lines: {
+        create: [
+          {
+            productId: oilFilter.id,
+            description: 'Oil filter',
+            quantity: 20,
+            received: 20,
+            unitCost: 8.0,
+            sortOrder: 1,
+          },
+          {
+            productId: products.find((p) => p.partNumber === 'TOY-0W20-5L')!.id,
+            description: 'Engine oil 0W-20, 5L',
+            quantity: 4,
+            received: 4,
+            unitCost: 27.0,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.supplierBill.createMany({
+    data: [
+      {
+        orgId: org.id,
+        supplierId: toyotaFactors.id,
+        orderId: closedOrder.id,
+        reference: 'NOE-99321',
+        status: 'APPROVED',
+        subtotal: 268.0,
+        taxTotal: 53.6,
+        total: 321.6,
+        billedAt: day(-9),
+        dueAt: day(5),
+      },
+      {
+        orgId: org.id,
+        supplierId: euroCarParts.id,
+        orderId: openOrder.id,
+        reference: 'PMF-40128',
+        status: 'DISPUTED',
+        subtotal: 498.0,
+        taxTotal: 99.6,
+        total: 597.6,
+        billedAt: day(-1),
+        dueAt: day(29),
+      },
+    ],
+  });
+
+  // Link the live job's part lines to real products, so reservation and
+  // consumption have something to act on.
+  const jobPartLines = await prisma.jobPartLine.findMany({ where: { jobId: brakeJob.id } });
+  for (const line of jobPartLines) {
+    const match = products.find((product) => product.partNumber === line.partNumber);
+    if (match) {
+      await prisma.jobPartLine.update({
+        where: { id: line.id },
+        data: { productId: match.id, status: 'RESERVED' },
+      });
+      await prisma.stockReservation.create({
+        data: {
+          productId: match.id,
+          warehouseId: warehouse.id,
+          jobPartLineId: line.id,
+          quantity: 1,
+        },
+      });
+    }
+  }
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -1319,6 +1683,8 @@ async function main() {
     Users          ${[ahmed, sara, john, mike, fatima, maria, david].length}
     Vehicles       4
     Jobs           2 (one awaiting approval, one paid)
+    Parts          ${productSpecs.length} across 3 categories, 2 below reorder point
+    Suppliers      2, with one part-received order and one disputed bill
 
   Sign in at http://localhost:3000/login
 
