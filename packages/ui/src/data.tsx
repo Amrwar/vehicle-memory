@@ -273,3 +273,66 @@ export function Tab({
     />
   );
 }
+
+/* ===========================================================================
+   Loading
+
+   Skeletons exist so a click produces a change on screen within a frame. The
+   shapes match the real layout closely enough that nothing jumps when the
+   content lands — a skeleton that reflows on arrival is worse than a spinner.
+   =========================================================================== */
+
+export function Skeleton({
+  className,
+  width,
+}: {
+  className?: string;
+  /** Convenience for the common case of a text line of a given width. */
+  width?: string;
+}) {
+  return <span className={cn('skeleton block h-4', className)} style={width ? { width } : undefined} />;
+}
+
+/** Placeholder matching StatRow, so the header does not jump on arrival. */
+export function StatRowSkeleton({ tiles = 4 }: { tiles?: number }) {
+  return (
+    <StatRow>
+      {Array.from({ length: tiles }, (_, index) => (
+        <div key={index} className="flex flex-col gap-2 bg-(--surface) p-4">
+          <Skeleton className="h-2.5" width="4.5rem" />
+          <Skeleton className="h-6" width="6rem" />
+          <Skeleton className="h-2.5" width="5.5rem" />
+        </div>
+      ))}
+    </StatRow>
+  );
+}
+
+/** Placeholder matching a Card wrapping a table. */
+export function TableSkeleton({ rows = 6, columns = 4 }: { rows?: number; columns?: number }) {
+  return (
+    <div className="overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--surface)">
+      <div className="border-b border-(--border) px-4 py-3">
+        <Skeleton className="h-3.5" width="9rem" />
+        <Skeleton className="mt-1.5 h-2.5" width="14rem" />
+      </div>
+      <div className="divide-y divide-(--border)">
+        {Array.from({ length: rows }, (_, row) => (
+          <div
+            key={row}
+            className="flex items-center gap-4 px-4 py-3"
+            style={{ opacity: 1 - row * 0.1 }}
+          >
+            {Array.from({ length: columns }, (_, column) => (
+              <Skeleton
+                key={column}
+                className="h-3.5 flex-1"
+                width={column === 0 ? '30%' : undefined}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -356,6 +356,74 @@ h6 {
   border: 3px solid var(--surface);
 }
 
+/* ---------------------------------------------------------------------------
+   Loading
+
+   A skeleton has to read as "this is arriving", not as content. It borrows the
+   sunk surface and sweeps a single highlight across it, slowly enough that a
+   fast response never shows a full cycle and never flashes.
+   --------------------------------------------------------------------------- */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--text-faint) 12%, transparent),
+    transparent
+  );
+  animation: carnet-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes carnet-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* The clicked nav item, while the next page is still on the wire. Feedback
+   belongs on the thing that was clicked, not only at the top of the window. */
+.nav-pending {
+  position: relative;
+}
+
+.nav-pending::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--brand);
+  transform-origin: left;
+  animation: carnet-crawl 1.6s ease-out forwards;
+}
+
+@keyframes carnet-crawl {
+  0% {
+    transform: scaleX(0.04);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleX(0.75);
+  }
+  100% {
+    transform: scaleX(0.94);
+    opacity: 0.85;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

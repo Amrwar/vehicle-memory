@@ -13,7 +13,21 @@ import 'dotenv/config';
 
 import { createHash } from 'node:crypto';
 
-import { chainEvent, eventsForCompletedJob, type DraftEvent } from '@carnet/core';
+import {
+  ACCOUNT,
+  chainEvent,
+  type DraftEvent,
+  eventsForCompletedJob,
+  type JournalEntryDraft,
+  money,
+  postGoodsReceived,
+  postInvoiceIssued,
+  postPartsConsumed,
+  postPaymentReceived,
+  postStockAdjustment,
+  STANDARD_CHART,
+  toNumber,
+} from '@carnet/core';
 import bcrypt from 'bcryptjs';
 
 import { prisma } from '../src/client';
@@ -1666,6 +1680,106 @@ async function main() {
     }
   }
 
+  /* --- money still out there ---------------------------------------------- */
+
+  // Three unpaid invoices, deliberately spread across the ageing buckets. A
+  // demo where every invoice is settled hides the one report an owner opens
+  // every Monday morning.
+  const openInvoices = [
+    {
+      number: 'INV-1036',
+      customerId: pennine.id,
+      issued: day(-110, 16, 0),
+      due: day(-95, 16, 0),
+      labour: 720.0,
+      parts: 350.0,
+      status: 'OVERDUE' as const,
+      note: 'Fleet van, chased twice.',
+    },
+    {
+      number: 'INV-1039',
+      customerId: mariaCustomer.id,
+      issued: day(-52, 11, 0),
+      due: day(-22, 11, 0),
+      labour: 380.0,
+      parts: 245.0,
+      status: 'OVERDUE' as const,
+      note: null,
+    },
+    {
+      number: 'INV-1041',
+      customerId: ahmedCustomer.id,
+      issued: day(-8, 14, 0),
+      due: day(22, 14, 0),
+      labour: 210.0,
+      parts: 96.0,
+      status: 'ISSUED' as const,
+      note: null,
+    },
+  ];
+
+  for (const invoice of openInvoices) {
+    const net = invoice.labour + invoice.parts;
+    const tax = Math.round(net * 0.2 * 100) / 100;
+
+    await prisma.invoice.create({
+      data: {
+        orgId: org.id,
+        number: invoice.number,
+        customerId: invoice.customerId,
+        status: invoice.status,
+        subtotal: net,
+        taxTotal: tax,
+        total: net + tax,
+        amountPaid: 0,
+        issuedAt: invoice.issued,
+        dueAt: invoice.due,
+        notes: invoice.note,
+        lines: {
+          create: [
+            {
+              kind: 'LABOUR',
+              description: 'Labour',
+              quantity: 1,
+              unitPrice: invoice.labour,
+              lineTotal: invoice.labour,
+              taxAmount: Math.round(invoice.labour * 0.2 * 100) / 100,
+              taxRateId: vat.id,
+              sortOrder: 1,
+            },
+            {
+              kind: 'PART',
+              description: 'Parts supplied',
+              quantity: 1,
+              unitPrice: invoice.parts,
+              lineTotal: invoice.parts,
+              taxAmount: Math.round(invoice.parts * 0.2 * 100) / 100,
+              taxRateId: vat.id,
+              sortOrder: 2,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  /* --- the ledger --------------------------------------------------------- */
+
+  await seedLedger(org.id, {
+    invoiceId: (await prisma.invoice.findFirst({ where: { number: 'INV-1042' } }))!.id,
+    paymentId: (await prisma.payment.findFirst({ where: { orgId: org.id } }))!.id,
+    jobId: serviceJob.id,
+    jobNumber: serviceJob.number,
+    orderId: closedOrder.id,
+    openInvoices: await prisma.invoice.findMany({
+      where: { orgId: org.id, number: { in: ['INV-1036', 'INV-1039', 'INV-1041'] } },
+      include: {
+        customer: { select: { displayName: true } },
+        lines: { select: { kind: true, lineTotal: true } },
+      },
+    }),
+  });
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -1715,6 +1829,269 @@ async function main() {
  * application does. Seeded history must verify, or the demo shows a broken
  * chain on its first screen.
  */
+/**
+ * The books.
+ *
+ * A workshop adopting Carnet mid-year brings balances and a trading history
+ * with it, so the demo does the same: an opening position on migration, three
+ * months of summarised trading, then this fortnight's real documents posted
+ * individually. Without the migrated history the statements would show one
+ * invoice against a full month of wages, which reads as a failing business
+ * rather than a partial month.
+ */
+async function seedLedger(
+  orgId: string,
+  refs: {
+    invoiceId: string;
+    paymentId: string;
+    jobId: string;
+    jobNumber: number;
+    orderId: string;
+    openInvoices: {
+      id: string;
+      number: string;
+      taxTotal: unknown;
+      issuedAt: Date | null;
+      customer: { displayName: string };
+      lines: { kind: string; lineTotal: unknown }[];
+    }[];
+  },
+) {
+  await prisma.account.createMany({
+    data: STANDARD_CHART.map((account) => ({
+      orgId,
+      code: account.code,
+      name: account.name,
+      type: account.type,
+    })),
+  });
+
+  const accounts = await prisma.account.findMany({
+    where: { orgId },
+    select: { id: true, code: true },
+  });
+  const accountId = new Map(accounts.map((account) => [account.code, account.id]));
+
+  // Quarters, with anything that closed more than 60 days ago locked. An entry
+  // seeded into the last fortnight always lands in an open period.
+  const year = new Date().getFullYear();
+  const quarters = [0, 1, 2, 3].map((index) => ({
+    name: `${year} Q${index + 1}`,
+    startsAt: new Date(year, index * 3, 1),
+    endsAt: new Date(year, index * 3 + 3, 0, 23, 59, 59),
+  }));
+
+  const cutoff = day(-60);
+  await prisma.fiscalPeriod.createMany({
+    data: quarters.map((quarter) => ({
+      orgId,
+      name: quarter.name,
+      startsAt: quarter.startsAt,
+      endsAt: quarter.endsAt,
+      isClosed: quarter.endsAt < cutoff,
+      closedAt: quarter.endsAt < cutoff ? quarter.endsAt : null,
+    })),
+  });
+
+  const periods = await prisma.fiscalPeriod.findMany({ where: { orgId } });
+  const periodFor = (at: Date) =>
+    periods.find((period) => at >= period.startsAt && at <= period.endsAt)?.id ?? null;
+
+  const gbp = (major: number) => money(Math.round(major * 100), 'GBP');
+
+  const post = async (draft: JournalEntryDraft) => {
+    await prisma.journalEntry.create({
+      data: {
+        orgId,
+        periodId: periodFor(draft.postedAt),
+        reference: draft.reference,
+        description: draft.description,
+        postedAt: draft.postedAt,
+        sourceType: draft.sourceType,
+        sourceId: draft.sourceId,
+        lines: {
+          create: draft.lines.map((line, index) => ({
+            accountId: accountId.get(line.accountCode)!,
+            debit: toNumber(line.debit),
+            credit: toNumber(line.credit),
+            memo: line.memo ?? null,
+            sortOrder: index,
+          })),
+        },
+      },
+    });
+  };
+
+  /* Opening position carried over on migration. */
+  await post({
+    reference: `OB-${year}`,
+    description: 'Opening balances brought forward on migration',
+    sourceType: 'Migration',
+    sourceId: 'opening-balance',
+    postedAt: new Date(year, 0, 1, 9, 0, 0),
+    lines: [
+      { accountCode: ACCOUNT.BANK, debit: gbp(18400), credit: gbp(0), memo: 'Cleared funds' },
+      {
+        accountCode: ACCOUNT.STOCK,
+        debit: gbp(6250),
+        credit: gbp(0),
+        memo: 'Stocktake at migration',
+      },
+      { accountCode: ACCOUNT.PAYABLE, debit: gbp(0), credit: gbp(3110) },
+      { accountCode: ACCOUNT.TAX_PAYABLE, debit: gbp(0), credit: gbp(1940) },
+      { accountCode: ACCOUNT.RETAINED, debit: gbp(0), credit: gbp(19600) },
+    ],
+  });
+
+  /* Three months of trading, summarised as they were migrated. */
+  for (const monthsBack of [3, 2, 1]) {
+    const now = new Date();
+    const at = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 0, 18, 0, 0);
+    const label = at.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+    const stamp = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}`;
+
+    await post({
+      reference: `TS-${stamp}`,
+      description: `Trading summary, ${label} (migrated)`,
+      sourceType: 'Migration',
+      sourceId: `trading-${stamp}`,
+      postedAt: at,
+      lines: [
+        { accountCode: ACCOUNT.BANK, debit: gbp(26544), credit: gbp(0), memo: 'Takings banked' },
+        { accountCode: ACCOUNT.COGS_PARTS, debit: gbp(6400), credit: gbp(0) },
+        { accountCode: ACCOUNT.WAGES, debit: gbp(7800), credit: gbp(0) },
+        {
+          accountCode: ACCOUNT.PREMISES,
+          debit: gbp(1450),
+          credit: gbp(0),
+          memo: 'Rent and utilities',
+        },
+        {
+          accountCode: ACCOUNT.STOCK,
+          debit: gbp(6600),
+          credit: gbp(0),
+          memo: 'Parts purchased',
+        },
+        { accountCode: ACCOUNT.TAX_RECEIVABLE, debit: gbp(1320), credit: gbp(0) },
+        { accountCode: ACCOUNT.LABOUR_REVENUE, debit: gbp(0), credit: gbp(12600) },
+        { accountCode: ACCOUNT.PARTS_REVENUE, debit: gbp(0), credit: gbp(8900) },
+        { accountCode: ACCOUNT.FEE_REVENUE, debit: gbp(0), credit: gbp(620) },
+        { accountCode: ACCOUNT.TAX_PAYABLE, debit: gbp(0), credit: gbp(4424) },
+        {
+          accountCode: ACCOUNT.STOCK,
+          debit: gbp(0),
+          credit: gbp(6400),
+          memo: 'Parts consumed',
+        },
+        {
+          accountCode: ACCOUNT.BANK,
+          debit: gbp(0),
+          credit: gbp(17170),
+          memo: 'Wages, rent, suppliers',
+        },
+      ],
+    });
+  }
+
+  /* This fortnight, posted from the documents themselves. */
+  await post(
+    postGoodsReceived({
+      receiptId: refs.orderId,
+      reference: 'GRN-2038',
+      orderNumber: 'PO-2038',
+      goodsValue: gbp(268),
+      taxValue: gbp(53.6),
+      receivedAt: day(-10, 11, 0),
+    }),
+  );
+
+  await post({
+    reference: 'RENT-CURRENT',
+    description: 'Rent and utilities',
+    sourceType: 'Expense',
+    sourceId: 'premises-current',
+    postedAt: day(-8, 9, 0),
+    lines: [
+      { accountCode: ACCOUNT.PREMISES, debit: gbp(1450), credit: gbp(0) },
+      { accountCode: ACCOUNT.BANK, debit: gbp(0), credit: gbp(1450) },
+    ],
+  });
+
+  await post(
+    postInvoiceIssued({
+      invoiceId: refs.invoiceId,
+      invoiceNumber: 'INV-1042',
+      customerName: 'Ahmed Hassan',
+      issuedAt: day(-6, 15, 30),
+      labourNet: gbp(142.5),
+      partsNet: gbp(94),
+      feeNet: gbp(0),
+      taxTotal: gbp(47.3),
+    }),
+  );
+
+  await post(
+    postPartsConsumed({
+      jobId: refs.jobId,
+      jobNumber: refs.jobNumber,
+      cost: gbp(47),
+      at: day(-6, 15, 30),
+    }),
+  );
+
+  await post(
+    postPaymentReceived({
+      paymentId: refs.paymentId,
+      reference: 'PAY-1042',
+      amount: gbp(283.8),
+      method: 'CARD',
+      receivedAt: day(-6, 16, 5),
+    }),
+  );
+
+  await post({
+    reference: 'WAGE-CURRENT',
+    description: 'Payroll',
+    sourceType: 'Expense',
+    sourceId: 'wages-current',
+    postedAt: day(-5, 9, 0),
+    lines: [
+      { accountCode: ACCOUNT.WAGES, debit: gbp(7800), credit: gbp(0) },
+      { accountCode: ACCOUNT.BANK, debit: gbp(0), credit: gbp(7800) },
+    ],
+  });
+
+  for (const invoice of refs.openInvoices) {
+    const netFor = (kind: string) =>
+      invoice.lines
+        .filter((line) => line.kind === kind)
+        .reduce((total, line) => total + Number(line.lineTotal), 0);
+
+    await post(
+      postInvoiceIssued({
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.number,
+        customerName: invoice.customer.displayName,
+        issuedAt: invoice.issuedAt ?? new Date(),
+        labourNet: gbp(netFor('LABOUR')),
+        partsNet: gbp(netFor('PART')),
+        feeNet: gbp(netFor('FEE')),
+        taxTotal: gbp(Number(invoice.taxTotal)),
+      }),
+    );
+  }
+
+  await post(
+    postStockAdjustment({
+      movementId: 'stocktake-current',
+      reference: 'ADJ-0091',
+      value: gbp(-24),
+      reason: 'Stocktake variance, brake cleaner',
+      at: day(-3, 16, 0),
+    }),
+  );
+}
+
 async function appendChain(
   vehicleId: string,
   drafts: readonly Omit<DraftEvent, 'vehicleId'>[],

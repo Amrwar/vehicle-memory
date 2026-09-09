@@ -3,6 +3,7 @@
 import { can, humaniseRole, type Permission, type Role } from '@carnet/core';
 import { cn } from '@carnet/ui';
 import Link from 'next/link';
+import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 
@@ -25,6 +26,17 @@ interface Item {
 interface Group {
   label: string;
   items: Item[];
+}
+
+/**
+ * Feedback on the item that was clicked, for the interval between the click
+ * and the next page arriving. `loading.tsx` covers the content area; this
+ * covers the sidebar, so the answer to "did that register?" is on the thing
+ * the person actually pressed.
+ */
+function PendingRule() {
+  const { pending } = useLinkStatus();
+  return pending ? <span aria-hidden className="nav-pending" /> : null;
 }
 
 const GROUPS: Group[] = [
@@ -54,8 +66,13 @@ const GROUPS: Group[] = [
       { href: '/purchasing', label: 'Purchasing', permission: 'purchase:request' },
     ],
   },
-  // Finance (ledger, financial statements) is Phase 3. The group returns when
-  // the pages exist; a sidebar entry that 404s is worse than an absent one.
+  {
+    label: 'Finance',
+    items: [
+      { href: '/ledger', label: 'Ledger', permission: 'ledger:read' },
+      { href: '/financials', label: 'Statements', permission: 'report:financial' },
+    ],
+  },
   {
     label: 'Admin',
     items: [
@@ -161,7 +178,10 @@ export function WorkshopNav({
                             : 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
                         )}
                       >
-                        <span>{item.label}</span>
+                        <span className="relative">
+                          {item.label}
+                          <PendingRule />
+                        </span>
                         {badge ? (
                           <span className="tabular rounded-full bg-(--warning-soft) px-1.5 text-[11px] font-semibold text-(--warning)">
                             {badge}
