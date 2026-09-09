@@ -143,6 +143,11 @@ jobs:
       - name: Verify sign-up creates a complete workshop
         run: npx tsx infra/scripts/verify-signup.ts
 
+      # A workshop has to be able to add its second person, and nobody may
+      # hand out a role above their own.
+      - name: Verify inviting, changing and removing people
+        run: npx tsx infra/scripts/verify-team.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -17,16 +17,16 @@ being specific about the gaps rather than generous about the ticks.
 
 ## Customer-facing side
 
-| Capability               | Status  | Where it is                                                                                                                                                           |
-| ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Book an appointment      | Partial | A customer can request a booking from the portal. Self-service booking that checks real bay and technician capacity, and confirms without staff action, is Phase 4.6. |
-| Select a service         | Phased  | Service items exist and price jobs. Choosing one during a customer booking is Phase 4.6.                                                                              |
-| Select a vehicle         | Partial | The portal lists the customer's vehicles. Choosing one inside a booking flow is Phase 4.6.                                                                            |
-| Receive confirmation     | Built   | Transactional email and SMS through the outbox, every message logged with delivery status (FR-1501, FR-1502).                                                         |
-| Receive updates          | Partial | Estimate and invoice messages are sent. Progress updates as a job moves through its statuses are Phase 4.6.                                                           |
-| View invoice and history | Built   | Portal invoices, and the vehicle passport as a public link (FR-1303, FR-1304, FR-1307).                                                                               |
-| Approve or decline work  | Built   | Estimates sent as a link, decided line by line (FR-1302, FR-802).                                                                                                     |
-| Pay online               | Phased  | FR-1309. Needs a payment provider, which is Phase 4.7 alongside point of sale.                                                                                        |
+| Capability               | Status | Where it is                                                                                                                                     |
+| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it. |
+| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                      |
+| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                        |
+| Receive confirmation     | Built  | Transactional email and SMS through the outbox, every message logged with delivery status (FR-1501, FR-1502).                                   |
+| Receive updates          | Built  | Queued at the four stages that change something for the customer. The others are deliberately silent.                                           |
+| View invoice and history | Built  | Portal invoices, and the vehicle passport as a public link (FR-1303, FR-1304, FR-1307).                                                         |
+| Approve or decline work  | Built  | Estimates sent as a link, decided line by line (FR-1302, FR-802).                                                                               |
+| Pay online               | Phased | FR-1309. Needs a payment provider, which is Phase 4.7 alongside point of sale.                                                                  |
 
 ## Workshop side
 
@@ -44,34 +44,32 @@ being specific about the gaps rather than generous about the ticks.
 | Quotes            | Partial | Estimates are built and approved on the job. There is no standalone estimates list, which is where a workshop chases the ones nobody answered. Phase 4.7. |
 | Invoices          | Built   | `/invoices`, gapless numbering, credit notes.                                                                                                             |
 | Payments          | Built   | `/payments`, with allocation and aged debt.                                                                                                               |
-| Service reminders | Partial | The schedule and the sending worker exist and run. There is no screen to see what is due or why, so nobody can check the machine is working. Phase 4.6.   |
+| Service reminders | Built   | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner.                                                           |
 
 ## ERP and business side
 
-| Capability                 | Status  | Where it is                                                                                                                                                                                            |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Accounting                 | Partial | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close are Phase 4.8.                       |
-| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                                       |
-| Expenses                   | Phased  | Nothing yet. Rent and wages are posted as journal entries by hand. Capture, approval and receipts are Phase 4.8.                                                                                       |
-| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission. Export to a payroll provider is Phase 4.8.                                                                               |
-| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                                    |
-| Supplier management        | Built   | As above.                                                                                                                                                                                              |
-| CRM                        | Phased  | Customer records, vehicles and history exist. Segments, campaigns, retention and lifetime value do not. Phase 5.                                                                                       |
-| Reports and analytics      | Partial | Operational reporting and financial statements are built. Revenue by service type, parts profitability by category, technician league tables, source of business and CSV export are Phase 4.7.         |
-| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                            |
-| Users and role permissions | Partial | Six roles, deny by default, enforced on every page and asserted in the smoke tests. There is no screen to invite a colleague or change somebody's role, so today it takes a database write. Phase 4.6. |
+| Capability                 | Status  | Where it is                                                                                                                                                                                    |
+| -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounting                 | Partial | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close are Phase 4.8.               |
+| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                               |
+| Expenses                   | Phased  | Nothing yet. Rent and wages are posted as journal entries by hand. Capture, approval and receipts are Phase 4.8.                                                                               |
+| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission. Export to a payroll provider is Phase 4.8.                                                                       |
+| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                            |
+| Supplier management        | Built   | As above.                                                                                                                                                                                      |
+| CRM                        | Phased  | Customer records, vehicles and history exist. Segments, campaigns, retention and lifetime value do not. Phase 5.                                                                               |
+| Reports and analytics      | Partial | Operational reporting and financial statements are built. Revenue by service type, parts profitability by category, technician league tables, source of business and CSV export are Phase 4.7. |
+| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                    |
+| Users and role permissions | Built   | `/settings/team`. Invite, change a role, move somebody between sites, remove a leaver. Nobody can grant a role above their own or change their own.                                            |
 
 ---
 
 ## What this leaves
 
-Eleven rows above are not fully built. They fall into four groups, and each
+Five rows above are not fully built. They fall into three groups, and each
 group is a phase rather than a backlog:
 
-**Phase 4.6 — Administration and the customer journey.** Inviting a colleague,
-changing a role, seeing what reminders are due, and the booking flow the
-customer actually walks: pick a service, pick a vehicle, pick a slot the diary
-really has, get a confirmation, then get told when the work moves.
+Phase 4.6 is done: inviting a colleague, changing a role, the reminders
+screen, and the booking flow a customer actually walks.
 
 **Phase 4.7 — Counter sales, reporting and the gaps.** Point of sale, the
 estimates list, the reports a workshop runs on a Monday, CSV export, and taking

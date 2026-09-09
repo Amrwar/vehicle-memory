@@ -163,6 +163,18 @@ of what is true.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Administration and the customer's journey
+
+| Req     | Story | Schema                              | Implementation          | Test             | Status |
+| ------- | ----- | ----------------------------------- | ----------------------- | ---------------- | ------ |
+| FR-1901 | —     | `Invitation`                        | `inviteColleague()`     | `verify-team.ts` | Done   |
+| FR-1902 | —     | `Invitation.tokenHash`, one-open ix | `acceptInvitation()`    | `verify-team.ts` | Done   |
+| FR-1903 | —     | `Membership.role`                   | `assertMayChangeRole()` | `team.test.ts`   | Done   |
+| FR-1904 | —     | `Booking.source`                    | `availableSlots()`      | `team.test.ts`   | Done   |
+| FR-1905 | —     | `ServiceSchedule`                   | `/reminders`            | `smoke.ts`       | Done   |
+| FR-1906 | —     | `Membership.isActive`               | `deactivateMember()`    | `verify-team.ts` | Done   |
+| FR-1907 | —     | `OutboxEvent`                       | `shouldNotify()`        | `team.test.ts`   | Done   |
+
 ## Front door and billing
 
 | Req     | Story | Schema         | Implementation                     | Test               | Status |
@@ -182,20 +194,21 @@ details without a provider behind it would be worse than not having one.
 
 ## Coverage summary
 
-| Area                      | Requirements in Phase 1 | Traced  | Automated test |
-| ------------------------- | ----------------------- | ------- | -------------- |
-| Foundation                | 9                       | 9       | 9              |
-| Customers and vehicles    | 13                      | 13      | 12             |
-| Passport                  | 13                      | 13      | 13             |
-| Booking and job           | 20                      | 20      | 19             |
-| Inspection and estimate   | 15                      | 15      | 15             |
-| Invoice and payment       | 8                       | 8       | 8              |
-| Portal, dashboard, notify | 14                      | 14      | 11             |
-| Inventory and procurement | 18                      | 18      | 18             |
-| Finance and ledger        | 13                      | 13      | 13             |
-| People and multi-site     | 13                      | 13      | 13             |
-| Front door and billing    | 6                       | 6       | 6              |
-| **Total**                 | **142**                 | **142** | **137 (96%)**  |
+| Area                       | Requirements in Phase 1 | Traced  | Automated test |
+| -------------------------- | ----------------------- | ------- | -------------- |
+| Foundation                 | 9                       | 9       | 9              |
+| Customers and vehicles     | 13                      | 13      | 12             |
+| Passport                   | 13                      | 13      | 13             |
+| Booking and job            | 20                      | 20      | 19             |
+| Inspection and estimate    | 15                      | 15      | 15             |
+| Invoice and payment        | 8                       | 8       | 8              |
+| Portal, dashboard, notify  | 14                      | 14      | 11             |
+| Inventory and procurement  | 18                      | 18      | 18             |
+| Finance and ledger         | 13                      | 13      | 13             |
+| People and multi-site      | 13                      | 13      | 13             |
+| Front door and billing     | 6                       | 6       | 6              |
+| Administration and booking | 7                       | 7       | 7              |
+| **Total**                  | **149**                 | **149** | **144 (97%)**  |
 
 The five without automated coverage are visual and interaction concerns
 verified by usability testing rather than assertion. They are named in the

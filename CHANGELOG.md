@@ -7,6 +7,37 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 4.6 - Administration and the customer's journey.**
+
+- `/settings/team`: invite a colleague, change a role, move somebody between
+  sites, remove a leaver. Until now this took a database write, which meant in
+  practice a workshop could not add its second user.
+- An invitation is a capability. The token is random, only its digest is
+  stored, and it works once. One open invitation per address per workshop,
+  enforced by a partial unique index: two live invitations each carry their own
+  role, so accepting the older one grants access nobody intended.
+- Nobody can hand out a role above their own, and nobody can change their own.
+  A manager promoting themselves is the exact thing roles exist to prevent, and
+  the form for it looks identical to changing anybody else.
+- An organisation always keeps one active owner. Locking everybody out of their
+  own workshop is recoverable only by a support call and a database write.
+- A leaver is deactivated, never deleted, and their sessions end immediately.
+  Their work is what last year's job costs are built on.
+- `/portal/book`: a customer picks the work, the vehicle and a time. Only times
+  the workshop can genuinely do are offered, and the slot is re-checked inside
+  the transaction that takes it, because the one that was free when the page
+  rendered may have gone to the counter since.
+- Customers are told at four stages and no more. Sending every status change
+  trains people to ignore all of them, which costs the one message that
+  mattered: the car needs a decision.
+- `/reminders`: what the reminder worker is about to do. It has been running
+  since Phase 1 with no screen, and a machine that sends messages on a schedule
+  with nothing showing what it is about to send is indistinguishable from one
+  that stopped three weeks ago.
+- 38 further domain tests, and `verify-team.ts`, which invites, accepts,
+  promotes, demotes and removes against a real database and asserts every
+  refusal.
+
 **Phase 4.5 - The front door.**
 
 - A marketing home page written for somebody who runs a workshop and has ten

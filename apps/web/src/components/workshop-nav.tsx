@@ -55,6 +55,7 @@ const GROUPS: Group[] = [
       { href: '/jobs', label: 'Jobs', icon: 'jobs', permission: 'job:read' },
       { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
       { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
+      { href: '/reminders', label: 'Reminders', icon: 'reminders', permission: 'customer:read' },
     ],
   },
   {
@@ -102,6 +103,7 @@ const GROUPS: Group[] = [
     label: 'Admin',
     items: [
       { href: '/settings', label: 'Settings', icon: 'settings', permission: 'settings:read' },
+      { href: '/settings/team', label: 'Team', icon: 'team', permission: 'settings:read' },
       { href: '/audit', label: 'Audit log', icon: 'audit', permission: 'audit:read' },
     ],
   },

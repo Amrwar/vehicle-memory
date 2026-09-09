@@ -160,7 +160,16 @@ export default async function PortalPage() {
         ) : null}
 
         <section className="mt-8">
-          <h2 className="font-display text-[17px] font-semibold">My vehicles</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-[17px] font-semibold">My vehicles</h2>
+            {ownerships.length > 0 ? (
+              <Link href="/portal/book">
+                <Button size="sm" variant="primary">
+                  Book a visit
+                </Button>
+              </Link>
+            ) : null}
+          </div>
 
           {ownerships.length === 0 ? (
             <EmptyState

@@ -89,6 +89,7 @@ model Organization {
   commissionSchemes   CommissionScheme[]
   commissionAwards    CommissionAward[]
   stockTransfers      StockTransfer[]
+  invitations         Invitation[]
 
   @@index([isActive])
   @@map("organizations")
@@ -194,6 +195,7 @@ model User {
   purchaseApprovals PurchaseRequest[]  @relation("PurchaseApprovedBy")
   // Phase 4
   employeeRecord      Employee?
+  invitationsSent     Invitation[]    @relation("InvitationSender")
   timesheetApprovals  Timesheet[]     @relation("TimesheetApprover")
   transfersDispatched StockTransfer[] @relation("TransferDispatcher")
   transfersReceived   StockTransfer[] @relation("TransferReceiver")
@@ -2339,4 +2341,38 @@ model StockTransferLine {
   @@index([transferId])
   @@index([productId])
   @@map("stock_transfer_lines")
+}
+
+/* ===========================================================================
+   TEAM — Phase 4.6
+
+   Until this existed, the only way to add a second user was a database write,
+   which means in practice a workshop could not add its second user.
+
+   An invitation is a capability, so only the digest of its token is stored,
+   the same treatment as a session and a passport share link. A database
+   disclosure must not hand somebody a way into a workshop.
+   =========================================================================== */
+
+model Invitation {
+  id              String    @id @default(cuid())
+  orgId           String
+  email           String
+  role            Role
+  locationId      String?
+  /// SHA-256 of the token in the link. The token itself is never stored.
+  tokenHash       String    @unique
+  invitedByUserId String?
+  message         String?
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy User?        @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, acceptedAt])
+  @@index([email])
+  @@map("invitations")
 }

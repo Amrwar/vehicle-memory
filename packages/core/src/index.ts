@@ -9,5 +9,6 @@ export * from './accounting/index';
 export * from './scheduling/index';
 export * from './people/index';
 export * from './multisite/index';
+export * from './team/index';
 export * from './billing/index';
 export * from './access/index';

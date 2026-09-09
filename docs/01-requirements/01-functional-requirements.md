@@ -257,6 +257,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-1900 — Administration and the customer's journey
+
+| Ref     | Requirement                                                                                                                  | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-1901 | An owner or manager MUST be able to invite a colleague by email, and MUST NOT be able to grant a role above their own.       | 4.6   |
+| FR-1902 | An invitation MUST be a single-use capability with an expiry, and only its digest MUST be stored.                            | 4.6   |
+| FR-1903 | A role MUST be changeable, nobody MUST be able to change their own, and an organisation MUST always retain one active owner. | 4.6   |
+| FR-1904 | A customer MUST be able to book online, and MUST only be offered times the workshop can genuinely do the work.               | 4.6   |
+| FR-1905 | The system MUST show which service reminders are due, which have been sent, and which have no reachable owner.               | 4.6   |
+| FR-1906 | A leaver MUST be deactivated rather than deleted, and their sessions MUST end immediately.                                   | 4.6   |
+| FR-1907 | The system MUST notify a customer only at the stages that change something for them.                                         | 4.6   |
+
 ## FR-1800 — Front door and billing
 
 | Ref     | Requirement                                                                                                                           | Phase |

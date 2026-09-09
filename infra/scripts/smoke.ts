@@ -244,6 +244,29 @@ async function main() {
       ],
     },
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
+    // Phase 4.6: administration and the customer's journey.
+    {
+      path: '/settings/team',
+      as: 'owner',
+      expect: ['Team', 'In the workshop', 'Invite somebody', 'How roles work'],
+    },
+    {
+      path: '/reminders',
+      as: 'advisor',
+      expect: ['Service reminders', 'Due', 'How this works'],
+    },
+    {
+      path: '/portal/book',
+      as: 'customer',
+      expect: ['When suits you?', 'What needs doing?', 'Which vehicle?'],
+    },
+    // An invitation link nobody issued says so, rather than "invalid link".
+    {
+      path: '/invite/not-a-real-token',
+      as: 'anon',
+      expect: ['We did not issue this link'],
+    },
+
     // Phase 4: people, payroll and multi-site.
     {
       path: '/people',
