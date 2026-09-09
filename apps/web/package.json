@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "db:generate": "prisma generate --schema=../../packages/db/prisma/schema.prisma",
+    "prebuild": "npm run db:generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -25,6 +27,7 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "prisma": "^7.10.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }
