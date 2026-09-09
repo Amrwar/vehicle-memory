@@ -64,7 +64,10 @@ export function Td({
   return (
     <td
       className={cn(
-        'border-b border-(--border) px-3 py-2 align-middle',
+        'border-b border-(--border) px-3 py-2.5 align-middle',
+        // The wrapper scrolls horizontally, so wrapping buys nothing and costs
+        // a consistent row height. Pages opt back in with `whitespace-normal`.
+        'whitespace-nowrap',
         numeric && 'text-right tabular',
         className,
       )}
@@ -81,8 +84,8 @@ export function Tr({
   return (
     <tr
       className={cn(
-        'last:[&>td]:border-b-0',
-        interactive && 'cursor-pointer transition-colors hover:bg-(--surface-sunk)',
+        'last:[&>td]:border-b-0 transition-colors hover:bg-(--surface-sunk)',
+        interactive && 'cursor-pointer',
         className,
       )}
       {...props}

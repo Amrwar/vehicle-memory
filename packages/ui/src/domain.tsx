@@ -44,9 +44,9 @@ export function Registration({ value, className }: { value: string; className?: 
   return (
     <span
       className={cn(
-        'datum inline-flex items-center rounded-(--radius-xs) border',
-        'border-(--border-strong) bg-(--surface-sunk) px-1.5 py-px',
-        'text-[12px] font-semibold uppercase tracking-wider',
+        'datum inline-flex shrink-0 items-center whitespace-nowrap',
+        'rounded-(--radius-xs) border border-(--border-strong) bg-(--surface-sunk)',
+        'px-1.5 py-px text-[12px] font-semibold uppercase tracking-wider',
         className,
       )}
     >

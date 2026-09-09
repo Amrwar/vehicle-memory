@@ -14,15 +14,20 @@ const button = cva(
   {
     variants: {
       variant: {
+        // Solid tokens, not the ink tokens: a button surface and a
+        // brand-coloured icon have opposite contrast needs, and one value
+        // cannot serve both across two themes.
         primary:
-          'bg-(--brand) text-(--text-inverse) hover:bg-(--brand-hover) ' +
-          'dark:text-(--color-slate-950)',
+          'bg-(--brand-solid) text-(--on-brand-solid) hover:bg-(--brand-solid-hover) ' +
+          'shadow-sm',
         secondary:
           'bg-(--surface) text-(--text) border border-(--border-strong) ' +
-          'hover:bg-(--surface-sunk)',
+          'hover:bg-(--surface-sunk) hover:border-(--text-faint)',
         ghost: 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
-        danger: 'bg-(--danger) text-white hover:brightness-110',
-        accent: 'bg-(--accent) text-white hover:brightness-110 dark:text-(--color-slate-950)',
+        // White holds contrast on the danger colour in both themes.
+        danger: 'bg-(--danger) text-white hover:brightness-110 shadow-sm',
+        accent:
+          'bg-(--accent-solid) text-(--on-accent-solid) hover:bg-(--accent-solid-hover) shadow-sm',
         link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',
       },
       size: {

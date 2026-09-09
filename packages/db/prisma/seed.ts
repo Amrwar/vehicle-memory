@@ -11,12 +11,16 @@
 
 import 'dotenv/config';
 
+import { createHash } from 'node:crypto';
+
 import { chainEvent, eventsForCompletedJob, type DraftEvent } from '@carnet/core';
 import bcrypt from 'bcryptjs';
 
 import { prisma } from '../src/client';
 
 const PASSWORD = 'carnet-demo-2026';
+/** Opens the seeded public passport at /p/demo-share-token. */
+const DEMO_SHARE_TOKEN = 'demo-share-token';
 const SALT = process.env.LEDGER_CHAIN_SALT ?? 'dev-ledger-salt-change-me';
 
 const day = (offset: number, hour = 9, minute = 0): Date => {
@@ -1667,8 +1671,10 @@ async function main() {
   await prisma.passportShare.create({
     data: {
       vehicleId: bmw.id,
-      // Demo link: /p/demo-share-token
-      tokenHash: '3c9e2a4b6d8f0a1c3e5b7d9f1a3c5e7b9d1f3a5c7e9b1d3f5a7c9e1b3d5f7a9c',
+      // The real SHA-256 of DEMO_SHARE_TOKEN, so /p/demo-share-token actually
+      // opens. A hand-written placeholder hash is unopenable: no token
+      // produces it, and the demo link silently 404s.
+      tokenHash: createHash('sha256').update(DEMO_SHARE_TOKEN).digest('hex'),
       label: 'Shared with a prospective buyer',
       createdByUserId: maria!.id,
       expiresAt: day(30),
@@ -1685,6 +1691,9 @@ async function main() {
     Jobs           2 (one awaiting approval, one paid)
     Parts          ${productSpecs.length} across 3 categories, 2 below reorder point
     Suppliers      2, with one part-received order and one disputed bill
+
+  Public vehicle passport, no account needed:
+    /p/${DEMO_SHARE_TOKEN}
 
   Sign in at http://localhost:3000/login
 

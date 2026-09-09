@@ -127,14 +127,22 @@
   --text-faint: var(--color-slate-500);
   --text-inverse: var(--color-slate-0);
 
+  /* Brand as ink: text, icons, hairlines. */
   --brand: var(--color-petrol-600);
-  --brand-hover: var(--color-petrol-700);
-  --brand-soft: var(--color-petrol-50);
   --brand-text: var(--color-petrol-700);
+  --brand-soft: var(--color-petrol-50);
+  /* Brand as a surface: solid buttons. Always carries white, in both themes,
+     so the identity reads the same either way. */
+  --brand-solid: var(--color-petrol-600);
+  --brand-solid-hover: var(--color-petrol-700);
+  --on-brand-solid: #ffffff;
 
   --accent: var(--color-brass-600);
   --accent-soft: var(--color-brass-50);
   --accent-text: var(--color-brass-700);
+  --accent-solid: var(--color-brass-600);
+  --accent-solid-hover: var(--color-brass-700);
+  --on-accent-solid: #ffffff;
 
   --success: var(--color-success-600);
   --success-soft: var(--color-success-50);
@@ -149,18 +157,74 @@
   --touch: 48px;
 }
 
+/* ---------------------------------------------------------------------------
+   Dark theme.
+
+   Declared three times deliberately, and the repetition is the point:
+
+   1. Under prefers-color-scheme, so the app follows the operating system.
+      Tailwind's `dark:` variant already keys off this media query, so if the
+      tokens did not, the two would disagree — which produced dark text on a
+      dark button for anyone whose OS was set to dark.
+   2. Guarded by :not([data-theme='light']), so an explicit light choice beats
+      a dark OS.
+   3. On the explicit selectors, so a toggle wins in the other direction too.
+
+   Components must never reference a raw colour or a `dark:` variant. They read
+   these semantic tokens, and the tokens are the only thing that switches.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --ground: var(--color-slate-950);
+    --surface: var(--color-slate-900);
+    --surface-sunk: #141a1c;
+    --surface-raised: var(--color-slate-800);
+    --overlay: rgb(0 0 0 / 0.6);
+
+    --border: #2a3336;
+    --border-strong: #3b4649;
+    --border-focus: var(--color-brass-400);
+
+    --text: var(--color-slate-50);
+    --text-soft: var(--color-slate-300);
+    --text-faint: var(--color-slate-400);
+    --text-inverse: var(--color-slate-950);
+
+    --brand: var(--color-petrol-300);
+    --brand-hover: var(--color-petrol-200);
+    --brand-soft: #12292c;
+    --brand-text: var(--color-petrol-200);
+
+    --accent: var(--color-brass-300);
+    --accent-soft: #2a2114;
+    --accent-text: var(--color-brass-200);
+
+    --success: #6cbb8c;
+    --success-soft: #16251d;
+    --warning: #d9ab55;
+    --warning-soft: #26200f;
+    --danger: #e08383;
+    --danger-soft: #2a1a1a;
+    --info: #79b4d8;
+    --info-soft: #14242e;
+  }
+}
+
 .dark,
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --ground: var(--color-slate-950);
-  --surface: var(--color-slate-900);
-  --surface-sunk: #141a1c;
-  --surface-raised: var(--color-slate-800);
+  --ground: #0b1012;
+  --surface: #141b1d;
+  --surface-sunk: #101719;
+  --surface-raised: #1c2427;
   --overlay: rgb(0 0 0 / 0.6);
 
-  --border: #2a3336;
-  --border-strong: #3b4649;
+  --border: #263033;
+  --border-strong: #3a464a;
   --border-focus: var(--color-brass-400);
 
   --text: var(--color-slate-50);
@@ -168,14 +232,22 @@
   --text-faint: var(--color-slate-400);
   --text-inverse: var(--color-slate-950);
 
+  /* Light enough to read as text on a dark ground. */
   --brand: var(--color-petrol-300);
-  --brand-hover: var(--color-petrol-200);
-  --brand-soft: #12292c;
   --brand-text: var(--color-petrol-200);
+  --brand-soft: #12292c;
+  /* Saturated enough to carry white. A pale tint with dark text reads as a
+     disabled control, which is what the first attempt looked like. */
+  --brand-solid: var(--color-petrol-500);
+  --brand-solid-hover: var(--color-petrol-400);
+  --on-brand-solid: #ffffff;
 
   --accent: var(--color-brass-300);
   --accent-soft: #2a2114;
   --accent-text: var(--color-brass-200);
+  --accent-solid: var(--color-brass-500);
+  --accent-solid-hover: var(--color-brass-400);
+  --on-accent-solid: #1a1206;
 
   --success: #6cbb8c;
   --success-soft: #16251d;
@@ -233,7 +305,15 @@ h6 {
   color: var(--color-petrol-950);
 }
 
-.dark ::selection {
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) ::selection {
+    background: var(--color-petrol-800);
+    color: var(--color-petrol-50);
+  }
+}
+
+.dark ::selection,
+:root[data-theme='dark'] ::selection {
   background: var(--color-petrol-800);
   color: var(--color-petrol-50);
 }
