@@ -2,7 +2,7 @@
   "name": "carnet",
   "version": "0.1.0",
   "private": true,
-  "description": "Carnet — a portable vehicle history that follows the car, with a workshop management and ERP platform built on top of it.",
+  "description": "Carnet \u2014 a portable vehicle history that follows the car, with a workshop management and ERP platform built on top of it.",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0",
@@ -33,7 +33,8 @@
     "db:studio": "npm run studio --workspace=@carnet/db",
     "worker": "npm run dev --workspace=@carnet/worker",
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "postinstall": "npm run db:generate"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
