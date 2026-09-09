@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { StrandedCar } from '@/components/stranded-car';
+
 export const metadata: Metadata = {
   title: 'Link expired',
   robots: { index: false, follow: false },
@@ -42,7 +44,7 @@ export default function PassportLinkNotFound() {
           <span className="font-display text-[14px] font-semibold">Carnet</span>
         </div>
 
-        <TiredCar />
+        <StrandedCar className="mx-auto w-full max-w-[380px]" />
 
         <h1 className="mt-6 font-display text-[26px] font-semibold leading-tight">
           This link has run out of road
@@ -77,142 +79,5 @@ export default function PassportLinkNotFound() {
         </p>
       </main>
     </div>
-  );
-}
-
-/**
- * A car that has had enough. Line art rather than a cartoon: the audience is a
- * buyer about to spend real money, and a jokey illustration would undercut the
- * seriousness of everything else on the site.
- *
- * The flat rear tyre and the drooping stance carry the "expired" idea without
- * needing a caption.
- */
-function TiredCar() {
-  return (
-    <svg
-      viewBox="0 0 360 170"
-      className="mx-auto w-full max-w-[340px]"
-      role="img"
-      aria-label="A line drawing of a car resting on a flat rear tyre"
-    >
-      <title>An expired link</title>
-
-      {/* ground */}
-      <line
-        x1="20"
-        y1="146"
-        x2="340"
-        y2="146"
-        stroke="currentColor"
-        className="text-(--border-strong)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeDasharray="1 7"
-      />
-
-      {/* body: nose high, tail settled onto the flat tyre */}
-      <path
-        d="M44 118
-           C 44 104, 54 98, 70 96
-           L 104 92
-           C 118 76, 140 68, 168 68
-           C 196 68, 218 74, 232 90
-           L 276 96
-           C 298 100, 312 108, 314 122
-           L 314 126
-           C 314 131, 310 134, 304 134
-           L 60 134
-           C 50 134, 44 130, 44 122
-           Z"
-        fill="none"
-        stroke="currentColor"
-        className="text-(--text)"
-        strokeWidth="2.25"
-        strokeLinejoin="round"
-      />
-
-      {/* glasshouse */}
-      <path
-        d="M116 90 C 128 78, 146 73, 167 73 C 190 73, 208 78, 220 89 Z"
-        fill="currentColor"
-        className="text-(--brand-soft)"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <line
-        x1="168"
-        y1="72"
-        x2="168"
-        y2="90"
-        stroke="currentColor"
-        className="text-(--text)"
-        strokeWidth="1.5"
-      />
-
-      {/* front wheel, still round */}
-      <circle
-        cx="104"
-        cy="134"
-        r="17"
-        fill="var(--surface)"
-        stroke="currentColor"
-        className="text-(--text)"
-        strokeWidth="2.25"
-      />
-      <circle cx="104" cy="134" r="6" fill="currentColor" className="text-(--border-strong)" />
-
-      {/* rear wheel, flat: squashed and sitting lower */}
-      <ellipse
-        cx="266"
-        cy="138"
-        rx="18"
-        ry="12"
-        fill="var(--surface)"
-        stroke="currentColor"
-        className="text-(--danger)"
-        strokeWidth="2.25"
-      />
-      <ellipse
-        cx="266"
-        cy="138"
-        rx="6"
-        ry="4"
-        fill="currentColor"
-        className="text-(--border-strong)"
-      />
-
-      {/* the deflating puff */}
-      <path
-        d="M288 130 q 10 -5 16 -14 M296 136 q 13 -3 22 -10"
-        fill="none"
-        stroke="currentColor"
-        className="text-(--text-faint)"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-
-      {/* headlamp, dimmed */}
-      <path
-        d="M50 112 h 10"
-        stroke="currentColor"
-        className="text-(--text-faint)"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-
-      {/* resting marks over the roof */}
-      <g className="text-(--text-faint)" fill="currentColor" fontFamily="var(--font-mono)">
-        <text x="228" y="46" fontSize="11">
-          z
-        </text>
-        <text x="243" y="34" fontSize="14">
-          z
-        </text>
-        <text x="262" y="20" fontSize="17">
-          z
-        </text>
-      </g>
-    </svg>
   );
 }
