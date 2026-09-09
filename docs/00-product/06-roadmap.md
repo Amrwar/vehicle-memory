@@ -156,6 +156,99 @@ proven would double the cost of every earlier mistake.
 
 ---
 
+## Phase 4.5 — The front door
+
+**Runs alongside Phase 4.**
+
+|           |                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------- |
+| **Entry** | The product does enough that a stranger arriving cold has something worth reading about.                      |
+| **Exit**  | A workshop owner can understand what this is, what it costs, and start a trial, from a phone, without asking. |
+
+**Scope.** A marketing site that says what the system does and who it is for.
+The vehicle passport explained in the terms an owner cares about rather than in
+the terms it was built in. Pricing, published. Sign-up that creates an
+organisation rather than a loose account. Every page usable on a phone.
+
+**Why this is its own phase rather than a page.** Right now the front door is a
+holding page and sign-up creates a bare user with no workshop attached, which
+is the wrong shape: this product is sold to a business, and the first object
+created has to be the business. Getting that wrong is expensive to undo later,
+because every record in the system hangs off the organisation.
+
+**The specific decisions.**
+
+- **Signup creates an organisation.** A person signing up is creating a
+  workshop and becoming its owner. The alternative, an account that later joins
+  something, leaves orphaned users and a tenancy model with a hole in it.
+- **Plans are enforced, not decorative.** A published price with no limit
+  behind it is a promise the system cannot keep. Whatever a plan says it
+  includes is checked where the feature is used.
+- **Mobile is not a smaller desktop.** The shop floor already assumes a tablet.
+  The marketing site and the portal have to assume a phone, because that is
+  what somebody reading about a product on a Saturday is holding.
+
+---
+
+## Phase 4.7 — Counter sales, reporting and the gaps
+
+**Weeks 33–40, overlapping Phase 4.**
+
+|           |                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------ |
+| **Entry** | The ledger is posting and stock is accurate, because point of sale writes to both.               |
+| **Exit**  | A counter sale takes under thirty seconds, and every report a workshop actually runs is present. |
+
+**Scope.** Point of sale for over-the-counter parts and consumables: no job, no
+vehicle, often no customer record. Card and cash, split payment, refunds
+against the original sale. A till that reconciles at close of day.
+
+Reporting beyond the operational board that exists: revenue by service type,
+parts profitability by category, customer retention and lifetime value,
+technician league tables, source of business, and every one of them exportable
+as CSV (FR-1406, still open).
+
+**Why point of sale is not trivial.** It looks like a simplified invoice and it
+is not. A counter sale has no job to hang costs on, so parts consumption, the
+ledger posting and the stock movement all have to work without the anchor the
+rest of the system is built around. Getting it wrong shows up as stock that
+drifts and a till that does not balance.
+
+---
+
+## Phase 4.9 — Revision
+
+**Weeks 41–44.**
+
+|           |                                                                           |
+| --------- | ------------------------------------------------------------------------- |
+| **Entry** | Phases 1 to 4.7 shipped.                                                  |
+| **Exit**  | Every screen has been walked through as a user, on a phone and on a desk. |
+
+**Scope.** No new features. A pass over everything built so far, in the order a
+real workshop would meet it, fixing what does not work rather than adding what
+is missing.
+
+**What this phase is for.** Software built phase by phase accumulates seams:
+the page written in week three that nobody revisited, the empty state that
+never got designed because the demo data always had rows, the form that works
+on a desk and is unusable on a phone, the error that says something true and
+unhelpful. None of these are bugs anybody files. All of them are what somebody
+means when they say a product feels unfinished.
+
+**The checklist.**
+
+- Every page at 375px wide, with a real thumb
+- Every empty state, reached by emptying the data rather than by imagining it
+- Every error path, triggered deliberately
+- Every form submitted with nothing in it, and with too much in it
+- Every list at zero, one, and a thousand rows
+- Keyboard only, from sign-in to invoice
+- A screen reader over the passport, which is the page a stranger will meet
+- Every figure on every page traced back to the record behind it
+
+---
+
 ## Phase 5 — Customer Lifecycle and Automation
 
 **Weeks 37–44.**

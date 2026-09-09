@@ -5,9 +5,10 @@ import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
-
-import { ThemeToggle } from './theme-toggle';
 import * as React from 'react';
+
+import { NavIcon, type NavIconName } from './nav-icons';
+import { ThemeToggle } from './theme-toggle';
 
 /**
  * Workshop navigation.
@@ -16,13 +17,17 @@ import * as React from 'react';
  * lives in, and filtered by role: a bookkeeper never sees the diary, a
  * service advisor never sees the ledger. Items the role cannot reach are
  * absent, not greyed out — a disabled control is an invitation to ask why.
+ *
+ * The active item is marked by a brass rule against the panel edge rather than
+ * by a filled pill. A workshop screen is open all day and the sidebar is
+ * furniture: it should be legible at a glance and quiet the rest of the time.
  */
 
 interface Item {
   href: string;
   label: string;
+  icon: NavIconName;
   permission: Permission;
-  badge?: number;
 }
 
 interface Group {
@@ -45,49 +50,59 @@ const GROUPS: Group[] = [
   {
     label: 'Workshop',
     items: [
-      { href: '/dashboard', label: 'Dashboard', permission: 'job:read' },
-      { href: '/diary', label: 'Diary', permission: 'diary:read' },
-      { href: '/jobs', label: 'Jobs', permission: 'job:read' },
-      { href: '/customers', label: 'Customers', permission: 'customer:read' },
-      { href: '/vehicles', label: 'Vehicles', permission: 'vehicle:read' },
+      { href: '/dashboard', label: 'Dashboard', icon: 'dashboard', permission: 'job:read' },
+      { href: '/diary', label: 'Diary', icon: 'diary', permission: 'diary:read' },
+      { href: '/jobs', label: 'Jobs', icon: 'jobs', permission: 'job:read' },
+      { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
+      { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
     ],
   },
   {
     label: 'Money',
     items: [
-      { href: '/invoices', label: 'Invoices', permission: 'invoice:read' },
-      { href: '/payments', label: 'Payments', permission: 'payment:read' },
-      { href: '/reports', label: 'Reports', permission: 'report:operational' },
+      { href: '/invoices', label: 'Invoices', icon: 'invoices', permission: 'invoice:read' },
+      { href: '/payments', label: 'Payments', icon: 'payments', permission: 'payment:read' },
+      { href: '/reports', label: 'Reports', icon: 'reports', permission: 'report:operational' },
     ],
   },
   {
     label: 'Inventory',
     items: [
-      { href: '/parts', label: 'Parts', permission: 'inventory:read' },
-      { href: '/suppliers', label: 'Suppliers', permission: 'inventory:read' },
-      { href: '/purchasing', label: 'Purchasing', permission: 'purchase:request' },
-      { href: '/transfers', label: 'Transfers', permission: 'stock:transfer' },
+      { href: '/parts', label: 'Parts', icon: 'parts', permission: 'inventory:read' },
+      { href: '/suppliers', label: 'Suppliers', icon: 'suppliers', permission: 'inventory:read' },
+      {
+        href: '/purchasing',
+        label: 'Purchasing',
+        icon: 'purchasing',
+        permission: 'purchase:request',
+      },
+      { href: '/transfers', label: 'Transfers', icon: 'transfers', permission: 'stock:transfer' },
     ],
   },
   {
     label: 'Team',
     items: [
-      { href: '/people', label: 'People', permission: 'people:read' },
-      { href: '/group', label: 'Sites', permission: 'report:financial' },
+      { href: '/people', label: 'People', icon: 'people', permission: 'people:read' },
+      { href: '/group', label: 'Sites', icon: 'sites', permission: 'report:financial' },
     ],
   },
   {
     label: 'Finance',
     items: [
-      { href: '/ledger', label: 'Ledger', permission: 'ledger:read' },
-      { href: '/financials', label: 'Statements', permission: 'report:financial' },
+      { href: '/ledger', label: 'Ledger', icon: 'ledger', permission: 'ledger:read' },
+      {
+        href: '/financials',
+        label: 'Statements',
+        icon: 'statements',
+        permission: 'report:financial',
+      },
     ],
   },
   {
     label: 'Admin',
     items: [
-      { href: '/settings', label: 'Settings', permission: 'settings:read' },
-      { href: '/audit', label: 'Audit log', permission: 'audit:read' },
+      { href: '/settings', label: 'Settings', icon: 'settings', permission: 'settings:read' },
+      { href: '/audit', label: 'Audit log', icon: 'audit', permission: 'audit:read' },
     ],
   },
 ];
@@ -111,6 +126,13 @@ export function WorkshopNav({
     items: group.items.filter((item) => can(role, item.permission)),
   })).filter((group) => group.items.length > 0);
 
+  const initials = orgName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase();
+
   return (
     <>
       <button
@@ -118,7 +140,11 @@ export function WorkshopNav({
         aria-expanded={open}
         aria-controls="workshop-nav"
         onClick={() => setOpen((value) => !value)}
-        className="fixed left-3 top-3 z-40 grid h-10 w-10 place-items-center rounded-(--radius-md) border border-(--border) bg-(--surface) lg:hidden"
+        className={cn(
+          'fixed left-3 top-3 z-40 grid h-11 w-11 place-items-center lg:hidden',
+          'rounded-(--radius-md) border border-(--border) bg-(--surface) shadow-sm',
+          'transition-colors hover:bg-(--surface-sunk)',
+        )}
       >
         <span className="sr-only">{open ? 'Close navigation' : 'Open navigation'}</span>
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
@@ -134,29 +160,25 @@ export function WorkshopNav({
       <nav
         id="workshop-nav"
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-(--border) bg-(--surface)',
-          'transition-transform lg:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full',
+          'fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-(--border)',
+          'bg-(--surface) transition-transform lg:translate-x-0',
+          open ? 'translate-x-0 shadow-lg' : '-translate-x-full',
         )}
         aria-label="Workshop"
       >
-        <div className="flex items-center gap-2.5 border-b border-(--border) px-4 py-3.5 pl-14 lg:pl-4">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
+        {/* Identity. The mark is the workshop's initials rather than a stock
+            glyph, so somebody with two tabs open knows which is which. */}
+        <div className="flex items-center gap-3 border-b border-(--border) px-4 py-4 pl-16 lg:pl-4">
+          <span
             aria-hidden
-            className="text-(--brand)"
+            className={cn(
+              'grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md)',
+              'bg-(--brand-solid) font-display text-[13px] font-bold tracking-tight',
+              'text-(--on-brand-solid) shadow-sm',
+            )}
           >
-            <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M10 4.6v5.4l3.4 2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+            {initials}
+          </span>
           <div className="min-w-0">
             <p className="truncate font-display text-[14px] font-semibold leading-tight">
               {orgName}
@@ -165,11 +187,11 @@ export function WorkshopNav({
           </div>
         </div>
 
-        <div className="scroll-x flex-1 overflow-y-auto px-2 py-3">
+        <div className="scroll-x flex-1 overflow-y-auto px-3 py-4">
           {visible.map((group) => (
-            <div key={group.label} className="mb-4 last:mb-0">
-              <p className="eyebrow px-2 pb-1.5">{group.label}</p>
-              <ul className="grid gap-0.5">
+            <div key={group.label} className="mb-5 last:mb-0">
+              <p className="eyebrow px-2 pb-2">{group.label}</p>
+              <ul className="grid gap-px">
                 {group.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const badge =
@@ -182,18 +204,48 @@ export function WorkshopNav({
                         onClick={() => setOpen(false)}
                         aria-current={active ? 'page' : undefined}
                         className={cn(
-                          'flex items-center justify-between gap-2 rounded-(--radius-sm) px-2 py-1.5 text-[13px] transition-colors',
+                          'group relative flex items-center gap-2.5 rounded-(--radius-md)',
+                          'px-2.5 py-2 text-[13px] transition-colors duration-150',
                           active
                             ? 'bg-(--brand-soft) font-medium text-(--brand-text)'
                             : 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
                         )}
                       >
-                        <span className="relative">
+                        {/* Brass rule against the panel edge. Reads as a
+                            position in a list rather than as a button. */}
+                        <span
+                          aria-hidden
+                          className={cn(
+                            'absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full',
+                            'transition-all duration-150',
+                            active
+                              ? 'bg-(--accent) opacity-100'
+                              : 'bg-(--border-strong) opacity-0 group-hover:opacity-60',
+                          )}
+                        />
+
+                        <NavIcon
+                          name={item.icon}
+                          className={cn(
+                            'shrink-0 transition-colors',
+                            active
+                              ? 'text-(--brand)'
+                              : 'text-(--text-faint) group-hover:text-(--text-soft)',
+                          )}
+                        />
+
+                        <span className="relative flex-1 truncate">
                           {item.label}
                           <PendingRule />
                         </span>
+
                         {badge ? (
-                          <span className="tabular rounded-full bg-(--warning-soft) px-1.5 text-[11px] font-semibold text-(--warning)">
+                          <span
+                            className={cn(
+                              'tabular shrink-0 rounded-full px-1.5 py-px text-[11px] font-semibold',
+                              'bg-(--warning-soft) text-(--warning)',
+                            )}
+                          >
                             {badge}
                           </span>
                         ) : null}
@@ -207,21 +259,55 @@ export function WorkshopNav({
         </div>
 
         <div className="border-t border-(--border) p-3">
-          <div className="flex items-end justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-[13px] font-medium">{userName}</p>
-              <p className="text-[11px] text-(--text-faint)">{humaniseRole(role)}</p>
-            </div>
-            <ThemeToggle className="w-[5.5rem] shrink-0" />
-          </div>
-          <form action="/api/sign-out" method="post" className="mt-2">
-            <button
-              type="submit"
-              className="text-[12px] text-(--text-faint) underline underline-offset-2 hover:text-(--text)"
+          <div className="flex items-center gap-2.5 rounded-(--radius-md) bg-(--surface-sunk) px-2.5 py-2">
+            <span
+              aria-hidden
+              className={cn(
+                'grid h-8 w-8 shrink-0 place-items-center rounded-full',
+                'bg-(--surface) text-[11px] font-semibold text-(--text-soft)',
+                'ring-1 ring-(--border)',
+              )}
             >
-              Sign out
-            </button>
-          </form>
+              {userName
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((word) => word[0])
+                .join('')
+                .toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-medium leading-tight">{userName}</p>
+              <p className="truncate text-[11px] text-(--text-faint)">{humaniseRole(role)}</p>
+            </div>
+            <form action="/api/sign-out" method="post">
+              <button
+                type="submit"
+                title="Sign out"
+                className={cn(
+                  'grid h-7 w-7 place-items-center rounded-(--radius-sm)',
+                  'text-(--text-faint) transition-colors hover:bg-(--surface) hover:text-(--danger)',
+                )}
+              >
+                <span className="sr-only">Sign out</span>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M8 17H4.6A1.6 1.6 0 0 1 3 15.4V4.6A1.6 1.6 0 0 1 4.6 3H8" />
+                  <path d="m12.8 13.4 3.4-3.4-3.4-3.4M16.2 10H7.6" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <ThemeToggle className="mt-2 w-full" />
         </div>
       </nav>
 
