@@ -1,0 +1,20 @@
+# Normalise line endings: LF in the repository, native in the working tree.
+* text=auto eol=lf
+
+*.sh    text eol=lf
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.svg   text
+*.pdf   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+
+package-lock.json  linguist-generated=true -diff
+packages/db/src/generated/**  linguist-generated=true -diff
