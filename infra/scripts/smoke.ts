@@ -213,6 +213,48 @@ async function main() {
       ],
     },
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
+    // Phase 4: people, payroll and multi-site.
+    {
+      path: '/people',
+      as: 'owner',
+      expect: [
+        'Productivity',
+        'Utilisation',
+        'Efficiency',
+        'John Adeyemi',
+        'Pay, site and contracted hours',
+        // The lapsed MOT licence is the finding the page exists to surface.
+        'cannot',
+        'legally sign off',
+      ],
+    },
+    {
+      path: '/transfers',
+      as: 'owner',
+      expect: ['Stock transfers', 'On the road', 'TRF-0007', 'Bradford', 'Value on the road'],
+    },
+    {
+      path: '/group',
+      as: 'owner',
+      expect: ['Sites', 'By site', 'Bradford Lane', 'Hillside Road', 'Spread', 'Group'],
+    },
+    // A technician never reaches the productivity board or the group view.
+    {
+      path: '/people',
+      as: 'technician',
+      expect: [],
+      redirects: true,
+    },
+    // An advisor may raise a transfer but has no business reading pay.
+    { path: '/transfers', as: 'advisor', expect: ['Stock transfers'] },
+    {
+      path: '/people',
+      as: 'advisor',
+      expect: [],
+      redirectsTo: '/dashboard?denied=people%3Aread',
+      absent: ['Cost per hour', 'Pay history'],
+    },
+
     // An advisor typing the ledger URL is sent back to their own surface with
     // a reason, rather than shown a stack trace behind a 200.
     {

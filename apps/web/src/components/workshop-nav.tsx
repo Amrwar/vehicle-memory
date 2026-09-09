@@ -66,6 +66,14 @@ const GROUPS: Group[] = [
       { href: '/parts', label: 'Parts', permission: 'inventory:read' },
       { href: '/suppliers', label: 'Suppliers', permission: 'inventory:read' },
       { href: '/purchasing', label: 'Purchasing', permission: 'purchase:request' },
+      { href: '/transfers', label: 'Transfers', permission: 'stock:transfer' },
+    ],
+  },
+  {
+    label: 'Team',
+    items: [
+      { href: '/people', label: 'People', permission: 'people:read' },
+      { href: '/group', label: 'Sites', permission: 'report:financial' },
     ],
   },
   {

@@ -56,6 +56,15 @@ export const PERMISSIONS = [
   'inventory:write',
   'purchase:request',
   'purchase:approve',
+  'stock:transfer',
+
+  // People and payroll. Separated from report:financial because a workshop
+  // manager runs the productivity board every morning and must never see what
+  // the person standing next to them is paid.
+  'people:read',
+  'people:write',
+  'payroll:read',
+  'payroll:approve',
 
   // Passport
   'passport:read',
@@ -116,6 +125,9 @@ const GRANTS: Readonly<Record<Role, readonly Permission[]>> = {
     'inventory:write',
     'purchase:request',
     'purchase:approve',
+    'stock:transfer',
+    'people:read',
+    'people:write',
     'passport:read',
     'passport:write',
     'passport:share',
@@ -143,6 +155,7 @@ const GRANTS: Readonly<Record<Role, readonly Permission[]>> = {
     'report:operational',
     'inventory:read',
     'purchase:request',
+    'stock:transfer',
     'passport:read',
     'passport:write',
     'passport:share',
@@ -169,6 +182,9 @@ const GRANTS: Readonly<Record<Role, readonly Permission[]>> = {
     'report:financial',
     'ledger:read',
     'ledger:write',
+    'payroll:read',
+    'payroll:approve',
+    'people:read',
     'inventory:read',
     'audit:read',
   ],
@@ -275,6 +291,9 @@ export function humanisePermission(permission: string): string {
 
   const areas: Record<string, string> = {
     diary: 'the booking diary',
+    people: 'employee records',
+    payroll: 'payroll',
+    stock: 'stock transfers',
     customer: 'customer records',
     vehicle: 'vehicle records',
     job: 'jobs',

@@ -2497,9 +2497,12 @@ async function seedTransfers(
     dispatchedByUserId: string;
   },
 ) {
-  const pads = refs.products.find((product) => product.partNumber === 'BP-4471');
-  const filter = refs.products.find((product) => product.partNumber === '04152-YZZA1');
-  if (!pads || !filter) return;
+  // Sent from genuine surplus. Sending a part the origin is already short of
+  // would solve one site's problem by creating another's, which the suggestion
+  // engine refuses to propose and the demo should not depict.
+  const oil = refs.products.find((product) => product.partNumber === 'TOY-0W20-5L');
+  const cabin = refs.products.find((product) => product.partNumber === '87139-0D070');
+  if (!oil || !cabin) return;
 
   const transfer = await prisma.stockTransfer.create({
     data: {
@@ -2513,8 +2516,8 @@ async function seedTransfers(
       note: 'Bradford ran short before the weekend.',
       lines: {
         create: [
-          { productId: pads.id, quantity: 4, received: 0, unitCost: 42.5, sortOrder: 1 },
-          { productId: filter.id, quantity: 6, received: 0, unitCost: 8.0, sortOrder: 2 },
+          { productId: oil.id, quantity: 6, received: 0, unitCost: 27.4, sortOrder: 1 },
+          { productId: cabin.id, quantity: 4, received: 0, unitCost: 10.8, sortOrder: 2 },
         ],
       },
     },
@@ -2523,8 +2526,8 @@ async function seedTransfers(
   // The stock genuinely left. Without these movements the origin's balance
   // would still show parts that are sitting in a van.
   for (const line of [
-    { productId: pads.id, quantity: 4, unitCost: 42.5 },
-    { productId: filter.id, quantity: 6, unitCost: 8.0 },
+    { productId: oil.id, quantity: 6, unitCost: 27.4 },
+    { productId: cabin.id, quantity: 4, unitCost: 10.8 },
   ]) {
     const level = await prisma.stockLevel.findFirst({
       where: { productId: line.productId, warehouseId: refs.fromWarehouseId },
@@ -2566,7 +2569,7 @@ async function seedTransfers(
       receivedAt: day(-9, 16, 20),
       dispatchedByUserId: refs.dispatchedByUserId,
       lines: {
-        create: [{ productId: filter.id, quantity: 10, received: 10, unitCost: 8.0, sortOrder: 1 }],
+        create: [{ productId: cabin.id, quantity: 10, received: 10, unitCost: 10.8, sortOrder: 1 }],
       },
     },
   });
