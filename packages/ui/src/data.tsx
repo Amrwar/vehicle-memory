@@ -290,7 +290,9 @@ export function Skeleton({
   /** Convenience for the common case of a text line of a given width. */
   width?: string;
 }) {
-  return <span className={cn('skeleton block h-4', className)} style={width ? { width } : undefined} />;
+  return (
+    <span className={cn('skeleton block h-4', className)} style={width ? { width } : undefined} />
+  );
 }
 
 /** Placeholder matching StatRow, so the header does not jump on arrival. */

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireUser } from '@/lib/guard';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My jobs' };
 export const dynamic = 'force-dynamic';
@@ -77,16 +78,21 @@ export default async function ShopFloorPage() {
             <p className="eyebrow">Carnet</p>
             <h1 className="font-display text-[20px] font-semibold leading-tight">My jobs</h1>
           </div>
-          <div className="text-right">
-            <p className="text-[14px] font-medium">{user.name}</p>
-            <form action="/api/sign-out" method="post">
-              <button
-                type="submit"
-                className="text-[13px] text-(--text-faint) underline underline-offset-2"
-              >
-                Sign out
-              </button>
-            </form>
+          <div className="flex items-center gap-3">
+            {/* Night shifts run the bay lights low. The tablet's own setting
+                is usually not the one the technician wants here. */}
+            <ThemeToggle className="w-[6.5rem]" />
+            <div className="text-right">
+              <p className="text-[14px] font-medium">{user.name}</p>
+              <form action="/api/sign-out" method="post">
+                <button
+                  type="submit"
+                  className="text-[13px] text-(--text-faint) underline underline-offset-2"
+                >
+                  Sign out
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </header>

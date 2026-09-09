@@ -1,6 +1,38 @@
 import type { Metadata, Viewport } from 'next';
+import { Archivo, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
+
+import { THEME_SCRIPT } from '@/components/theme-toggle';
 
 import './globals.css';
+
+/**
+ * Fonts are self-hosted at build time rather than fetched from Google.
+ *
+ * The stylesheet link this replaces was render-blocking and third-party: two
+ * preconnects, a CSS round trip, then the font files, all before the first
+ * paint of every page. Self-hosting removes the round trips and the tracking,
+ * and `display: swap` means text is readable before the faces arrive.
+ */
+const display = Archivo({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-archivo',
+  display: 'swap',
+});
+
+const sans = Public_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-public-sans',
+  display: 'swap',
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-plex-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -21,20 +53,21 @@ export const viewport: Viewport = {
   maximumScale: 5,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f5f7f7' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f1516' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b1012' },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" suppressHydrationWarning>
+    <html
+      lang="en-GB"
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-        />
+        {/* Stamps the stored theme on <html> before anything is drawn. Without
+            it, a dark-mode user gets a white flash on every cold load. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
         <a

@@ -68,7 +68,9 @@ async function main() {
   check(
     'every entry balances individually',
     unbalanced.length === 0,
-    unbalanced.length ? unbalanced.map((entry) => entry.reference).join(', ') : `${entries.length} entries`,
+    unbalanced.length
+      ? unbalanced.map((entry) => entry.reference).join(', ')
+      : `${entries.length} entries`,
   );
 
   const orphaned = entries.filter((entry) => entry.lines.length === 0);

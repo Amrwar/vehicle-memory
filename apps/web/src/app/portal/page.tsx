@@ -15,6 +15,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireUser } from '@/lib/guard';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My vehicles' };
 export const dynamic = 'force-dynamic';
@@ -95,11 +96,14 @@ export default async function PortalPage() {
             </svg>
             <span className="font-display text-[14px] font-semibold">Carnet</span>
           </div>
-          <form action="/api/sign-out" method="post">
-            <button type="submit" className="text-[13px] text-(--text-faint) underline">
-              Sign out
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="w-[6.5rem]" />
+            <form action="/api/sign-out" method="post">
+              <button type="submit" className="text-[13px] text-(--text-faint) underline">
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 

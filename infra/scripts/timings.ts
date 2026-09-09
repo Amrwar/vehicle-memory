@@ -83,7 +83,9 @@ async function main() {
   console.info(`  median warm    ${Math.round(sorted[Math.floor(sorted.length / 2)]!)}ms`);
   console.info(`  slowest warm   ${Math.round(sorted[sorted.length - 1]!)}ms\n`);
 
-  await prisma.session.deleteMany({ where: { tokenHash: createHash('sha256').update(token).digest('hex') } });
+  await prisma.session.deleteMany({
+    where: { tokenHash: createHash('sha256').update(token).digest('hex') },
+  });
 }
 
 main()

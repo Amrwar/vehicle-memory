@@ -418,8 +418,10 @@ export function ChainFingerprint({
       <span
         aria-hidden
         className={cn(
-          'grid h-6 w-6 place-items-center rounded-full text-[13px] font-bold text-white',
-          verified ? 'bg-(--success)' : 'bg-(--danger)',
+          'grid h-6 w-6 place-items-center rounded-full text-[13px] font-bold',
+          verified
+            ? 'bg-(--success-solid) text-(--on-success-solid)'
+            : 'bg-(--danger-solid) text-(--on-danger-solid)',
         )}
       >
         {verified ? '✓' : '!'}

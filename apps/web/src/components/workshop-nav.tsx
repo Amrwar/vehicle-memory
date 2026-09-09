@@ -5,6 +5,8 @@ import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
+
+import { ThemeToggle } from './theme-toggle';
 import * as React from 'react';
 
 /**
@@ -197,8 +199,13 @@ export function WorkshopNav({
         </div>
 
         <div className="border-t border-(--border) p-3">
-          <p className="truncate text-[13px] font-medium">{userName}</p>
-          <p className="text-[11px] text-(--text-faint)">{humaniseRole(role)}</p>
+          <div className="flex items-end justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-medium">{userName}</p>
+              <p className="text-[11px] text-(--text-faint)">{humaniseRole(role)}</p>
+            </div>
+            <ThemeToggle className="w-[5.5rem] shrink-0" />
+          </div>
           <form action="/api/sign-out" method="post" className="mt-2">
             <button
               type="submit"

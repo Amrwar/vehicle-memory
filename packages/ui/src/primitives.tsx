@@ -24,8 +24,7 @@ const button = cva(
           'bg-(--surface) text-(--text) border border-(--border-strong) ' +
           'hover:bg-(--surface-sunk) hover:border-(--text-faint)',
         ghost: 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
-        // White holds contrast on the danger colour in both themes.
-        danger: 'bg-(--danger) text-white hover:brightness-110 shadow-sm',
+        danger: 'bg-(--danger-solid) text-(--on-danger-solid) hover:brightness-110 shadow-sm',
         accent:
           'bg-(--accent-solid) text-(--on-accent-solid) hover:bg-(--accent-solid-hover) shadow-sm',
         link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',

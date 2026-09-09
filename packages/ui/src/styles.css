@@ -85,9 +85,12 @@
   --color-info-700: #194c6f;
 
   /* --- typography ------------------------------------------------------- */
-  --font-display: 'Archivo', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-sans: 'Public Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* next/font supplies the three variables and self-hosts the faces. The
+     fallbacks are real stacks, not decoration: they are what renders during
+     the swap and on any surface that loads the CSS without the app. */
+  --font-display: var(--font-archivo), 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-public-sans), 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* --- radii: crisp and tool-like, not uniformly rounded ---------------- */
   --radius-xs: 3px;
@@ -120,11 +123,13 @@
 
   --border: var(--color-slate-200);
   --border-strong: var(--color-slate-300);
-  --border-focus: var(--color-brass-500);
+  --border-focus: var(--color-brass-600);
 
   --text: var(--color-slate-900);
   --text-soft: var(--color-slate-600);
-  --text-faint: var(--color-slate-500);
+  /* Not slate-500: it measured 3.89:1 on the sunk surface, and the sunk
+     surface is exactly where faint text sits (table headers, eyebrows). */
+  --text-faint: #5c686a;
   --text-inverse: var(--color-slate-0);
 
   /* Brand as ink: text, icons, hairlines. */
@@ -146,12 +151,22 @@
 
   --success: var(--color-success-600);
   --success-soft: var(--color-success-50);
-  --warning: var(--color-warning-600);
+  /* Warning-600 on its own tint measured 4.03:1. Amber is the hardest of the
+     four to keep legible, and it is the one that says "do not drive this". */
+  --warning: var(--color-warning-700);
   --warning-soft: var(--color-warning-50);
   --danger: var(--color-danger-600);
   --danger-soft: var(--color-danger-50);
   --info: var(--color-info-600);
   --info-soft: var(--color-info-50);
+
+  /* Status as a filled surface rather than as ink. Separate tokens because
+     the ink versions have to lighten in the dark theme and a filled chip
+     cannot: white on a pale pink is unreadable either way round. */
+  --success-solid: var(--color-success-600);
+  --on-success-solid: #ffffff;
+  --danger-solid: var(--color-danger-600);
+  --on-danger-solid: #ffffff;
 
   /* Shop-floor minimum touch target. NFR-605. */
   --touch: 48px;
@@ -170,6 +185,12 @@
       a dark OS.
    3. On the explicit selectors, so a toggle wins in the other direction too.
 
+   The two blocks carry identical values. They have to: a person whose system
+   is dark and who has never touched the toggle gets the media block, and a
+   person who chose dark gets the selector block. If those two disagreed, the
+   same app would look like two different products depending on a setting
+   nobody remembers making. `npm run audit:theme` fails when they drift.
+
    Components must never reference a raw colour or a `dark:` variant. They read
    these semantic tokens, and the tokens are the only thing that switches.
    --------------------------------------------------------------------------- */
@@ -178,29 +199,40 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    --ground: var(--color-slate-950);
-    --surface: var(--color-slate-900);
-    --surface-sunk: #141a1c;
-    --surface-raised: var(--color-slate-800);
-    --overlay: rgb(0 0 0 / 0.6);
+    --ground: #0b1012;
+    --surface: #141b1d;
+    --surface-sunk: #101719;
+    --surface-raised: #1c2427;
+    --overlay: rgb(0 0 0 / 0.62);
 
-    --border: #2a3336;
-    --border-strong: #3b4649;
+    --border: #263033;
+    --border-strong: #3a464a;
     --border-focus: var(--color-brass-400);
 
     --text: var(--color-slate-50);
-    --text-soft: var(--color-slate-300);
-    --text-faint: var(--color-slate-400);
+    --text-soft: #c2cbcd;
+    --text-faint: #9aa5a7;
     --text-inverse: var(--color-slate-950);
 
+    /* Brand as ink: light enough to read as text on a dark ground. */
     --brand: var(--color-petrol-300);
-    --brand-hover: var(--color-petrol-200);
-    --brand-soft: #12292c;
     --brand-text: var(--color-petrol-200);
+    --brand-soft: #12292c;
+    /* Brand as a surface. Saturated enough to carry white; a pale tint with
+       dark text reads as a disabled control, which is what the first attempt
+       looked like. */
+    --brand-solid: var(--color-petrol-600);
+    --brand-solid-hover: var(--color-petrol-500);
+    --on-brand-solid: #ffffff;
 
     --accent: var(--color-brass-300);
-    --accent-soft: #2a2114;
     --accent-text: var(--color-brass-200);
+    --accent-soft: #2a2114;
+    /* Brass is too light to carry white at any usable tint, so the ink goes
+       dark here while the brand keeps white. Consistency would cost legibility. */
+    --accent-solid: var(--color-brass-500);
+    --accent-solid-hover: var(--color-brass-400);
+    --on-accent-solid: #1a1206;
 
     --success: #6cbb8c;
     --success-soft: #16251d;
@@ -210,41 +242,54 @@
     --danger-soft: #2a1a1a;
     --info: #79b4d8;
     --info-soft: #14242e;
+
+    /* The ink versions above are pale so they read as text on a dark
+       ground. A filled chip needs the opposite, so it keeps the saturated
+       colour and its white label in both themes. */
+    --success-solid: var(--color-success-500);
+    --on-success-solid: #ffffff;
+    /* Between two thresholds: light enough to separate from the dark tint
+       behind it, dark enough to hold a white label at 4.75:1. */
+    --danger-solid: #c44a4a;
+    --on-danger-solid: #ffffff;
   }
 }
 
-.dark,
-:root[data-theme='dark'] {
+:root[data-theme='dark'],
+.dark {
   color-scheme: dark;
 
   --ground: #0b1012;
   --surface: #141b1d;
   --surface-sunk: #101719;
   --surface-raised: #1c2427;
-  --overlay: rgb(0 0 0 / 0.6);
+  --overlay: rgb(0 0 0 / 0.62);
 
   --border: #263033;
   --border-strong: #3a464a;
   --border-focus: var(--color-brass-400);
 
   --text: var(--color-slate-50);
-  --text-soft: var(--color-slate-300);
-  --text-faint: var(--color-slate-400);
+  --text-soft: #c2cbcd;
+  --text-faint: #9aa5a7;
   --text-inverse: var(--color-slate-950);
 
-  /* Light enough to read as text on a dark ground. */
+  /* Brand as ink: light enough to read as text on a dark ground. */
   --brand: var(--color-petrol-300);
   --brand-text: var(--color-petrol-200);
   --brand-soft: #12292c;
-  /* Saturated enough to carry white. A pale tint with dark text reads as a
-     disabled control, which is what the first attempt looked like. */
-  --brand-solid: var(--color-petrol-500);
-  --brand-solid-hover: var(--color-petrol-400);
+  /* Brand as a surface. Saturated enough to carry white; a pale tint with
+     dark text reads as a disabled control, which is what the first attempt
+     looked like. */
+  --brand-solid: var(--color-petrol-600);
+  --brand-solid-hover: var(--color-petrol-500);
   --on-brand-solid: #ffffff;
 
   --accent: var(--color-brass-300);
-  --accent-soft: #2a2114;
   --accent-text: var(--color-brass-200);
+  --accent-soft: #2a2114;
+  /* Brass is too light to carry white at any usable tint, so the ink goes
+     dark here while the brand keeps white. Consistency would cost legibility. */
   --accent-solid: var(--color-brass-500);
   --accent-solid-hover: var(--color-brass-400);
   --on-accent-solid: #1a1206;
@@ -257,6 +302,16 @@
   --danger-soft: #2a1a1a;
   --info: #79b4d8;
   --info-soft: #14242e;
+
+  /* The ink versions above are pale so they read as text on a dark
+     ground. A filled chip needs the opposite, so it keeps the saturated
+     colour and its white label in both themes. */
+  --success-solid: var(--color-success-500);
+  --on-success-solid: #ffffff;
+  /* Between two thresholds: light enough to separate from the dark tint
+     behind it, dark enough to hold a white label at 4.75:1. */
+  --danger-solid: #c44a4a;
+  --on-danger-solid: #ffffff;
 }
 
 /* ===========================================================================
