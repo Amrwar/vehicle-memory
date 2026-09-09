@@ -15,13 +15,13 @@ That is not only taste. It solves a real constraint.
 job status, capacity, ledger sign. The brand colour therefore cannot be any of
 them, and cannot be adjacent to any of them:
 
-| Candidate brand | Why it fails |
-| --- | --- |
-| Blue or indigo | Collides with the "info" state, which the diary uses heavily |
-| Green | Collides with "pass" and "healthy capacity" |
-| Orange | Collides with "advisory", and belongs to the incumbent |
-| Red | Collides with "critical". Obviously |
-| **Petrol** | Dark enough for white text at every usable tint, distinct from all four semantic hues, and drawn from the subject |
+| Candidate brand | Why it fails                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Blue or indigo  | Collides with the "info" state, which the diary uses heavily                                                      |
+| Green           | Collides with "pass" and "healthy capacity"                                                                       |
+| Orange          | Collides with "advisory", and belongs to the incumbent                                                            |
+| Red             | Collides with "critical". Obviously                                                                               |
+| **Petrol**      | Dark enough for white text at every usable tint, distinct from all four semantic hues, and drawn from the subject |
 
 Brass is spent sparingly: focus rings, the passport, the one thing on a screen
 that should be looked at first. If brass is everywhere, it is nowhere.
@@ -30,20 +30,20 @@ that should be looked at first. If brass is everywhere, it is nowhere.
 
 ### Brand — petrol
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| `--color-petrol-50` | `#eef6f6` | Active navigation background |
-| `--color-petrol-300` | `#7fb8bc` | Brand colour in dark mode |
+| Token                | Hex       | Use                                      |
+| -------------------- | --------- | ---------------------------------------- |
+| `--color-petrol-50`  | `#eef6f6` | Active navigation background             |
+| `--color-petrol-300` | `#7fb8bc` | Brand colour in dark mode                |
 | `--color-petrol-600` | `#1f6167` | **Primary buttons, links, active state** |
-| `--color-petrol-700` | `#1a4d52` | Primary hover |
-| `--color-petrol-900` | `#123236` | Sign-in panel, marketing ground |
+| `--color-petrol-700` | `#1a4d52` | Primary hover                            |
+| `--color-petrol-900` | `#123236` | Sign-in panel, marketing ground          |
 
 ### Accent — brass
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| `--color-brass-50` | `#fbf6ec` | Passport highlight |
-| `--color-brass-500` | `#b8863b` | **Focus ring** |
+| Token               | Hex       | Use                            |
+| ------------------- | --------- | ------------------------------ |
+| `--color-brass-50`  | `#fbf6ec` | Passport highlight             |
+| `--color-brass-500` | `#b8863b` | **Focus ring**                 |
 | `--color-brass-600` | `#9a6d24` | Accent text, section numbering |
 
 Focus is brass precisely because it is not a status colour. A focus ring that
@@ -57,12 +57,12 @@ obvious; on its own it simply looks deliberate.
 
 ### Semantic
 
-| Role | Light | Dark | Meaning in this product |
-| --- | --- | --- | --- |
-| Success | `#2c6e4b` | `#6cbb8c` | Inspection pass, healthy capacity, paid |
-| Warning | `#9a6a12` | `#d9ab55` | Advisory finding, awaiting customer, day full |
-| Danger | `#973030` | `#e08383` | Critical finding, overdue, chain broken, overbooked |
-| Info | `#1f5f8b` | `#79b4d8` | Booked, in progress, workshop-recorded event |
+| Role    | Light     | Dark      | Meaning in this product                             |
+| ------- | --------- | --------- | --------------------------------------------------- |
+| Success | `#2c6e4b` | `#6cbb8c` | Inspection pass, healthy capacity, paid             |
+| Warning | `#9a6a12` | `#d9ab55` | Advisory finding, awaiting customer, day full       |
+| Danger  | `#973030` | `#e08383` | Critical finding, overdue, chain broken, overbooked |
+| Info    | `#1f5f8b` | `#79b4d8` | Booked, in progress, workshop-recorded event        |
 
 ### The rule that governs all of it
 
@@ -89,11 +89,11 @@ petrol is.
 
 ## 4. Typography
 
-| Role | Face | Why |
-| --- | --- | --- |
-| Display | **Archivo** 600/700 | Industrial signage character. Slightly condensed, so a long vehicle description fits a table heading. |
-| Interface | **Public Sans** 400/500/600 | Neutral, highly legible at 13px, which is where this interface lives |
-| Data | **IBM Plex Mono** | VINs, registrations, part numbers, job numbers, hashes, and every figure in a column |
+| Role      | Face                        | Why                                                                                                   |
+| --------- | --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Display   | **Archivo** 600/700         | Industrial signage character. Slightly condensed, so a long vehicle description fits a table heading. |
+| Interface | **Public Sans** 400/500/600 | Neutral, highly legible at 13px, which is where this interface lives                                  |
+| Data      | **IBM Plex Mono**           | VINs, registrations, part numbers, job numbers, hashes, and every figure in a column                  |
 
 Monospace for data is not an aesthetic preference. A VIN is read character by
 character and compared against a plate on a windscreen. A proportional face
@@ -117,14 +117,14 @@ lifts off the page.** A dialog has a shadow. A card does not.
 
 One design system, four voices ([ADR-0009](../03-adr/0009-role-segregated-interfaces.md)).
 
-| | Workshop | Shop floor | Portal | Public passport |
-| --- | --- | --- | --- | --- |
-| Body size | 13px | 15px | 15px | 15px |
-| Target size | 32px | **48px minimum** | 44px | 44px |
-| Density | High | Low | Low | Low |
-| Navigation | Sidebar, grouped | None | Minimal | None |
-| Hover | Used | **Never** | Never | Never |
-| Language | Trade terms | Trade terms | Plain English | Plain English |
+|             | Workshop         | Shop floor       | Portal        | Public passport |
+| ----------- | ---------------- | ---------------- | ------------- | --------------- |
+| Body size   | 13px             | 15px             | 15px          | 15px            |
+| Target size | 32px             | **48px minimum** | 44px          | 44px            |
+| Density     | High             | Low              | Low           | Low             |
+| Navigation  | Sidebar, grouped | None             | Minimal       | None            |
+| Hover       | Used             | **Never**        | Never         | Never           |
+| Language    | Trade terms      | Trade terms      | Plain English | Plain English   |
 
 The shop floor rules are binding. `size="touch"` exists on every control for
 exactly this reason, and a hover-dependent interaction there is a defect, not a
@@ -193,4 +193,4 @@ The words are design material.
 
 ---
 
-*Next: [Wireframes](09-wireframes.md).*
+_Next: [Wireframes](09-wireframes.md)._

@@ -125,4 +125,4 @@ Do not run a delete. Follow
 
 ---
 
-*Next: [Ways of working](../05-project/01-ways-of-working.md).*
+_Next: [Ways of working](../05-project/01-ways-of-working.md)._

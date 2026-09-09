@@ -77,9 +77,21 @@ export default async function PortalPage() {
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden className="text-(--brand)">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden
+              className="text-(--brand)"
+            >
               <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M10 4.6v5.4l3.4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M10 4.6v5.4l3.4 2"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             <span className="font-display text-[14px] font-semibold">Carnet</span>
           </div>
@@ -123,10 +135,7 @@ export default async function PortalPage() {
                       <p className="eyebrow">Estimated total</p>
                       <p className="font-display text-[24px] font-semibold">
                         {estimate ? (
-                          <Money
-                            amount={Number(estimate.total)}
-                            currency={estimate.currency}
-                          />
+                          <Money amount={Number(estimate.total)} currency={estimate.currency} />
                         ) : (
                           '—'
                         )}
@@ -175,8 +184,8 @@ export default async function PortalPage() {
                               ) : null}
                             </div>
                             <p className="mt-1 text-[13px] text-(--text-faint)">
-                              <Mileage km={vehicle.lastOdometerKm} /> ·{' '}
-                              {vehicle._count.events} entries on record
+                              <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events}{' '}
+                              entries on record
                             </p>
                           </div>
 
@@ -193,8 +202,7 @@ export default async function PortalPage() {
 
                         {vehicle.recalls.length > 0 ? (
                           <p className="mt-3 rounded-(--radius-sm) bg-(--danger-soft) px-2.5 py-1.5 text-[13px] text-(--danger)">
-                            This vehicle has an outstanding safety recall. Contact your
-                            workshop.
+                            This vehicle has an outstanding safety recall. Contact your workshop.
                           </p>
                         ) : null}
 

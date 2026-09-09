@@ -7,12 +7,12 @@ instructions are the defect.
 
 ## Prerequisites
 
-| Tool | Version | Check |
-| --- | --- | --- |
-| Node.js | 22 or later | `node --version` |
-| npm | 10 or later | `npm --version` |
-| Docker | with Compose | `docker compose version` |
-| Git | any recent | `git --version` |
+| Tool    | Version      | Check                    |
+| ------- | ------------ | ------------------------ |
+| Node.js | 22 or later  | `node --version`         |
+| npm     | 10 or later  | `npm --version`          |
+| Docker  | with Compose | `docker compose version` |
+| Git     | any recent   | `git --version`          |
 
 ## Steps
 
@@ -44,13 +44,13 @@ npm run dev             # http://localhost:3000
 
 A workshop called **Hillside Motors** having a plausible Tuesday.
 
-| Sign in as | Email | Lands on |
-| --- | --- | --- |
-| Owner | `ahmed@hillsidemotors.test` | Dashboard |
-| Service advisor | `sara@hillsidemotors.test` | Dashboard |
-| Technician | `john@hillsidemotors.test` | Shop floor |
-| Bookkeeper | `fatima@hillsidemotors.test` | Dashboard |
-| Customer | `maria@example.test` | Portal |
+| Sign in as      | Email                        | Lands on   |
+| --------------- | ---------------------------- | ---------- |
+| Owner           | `ahmed@hillsidemotors.test`  | Dashboard  |
+| Service advisor | `sara@hillsidemotors.test`   | Dashboard  |
+| Technician      | `john@hillsidemotors.test`   | Shop floor |
+| Bookkeeper      | `fatima@hillsidemotors.test` | Dashboard  |
+| Customer        | `maria@example.test`         | Portal     |
 
 Password for all: `carnet-demo-2026`
 
@@ -74,27 +74,27 @@ guarantee nobody tests is a guarantee nobody has.
 
 ## Common commands
 
-| Command | Does |
-| --- | --- |
-| `npm run dev` | Web app on :3000 |
-| `npm run worker` | Background worker |
-| `npm test` | Domain tests |
-| `npm run test:coverage` | With coverage thresholds |
-| `npm run verify` | format, lint, typecheck, test — what CI runs |
-| `npm run db:studio` | Prisma Studio |
-| `npm run db:reset` | Drop, migrate, reseed |
+| Command                 | Does                                         |
+| ----------------------- | -------------------------------------------- |
+| `npm run dev`           | Web app on :3000                             |
+| `npm run worker`        | Background worker                            |
+| `npm test`              | Domain tests                                 |
+| `npm run test:coverage` | With coverage thresholds                     |
+| `npm run verify`        | format, lint, typecheck, test — what CI runs |
+| `npm run db:studio`     | Prisma Studio                                |
+| `npm run db:reset`      | Drop, migrate, reseed                        |
 
 ## When it goes wrong
 
-| Symptom | Cause and fix |
-| --- | --- |
-| `DATABASE_URL is not set` | `.env` missing, or not copied to `packages/db` and `apps/web` |
-| `LEDGER_CHAIN_SALT is required` | Same. The salt is mandatory to write passport events. |
-| `Can't reach database` | `docker compose up -d postgres`, then `docker compose ps` |
-| Components render unstyled | Tailwind is not seeing `packages/ui`. Check the `@source` lines in `apps/web/src/app/globals.css`. |
-| `chain BROKEN` after a reseed | The salt changed. Rotating it invalidates every existing chain, by design. Reseed. |
-| Port 3000 taken | `npm run dev -- --port 3001` |
+| Symptom                         | Cause and fix                                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL is not set`       | `.env` missing, or not copied to `packages/db` and `apps/web`                                      |
+| `LEDGER_CHAIN_SALT is required` | Same. The salt is mandatory to write passport events.                                              |
+| `Can't reach database`          | `docker compose up -d postgres`, then `docker compose ps`                                          |
+| Components render unstyled      | Tailwind is not seeing `packages/ui`. Check the `@source` lines in `apps/web/src/app/globals.css`. |
+| `chain BROKEN` after a reseed   | The salt changed. Rotating it invalidates every existing chain, by design. Reseed.                 |
+| Port 3000 taken                 | `npm run dev -- --port 3001`                                                                       |
 
 ---
 
-*Next: [Coding standards](02-coding-standards.md).*
+_Next: [Coding standards](02-coding-standards.md)._

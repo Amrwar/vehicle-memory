@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Badge } from './primitives';
 import { cn } from './cn';
 
@@ -232,8 +230,7 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
               aria-hidden
               className={cn(
                 'relative z-10 mt-1 grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full border-2 text-[9px] font-bold',
-                stage.state === 'done' &&
-                  'border-(--success) bg-(--success) text-white',
+                stage.state === 'done' && 'border-(--success) bg-(--success) text-white',
                 stage.state === 'current' &&
                   'border-(--brand) bg-(--surface) ring-4 ring-(--brand-soft)',
                 stage.state === 'upcoming' && 'border-(--border-strong) bg-(--surface)',
@@ -267,10 +264,7 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
 /* --- passport timeline ---------------------------------------------------- */
 
 export type VerificationLevel =
-  | 'SELF_REPORTED'
-  | 'WORKSHOP_RECORDED'
-  | 'WORKSHOP_VERIFIED'
-  | 'AUTHORITY';
+  'SELF_REPORTED' | 'WORKSHOP_RECORDED' | 'WORKSHOP_VERIFIED' | 'AUTHORITY';
 
 const VERIFICATION: Record<
   VerificationLevel,
@@ -360,10 +354,7 @@ export function TimelineEntry({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="eyebrow">{event.typeLabel}</span>
-          <time
-            dateTime={date.toISOString()}
-            className="datum text-[11px] text-(--text-faint)"
-          >
+          <time dateTime={date.toISOString()} className="datum text-[11px] text-(--text-faint)">
             {date.toLocaleDateString(locale, {
               day: 'numeric',
               month: 'short',
@@ -442,9 +433,7 @@ export function ChainFingerprint({
         >
           {verified ? 'History intact' : 'History integrity check failed'}
         </p>
-        <p className="datum text-[11px] text-(--text-faint) leading-tight">
-          Chain {short}
-        </p>
+        <p className="datum text-[11px] text-(--text-faint) leading-tight">Chain {short}</p>
       </div>
     </div>
   );

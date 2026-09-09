@@ -62,8 +62,14 @@ describe('canonicalisation', () => {
   });
 
   it('handles nested arrays of objects deterministically', () => {
-    const a = canonicalise([{ b: 1, a: 2 }, { d: 3, c: 4 }]);
-    const b = canonicalise([{ a: 2, b: 1 }, { c: 4, d: 3 }]);
+    const a = canonicalise([
+      { b: 1, a: 2 },
+      { d: 3, c: 4 },
+    ]);
+    const b = canonicalise([
+      { a: 2, b: 1 },
+      { c: 4, d: 3 },
+    ]);
     expect(a).toBe(b);
   });
 });

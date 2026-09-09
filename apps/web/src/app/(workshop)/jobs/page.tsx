@@ -67,7 +67,11 @@ export default async function JobsPage({
         customer: { select: { id: true, displayName: true } },
         vehicle: { select: { id: true, make: true, model: true, registration: true } },
         technicians: { include: { user: { select: { name: true } } } },
-        estimates: { orderBy: { version: 'desc' }, take: 1, select: { total: true, currency: true } },
+        estimates: {
+          orderBy: { version: 'desc' },
+          take: 1,
+          select: { total: true, currency: true },
+        },
       },
     }),
     db.job.count({ where }),
@@ -146,8 +150,7 @@ export default async function JobsPage({
               <tbody>
                 {jobs.map((job) => {
                   const estimate = job.estimates[0];
-                  const primary =
-                    job.technicians.find((t) => t.isPrimary) ?? job.technicians[0];
+                  const primary = job.technicians.find((t) => t.isPrimary) ?? job.technicians[0];
 
                   return (
                     <Tr key={job.id}>
@@ -184,10 +187,7 @@ export default async function JobsPage({
                       </Td>
                       <Td numeric className="text-(--text-soft)">
                         {estimate ? (
-                          <Money
-                            amount={Number(estimate.total)}
-                            currency={estimate.currency}
-                          />
+                          <Money amount={Number(estimate.total)} currency={estimate.currency} />
                         ) : (
                           <span className="text-(--text-faint)">—</span>
                         )}

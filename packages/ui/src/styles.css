@@ -24,7 +24,7 @@
 
 @theme {
   /* --- brand: petrol ---------------------------------------------------- */
-  --color-petrol-50:  #eef6f6;
+  --color-petrol-50: #eef6f6;
   --color-petrol-100: #d6e9ea;
   --color-petrol-200: #b0d4d6;
   --color-petrol-300: #7fb8bc;
@@ -37,7 +37,7 @@
   --color-petrol-950: #0a1f22;
 
   /* --- accent: brass ---------------------------------------------------- */
-  --color-brass-50:  #fbf6ec;
+  --color-brass-50: #fbf6ec;
   --color-brass-100: #f4e8cf;
   --color-brass-200: #e8d0a0;
   --color-brass-300: #d9b36c;
@@ -49,9 +49,9 @@
   --color-brass-900: #533a1c;
 
   /* --- neutrals: petrol-biased slate ------------------------------------ */
-  --color-slate-0:   #ffffff;
-  --color-slate-25:  #fafbfb;
-  --color-slate-50:  #f5f7f7;
+  --color-slate-0: #ffffff;
+  --color-slate-25: #fafbfb;
+  --color-slate-50: #f5f7f7;
   --color-slate-100: #eceff0;
   --color-slate-200: #dde2e3;
   --color-slate-300: #c6cdcf;
@@ -64,22 +64,22 @@
   --color-slate-950: #0f1516;
 
   /* --- semantic --------------------------------------------------------- */
-  --color-success-50:  #e4efe8;
+  --color-success-50: #e4efe8;
   --color-success-500: #3a8a5f;
   --color-success-600: #2c6e4b;
   --color-success-700: #21553a;
 
-  --color-warning-50:  #f6ecd9;
+  --color-warning-50: #f6ecd9;
   --color-warning-500: #b8811d;
   --color-warning-600: #9a6a12;
   --color-warning-700: #7a540e;
 
-  --color-danger-50:  #f4e4e4;
+  --color-danger-50: #f4e4e4;
   --color-danger-500: #b53b3b;
   --color-danger-600: #973030;
   --color-danger-700: #7a2727;
 
-  --color-info-50:  #e2edf4;
+  --color-info-50: #e2edf4;
   --color-info-500: #2a7ab0;
   --color-info-600: #1f5f8b;
   --color-info-700: #194c6f;
@@ -209,7 +209,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -262,7 +267,9 @@ h1, h2, h3, h4, h5, h6 {
   overscroll-behavior-x: contain;
 }
 
-.scroll-x::-webkit-scrollbar { height: 10px; }
+.scroll-x::-webkit-scrollbar {
+  height: 10px;
+}
 .scroll-x::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: 999px;
@@ -281,6 +288,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media print {
-  .no-print { display: none !important; }
-  body { background: #fff; color: #000; }
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
 }

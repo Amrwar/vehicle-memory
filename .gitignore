@@ -40,3 +40,6 @@ logs/
 # uploads (local dev object storage)
 apps/web/public/uploads/
 .storage/
+
+# TypeScript project references
+*.tsbuildinfo

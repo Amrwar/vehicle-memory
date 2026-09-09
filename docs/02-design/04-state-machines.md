@@ -70,12 +70,12 @@ advancing it, after which the status field means nothing.
 message naming what is missing, so the interface can say "this job type
 requires a quality check" rather than merely disabling a button.
 
-| Guard | Rule |
-| --- | --- |
+| Guard                    | Rule                                                                  |
+| ------------------------ | --------------------------------------------------------------------- |
 | `QUALITY_CHECK_REQUIRED` | `COMPLETED` refused when the job type demands a check and none passed |
-| `APPROVAL_REQUIRED` | `IN_PROGRESS` refused from `AWAITING_APPROVAL` without approval |
-| `NOTHING_TO_INVOICE` | `INVOICED` refused with no chargeable lines |
-| `TERMINAL_STATUS` | Nothing leaves `PAID` or `CANCELLED` |
+| `APPROVAL_REQUIRED`      | `IN_PROGRESS` refused from `AWAITING_APPROVAL` without approval       |
+| `NOTHING_TO_INVOICE`     | `INVOICED` refused with no chargeable lines                           |
+| `TERMINAL_STATUS`        | Nothing leaves `PAID` or `CANCELLED`                                  |
 
 ## 2. Estimate
 
@@ -163,4 +163,4 @@ them in `packages/core` buys three things:
 
 ---
 
-*Next: [Security model](05-security-model.md).*
+_Next: [Security model](05-security-model.md)._

@@ -35,11 +35,11 @@ carry their own access checks.
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **PostgreSQL row-level security** | The strongest option, and genuinely better in principle: the database refuses regardless of application bugs. Rejected for now because Prisma's connection pooling makes reliably setting a per-request session variable awkward, and getting it subtly wrong would give false confidence. Revisit in Phase 3, when the ledger raises the stakes. |
-| **A database per tenant** | Perfect isolation, but the passport is deliberately cross-tenant, so this is incompatible with the product. |
-| **Manual filtering with review discipline** | The industry default, and the reason these breaches keep happening. |
+| Option                                      | Why not                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PostgreSQL row-level security**           | The strongest option, and genuinely better in principle: the database refuses regardless of application bugs. Rejected for now because Prisma's connection pooling makes reliably setting a per-request session variable awkward, and getting it subtly wrong would give false confidence. Revisit in Phase 3, when the ledger raises the stakes. |
+| **A database per tenant**                   | Perfect isolation, but the passport is deliberately cross-tenant, so this is incompatible with the product.                                                                                                                                                                                                                                       |
+| **Manual filtering with review discipline** | The industry default, and the reason these breaches keep happening.                                                                                                                                                                                                                                                                               |
 
 ## Consequences
 

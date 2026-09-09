@@ -58,7 +58,10 @@ export default async function DiaryPage({
   ]);
 
   const capacity = Number(location?.dailyCapacityHours ?? 40);
-  const days = Array.from({ length: 7 }, (_, index) => new Date(start.getTime() + index * 86_400_000));
+  const days = Array.from(
+    { length: 7 },
+    (_, index) => new Date(start.getTime() + index * 86_400_000),
+  );
   const hours = Array.from({ length: CLOSING_HOUR - OPENING_HOUR }, (_, i) => OPENING_HOUR + i);
 
   const scheduled = bookings.map((booking) => ({

@@ -38,14 +38,14 @@ Specifically:
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
+| Option                                        | Why not                                                                                                                                                                                                                            |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **NestJS API plus a separate React frontend** | Cleaner module boundaries, and a genuinely reasonable choice. Rejected because it doubles the deployables and adds a network hop and a hand-maintained client for a team of three. Revisit if the API gains third-party consumers. |
-| **Django and DRF** | Excellent admin, which would give free back-office CRUD. Rejected because it splits the team across two languages and the domain layer could not then be shared with the frontend. |
-| **Rails** | Fast to build. Rejected for the same typing reason: money and status enums crossing an untyped boundary is exactly the class of bug that is most expensive here. |
-| **MySQL** | No partial indexes, weaker JSON, weaker constraint triggers. The invariants migration would not be expressible. |
-| **MongoDB** | The domain is relational to its core. A job joins nine tables on one screen. |
-| **A blockchain for the ledger** | Addressed separately in ADR-0005. |
+| **Django and DRF**                            | Excellent admin, which would give free back-office CRUD. Rejected because it splits the team across two languages and the domain layer could not then be shared with the frontend.                                                 |
+| **Rails**                                     | Fast to build. Rejected for the same typing reason: money and status enums crossing an untyped boundary is exactly the class of bug that is most expensive here.                                                                   |
+| **MySQL**                                     | No partial indexes, weaker JSON, weaker constraint triggers. The invariants migration would not be expressible.                                                                                                                    |
+| **MongoDB**                                   | The domain is relational to its core. A job joins nine tables on one screen.                                                                                                                                                       |
+| **A blockchain for the ledger**               | Addressed separately in ADR-0005.                                                                                                                                                                                                  |
 
 ## Consequences
 

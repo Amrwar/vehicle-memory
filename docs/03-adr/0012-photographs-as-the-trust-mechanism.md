@@ -37,11 +37,11 @@ revenue share pays for.
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **Photographs as generic job attachments** | They exist but nothing depends on them, so under time pressure they stop being taken. |
-| **Mandatory photographs on every finding** | Would guarantee coverage and would also guarantee that technicians photograph the floor to get past the screen. A requirement that can be satisfied meaninglessly produces meaningless data. |
-| **Treat all workshop entries as equally verified** | Simpler, and dishonest. A buyer is entitled to weigh "a garage typed this" differently from "a garage typed this and here is the picture". |
+| Option                                             | Why not                                                                                                                                                                                      |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Photographs as generic job attachments**         | They exist but nothing depends on them, so under time pressure they stop being taken.                                                                                                        |
+| **Mandatory photographs on every finding**         | Would guarantee coverage and would also guarantee that technicians photograph the floor to get past the screen. A requirement that can be satisfied meaninglessly produces meaningless data. |
+| **Treat all workshop entries as equally verified** | Simpler, and dishonest. A buyer is entitled to weigh "a garage typed this" differently from "a garage typed this and here is the picture".                                                   |
 
 ## Consequences
 

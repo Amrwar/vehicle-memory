@@ -17,7 +17,12 @@ const SALT = process.env.LEDGER_CHAIN_SALT ?? '';
 
 function reason(error: unknown, needle: string): string {
   const text = String((error as Error).message);
-  return text.split('\n').find((line) => line.includes(needle))?.trim() ?? 'blocked';
+  return (
+    text
+      .split('\n')
+      .find((line) => line.includes(needle))
+      ?.trim() ?? 'blocked'
+  );
 }
 
 async function main() {
@@ -105,7 +110,11 @@ async function main() {
     try {
       await prisma.$transaction(async (tx) => {
         const entry = await tx.journalEntry.create({
-          data: { orgId: org.id, reference: 'INTEGRITY-TEST', description: 'deliberately unbalanced' },
+          data: {
+            orgId: org.id,
+            reference: 'INTEGRITY-TEST',
+            description: 'deliberately unbalanced',
+          },
         });
         await tx.journalLine.create({
           data: { entryId: entry.id, accountId: account.id, debit: 100, credit: 0 },
@@ -146,9 +155,7 @@ async function main() {
   }
 
   console.info(
-    failures === 0
-      ? '\nAll integrity guarantees held.'
-      : `\n${failures} guarantee(s) FAILED.`,
+    failures === 0 ? '\nAll integrity guarantees held.' : `\n${failures} guarantee(s) FAILED.`,
   );
 
   if (failures > 0) process.exitCode = 1;

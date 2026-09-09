@@ -1,12 +1,12 @@
 # Project Proposal — Carnet
 
-| | |
-| --- | --- |
-| **Document** | Commercial and delivery proposal |
-| **Version** | 1.0 |
-| **Date** | 9 September 2026 |
-| **Prepared by** | Amr Hefny |
-| **Status** | For approval |
+|                 |                                  |
+| --------------- | -------------------------------- |
+| **Document**    | Commercial and delivery proposal |
+| **Version**     | 1.0                              |
+| **Date**        | 9 September 2026                 |
+| **Prepared by** | Amr Hefny                        |
+| **Status**      | For approval                     |
 
 ---
 
@@ -18,9 +18,9 @@ rather than the owner or the workshop**.
 
 The workshop software market is mature and competently served. We do not
 propose to win on feature count. We propose to win on a structural advantage
-that incumbents cannot copy without rebuilding their data model: *every job a
+that incumbents cannot copy without rebuilding their data model: _every job a
 Carnet workshop completes contributes verified events to a vehicle history that
-outlives the customer relationship.*
+outlives the customer relationship._
 
 That produces a compounding asset. Workshop software is a business with modest
 switching costs and price competition. A vehicle history network with genuine
@@ -36,10 +36,10 @@ sellable product with paying customers by week 20.
 
 ### 2.1 Two revenue lines, one build
 
-| Line | Customer | Model | Timing |
-| --- | --- | --- | --- |
-| **Carnet Workshop** | Independent workshops, 2 to 30 bays | SaaS subscription, per bay per month | Revenue from month 5 |
-| **Carnet Passport** | Vehicle buyers and sellers | Per verified report, revenue-shared with contributing workshops | Revenue from month 18, once coverage supports it |
+| Line                | Customer                            | Model                                                           | Timing                                           |
+| ------------------- | ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
+| **Carnet Workshop** | Independent workshops, 2 to 30 bays | SaaS subscription, per bay per month                            | Revenue from month 5                             |
+| **Carnet Passport** | Vehicle buyers and sellers          | Per verified report, revenue-shared with contributing workshops | Revenue from month 18, once coverage supports it |
 
 The subscription business funds the company. The passport business is what
 makes the company valuable. Critically, **the second requires no additional
@@ -99,15 +99,15 @@ phase whose output is a document.
 These are deliberately deferred, not forgotten. Each is scoped in the
 [roadmap](06-roadmap.md).
 
-| Excluded | Phase | Why deferred |
-| --- | --- | --- |
-| HR, payroll, commissions | 4 | High regulatory variance by jurisdiction; buy or integrate before building |
-| Multi-location stock transfer and consolidation | 4 | Needs real multi-site customers to design against |
-| Native mobile applications | 5 | The responsive web technician interface is sufficient to validate; native is an optimisation |
-| Online customer self-booking | 5 | Requires the diary to be proven under real load first |
-| Forecasting and AI-assisted diagnosis | 6 | Requires a corpus of real job data that does not yet exist |
-| OBD telematics ingestion | 6 | Hardware partnership, separate commercial track |
-| Accounting-package integration (Xero, QuickBooks) | 3.5 | Build the ledger first so there is something coherent to sync |
+| Excluded                                          | Phase | Why deferred                                                                                 |
+| ------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------- |
+| HR, payroll, commissions                          | 4     | High regulatory variance by jurisdiction; buy or integrate before building                   |
+| Multi-location stock transfer and consolidation   | 4     | Needs real multi-site customers to design against                                            |
+| Native mobile applications                        | 5     | The responsive web technician interface is sufficient to validate; native is an optimisation |
+| Online customer self-booking                      | 5     | Requires the diary to be proven under real load first                                        |
+| Forecasting and AI-assisted diagnosis             | 6     | Requires a corpus of real job data that does not yet exist                                   |
+| OBD telematics ingestion                          | 6     | Hardware partnership, separate commercial track                                              |
+| Accounting-package integration (Xero, QuickBooks) | 3.5   | Build the ledger first so there is something coherent to sync                                |
 
 ### 3.3 Assumptions
 
@@ -169,14 +169,14 @@ on the parts that are solved.
 
 ### 5.1 Shape of the team
 
-| Role | Allocation | Weeks | Responsibility |
-| --- | --- | --- | --- |
-| Tech lead / architect | 1.0 FTE | 28 | Domain model, architecture, code review, the hard parts |
-| Senior full-stack engineer | 1.0 FTE | 28 | Feature delivery across the stack |
-| Full-stack engineer | 1.0 FTE | 24 | Feature delivery, from week 5 |
-| Product designer | 0.5 FTE | 20 | Design system, screen design, usability testing |
-| QA engineer | 0.5 FTE | 22 | Test strategy, automation, exploratory testing, from week 7 |
-| Product owner | 0.2 FTE | 28 | Prioritisation, acceptance, design-partner relationships |
+| Role                       | Allocation | Weeks | Responsibility                                              |
+| -------------------------- | ---------- | ----- | ----------------------------------------------------------- |
+| Tech lead / architect      | 1.0 FTE    | 28    | Domain model, architecture, code review, the hard parts     |
+| Senior full-stack engineer | 1.0 FTE    | 28    | Feature delivery across the stack                           |
+| Full-stack engineer        | 1.0 FTE    | 24    | Feature delivery, from week 5                               |
+| Product designer           | 0.5 FTE    | 20    | Design system, screen design, usability testing             |
+| QA engineer                | 0.5 FTE    | 22    | Test strategy, automation, exploratory testing, from week 7 |
+| Product owner              | 0.2 FTE    | 28    | Prioritisation, acceptance, design-partner relationships    |
 
 Peak team size is 4.2 FTE. Deliberately small: this domain requires shared
 understanding of a single intricate model, and that does not survive a large
@@ -186,14 +186,14 @@ team.
 
 Blended rate assumption of £550 per person-day, 5-day weeks.
 
-| Phase | Weeks | Person-weeks | Estimate |
-| --- | --- | --- | --- |
-| Phase 1 — Workshop Core | 10 | 34 | £93,500 |
-| Phase 2 — Inventory and Procurement | 8 | 34 | £93,500 |
-| Phase 3 — Finance and ERP | 10 | 42 | £115,500 |
-| **Build subtotal** | **28** | **110** | **£302,500** |
-| Contingency at 15% (held, released on evidence) | | | £45,375 |
-| **Total with contingency** | | | **£347,875** |
+| Phase                                           | Weeks  | Person-weeks | Estimate     |
+| ----------------------------------------------- | ------ | ------------ | ------------ |
+| Phase 1 — Workshop Core                         | 10     | 34           | £93,500      |
+| Phase 2 — Inventory and Procurement             | 8      | 34           | £93,500      |
+| Phase 3 — Finance and ERP                       | 10     | 42           | £115,500     |
+| **Build subtotal**                              | **28** | **110**      | **£302,500** |
+| Contingency at 15% (held, released on evidence) |        |              | £45,375      |
+| **Total with contingency**                      |        |              | **£347,875** |
 
 Range presented in the summary (£268,000–£312,000) reflects the plausible
 outcome band excluding held contingency, per the estimation model in
@@ -205,13 +205,13 @@ scaling with tenant count.
 
 ### 5.3 Payment schedule
 
-| Milestone | Trigger | Share |
-| --- | --- | --- |
-| Mobilisation | Contract signature | 15% |
-| Phase 1 acceptance | Workshop Core demonstrated against acceptance criteria | 30% |
-| Phase 2 acceptance | Inventory and Procurement accepted | 25% |
-| Phase 3 acceptance | Finance and ERP accepted | 25% |
-| Warranty release | 30 days after Phase 3 acceptance | 5% |
+| Milestone          | Trigger                                                | Share |
+| ------------------ | ------------------------------------------------------ | ----- |
+| Mobilisation       | Contract signature                                     | 15%   |
+| Phase 1 acceptance | Workshop Core demonstrated against acceptance criteria | 30%   |
+| Phase 2 acceptance | Inventory and Procurement accepted                     | 25%   |
+| Phase 3 acceptance | Finance and ERP accepted                               | 25%   |
+| Warranty release   | 30 days after Phase 3 acceptance                       | 5%    |
 
 ---
 
@@ -238,14 +238,14 @@ inventory schema work does not contend with Phase 1 UI work.
 
 ### Key dates
 
-| Week | Milestone |
-| --- | --- |
-| 2 | Design system approved. Domain model reviewed with design partners. |
-| 4 | Architecture and data model signed off. Walking skeleton deployed. |
-| 10 | **Phase 1 accepted.** MVP live with design partners. |
-| 20 | **First paying customer.** Pricing validated. |
-| 18 | Phase 2 accepted. |
-| 28 | **Phase 3 accepted.** Commercially complete platform. |
+| Week | Milestone                                                           |
+| ---- | ------------------------------------------------------------------- |
+| 2    | Design system approved. Domain model reviewed with design partners. |
+| 4    | Architecture and data model signed off. Walking skeleton deployed.  |
+| 10   | **Phase 1 accepted.** MVP live with design partners.                |
+| 20   | **First paying customer.** Pricing validated.                       |
+| 18   | Phase 2 accepted.                                                   |
+| 28   | **Phase 3 accepted.** Commercially complete platform.               |
 
 ---
 
@@ -254,13 +254,13 @@ inventory schema work does not contend with Phase 1 UI work.
 The five that could actually derail this. The full register with owners and
 triggers is in [Risk register](../05-project/04-risk-register.md).
 
-| # | Risk | Impact | Likelihood | Mitigation |
-| --- | --- | --- | --- | --- |
-| R1 | **Technicians do not adopt the shop-floor interface.** Data quality collapses and the passport is worthless. | Critical | Medium | Design partners from week 3. Usability testing on real tablets in a real workshop, with gloves on, before Phase 1 acceptance. |
-| R2 | **Accounting correctness defects.** A ledger that does not balance destroys trust irrecoverably. | Critical | Medium | Double-entry invariants enforced in the domain layer and property-tested. No journal may post unbalanced. External accountant review before Phase 3 acceptance. |
-| R3 | **Cold-start.** Passports stay empty long enough that the differentiator never materialises. | High | High | Phase 1 already writes passport events. Coverage is measured from day one. Revenue share designed in from the start, not retrofitted. |
-| R4 | **Scope expansion into general ERP.** The word "ERP" attracts unbounded requirements. | High | High | Explicit exclusions in 3.2. Anything not on the roadmap requires a change request with cost and schedule impact. |
-| R5 | **Data protection exposure.** We hold personal data plus a vehicle's complete history. A breach is existential. | Critical | Low | Tenant isolation enforced at the data-access layer, not by convention. Security model documented and reviewed. Penetration test before general availability. |
+| #   | Risk                                                                                                            | Impact   | Likelihood | Mitigation                                                                                                                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | **Technicians do not adopt the shop-floor interface.** Data quality collapses and the passport is worthless.    | Critical | Medium     | Design partners from week 3. Usability testing on real tablets in a real workshop, with gloves on, before Phase 1 acceptance.                                   |
+| R2  | **Accounting correctness defects.** A ledger that does not balance destroys trust irrecoverably.                | Critical | Medium     | Double-entry invariants enforced in the domain layer and property-tested. No journal may post unbalanced. External accountant review before Phase 3 acceptance. |
+| R3  | **Cold-start.** Passports stay empty long enough that the differentiator never materialises.                    | High     | High       | Phase 1 already writes passport events. Coverage is measured from day one. Revenue share designed in from the start, not retrofitted.                           |
+| R4  | **Scope expansion into general ERP.** The word "ERP" attracts unbounded requirements.                           | High     | High       | Explicit exclusions in 3.2. Anything not on the roadmap requires a change request with cost and schedule impact.                                                |
+| R5  | **Data protection exposure.** We hold personal data plus a vehicle's complete history. A breach is existential. | Critical | Low        | Tenant isolation enforced at the data-access layer, not by convention. Security model documented and reviewed. Penetration test before general availability.    |
 
 ---
 
@@ -287,11 +287,11 @@ Approval of this proposal authorises mobilisation and Phase 1. Phases 2 and 3
 are re-confirmed at their respective gates, at which point either party may
 stop with no further obligation beyond work completed.
 
-| | Name | Signature | Date |
-| --- | --- | --- | --- |
-| **Client** | | | |
-| **Supplier** | | | |
+|              | Name | Signature | Date |
+| ------------ | ---- | --------- | ---- |
+| **Client**   |      |           |      |
+| **Supplier** |      |           |      |
 
 ---
 
-*Next: [Market and competition](03-market-and-competition.md).*
+_Next: [Market and competition](03-market-and-competition.md)._

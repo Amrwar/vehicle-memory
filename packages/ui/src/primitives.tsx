@@ -22,8 +22,7 @@ const button = cva(
           'hover:bg-(--surface-sunk)',
         ghost: 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
         danger: 'bg-(--danger) text-white hover:brightness-110',
-        accent:
-          'bg-(--accent) text-white hover:brightness-110 dark:text-(--color-slate-950)',
+        accent: 'bg-(--accent) text-white hover:brightness-110 dark:text-(--color-slate-950)',
         link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',
       },
       size: {
@@ -42,8 +41,7 @@ const button = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof button> {}
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof button> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, block, type = 'button', ...props }, ref) => (
@@ -87,8 +85,7 @@ const badge = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badge> {
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badge> {
   /** Small leading dot, for statuses read at a glance across a list. */
   dot?: boolean;
 }
@@ -96,9 +93,7 @@ export interface BadgeProps
 export function Badge({ className, tone, size, dot, children, ...props }: BadgeProps) {
   return (
     <span className={cn(badge({ tone, size }), className)} {...props}>
-      {dot ? (
-        <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
-      ) : null}
+      {dot ? <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current opacity-80" /> : null}
       {children}
     </span>
   );
@@ -111,16 +106,10 @@ export function Badge({ className, tone, size, dot, children, ...props }: BadgeP
    Not everything is a card.
    =========================================================================== */
 
-export function Card({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'bg-(--surface) border border-(--border) rounded-(--radius-lg)',
-        className,
-      )}
+      className={cn('bg-(--surface) border border-(--border) rounded-(--radius-lg)', className)}
       {...props}
     />
   );
@@ -339,9 +328,7 @@ export function PageHeader({
       <div className="min-w-0">
         {eyebrow ? <p className="eyebrow mb-1">{eyebrow}</p> : null}
         <h1 className="text-[22px] font-semibold leading-tight">{title}</h1>
-        {description ? (
-          <p className="text-[13px] text-(--text-faint) mt-1">{description}</p>
-        ) : null}
+        {description ? <p className="text-[13px] text-(--text-faint) mt-1">{description}</p> : null}
       </div>
       {actions ? <div className="flex items-center gap-2 shrink-0">{actions}</div> : null}
     </div>

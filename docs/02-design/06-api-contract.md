@@ -13,17 +13,17 @@ are shaped by it rather than retrofitted to it.
 
 ## 2. Conventions
 
-| Aspect | Rule |
-| --- | --- |
-| Base | `/api/v1` |
-| Format | JSON, UTF-8 |
-| Auth | `Authorization: Bearer <token>` |
-| Tenancy | Derived from the token. Never a parameter, so it cannot be forged. |
-| Times | ISO 8601, UTC. `2026-09-09T15:30:00Z` |
-| Money | `{ "amount": "1509.00", "currency": "GBP" }` as a string, never a float |
-| Ids | Opaque strings. Clients must not parse them. |
-| Casing | `camelCase` |
-| Idempotency | `Idempotency-Key` header on POST; a repeat returns the original result |
+| Aspect      | Rule                                                                    |
+| ----------- | ----------------------------------------------------------------------- |
+| Base        | `/api/v1`                                                               |
+| Format      | JSON, UTF-8                                                             |
+| Auth        | `Authorization: Bearer <token>`                                         |
+| Tenancy     | Derived from the token. Never a parameter, so it cannot be forged.      |
+| Times       | ISO 8601, UTC. `2026-09-09T15:30:00Z`                                   |
+| Money       | `{ "amount": "1509.00", "currency": "GBP" }` as a string, never a float |
+| Ids         | Opaque strings. Clients must not parse them.                            |
+| Casing      | `camelCase`                                                             |
+| Idempotency | `Idempotency-Key` header on POST; a repeat returns the original result  |
 
 ### Pagination
 
@@ -56,34 +56,34 @@ RFC 9457 problem details, with a machine-readable code:
 }
 ```
 
-The `detail` names what *is* permitted. An error that only says no forces the
+The `detail` names what _is_ permitted. An error that only says no forces the
 client to guess.
 
-| Status | Meaning |
-| --- | --- |
-| 400 | Malformed request |
-| 401 | Missing or invalid token |
-| 403 | Authenticated, but the role lacks the permission |
-| 404 | Not found, **or** outside your tenant. Deliberately indistinguishable. |
-| 409 | Conflict: illegal transition, version mismatch |
-| 422 | Validation failed. `errors[]` names each field. |
-| 429 | Rate limited. `Retry-After` present. |
+| Status | Meaning                                                                |
+| ------ | ---------------------------------------------------------------------- |
+| 400    | Malformed request                                                      |
+| 401    | Missing or invalid token                                               |
+| 403    | Authenticated, but the role lacks the permission                       |
+| 404    | Not found, **or** outside your tenant. Deliberately indistinguishable. |
+| 409    | Conflict: illegal transition, version mismatch                         |
+| 422    | Validation failed. `errors[]` names each field.                        |
+| 429    | Rate limited. `Retry-After` present.                                   |
 
 ## 3. Surface
 
 ### Jobs
 
-| Method | Path | Permission |
-| --- | --- | --- |
-| GET | `/jobs` | `job:read` |
-| POST | `/jobs` | `job:write` |
-| GET | `/jobs/{id}` | `job:read` |
-| PATCH | `/jobs/{id}` | `job:write` |
-| POST | `/jobs/{id}/status` | `job:write` |
-| GET | `/jobs/{id}/timeline` | `job:read` |
-| POST | `/jobs/{id}/labour` | `job:write` |
-| POST | `/jobs/{id}/parts` | `job:write` |
-| POST | `/jobs/{id}/time-entries` | `timeentry:write` |
+| Method | Path                      | Permission        |
+| ------ | ------------------------- | ----------------- |
+| GET    | `/jobs`                   | `job:read`        |
+| POST   | `/jobs`                   | `job:write`       |
+| GET    | `/jobs/{id}`              | `job:read`        |
+| PATCH  | `/jobs/{id}`              | `job:write`       |
+| POST   | `/jobs/{id}/status`       | `job:write`       |
+| GET    | `/jobs/{id}/timeline`     | `job:read`        |
+| POST   | `/jobs/{id}/labour`       | `job:write`       |
+| POST   | `/jobs/{id}/parts`        | `job:write`       |
+| POST   | `/jobs/{id}/time-entries` | `timeentry:write` |
 
 Status changes go through their own endpoint rather than `PATCH`, because a
 transition is a domain operation with guards, not a field assignment.
@@ -95,36 +95,36 @@ POST /api/v1/jobs/{id}/status
 
 ### Vehicles and passport
 
-| Method | Path | Permission |
-| --- | --- | --- |
-| GET | `/vehicles/{id}` | `vehicle:read` + vehicle access |
-| GET | `/vehicles/by-vin/{vin}` | `vehicle:read` |
-| GET | `/vehicles/{id}/passport` | `passport:read` + vehicle access |
-| GET | `/vehicles/{id}/passport/verify` | `passport:read` |
-| POST | `/vehicles/{id}/odometer` | `vehicle:write` |
-| POST | `/vehicles/{id}/shares` | `passport:share` (owner only) |
-| DELETE | `/vehicles/{id}/shares/{shareId}` | `passport:share` |
+| Method | Path                              | Permission                       |
+| ------ | --------------------------------- | -------------------------------- |
+| GET    | `/vehicles/{id}`                  | `vehicle:read` + vehicle access  |
+| GET    | `/vehicles/by-vin/{vin}`          | `vehicle:read`                   |
+| GET    | `/vehicles/{id}/passport`         | `passport:read` + vehicle access |
+| GET    | `/vehicles/{id}/passport/verify`  | `passport:read`                  |
+| POST   | `/vehicles/{id}/odometer`         | `vehicle:write`                  |
+| POST   | `/vehicles/{id}/shares`           | `passport:share` (owner only)    |
+| DELETE | `/vehicles/{id}/shares/{shareId}` | `passport:share`                 |
 
 There is deliberately **no** endpoint that updates or deletes a passport event.
 The API surface enforces the same append-only rule as the database.
 
 ### Inspections and estimates
 
-| Method | Path | Permission |
-| --- | --- | --- |
-| POST | `/jobs/{id}/inspections` | `inspection:write` |
-| PATCH | `/inspections/{id}/results/{resultId}` | `inspection:write` |
-| POST | `/inspections/{id}/complete` | `inspection:write` |
-| POST | `/inspections/{id}/to-estimate` | `estimate:write` |
-| POST | `/estimates/{id}/send` | `estimate:send` |
+| Method | Path                                   | Permission         |
+| ------ | -------------------------------------- | ------------------ |
+| POST   | `/jobs/{id}/inspections`               | `inspection:write` |
+| PATCH  | `/inspections/{id}/results/{resultId}` | `inspection:write` |
+| POST   | `/inspections/{id}/complete`           | `inspection:write` |
+| POST   | `/inspections/{id}/to-estimate`        | `estimate:write`   |
+| POST   | `/estimates/{id}/send`                 | `estimate:send`    |
 
 ### Public, token-authenticated
 
-| Method | Path | Auth |
-| --- | --- | --- |
-| GET | `/public/passport/{token}` | Share token |
-| GET | `/public/estimates/{token}` | Estimate token |
-| POST | `/public/estimates/{token}/decision` | Estimate token |
+| Method | Path                                 | Auth           |
+| ------ | ------------------------------------ | -------------- |
+| GET    | `/public/passport/{token}`           | Share token    |
+| GET    | `/public/estimates/{token}`          | Estimate token |
+| POST   | `/public/estimates/{token}/decision` | Estimate token |
 
 These are separate from the authenticated surface, rate limited harder, and
 return a narrower projection with no personal details.
@@ -134,12 +134,12 @@ return a narrower projection with no personal details.
 For integrations, signed with HMAC-SHA256 over the raw body, timestamped to
 prevent replay.
 
-| Event | When |
-| --- | --- |
-| `job.completed` | A job reaches COMPLETED |
-| `estimate.decided` | A customer approves or declines |
-| `invoice.issued` | An invoice is issued |
-| `payment.received` | A payment is recorded |
+| Event                     | When                             |
+| ------------------------- | -------------------------------- |
+| `job.completed`           | A job reaches COMPLETED          |
+| `estimate.decided`        | A customer approves or declines  |
+| `invoice.issued`          | An invoice is issued             |
+| `payment.received`        | A payment is recorded            |
 | `passport.event.appended` | An event is written to a vehicle |
 
 Delivery is at-least-once with exponential backoff, so consumers must be
@@ -159,4 +159,4 @@ It does not yet exist because the endpoints do not; it lands with Phase 3.5.
 
 ---
 
-*Next: [Accounting model](07-accounting-model.md).*
+_Next: [Accounting model](07-accounting-model.md)._

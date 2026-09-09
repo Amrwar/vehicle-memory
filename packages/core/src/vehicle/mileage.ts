@@ -166,9 +166,7 @@ export function projectServiceDue(input: ServiceIntervalInput): ServiceDue {
 
   const candidates = [dueAt, projectedFromKm].filter((d): d is Date => d !== null);
   const projectedDueAt =
-    candidates.length > 0
-      ? new Date(Math.min(...candidates.map((d) => d.getTime())))
-      : null;
+    candidates.length > 0 ? new Date(Math.min(...candidates.map((d) => d.getTime()))) : null;
 
   const isOverdue =
     (daysRemaining !== null && daysRemaining < 0) || (kmRemaining !== null && kmRemaining < 0);

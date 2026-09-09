@@ -14,6 +14,7 @@ Personas are referenced as defined in [Personas](../00-product/04-personas.md).
 ## Epic A — Foundation and access
 
 ### A1 — Sign in to my workshop
+
 **As** any staff user **I want** to sign in with my email and password **so
 that** I can reach my workshop's data and nobody else's.
 **Size** 5 · **Satisfies** FR-103, FR-104, FR-105, FR-110
@@ -33,6 +34,7 @@ that** I can reach my workshop's data and nobody else's.
   httpOnly, Secure and SameSite=Lax.
 
 ### A2 — Never see another workshop's data
+
 **As** a workshop owner **I want** absolute certainty that no other
 organisation can see my records **so that** I can trust the platform with my
 business.
@@ -51,6 +53,7 @@ business.
   cross-tenant isolation test for every tenant-scoped entity.
 
 ### A3 — See only what my role permits
+
 **As** a workshop owner **I want** technicians to see jobs but not financial
 reports **so that** commercial information stays with the people who need it.
 **Size** 5 · **Satisfies** FR-106, FR-107
@@ -63,6 +66,7 @@ reports **so that** commercial information stays with the people who need it.
   checked, **then** the result is deny.
 
 ### A4 — Know who changed what
+
 **As** a workshop owner **I want** an audit record of every change **so that**
 I can resolve disputes about what happened.
 **Size** 5 · **Satisfies** FR-109
@@ -78,6 +82,7 @@ I can resolve disputes about what happened.
 ## Epic B — Customers and vehicles
 
 ### B1 — Add a customer without re-typing
+
 **As** Sara, service advisor **I want** to create a customer quickly while
 someone is on the phone **so that** I am not keeping them waiting.
 **Size** 5 · **Satisfies** FR-201, FR-202, FR-203, FR-206
@@ -91,6 +96,7 @@ someone is on the phone **so that** I am not keeping them waiting.
   form asks for a trading name and tax reference instead of a personal name.
 
 ### B2 — See everything about a customer in one place
+
 **As** Sara **I want** one screen showing a customer's vehicles, jobs, invoices
 and messages **so that** I can answer any question without navigating away.
 **Size** 5 · **Satisfies** FR-205
@@ -102,6 +108,7 @@ and messages **so that** I can answer any question without navigating away.
   directly to that vehicle without losing my place.
 
 ### B3 — Identify a vehicle from its VIN
+
 **As** Sara **I want** the VIN to fill in the vehicle details **so that** I do
 not mistype a model and corrupt the history.
 **Size** 8 · **Satisfies** FR-301, FR-302, FR-304, FR-305
@@ -118,6 +125,7 @@ not mistype a model and corrupt the history.
   disclosure level the owner permits.
 
 ### B4 — Record mileage and catch impossible readings
+
 **As** the system **I want** to validate odometer readings **so that** the
 history stays trustworthy.
 **Size** 5 · **Satisfies** FR-306, FR-307, FR-308
@@ -136,6 +144,7 @@ history stays trustworthy.
 ## Epic C — The vehicle passport
 
 ### C1 — See a vehicle's whole life
+
 **As** Maria, vehicle owner **I want** to see everything that has happened to
 my car **so that** I understand what I own.
 **Size** 8 · **Satisfies** FR-401, FR-402, FR-405, FR-413
@@ -151,6 +160,7 @@ my car **so that** I understand what I own.
   within the NFR-104 budget.
 
 ### C2 — Trust that the history has not been altered
+
 **As** David, used-car buyer **I want** evidence that the history is not edited
 **so that** I can rely on it when spending fourteen thousand pounds.
 **Size** 13 · **Satisfies** FR-403, FR-404, FR-406
@@ -166,6 +176,7 @@ my car **so that** I understand what I own.
   visible with the original shown as superseded.
 
 ### C3 — Write history automatically by doing the work
+
 **As** John, technician **I want** the passport to fill itself in **so that** I
 never do data entry twice.
 **Size** 8 · **Satisfies** FR-408, FR-707, FR-614
@@ -180,6 +191,7 @@ never do data entry twice.
   because losing the job is worse than delaying the event.
 
 ### C4 — Share my car's history with a buyer
+
 **As** Maria, selling her car **I want** to give a buyer a link **so that** I
 can prove how well it was maintained.
 **Size** 8 · **Satisfies** FR-409, FR-410, NFR-410
@@ -195,6 +207,7 @@ can prove how well it was maintained.
 - **Given** an expired link, **when** it is opened, **then** access is refused.
 
 ### C5 — Hand the history over with the car
+
 **As** Maria **I want** the history to transfer to the buyer **so that** it
 stays with the vehicle.
 **Size** 8 · **Satisfies** FR-411, FR-412
@@ -212,6 +225,7 @@ stays with the vehicle.
 ## Epic D — Booking and the diary
 
 ### D1 — See the week at a glance
+
 **As** Sara **I want** a diary showing bays and technicians **so that** I know
 what can be promised.
 **Size** 13 · **Satisfies** FR-501, FR-502
@@ -226,6 +240,7 @@ what can be promised.
   entries remain and the filter persists across reloads.
 
 ### D2 — Move a booking by dragging it
+
 **As** Sara **I want** to drag a booking to a new slot **so that** rescheduling
 takes seconds.
 **Size** 8 · **Satisfies** FR-504, FR-505
@@ -240,6 +255,7 @@ takes seconds.
   returns to its original position.
 
 ### D3 — Turn a booking into a job on arrival
+
 **As** Sara **I want** one action to start the job **so that** check-in is not
 re-typing.
 **Size** 5 · **Satisfies** FR-506
@@ -256,6 +272,7 @@ re-typing.
 ## Epic E — The job
 
 ### E1 — Everything about a job on one screen
+
 **As** Ahmed, owner **I want** one screen that answers every question about a
 job **so that** I never navigate between modules to understand what happened.
 **Size** 13 · **Satisfies** FR-601, FR-604, FR-605, FR-606
@@ -270,6 +287,7 @@ job **so that** I never navigate between modules to understand what happened.
   **then** each is reachable in one click and shows its status inline.
 
 ### E2 — Only legal status changes
+
 **As** the system **I want** to reject impossible transitions **so that** the
 data stays coherent.
 **Size** 8 · **Satisfies** FR-602, FR-603
@@ -284,6 +302,7 @@ data stays coherent.
   note are recorded.
 
 ### E3 — Clock on and off
+
 **As** John **I want** to start and stop the clock in one tap **so that**
 labour time is real rather than estimated.
 **Size** 5 · **Satisfies** FR-610
@@ -300,6 +319,7 @@ labour time is real rather than estimated.
 ## Epic F — Inspection
 
 ### F1 — Complete an inspection on a tablet
+
 **As** John **I want** to record a 30-point inspection in under four minutes
 **so that** it actually gets done.
 **Size** 13 · **Satisfies** FR-701, FR-702, FR-703, FR-706, NFR-605, NFR-606
@@ -317,6 +337,7 @@ labour time is real rather than estimated.
   gloves, **then** the median completion is under four minutes.
 
 ### F2 — Structured measurements, not prose
+
 **As** Ahmed **I want** tyre and brake measurements recorded as numbers **so
 that** wear can be tracked across visits.
 **Size** 5 · **Satisfies** FR-709
@@ -329,6 +350,7 @@ that** wear can be tracked across visits.
   **then** the previous value and the wear rate are shown.
 
 ### F3 — Turn findings into an estimate
+
 **As** Sara **I want** inspection findings to become estimate lines **so that**
 nothing is lost in re-typing.
 **Size** 8 · **Satisfies** FR-705
@@ -346,6 +368,7 @@ nothing is lost in re-typing.
 ## Epic G — Estimate and approval
 
 ### G1 — Send an estimate the customer can actually read
+
 **As** Sara **I want** to send an estimate by SMS **so that** approval does not
 depend on a phone call.
 **Size** 8 · **Satisfies** FR-803, FR-804, FR-809
@@ -359,6 +382,7 @@ depend on a phone call.
   refused with an instruction to contact the workshop.
 
 ### G2 — Approve on a phone in under a minute
+
 **As** Maria **I want** to approve without an account **so that** I can do it
 in a supermarket car park.
 **Size** 8 · **Satisfies** FR-805, FR-806, FR-807, FR-808, NFR-608
@@ -376,6 +400,7 @@ in a supermarket car park.
   job and the advisor is notified.
 
 ### G3 — Extra work needs fresh approval
+
 **As** Ahmed **I want** work beyond the approved figure to require re-approval
 **so that** we never argue at the collection desk.
 **Size** 5 · **Satisfies** FR-812, FR-810
@@ -390,6 +415,7 @@ in a supermarket car park.
 ## Epic H — Technician interface
 
 ### H1 — See only my work
+
 **As** John **I want** a list of just my jobs for today **so that** I do not
 navigate a management system.
 **Size** 8 · **Satisfies** FR-106, NFR-108
@@ -403,6 +429,7 @@ navigate a management system.
   is interactive within 1.5 seconds.
 
 ### H2 — Request a part without leaving the job
+
 **As** John **I want** to request a part in two taps **so that** I do not walk
 to the office.
 **Size** 5 · **Satisfies** FR-609, FR-1102
@@ -417,6 +444,7 @@ to the office.
 ## Epic I — Invoice and payment
 
 ### I1 — Invoice from the completed job
+
 **As** Sara **I want** the invoice to build itself **so that** collection is not
 delayed by paperwork.
 **Size** 8 · **Satisfies** FR-901, FR-902, FR-903, FR-907
@@ -429,6 +457,7 @@ delayed by paperwork.
   assigned, **then** they are sequential with no gaps.
 
 ### I2 — Take a part payment
+
 **As** Sara **I want** to record a deposit or partial payment **so that** the
 balance is always right.
 **Size** 5 · **Satisfies** FR-905, FR-906, FR-908
@@ -443,6 +472,7 @@ balance is always right.
 ## Epic J — Dashboard and portal
 
 ### J1 — Know what needs me today
+
 **As** Ahmed **I want** a dashboard of actions rather than charts **so that**
 opening it tells me what to do.
 **Size** 8 · **Satisfies** FR-1401, FR-1402
@@ -455,6 +485,7 @@ opening it tells me what to do.
   reviewed and chased from the dashboard itself.
 
 ### J2 — Follow my car from my phone
+
 **As** Maria **I want** to see my vehicle's status without ringing **so that**
 I know when it will be ready.
 **Size** 8 · **Satisfies** FR-1301, FR-1303, FR-1304, FR-1308
@@ -495,4 +526,4 @@ the bottom row alone.
 
 ---
 
-*Next: [Traceability matrix](04-traceability-matrix.md).*
+_Next: [Traceability matrix](04-traceability-matrix.md)._

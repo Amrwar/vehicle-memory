@@ -4,26 +4,26 @@
 
 Two-week sprints. Deliberately boring.
 
-| Ceremony | When | Length | Purpose |
-| --- | --- | --- | --- |
-| Planning | Day 1 | 90 min | Agree the sprint goal and pull work |
-| Standup | Daily | 10 min | Blockers only, not status theatre |
-| Design-partner review | Fortnightly | 60 min | Real workshops, real feedback |
-| Demo | Last day | 45 min | Against written acceptance criteria |
-| Retrospective | Last day | 45 min | One change, owned by a person |
+| Ceremony              | When        | Length | Purpose                             |
+| --------------------- | ----------- | ------ | ----------------------------------- |
+| Planning              | Day 1       | 90 min | Agree the sprint goal and pull work |
+| Standup               | Daily       | 10 min | Blockers only, not status theatre   |
+| Design-partner review | Fortnightly | 60 min | Real workshops, real feedback       |
+| Demo                  | Last day    | 45 min | Against written acceptance criteria |
+| Retrospective         | Last day    | 45 min | One change, owned by a person       |
 
 A retrospective that produces five actions produces none. One change, one
 owner, checked at the next retrospective.
 
 ## Roles
 
-| Role | Accountable for |
-| --- | --- |
+| Role          | Accountable for                                    |
+| ------------- | -------------------------------------------------- |
 | Product owner | Priority, acceptance, design-partner relationships |
-| Tech lead | Architecture, the domain model, review quality |
-| Engineers | Delivery, tests, documentation of their work |
-| Designer | Design system, screen design, usability testing |
-| QA | Test strategy, automation, exploratory testing |
+| Tech lead     | Architecture, the domain model, review quality     |
+| Engineers     | Delivery, tests, documentation of their work       |
+| Designer      | Design system, screen design, usability testing    |
+| QA            | Test strategy, automation, exploratory testing     |
 
 ## Work flow
 
@@ -53,12 +53,12 @@ than any planning meeting.
 
 ## Decisions
 
-| Kind | How |
-| --- | --- |
-| Architectural | ADR, written before implementation |
-| Product | Product owner decides, records why |
-| Technical, local | Whoever is doing the work |
-| Contested | Tech lead and product owner, within one working day |
+| Kind             | How                                                 |
+| ---------------- | --------------------------------------------------- |
+| Architectural    | ADR, written before implementation                  |
+| Product          | Product owner decides, records why                  |
+| Technical, local | Whoever is doing the work                           |
+| Contested        | Tech lead and product owner, within one working day |
 
 Nothing waits more than a day for a decision. A blocked engineer is more
 expensive than an imperfect choice.
@@ -72,4 +72,4 @@ expensive than an imperfect choice.
 
 ---
 
-*Next: [Definition of done](02-definition-of-done.md).*
+_Next: [Definition of done](02-definition-of-done.md)._

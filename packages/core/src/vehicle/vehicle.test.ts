@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  assessReading,
-  averageKmPerDay,
-  projectServiceDue,
-  type Reading,
-} from './mileage';
+import { assessReading, averageKmPerDay, projectServiceDue, type Reading } from './mileage';
 import {
   computeCheckDigit,
   formatVin,
@@ -96,10 +91,7 @@ describe('odometer anomaly detection', () => {
   });
 
   it('accepts a normal increase', () => {
-    const result = assessReading(
-      { km: 51_000, readAt: day(31) },
-      { km: 50_000, readAt: day(1) },
-    );
+    const result = assessReading({ km: 51_000, readAt: day(31) }, { km: 50_000, readAt: day(1) });
     expect(result.anomaly).toBe('NONE');
     expect(result.kmPerDay).toBeCloseTo(33.3, 0);
   });
@@ -107,27 +99,24 @@ describe('odometer anomaly detection', () => {
   // The central design decision in this module. A decreasing odometer is
   // evidence of fraud, and rejecting the reading would destroy it.
   it('records and flags a decreasing reading rather than rejecting it', () => {
-    const result = assessReading(
-      { km: 71_000, readAt: day(31) },
-      { km: 82_430, readAt: day(1) },
-    );
+    const result = assessReading({ km: 71_000, readAt: day(31) }, { km: 82_430, readAt: day(1) });
 
     expect(result.anomaly).toBe('DECREASE');
     expect(result.message).toContain('11,430');
   });
 
   it('flags an implausible daily rate', () => {
-    const result = assessReading(
-      { km: 60_000, readAt: day(2) },
-      { km: 50_000, readAt: day(1) },
-    );
+    const result = assessReading({ km: 60_000, readAt: day(2) }, { km: 50_000, readAt: day(1) });
     expect(result.anomaly).toBe('IMPLAUSIBLE_RATE');
   });
 
   it('does not judge readings taken within hours of each other', () => {
     const morning = new Date(Date.UTC(2026, 0, 1, 8));
     const afternoon = new Date(Date.UTC(2026, 0, 1, 16));
-    const result = assessReading({ km: 50_400, readAt: afternoon }, { km: 50_000, readAt: morning });
+    const result = assessReading(
+      { km: 50_400, readAt: afternoon },
+      { km: 50_000, readAt: morning },
+    );
     expect(result.anomaly).toBe('NONE');
   });
 

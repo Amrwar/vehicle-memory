@@ -135,10 +135,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const estimate = job.estimates[0];
   const invoice = job.invoices[0];
 
-  const clockedMinutes = job.timeEntries.reduce(
-    (total, entry) => total + (entry.minutes ?? 0),
-    0,
-  );
+  const clockedMinutes = job.timeEntries.reduce((total, entry) => total + (entry.minutes ?? 0), 0);
 
   const findings = inspection
     ? summarise(
@@ -223,8 +220,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
                   },
                   {
                     label: 'Technician',
-                    value:
-                      job.technicians.map((t) => t.user.name).join(', ') || 'Unassigned',
+                    value: job.technicians.map((t) => t.user.name).join(', ') || 'Unassigned',
                   },
                   { label: 'Bay', value: job.bay?.name },
                   {
@@ -244,9 +240,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
                   {
                     label: 'Clocked time',
                     value:
-                      clockedMinutes > 0
-                        ? `${(clockedMinutes / 60).toFixed(1)} h actual`
-                        : null,
+                      clockedMinutes > 0 ? `${(clockedMinutes / 60).toFixed(1)} h actual` : null,
                   },
                 ]}
               />

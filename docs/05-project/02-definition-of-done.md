@@ -6,11 +6,13 @@ delivered, is not demoed, and does not move the burndown.
 ## A story is done when
 
 **Function**
+
 - [ ] Every acceptance criterion passes, demonstrated rather than asserted
 - [ ] Edge cases handled: empty, single, many, error
 - [ ] Errors say what went wrong and what to do about it
 
 **Code**
+
 - [ ] Domain logic in `packages/core`, not in a page
 - [ ] Tenant scoping via the scoped client
 - [ ] Reviewed and approved by someone who did not write it
@@ -18,6 +20,7 @@ delivered, is not demoed, and does not move the burndown.
 - [ ] TypeScript strict, no unexplained suppressions
 
 **Tests**
+
 - [ ] Unit tests for the domain logic
 - [ ] Integration test for the route
 - [ ] Cross-tenant isolation test if a new tenant-scoped entity
@@ -25,6 +28,7 @@ delivered, is not demoed, and does not move the burndown.
 - [ ] Whole suite green
 
 **Interface**
+
 - [ ] Matches the design system; no raw colours
 - [ ] Keyboard operable, focus visible
 - [ ] Contrast meets AA
@@ -35,16 +39,19 @@ delivered, is not demoed, and does not move the burndown.
 - [ ] Loading, empty and error states all designed
 
 **Data**
+
 - [ ] Migration is backward compatible with the previous release
 - [ ] Indexes for the queries the feature introduces
 - [ ] Seed updated if the feature needs demo data
 
 **Operations**
+
 - [ ] Structured logs at the right level
 - [ ] Metrics emitted for anything worth alerting on
 - [ ] Runbook entry if a new failure mode exists
 
 **Documentation**
+
 - [ ] Requirement traced in the matrix
 - [ ] ADR written if an architectural decision was made
 - [ ] README or getting-started updated if setup changed
@@ -53,7 +60,7 @@ delivered, is not demoed, and does not move the burndown.
 
 - [ ] Every story meets the above
 - [ ] Deployed to staging
-- [ ] Demonstrated against criteria agreed *before* the work started
+- [ ] Demonstrated against criteria agreed _before_ the work started
 - [ ] No new critical or high defects open
 - [ ] Design partners have seen it
 
@@ -77,4 +84,4 @@ context.
 
 ---
 
-*Next: [Estimation and plan](03-estimation-and-plan.md).*
+_Next: [Estimation and plan](03-estimation-and-plan.md)._

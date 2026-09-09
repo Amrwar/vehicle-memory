@@ -206,13 +206,16 @@ describe('slot suggestion', () => {
   });
 
   it('does not invent Sunday availability', () => {
-    const slots = suggestSlots({
-      from: at(8),
-      durationHours: 1,
-      existing: [],
-      bayIds: ['bay1'],
-      daysToSearch: 14,
-    }, 30);
+    const slots = suggestSlots(
+      {
+        from: at(8),
+        durationHours: 1,
+        existing: [],
+        bayIds: ['bay1'],
+        daysToSearch: 14,
+      },
+      30,
+    );
 
     for (const slot of slots) {
       expect(slot.startAt.getDay()).not.toBe(0);

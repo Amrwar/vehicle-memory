@@ -60,7 +60,10 @@ export default async function ShopFloorPage() {
       customer: { select: { displayName: true } },
       tasks: { select: { isDone: true } },
       inspections: { select: { id: true, status: true } },
-      timeEntries: { where: { userId: user.userId, endedAt: null }, select: { id: true, startedAt: true } },
+      timeEntries: {
+        where: { userId: user.userId, endedAt: null },
+        select: { id: true, startedAt: true },
+      },
     },
   });
 
@@ -120,8 +123,7 @@ export default async function ShopFloorPage() {
               const inspection = job.inspections[0];
               // Work must not begin on unapproved chargeable work. The screen
               // says why rather than simply disabling the button.
-              const blocked =
-                job.status === 'AWAITING_APPROVAL' || job.status === 'ESTIMATED';
+              const blocked = job.status === 'AWAITING_APPROVAL' || job.status === 'ESTIMATED';
 
               return (
                 <li key={job.id}>
@@ -179,8 +181,8 @@ export default async function ShopFloorPage() {
 
                     {blocked ? (
                       <p className="mt-3 rounded-(--radius-md) border-l-[3px] border-(--warning) bg-(--warning-soft) px-3 py-2.5 text-[14px] text-(--warning)">
-                        Waiting for the customer to approve the estimate. Do not start
-                        this work yet.
+                        Waiting for the customer to approve the estimate. Do not start this work
+                        yet.
                       </p>
                     ) : null}
 

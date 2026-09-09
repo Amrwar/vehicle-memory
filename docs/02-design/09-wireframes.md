@@ -284,4 +284,4 @@ most valuable thing this page can tell him.
 
 ---
 
-*Next: [Architecture decision records](../03-adr/).*
+_Next: [Architecture decision records](../03-adr/)._

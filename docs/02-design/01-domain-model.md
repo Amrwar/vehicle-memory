@@ -65,27 +65,27 @@ vehicle record.** Access is mediated, always.
 Terms used in code exactly as defined here. Where the industry uses a word
 loosely, we pick one meaning and hold it.
 
-| Term | Definition | Not to be confused with |
-| --- | --- | --- |
-| **Vehicle** | A physical car, identified by VIN, existing independently of any owner or workshop. | The customer's record of it |
-| **Passport** | The complete, append-only event history of one vehicle. | A report, which is a rendering of it |
-| **Event** | One immutable fact about a vehicle at a point in time. | A job, which is workshop work |
-| **Customer** | A party, person or company, in a commercial relationship with one workshop. | Owner |
-| **Owner** | The party who holds the vehicle during a period. May not be a customer of anyone. | Customer |
-| **Booking** | A reserved future slot. | Job |
-| **Job** | One visit's work on one vehicle. The central operational aggregate. | Booking, invoice |
-| **Inspection** | A structured assessment producing per-item results. | Diagnosis |
-| **Diagnosis** | The technician's conclusion about a fault. | Inspection |
-| **Finding** | One inspection item result requiring action. | Recommendation |
-| **Estimate** | A priced proposal requiring customer approval. | Quote, invoice |
-| **Approval** | A recorded customer decision on an estimate. | Acceptance of the work |
-| **Labour line** | Time to be charged, at a rate. | Time entry |
-| **Time entry** | Actual clocked time, used for cost. | Labour line |
-| **Part line** | A part to be charged on a job. | Stock movement |
-| **Invoice** | An issued, immutable demand for payment. | Estimate |
-| **Bay** | A physical work position. Constrains scheduling. | Location |
-| **Location** | A physical site within an organisation. | Organisation |
-| **Organisation** | The tenant. One business. | Location |
+| Term             | Definition                                                                          | Not to be confused with              |
+| ---------------- | ----------------------------------------------------------------------------------- | ------------------------------------ |
+| **Vehicle**      | A physical car, identified by VIN, existing independently of any owner or workshop. | The customer's record of it          |
+| **Passport**     | The complete, append-only event history of one vehicle.                             | A report, which is a rendering of it |
+| **Event**        | One immutable fact about a vehicle at a point in time.                              | A job, which is workshop work        |
+| **Customer**     | A party, person or company, in a commercial relationship with one workshop.         | Owner                                |
+| **Owner**        | The party who holds the vehicle during a period. May not be a customer of anyone.   | Customer                             |
+| **Booking**      | A reserved future slot.                                                             | Job                                  |
+| **Job**          | One visit's work on one vehicle. The central operational aggregate.                 | Booking, invoice                     |
+| **Inspection**   | A structured assessment producing per-item results.                                 | Diagnosis                            |
+| **Diagnosis**    | The technician's conclusion about a fault.                                          | Inspection                           |
+| **Finding**      | One inspection item result requiring action.                                        | Recommendation                       |
+| **Estimate**     | A priced proposal requiring customer approval.                                      | Quote, invoice                       |
+| **Approval**     | A recorded customer decision on an estimate.                                        | Acceptance of the work               |
+| **Labour line**  | Time to be charged, at a rate.                                                      | Time entry                           |
+| **Time entry**   | Actual clocked time, used for cost.                                                 | Labour line                          |
+| **Part line**    | A part to be charged on a job.                                                      | Stock movement                       |
+| **Invoice**      | An issued, immutable demand for payment.                                            | Estimate                             |
+| **Bay**          | A physical work position. Constrains scheduling.                                    | Location                             |
+| **Location**     | A physical site within an organisation.                                             | Organisation                         |
+| **Organisation** | The tenant. One business.                                                           | Location                             |
 
 Two distinctions earn their keep:
 
@@ -108,15 +108,15 @@ transaction; everything outside is eventually consistent.
 **Root:** `Vehicle` · **Contains:** `VehicleEvent`, `VehicleOwnership`,
 `OdometerReading`
 
-| # | Invariant | Enforced by |
-| --- | --- | --- |
-| V1 | VIN is globally unique | Database unique index |
-| V2 | Events are append-only. No update, no delete, ever. | Repository refuses; no update path exists in code |
-| V3 | Each event's hash covers its content and its predecessor's hash | `chain.ts`, verified in tests |
-| V4 | Events are totally ordered per vehicle by sequence number | Unique index on (vehicleId, sequence) |
-| V5 | At most one open ownership at a time | Partial unique index where `endedAt is null` |
-| V6 | A correction is a new event referencing the superseded one | `supersede()` is the only correction path |
-| V7 | An odometer decrease is recorded and flagged, never rejected | `mileage.ts` |
+| #   | Invariant                                                       | Enforced by                                       |
+| --- | --------------------------------------------------------------- | ------------------------------------------------- |
+| V1  | VIN is globally unique                                          | Database unique index                             |
+| V2  | Events are append-only. No update, no delete, ever.             | Repository refuses; no update path exists in code |
+| V3  | Each event's hash covers its content and its predecessor's hash | `chain.ts`, verified in tests                     |
+| V4  | Events are totally ordered per vehicle by sequence number       | Unique index on (vehicleId, sequence)             |
+| V5  | At most one open ownership at a time                            | Partial unique index where `endedAt is null`      |
+| V6  | A correction is a new event referencing the superseded one      | `supersede()` is the only correction path         |
+| V7  | An odometer decrease is recorded and flagged, never rejected    | `mileage.ts`                                      |
 
 V7 deserves a note. The intuitive design rejects impossible readings. That is
 wrong: an odometer that goes backwards is either a clerical error or **odometer
@@ -128,17 +128,17 @@ Rejecting the reading deletes the evidence. We record it and flag it.
 **Root:** `Job` · **Contains:** `JobStatusEvent`, `JobTask`, `JobLabourLine`,
 `JobPartLine`, `JobNote`, `JobAttachment`, `TimeEntry`, `QualityCheck`
 
-| # | Invariant | Enforced by |
-| --- | --- | --- |
-| J1 | Status changes only along permitted transitions | `lifecycle.ts` state machine |
-| J2 | Every status change records actor and time | Transition function is the only mutator |
-| J3 | A job belongs to exactly one vehicle and one customer | Non-null foreign keys |
-| J4 | Totals are derived from lines, never stored independently | Computed in `totals.ts` |
-| J5 | A technician has at most one open time entry | Partial unique index |
-| J6 | Completion requires a passed quality check where the job type demands one | Lifecycle guard |
-| J7 | Completion writes passport events | Transactional outbox, retried |
+| #   | Invariant                                                                 | Enforced by                             |
+| --- | ------------------------------------------------------------------------- | --------------------------------------- |
+| J1  | Status changes only along permitted transitions                           | `lifecycle.ts` state machine            |
+| J2  | Every status change records actor and time                                | Transition function is the only mutator |
+| J3  | A job belongs to exactly one vehicle and one customer                     | Non-null foreign keys                   |
+| J4  | Totals are derived from lines, never stored independently                 | Computed in `totals.ts`                 |
+| J5  | A technician has at most one open time entry                              | Partial unique index                    |
+| J6  | Completion requires a passed quality check where the job type demands one | Lifecycle guard                         |
+| J7  | Completion writes passport events                                         | Transactional outbox, retried           |
 
-J7 is deliberately *not* a synchronous invariant. If passport writing fails,
+J7 is deliberately _not_ a synchronous invariant. If passport writing fails,
 the job still completes and the write is retried. A workshop losing a completed
 job because a downstream write failed is unacceptable; a passport event
 arriving ninety seconds late is not a problem.
@@ -148,23 +148,23 @@ arriving ninety seconds late is not a problem.
 **Root:** `Estimate` · **Contains:** `EstimateLine`, `EstimateApproval`,
 `EstimateShare`
 
-| # | Invariant | Enforced by |
-| --- | --- | --- |
-| E1 | A sent estimate is immutable; changes create a new version | `revise()` returns a new aggregate |
-| E2 | Approval records the exact total agreed at that moment | Snapshot stored on approval |
-| E3 | Line-level decisions sum to the recorded approved total | Checked on approval |
-| E4 | A share token is single-vehicle, expiring, revocable | `share.ts` |
+| #   | Invariant                                                  | Enforced by                        |
+| --- | ---------------------------------------------------------- | ---------------------------------- |
+| E1  | A sent estimate is immutable; changes create a new version | `revise()` returns a new aggregate |
+| E2  | Approval records the exact total agreed at that moment     | Snapshot stored on approval        |
+| E3  | Line-level decisions sum to the recorded approved total    | Checked on approval                |
+| E4  | A share token is single-vehicle, expiring, revocable       | `share.ts`                         |
 
 ### 3.4 Invoice aggregate (Finance context)
 
 **Root:** `Invoice` · **Contains:** `InvoiceLine`, `Payment`
 
-| # | Invariant | Enforced by |
-| --- | --- | --- |
-| I1 | An issued invoice is immutable | Status guard; corrections are credit notes |
-| I2 | Numbers are sequential and gapless per organisation | `DocumentSequence` row lock |
-| I3 | Payments never exceed the invoice total | Checked on payment |
-| I4 | Paid status is derived from payments, not set directly | Computed |
+| #   | Invariant                                              | Enforced by                                |
+| --- | ------------------------------------------------------ | ------------------------------------------ |
+| I1  | An issued invoice is immutable                         | Status guard; corrections are credit notes |
+| I2  | Numbers are sequential and gapless per organisation    | `DocumentSequence` row lock                |
+| I3  | Payments never exceed the invoice total                | Checked on payment                         |
+| I4  | Paid status is derived from payments, not set directly | Computed                                   |
 
 I2 requires a row-level lock rather than a sequence, because a database
 sequence produces gaps on rollback, and gapless numbering is a legal
@@ -175,12 +175,12 @@ requirement in several jurisdictions (NFR-902).
 **Root:** `Product` · **Contains:** `StockLevel`, `StockMovement`,
 `StockReservation`
 
-| # | Invariant | Enforced by |
-| --- | --- | --- |
-| S1 | On-hand equals the sum of movements | Reconciliation check |
-| S2 | Available equals on-hand minus reservations | Computed |
-| S3 | Reservations never exceed available | Checked under lock |
-| S4 | Every movement names its cause | Non-null reference |
+| #   | Invariant                                   | Enforced by          |
+| --- | ------------------------------------------- | -------------------- |
+| S1  | On-hand equals the sum of movements         | Reconciliation check |
+| S2  | Available equals on-hand minus reservations | Computed             |
+| S3  | Reservations never exceed available         | Checked under lock   |
+| S4  | Every movement names its cause              | Non-null reference   |
 
 ## 4. Cross-context communication
 
@@ -215,14 +215,14 @@ at-least-once delivery, so every handler must be idempotent. See
 
 ## 5. What we deliberately did not model
 
-| Rejected | Why |
-| --- | --- |
-| A `Party` supertype for Customer, Supplier and Employee | Elegant in theory. In practice it forces a join for every read of a customer name, and the three have almost no shared behaviour. |
-| Event sourcing for the whole system | We event-source the vehicle, where immutability is the product. Event-sourcing the diary would make "move this booking" needlessly hard. |
-| A generic `Document` supertype for estimate, invoice and purchase order | Their lifecycles differ materially. The abstraction leaks immediately. |
-| Soft deletes everywhere | Deleted-flag filtering is forgotten exactly once and then leaks data across tenants. We hard-delete operational records and rely on the audit log and the append-only passport for history. |
-| Storing computed totals on the job | The first time a line changes and the total does not, trust is gone. Totals are derived. |
+| Rejected                                                                | Why                                                                                                                                                                                         |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A `Party` supertype for Customer, Supplier and Employee                 | Elegant in theory. In practice it forces a join for every read of a customer name, and the three have almost no shared behaviour.                                                           |
+| Event sourcing for the whole system                                     | We event-source the vehicle, where immutability is the product. Event-sourcing the diary would make "move this booking" needlessly hard.                                                    |
+| A generic `Document` supertype for estimate, invoice and purchase order | Their lifecycles differ materially. The abstraction leaks immediately.                                                                                                                      |
+| Soft deletes everywhere                                                 | Deleted-flag filtering is forgotten exactly once and then leaks data across tenants. We hard-delete operational records and rely on the audit log and the append-only passport for history. |
+| Storing computed totals on the job                                      | The first time a line changes and the total does not, trust is gone. Totals are derived.                                                                                                    |
 
 ---
 
-*Next: [Data model](02-data-model.md).*
+_Next: [Data model](02-data-model.md)._

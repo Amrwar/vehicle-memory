@@ -119,9 +119,21 @@ export function WorkshopNav({
         aria-label="Workshop"
       >
         <div className="flex items-center gap-2.5 border-b border-(--border) px-4 py-3.5 pl-14 lg:pl-4">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden className="text-(--brand)">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden
+            className="text-(--brand)"
+          >
             <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M10 4.6v5.4l3.4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              d="M10 4.6v5.4l3.4 2"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
           <div className="min-w-0">
             <p className="truncate font-display text-[14px] font-semibold leading-tight">
@@ -137,8 +149,7 @@ export function WorkshopNav({
               <p className="eyebrow px-2 pb-1.5">{group.label}</p>
               <ul className="grid gap-0.5">
                 {group.items.map((item) => {
-                  const active =
-                    pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const badge =
                     item.href === '/jobs' && approvalsWaiting > 0 ? approvalsWaiting : undefined;
 

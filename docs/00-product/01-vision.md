@@ -25,13 +25,13 @@ none of it survives.
 
 The consequences are concrete and expensive:
 
-| Who | What it costs them |
-| --- | --- |
-| **Buyer** | Pays for a car whose real condition is unknowable. Odometer fraud, undisclosed accident damage, skipped timing-belt intervals. Buys risk blind. |
-| **Seller** | Cannot prove the thousands they spent on diligent maintenance. A well-kept car sells for the same price as a neglected one. Their care evaporates at the point of sale. |
-| **Workshop** | Every unfamiliar car is diagnosed from zero. "When were the plugs last done?" *Nobody knows.* Hours spent rediscovering facts someone already established. |
-| **Owner** | Cannot judge whether a quote is reasonable, because they have no record of what was already replaced. Pays twice for the same part more often than anyone admits. |
-| **Manufacturer / insurer** | Recall campaigns reach a fraction of affected vehicles. Claims are assessed on assertion rather than evidence. |
+| Who                        | What it costs them                                                                                                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Buyer**                  | Pays for a car whose real condition is unknowable. Odometer fraud, undisclosed accident damage, skipped timing-belt intervals. Buys risk blind.                         |
+| **Seller**                 | Cannot prove the thousands they spent on diligent maintenance. A well-kept car sells for the same price as a neglected one. Their care evaporates at the point of sale. |
+| **Workshop**               | Every unfamiliar car is diagnosed from zero. "When were the plugs last done?" _Nobody knows._ Hours spent rediscovering facts someone already established.              |
+| **Owner**                  | Cannot judge whether a quote is reasonable, because they have no record of what was already replaced. Pays twice for the same part more often than anyone admits.       |
+| **Manufacturer / insurer** | Recall campaigns reach a fraction of affected vehicles. Claims are assessed on assertion rather than evidence.                                                          |
 
 The record exists. It is simply **scattered across parties who have no
 mechanism, and no incentive, to share it.**
@@ -170,11 +170,11 @@ Naming these keeps the scope honest.
 
 ## 6. What winning looks like
 
-| Horizon | Measure of success |
-| --- | --- |
-| **12 months** | 50 paying workshops, running software they would refuse to give up. 20,000 vehicles carrying at least one verified event. |
+| Horizon       | Measure of success                                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **12 months** | 50 paying workshops, running software they would refuse to give up. 20,000 vehicles carrying at least one verified event.                  |
 | **24 months** | 400 workshops. 250,000 vehicles. A meaningful share of second-hand sales in one region where the buyer asks for a Carnet passport by name. |
-| **48 months** | A passport is a normal part of a private vehicle sale. Insurers price against it. A vehicle without one is the one that raises questions. |
+| **48 months** | A passport is a normal part of a private vehicle sale. Insurers price against it. A vehicle without one is the one that raises questions.  |
 
 The end state, stated plainly:
 
@@ -203,4 +203,4 @@ These are the tie-breakers when a design decision is genuinely balanced.
 
 ---
 
-*Next: [Proposal](02-proposal.md).*
+_Next: [Proposal](02-proposal.md)._

@@ -23,12 +23,12 @@ consider most likely to kill the product.
 
 Four distinct interface surfaces over one schema:
 
-| Surface | Route | Audience | Character |
-| --- | --- | --- | --- |
-| Workshop | `/dashboard`, `/jobs`, `/diary`, ... | Owner, manager, advisor, bookkeeper | Dense, keyboard-driven, analytical |
-| Shop floor | `/shop` | Technician | Large targets, minimal typing, offline-tolerant |
-| Portal | `/portal` | Customer | Mobile-first, plain language, zero training |
-| Public passport | `/p/<token>` | Anonymous reader | No account, comprehensible cold |
+| Surface         | Route                                | Audience                            | Character                                       |
+| --------------- | ------------------------------------ | ----------------------------------- | ----------------------------------------------- |
+| Workshop        | `/dashboard`, `/jobs`, `/diary`, ... | Owner, manager, advisor, bookkeeper | Dense, keyboard-driven, analytical              |
+| Shop floor      | `/shop`                              | Technician                          | Large targets, minimal typing, offline-tolerant |
+| Portal          | `/portal`                            | Customer                            | Mobile-first, plain language, zero training     |
+| Public passport | `/p/<token>`                         | Anonymous reader                    | No account, comprehensible cold                 |
 
 `surfaceFor(role)` decides where a user lands. A technician who reaches a
 workshop URL is redirected rather than shown an access-denied page: their
@@ -44,11 +44,11 @@ Design constraints per surface are binding, not advisory:
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
+| Option                                                | Why not                                                                                                                                                                                    |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **One responsive interface with role-filtered menus** | Cheapest to build, and the reason most workshop software is unusable on the shop floor. The information density a bookkeeper needs is exactly what makes a screen unusable with gloves on. |
-| **A separate native mobile app for technicians** | Better ergonomics, materially more cost, and a second deployment pipeline. Deferred to Phase 5, and only if the responsive surface proves insufficient against measured evidence. |
-| **A separate application per surface** | Four deployables and four auth integrations, for a benefit already obtained by route groups sharing one schema. |
+| **A separate native mobile app for technicians**      | Better ergonomics, materially more cost, and a second deployment pipeline. Deferred to Phase 5, and only if the responsive surface proves insufficient against measured evidence.          |
+| **A separate application per surface**                | Four deployables and four auth integrations, for a benefit already obtained by route groups sharing one schema.                                                                            |
 
 ## Consequences
 

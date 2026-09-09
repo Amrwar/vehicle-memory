@@ -38,11 +38,11 @@ customer adding up the invoice by hand must reach the printed total.
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **JavaScript `number` for currency** | Wrong, and the failure is intermittent and looks like a rounding preference rather than a bug. |
-| **decimal.js or big.js** | Correct, and a reasonable choice. Rejected because integer minor units are simpler, faster, allocate no objects per operation, and make the rounding decision explicit at every point rather than configured once and forgotten. |
-| **Prisma `Decimal` throughout the domain** | Would import an ORM type into the framework-free domain layer, violating ADR-0003. Decimals are converted at the boundary. |
+| Option                                     | Why not                                                                                                                                                                                                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **JavaScript `number` for currency**       | Wrong, and the failure is intermittent and looks like a rounding preference rather than a bug.                                                                                                                                   |
+| **decimal.js or big.js**                   | Correct, and a reasonable choice. Rejected because integer minor units are simpler, faster, allocate no objects per operation, and make the rounding decision explicit at every point rather than configured once and forgotten. |
+| **Prisma `Decimal` throughout the domain** | Would import an ORM type into the framework-free domain layer, violating ADR-0003. Decimals are converted at the boundary.                                                                                                       |
 
 ## Consequences
 

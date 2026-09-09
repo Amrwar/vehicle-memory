@@ -33,12 +33,12 @@ The vehicle event log is **append-only and hash-linked**.
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
+| Option                                   | Why not                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A blockchain, public or permissioned** | Distributed consensus answers "who decides what is true when nobody is trusted". Our question is narrower: "can the operator silently rewrite the past". A hash chain answers that. A chain adds transaction cost, latency, key management, an immutable-personal-data conflict with data-protection law, and a governance problem, in exchange for solving a problem we do not have. |
-| **Database audit log only** | An audit log the operator can also edit proves nothing to a third party. |
-| **Signed events with per-workshop keys** | Genuinely stronger, and the natural next step. Deferred because it requires key distribution and rotation across hundreds of small workshops, which is an operational burden we cannot carry at launch. The chain format carries a version field so signatures can be added without invalidating existing events. |
-| **No integrity mechanism** | Then the passport is a database table, and the product's central claim is false. |
+| **Database audit log only**              | An audit log the operator can also edit proves nothing to a third party.                                                                                                                                                                                                                                                                                                              |
+| **Signed events with per-workshop keys** | Genuinely stronger, and the natural next step. Deferred because it requires key distribution and rotation across hundreds of small workshops, which is an operational burden we cannot carry at launch. The chain format carries a version field so signatures can be added without invalidating existing events.                                                                     |
+| **No integrity mechanism**               | Then the passport is a database table, and the product's central claim is false.                                                                                                                                                                                                                                                                                                      |
 
 ## Honest limits of this scheme
 

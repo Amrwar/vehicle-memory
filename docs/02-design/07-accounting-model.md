@@ -24,26 +24,26 @@ Two rules are absolute:
 
 Seeded per organisation, editable.
 
-| Code | Account | Type |
-| --- | --- | --- |
-| 1000 | Bank | Asset |
-| 1010 | Cash | Asset |
-| 1100 | Accounts receivable | Asset |
-| 1200 | Stock on hand | Asset |
-| 1500 | Work in progress | Asset |
-| 2000 | Accounts payable | Liability |
-| 2100 | Tax payable (output) | Liability |
-| 2110 | Tax receivable (input) | Asset |
-| 2200 | Customer deposits | Liability |
-| 3000 | Retained earnings | Equity |
-| 4000 | Labour revenue | Revenue |
-| 4010 | Parts revenue | Revenue |
-| 4020 | Fees and sundry revenue | Revenue |
-| 5000 | Cost of goods sold, parts | Expense |
-| 5010 | Cost of labour | Expense |
-| 6000 | Wages | Expense |
-| 6100 | Premises | Expense |
-| 6200 | Stock adjustments | Expense |
+| Code | Account                   | Type      |
+| ---- | ------------------------- | --------- |
+| 1000 | Bank                      | Asset     |
+| 1010 | Cash                      | Asset     |
+| 1100 | Accounts receivable       | Asset     |
+| 1200 | Stock on hand             | Asset     |
+| 1500 | Work in progress          | Asset     |
+| 2000 | Accounts payable          | Liability |
+| 2100 | Tax payable (output)      | Liability |
+| 2110 | Tax receivable (input)    | Asset     |
+| 2200 | Customer deposits         | Liability |
+| 3000 | Retained earnings         | Equity    |
+| 4000 | Labour revenue            | Revenue   |
+| 4010 | Parts revenue             | Revenue   |
+| 4020 | Fees and sundry revenue   | Revenue   |
+| 5000 | Cost of goods sold, parts | Expense   |
+| 5010 | Cost of labour            | Expense   |
+| 6000 | Wages                     | Expense   |
+| 6100 | Premises                  | Expense   |
+| 6200 | Stock adjustments         | Expense   |
 
 ## 3. Postings
 
@@ -162,16 +162,16 @@ cannot tell you which jobs lose money.
 
 ## 6. Reports
 
-| Report | Definition |
-| --- | --- |
-| Trial balance | Sum of debits and credits per account. Must balance. |
-| Profit and loss | Revenue less expense accounts over a period |
-| Balance sheet | Assets, liabilities and equity at a date |
-| Aged receivables | Outstanding invoices by age band |
-| Aged payables | Outstanding supplier bills by age band |
-| Tax report | Output less input tax for the period |
-| Job profitability | Section 4, per job or aggregated |
-| Parts profitability | Revenue less cost by part and category |
+| Report              | Definition                                           |
+| ------------------- | ---------------------------------------------------- |
+| Trial balance       | Sum of debits and credits per account. Must balance. |
+| Profit and loss     | Revenue less expense accounts over a period          |
+| Balance sheet       | Assets, liabilities and equity at a date             |
+| Aged receivables    | Outstanding invoices by age band                     |
+| Aged payables       | Outstanding supplier bills by age band               |
+| Tax report          | Output less input tax for the period                 |
+| Job profitability   | Section 4, per job or aggregated                     |
+| Parts profitability | Revenue less cost by part and category               |
 
 ## 7. Before this ships
 
@@ -186,4 +186,4 @@ irrecoverably (risk R2):
 
 ---
 
-*Next: [Design system](08-design-system.md).*
+_Next: [Design system](08-design-system.md)._

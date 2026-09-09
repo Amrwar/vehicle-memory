@@ -9,11 +9,11 @@ of them is out, regardless of how good an idea it is.
 
 ## 2. The hypotheses under test
 
-| # | Hypothesis | How the MVP tests it | Fails if |
-| --- | --- | --- | --- |
-| **H1** | A workshop will run its entire day in Carnet, in preference to what it uses now. | Two design-partner workshops run live for 4 weeks with no parallel system. | They keep a paper diary or spreadsheet alongside it. |
-| **H2** | Technicians will actually record inspection results on a tablet. | Measure inspection completion rate per job and median time per inspection. | Under 60% of jobs get a completed inspection, or median time exceeds 4 minutes. |
-| **H3** | Customers will approve estimates on their phone rather than by telephone. | Measure share of estimates approved via link, and time from send to decision. | Under 40% approved via link, or advisors keep phoning anyway. |
+| #      | Hypothesis                                                                       | How the MVP tests it                                                          | Fails if                                                                        |
+| ------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **H1** | A workshop will run its entire day in Carnet, in preference to what it uses now. | Two design-partner workshops run live for 4 weeks with no parallel system.    | They keep a paper diary or spreadsheet alongside it.                            |
+| **H2** | Technicians will actually record inspection results on a tablet.                 | Measure inspection completion rate per job and median time per inspection.    | Under 60% of jobs get a completed inspection, or median time exceeds 4 minutes. |
+| **H3** | Customers will approve estimates on their phone rather than by telephone.        | Measure share of estimates approved via link, and time from send to decision. | Under 40% approved via link, or advisors keep phoning anyway.                   |
 
 H2 is the one that matters most. **If technicians do not record, the passport
 is empty, and without the passport this is just another workshop system.**
@@ -150,19 +150,19 @@ read path will be lightly used for a year.
 
 ## 5. Explicitly out of MVP
 
-| Excluded | Why | Where it lands |
-| --- | --- | --- |
-| Inventory and stock control | Jobs can name parts as free text with a cost. Full stock management is a phase of its own. | Phase 2 |
-| Purchase orders and suppliers | No stock, no purchasing | Phase 2 |
-| General ledger and accounting | Invoices and payments are recorded; posting them to a ledger is Phase 3 | Phase 3 |
-| Payroll, HR, commissions | Regulatory variance, low differentiation | Phase 4 |
-| Multi-location | One location proves the model | Phase 4 |
-| Point of sale | Counter sales are not the wedge | Phase 5 |
-| Online self-service booking | Advisor-created bookings first | Phase 5 |
-| Native mobile apps | Responsive web is enough to test H2 | Phase 5 |
-| Forecasting, AI diagnosis | Requires data we will not have for a year | Phase 6 |
-| OBD telematics | Hardware partnership | Phase 6 |
-| Accounting integrations | Nothing coherent to sync until Phase 3 | Phase 3.5 |
+| Excluded                      | Why                                                                                        | Where it lands |
+| ----------------------------- | ------------------------------------------------------------------------------------------ | -------------- |
+| Inventory and stock control   | Jobs can name parts as free text with a cost. Full stock management is a phase of its own. | Phase 2        |
+| Purchase orders and suppliers | No stock, no purchasing                                                                    | Phase 2        |
+| General ledger and accounting | Invoices and payments are recorded; posting them to a ledger is Phase 3                    | Phase 3        |
+| Payroll, HR, commissions      | Regulatory variance, low differentiation                                                   | Phase 4        |
+| Multi-location                | One location proves the model                                                              | Phase 4        |
+| Point of sale                 | Counter sales are not the wedge                                                            | Phase 5        |
+| Online self-service booking   | Advisor-created bookings first                                                             | Phase 5        |
+| Native mobile apps            | Responsive web is enough to test H2                                                        | Phase 5        |
+| Forecasting, AI diagnosis     | Requires data we will not have for a year                                                  | Phase 6        |
+| OBD telematics                | Hardware partnership                                                                       | Phase 6        |
+| Accounting integrations       | Nothing coherent to sync until Phase 3                                                     | Phase 3.5      |
 
 ## 6. Definition of MVP done
 
@@ -188,20 +188,20 @@ The MVP is complete when **all** of the following are true. Not most.
 
 ## 7. What we will measure
 
-| Metric | Target | Tests |
-| --- | --- | --- |
-| Inspection completion rate | > 60% of jobs | H2 |
-| Median inspection duration | < 4 minutes | H2 |
-| Estimates approved via link | > 40% | H3 |
-| Median send-to-decision time | < 4 hours | H3 |
-| Jobs created per workshop per day | > 8 | H1 |
-| Days with zero parallel-system use | > 90% of days | H1 |
-| Passport events written per completed job | > 3 | Coverage |
-| Time from vehicle arrival to estimate sent | < 90 minutes | Flow efficiency |
+| Metric                                     | Target        | Tests           |
+| ------------------------------------------ | ------------- | --------------- |
+| Inspection completion rate                 | > 60% of jobs | H2              |
+| Median inspection duration                 | < 4 minutes   | H2              |
+| Estimates approved via link                | > 40%         | H3              |
+| Median send-to-decision time               | < 4 hours     | H3              |
+| Jobs created per workshop per day          | > 8           | H1              |
+| Days with zero parallel-system use         | > 90% of days | H1              |
+| Passport events written per completed job  | > 3           | Coverage        |
+| Time from vehicle arrival to estimate sent | < 90 minutes  | Flow efficiency |
 
 If H2 fails, we stop and redesign the technician interface before building
 anything else. It is the load-bearing hypothesis.
 
 ---
 
-*Next: [Roadmap](06-roadmap.md).*
+_Next: [Roadmap](06-roadmap.md)._

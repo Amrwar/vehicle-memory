@@ -193,7 +193,9 @@ export function applyDocumentDiscount(
   discount: Money,
   currency: Currency = 'GBP',
 ): PriceableLine[] {
-  const chargeable = lines.map((line) => (isChargeable(line) ? calculateLine(line, currency) : null));
+  const chargeable = lines.map((line) =>
+    isChargeable(line) ? calculateLine(line, currency) : null,
+  );
   const weights = chargeable.map((l) => l?.net.minor ?? 0);
   const shares = allocateByWeights(discount, weights);
 
@@ -250,10 +252,7 @@ export interface Profitability {
 export function calculateProfitability(input: ProfitabilityInput): Profitability {
   const currency = input.currency ?? input.revenue.currency;
   const hourlyCost = fromDecimal(input.labourCostPerHour, currency);
-  const labourCost = money(
-    Math.round((hourlyCost.minor * input.labourMinutes) / 60),
-    currency,
-  );
+  const labourCost = money(Math.round((hourlyCost.minor * input.labourMinutes) / 60), currency);
   const otherCost = input.otherCost ?? zero(currency);
 
   const grossProfit = subtract(

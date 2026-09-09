@@ -50,10 +50,10 @@ inside one tenant, where it dies the moment the customer goes elsewhere.
 
 Two surfaces, one data core:
 
-| | Who | What |
-| --- | --- | --- |
+|                     | Who                                           | What                                                                                                                   |
+| ------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **Carnet Workshop** | Workshops, technicians, advisors, bookkeepers | Booking, jobs, digital inspections, estimates, customer approval, invoicing, and a real double-entry ledger underneath |
-| **Carnet Passport** | Owners, buyers, sellers | The vehicle's permanent, append-only, tamper-evident timeline. It transfers when the car is sold. |
+| **Carnet Passport** | Owners, buyers, sellers                       | The vehicle's permanent, append-only, tamper-evident timeline. It transfers when the car is sold.                      |
 
 ## Quick start
 
@@ -108,7 +108,7 @@ controls disclosure.
 **[ADR-0005](docs/03-adr/0005-append-only-vehicle-event-ledger.md) — append-only, hash-linked, not a blockchain.**
 Each event's hash covers its content and its predecessor's hash. The rule is
 enforced by a database trigger, so it holds even from a psql session. The ADR
-also states, plainly, what this scheme does *not* prove.
+also states, plainly, what this scheme does _not_ prove.
 
 ```bash
 npx tsx infra/scripts/verify-integrity.ts
@@ -136,26 +136,26 @@ changes.
 
 ## Verification
 
-| Command | What it proves |
-| --- | --- |
-| `npm test` | 192 domain tests. 92.7% statements, 85.1% branches. |
+| Command                                     | What it proves                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| `npm test`                                  | 192 domain tests. 92.7% statements, 85.1% branches.                       |
 | `npx tsx infra/scripts/verify-integrity.ts` | Chains verify; the database refuses every attempt to violate an invariant |
-| `npx tsx infra/scripts/smoke.ts` | 13 routes render real content across five roles, including role redirects |
-| `npm run verify` | Everything CI runs |
+| `npx tsx infra/scripts/smoke.ts`            | 13 routes render real content across five roles, including role redirects |
+| `npm run verify`                            | Everything CI runs                                                        |
 
 ## Documentation
 
 46 documents. The ones worth reading first:
 
-| | |
-| --- | --- |
-| [Vision](docs/00-product/01-vision.md) | The problem and why this approach works where others have not |
-| [Proposal](docs/00-product/02-proposal.md) | Scope, team, cost, timeline, payment schedule |
-| [MVP definition](docs/00-product/05-mvp-definition.md) | Three falsifiable hypotheses, and what would disprove them |
-| [Competition](docs/00-product/03-market-and-competition.md) | Verified feature comparison against a named incumbent |
-| [Domain model](docs/02-design/01-domain-model.md) | Bounded contexts, aggregates, invariants, and what we deliberately did not model |
-| [Design system](docs/02-design/08-design-system.md) | Why petrol and brass, and why the brand colour could not be blue |
-| [ADRs](docs/03-adr/) | Twelve decisions, each with the options rejected and why |
+|                                                             |                                                                                  |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Vision](docs/00-product/01-vision.md)                      | The problem and why this approach works where others have not                    |
+| [Proposal](docs/00-product/02-proposal.md)                  | Scope, team, cost, timeline, payment schedule                                    |
+| [MVP definition](docs/00-product/05-mvp-definition.md)      | Three falsifiable hypotheses, and what would disprove them                       |
+| [Competition](docs/00-product/03-market-and-competition.md) | Verified feature comparison against a named incumbent                            |
+| [Domain model](docs/02-design/01-domain-model.md)           | Bounded contexts, aggregates, invariants, and what we deliberately did not model |
+| [Design system](docs/02-design/08-design-system.md)         | Why petrol and brass, and why the brand colour could not be blue                 |
+| [ADRs](docs/03-adr/)                                        | Twelve decisions, each with the options rejected and why                         |
 
 ## Stack
 

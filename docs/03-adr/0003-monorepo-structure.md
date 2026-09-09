@@ -38,11 +38,11 @@ and portable if the web framework changes (NFR-701).
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **One Next.js app, no packages** | Simplest, and tempting. Rejected because the worker needs the domain logic, and duplicating the lifecycle state machine into two places guarantees they diverge. |
-| **Separate repositories** | A lifecycle change would need coordinated releases across three repos. At this team size that is pure overhead. |
-| **Nx or Turborepo** | Real caching benefits at larger scale. Rejected for now because npm workspaces plus TypeScript project references covers this, and every added tool is a thing a new engineer must learn before their first commit. |
+| Option                           | Why not                                                                                                                                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **One Next.js app, no packages** | Simplest, and tempting. Rejected because the worker needs the domain logic, and duplicating the lifecycle state machine into two places guarantees they diverge.                                                    |
+| **Separate repositories**        | A lifecycle change would need coordinated releases across three repos. At this team size that is pure overhead.                                                                                                     |
+| **Nx or Turborepo**              | Real caching benefits at larger scale. Rejected for now because npm workspaces plus TypeScript project references covers this, and every added tool is a thing a new engineer must learn before their first commit. |
 
 ## Consequences
 

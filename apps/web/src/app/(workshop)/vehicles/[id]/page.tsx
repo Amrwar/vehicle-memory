@@ -148,12 +148,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
           <Card>
             <CardHeader
               title="Identity"
-              action={
-                <ChainFingerprint
-                  head={vehicle.chainHead}
-                  verified={verification.valid}
-                />
-              }
+              action={<ChainFingerprint head={vehicle.chainHead} verified={verification.valid} />}
             />
             <CardBody>
               <KeyValue
@@ -172,7 +167,9 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
                   },
                   {
                     label: 'Average use',
-                    value: kmPerDay ? `${Math.round(kmPerDay * 30).toLocaleString()} km/month` : null,
+                    value: kmPerDay
+                      ? `${Math.round(kmPerDay * 30).toLocaleString()} km/month`
+                      : null,
                   },
                   {
                     label: 'Current owner',
@@ -194,8 +191,8 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
                   <p className="font-semibold">Integrity check failed</p>
                   <p className="mt-0.5">
                     The chain diverges at entry {verification.failedAt.sequence} (
-                    {verification.failedAt.reason.toLowerCase().replace('_', ' ')}). Entries
-                    before that point are unaffected.
+                    {verification.failedAt.reason.toLowerCase().replace('_', ' ')}). Entries before
+                    that point are unaffected.
                   </p>
                 </div>
               ) : null}
@@ -342,9 +339,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
                   <p className="font-medium">{ownership.ownerName ?? 'Unnamed owner'}</p>
                   <p className="datum text-[11px] text-(--text-faint)">
                     {ownership.startedAt.toLocaleDateString('en-GB')} —{' '}
-                    {ownership.endedAt
-                      ? ownership.endedAt.toLocaleDateString('en-GB')
-                      : 'present'}
+                    {ownership.endedAt ? ownership.endedAt.toLocaleDateString('en-GB') : 'present'}
                   </p>
                 </li>
               ))}

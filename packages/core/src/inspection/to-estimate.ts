@@ -104,22 +104,25 @@ export function findingsToEstimateLines(
   const existing = new Set(options.existingFindingIds ?? []);
   const advisoriesOptional = options.advisoriesOptional ?? true;
 
-  return actionable(findings)
-    .filter((finding) => !existing.has(finding.id))
-    // Critical first: the customer should read the safety item before the
-    // nice-to-have, and reading order is a design decision, not an accident.
-    .sort((a, b) => severityRank(b.severity) - severityRank(a.severity))
-    .map((finding) => ({
-      sourceFindingId: finding.id,
-      kind: 'PART' as const,
-      description: finding.recommendedAction?.trim() || `${finding.itemName} — attention required`,
-      detail: describeFinding(finding),
-      severity: finding.severity,
-      quantity: 1,
-      unitPrice: finding.estimatedCost ?? 0,
-      taxRatePct: options.taxRatePct ?? 0,
-      isOptional: advisoriesOptional && finding.severity === 'ADVISORY',
-    }));
+  return (
+    actionable(findings)
+      .filter((finding) => !existing.has(finding.id))
+      // Critical first: the customer should read the safety item before the
+      // nice-to-have, and reading order is a design decision, not an accident.
+      .sort((a, b) => severityRank(b.severity) - severityRank(a.severity))
+      .map((finding) => ({
+        sourceFindingId: finding.id,
+        kind: 'PART' as const,
+        description:
+          finding.recommendedAction?.trim() || `${finding.itemName} — attention required`,
+        detail: describeFinding(finding),
+        severity: finding.severity,
+        quantity: 1,
+        unitPrice: finding.estimatedCost ?? 0,
+        taxRatePct: options.taxRatePct ?? 0,
+        isOptional: advisoriesOptional && finding.severity === 'ADVISORY',
+      }))
+  );
 }
 
 /**
@@ -205,10 +208,7 @@ export const TREAD_ADVISORY_MM = 3.0;
 export const PAD_CRITICAL_MM = 3.0;
 export const PAD_ADVISORY_MM = 5.0;
 
-export function severityForMeasurement(
-  value: number,
-  type: MeasurementType,
-): Severity | null {
+export function severityForMeasurement(value: number, type: MeasurementType): Severity | null {
   switch (type) {
     case 'TREAD_DEPTH_MM':
       if (value <= TREAD_CRITICAL_MM) return 'CRITICAL';

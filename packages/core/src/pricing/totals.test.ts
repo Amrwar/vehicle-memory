@@ -58,7 +58,12 @@ describe('line calculation', () => {
   });
 
   it('clamps a nonsensical discount instead of producing negative revenue', () => {
-    const line = calculateLine({ kind: 'PART', quantity: 1, unitPrice: '100.00', discountPct: 250 });
+    const line = calculateLine({
+      kind: 'PART',
+      quantity: 1,
+      unitPrice: '100.00',
+      discountPct: 250,
+    });
     expect(toDecimalString(line.net)).toBe('0.00');
   });
 });

@@ -18,22 +18,22 @@ nothing ([ADR-0003](../03-adr/0003-monorepo-structure.md)).
 
 ## 2. What is tested where
 
-| Layer | Tool | Tests |
-| --- | --- | --- |
-| Domain | Vitest | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion |
-| Data | Vitest + Postgres | Tenant isolation per entity, invariants, ledger append concurrency |
-| Routes | Vitest + fetch | Auth, permissions, redirects, rendered content |
-| Journeys | Playwright | Book to invoice, inspection to approval, passport share |
-| Integrity | `verify-integrity.ts` | Actively tries to violate every database guarantee |
-| Usability | Humans | The four criteria in section 7 |
+| Layer     | Tool                  | Tests                                                                                          |
+| --------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| Domain    | Vitest                | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion |
+| Data      | Vitest + Postgres     | Tenant isolation per entity, invariants, ledger append concurrency                             |
+| Routes    | Vitest + fetch        | Auth, permissions, redirects, rendered content                                                 |
+| Journeys  | Playwright            | Book to invoice, inspection to approval, passport share                                        |
+| Integrity | `verify-integrity.ts` | Actively tries to violate every database guarantee                                             |
+| Usability | Humans                | The four criteria in section 7                                                                 |
 
 ## 3. Coverage
 
-| Area | Floor | Actual |
-| --- | --- | --- |
-| Domain overall | 70% | **92.7%** statements, 85.1% branches |
-| Job lifecycle | 90% | 97.8% |
-| Passport chain | 90% | 94% |
+| Area           | Floor | Actual                               |
+| -------------- | ----- | ------------------------------------ |
+| Domain overall | 70%   | **92.7%** statements, 85.1% branches |
+| Job lifecycle  | 90%   | 97.8%                                |
+| Passport chain | 90%   | 94%                                  |
 
 Thresholds are enforced in `vitest.config.mts` and fail the build. They are a
 floor, not a target: coverage measures what was executed, not what was
@@ -64,23 +64,23 @@ name should convey.
 Some are worth calling out because they encode a decision rather than checking
 a calculation:
 
-| Test | Guards |
-| --- | --- |
-| `detects a payload that has been edited in place` | The passport's entire value |
-| `records and flags a decreasing reading` | Odometer fraud evidence survives |
-| `splits without losing a penny` | Allocation preserves totals |
-| `proves that a blended rate on the subtotal would be wrong` | Per-line tax |
-| `makes the printed lines add up to the printed total` | Customer arithmetic |
-| `keeps a technician out of financial reporting` | Role segregation |
+| Test                                                        | Guards                           |
+| ----------------------------------------------------------- | -------------------------------- |
+| `detects a payload that has been edited in place`           | The passport's entire value      |
+| `records and flags a decreasing reading`                    | Odometer fraud evidence survives |
+| `splits without losing a penny`                             | Allocation preserves totals      |
+| `proves that a blended rate on the subtotal would be wrong` | Per-line tax                     |
+| `makes the printed lines add up to the printed total`       | Customer arithmetic              |
+| `keeps a technician out of financial reporting`             | Role segregation                 |
 | `allows a job to go backwards when a second fault is found` | Workshops are not assembly lines |
-| `costs labour from clocked time, not from charged hours` | Profitability is real |
+| `costs labour from clocked time, not from charged hours`    | Profitability is real            |
 
 ## 6. Data
 
 - Domain tests use literals. No fixtures, no factories, no shared mutable
   state.
 - Integration tests run against a real Postgres in a transaction that rolls
-  back. Never a mocked database: the invariants under test are enforced *by*
+  back. Never a mocked database: the invariants under test are enforced _by_
   the database.
 - The seed is demo data, not test data. Tests that depend on the seed break
   when the demo changes.
@@ -91,13 +91,13 @@ Named here so the gap is visible rather than accidental. These are the five
 requirements in the [traceability matrix](../01-requirements/04-traceability-matrix.md)
 without automated coverage:
 
-| Criterion | Verified by |
-| --- | --- |
-| A 30-item inspection in under four minutes with gloves on | Observed testing on a real tablet in a real workshop |
-| A customer approving on a phone in under sixty seconds | Moderated usability testing |
-| A new advisor creating a booking unaided within five minutes | Observed onboarding |
-| The passport being comprehensible to someone with no account | Interview with actual used-car buyers |
-| Colour-independence of status | Manual review plus greyscale printing |
+| Criterion                                                    | Verified by                                          |
+| ------------------------------------------------------------ | ---------------------------------------------------- |
+| A 30-item inspection in under four minutes with gloves on    | Observed testing on a real tablet in a real workshop |
+| A customer approving on a phone in under sixty seconds       | Moderated usability testing                          |
+| A new advisor creating a booking unaided within five minutes | Observed onboarding                                  |
+| The passport being comprehensible to someone with no account | Interview with actual used-car buyers                |
+| Colour-independence of status                                | Manual review plus greyscale printing                |
 
 Every one of these is a judgement a human has to make. Asserting them in code
 would be asserting a proxy, and the proxy would pass while the real thing
@@ -114,4 +114,4 @@ gets bypassed, and a bypassed pipeline is not a pipeline.
 
 ---
 
-*Next: [CI/CD](05-ci-cd.md).*
+_Next: [CI/CD](05-ci-cd.md)._

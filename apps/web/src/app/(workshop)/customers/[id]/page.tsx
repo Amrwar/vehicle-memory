@@ -101,15 +101,16 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                   { label: 'Email', value: customer.email },
                   {
                     label: 'Address',
-                    value: [
-                      customer.addressLine1,
-                      customer.addressLine2,
-                      customer.locality,
-                      customer.region,
-                      customer.postcode,
-                    ]
-                      .filter(Boolean)
-                      .join(', ') || null,
+                    value:
+                      [
+                        customer.addressLine1,
+                        customer.addressLine2,
+                        customer.locality,
+                        customer.region,
+                        customer.postcode,
+                      ]
+                        .filter(Boolean)
+                        .join(', ') || null,
                   },
                   { label: 'Tax number', value: customer.taxNumber },
                   {
@@ -148,7 +149,10 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               description={`${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'}`}
             />
             {vehicles.length === 0 ? (
-              <EmptyState title="No vehicles" description="Vehicles appear once a job is created." />
+              <EmptyState
+                title="No vehicles"
+                description="Vehicles appear once a job is created."
+              />
             ) : (
               <ul className="divide-y divide-(--border)">
                 {vehicles.map((vehicle) => (
@@ -171,8 +175,8 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                         ) : null}
                       </div>
                       <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                        <Mileage km={vehicle.lastOdometerKm} /> ·{' '}
-                        {vehicle._count.events} history entries
+                        <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events} history
+                        entries
                       </p>
                     </div>
                     <Link href={`/vehicles/${vehicle.id}`}>

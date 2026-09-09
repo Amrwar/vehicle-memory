@@ -59,9 +59,8 @@ export default async function LoginPage({
             The history should belong to the car.
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-(--color-petrol-200)">
-            Every job you complete writes a verified, tamper-evident entry to the
-            vehicle&rsquo;s permanent record. When the car is sold, the history goes
-            with it.
+            Every job you complete writes a verified, tamper-evident entry to the vehicle&rsquo;s
+            permanent record. When the car is sold, the history goes with it.
           </p>
         </div>
 

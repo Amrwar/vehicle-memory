@@ -33,10 +33,7 @@ export type VehicleEventType =
   | 'NOTE';
 
 export type VerificationLevel =
-  | 'SELF_REPORTED'
-  | 'WORKSHOP_RECORDED'
-  | 'WORKSHOP_VERIFIED'
-  | 'AUTHORITY';
+  'SELF_REPORTED' | 'WORKSHOP_RECORDED' | 'WORKSHOP_VERIFIED' | 'AUTHORITY';
 
 export interface DraftEvent extends Omit<ChainableEvent, 'sequence'> {
   type: VehicleEventType;
@@ -195,9 +192,7 @@ function buildWorkSummary(job: CompletedJobInput): string | null {
   if (job.parts.length > 0) {
     const names = job.parts.slice(0, 3).map((p) => p.description);
     const extra = job.parts.length - names.length;
-    pieces.push(
-      `Parts fitted: ${names.join(', ')}${extra > 0 ? ` and ${extra} more` : ''}.`,
-    );
+    pieces.push(`Parts fitted: ${names.join(', ')}${extra > 0 ? ` and ${extra} more` : ''}.`);
   }
 
   const hours = job.labour.reduce((total, l) => total + l.hours, 0);

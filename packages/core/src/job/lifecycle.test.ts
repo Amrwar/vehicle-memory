@@ -79,8 +79,16 @@ describe('permitted transitions', () => {
 
   it('can cancel from every status before completion', () => {
     const cancellable: JobStatus[] = [
-      'DRAFT', 'BOOKED', 'RECEIVED', 'INSPECTING', 'DIAGNOSED',
-      'ESTIMATED', 'AWAITING_APPROVAL', 'APPROVED', 'IN_PROGRESS', 'QUALITY_CHECK',
+      'DRAFT',
+      'BOOKED',
+      'RECEIVED',
+      'INSPECTING',
+      'DIAGNOSED',
+      'ESTIMATED',
+      'AWAITING_APPROVAL',
+      'APPROVED',
+      'IN_PROGRESS',
+      'QUALITY_CHECK',
     ];
     for (const status of cancellable) {
       expect(checkTransition(status, 'CANCELLED').ok, status).toBe(true);
@@ -115,9 +123,9 @@ describe('transition guards', () => {
   });
 
   it('allows completion when the job type does not demand a check', () => {
-    expect(
-      checkTransition('IN_PROGRESS', 'COMPLETED', { requiresQualityCheck: false }).ok,
-    ).toBe(true);
+    expect(checkTransition('IN_PROGRESS', 'COMPLETED', { requiresQualityCheck: false }).ok).toBe(
+      true,
+    );
   });
 
   it('refuses to invoice a job with nothing chargeable on it', () => {
@@ -150,7 +158,10 @@ describe('assertTransition', () => {
 describe('progress trail', () => {
   it('marks earlier stages done, the current one current, and later ones upcoming', () => {
     const stages = progressFor('AWAITING_APPROVAL', [
-      'RECEIVED', 'INSPECTING', 'DIAGNOSED', 'ESTIMATED',
+      'RECEIVED',
+      'INSPECTING',
+      'DIAGNOSED',
+      'ESTIMATED',
     ]);
 
     const byStatus = Object.fromEntries(stages.map((s) => [s.status, s.state]));

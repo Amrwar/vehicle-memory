@@ -13,5 +13,8 @@
     "@carnet/core": "*",
     "@carnet/db": "*"
   },
-  "devDependencies": { "tsx": "^4.23.13", "typescript": "^5.9.3" }
+  "devDependencies": {
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
 }

@@ -83,8 +83,7 @@ export async function recordAttempt(
 /* --- sign in and out ------------------------------------------------------ */
 
 export type SignInResult =
-  | { ok: true; role: Role; orgId: string | null }
-  | { ok: false; error: string };
+  { ok: true; role: Role; orgId: string | null } | { ok: false; error: string };
 
 export async function signIn(email: string, password: string): Promise<SignInResult> {
   const headerList = await headers();
@@ -214,8 +213,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
   if (!session.user.isActive) return null;
 
   const membership =
-    session.user.memberships.find((m) => m.orgId === session.orgId) ??
-    session.user.memberships[0];
+    session.user.memberships.find((m) => m.orgId === session.orgId) ?? session.user.memberships[0];
 
   return {
     userId: session.user.id,

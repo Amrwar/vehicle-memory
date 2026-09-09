@@ -14,13 +14,13 @@
 that is a merge conflict waiting to happen and usually means the work should
 have been split.
 
-| Prefix | For |
-| --- | --- |
-| `feat/` | New capability |
-| `fix/` | Defect |
-| `docs/` | Documentation only |
-| `refactor/` | Behaviour unchanged |
-| `chore/` | Tooling, dependencies |
+| Prefix      | For                   |
+| ----------- | --------------------- |
+| `feat/`     | New capability        |
+| `fix/`      | Defect                |
+| `docs/`     | Documentation only    |
+| `refactor/` | Behaviour unchanged   |
+| `chore/`    | Tooling, dependencies |
 
 Name the branch after the outcome: `feat/inspection-to-estimate`, not
 `feat/sprint-3-work`.
@@ -77,4 +77,4 @@ release.
 
 ---
 
-*Next: [Testing strategy](04-testing-strategy.md).*
+_Next: [Testing strategy](04-testing-strategy.md)._

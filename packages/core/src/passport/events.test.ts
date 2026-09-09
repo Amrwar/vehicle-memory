@@ -64,9 +64,9 @@ describe('events from a completed job', () => {
 
   it('marks events verified only when photographs back them', () => {
     expect(eventsForCompletedJob(JOB)[0]!.verification).toBe('WORKSHOP_VERIFIED');
-    expect(
-      eventsForCompletedJob({ ...JOB, hasPhotoEvidence: false })[0]!.verification,
-    ).toBe('WORKSHOP_RECORDED');
+    expect(eventsForCompletedJob({ ...JOB, hasPhotoEvidence: false })[0]!.verification).toBe(
+      'WORKSHOP_RECORDED',
+    );
   });
 
   it('writes a summary a non-expert can read', () => {

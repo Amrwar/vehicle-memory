@@ -28,11 +28,11 @@ A first-party session implementation:
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **Auth.js / NextAuth** | The obvious choice, and a good library. Rejected for this shape: credentials plus a database adapter is the combination it handles worst, credentials force JWT sessions which we do not want (we need server-side revocation), and the customisation needed for share links would leave us maintaining most of this anyway, with less clarity about what it does. |
-| **A hosted identity provider (Auth0, Clerk, WorkOS)** | Strong option, and where we expect to end up. Rejected for launch because per-user pricing is hostile to a model where a workshop should be encouraged to give every technician an account, and because portal customers would multiply seats. |
-| **JWT with no server-side session** | Cannot revoke. A technician leaves a shared tablet signed in and the token stays valid until expiry. Unacceptable on a shop floor. |
+| Option                                                | Why not                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Auth.js / NextAuth**                                | The obvious choice, and a good library. Rejected for this shape: credentials plus a database adapter is the combination it handles worst, credentials force JWT sessions which we do not want (we need server-side revocation), and the customisation needed for share links would leave us maintaining most of this anyway, with less clarity about what it does. |
+| **A hosted identity provider (Auth0, Clerk, WorkOS)** | Strong option, and where we expect to end up. Rejected for launch because per-user pricing is hostile to a model where a workshop should be encouraged to give every technician an account, and because portal customers would multiply seats.                                                                                                                     |
+| **JWT with no server-side session**                   | Cannot revoke. A technician leaves a shared tablet signed in and the token stays valid until expiry. Unacceptable on a shop floor.                                                                                                                                                                                                                                 |
 
 ## Migration path
 

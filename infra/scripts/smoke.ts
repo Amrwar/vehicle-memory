@@ -56,20 +56,62 @@ async function main() {
 
   const job = await prisma.job.findFirstOrThrow({ where: { number: 10_482 } });
   const vehicle = await prisma.vehicle.findFirstOrThrow({ where: { make: 'BMW' } });
-  const customer = await prisma.customer.findFirstOrThrow({ where: { displayName: 'Maria Okonkwo' } });
+  const customer = await prisma.customer.findFirstOrThrow({
+    where: { displayName: 'Maria Okonkwo' },
+  });
 
   const checks: Check[] = [
     { path: '/login', as: 'anon', expect: ['Sign in', 'The history should belong to the car'] },
-    { path: '/dashboard', as: 'owner', expect: ['Awaiting approval', 'Today in the workshop', 'Approvals needed'] },
+    {
+      path: '/dashboard',
+      as: 'owner',
+      expect: ['Awaiting approval', 'Today in the workshop', 'Approvals needed'],
+    },
     { path: '/diary', as: 'owner', expect: ['Diary', 'Brake system repair', 'Capacity'] },
     { path: '/jobs', as: 'owner', expect: ['Jobs', '10482', 'Brake system repair'] },
-    { path: `/jobs/${job.id}`, as: 'owner', expect: ['Brake system repair', 'Progress', 'Front pads', 'Estimate v1', 'Waiting on the customer'] },
-    { path: '/customers', as: 'advisor', expect: ['Customers', 'Maria Okonkwo', 'Pennine Plumbing'] },
-    { path: `/customers/${customer.id}`, as: 'advisor', expect: ['Maria Okonkwo', 'Vehicles', 'Recent jobs'] },
+    {
+      path: `/jobs/${job.id}`,
+      as: 'owner',
+      expect: [
+        'Brake system repair',
+        'Progress',
+        'Front pads',
+        'Estimate v1',
+        'Waiting on the customer',
+      ],
+    },
+    {
+      path: '/customers',
+      as: 'advisor',
+      expect: ['Customers', 'Maria Okonkwo', 'Pennine Plumbing'],
+    },
+    {
+      path: `/customers/${customer.id}`,
+      as: 'advisor',
+      expect: ['Maria Okonkwo', 'Vehicles', 'Recent jobs'],
+    },
     { path: '/vehicles', as: 'advisor', expect: ['Vehicles', 'WBAJA9C509G000000', 'MK20 XRT'] },
-    { path: `/vehicles/${vehicle.id}`, as: 'advisor', expect: ['History intact', 'Kirkstall Autocentre', 'Ownership transferred', 'Open recalls', 'Next service'] },
-    { path: '/shop', as: 'technician', expect: ['My jobs', 'Brake system repair', 'Inspect', 'Waiting for the customer'] },
-    { path: '/portal', as: 'customer', expect: ['My vehicles', 'Needs your approval', 'Review and decide'] },
+    {
+      path: `/vehicles/${vehicle.id}`,
+      as: 'advisor',
+      expect: [
+        'History intact',
+        'Kirkstall Autocentre',
+        'Ownership transferred',
+        'Open recalls',
+        'Next service',
+      ],
+    },
+    {
+      path: '/shop',
+      as: 'technician',
+      expect: ['My jobs', 'Brake system repair', 'Inspect', 'Waiting for the customer'],
+    },
+    {
+      path: '/portal',
+      as: 'customer',
+      expect: ['My vehicles', 'Needs your approval', 'Review and decide'],
+    },
     // Role segregation: a technician reaching a workshop URL is redirected.
     { path: '/dashboard', as: 'technician', expect: [], redirects: true },
     { path: '/dashboard', as: 'anon', expect: [], redirects: true },

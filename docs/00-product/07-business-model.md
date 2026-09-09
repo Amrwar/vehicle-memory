@@ -2,13 +2,13 @@
 
 ## 1. Two revenue lines
 
-| | Carnet Workshop | Carnet Passport |
-| --- | --- | --- |
-| **Who pays** | Workshops | Vehicle buyers, dealers, insurers |
-| **What for** | Running the business | Verified history at the point of sale |
-| **Model** | Subscription, per bay per month | Per report, or per-seat for trade |
-| **Starts** | Month 5 | Month 18 |
-| **Role** | Funds the company | Makes the company valuable |
+|              | Carnet Workshop                 | Carnet Passport                       |
+| ------------ | ------------------------------- | ------------------------------------- |
+| **Who pays** | Workshops                       | Vehicle buyers, dealers, insurers     |
+| **What for** | Running the business            | Verified history at the point of sale |
+| **Model**    | Subscription, per bay per month | Per report, or per-seat for trade     |
+| **Starts**   | Month 5                         | Month 18                              |
+| **Role**     | Funds the company               | Makes the company valuable            |
 
 The relationship between them is the whole strategy: **line one generates the
 inventory that line two sells, at zero marginal data-entry cost.**
@@ -19,11 +19,11 @@ Per bay per month, billed annually or monthly. Bays, not users, because bays
 correlate with capacity and revenue while user count punishes workshops for
 giving staff access, which is exactly the opposite of what we want.
 
-| Tier | Price / bay / month | Includes |
-| --- | --- | --- |
-| **Core** | £39 | Diary, jobs, customers, vehicles, inspections, estimates, invoicing, technician interface, customer portal, passport writing |
-| **Complete** | £69 | Core plus inventory, purchasing, suppliers, general ledger, financial statements, job profitability |
-| **Group** | £99 | Complete plus multi-location, consolidated reporting, stock transfer, commissions, priority support |
+| Tier         | Price / bay / month | Includes                                                                                                                     |
+| ------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Core**     | £39                 | Diary, jobs, customers, vehicles, inspections, estimates, invoicing, technician interface, customer portal, passport writing |
+| **Complete** | £69                 | Core plus inventory, purchasing, suppliers, general ledger, financial statements, job profitability                          |
+| **Group**    | £99                 | Complete plus multi-location, consolidated reporting, stock transfer, commissions, priority support                          |
 
 Rationale for the shape:
 
@@ -46,13 +46,13 @@ Complete functionality and real onboarding help.
 their own vehicle's history is the mechanism by which the network becomes
 valuable. Charging for it would be charging for our own distribution.
 
-| Product | Price | Buyer |
-| --- | --- | --- |
-| Owner access to own vehicles | Free | Every owner |
-| Share link to a prospective buyer | Free | Seller |
-| **Verified Buyer Report** | £14.99 | Private buyer |
-| Trade seat, unlimited reports | £99/month | Used-car dealers |
-| API access | Volume-priced | Insurers, auction houses, finance |
+| Product                           | Price         | Buyer                             |
+| --------------------------------- | ------------- | --------------------------------- |
+| Owner access to own vehicles      | Free          | Every owner                       |
+| Share link to a prospective buyer | Free          | Seller                            |
+| **Verified Buyer Report**         | £14.99        | Private buyer                     |
+| Trade seat, unlimited reports     | £99/month     | Used-car dealers                  |
+| API access                        | Volume-priced | Insurers, auction houses, finance |
 
 The Verified Buyer Report is a formal document with the tamper-evidence proof,
 mileage consistency analysis, service-interval adherence, outstanding recalls
@@ -100,16 +100,16 @@ Amounts per report are small. The signal is not.
 
 Modelled on a 6-bay workshop on Complete at £414/month.
 
-| Line | Value | Note |
-| --- | --- | --- |
-| ARPA | £414/month, £4,968/year | |
-| Gross margin | ~82% | Hosting, storage, SMS, email, payment fees |
-| CAC | £1,400 | Assumes inside sales plus onboarding effort |
-| Payback | ~4.1 months | On gross profit |
-| Annual churn | 12% assumed | Workshop software is sticky once the diary is in it |
-| Lifetime | ~8.3 years | |
-| **LTV** | **~£33,800** | |
-| **LTV:CAC** | **~24:1** | High because churn is low; sensitive to the churn assumption |
+| Line         | Value                   | Note                                                         |
+| ------------ | ----------------------- | ------------------------------------------------------------ |
+| ARPA         | £414/month, £4,968/year |                                                              |
+| Gross margin | ~82%                    | Hosting, storage, SMS, email, payment fees                   |
+| CAC          | £1,400                  | Assumes inside sales plus onboarding effort                  |
+| Payback      | ~4.1 months             | On gross profit                                              |
+| Annual churn | 12% assumed             | Workshop software is sticky once the diary is in it          |
+| Lifetime     | ~8.3 years              |                                                              |
+| **LTV**      | **~£33,800**            |                                                              |
+| **LTV:CAC**  | **~24:1**               | High because churn is low; sensitive to the churn assumption |
 
 The churn assumption is the fragile one. A workshop that has put its diary,
 its history and its ledger into a system does not casually leave, but this is
@@ -141,13 +141,13 @@ product that cannot yet deliver.
 Held honestly, because a business model document that only argues for itself is
 worthless.
 
-| Assumption | If false | Detected by |
-| --- | --- | --- |
-| Workshops will pay a premium over incumbents for accounting integration | Compress to a single £45 tier and compete on the passport alone | Design-partner pricing validation, week 20 |
-| Local density is achievable at reasonable CAC | The network effect never ignites; we are a workshop SaaS with a nice feature | CAC and density tracking through months 5–12 |
-| Buyers will pay for a report when free share links exist | Passport revenue never materialises; the moat is defensive only | First paid-report cohort, month 18 |
-| Churn is near 12% | LTV drops sharply and the CAC budget must shrink | Cohort retention from month 12 |
-| Workshops are not actively hostile to data portability | Adoption stalls on principle rather than product | Design-partner interviews, week 6 |
+| Assumption                                                              | If false                                                                     | Detected by                                  |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
+| Workshops will pay a premium over incumbents for accounting integration | Compress to a single £45 tier and compete on the passport alone              | Design-partner pricing validation, week 20   |
+| Local density is achievable at reasonable CAC                           | The network effect never ignites; we are a workshop SaaS with a nice feature | CAC and density tracking through months 5–12 |
+| Buyers will pay for a report when free share links exist                | Passport revenue never materialises; the moat is defensive only              | First paid-report cohort, month 18           |
+| Churn is near 12%                                                       | LTV drops sharply and the CAC budget must shrink                             | Cohort retention from month 12               |
+| Workshops are not actively hostile to data portability                  | Adoption stalls on principle rather than product                             | Design-partner interviews, week 6            |
 
 The last one is the one to watch early. It is a belief about attitude, not
 about software, and it is cheap to test in conversation long before it is
@@ -155,4 +155,4 @@ expensive to discover in the market.
 
 ---
 
-*Next: [Functional requirements](../01-requirements/01-functional-requirements.md).*
+_Next: [Functional requirements](../01-requirements/01-functional-requirements.md)._

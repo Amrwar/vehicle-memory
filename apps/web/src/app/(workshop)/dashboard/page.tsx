@@ -156,9 +156,7 @@ export default async function DashboardPage() {
                       {job.vehicle.registration ? (
                         <Registration value={job.vehicle.registration} />
                       ) : null}
-                      <span className="datum text-[11px] text-(--text-faint)">
-                        #{job.number}
-                      </span>
+                      <span className="datum text-[11px] text-(--text-faint)">#{job.number}</span>
                     </div>
                     <p className="mt-0.5 truncate text-[12px] text-(--text-faint)">
                       {job.customer.displayName} &middot; {job.shortDescription}
@@ -168,10 +166,7 @@ export default async function DashboardPage() {
 
                   {estimate ? (
                     <span className="font-display text-[16px] font-semibold tabular">
-                      <Money
-                        amount={Number(estimate.total)}
-                        currency={estimate.currency}
-                      />
+                      <Money amount={Number(estimate.total)} currency={estimate.currency} />
                     </span>
                   ) : null}
 

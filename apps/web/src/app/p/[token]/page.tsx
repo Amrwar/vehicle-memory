@@ -99,9 +99,21 @@ export default async function PublicPassportPage({
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto max-w-3xl px-4 py-4">
           <div className="flex items-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden className="text-(--brand)">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden
+              className="text-(--brand)"
+            >
               <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M10 4.6v5.4l3.4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M10 4.6v5.4l3.4 2"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             <span className="font-display text-[14px] font-semibold">Carnet</span>
             <span className="eyebrow ml-auto">Vehicle history</span>
@@ -123,9 +135,9 @@ export default async function PublicPassportPage({
         </div>
 
         <p className="mt-3 text-[13px] leading-relaxed text-(--text-soft)">
-          This record is append-only. Each entry is cryptographically linked to the one
-          before it, so an entry cannot be altered or removed without breaking the
-          chain. The check above recomputes it.
+          This record is append-only. Each entry is cryptographically linked to the one before it,
+          so an entry cannot be altered or removed without breaking the chain. The check above
+          recomputes it.
         </p>
 
         <section className="mt-6 rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
@@ -178,10 +190,10 @@ export default async function PublicPassportPage({
               Mileage inconsistency on record
             </p>
             <p className="mt-1 text-[13px] text-(--text-soft)">
-              {anomalies} odometer reading{anomalies === 1 ? ' has' : 's have'} been
-              recorded that {anomalies === 1 ? 'does' : 'do'} not follow from the
-              readings before {anomalies === 1 ? 'it' : 'them'}. Readings are never
-              discarded, so you can see them below.
+              {anomalies} odometer reading{anomalies === 1 ? ' has' : 's have'} been recorded that{' '}
+              {anomalies === 1 ? 'does' : 'do'} not follow from the readings before{' '}
+              {anomalies === 1 ? 'it' : 'them'}. Readings are never discarded, so you can see them
+              below.
             </p>
           </div>
         ) : null}
@@ -205,8 +217,8 @@ export default async function PublicPassportPage({
         <section className="mt-6">
           <h2 className="font-display text-[18px] font-semibold">History</h2>
           <p className="mt-1 text-[13px] text-(--text-faint)">
-            Newest first. Each entry names the workshop that recorded it and how well
-            evidenced it is.
+            Newest first. Each entry names the workshop that recorded it and how well evidenced it
+            is.
           </p>
 
           <div className="mt-4 rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
@@ -257,12 +269,12 @@ export default async function PublicPassportPage({
                 year: 'numeric',
               })}
             </time>
-            , and the owner can revoke it at any time. Your visit has been recorded and
-            is visible to them.
+            , and the owner can revoke it at any time. Your visit has been recorded and is visible
+            to them.
           </p>
           <p className="mt-2">
-            No personal details of any owner are shown. Carnet does not verify claims
-            made outside this record.
+            No personal details of any owner are shown. Carnet does not verify claims made outside
+            this record.
           </p>
         </footer>
       </main>

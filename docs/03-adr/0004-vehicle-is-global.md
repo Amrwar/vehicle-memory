@@ -33,11 +33,11 @@ Workshop access is mediated rather than owned:
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **Vehicle inside the tenant, synchronised to a shared registry** | The obvious incremental design. Rejected because two copies of a fact diverge, and then the question "what is this vehicle's mileage" has two answers. The whole product rests on there being one. |
-| **Vehicle in the tenant, with a separate global passport keyed by VIN** | Better, but it splits the vehicle's identity from its history, and every write becomes a two-phase operation across a boundary. Also makes the "same car, two workshops" case a merge problem. |
-| **Global vehicle, but history private per workshop unless shared** | This is the status quo with extra steps. Coverage would never accumulate. |
+| Option                                                                  | Why not                                                                                                                                                                                            |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vehicle inside the tenant, synchronised to a shared registry**        | The obvious incremental design. Rejected because two copies of a fact diverge, and then the question "what is this vehicle's mileage" has two answers. The whole product rests on there being one. |
+| **Vehicle in the tenant, with a separate global passport keyed by VIN** | Better, but it splits the vehicle's identity from its history, and every write becomes a two-phase operation across a boundary. Also makes the "same car, two workshops" case a merge problem.     |
+| **Global vehicle, but history private per workshop unless shared**      | This is the status quo with extra steps. Coverage would never accumulate.                                                                                                                          |
 
 ## Consequences
 

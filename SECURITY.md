@@ -11,8 +11,7 @@ Email **hefnyamr@rocketmail.com** with:
 - what an attacker could do with it
 - anything you think we would miss
 
-You will get an acknowledgement within 2 working days and an assessment within
-5. We will tell you what we intend to do and when, and we will credit you when
+You will get an acknowledgement within 2 working days and an assessment within 5. We will tell you what we intend to do and when, and we will credit you when
 it is fixed unless you would rather we did not.
 
 Please give us reasonable time to fix an issue before disclosing it publicly.

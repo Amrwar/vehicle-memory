@@ -29,12 +29,12 @@ vulnerabilities open an issue with a deadline.
 
 ## Environments
 
-| | Development | Staging | Production |
-| --- | --- | --- | --- |
-| Deploys | Local | Every merge to `main` | Tagged release |
-| Data | Seed | Anonymised copy | Real |
-| Secrets | `.env` | Vault | Vault |
-| Migrations | `migrate dev` | `migrate deploy` | `migrate deploy`, gated |
+|            | Development   | Staging               | Production              |
+| ---------- | ------------- | --------------------- | ----------------------- |
+| Deploys    | Local         | Every merge to `main` | Tagged release          |
+| Data       | Seed          | Anonymised copy       | Real                    |
+| Secrets    | `.env`        | Vault                 | Vault                   |
+| Migrations | `migrate dev` | `migrate deploy`      | `migrate deploy`, gated |
 
 ## Migrations
 
@@ -76,4 +76,4 @@ workshops stop creating jobs, something is broken that no error counter caught.
 
 ---
 
-*Next: [Observability](06-observability.md).*
+_Next: [Observability](06-observability.md)._

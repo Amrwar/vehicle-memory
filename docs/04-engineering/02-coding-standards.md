@@ -16,12 +16,12 @@ That is what makes the domain testable in milliseconds and portable if the
 framework changes. 192 tests run in under half a second because none of them
 touch a database.
 
-| Layer | May import |
-| --- | --- |
+| Layer           | May import       |
+| --------------- | ---------------- |
 | `packages/core` | nothing internal |
-| `packages/db` | core |
-| `packages/ui` | core, React |
-| `apps/*` | everything |
+| `packages/db`   | core             |
+| `packages/ui`   | core, React      |
+| `apps/*`        | everything       |
 
 ## 2. TypeScript
 
@@ -37,15 +37,15 @@ touch a database.
 
 ## 3. Naming
 
-| Thing | Convention | Example |
-| --- | --- | --- |
-| Files | kebab-case | `to-estimate.ts` |
-| Components | PascalCase | `ProgressTrail` |
-| Functions | camelCase, verb first | `calculateTotals` |
-| Booleans | `is`, `has`, `can` | `isTerminal`, `hasApprovedEstimate` |
-| Constants | SCREAMING_SNAKE | `TREAD_CRITICAL_MM` |
-| Database tables | snake_case plural | `vehicle_events` |
-| Prisma models | PascalCase singular | `VehicleEvent` |
+| Thing           | Convention            | Example                             |
+| --------------- | --------------------- | ----------------------------------- |
+| Files           | kebab-case            | `to-estimate.ts`                    |
+| Components      | PascalCase            | `ProgressTrail`                     |
+| Functions       | camelCase, verb first | `calculateTotals`                   |
+| Booleans        | `is`, `has`, `can`    | `isTerminal`, `hasApprovedEstimate` |
+| Constants       | SCREAMING_SNAKE       | `TREAD_CRITICAL_MM`                 |
+| Database tables | snake_case plural     | `vehicle_events`                    |
+| Prisma models   | PascalCase singular   | `VehicleEvent`                      |
 
 **Names come from the ubiquitous language** ([domain model](../02-design/01-domain-model.md)
 section 2). A labour line and a time entry are different concepts with
@@ -59,7 +59,7 @@ Comment the **why**, never the what. The code says what.
 ```ts
 // Bad — restates the code
 // Loop through the findings and filter to critical ones
-const critical = findings.filter(f => f.severity === 'CRITICAL');
+const critical = findings.filter((f) => f.severity === 'CRITICAL');
 
 // Good — explains a decision the reader would otherwise question
 // A decreasing odometer is recorded and flagged, never rejected. It is either
@@ -140,4 +140,4 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `ci`.
 
 ---
 
-*Next: [Git and branching](03-git-and-branching.md).*
+_Next: [Git and branching](03-git-and-branching.md)._

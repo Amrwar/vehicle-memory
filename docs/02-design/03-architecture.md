@@ -119,13 +119,13 @@ second must not both claim sequence 41.
 
 ## 5. Layering rules
 
-| Layer | May import | Must not import |
-| --- | --- | --- |
+| Layer           | May import             | Must not import     |
+| --------------- | ---------------------- | ------------------- |
 | `packages/core` | nothing from this repo | Prisma, React, Next |
-| `packages/db` | core | React, Next |
-| `packages/ui` | core, React | Prisma, Next |
-| `apps/web` | all packages | — |
-| `apps/worker` | core, db | React, ui |
+| `packages/db`   | core                   | React, Next         |
+| `packages/ui`   | core, React            | Prisma, Next        |
+| `apps/web`      | all packages           | —                   |
+| `apps/worker`   | core, db               | React, ui           |
 
 `packages/core` importing nothing is what makes the domain testable without a
 database and portable if the framework changes. 192 tests run in under half a
@@ -156,14 +156,14 @@ never has a moment where running code and live schema disagree.
 
 ## 7. Failure modes and what happens
 
-| Failure | Behaviour |
-| --- | --- |
-| Postgres unavailable | Application returns 503. No degraded write path; a workshop system that silently drops writes is worse than one that is down. |
-| Redis unavailable | Rate limiting falls back to the database. Queues pause. Core workflow continues. |
-| SMS or email provider down | Message queued in the outbox and retried. The estimate still exists and can be read from the portal. |
-| VIN decode unavailable | Manual entry. The field is never blocking. |
-| Worker down | Outbox accumulates. Jobs still complete. Passport events arrive when it returns. Alert fires on queue depth. |
-| Object storage down | Photograph upload fails with a clear message; the inspection item still records its finding. |
+| Failure                    | Behaviour                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Postgres unavailable       | Application returns 503. No degraded write path; a workshop system that silently drops writes is worse than one that is down. |
+| Redis unavailable          | Rate limiting falls back to the database. Queues pause. Core workflow continues.                                              |
+| SMS or email provider down | Message queued in the outbox and retried. The estimate still exists and can be read from the portal.                          |
+| VIN decode unavailable     | Manual entry. The field is never blocking.                                                                                    |
+| Worker down                | Outbox accumulates. Jobs still complete. Passport events arrive when it returns. Alert fires on queue depth.                  |
+| Object storage down        | Photograph upload fails with a clear message; the inspection item still records its finding.                                  |
 
 The pattern throughout: **never let a peripheral dependency stop the shop
 floor.**
@@ -181,4 +181,4 @@ Recorded now so it is a decision later rather than a surprise:
 
 ---
 
-*Next: [State machines](04-state-machines.md).*
+_Next: [State machines](04-state-machines.md)._

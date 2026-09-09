@@ -14,15 +14,38 @@ import {
 } from './to-estimate';
 
 const FINDINGS: Finding[] = [
-  { id: 'f1', sectionName: 'Brakes', itemName: 'Front pads', severity: 'CRITICAL',
-    note: 'Metal on metal', recommendedAction: 'Replace front brake pads and discs',
-    estimatedCost: 850, measurementValue: 1.5, measurementType: 'PAD_THICKNESS_MM',
-    photoCount: 2 },
-  { id: 'f2', sectionName: 'Electrical', itemName: 'Battery', severity: 'ADVISORY',
-    note: 'Holding charge but weak under load', recommendedAction: 'Replace battery',
-    estimatedCost: 240, measurementValue: 11.9, measurementType: 'VOLTAGE' },
-  { id: 'f3', sectionName: 'Tires', itemName: 'Front left tyre', severity: 'PASS',
-    measurementValue: 6.2, measurementType: 'TREAD_DEPTH_MM', position: 'FRONT_LEFT' },
+  {
+    id: 'f1',
+    sectionName: 'Brakes',
+    itemName: 'Front pads',
+    severity: 'CRITICAL',
+    note: 'Metal on metal',
+    recommendedAction: 'Replace front brake pads and discs',
+    estimatedCost: 850,
+    measurementValue: 1.5,
+    measurementType: 'PAD_THICKNESS_MM',
+    photoCount: 2,
+  },
+  {
+    id: 'f2',
+    sectionName: 'Electrical',
+    itemName: 'Battery',
+    severity: 'ADVISORY',
+    note: 'Holding charge but weak under load',
+    recommendedAction: 'Replace battery',
+    estimatedCost: 240,
+    measurementValue: 11.9,
+    measurementType: 'VOLTAGE',
+  },
+  {
+    id: 'f3',
+    sectionName: 'Tires',
+    itemName: 'Front left tyre',
+    severity: 'PASS',
+    measurementValue: 6.2,
+    measurementType: 'TREAD_DEPTH_MM',
+    position: 'FRONT_LEFT',
+  },
   { id: 'f4', sectionName: 'Engine', itemName: 'Cabin filter', severity: 'NOT_CHECKED' },
 ];
 
@@ -30,7 +53,11 @@ describe('summary', () => {
   it('counts by severity', () => {
     const summary = summarise(FINDINGS);
     expect(summary).toMatchObject({
-      pass: 1, advisory: 1, critical: 1, notChecked: 1, total: 4,
+      pass: 1,
+      advisory: 1,
+      critical: 1,
+      notChecked: 1,
+      total: 4,
     });
   });
 

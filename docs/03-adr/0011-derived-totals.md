@@ -25,11 +25,11 @@ agreed.**
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **Store totals, recompute on every write** | Works until one write path forgets. The first time a line changes and the total does not, every figure in the system becomes suspect. |
-| **Store totals, recompute in a nightly job** | Guarantees a window in which the displayed total is wrong. |
-| **Database generated columns** | Cannot express per-line tax with rates joined from another table. |
+| Option                                       | Why not                                                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Store totals, recompute on every write**   | Works until one write path forgets. The first time a line changes and the total does not, every figure in the system becomes suspect. |
+| **Store totals, recompute in a nightly job** | Guarantees a window in which the displayed total is wrong.                                                                            |
+| **Database generated columns**               | Cannot express per-line tax with rates joined from another table.                                                                     |
 
 ## Consequences
 

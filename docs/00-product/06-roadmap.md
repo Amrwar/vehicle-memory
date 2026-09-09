@@ -18,10 +18,10 @@ reason for its position in the sequence. No phase is a document-only phase.
 
 **Weeks 1–10. This is the MVP.**
 
-| | |
-| --- | --- |
-| **Entry** | Proposal approved. Design partners committed. |
-| **Exit** | All criteria in [MVP definition](05-mvp-definition.md) section 6 met. Two design partners live for four weeks. |
+|           |                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------- |
+| **Entry** | Proposal approved. Design partners committed.                                                                  |
+| **Exit**  | All criteria in [MVP definition](05-mvp-definition.md) section 6 met. Two design partners live for four weeks. |
 
 **Scope.** Tenancy and auth. Customers and vehicles. **The vehicle passport
 event ledger.** Booking diary with resource lanes. The job lifecycle engine.
@@ -38,10 +38,10 @@ before it exists.
 
 **Weeks 11–18.**
 
-| | |
-| --- | --- |
-| **Entry** | Phase 1 accepted. At least one design partner asking for stock control. |
-| **Exit** | A part can be added to a job, reserved from stock, ordered from a supplier when short, received, and consumed, with stock value correct at every step. |
+|           |                                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Entry** | Phase 1 accepted. At least one design partner asking for stock control.                                                                                |
+| **Exit**  | A part can be added to a job, reserved from stock, ordered from a supplier when short, received, and consumed, with stock value correct at every step. |
 
 **Scope.** Parts catalogue and categories. Warehouses and bins. Stock levels,
 movements and valuation. Automatic reservation when a part is added to a job.
@@ -79,10 +79,10 @@ Phase 3 needs a true cost of goods sold, and that comes from here.
 
 **Weeks 19–28.**
 
-| | |
-| --- | --- |
-| **Entry** | Phase 2 accepted. Stock valuation correct and reconciled. |
-| **Exit** | Trial balance balances. An external accountant reviews and signs off the postings. Job profitability agrees with the ledger. |
+|           |                                                                                                                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 2 accepted. Stock valuation correct and reconciled.                                                                    |
+| **Exit**  | Trial balance balances. An external accountant reviews and signs off the postings. Job profitability agrees with the ledger. |
 
 **Scope.** Chart of accounts. General ledger with enforced double-entry.
 Automatic journal posting from every operational event. Accounts receivable and
@@ -108,10 +108,10 @@ is a coherent internal ledger to synchronise from.
 
 **Weeks 29–36.**
 
-| | |
-| --- | --- |
-| **Entry** | Phase 3 accepted. At least two customers operating more than one location. |
-| **Exit** | A group can see consolidated financials, move stock between sites, and pay technicians from recorded time. |
+|           |                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 3 accepted. At least two customers operating more than one location.                                 |
+| **Exit**  | A group can see consolidated financials, move stock between sites, and pay technicians from recorded time. |
 
 **Scope.** Employees and HR records. Attendance and timesheets feeding real
 labour cost. Payroll or payroll integration. Technician commission schemes.
@@ -148,10 +148,10 @@ proven would double the cost of every earlier mistake.
 
 **Weeks 37–44.**
 
-| | |
-| --- | --- |
-| **Entry** | Phase 1 flows stable under real load. Portal adoption above 40%. |
-| **Exit** | A service reminder can lead to a booking, a job and an invoice with no staff action until the car arrives. |
+|           |                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 1 flows stable under real load. Portal adoption above 40%.                                           |
+| **Exit**  | A service reminder can lead to a booking, a job and an invoice with no staff action until the car arrives. |
 
 **Scope.** Online self-service booking with real capacity checking. Automated
 service reminders driven by both elapsed time and projected mileage. The
@@ -178,10 +178,10 @@ The loop this closes:
 
 **Weeks 45–52 and continuing.**
 
-| | |
-| --- | --- |
-| **Entry** | A year of real job data across a meaningful number of workshops. |
-| **Exit** | Recommendations measurably outperform the workshop's own judgement on a held-out sample. |
+|           |                                                                                          |
+| --------- | ---------------------------------------------------------------------------------------- |
+| **Entry** | A year of real job data across a meaningful number of workshops.                         |
+| **Exit**  | Recommendations measurably outperform the workshop's own judgement on a held-out sample. |
 
 **Scope.** Demand forecasting for stock. Optimal reorder quantities from actual
 usage. Job duration prediction from historical time entries. Estimate
@@ -201,16 +201,16 @@ wrong is worse than shipping nothing.
 
 These run across all phases, because coverage is the long game.
 
-| Milestone | Condition | Target |
-| --- | --- | --- |
-| First verified event | A completed job writes to a passport | Phase 1, week 8 |
-| First transfer | A vehicle changes owner and the history goes with it | Phase 1, week 10 |
-| First external read | Someone with no account reads a shared passport | Phase 1, week 10 |
-| 10,000 vehicles with 3+ events | Coverage becomes locally useful | Month 9 |
-| First paid report | A buyer pays for a verified history | Month 18 |
-| First revenue share paid | A workshop is paid for data it contributed | Month 19 |
-| Passport requested by name | A buyer asks a seller for a Carnet passport unprompted | Month 24 |
+| Milestone                      | Condition                                              | Target           |
+| ------------------------------ | ------------------------------------------------------ | ---------------- |
+| First verified event           | A completed job writes to a passport                   | Phase 1, week 8  |
+| First transfer                 | A vehicle changes owner and the history goes with it   | Phase 1, week 10 |
+| First external read            | Someone with no account reads a shared passport        | Phase 1, week 10 |
+| 10,000 vehicles with 3+ events | Coverage becomes locally useful                        | Month 9          |
+| First paid report              | A buyer pays for a verified history                    | Month 18         |
+| First revenue share paid       | A workshop is paid for data it contributed             | Month 19         |
+| Passport requested by name     | A buyer asks a seller for a Carnet passport unprompted | Month 24         |
 
 ---
 
-*Next: [Business model](07-business-model.md).*
+_Next: [Business model](07-business-model.md)._

@@ -34,12 +34,12 @@ makes the retry safe either way.
 
 ## Alternatives considered
 
-| Option | Why not |
-| --- | --- |
-| **Everything in one transaction** | Couples the workshop's ability to close a job to the availability of every downstream concern. |
-| **Fire-and-forget after commit** | Silently loses events on crash. For a ledger that claims completeness, this is disqualifying. |
+| Option                                      | Why not                                                                                                                                                                                                                                                     |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Everything in one transaction**           | Couples the workshop's ability to close a job to the availability of every downstream concern.                                                                                                                                                              |
+| **Fire-and-forget after commit**            | Silently loses events on crash. For a ledger that claims completeness, this is disqualifying.                                                                                                                                                               |
 | **A message broker (Kafka, RabbitMQ, SQS)** | Correct at scale, and where this goes if volume demands it. Rejected now because it introduces a second durable store that can disagree with the database, plus operational burden, for a system handling thousands of events per day rather than millions. |
-| **Database LISTEN/NOTIFY** | Not durable. A disconnected listener misses events. |
+| **Database LISTEN/NOTIFY**                  | Not durable. A disconnected listener misses events.                                                                                                                                                                                                         |
 
 ## Consequences
 
