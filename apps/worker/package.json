@@ -1,0 +1,17 @@
+{
+  "name": "@carnet/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "@carnet/core": "*",
+    "@carnet/db": "*"
+  },
+  "devDependencies": { "tsx": "^4.23.13", "typescript": "^5.9.3" }
+}
