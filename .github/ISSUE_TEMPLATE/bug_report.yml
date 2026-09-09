@@ -1,0 +1,41 @@
+name: Bug report
+description: Something behaves incorrectly
+labels: [bug, triage]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you observed, and what you expected instead.
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as a service advisor
+        2. Open job #10482
+        3. ...
+    validations: { required: true }
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface
+      options: [Workshop, Shop floor, Customer portal, Public passport, API, Worker]
+    validations: { required: true }
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Data loss and cross-tenant issues are always critical.
+      options:
+        - Critical - data loss, cross-tenant access, or ledger integrity
+        - High - a workflow is blocked
+        - Medium - a workaround exists
+        - Low - cosmetic
+    validations: { required: true }
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment
+      placeholder: Browser, device, role, and anything in the logs.

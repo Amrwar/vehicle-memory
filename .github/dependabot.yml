@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      # One PR per ecosystem rather than fifteen. Reviewer attention is finite.
+      types: { patterns: ['@types/*'] }
+      next: { patterns: ['next', 'eslint-config-next', 'react', 'react-dom'] }
+      prisma: { patterns: ['prisma', '@prisma/*'] }
+      tooling: { patterns: ['eslint*', 'prettier', 'typescript', 'vitest', '@vitest/*'] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }

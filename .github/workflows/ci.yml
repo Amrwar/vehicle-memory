@@ -1,0 +1,200 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  # Test-only values. Real secrets never appear in a workflow file.
+  AUTH_SECRET: ci-auth-secret-value-at-least-32-characters-long
+  PUBLIC_LINK_SECRET: ci-public-link-secret-at-least-32-characters-long
+  LEDGER_CHAIN_SALT: ci-ledger-chain-salt-value
+  DATABASE_URL: postgresql://carnet:carnet@localhost:5432/carnet_test?schema=public
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Fast feedback. Runs on every push, finishes in about a minute.
+  # -------------------------------------------------------------------------
+  static:
+    name: Format, lint, types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+  # -------------------------------------------------------------------------
+  # Domain tests. No database: packages/core imports nothing (ADR-0003).
+  # -------------------------------------------------------------------------
+  unit:
+    name: Domain tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  # -------------------------------------------------------------------------
+  # The guarantees the product's central claim rests on. This job does not
+  # check that the invariants are configured; it actively tries to break them.
+  # -------------------------------------------------------------------------
+  integrity:
+    name: Database invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: carnet
+          POSTGRES_PASSWORD: carnet
+          POSTGRES_DB: carnet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U carnet"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate client and apply migrations
+        run: |
+          npm run db:generate
+          npm run db:deploy
+
+      - name: Seed
+        run: npm run db:seed
+
+      - name: Verify chains and invariants
+        run: npx tsx infra/scripts/verify-integrity.ts
+
+  # -------------------------------------------------------------------------
+  # Production build, then every route rendered against a seeded database.
+  # -------------------------------------------------------------------------
+  build:
+    name: Build and smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [static, unit]
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: carnet
+          POSTGRES_PASSWORD: carnet
+          POSTGRES_DB: carnet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U carnet"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prepare database
+        run: |
+          npm run db:generate
+          npm run db:deploy
+          npm run db:seed
+
+      - name: Build
+        run: npm run build
+
+      - name: Start the application
+        run: |
+          npm run start --workspace=@carnet/web &
+          npx wait-on http://localhost:3000/login --timeout 90000
+
+      - name: Smoke test every route, every role
+        run: npx tsx infra/scripts/smoke.ts http://localhost:3000
+
+  # -------------------------------------------------------------------------
+  # Supply chain. Critical findings block the merge (NFR-409).
+  # -------------------------------------------------------------------------
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Audit
+        run: npm audit --audit-level=critical
+
+      - name: Check for committed secrets
+        run: |
+          if git grep -nIE '(AUTH_SECRET|LEDGER_CHAIN_SALT|PUBLIC_LINK_SECRET)=[A-Za-z0-9+/_-]{16,}' \
+               -- ':!.env.example' ':!.github/workflows'; then
+            echo "::error::A secret appears to be committed."
+            exit 1
+          fi
+          echo "No committed secrets found."

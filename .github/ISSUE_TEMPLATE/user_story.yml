@@ -1,0 +1,32 @@
+name: User story
+description: A unit of product work
+labels: [story]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: Story
+      value: |
+        **As** <persona>
+        **I want** <capability>
+        **So that** <outcome>
+    validations: { required: true }
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance criteria
+      description: Given / When / Then. Every criterion must be demonstrable.
+      value: |
+        - **Given** ..., **when** ..., **then** ...
+    validations: { required: true }
+  - type: input
+    id: requirement
+    attributes:
+      label: Satisfies
+      placeholder: FR-705, NFR-605
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Anything above 13 must be split before it enters a sprint.
+      options: ['1', '2', '3', '5', '8', '13']

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Architecture decision
+    url: https://github.com/Amrwar/vehicle-memory/tree/main/docs/03-adr
+    about: Decisions of consequence are recorded as ADRs, not issues. Open a pull request adding one.

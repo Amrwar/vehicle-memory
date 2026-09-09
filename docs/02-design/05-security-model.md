@@ -1,0 +1,159 @@
+# Security Model
+
+## 1. What we are protecting
+
+| Asset | If compromised |
+| --- | --- |
+| Cross-tenant data | Reportable breach. Ends the business. |
+| The passport ledger | The product's central claim becomes false. |
+| Personal data | Regulatory exposure, loss of customer trust. |
+| Financial records | Fraud, and an unauditable ledger. |
+| Session tokens | Account takeover on a shared shop-floor tablet. |
+
+## 2. Authentication
+
+Implemented in `apps/web/src/lib/auth.ts`, rationale in
+[ADR-0006](../03-adr/0006-first-party-session-auth.md).
+
+| Control | Implementation |
+| --- | --- |
+| Password storage | bcrypt, cost 12, per-password salt |
+| Account enumeration | A hash comparison runs even when the account does not exist, so response time does not disclose registration |
+| Session token | 32 random bytes; only its SHA-256 digest is stored |
+| Cookie | httpOnly, Secure in production, SameSite=Lax |
+| Revocation | Server-side. A session can be killed without waiting for expiry |
+| Idle expiry | Configurable per organisation, 12 hours by default |
+| Rate limiting | 5 failures per 15 minutes, keyed on both email and source address |
+
+The shared-tablet case drove the revocation requirement. A technician who
+leaves a tablet signed in must be removable, which a stateless JWT cannot do.
+
+## 3. Authorisation
+
+Two independent layers. Both must pass.
+
+**Layer 1, permission.** `can(role, permission)`, deny by default. A permission
+not explicitly granted is refused, so adding a capability cannot widen anyone's
+access by accident.
+
+**Layer 2, scope.** Holding a permission is necessary, never sufficient. A
+customer with `passport:read` reads *their* vehicles. The scoped query decides
+which rows, and it is applied in the data-access layer rather than by the
+caller.
+
+```
+  Request
+    -> authenticated?          no -> 302 /login
+    -> role has permission?    no -> 403, audited
+    -> row in scope?           no -> 404, never 403
+```
+
+The last line matters: a cross-tenant request by id returns **404**, so
+existence is not disclosed.
+
+## 4. Tenant isolation
+
+The most severe defect this system could have.
+[ADR-0010](../03-adr/0010-tenant-isolation-in-data-layer.md) covers the
+mechanism. Summary:
+
+- `forOrg(orgId)` adds the tenant predicate to reads and stamps it on creates.
+- `findUnique` is rewritten to `findFirst` with the predicate, so an id lookup
+  cannot escape the tenant.
+- The route guard hands back the scoped client, so there is no ergonomic path
+  to an unscoped one.
+- Cross-tenant isolation tests exist per entity; adding a model without one is
+  a review failure.
+
+**Known gap, stated rather than hidden:** `update` and `delete` by id are not
+narrowed by the extension, because their `where` must address a unique row. The
+convention is to load through the scoped client first. Row-level security in
+Postgres is the intended successor and closes this.
+
+## 5. The passport exception
+
+Passport tables are deliberately not tenant-scoped
+([ADR-0004](../03-adr/0004-vehicle-is-global.md)), which means they cannot rely
+on the mechanism above. Access is explicit:
+
+| Reader | Basis | Scope |
+| --- | --- | --- |
+| Workshop | Has serviced the vehicle, or holds a grant | Full history, subject to owner disclosure settings |
+| Current owner | Ownership row | Full history, plus the access log |
+| Previous owner | Ownership row with an end date | Read-only, limited to the period they owned it |
+| Share-link holder | Unguessable token | Read-only, no personal details, time-limited, revocable |
+| Anyone else | — | Nothing |
+
+Every share-link read is logged and visible to the owner (FR-410).
+
+## 6. Public links
+
+Estimate approval and passport sharing both hand a capability to someone with
+no account. The token *is* the credential, so:
+
+- 32 random bytes, well beyond the 128 bits NFR-410 requires.
+- Stored hashed. A database disclosure does not yield working links.
+- Scoped to exactly one estimate or one vehicle.
+- Expiring, with an explicit date shown to the reader.
+- Revocable, taking effect immediately.
+- Rate limited, so a token cannot be brute-forced.
+- Never indexed: `robots: noindex` on every public page.
+
+## 7. Input and output
+
+| Control | Implementation |
+| --- | --- |
+| Input validation | Zod schemas at every boundary. Client-side validation is a convenience, never a control. |
+| SQL injection | Parameterised queries only. Raw SQL uses tagged templates. |
+| XSS | React escapes by default. `dangerouslySetInnerHTML` is not used anywhere. |
+| CSRF | SameSite=Lax plus origin checking on state-changing requests. |
+| File upload | Content-type and size validated, stored outside the web root, served through an authorising handler. |
+| Headers | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy. |
+
+## 8. Threat model
+
+| # | Threat | Mitigation | Residual |
+| --- | --- | --- | --- |
+| T1 | Credential stuffing | Rate limiting, bcrypt, no enumeration | Weak passwords chosen by users. Add a breached-password check. |
+| T2 | Cross-tenant access via id | Data-layer scoping, 404 not 403 | The update/delete gap in section 4. |
+| T3 | Session theft on a shared tablet | Short idle expiry, server-side revocation | Physical access to an unlocked tablet. |
+| T4 | Share-link leakage | Expiry, revocation, no personal details | A forwarded link works until it expires. Accepted: it is what sharing means. |
+| T5 | Ledger tampering by an insider | Append-only trigger, hash chain, salt | Someone with both database write access and the salt. Mitigated by external anchoring in Phase 5. |
+| T6 | Malicious file upload | Type and size validation, served through a handler | Content-level malware. Add scanning before general availability. |
+| T7 | VIN collision merging two vehicles | Format and check-digit validation, duplicate warning | A determined mistype. On the risk register. |
+| T8 | Denial of service | Rate limiting, pagination on every list | Volumetric attack. Handled at the edge. |
+
+## 9. Privacy: erasure and the vehicle
+
+The subtle case, and the one most likely to be got wrong.
+
+When Maria sells her car and asks to be forgotten, two things are true at once:
+her personal data must go, and the fact that the brake discs were replaced at
+82,430 km must remain, because that belongs to the vehicle.
+
+| Data | On erasure |
+| --- | --- |
+| Name, email, phone, address | Removed |
+| Customer record | Anonymised, commercial history retained for the statutory period |
+| `VehicleOwnership.ownerName` | Replaced with "Previous owner" |
+| `VehicleOwnership` dates | Retained. Ownership duration is the vehicle's record. |
+| Passport events | Retained in full. They describe the vehicle, not the person. |
+| Photographs of components | Retained |
+| Photographs incidentally containing a person | Reviewed and removed on request |
+
+The passport ledger is append-only, so erasure cannot delete events. It
+supersedes those carrying personal identifiers with redacted versions, which
+keeps the chain intact and the fact preserved.
+
+## 10. Before general availability
+
+- [ ] Penetration test, high findings resolved (NFR-413)
+- [ ] Dependency scanning blocking on critical (NFR-409)
+- [ ] Secret scanning in CI
+- [ ] Security review of `lib/auth.ts` by someone who did not write it
+- [ ] Backup restoration tested end to end
+- [ ] Incident response runbook exercised
+
+---
+
+*Next: [API contract](06-api-contract.md).*

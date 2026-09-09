@@ -1,0 +1,189 @@
+# Accounting Model
+
+**Phase 3.** The schema exists from the first migration; the posting logic
+lands in Phase 3. This document specifies exactly what each operational event
+posts, so the implementation is transcription rather than invention, and so an
+external accountant can review the design before the code exists.
+
+## 1. The principle
+
+**Every operational act posts its financial consequence automatically.** No
+parallel bookkeeping, no month-end re-entry of facts the system already holds.
+This is the second differentiator after the passport: incumbents produce an
+invoice, we post the ledger behind it.
+
+Two rules are absolute:
+
+1. **Every entry balances.** Enforced by a deferred constraint trigger. An
+   unbalanced entry cannot be committed, whatever the application does.
+2. **Every posted entry references the operational document that caused it.**
+   `sourceType` and `sourceId` are not optional. A figure a bookkeeper cannot
+   trace back in one click is a defect (persona P6).
+
+## 2. Chart of accounts
+
+Seeded per organisation, editable.
+
+| Code | Account | Type |
+| --- | --- | --- |
+| 1000 | Bank | Asset |
+| 1010 | Cash | Asset |
+| 1100 | Accounts receivable | Asset |
+| 1200 | Stock on hand | Asset |
+| 1500 | Work in progress | Asset |
+| 2000 | Accounts payable | Liability |
+| 2100 | Tax payable (output) | Liability |
+| 2110 | Tax receivable (input) | Asset |
+| 2200 | Customer deposits | Liability |
+| 3000 | Retained earnings | Equity |
+| 4000 | Labour revenue | Revenue |
+| 4010 | Parts revenue | Revenue |
+| 4020 | Fees and sundry revenue | Revenue |
+| 5000 | Cost of goods sold, parts | Expense |
+| 5010 | Cost of labour | Expense |
+| 6000 | Wages | Expense |
+| 6100 | Premises | Expense |
+| 6200 | Stock adjustments | Expense |
+
+## 3. Postings
+
+Worked with the brake job used throughout the documentation: labour 427.50,
+parts 830.00, VAT at 20%, parts cost 498.00.
+
+### 3.1 Invoice issued
+
+```
+  Dr  1100 Accounts receivable        1,509.00
+      Cr  4000 Labour revenue                      427.50
+      Cr  4010 Parts revenue                       830.00
+      Cr  2100 Tax payable                         251.50
+
+  source: Invoice INV-1043
+```
+
+Revenue is split by line kind, not lumped, because parts margin and labour
+margin are different questions and the owner needs both.
+
+### 3.2 Parts consumed on the job
+
+Posted when the job completes, at weighted average cost:
+
+```
+  Dr  5000 Cost of goods sold, parts     498.00
+      Cr  1200 Stock on hand                       498.00
+
+  source: Job 10482
+```
+
+### 3.3 Payment received
+
+```
+  Dr  1000 Bank                        1,509.00
+      Cr  1100 Accounts receivable                1,509.00
+
+  source: Payment pay_...
+```
+
+### 3.4 Goods received from a supplier
+
+```
+  Dr  1200 Stock on hand                 498.00
+  Dr  2110 Tax receivable                 99.60
+      Cr  2000 Accounts payable                    597.60
+
+  source: GoodsReceipt gr_...
+```
+
+Stock is debited on receipt, not on invoice, so stock value reflects what is
+physically on the shelf.
+
+### 3.5 Supplier bill paid
+
+```
+  Dr  2000 Accounts payable              597.60
+      Cr  1000 Bank                                597.60
+```
+
+### 3.6 Customer deposit
+
+```
+  Dr  1000 Bank                          500.00
+      Cr  2200 Customer deposits                   500.00
+```
+
+A deposit is a liability until the work is invoiced, at which point it offsets
+receivable. Treating it as revenue on receipt is the classic error.
+
+### 3.7 Stock adjustment
+
+```
+  Dr  6200 Stock adjustments              42.00
+      Cr  1200 Stock on hand                        42.00
+
+  source: StockMovement sm_..., reason mandatory
+```
+
+### 3.8 Credit note
+
+An issued invoice is never edited. A credit note reverses proportionally:
+
+```
+  Dr  4010 Parts revenue                 410.00
+  Dr  2100 Tax payable                    82.00
+      Cr  1100 Accounts receivable                 492.00
+```
+
+## 4. Job profitability
+
+Derived from the postings, not computed separately, so the figure on the job
+screen and the figure in the accounts cannot disagree.
+
+```
+  Revenue        4000 + 4010 + 4020 where sourceId = job     1,257.50
+  Parts cost     5000 where sourceId = job                    -498.00
+  Labour cost    clocked minutes x technician cost rate       -197.60
+  ---------------------------------------------------------------------
+  Gross profit                                                 561.90
+  Margin                                                        44.7%
+```
+
+Labour cost uses **clocked** time at the technician's cost rate, not the
+charged hours. This job bills 4.5 hours; the technician took 5.2. Both are
+true, and only using the second gives a real margin. Systems that conflate the
+two cannot measure profitability at all, which is why most workshop owners
+cannot tell you which jobs lose money.
+
+## 5. Periods and closing
+
+- A fiscal period has a start, an end, and a closed flag.
+- Posting into a closed period is refused.
+- Closing computes the period's profit and posts it to retained earnings.
+- Reopening is possible, permission-gated, and audited.
+
+## 6. Reports
+
+| Report | Definition |
+| --- | --- |
+| Trial balance | Sum of debits and credits per account. Must balance. |
+| Profit and loss | Revenue less expense accounts over a period |
+| Balance sheet | Assets, liabilities and equity at a date |
+| Aged receivables | Outstanding invoices by age band |
+| Aged payables | Outstanding supplier bills by age band |
+| Tax report | Output less input tax for the period |
+| Job profitability | Section 4, per job or aggregated |
+| Parts profitability | Revenue less cost by part and category |
+
+## 7. Before this ships
+
+Non-negotiable, because a ledger that does not balance destroys trust
+irrecoverably (risk R2):
+
+- [ ] Property tests: no sequence of operations produces an unbalanced entry
+- [ ] Trial balance reconciles against operational totals on seeded data
+- [ ] Stock value in the ledger equals the sum of stock movements
+- [ ] An external accountant reviews the postings in this document
+- [ ] Period close and reopen tested, including the retained-earnings posting
+
+---
+
+*Next: [Design system](08-design-system.md).*

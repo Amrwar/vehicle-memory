@@ -1,0 +1,8 @@
+# Default
+*                       @Amrwar
+
+# The parts where a mistake is expensive and hard to undo.
+/packages/db/prisma/    @Amrwar
+/packages/core/src/passport/  @Amrwar
+/docs/03-adr/           @Amrwar
+/.github/workflows/     @Amrwar
