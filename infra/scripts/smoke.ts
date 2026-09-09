@@ -23,6 +23,16 @@ interface Check {
   expect: string[];
   /** Expect a redirect away rather than a rendered page. */
   redirects?: boolean;
+  /**
+   * Expect the response to send the browser here, by whichever mechanism.
+   *
+   * A redirect decided before rendering arrives as a 3xx with a Location
+   * header. One decided after the loading boundary has flushed cannot: the
+   * status line is already sent, so Next carries it as a meta refresh in the
+   * body instead. Both are redirects to the person using the app, so the
+   * assertion is on the destination rather than on the status code.
+   */
+  redirectsTo?: string;
   /** Text that must NOT appear. Used for figures a role should never see. */
   absent?: string[];
 }
@@ -205,7 +215,13 @@ async function main() {
     { path: '/financials?range=month', as: 'bookkeeper', expect: ['Financial statements'] },
     // An advisor typing the ledger URL is sent back to their own surface with
     // a reason, rather than shown a stack trace behind a 200.
-    { path: '/ledger', as: 'advisor', expect: [], redirects: true },
+    {
+      path: '/ledger',
+      as: 'advisor',
+      expect: [],
+      redirectsTo: '/dashboard?denied=ledger%3Aread',
+      absent: ['Trial balance', 'Accounts receivable'],
+    },
     { path: '/dashboard?denied=ledger%3Aread', as: 'advisor', expect: ['general ledger'] },
 
     // Role segregation: a technician reaching a workshop URL is redirected.
@@ -221,6 +237,25 @@ async function main() {
       redirect: 'manual',
       headers: token ? { cookie: `carnet_session=${token}` } : {},
     });
+
+    if (check.redirectsTo) {
+      const body = await response.text();
+      const viaHeader = response.headers.get('location') ?? '';
+      const viaRefresh = body.match(/http-equiv="refresh" content="[^"]*url=([^"]+)"/)?.[1] ?? '';
+      const target = viaHeader || viaRefresh.replace(/&#x27;/g, "'");
+      const leaked = (check.absent ?? []).filter((needle) => body.includes(needle));
+
+      const sent = target.includes(check.redirectsTo);
+      const clean = leaked.length === 0;
+
+      console.info(
+        sent && clean
+          ? `  ok    ${check.as.padEnd(11)} ${check.path} -> sent to ${check.redirectsTo}, nothing leaked`
+          : `  FAIL  ${check.as.padEnd(11)} ${check.path} ${sent ? `leaked: ${leaked.join(', ')}` : `went to "${target || 'nowhere'}"`}`,
+      );
+      if (!sent || !clean) failures += 1;
+      continue;
+    }
 
     if (check.redirects) {
       const redirected = response.status >= 300 && response.status < 400;
