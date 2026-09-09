@@ -7,6 +7,31 @@ import { z } from 'zod';
  * naming the variable rather than failing the first request that happens to
  * need it, at 4pm, in production.
  */
+/**
+ * The application's own public origin, used to build the absolute links that
+ * go out in estimate and passport messages.
+ *
+ * Set APP_URL explicitly once there is a real domain. Until then it is derived
+ * from the host's own variables, which is better than a hard-coded value in
+ * two ways: it is correct before a domain exists, and on a preview deployment
+ * it points at *that* preview rather than at production. An approval link in a
+ * test email that opens the live site is a genuinely confusing bug.
+ */
+function inferAppUrl(): string | undefined {
+  if (process.env.APP_URL) return process.env.APP_URL;
+
+  // Vercel supplies these automatically; neither includes a protocol.
+  const vercelProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const vercelDeployment = process.env.VERCEL_URL;
+
+  if (process.env.VERCEL_ENV === 'production' && vercelProduction) {
+    return `https://${vercelProduction}`;
+  }
+  if (vercelDeployment) return `https://${vercelDeployment}`;
+
+  return undefined;
+}
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_URL: z.string().url().default('http://localhost:3000'),
@@ -49,7 +74,7 @@ let cached: Env | undefined;
 export function env(): Env {
   if (cached) return cached;
 
-  const parsed = schema.safeParse(process.env);
+  const parsed = schema.safeParse({ ...process.env, APP_URL: inferAppUrl() });
 
   if (!parsed.success) {
     const problems = parsed.error.issues

@@ -69,16 +69,23 @@ app, the worker and Postgres together. Simpler to operate, weaker at previews.
    `prebuild` hook that generates the Prisma client.
 2. Set these for both Production and Preview:
 
-   | Variable              | Value                         |
-   | --------------------- | ----------------------------- |
-   | `DATABASE_URL`        | Neon pooled connection string |
-   | `DIRECT_DATABASE_URL` | Neon direct connection string |
-   | `AUTH_SECRET`         | `openssl rand -base64 48`     |
-   | `LEDGER_CHAIN_SALT`   | `openssl rand -base64 32`     |
-   | `APP_URL`             | Your deployment URL           |
-   | `NODE_ENV`            | `production`                  |
+   | Variable              | Value                                          |
+   | --------------------- | ---------------------------------------------- |
+   | `DATABASE_URL`        | Neon pooled connection string                  |
+   | `DIRECT_DATABASE_URL` | Neon direct connection string                  |
+   | `AUTH_SECRET`         | `openssl rand -base64 48`                      |
+   | `LEDGER_CHAIN_SALT`   | `openssl rand -base64 32`                      |
+   | `APP_URL`             | Optional. Leave unset until you have a domain. |
+   | `NODE_ENV`            | `production`                                   |
 
 3. Deploy.
+
+`APP_URL` is deliberately absent from that list. Until you have a domain,
+leaving it unset is better than guessing: the application derives its own
+origin from `VERCEL_PROJECT_PRODUCTION_URL` in production and `VERCEL_URL` on
+previews, so an approval link generated on a preview deployment opens that
+preview rather than production. Set `APP_URL` explicitly once a real domain
+exists, and it overrides both.
 
 > **`LEDGER_CHAIN_SALT` must never change once events exist.**
 >
@@ -138,13 +145,13 @@ inspection photograph belongs to a vehicle whose owner controls disclosure.
 
 ## 4. What each environment variable actually does
 
-| Variable              | Consequence of getting it wrong                             |
-| --------------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`        | Nothing works                                               |
-| `DIRECT_DATABASE_URL` | Migrations hang against a pooled provider                   |
-| `AUTH_SECRET`         | Sessions cannot be verified; everyone is signed out         |
-| `LEDGER_CHAIN_SALT`   | **Every vehicle's history fails verification, permanently** |
-| `APP_URL`             | Links in emails and SMS point at the wrong host             |
+| Variable              | Consequence of getting it wrong                                                  |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`        | Nothing works                                                                    |
+| `DIRECT_DATABASE_URL` | Migrations hang against a pooled provider                                        |
+| `AUTH_SECRET`         | Sessions cannot be verified; everyone is signed out                              |
+| `LEDGER_CHAIN_SALT`   | **Every vehicle's history fails verification, permanently**                      |
+| `APP_URL`             | Links in email and SMS point at the wrong host. Inferred from Vercel when unset. |
 
 ## 5. Before real customers
 
