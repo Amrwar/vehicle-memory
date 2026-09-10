@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MarketingFooter, MarketingHeader, Section, SectionHead } from '@/components/marketing';
+import { PassportHero } from '@/components/passport-hero';
 import { currentUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
@@ -75,9 +76,13 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* The claim, drawn. A vehicle's history crossing three garages and
-                three owners, which is the thing a paper folder cannot do. */}
-            <PassportDiagram />
+            {/* The claim, in three dimensions. The vehicle itself with its
+                record attached to the parts it was written about, which is the
+                one thing on this page a competitor cannot copy: they have no
+                record that belongs to the car. Everything it shows is also
+                below it as text and as buttons, so the canvas is decoration in
+                the strict sense and carries aria-hidden. */}
+            <PassportHero />
           </div>
         </section>
 
@@ -329,57 +334,6 @@ export default async function HomePage() {
 /* ---------------------------------------------------------------------------
    Illustrations
    --------------------------------------------------------------------------- */
-
-/**
- * One vehicle, three garages, two owners, one continuous record.
- *
- * The whole proposition in a shape, because the sentence takes a paragraph and
- * the diagram takes a glance.
- */
-function PassportDiagram() {
-  const stops = [
-    { year: '2019', who: 'Kirkstall Autocentre', what: 'Cambelt and water pump' },
-    { year: '2022', who: 'Sold — second owner', what: 'History transferred' },
-    { year: '2024', who: 'Pennine Motors', what: 'Brakes, MOT, advisories' },
-    { year: '2026', who: 'Hillside Motors', what: 'Major service' },
-  ];
-
-  return (
-    <div className="rounded-(--radius-xl) border border-(--border) bg-(--ground) p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow">One vehicle · WBAJA9C509G000000</p>
-        <span className="rounded-(--radius-xs) bg-(--success-soft) px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--success)">
-          Verified
-        </span>
-      </div>
-
-      <ol className="mt-4 grid gap-0">
-        {stops.map((stop, index) => (
-          <li key={stop.year} className="grid grid-cols-[3.2rem_auto_1fr] items-start gap-3">
-            <span className="datum pt-0.5 text-[12px] text-(--text-faint)">{stop.year}</span>
-
-            <span aria-hidden className="grid justify-items-center">
-              <span className="mt-1 h-2.5 w-2.5 rounded-full bg-(--brand)" />
-              {index < stops.length - 1 ? (
-                <span className="h-11 w-px bg-(--border-strong)" />
-              ) : null}
-            </span>
-
-            <span className="pb-3">
-              <span className="block text-[13px] font-medium leading-tight">{stop.who}</span>
-              <span className="block text-[12px] leading-snug text-(--text-soft)">{stop.what}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-
-      <p className="mt-1 border-t border-(--border) pt-3 text-[12px] leading-relaxed text-(--text-faint)">
-        Three workshops. Two owners. The car kept all of it, and the next buyer can check every
-        line.
-      </p>
-    </div>
-  );
-}
 
 /** A fragment of a real passport entry, at the level of detail it carries. */
 function PassportSample() {

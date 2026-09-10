@@ -7,6 +7,44 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 7 - Digital vehicle inspection, and controls that do something.**
+
+Six inspection tables have existed since Phase 1 with nothing able to write to
+them but the seed.
+
+- A technician works through the template on a tablet, three buttons an item.
+  Each answer saves as it is given, because a tablet that sleeps in a cold
+  workshop would otherwise lose the hour just spent under a car.
+- Amber and red require a measurement, a note or a recommendation. The
+  customer sees the colour, and a red the workshop cannot explain is worse
+  than no inspection at all.
+- Gaps are allowed and reported. Refusing to finish would make somebody tick
+  boxes to escape the screen, and a green tick meaning "I wanted to leave" is
+  the one outcome worse than an honest blank.
+- Completing it writes the quote in the same transaction, each line linked to
+  the measurement behind it, and moves the job to waiting on the customer.
+
+**The wider problem.** Every control on the technician's screen was inert: the
+clock had no action, the inspection link pointed at a route that had never
+existed, and two more buttons did nothing. Every labour cost, utilisation
+figure and job profit in the product is built on time entries, and the only
+way one had ever been written was the seed.
+
+- `verify:controls` walks every page, pairs each button with the form
+  enclosing it, and follows every link to see that something answers. It is
+  the fourth time in a week a dead control was found by hand, so it is now
+  found by a script instead.
+- It turned up four missing pages other pages had been linking to: both
+  booking screens and both supplier screens, all 404s. Those are built.
+- Detail pages carry a back link that names where it goes, because somebody
+  interrupted cannot remember where "back" leads.
+
+**The front door.** The flat diagram is now the vehicle itself in WebGL,
+turning, draggable, with its record attached to the parts it was written
+about: the tyre reading on the wheel, the rollback above the roof. Everything
+it shows is also text and real buttons, so the canvas carries aria-hidden and
+a browser without WebGL loses nothing. Reduced motion stops the idle rotation.
+
 **Phase 6 (part) - What the record supports saying.**
 
 The roadmap gates this phase on a year of data across many workshops, which

@@ -50,6 +50,13 @@ const ALLOWED = [
   // The sidebar's own open and close control on a narrow screen.
   'Open navigation',
   'Close navigation',
+  // The years on the home page's vehicle, which select an entry on its record.
+  // Each is a real button with a handler in a client component, and each is
+  // also what makes that scene readable without the canvas.
+  '2022',
+  '2023',
+  'Mar 2024',
+  'Sep 2024',
 ];
 
 const PAGES = [

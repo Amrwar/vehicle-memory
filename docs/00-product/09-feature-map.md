@@ -71,7 +71,7 @@ says why.
 | Mileage, engine, fuel      | Built   |                                               |
 | Service and repair history | Built   | Every visit, across workshops                 |
 | Parts replaced             | Built   | Through job lines                             |
-| Inspections                | Partial | Recorded; no interface to carry one out       |
+| Inspections                | Built   | Carried out on a tablet, sent to the customer |
 | Upcoming maintenance       | Built   | Service schedules                             |
 | Warranty information       | Missing | See section 14                                |
 | Insurance information      | Missing |                                               |
@@ -81,15 +81,23 @@ says why.
 
 ## 5. Digital vehicle inspection
 
-**Partial, and the gap is the whole feature.** Six tables exist: templates,
-template items, inspections, results with severity and measurements,
-photos, and the link from a result to an estimate line. The passport reads
-them and the estimate builder uses them.
+**Built.** A technician works through the template on a tablet, section by
+section, three buttons an item. Each answer saves the moment it is given, so a
+tablet that sleeps in a cold workshop loses nothing. Marking something amber or
+red requires a measurement, a note or a recommendation, because the customer
+sees the colour and a red the workshop cannot explain is worse than no
+inspection at all.
 
-There is no interface for a technician to carry out an inspection. The data
-gets there through the seed. This is the largest single gap in the product and
-the one with the clearest revenue attached, since an inspection is what turns
-a booked oil change into approved brake work.
+Gaps are permitted on purpose and reported to the customer as not checked.
+Refusing to finish would make somebody tick boxes to escape the screen.
+
+Completing it turns what was found into quote lines in one transaction, each
+linked to the measurement behind it, and moves the job to waiting on the
+customer. `verify:inspection` walks the whole path.
+
+Photographs are the one part still absent. They need a file store, which is a
+vendor decision nobody has made, and a camera button that silently loses what
+it captures would be worse than not having one.
 
 ## 6. Smart estimates
 
@@ -109,17 +117,17 @@ share links the owner controls. Repair tracking is the status timeline on
 
 ## 8. Technician app
 
-| Item                         | Status  | Note                               |
-| ---------------------------- | ------- | ---------------------------------- |
-| My jobs, mobile-first        | Built   | `/shop`                            |
-| Start and stop the clock     | Built   |                                    |
-| View instructions            | Built   |                                    |
-| View the inspection          | Missing |                                    |
-| Add notes                    | Built   |                                    |
-| Add or request parts         | Missing | The button exists and does nothing |
-| Upload photos                | Missing | The button exists and does nothing |
-| Mark a task complete         | Built   |                                    |
-| Report an additional problem | Missing |                                    |
+| Item                         | Status  | Note                                      |
+| ---------------------------- | ------- | ----------------------------------------- |
+| My jobs, mobile-first        | Built   | `/shop`                                   |
+| Start and stop the clock     | Built   | Was a button with no action until Phase 7 |
+| View instructions            | Built   |                                           |
+| View the inspection          | Built   | From the technician's own job list        |
+| Add notes                    | Built   |                                           |
+| Add or request parts         | Built   | Raises a purchase request against the job |
+| Upload photos                | Missing | Needs a file store choosing               |
+| Mark a task complete         | Built   |                                           |
+| Report an additional problem | Built   | Any item can be marked and quoted         |
 
 Two buttons on this page do nothing when pressed. They are listed as missing
 rather than partial for that reason.
@@ -136,14 +144,14 @@ it puts wrong parts on cars.
 
 ## 10. Purchasing
 
-| Item                    | Status  | Note                               |
-| ----------------------- | ------- | ---------------------------------- |
-| Low stock to suggestion | Built   | `/purchasing`                      |
-| Purchase orders         | Built   | With approval thresholds           |
-| Goods received          | Built   | Partial receipts handled           |
-| Supplier invoices       | Built   | Three-way match                    |
-| Supplier payments       | Missing |                                    |
-| Price history           | Missing | "Supplier B is cheaper this month" |
+| Item                    | Status  | Note                                              |
+| ----------------------- | ------- | ------------------------------------------------- |
+| Low stock to suggestion | Built   | `/purchasing`                                     |
+| Purchase orders         | Built   | With approval thresholds                          |
+| Goods received          | Built   | Partial receipts handled                          |
+| Supplier invoices       | Built   | Three-way match                                   |
+| Supplier payments       | Missing |                                                   |
+| Price history           | Built   | On each supplier, with the change since last time |
 
 ## 11. Financial ERP
 
@@ -244,9 +252,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 42           |
-| Partial | 10           |
-| Missing | 31           |
+| Built   | 48           |
+| Partial | 8            |
+| Missing | 27           |
 
 <!-- counts:end -->
 
