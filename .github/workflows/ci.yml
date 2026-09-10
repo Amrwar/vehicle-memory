@@ -170,6 +170,12 @@ jobs:
       - name: Verify a queued message actually leaves the building
         run: npx tsx infra/scripts/verify-messaging.ts
 
+      # Six tables existed and nothing but the seed could write to them, so the
+      # check walks the whole path: open one, record findings, complete it, and
+      # see that what was found became a quote the customer can answer.
+      - name: Verify an inspection becomes a quote
+        run: npx tsx infra/scripts/verify-inspection.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
@@ -231,6 +237,13 @@ jobs:
       # because everything looks fine to whoever is building it.
       - name: Accessibility
         run: npx tsx infra/scripts/verify-access.ts http://localhost:3000
+
+      # Four times in one week a button turned out to have nothing behind it,
+      # each found by somebody happening to press it. A control that responds
+      # to nothing makes a person believe they have done something they have
+      # not, and the first they learn otherwise is when the customer rings.
+      - name: Every control does something, every link goes somewhere
+        run: npx tsx infra/scripts/verify-controls.ts http://localhost:3000
 
   # -------------------------------------------------------------------------
   # Supply chain. Critical findings block the merge (NFR-409).

@@ -17,6 +17,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
@@ -77,6 +78,10 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/customers">All customers</BackLink>
+      </div>
+
       <PageHeader
         eyebrow={customer.kind === 'COMPANY' ? 'Company' : 'Individual'}
         title={customer.displayName}

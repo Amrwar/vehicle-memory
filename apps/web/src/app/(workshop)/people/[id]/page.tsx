@@ -22,6 +22,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@carnet/db';
 
 import { PlanWall } from '@/components/plan-wall';
+import { BackLink } from '@/components/back-link';
 import { planIncludes, requireSession } from '@/lib/guard';
 import { commissionFor, draftTimesheet, teamProductivity } from '@/lib/people';
 
@@ -102,6 +103,10 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/people">Everyone</BackLink>
+      </div>
+
       <PageHeader
         eyebrow={employee.reference}
         title={employee.displayName}

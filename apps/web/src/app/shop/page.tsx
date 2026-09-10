@@ -2,10 +2,11 @@ import { humanise, toneFor, type JobStatus } from '@carnet/core';
 import { forOrg } from '@carnet/db';
 import { Badge, Button, EmptyState, Mileage, Registration } from '@carnet/ui';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireUser } from '@/lib/guard';
+import { startInspection } from '@/lib/inspections';
+import { requestPart, ShopFloorError, toggleClock } from '@/lib/shopfloor';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My jobs' };
@@ -22,8 +23,80 @@ export const dynamic = 'force-dynamic';
  * (NFR-611), and the type is a size larger than the desktop application
  * because the tablet is at arm's length.
  */
-export default async function ShopFloorPage() {
+/**
+ * Starts or stops the clock.
+ *
+ * Every labour cost, utilisation figure and job profit in the product is built
+ * on time entries, and until this existed the only way one got written was the
+ * seed. The button on this screen had no action behind it at all.
+ */
+async function clock(formData: FormData) {
+  'use server';
+
   const user = await requireUser();
+  if (!user.orgId) redirect('/login');
+
+  try {
+    await toggleClock({
+      orgId: user.orgId,
+      userId: user.userId,
+      jobId: String(formData.get('jobId') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof ShopFloorError) {
+      redirect(`/shop?error=${encodeURIComponent(error.message)}`);
+    }
+
+    throw error;
+  }
+
+  redirect('/shop');
+}
+
+/** Opens the inspection, or returns to the one already started. */
+async function inspect(formData: FormData) {
+  'use server';
+
+  const user = await requireUser();
+  if (!user.orgId) redirect('/login');
+
+  const id = await startInspection({
+    orgId: user.orgId,
+    userId: user.userId,
+    jobId: String(formData.get('jobId') ?? ''),
+  });
+
+  redirect(`/shop/inspect/${id}`);
+}
+
+/** Raises a part request against the job, for whoever approves spending. */
+async function askForPart(formData: FormData) {
+  'use server';
+
+  const user = await requireUser();
+  if (!user.orgId) redirect('/login');
+
+  const notes = String(formData.get('notes') ?? '').trim();
+
+  if (!notes) redirect('/shop?error=' + encodeURIComponent('Say which part you need.'));
+
+  await requestPart({
+    orgId: user.orgId,
+    userId: user.userId,
+    jobId: String(formData.get('jobId') ?? ''),
+    notes,
+  });
+
+  redirect('/shop?requested=1');
+}
+
+export default async function ShopFloorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; requested?: string; inspected?: string }>;
+}) {
+  const user = await requireUser();
+  const notice = await searchParams;
 
   if (user.role !== 'TECHNICIAN') {
     redirect(user.orgId ? '/dashboard' : '/portal');
@@ -98,6 +171,31 @@ export default async function ShopFloorPage() {
       </header>
 
       <main id="main" className="mx-auto max-w-3xl px-4 py-4">
+        {notice.error ? (
+          <div className="mb-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">
+            <p className="text-[14px] text-(--danger)">{notice.error}</p>
+          </div>
+        ) : null}
+
+        {notice.requested ? (
+          <div className="mb-4 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
+            <p className="text-[14px] text-(--success)">
+              Asked for. It will show up for whoever approves spending.
+            </p>
+          </div>
+        ) : null}
+
+        {notice.inspected ? (
+          <div className="mb-4 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
+            <p className="text-[14px] text-(--success)">
+              Inspection sent.{' '}
+              {Number(notice.inspected) > 0
+                ? `${notice.inspected} item${notice.inspected === '1' ? '' : 's'} went onto a quote for the customer to approve.`
+                : 'Nothing needed quoting.'}
+            </p>
+          </div>
+        ) : null}
+
         {openEntry ? (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
             <div>
@@ -130,6 +228,10 @@ export default async function ShopFloorPage() {
               // Work must not begin on unapproved chargeable work. The screen
               // says why rather than simply disabling the button.
               const blocked = job.status === 'AWAITING_APPROVAL' || job.status === 'ESTIMATED';
+
+              // The query already limits time entries to this person's open
+              // ones, so any row here means their clock is running on this job.
+              const running = job.timeEntries.length > 0;
 
               return (
                 <li key={job.id}>
@@ -192,22 +294,48 @@ export default async function ShopFloorPage() {
                       </p>
                     ) : null}
 
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      <Button
-                        size="touch"
-                        variant="primary"
-                        disabled={blocked}
-                        className="col-span-2 sm:col-span-1"
-                      >
-                        {job.timeEntries.length > 0 ? 'Stop job' : 'Start job'}
-                      </Button>
-                      <Link href={`/shop/${job.id}/inspection`}>
-                        <Button size="touch" block>
-                          {inspection?.status === 'COMPLETED' ? 'Inspection ✓' : 'Inspect'}
+                    {/* Every control here was inert until Phase 7: the clock
+                        had no action, and the inspection link pointed at a
+                        route that did not exist. Photographs are absent rather
+                        than present and dead, because they need a file store
+                        nobody has chosen yet. */}
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      <form action={clock}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <Button
+                          type="submit"
+                          size="touch"
+                          variant="primary"
+                          disabled={blocked && !running}
+                          block
+                        >
+                          {running ? 'Stop the clock' : 'Start the clock'}
                         </Button>
-                      </Link>
-                      <Button size="touch">Add photo</Button>
-                      <Button size="touch">Request part</Button>
+                      </form>
+
+                      <form action={inspect}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <Button type="submit" size="touch" block>
+                          {inspection?.status === 'COMPLETED'
+                            ? 'Inspection sent'
+                            : inspection
+                              ? 'Carry on inspecting'
+                              : 'Inspect'}
+                        </Button>
+                      </form>
+
+                      <form action={askForPart} className="flex gap-2">
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <input
+                          name="notes"
+                          placeholder="Part needed"
+                          aria-label={`Part needed for job ${job.number}`}
+                          className="min-w-0 flex-1 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3 text-[15px]"
+                        />
+                        <Button type="submit" size="touch">
+                          Ask
+                        </Button>
+                      </form>
                     </div>
                   </div>
                 </li>

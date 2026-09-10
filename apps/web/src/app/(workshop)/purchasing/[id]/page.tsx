@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
+import { BackLink } from '@/components/back-link';
 import { audit, requireSession } from '@/lib/guard';
 import { receiveGoods } from '@/lib/inventory';
 
@@ -154,6 +155,10 @@ export default async function PurchaseOrderPage({
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/purchasing">Purchasing</BackLink>
+      </div>
+
       <PageHeader
         eyebrow={`Purchase order · ${order.supplier.name}`}
         title={

@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { prisma } from '@carnet/db';
+import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 
@@ -122,6 +123,10 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/vehicles">All vehicles</BackLink>
+      </div>
+
       <PageHeader
         eyebrow="Vehicle passport"
         title={

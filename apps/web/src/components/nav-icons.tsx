@@ -53,10 +53,19 @@ export type NavIconName =
   | 'automation'
   | 'messages'
   | 'insights'
+  | 'inspections'
   | 'crm'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // A clipboard with a tick: what was looked at, and what was found.
+  inspections: (
+    <>
+      <rect x="4.2" y="3.4" width="11.6" height="13.2" rx="1.6" />
+      <path d="M7.6 3.4V2.2h4.8v1.2" />
+      <path d="M7.4 9.8l1.8 1.8 3.4-3.6" />
+    </>
+  ),
   // A magnifier over a trend: what the record shows, not what it predicts.
   insights: (
     <>

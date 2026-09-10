@@ -26,6 +26,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
 
@@ -99,6 +100,10 @@ export default async function PartPage({ params }: { params: Promise<{ id: strin
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/parts">All parts</BackLink>
+      </div>
+
       <PageHeader
         eyebrow={product.category?.name ?? 'Part'}
         title={

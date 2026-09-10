@@ -36,6 +36,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
@@ -187,6 +188,10 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
 
   return (
     <>
+      <div className="mb-3">
+        <BackLink href="/jobs">All jobs</BackLink>
+      </div>
+
       <PageHeader
         eyebrow={`Job #${job.number} · ${job.location.name}`}
         title={
