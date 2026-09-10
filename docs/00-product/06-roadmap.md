@@ -597,6 +597,145 @@ wrong is worse than shipping nothing.
 
 ---
 
+## Phases 7 to 12 — the remaining feature map
+
+Everything in the [feature map](09-feature-map.md) marked missing, grouped and
+ordered by what a workshop loses each day it is absent rather than by how
+interesting it is to build.
+
+---
+
+## Phase 7 — Digital vehicle inspection
+
+**The largest single gap, and the one with money attached.**
+
+Six tables already exist: templates, template items, inspections, results with
+severity and measurements, photos, and the link from a result to an estimate
+line. The passport reads them and the estimate builder uses them. There is no
+way for a technician to carry one out, so the data only arrives through the
+seed.
+
+**Why first.** An inspection is what turns a booked oil change into approved
+brake work. Every day without it, a workshop finds things on cars and writes
+them on paper, and roughly half of what they find is never quoted. The
+schema is done; this is an interface and a flow.
+
+**Scope.** A tablet interface a technician can work through with oily hands:
+sections, items, a green, amber or red per item, measurements where they
+matter, notes, photos and video. The customer receives the result with the
+photos, and approves item by item using the screen built in Phase 5.1. Then
+the approved items become estimate lines automatically, which the mapping in
+core already does.
+
+**Exit.** A technician carries out an inspection on a tablet, the customer
+approves two of five items from a link, and those two appear on the job
+without anybody retyping them.
+
+---
+
+## Phase 8 — The floor and the diary
+
+**Scope.** The calendar in the views a workshop actually uses: day, week,
+month, by technician, by bay, by site. Dragging a job from one bay or person
+to another, with the capacity check that already exists running on the drop.
+A visual bay board showing what is in each bay right now.
+
+Plus the dashboard rows still missing: jobs waiting for parts, jobs overdue,
+and an activity feed. The audit log already records everything a feed would
+show and nothing reads it that way.
+
+**Exit.** A service manager moves a job between bays by dragging it, and the
+diary refuses a drop that would overbook the bay.
+
+---
+
+## Phase 9 — Warranty, fleet and the customer thread
+
+Three things that share one property: each turns a set of records the product
+already holds into something a person can act on.
+
+**Warranty.** Parts and labour warranty against the job that fitted them, with
+expiry, claims and the supplier's own warranty behind it. A workshop currently
+finds out a part was under warranty when the customer says so.
+
+**Fleet.** A company with fifty vehicles is fifty unrelated customer records
+today. A fleet is an account with vehicles under it, a dashboard of what is due
+and what is overdue, and central approval of repairs. This opens a market
+rather than adding a feature.
+
+**Customer thread.** One timeline per customer with every visit, quote,
+approval, payment and message on it, and the per-customer communication history
+that `/messages` shows only across the whole organisation.
+
+**Exit.** A fleet manager approves work on three of their vehicles in one
+sitting, and a warranty claim on a part fitted last March is raised from the
+job that fitted it.
+
+---
+
+## Phase 10 — Reviews, loyalty and the inbox
+
+**Reviews.** Asked after a completed job, with the routing that matters: a
+strong rating is invited to a public review, a poor one opens a private
+conversation with the workshop instead. Doing it the other way round is how a
+business collects one-star reviews it could have fixed.
+
+**Loyalty and referral.** Points, coupons, gift cards and a referral that
+credits both sides. The consent and campaign machinery from Phase 5 already
+carries the messages.
+
+**Inbound messages.** The unified inbox. Everything outbound is recorded and
+sent; nothing inbound arrives. A customer replying to a text about their car
+should land against that job, not in somebody's phone.
+
+**Exit.** A customer replies to a message and the reply appears against the
+job, and a five-star rating results in a review request that a four-star
+rating does not.
+
+---
+
+## Phase 11 — Filling in the ERP
+
+The remaining accounting and purchasing gaps, each small on its own.
+
+Supplier payments and remittances. Purchase price history, so a workshop can
+see that the part was cheaper elsewhere last month. Refunds as a proper flow
+rather than a credit note used as one. Card payment, which needs a provider
+chosen. Payroll export, which needs a named target format.
+
+Also parts fitment: which vehicles a part fits. This waits on a data source,
+because guessing it puts wrong parts on cars.
+
+**Exit.** A supplier is paid from the product, and the purchase screen shows
+what the part cost last time and from whom.
+
+---
+
+## Phase 12 — Answers rather than pages
+
+**The owner command centre, and AI used inside the workflow rather than as the
+product.**
+
+Every figure the command centre would need is already computed somewhere, so
+this is mostly routing a question to the right existing calculation and
+refusing the ones it cannot answer. "Which technician generated the most
+revenue" is a query the product already runs.
+
+Three AI uses, in the order they can be trusted. A job summary written for the
+customer, which restates work already recorded and is checkable against it. A
+revenue observation, which is arithmetic with a sentence around it. A service
+adviser suggesting where to look, which comes last because it needs a corpus of
+symptoms against confirmed causes that does not exist yet, and a confident
+wrong suggestion on a braking fault is not a small error.
+
+Nothing here decides anything. Every output is a suggestion a person accepts,
+which is the same rule the arrival suggestions and the mileage findings follow.
+
+**Exit.** An owner asks a question in words and gets a figure with the
+reasoning behind it, or a plain statement that the data cannot answer it.
+
+---
+
 ## Passport network milestones
 
 These run across all phases, because coverage is the long game.

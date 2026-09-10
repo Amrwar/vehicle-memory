@@ -54,3 +54,7 @@ apps/web/public/uploads/
 
 # Word and Excel lock files, created while a document is open.
 ~$*
+
+# Python bytecode from the documentation scripts.
+__pycache__/
+*.pyc
