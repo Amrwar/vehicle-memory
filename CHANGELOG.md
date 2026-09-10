@@ -7,6 +7,29 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 5.3 - Somewhere for the work to run.**
+
+The worker had no production home. It was a five-second polling process started
+by hand by a script that runs in watch mode. Vercel cannot hold a loop open,
+Compose had no worker service, and no schedule was configured anywhere, so
+configuring a mail provider would still have sent nothing.
+
+- The jobs moved into `@carnet/jobs`. Two drivers over one implementation: a
+  loop for development, a scheduled request in production. Two implementations
+  would mean one quietly stopping matching the other, and it would be the one
+  nobody runs locally.
+- `/api/cron/[job]` runs them on a schedule, dispatch every minute and the
+  hourly jobs at seven past. The dispatch job runs the outbox, then automation
+  actions, then the sender, in that order, so work created in a pass goes out
+  in the same pass.
+- Overlapping runs are safe, and were already safe: every job claims what it is
+  working on before working on it.
+- The routes refuse anything without the scheduler's secret, compared in
+  constant time. A signed-in workshop owner is refused exactly like a stranger,
+  and a missing secret refuses everything rather than opening the routes.
+- A failed run answers 500 so the platform records it. A job that fails
+  silently is how a queue stops draining for a week.
+
 **Phase 5.2 - Sending.**
 
 Nothing sent. Since Phase 1 the product had been writing rows to

@@ -5,7 +5,11 @@
     "rootDir": "./src",
     "lib": ["ES2023"]
   },
-  "references": [{ "path": "../../packages/db" }, { "path": "../../packages/core" }],
+  "references": [
+    { "path": "../../packages/db" },
+    { "path": "../../packages/core" },
+    { "path": "../../packages/jobs" }
+  ],
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }

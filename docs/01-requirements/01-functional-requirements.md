@@ -257,6 +257,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2500 — Scheduled work
+
+| Ref     | Requirement                                                                                                               | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2501 | Background jobs MUST run in production without a long-running process being deployed.                                     | 5.3   |
+| FR-2502 | The scheduled driver and the development loop MUST call the same implementation of every job.                             | 5.3   |
+| FR-2503 | Every job MUST be safe to run concurrently and safe to run twice.                                                         | 5.3   |
+| FR-2504 | The scheduled routes MUST refuse any request that does not carry the scheduler's secret, including from a signed-in user. | 5.3   |
+| FR-2505 | A missing scheduler secret MUST cause refusal, never open access.                                                         | 5.3   |
+| FR-2506 | A failed scheduled run MUST answer with an error status so the platform records it.                                       | 5.3   |
+
 ## FR-2400 — Outbound messaging
 
 | Ref     | Requirement                                                                                                               | Phase |

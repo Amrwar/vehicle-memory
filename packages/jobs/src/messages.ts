@@ -8,6 +8,7 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { log } from './log';
 import { configureTransports, transportFor } from './transport/configure';
 import { TransportError } from './transport/index';
 
@@ -26,10 +27,6 @@ import { TransportError } from './transport/index';
 const BATCH_SIZE = Number(process.env.WORKER_BATCH ?? 25);
 
 export const TRANSPORTS = configureTransports();
-
-function log(event: string, detail: Record<string, unknown> = {}): void {
-  console.info(JSON.stringify({ time: new Date().toISOString(), event, ...detail }));
-}
 
 /**
  * Hands every message that is due to whichever provider carries its channel.

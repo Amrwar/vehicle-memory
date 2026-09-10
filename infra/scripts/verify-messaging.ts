@@ -21,7 +21,7 @@ import 'dotenv/config';
 
 import { prisma } from '@carnet/db';
 
-import { sendQueuedMessages, TRANSPORTS } from '../../apps/worker/src/messages';
+import { sendQueuedMessages, TRANSPORTS } from '@carnet/jobs';
 
 let failures = 0;
 let checked = 0;

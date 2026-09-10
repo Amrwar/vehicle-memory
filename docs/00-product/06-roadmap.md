@@ -532,6 +532,48 @@ for, because nothing at all is going out.
 
 ---
 
+## Phase 5.3 — Somewhere for the work to run
+
+**Done.**
+
+|           |                                                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 5.2 complete. Messages can be sent, given something to send them.                                               |
+| **Exit**  | The background work runs in production without a second server, and cannot be triggered by anybody but the scheduler. |
+
+**The gap this closed.** The worker had no production home. It was a process
+polling every five seconds, started by hand on a developer's machine by a
+script that runs in watch mode. Vercel hosts the application and cannot hold a
+loop open; Compose defined postgres, redis, mailpit and web, and no worker;
+there was no schedule configured anywhere. So configuring a mail provider
+would still have sent nothing, because nothing would have called the drain.
+
+**Why a schedule rather than a server.** A container on another platform keeps
+the five-second loop, at the cost of a second deploy target, a second bill and
+a second thing to watch. The slowest job here runs hourly and the fastest needs
+to be prompt rather than instant: a confirmation email arriving forty seconds
+after a booking is invisible to the person who made it.
+
+The concern with a schedule is overlapping runs, and it was already answered.
+Every job claims what it is working on before working on it: the message
+sweeper marks a row as attempted before handing it to a provider rather than
+after, precisely so a crash or an overlap leaves a row that says it was tried,
+which is true, rather than one that looks untouched and gets sent twice.
+
+**What changed.** The jobs moved out of the worker into `@carnet/jobs`, and
+there are now two drivers over one implementation: a loop for development,
+where a five-second poll is what you want while building, and a scheduled
+request in production. Two implementations would mean one of them quietly
+stopping matching the other, and it would be the one nobody runs locally.
+
+**The routes refuse by default.** They send messages to customers and close
+people's timesheets, so an open URL would hand both to anybody. The secret is
+compared in constant time, a signed-in workshop owner is refused exactly like
+a stranger, and a deployment that forgets to set the secret refuses everything
+rather than exposing the routes.
+
+---
+
 ## Phase 6 — Intelligence
 
 **Weeks 45–52 and continuing.**

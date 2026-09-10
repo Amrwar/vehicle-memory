@@ -10,12 +10,10 @@
     "build": "tsc --build"
   },
   "dependencies": {
-    "@carnet/core": "*",
     "@carnet/db": "*",
-    "nodemailer": "^10.0.2"
+    "@carnet/jobs": "*"
   },
   "devDependencies": {
-    "@types/nodemailer": "^8.0.1",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   }

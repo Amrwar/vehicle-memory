@@ -370,6 +370,23 @@ async function main() {
       as: 'anon',
       expect: ['This link is no longer live'],
     },
+    // The scheduled jobs send messages to customers and close people's
+    // timesheets. An open URL would hand both to anybody on the internet, so
+    // the check that matters is the refusal.
+    {
+      path: '/api/cron/dispatch',
+      as: 'anon',
+      expect: ['Not authorised'],
+      status: 401,
+    },
+    // Signed in is not the same as being the scheduler. A workshop owner has
+    // no more right to trigger these than a stranger does.
+    {
+      path: '/api/cron/dispatch',
+      as: 'owner',
+      expect: ['Not authorised'],
+      status: 401,
+    },
     // An invitation link nobody issued says so, rather than "invalid link".
     {
       path: '/invite/not-a-real-token',

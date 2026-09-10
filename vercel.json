@@ -21,5 +21,15 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/hourly",
+      "schedule": "7 * * * *"
+    }
   ]
 }

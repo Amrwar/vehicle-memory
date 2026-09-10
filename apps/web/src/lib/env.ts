@@ -55,6 +55,11 @@ const schema = z.object({
     .string()
     .min(16, 'LEDGER_CHAIN_SALT must be at least 16 characters and must never be rotated'),
 
+  // Shared with the scheduler. Absent means the cron routes refuse every
+  // request, which is the right failure: they send messages to customers and
+  // close people's timesheets, so an open URL would hand both to anybody.
+  CRON_SECRET: z.string().min(16).optional(),
+
   MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
   MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),

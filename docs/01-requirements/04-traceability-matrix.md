@@ -169,6 +169,22 @@ were unbuilt remainder of Phase 3, was also stale. Both shipped in Phase 4.8.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Scheduled work
+
+| Req     | Story | Schema | Implementation                | Test                  | Status |
+| ------- | ----- | ------ | ----------------------------- | --------------------- | ------ |
+| FR-2501 | —     | —      | `vercel.json` crons           | `smoke.ts`            | Done   |
+| FR-2502 | —     | —      | `@carnet/jobs`                | `verify-messaging.ts` | Done   |
+| FR-2503 | —     | —      | claim-before-work in each job | `verify-messaging.ts` | Done   |
+| FR-2504 | —     | —      | `authorised()`                | `smoke.ts`            | Done   |
+| FR-2505 | —     | —      | `authorised()`                | `smoke.ts`            | Done   |
+| FR-2506 | —     | —      | `/api/cron/[job]`             | `smoke.ts`            | Done   |
+
+The development worker and the production schedule are two drivers over one
+package. Two implementations of the same job would mean one of them quietly
+stopping matching the other, and the one that stopped would be the one nobody
+runs locally.
+
 ## Outbound messaging
 
 | Req     | Story | Schema                           | Implementation          | Test                  | Status |
@@ -300,6 +316,7 @@ details without a provider behind it would be worse than not having one.
 | Inventory and procurement (Phase 2)       | 19                  | 18                     |
 | Finance and ledger                        | 12                  | 12                     |
 | People and multi-site                     | 13                  | 13                     |
+| Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
 | The customer's own side                   | 9                   | 9                      |
 | Automation and customer relationships     | 11                  | 11                     |
@@ -307,9 +324,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **147**             | **144 (98%)**          |
+| **Total**                                 | **153**             | **150 (98%)**          |
 
-The requirements document lists 231 requirements. 84 of
+The requirements document lists 237 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that
