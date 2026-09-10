@@ -72,6 +72,7 @@ const GROUPS: Group[] = [
         icon: 'business',
         permission: 'report:operational',
       },
+      { href: '/insights', label: 'Insights', icon: 'insights', permission: 'report:operational' },
       { href: '/counter', label: 'Counter', icon: 'counter', permission: 'invoice:write' },
     ],
   },

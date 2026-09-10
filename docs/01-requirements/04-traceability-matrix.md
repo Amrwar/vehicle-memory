@@ -169,6 +169,25 @@ were unbuilt remainder of Phase 3, was also stale. Both shipped in Phase 4.8.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## What the record supports saying
+
+| Req     | Story | Schema                    | Implementation          | Test              | Status |
+| ------- | ----- | ------------------------- | ----------------------- | ----------------- | ------ |
+| FR-2601 | —     | `OdometerReading`         | `inspectHistory()`      | `history.test.ts` | Done   |
+| FR-2602 | —     | —                         | `MASKED_ROLLBACK`       | `history.test.ts` | Done   |
+| FR-2603 | —     | —                         | `HistoryConfidence`     | `history.test.ts` | Done   |
+| FR-2604 | —     | —                         | `THIN_HISTORY`          | `history.test.ts` | Done   |
+| FR-2605 | —     | —                         | `MileageFindings`       | `smoke.ts`        | Done   |
+| FR-2606 | —     | `StockMovement`           | `recommendReorder()`    | `stock.test.ts`   | Done   |
+| FR-2607 | —     | —                         | `Recommendation`        | `stock.test.ts`   | Done   |
+| FR-2608 | —     | `PurchaseOrder`, receipts | `typicalLeadTimeDays()` | `smoke.ts`        | Done   |
+| FR-2609 | —     | `TimeEntry`               | `durationFor()`         | `stock.test.ts`   | Done   |
+| FR-2610 | —     | `JobType.defaultHours`    | `assessQuoting()`       | `stock.test.ts`   | Done   |
+
+Estimate suggestion from free-text symptoms is deliberately absent. It needs a
+corpus that does not exist yet, and a wrong suggestion on a brake fault is not
+a small error.
+
 ## Scheduled work
 
 | Req     | Story | Schema | Implementation                | Test                  | Status |
@@ -316,6 +335,7 @@ details without a provider behind it would be worse than not having one.
 | Inventory and procurement (Phase 2)       | 19                  | 18                     |
 | Finance and ledger                        | 12                  | 12                     |
 | People and multi-site                     | 13                  | 13                     |
+| What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
 | The customer's own side                   | 9                   | 9                      |
@@ -324,9 +344,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **153**             | **150 (98%)**          |
+| **Total**                                 | **163**             | **160 (98%)**          |
 
-The requirements document lists 237 requirements. 84 of
+The requirements document lists 247 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

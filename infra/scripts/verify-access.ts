@@ -49,6 +49,7 @@ const PAGES = [
   '/crm',
   '/automation',
   '/messages',
+  '/insights',
   '/ledger',
   '/financials',
   '/expenses',

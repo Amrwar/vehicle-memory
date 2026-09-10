@@ -315,6 +315,14 @@ async function main() {
     // The failed row is the one this page exists for. A message nobody
     // received, with the reason it will not be retried, has to be visible
     // without anybody going looking for it.
+    // The refusals are the assertions worth making. A page that offers a
+    // reorder figure for every part, including those that moved twice, is
+    // exactly what this was written not to be.
+    {
+      path: '/insights',
+      as: 'owner',
+      expect: ['Insights', 'Stock levels worth changing', 'Work sold for the wrong time'],
+    },
     {
       path: '/messages',
       as: 'owner',

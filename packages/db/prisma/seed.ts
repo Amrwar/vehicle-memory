@@ -592,8 +592,17 @@ async function main() {
 
   await appendChain(bmw.id, priorEvents);
 
-  // Odometer history, including one deliberately impossible reading so the
-  // fraud-detection path is visible in the demo.
+  // Odometer history, and the shape that makes the product's case.
+  //
+  // The readings go 67,410 then 62,000 then 74,800: up, down, up. Every
+  // adjacent pair at the end of the history is consistent, so a single
+  // workshop looking at its own last two readings sees nothing wrong. The
+  // rollback is only visible to somebody holding the whole sequence, which is
+  // the entire argument for the record belonging to the vehicle rather than
+  // to a garage.
+  //
+  // Each reading is attributed to whoever took it, because "checked across
+  // every workshop" is only true if the readings know where they came from.
   await prisma.odometerReading.createMany({
     data: [
       {
@@ -602,6 +611,7 @@ async function main() {
         readAt: yearsAgo(4, 3, 14),
         source: 'WORKSHOP',
         anomaly: 'NONE',
+        recordedByOrgId: priorWorkshop.id,
       },
       {
         vehicleId: bmw.id,
@@ -609,6 +619,7 @@ async function main() {
         readAt: yearsAgo(3, 10, 2),
         source: 'WORKSHOP',
         anomaly: 'NONE',
+        recordedByOrgId: priorWorkshop.id,
       },
       {
         vehicleId: bmw.id,
@@ -616,6 +627,7 @@ async function main() {
         readAt: yearsAgo(2, 4, 27),
         source: 'WORKSHOP',
         anomaly: 'NONE',
+        recordedByOrgId: priorWorkshop.id,
       },
       {
         vehicleId: bmw.id,
@@ -623,6 +635,7 @@ async function main() {
         readAt: yearsAgo(2, 1, 9),
         source: 'OWNER',
         anomaly: 'DECREASE',
+        recordedByOrgId: null,
       },
       {
         vehicleId: bmw.id,
@@ -630,6 +643,7 @@ async function main() {
         readAt: yearsAgo(1, 6, 2),
         source: 'WORKSHOP',
         anomaly: 'NONE',
+        recordedByOrgId: priorWorkshop.id,
       },
       {
         vehicleId: bmw.id,
@@ -637,8 +651,16 @@ async function main() {
         readAt: yearsAgo(1, 2, 19),
         source: 'WORKSHOP',
         anomaly: 'NONE',
+        recordedByOrgId: priorWorkshop.id,
       },
-      { vehicleId: bmw.id, km: 82_430, readAt: day(-1), source: 'WORKSHOP', anomaly: 'NONE' },
+      {
+        vehicleId: bmw.id,
+        km: 82_430,
+        readAt: day(-1),
+        source: 'WORKSHOP',
+        anomaly: 'NONE',
+        recordedByOrgId: org.id,
+      },
     ],
   });
 

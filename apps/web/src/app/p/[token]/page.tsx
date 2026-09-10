@@ -13,6 +13,9 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
+import { MileageFindings } from '@/components/mileage-findings';
+import { mileageFindings } from '@/lib/insights';
+
 import { hashShareToken } from '@/lib/auth';
 import { verifyVehicleChain } from '@/lib/passport';
 
@@ -92,7 +95,14 @@ export default async function PublicPassportPage({
     byYear.set(year, [...(byYear.get(year) ?? []), event]);
   }
 
-  const anomalies = vehicle.odometerReadings.length;
+  // Read across every workshop that has recorded a reading. Clocking happens
+  // between garages; one workshop's own records agree with themselves almost
+  // by definition.
+  const mileage = await mileageFindings(vehicle.id);
+
+  // Only the contradictions count here. A thin patch of history is worth
+  // knowing and is not something the vehicle did.
+  const serious = mileage.findings.filter((finding) => finding.severity === 'SERIOUS').length;
 
   return (
     <div className="min-h-dvh bg-(--ground)">
@@ -157,9 +167,9 @@ export default async function PublicPassportPage({
               {
                 label: 'Mileage anomalies',
                 value:
-                  anomalies > 0 ? (
+                  serious > 0 ? (
                     <Badge tone="danger" dot>
-                      {anomalies} flagged
+                      {serious} contradiction{serious === 1 ? '' : 's'}
                     </Badge>
                   ) : (
                     <Badge tone="success" dot>
@@ -184,19 +194,17 @@ export default async function PublicPassportPage({
           />
         </section>
 
-        {anomalies > 0 ? (
-          <div className="mt-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">
-            <p className="text-[14px] font-semibold text-(--danger)">
-              Mileage inconsistency on record
-            </p>
-            <p className="mt-1 text-[13px] text-(--text-soft)">
-              {anomalies} odometer reading{anomalies === 1 ? ' has' : 's have'} been recorded that{' '}
-              {anomalies === 1 ? 'does' : 'do'} not follow from the readings before{' '}
-              {anomalies === 1 ? 'it' : 'them'}. Readings are never discarded, so you can see them
-              below.
-            </p>
-          </div>
-        ) : null}
+        {/* The whole record read at once, rather than a count of rows already
+            flagged. A rollback with two years of normal driving after it
+            leaves no adjacent pair looking wrong, and the count above it
+            would be zero. */}
+        <section className="mt-4">
+          <MileageFindings
+            findings={mileage.findings}
+            summary={mileage.summary}
+            readings={mileage.readings}
+          />
+        </section>
 
         {vehicle.recalls.length > 0 ? (
           <div className="mt-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">

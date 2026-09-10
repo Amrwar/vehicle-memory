@@ -257,6 +257,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2600 — What the record supports saying
+
+| Ref     | Requirement                                                                                    | Phase |
+| ------- | ---------------------------------------------------------------------------------------------- | ----- |
+| FR-2601 | A vehicle's mileage record MUST be examined as a whole sequence, not only pairwise.            | 6     |
+| FR-2602 | A rollback later masked by higher readings MUST be detected and identified as masked.          | 6     |
+| FR-2603 | Every finding MUST carry how certain it is, and arithmetic MUST be distinguished from pattern. | 6     |
+| FR-2604 | An absence of records MUST be reported as thin history and MUST NOT be presented as suspicion. | 6     |
+| FR-2605 | The system MUST NOT reduce a vehicle's record to a score.                                      | 6     |
+| FR-2606 | A reorder recommendation MUST account for demand variability, not only the mean.               | 6     |
+| FR-2607 | A recommendation MUST be refused, with its reason, when the history behind it is too thin.     | 6     |
+| FR-2608 | Lead time MUST be measured from the workshop's own orders rather than read from a setting.     | 6     |
+| FR-2609 | Job duration MUST be reported as a median with its spread, and refused below a sample floor.   | 6     |
+| FR-2610 | Work booked for longer than it takes MUST be surfaced alongside work booked for less.          | 6     |
+
 ## FR-2500 — Scheduled work
 
 | Ref     | Requirement                                                                                                               | Phase |

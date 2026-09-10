@@ -7,6 +7,35 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 6 (part) - What the record supports saying.**
+
+The roadmap gates this phase on a year of data across many workshops, which
+does not exist. So this is the half that can be earned from the data there is,
+and the half that would be guesswork is still absent.
+
+- A vehicle's mileage is read as a whole sequence rather than pairwise. A
+  rollback followed by two years of normal driving leaves no adjacent pair
+  looking wrong, and that is the case that matters: the demo vehicle has
+  exactly this shape, and the passport now names it.
+- Every finding says how certain it is. A reading lower than an earlier one is
+  arithmetic. A drop in annual mileage before a sale also fits retirement, a
+  second car or illness, and is put as a question.
+- Nothing is scored. A number out of ten would be quoted in an advert and
+  cannot carry the reasoning that produced it.
+- Gaps are reported as thin history, never as suspicion. An absence of records
+  is not evidence.
+- Reorder points account for how much demand swings, not just its average. Two
+  parts averaging ten a month need different shelves if one sells ten every
+  month and the other sixty once a year.
+- Lead time is measured from the workshop's own orders rather than read from a
+  field nobody fills in.
+- Job duration is a median with its spread, refused below five samples. Work
+  booked for longer than it takes is surfaced next to work booked for less:
+  the first never shows up in the accounts, it shows up as a diary with holes
+  in it nobody can explain.
+- Every recommendation carries what it rests on, and the page says how many
+  parts it could not assess.
+
 **Phase 5.3 - Somewhere for the work to run.**
 
 The worker had no production home. It was a five-second polling process started

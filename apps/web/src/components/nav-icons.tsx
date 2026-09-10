@@ -52,10 +52,19 @@ export type NavIconName =
   | 'banking'
   | 'automation'
   | 'messages'
+  | 'insights'
   | 'crm'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // A magnifier over a trend: what the record shows, not what it predicts.
+  insights: (
+    <>
+      <circle cx="8.6" cy="8.6" r="5.4" />
+      <path d="M12.6 12.6 17 17" />
+      <path d="M6.2 9.6l1.8-2 1.6 1.4 1.8-2.4" />
+    </>
+  ),
   // An envelope, with the line that says it left.
   messages: (
     <>
