@@ -7,6 +7,44 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 5.1 - The customer's own side.**
+
+The coverage map said this column was built. It was not: three buttons on the
+customer's home screen led to pages that did not exist, and the link to review
+a quote pointed at a share row's id rather than at a capability token, so it
+had never opened anything.
+
+- A quote is answered line by line, not whole. An estimate offered as one
+  take-it-or-leave-it figure gets declined whole, and the workshop loses the
+  items the customer would have taken.
+- Nothing arrives preselected. A form that opens with every box ticked is not
+  asking a question, and the approval it produces is worth nothing the first
+  time somebody disputes it.
+- Anything left unticked is recorded as declined rather than pending. A
+  pending line means somebody has to ring to find out.
+- A safety item can be declined, with a plain statement of what that means and
+  a permanent record that the statement was made. It is the customer's car.
+- The same screen works signed in or through the link the workshop texted,
+  which needs no account. Most people will meet Carnet there and nowhere else.
+- A vehicle's full history from the owner's side, including what each visit
+  cost, with share links they create and can take back.
+- Every invoice across every workshop that uses Carnet, outstanding first.
+- Job progress written in the customer's language. "Quality check" is precise
+  to a service manager and meaningless to the person waiting for their car.
+- A customer reaching a vehicle that is not theirs meets a page that does not
+  exist, rather than one confirming somebody else's does.
+
+**Fixed.**
+
+- The traceability matrix's finance rows were misaligned by one from FR-1202
+  down, and traced an FR-1212 that has never existed. The implementations were
+  real; they were filed against the wrong requirements.
+- A stale note in the same file still described bank reconciliation and expense
+  capture as unbuilt remainder of Phase 3. Both shipped in Phase 4.8.
+- The smoke test could not express "this page should not exist", so the checks
+  that matter most for a customer reaching somebody else's data could not be
+  written. It can now.
+
 **Phase 5 - Customer lifecycle and automation.**
 
 The engine that acts without a person in the room, and the CRM it drives.

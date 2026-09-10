@@ -124,26 +124,32 @@ recorded · **Planned** in a later phase.
 
 ## Finance and ledger
 
-| Req     | Story | Schema                           | Implementation              | Test                 | Status |
-| ------- | ----- | -------------------------------- | --------------------------- | -------------------- | ------ |
-| FR-1201 | —     | `Account`                        | `STANDARD_CHART`            | `accounting.test.ts` | Done   |
-| FR-1202 | —     | `JournalEntry`, `JournalLine`    | `postEntry()`               | `verify-ledger.ts`   | Done   |
-| FR-1203 | —     | `journal_lines_balance`          | deferred constraint trigger | `verify-ledger.ts`   | Done   |
-| FR-1204 | —     | `journal_lines_debit_xor_credit` | check constraint            | `verify-ledger.ts`   | Done   |
-| FR-1205 | —     | `JournalEntry.sourceType`        | posting rules               | `accounting.test.ts` | Done   |
-| FR-1206 | —     | —                                | `trialBalance()`            | `accounting.test.ts` | Done   |
-| FR-1207 | —     | —                                | `profitAndLoss()`           | `accounting.test.ts` | Done   |
-| FR-1208 | —     | —                                | `balanceSheet()`            | `accounting.test.ts` | Done   |
-| FR-1209 | —     | `Invoice`, `SupplierBill`        | `ageAnalysis()`             | `verify-ledger.ts`   | Done   |
-| FR-1210 | —     | `TaxRate`                        | `taxReturn()`               | `accounting.test.ts` | Done   |
-| FR-1211 | —     | `FiscalPeriod.isClosed`          | `postEntry()` period guard  | `verify-ledger.ts`   | Done   |
-| FR-1212 | —     | `JournalEntry.reversesId`        | `reverse()`                 | `accounting.test.ts` | Done   |
-| FR-613  | —     | `TimeEntry.costRate`             | `jobProfit()`               | `smoke.ts`           | Done   |
+| Req     | Story | Schema                                              | Implementation                                        | Test                 | Status |
+| ------- | ----- | --------------------------------------------------- | ----------------------------------------------------- | -------------------- | ------ |
+| FR-1201 | —     | `Account`                                           | `STANDARD_CHART`                                      | `accounting.test.ts` | Done   |
+| FR-1202 | —     | `journal_lines_balance`, `_debit_xor_credit`        | deferred constraint trigger                           | `verify-ledger.ts`   | Done   |
+| FR-1203 | —     | `JournalEntry`, `JournalLine`                       | `postEntry()` from operational events                 | `verify-ledger.ts`   | Done   |
+| FR-1204 | —     | `JournalEntry.reversesId`, immutability trigger     | `reverse()`                                           | `accounting.test.ts` | Done   |
+| FR-1205 | —     | `JournalEntry.sourceType`, `.sourceId`              | posting rules                                         | `accounting.test.ts` | Done   |
+| FR-1206 | —     | —                                                   | `trialBalance()`, `profitAndLoss()`, `balanceSheet()` | `accounting.test.ts` | Done   |
+| FR-1207 | —     | `FiscalPeriod.isClosed`                             | `postEntry()` period guard                            | `verify-ledger.ts`   | Done   |
+| FR-1208 | —     | `Invoice`, `SupplierBill`                           | `ageAnalysis()`                                       | `verify-ledger.ts`   | Done   |
+| FR-1209 | —     | `BankAccount`, `BankStatement`, `BankStatementLine` | `suggestMatches()`                                    | `banking.test.ts`    | Done   |
+| FR-1210 | —     | `TaxRate`                                           | `taxReturn()`                                         | `accounting.test.ts` | Done   |
+| FR-1211 | —     | `Expense`                                           | `recordExpense()`, `postExpense()`                    | `banking.test.ts`    | Done   |
+| FR-613  | —     | `TimeEntry.costRate`                                | `jobProfit()`                                         | `smoke.ts`           | Done   |
 
-Bank reconciliation, expense capture and period close are the remainder of
-Phase 3 and are not yet built. They are absent from this table rather than
-listed as planned, because a matrix that lists intentions stops being a record
-of what is true.
+**A correction.** These rows were misaligned by one from FR-1202 down. The
+matrix said FR-1207 was the profit and loss statement when the requirement is
+fiscal periods, said FR-1209 was aged debt when the requirement is bank
+reconciliation, and traced an FR-1212 that has never existed in the
+requirements document. Every one of those implementations was real; they were
+filed against the wrong requirement, which is the failure mode of a matrix
+maintained by hand and the reason the coverage summary is now computed from
+the file rather than typed.
+
+The note that used to sit here, saying bank reconciliation and expense capture
+were unbuilt remainder of Phase 3, was also stale. Both shipped in Phase 4.8.
 
 ## People and multi-site
 
@@ -162,6 +168,24 @@ of what is true.
 | FR-1703 | —     | —                                 | `consolidate()`             | `multisite.test.ts` | Done   |
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
+
+## The customer's own side
+
+| Req     | Story | Schema                                 | Implementation              | Test               | Status |
+| ------- | ----- | -------------------------------------- | --------------------------- | ------------------ | ------ |
+| FR-2301 | —     | `EstimateShare.tokenHash`              | `/e/[token]`                | `smoke.ts`         | Done   |
+| FR-2302 | —     | `EstimateApproval`, `EstimateLine`     | `recordDecision()`          | `decision.test.ts` | Done   |
+| FR-2303 | —     | `InspectionResult.severity`            | `confirmationFor()`         | `decision.test.ts` | Done   |
+| FR-2304 | —     | `VehicleOwnership`                     | `/portal/vehicles/[id]`     | `smoke.ts`         | Done   |
+| FR-2305 | —     | `PassportShare.tokenHash`, `revokedAt` | `shareVehicle()`            | `smoke.ts`         | Done   |
+| FR-2306 | —     | `Invoice.amountPaid`                   | `/portal/invoices`          | `smoke.ts`         | Done   |
+| FR-2307 | —     | —                                      | `customerProgressFor()`     | `decision.test.ts` | Done   |
+| FR-2308 | —     | —                                      | `ownsVehicle()`, `notFound` | `smoke.ts`         | Done   |
+| FR-2309 | —     | `EstimateShare.expiresAt`              | `/e/[token]`                | `smoke.ts`         | Done   |
+
+Paying online (FR-1309) is the one thing on this side a customer still cannot
+do. It needs a payment provider, and a page collecting card details with
+nothing behind it would be worse than not having one.
 
 ## Automation and customer relationships
 
@@ -256,16 +280,17 @@ details without a provider behind it would be worse than not having one.
 | Booking, job, inspection, estimate        | 11                  | 11                     |
 | Invoicing, portal, reporting              | 4                   | 4                      |
 | Inventory and procurement (Phase 2)       | 19                  | 18                     |
-| Finance and ledger                        | 13                  | 13                     |
+| Finance and ledger                        | 12                  | 12                     |
 | People and multi-site                     | 13                  | 13                     |
+| The customer's own side                   | 9                   | 9                      |
 | Automation and customer relationships     | 11                  | 11                     |
 | Expenses, banking and period close        | 6                   | 6                      |
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **130**             | **127 (98%)**          |
+| **Total**                                 | **138**             | **135 (98%)**          |
 
-The requirements document lists 213 requirements. 84 of
+The requirements document lists 222 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

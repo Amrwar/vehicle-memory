@@ -416,6 +416,63 @@ The loop this closes:
 
 ---
 
+## Phase 5.1 — The customer's own side
+
+**Done.**
+
+|           |                                                                                                                      |
+| --------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 5 complete. Automation drives reminders, and reminders point at a booking.                                     |
+| **Exit**  | A customer can answer a quote, read a vehicle's history, see what is owed and share it, all without ringing anybody. |
+
+**Why this was a phase rather than a fix.** The coverage map already marked
+this column built. It was not. Three of the buttons on the customer's own home
+screen led to pages that did not exist: "View history", "Share with a buyer",
+and the link to review a quote, which pointed at a share row's id rather than
+at a capability token and had therefore never opened anything. The rows had
+been written from the data model rather than from the product.
+
+**What is built.**
+
+The quote screen is the important one, because it is the only screen in the
+product where the person using it is not a professional, is often standing in
+a car park, and is being asked for money.
+
+It is answered line by line rather than whole. An estimate offered as one
+take-it-or-leave-it figure gets declined whole, and the workshop loses the
+three items the customer would have said yes to. Nothing arrives preselected:
+a form that opens with every box ticked is not asking a question, and the
+approval it produces is worth nothing the first time somebody disputes it.
+Anything left unticked is recorded as declined rather than left pending,
+because a pending line means the workshop has to ring to find out, which is the
+telephone call the whole screen exists to avoid.
+
+A safety-critical item can be turned down. It is the customer's car. What the
+system owes them is a plain statement of what leaving it means, and a permanent
+record that the statement was made, which is a different thing from refusing to
+let them.
+
+The same screen is reachable two ways: signed in, and through the link the
+workshop texted, which needs no account at all. Most people will meet Carnet
+there and nowhere else, and asking somebody to register before they can answer
+a question their own garage asked them is how a quote goes unanswered for four
+days.
+
+Alongside it: a vehicle's full history from the owner's side including what
+each visit cost, share links the owner creates and can take back, every invoice
+across every workshop that uses Carnet with what is outstanding stated first,
+and a plain-language view of what is happening to the car right now. Every
+status is translated. "Quality check" is precise to a service manager and
+meaningless to the person waiting, whose only question is when they can have it
+back.
+
+**What it found.** The traceability matrix's finance rows were misaligned by
+one from FR-1202 down, and traced an FR-1212 that has never existed in the
+requirements document. The implementations were all real; they were filed
+against the wrong requirements.
+
+---
+
 ## Phase 6 — Intelligence
 
 **Weeks 45–52 and continuing.**

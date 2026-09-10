@@ -57,7 +57,14 @@ const PAGES = [
   '/audit',
 ];
 
-const PUBLIC_PAGES = ['/', '/pricing', '/signup', '/login', '/p/demo-share-token'];
+const PUBLIC_PAGES = [
+  '/',
+  '/pricing',
+  '/signup',
+  '/login',
+  '/p/demo-share-token',
+  '/e/demo-estimate-token',
+];
 
 /* --- the checks ------------------------------------------------------------ */
 

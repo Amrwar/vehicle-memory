@@ -17,16 +17,28 @@ being specific about the gaps rather than generous about the ticks.
 
 ## Customer-facing side
 
-| Capability               | Status | Where it is                                                                                                                                     |
-| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it. |
-| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                      |
-| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                        |
-| Receive confirmation     | Built  | Transactional email and SMS through the outbox, every message logged with delivery status (FR-1501, FR-1502).                                   |
-| Receive updates          | Built  | Queued at the four stages that change something for the customer. The others are deliberately silent.                                           |
-| View invoice and history | Built  | Portal invoices, and the vehicle passport as a public link (FR-1303, FR-1304, FR-1307).                                                         |
-| Approve or decline work  | Built  | Estimates sent as a link, decided line by line (FR-1302, FR-802).                                                                               |
-| Pay online               | Phased | FR-1309. Needs a payment provider, which is Phase 4.7 alongside point of sale.                                                                  |
+| Capability               | Status | Where it is                                                                                                                                                                 |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it.                             |
+| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                                                  |
+| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                                                    |
+| Receive confirmation     | Built  | Transactional email and SMS through the outbox, every message logged with delivery status (FR-1501, FR-1502).                                                               |
+| Receive updates          | Built  | Messages queued at the four stages that change something for the customer, and `/portal/updates`, where every visit says in plain words what is happening and what is owed. |
+| View invoice and history | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).          |
+| Approve or decline work  | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                    |
+| Pay online               | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                       |
+
+**A correction.** Three rows in this table were marked built before they were.
+"View invoice and history" cited portal invoices, and there was no such page.
+"Approve or decline work" cited a link decided line by line, and the route it
+named returned a 404. "Receive updates" counted queued messages as a surface,
+which they are not.
+
+The rows had been written from the data model rather than from the product,
+which is exactly what the note at the top of this file says never to do. All
+three are now genuinely built and covered by the smoke test, but the lesson is
+the part worth keeping: a row is built when somebody can do the thing, and the
+way to find that out is to press the button rather than to read the schema.
 
 ## Workshop side
 

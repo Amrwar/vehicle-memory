@@ -74,7 +74,7 @@ async function book(formData: FormData) {
 export default async function BookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string; error?: string }>;
+  searchParams: Promise<{ service?: string; vehicle?: string; error?: string }>;
 }) {
   const user = await requireUser();
   const params = await searchParams;
@@ -195,7 +195,10 @@ export default async function BookPage({
                 <CardHeader title="Which vehicle?" />
                 <CardBody className="grid gap-3.5">
                   <Field label="Vehicle">
-                    <Select name="vehicleId" required>
+                    {/* Preselected when the customer arrived from one
+                        vehicle's card, so somebody with three cars does not
+                        have to find the one they were just looking at. */}
+                    <Select name="vehicleId" required defaultValue={params.vehicle ?? undefined}>
                       {vehicles.map(({ vehicle }) => (
                         <option key={vehicle.id} value={vehicle.id}>
                           {[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}

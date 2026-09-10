@@ -35,6 +35,9 @@ import { prisma } from '../src/client';
 const PASSWORD = 'carnet-demo-2026';
 /** Opens the seeded public passport at /p/demo-share-token. */
 const DEMO_SHARE_TOKEN = 'demo-share-token';
+
+/** The quote link a workshop would text a customer. Opens /e/<token>. */
+const DEMO_ESTIMATE_TOKEN = 'demo-estimate-token';
 const SALT = process.env.LEDGER_CHAIN_SALT ?? 'dev-ledger-salt-change-me';
 
 const day = (offset: number, hour = 9, minute = 0): Date => {
@@ -1843,6 +1846,22 @@ async function main() {
 
   await seedAutomation(org.id);
 
+  /* --- the quote link the customer was sent ------------------------------- */
+
+  // The estimate is the one thing a customer has to answer, and most of them
+  // will answer it from a text message rather than by signing in. Seeding the
+  // link means the flow can be walked end to end without one being generated
+  // by hand first.
+  await prisma.estimateShare.create({
+    data: {
+      estimateId: estimate.id,
+      tokenHash: createHash('sha256').update(DEMO_ESTIMATE_TOKEN).digest('hex'),
+      channel: 'SMS',
+      sentTo: maria!.email,
+      expiresAt: day(14),
+    },
+  });
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -1871,6 +1890,9 @@ async function main() {
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}
+
+  The quote Maria was sent, no account needed:
+    /e/${DEMO_ESTIMATE_TOKEN}
 
   Sign in at http://localhost:3000/login
 

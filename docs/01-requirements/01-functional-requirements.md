@@ -257,6 +257,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2300 — The customer's own side
+
+| Ref     | Requirement                                                                                                                   | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2301 | A customer MUST be able to answer a quote line by line, with nothing preselected, and MUST NOT need an account to do it.      | 5.1   |
+| FR-2302 | Work not chosen MUST be recorded as declined, never left pending, and the record MUST name who agreed and from where.         | 5.1   |
+| FR-2303 | A safety-critical item MUST be declinable, and the customer MUST be told in plain words what leaving it means.                | 5.1   |
+| FR-2304 | A customer MUST be able to read one vehicle's full history, including what each visit cost.                                   | 5.1   |
+| FR-2305 | A customer MUST be able to create and withdraw a share link for their own vehicle, and MUST see the token exactly once.       | 5.1   |
+| FR-2306 | A customer MUST see every invoice across every workshop that uses Carnet, with what is outstanding stated first.              | 5.1   |
+| FR-2307 | Job progress shown to a customer MUST be written in their language, never in workshop status names.                           | 5.1   |
+| FR-2308 | A customer MUST NOT reach a vehicle, quote or invoice that is not theirs, and MUST meet a missing page rather than a refusal. | 5.1   |
+| FR-2309 | A dead or withdrawn share link MUST say so plainly rather than erroring or returning a missing page.                          | 5.1   |
+
 ## FR-2200 — Automation and customer relationships
 
 | Ref     | Requirement                                                                                                                      | Phase |

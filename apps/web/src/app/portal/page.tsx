@@ -45,7 +45,7 @@ export default async function PortalPage() {
           estimates: {
             orderBy: { version: 'desc' },
             take: 1,
-            include: { shares: { orderBy: { createdAt: 'desc' }, take: 1 } },
+            select: { id: true, total: true, currency: true },
           },
           invoices: { orderBy: { createdAt: 'desc' }, take: 1 },
         },
@@ -121,7 +121,6 @@ export default async function PortalPage() {
           <section className="mt-5 grid gap-3">
             {awaiting.map(({ job, orgName }) => {
               const estimate = job.estimates[0];
-              const share = estimate?.shares[0];
 
               return (
                 <Card key={job.id} className="border-(--warning)">
@@ -145,8 +144,12 @@ export default async function PortalPage() {
                         )}
                       </p>
                     </div>
-                    {share ? (
-                      <Link href={`/e/${share.id}`}>
+                    {estimate ? (
+                      // The account route, not the share link. A share id is
+                      // not the capability token and never opened anything;
+                      // somebody signed in is entitled to the quote without
+                      // needing the link that was emailed to them.
+                      <Link href={`/portal/estimates/${estimate.id}`}>
                         <Button variant="primary" size="lg">
                           Review and decide
                         </Button>
@@ -223,8 +226,17 @@ export default async function PortalPage() {
                           <Link href={`/portal/vehicles/${vehicle.id}`}>
                             <Button size="touch">View history</Button>
                           </Link>
-                          <Button size="touch">Share with a buyer</Button>
-                          <Button size="touch">Book a service</Button>
+                          {/* Both of these were buttons with nothing behind
+                              them. Sharing lives on the vehicle's own page,
+                              because the moment somebody wants to share a
+                              car's history is the moment they are looking at
+                              it. */}
+                          <Link href={`/portal/vehicles/${vehicle.id}#share`}>
+                            <Button size="touch">Share with a buyer</Button>
+                          </Link>
+                          <Link href={`/portal/book?vehicle=${vehicle.id}`}>
+                            <Button size="touch">Book a service</Button>
+                          </Link>
                         </div>
                       </CardBody>
                     </Card>

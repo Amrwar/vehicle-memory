@@ -35,6 +35,14 @@ interface Check {
   redirectsTo?: string;
   /** Text that must NOT appear. Used for figures a role should never see. */
   absent?: string[];
+  /**
+   * The status the page should answer with, when it is not 200.
+   *
+   * Used for the routes whose correct answer is "there is no such thing here":
+   * a customer reaching another customer's vehicle must meet a page that does
+   * not exist, rather than one that confirms somebody else's does.
+   */
+  status?: number;
 }
 
 async function sessionFor(email: string): Promise<string> {
@@ -71,6 +79,7 @@ async function main() {
   const customer = await prisma.customer.findFirstOrThrow({
     where: { displayName: 'Maria Okonkwo' },
   });
+  const estimate = await prisma.estimate.findFirstOrThrow({ where: { status: 'SENT' } });
   const product = await prisma.product.findFirstOrThrow({ where: { partNumber: '04152-YZZA1' } });
   const order = await prisma.purchaseOrder.findFirstOrThrow({ where: { number: 'PO-2041' } });
 
@@ -308,6 +317,51 @@ async function main() {
       as: 'customer',
       expect: ['When suits you?', 'What needs doing?', 'Which vehicle?'],
     },
+    // The customer's own view of a vehicle they own, which is the same record
+    // a stranger reads through a share link plus the two things a stranger is
+    // not entitled to: what each visit cost, and the ability to share it.
+    {
+      path: `/portal/vehicles/${vehicle.id}`,
+      as: 'customer',
+      expect: ['Every visit', 'Show this history to somebody', 'Create a link'],
+    },
+    {
+      path: `/portal/estimates/${estimate.id}`,
+      as: 'customer',
+      expect: ['A quote for your', 'What we recommend', 'Send my answer'],
+    },
+    // A vehicle this customer does not own is not theirs to read.
+    {
+      path: '/portal/vehicles/not-a-real-vehicle',
+      as: 'customer',
+      expect: [],
+      status: 404,
+    },
+    {
+      path: '/portal/updates',
+      as: 'customer',
+      expect: ['Updates', 'Waiting on you', 'Review and decide'],
+    },
+    {
+      path: '/portal/invoices',
+      as: 'customer',
+      expect: ['Invoices'],
+    },
+    // The quote link a workshop would text, opened by somebody with no
+    // account at all. Most people will meet Carnet here and nowhere else.
+    {
+      path: '/e/demo-estimate-token',
+      as: 'anon',
+      expect: ['A quote for your', 'What we recommend', 'Send my answer', 'Your name'],
+    },
+    // A link that was never issued says the link is dead, rather than 404ing,
+    // which reads as a broken system, or erroring, which reads as the
+    // customer's fault.
+    {
+      path: '/e/not-a-real-token',
+      as: 'anon',
+      expect: ['This link is no longer live'],
+    },
     // An invitation link nobody issued says so, rather than "invalid link".
     {
       path: '/invite/not-a-real-token',
@@ -467,7 +521,14 @@ async function main() {
       continue;
     }
 
-    if (response.status !== 200) {
+    if (check.status && response.status === check.status) {
+      console.info(
+        `  ok    ${check.as.padEnd(11)} ${check.path} -> ${response.status}, as it should`,
+      );
+      continue;
+    }
+
+    if (response.status !== (check.status ?? 200)) {
       console.error(`  FAIL  ${check.as.padEnd(11)} ${check.path} -> ${response.status}`);
       failures += 1;
       continue;
