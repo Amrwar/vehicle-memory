@@ -30,7 +30,13 @@ function check(label: string, passed: boolean, detail?: string) {
 }
 
 async function main() {
-  const org = await prisma.organization.findFirstOrThrow();
+  // Named, not first. The seed contains a second organisation, the prior
+  // workshop that wrote entries to the BMW's passport, and it has no ledger
+  // of its own. An unfiltered findFirst returned it and quietly measured the
+  // wrong books: every check passed against nothing at all.
+  const org = await prisma.organization.findFirstOrThrow({
+    where: { slug: 'hillside-motors' },
+  });
 
   console.info(`\n  Ledger integrity, ${org.name}\n`);
 
@@ -40,7 +46,7 @@ async function main() {
   const sheet = balanceSheet(lines);
   const vat = taxReturn(lines);
 
-  check('postings exist', lines.length > 0, `${lines.length} lines`);
+  check('postings exist', lines.length > 0, `${lines.length} lines in ${org.name}`);
   check(
     'trial balance balances',
     balance.balanced,
