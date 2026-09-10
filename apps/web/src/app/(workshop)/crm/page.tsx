@@ -1,24 +1,44 @@
-import { describeSegment, lifetimeValue, type SegmentRule, toNumber } from '@carnet/core';
 import {
+  type Channel,
+  describeSegment,
+  lifetimeValue,
+  type SegmentRule,
+  toNumber,
+} from '@carnet/core';
+import {
+  Alert,
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   Money,
   PageHeader,
+  Select,
   StatRow,
   StatTile,
   Table,
   TableWrap,
   Td,
+  Textarea,
   Th,
   Tr,
 } from '@carnet/ui';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
+import {
+  CampaignError,
+  draftCampaign,
+  listCampaigns,
+  previewSegment,
+  retention,
+  sendCampaign,
+} from '@/lib/automation';
 import { requireSession } from '@/lib/guard';
-import { listCampaigns, previewSegment, retention } from '@/lib/automation';
 
 export const metadata: Metadata = { title: 'Customers' };
 export const dynamic = 'force-dynamic';
@@ -45,8 +65,69 @@ const SEGMENTS: { key: string; rules: SegmentRule[] }[] = [
   { key: 'declined', rules: [{ kind: 'declined-work-since', days: 180 }] },
 ];
 
-export default async function CrmPage() {
+/**
+ * Writes a campaign as a draft. Deliberately does not send it.
+ *
+ * Composing and sending are two steps because a campaign is the only thing in
+ * this product that cannot be recalled. The draft row is what lets the page
+ * say, before anybody commits, how many people will actually be written to
+ * once consent has been rechecked.
+ */
+async function compose(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:read');
+
+  const chosen = SEGMENTS.find((segment) => segment.key === String(formData.get('segment') ?? ''));
+
+  await draftCampaign({
+    orgId,
+    userId: user.userId,
+    name: String(formData.get('name') ?? '').trim(),
+    channel: String(formData.get('channel') ?? 'EMAIL') as Channel,
+    segment: chosen?.rules ?? [],
+    subject: String(formData.get('subject') ?? '').trim(),
+    body: String(formData.get('body') ?? '').trim(),
+  });
+
+  redirect('/crm?drafted=1');
+}
+
+/**
+ * Sends one. Consent is rechecked here, per person, at this moment.
+ *
+ * There is no undo, and the service layer refuses a second send rather than
+ * relying on the button being pressed once.
+ */
+async function send(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:read');
+
+  try {
+    const result = await sendCampaign({
+      orgId,
+      userId: user.userId,
+      campaignId: String(formData.get('campaignId') ?? ''),
+    });
+
+    redirect(`/crm?sent=${result.sent}&held=${result.suppressed}`);
+  } catch (error) {
+    if (error instanceof CampaignError) {
+      redirect(`/crm?error=${encodeURIComponent(error.message)}`);
+    }
+
+    throw error;
+  }
+}
+
+export default async function CrmPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ drafted?: string; sent?: string; held?: string; error?: string }>;
+}) {
   const { orgId } = await requireSession('customer:read');
+  const { drafted, sent, held, error } = await searchParams;
 
   const [segments, campaigns, cohortRows] = await Promise.all([
     Promise.all(
@@ -75,6 +156,25 @@ export default async function CrmPage() {
         title="Relationships"
         description="Who has stopped coming, who is staying, and who you are allowed to write to"
       />
+
+      {error ? (
+        <Alert tone="danger" className="mb-5" title="Nothing was sent">
+          {error}
+        </Alert>
+      ) : null}
+
+      {drafted ? (
+        <Alert tone="info" className="mb-5" title="Saved as a draft">
+          Nothing has gone out. The campaign below will say how many people it reaches before you
+          commit to it.
+        </Alert>
+      ) : null}
+
+      {sent ? (
+        <Alert tone="success" className="mb-5" title="Sent">
+          {sent} written to, {held ?? 0} held back. There is no way to call it back.
+        </Alert>
+      ) : null}
 
       <StatRow className="mb-5">
         <StatTile
@@ -207,6 +307,61 @@ export default async function CrmPage() {
         )}
       </Card>
 
+      <Card className="mb-5">
+        <CardHeader
+          title="Write a campaign"
+          description="Saving writes a draft and sends nothing. The audience is stored as its rules, so consent is rechecked against every person at the moment you send."
+        />
+        <CardBody>
+          <form action={compose} className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Call it" htmlFor="campaign-name" required>
+                <Input id="campaign-name" name="name" required placeholder="Winter check offer" />
+              </Field>
+
+              <Field label="Who" htmlFor="segment">
+                <Select id="segment" name="segment" defaultValue="lapsed">
+                  {segments.map((segment) => (
+                    <option key={segment.key} value={segment.key}>
+                      {segment.label} ({segment.segment.reachable.length} reachable)
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field
+                label="How"
+                htmlFor="channel"
+                hint="A text costs money to send. Email does not."
+              >
+                <Select id="channel" name="channel" defaultValue="EMAIL">
+                  <option value="EMAIL">Email</option>
+                  <option value="SMS">Text</option>
+                </Select>
+              </Field>
+            </div>
+
+            <Field label="Subject" htmlFor="subject" hint="Email only.">
+              <Input
+                id="subject"
+                name="subject"
+                placeholder="A free winter check while the weather turns"
+              />
+            </Field>
+
+            <Field label="What it says" htmlFor="body" required>
+              <Textarea id="body" name="body" required rows={4} />
+            </Field>
+
+            <div>
+              <Button type="submit" variant="secondary">
+                Save as a draft
+              </Button>
+            </div>
+          </form>
+        </CardBody>
+      </Card>
+
       <Card className="overflow-hidden">
         <CardHeader
           title="Campaigns"
@@ -228,6 +383,7 @@ export default async function CrmPage() {
                   <Th numeric>Sent</Th>
                   <Th numeric>Held back</Th>
                   <Th>When</Th>
+                  <Th>&nbsp;</Th>
                 </tr>
               </thead>
               <tbody>
@@ -261,6 +417,16 @@ export default async function CrmPage() {
                             year: 'numeric',
                           })
                         : 'Not sent'}
+                    </Td>
+                    <Td>
+                      {campaign.status === 'DRAFT' ? (
+                        <form action={send}>
+                          <input type="hidden" name="campaignId" value={campaign.id} />
+                          <Button type="submit" size="sm" variant="secondary">
+                            Send it
+                          </Button>
+                        </form>
+                      ) : null}
                     </Td>
                   </Tr>
                 ))}

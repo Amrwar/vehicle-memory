@@ -1,11 +1,26 @@
-import { describeTrigger } from '@carnet/core';
 import {
+  type Action,
+  type Comparison,
+  type ConditionField,
+  describeComparison,
+  describeField,
+  describeTrigger,
+  fieldsFor,
+  RuleError,
+  type TriggerEvent,
+} from '@carnet/core';
+import {
+  Alert,
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   PageHeader,
+  Select,
   StatRow,
   StatTile,
   Table,
@@ -15,12 +30,135 @@ import {
   Tr,
 } from '@carnet/ui';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
-import { listRules, pendingActions, recentRuns } from '@/lib/automation';
+import {
+  cancelAction,
+  listRules,
+  pendingActions,
+  recentRuns,
+  saveRule,
+  setRuleActive,
+} from '@/lib/automation';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Automation' };
 export const dynamic = 'force-dynamic';
+
+/** Every trigger, with the sentence the page shows for it. */
+const TRIGGERS: TriggerEvent[] = [
+  'job.completed',
+  'job.awaiting_approval',
+  'invoice.issued',
+  'invoice.overdue',
+  'booking.created',
+  'booking.missed',
+  'service.due',
+  'vehicle.mot_due',
+  'estimate.declined',
+  'customer.lapsing',
+];
+
+const ACTION_KINDS: { kind: Action['kind']; label: string }[] = [
+  { kind: 'send.email', label: 'Email them' },
+  { kind: 'send.sms', label: 'Text them' },
+  { kind: 'task.create', label: 'Create a task' },
+  { kind: 'tag.add', label: 'Tag the customer' },
+  { kind: 'booking.suggest', label: 'Offer a booking' },
+];
+
+const COMPARISONS: Comparison[] = ['gte', 'gt', 'eq', 'ne', 'lt', 'lte'];
+
+/**
+ * Writes a rule.
+ *
+ * The domain layer refuses anything that could never fire, and its complaint
+ * is shown as it was written rather than translated into "invalid input". The
+ * refusals are the useful part: they say which condition the trigger cannot
+ * see, and why.
+ */
+async function create(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:read');
+
+  const field = String(formData.get('field') ?? '');
+  const value = Number(formData.get('value') ?? 0);
+
+  const conditions =
+    field && Number.isFinite(value)
+      ? [
+          {
+            field: field as ConditionField,
+            is: String(formData.get('is') ?? 'gte') as Comparison,
+            value,
+          },
+        ]
+      : [];
+
+  try {
+    await saveRule({
+      orgId,
+      userId: user.userId,
+      name: String(formData.get('name') ?? '').trim(),
+      trigger: String(formData.get('trigger') ?? 'job.completed') as TriggerEvent,
+      conditions,
+      actions: [
+        {
+          kind: String(formData.get('kind') ?? 'send.email') as Action['kind'],
+          target: String(formData.get('target') ?? '').trim(),
+          delayHours: Math.max(0, Number(formData.get('delayHours') ?? 0) || 0),
+        },
+      ],
+      cooldownHours: Math.max(1, Number(formData.get('cooldownHours') ?? 24) || 24),
+      isActive: formData.get('isActive') === 'on',
+    });
+  } catch (error) {
+    const message = error instanceof RuleError ? error.message : 'That rule could not be saved.';
+
+    redirect(`/automation?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect('/automation?saved=1');
+}
+
+async function toggle(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:read');
+
+  await setRuleActive({
+    orgId,
+    userId: user.userId,
+    ruleId: String(formData.get('ruleId') ?? ''),
+    isActive: formData.get('to') === 'on',
+  });
+
+  redirect('/automation');
+}
+
+async function stop(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:read');
+
+  await cancelAction({
+    orgId,
+    userId: user.userId,
+    actionId: String(formData.get('actionId') ?? ''),
+  });
+
+  redirect('/automation?stopped=1');
+}
+
+function when(date: Date): string {
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 /**
  * The rules, what they are about to do, and what they last did. FR-2200.
@@ -35,17 +173,13 @@ export const dynamic = 'force-dynamic';
  * "why did this rule send nothing" is the question people actually ask; and
  * the rules themselves, written as sentences rather than as a grid of fields.
  */
-function when(date: Date): string {
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export default async function AutomationPage() {
+export default async function AutomationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; saved?: string; stopped?: string }>;
+}) {
   const { orgId } = await requireSession('settings:read');
+  const { error, saved, stopped } = await searchParams;
 
   const [rules, queued, runs] = await Promise.all([
     listRules(orgId),
@@ -64,6 +198,24 @@ export default async function AutomationPage() {
         title="Automation"
         description="Rules that act on their own, and the record of what they did"
       />
+
+      {error ? (
+        <Alert tone="danger" className="mb-5" title="That rule was refused">
+          {error}
+        </Alert>
+      ) : null}
+
+      {saved ? (
+        <Alert tone="success" className="mb-5" title="Saved">
+          It will act the next time something sets it off.
+        </Alert>
+      ) : null}
+
+      {stopped ? (
+        <Alert tone="success" className="mb-5" title="Stopped">
+          That action will not go out.
+        </Alert>
+      ) : null}
 
       <StatRow className="mb-5">
         <StatTile label="Rules on" value={active.length} note={`${rules.length} written`} />
@@ -115,6 +267,7 @@ export default async function AutomationPage() {
                   <Th>Rule</Th>
                   <Th>Action</Th>
                   <Th>About</Th>
+                  <Th>&nbsp;</Th>
                 </tr>
               </thead>
               <tbody>
@@ -130,6 +283,14 @@ export default async function AutomationPage() {
                       {action.kind.replace('.', ' ')} &mdash; {action.target}
                     </Td>
                     <Td className="text-(--text-faint)">{action.subjectType}</Td>
+                    <Td>
+                      <form action={stop}>
+                        <input type="hidden" name="actionId" value={action.id} />
+                        <Button type="submit" size="sm" variant="ghost">
+                          Stop it
+                        </Button>
+                      </form>
+                    </Td>
                   </Tr>
                 ))}
               </tbody>
@@ -157,6 +318,13 @@ export default async function AutomationPage() {
                   <Badge tone={rule.isActive ? 'success' : 'neutral'} size="sm">
                     {rule.isActive ? 'on' : 'off'}
                   </Badge>
+                  <form action={toggle} className="contents">
+                    <input type="hidden" name="ruleId" value={rule.id} />
+                    <input type="hidden" name="to" value={rule.isActive ? 'off' : 'on'} />
+                    <Button type="submit" size="sm" variant="ghost">
+                      {rule.isActive ? 'Switch off' : 'Switch on'}
+                    </Button>
+                  </form>
                   <span className="text-[11px] text-(--text-faint)">
                     on {describeTrigger(rule.trigger)}
                   </span>
@@ -176,6 +344,118 @@ export default async function AutomationPage() {
             ))}
           </ul>
         )}
+      </Card>
+
+      <Card className="mb-5">
+        <CardHeader
+          title="Write a rule"
+          description="One trigger, one condition if you want one, one action. Anything that could never fire is refused here rather than going quiet later."
+        />
+        <CardBody>
+          <form action={create} className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Call it" htmlFor="name" required>
+                <Input id="name" name="name" required placeholder="Thank the customer" />
+              </Field>
+
+              <Field label="When" htmlFor="trigger" hint="What sets it off.">
+                <Select id="trigger" name="trigger" defaultValue="job.completed">
+                  {TRIGGERS.map((trigger) => (
+                    <option key={trigger} value={trigger}>
+                      {describeTrigger(trigger)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Only if" htmlFor="field" hint="Leave blank to act every time.">
+                <Select id="field" name="field" defaultValue="">
+                  <option value="">No condition</option>
+                  {/* Every field any trigger can see. The domain layer refuses
+                      a pairing the chosen trigger cannot know about, and says
+                      which one, rather than this list guessing. */}
+                  {[...new Set(TRIGGERS.flatMap((trigger) => fieldsFor(trigger)))].map((field) => (
+                    <option key={field} value={field}>
+                      {describeField(field)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field label="Is" htmlFor="is">
+                <Select id="is" name="is" defaultValue="gte">
+                  {COMPARISONS.map((comparison) => (
+                    <option key={comparison} value={comparison}>
+                      {describeComparison(comparison)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field label="This much" htmlFor="value" hint="Money in pence.">
+                <Input id="value" name="value" type="number" inputMode="numeric" defaultValue={0} />
+              </Field>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Then" htmlFor="kind">
+                <Select id="kind" name="kind" defaultValue="send.email">
+                  {ACTION_KINDS.map((action) => (
+                    <option key={action.kind} value={action.kind}>
+                      {action.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field label="Saying" htmlFor="target" required>
+                <Input id="target" name="target" required placeholder="Thanks for your visit" />
+              </Field>
+
+              <Field
+                label="After how many hours"
+                htmlFor="delayHours"
+                hint="0 sends it straight away."
+              >
+                <Input
+                  id="delayHours"
+                  name="delayHours"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  defaultValue={24}
+                />
+              </Field>
+            </div>
+
+            <div className="grid items-end gap-4 sm:grid-cols-2">
+              <Field
+                label="Leave the same person alone for"
+                htmlFor="cooldownHours"
+                hint="Hours. The floor is one, and it is the database that holds it."
+              >
+                <Input
+                  id="cooldownHours"
+                  name="cooldownHours"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  defaultValue={720}
+                />
+              </Field>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <label className="flex items-center gap-2 text-[13px]">
+                  <input type="checkbox" name="isActive" defaultChecked />
+                  Switch it on now
+                </label>
+                <Button type="submit">Save the rule</Button>
+              </div>
+            </div>
+          </form>
+        </CardBody>
       </Card>
 
       <Card className="overflow-hidden">

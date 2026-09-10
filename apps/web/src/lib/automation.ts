@@ -149,6 +149,67 @@ export async function saveRule(input: {
 }
 
 /**
+ * Switches a rule on or off.
+ *
+ * Kept separate from saving, because turning a rule off is the thing somebody
+ * does in a hurry when it is misbehaving, and it must not require them to get
+ * the rest of the form past validation first.
+ */
+export async function setRuleActive(input: {
+  orgId: string;
+  userId: string;
+  ruleId: string;
+  isActive: boolean;
+}) {
+  const rule = await prisma.automationRule.findFirstOrThrow({
+    where: { id: input.ruleId, orgId: input.orgId },
+    select: { id: true, name: true },
+  });
+
+  await prisma.automationRule.update({
+    where: { id: rule.id },
+    data: { isActive: input.isActive },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: input.isActive ? 'automation.rule.enabled' : 'automation.rule.disabled',
+    entityType: 'AutomationRule',
+    entityId: rule.id,
+    after: { name: rule.name, isActive: input.isActive },
+  });
+}
+
+/**
+ * Stops a queued action before it goes out.
+ *
+ * The window between a rule firing and its delay elapsing is the only moment
+ * anything can still be called back, which is the whole reason the queue is
+ * rows on a page rather than timers in memory.
+ */
+export async function cancelAction(input: { orgId: string; userId: string; actionId: string }) {
+  const action = await prisma.automationAction.findFirstOrThrow({
+    where: { id: input.actionId, status: 'PENDING', run: { rule: { orgId: input.orgId } } },
+    select: { id: true, kind: true, target: true },
+  });
+
+  await prisma.automationAction.update({
+    where: { id: action.id },
+    data: { status: 'CANCELLED' },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'automation.action.cancelled',
+    entityType: 'AutomationAction',
+    entityId: action.id,
+    after: { kind: action.kind, target: action.target },
+  });
+}
+
+/**
  * Runs one event past every rule that listens for it.
  *
  * The blocked runs are written too, and that is the point. A rule that has
@@ -396,6 +457,46 @@ export async function listCampaigns(orgId: string) {
     plannedRecipients: row.plannedRecipients,
     plannedSuppressed: row.plannedSuppressed,
   }));
+}
+
+/**
+ * Writes a campaign as a draft. It sends nothing.
+ *
+ * The two steps are deliberate. A campaign is the only action in this product
+ * that cannot be undone, so composing it and sending it are separated by a
+ * page that says how many people it will actually reach.
+ */
+export async function draftCampaign(input: {
+  orgId: string;
+  userId: string;
+  name: string;
+  channel: Channel;
+  segment: SegmentRule[];
+  subject: string;
+  body: string;
+}) {
+  const campaign = await prisma.campaign.create({
+    data: {
+      orgId: input.orgId,
+      name: input.name,
+      channel: input.channel,
+      segment: input.segment as never,
+      subject: input.subject || null,
+      body: input.body,
+      status: 'DRAFT',
+    },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'campaign.drafted',
+    entityType: 'Campaign',
+    entityId: campaign.id,
+    after: { name: input.name, channel: input.channel },
+  });
+
+  return campaign;
 }
 
 export class CampaignError extends Error {
