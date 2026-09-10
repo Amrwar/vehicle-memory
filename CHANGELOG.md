@@ -7,6 +7,38 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 4.9 - Revision.**
+
+No new features. A pass over everything built so far, with the checkable half
+turned into scripts so it can be repeated rather than done once.
+
+- `verify:empty` creates a genuinely empty workshop and walks all twenty-five
+  pages as its owner. Empty states are the part nobody designs, because the
+  demo data always has rows, and the first person to meet them is a real
+  workshop on their first morning.
+- `verify:access` checks twenty-nine pages for inputs with no label, buttons
+  with no accessible name, images with no alternative, decorative graphics not
+  hidden from a screen reader, headings that skip a level, and missing
+  landmarks, skip links or language. These are the failures that accumulate
+  silently, because everything looks fine to whoever is building it.
+
+**Fixed.**
+
+- The group view showed its empty state only at zero sites. A new workshop has
+  one, so the first thing anybody saw there was a comparison table with a
+  single row and a spread of nothing.
+- The pricing page had no h1. Its title came from the shared section heading,
+  which renders an h2, so the outline began at level two with nothing above it.
+- PageHeader actions wrap instead of overflowing; several pages put six
+  controls there, which on a phone is two rows rather than a scrollbar.
+
+Both first attempts at these checks reported every page as broken, because
+they were reading the React payload Next.js inlines into the document rather
+than the document. A check that fails everywhere is indistinguishable from a
+check that is wrong. The table-overflow rule was removed rather than
+approximated further, on the grounds that a check nobody can trust is worse
+than no check.
+
 **Phase 4.8 - Expenses, banking and the close.**
 
 - `/expenses`: money out that is not a supplier bill. These were hand-written

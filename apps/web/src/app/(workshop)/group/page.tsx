@@ -64,12 +64,14 @@ export default async function GroupPage({
     inTransitNow(orgId),
   ]);
 
-  if (group.sites.length === 0) {
+  // Fewer than two, not zero. A new workshop has one site, and comparing one
+  // site against itself is a table with a single row and a spread of nothing.
+  if (group.sites.length < 2) {
     return (
       <>
         <PageHeader eyebrow="Group" title="Sites" />
         <EmptyState
-          title="One site"
+          title="One site so far"
           description="This view compares sites against each other. It becomes useful when there are at least two."
         />
       </>

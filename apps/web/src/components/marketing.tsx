@@ -172,18 +172,29 @@ export function SectionHead({
   title,
   lede,
   align = 'left',
+  /**
+   * The page's own title, rather than a section within it.
+   *
+   * Every page needs exactly one h1. Without it a screen reader has no anchor
+   * for what the page is, and the heading outline starts at level two with
+   * nothing above it.
+   */
+  primary = false,
 }: {
   eyebrow: string;
   title: string;
   lede?: string;
   align?: 'left' | 'centre';
+  primary?: boolean;
 }) {
+  const Heading = primary ? 'h1' : 'h2';
+
   return (
     <div className={cn('max-w-2xl', align === 'centre' && 'mx-auto text-center')}>
       <p className="eyebrow mb-2.5">{eyebrow}</p>
-      <h2 className="font-display text-[clamp(1.5rem,4vw,2.1rem)] font-semibold leading-[1.15] tracking-tight">
+      <Heading className="font-display text-[clamp(1.5rem,4vw,2.1rem)] font-semibold leading-[1.15] tracking-tight">
         {title}
-      </h2>
+      </Heading>
       {lede ? <p className="mt-3 text-[15px] leading-relaxed text-(--text-soft)">{lede}</p> : null}
     </div>
   );

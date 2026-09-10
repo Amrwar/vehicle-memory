@@ -208,6 +208,18 @@ jobs:
       - name: Smoke test every route, every role
         run: npx tsx infra/scripts/smoke.ts http://localhost:3000
 
+      # Empty states are the part nobody designs, because the demo data always
+      # has rows. The first person to see them is a real workshop on their
+      # first morning.
+      - name: Every page, with nothing in it
+        run: npx tsx infra/scripts/verify-empty.ts http://localhost:3000
+
+      # The mechanical half of accessibility: labels, names, alternatives,
+      # heading order, landmarks. The failures that accumulate silently,
+      # because everything looks fine to whoever is building it.
+      - name: Accessibility
+        run: npx tsx infra/scripts/verify-access.ts http://localhost:3000
+
   # -------------------------------------------------------------------------
   # Supply chain. Critical findings block the merge (NFR-409).
   # -------------------------------------------------------------------------

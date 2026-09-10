@@ -72,6 +72,7 @@ export default async function PricingPage({
         <Section tone="surface">
           <SectionHead
             eyebrow="Pricing"
+            primary
             title="Per bay, per month, published in full"
             lede="Priced per bay, because bays are what a workshop earns from. Staff accounts are unlimited on every plan: charging per user would bill you for giving your own people access."
             align="centre"

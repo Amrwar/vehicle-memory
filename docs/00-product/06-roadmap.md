@@ -295,6 +295,41 @@ means when they say a product feels unfinished.
 - A screen reader over the passport, which is the page a stranger will meet
 - Every figure on every page traced back to the record behind it
 
+**How it was done.** The parts of that list a machine can check became scripts,
+so the pass is repeatable rather than a one-off afternoon:
+
+- `verify:empty` creates a genuinely empty workshop and walks all twenty-five
+  pages as its owner, asserting nothing errors, nothing shows a bare NaN or an
+  Invalid Date, and every page says what to do next rather than showing a
+  blank table.
+- `verify:access` checks the mechanical half of accessibility across
+  twenty-nine pages: inputs with no label, buttons with no accessible name,
+  images with no alternative, decorative graphics not hidden from a screen
+  reader, headings that skip a level, and pages missing a landmark, a skip
+  link or a language.
+
+Both run in CI. The half a machine cannot check, whether a page actually makes
+sense read aloud, still needs a person and a screen reader.
+
+**What it found.** Two real defects, and one lesson about checks.
+
+The group view only showed its empty state at zero sites. A new workshop has
+one, so the first thing a customer saw on that page was a comparison table
+with a single row and a spread of nothing. It now needs two sites before it
+claims to compare anything.
+
+The pricing page had no h1. Its title came from the shared section heading
+component, which renders an h2, so the outline started at level two with
+nothing above it.
+
+The lesson: the first version of the accessibility check reported every table
+on every page as unwrapped, and the first version of the empty-state check
+reported every page as broken. Both were reading the React payload Next.js
+inlines into the document rather than the document. A check that fails
+everywhere is indistinguishable from a check that is wrong, and shipping one
+that cannot be trusted is worse than not having it. The table rule was removed
+rather than approximated further.
+
 ---
 
 ## Phase 5 — Customer Lifecycle and Automation
