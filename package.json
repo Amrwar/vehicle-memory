@@ -34,6 +34,7 @@
     "verify:counter": "tsx infra/scripts/verify-counter.ts",
     "verify:banking": "tsx infra/scripts/verify-banking.ts",
     "verify:automation": "tsx infra/scripts/verify-automation.ts",
+    "verify:messaging": "tsx infra/scripts/verify-messaging.ts",
     "verify:empty": "tsx infra/scripts/verify-empty.ts",
     "verify:access": "tsx infra/scripts/verify-access.ts",
     "smoke": "tsx infra/scripts/smoke.ts",

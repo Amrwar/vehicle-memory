@@ -312,6 +312,14 @@ async function main() {
       as: 'owner',
       expect: ['Automation', 'About to happen', 'Rules', 'What happened', 'held back'],
     },
+    // The failed row is the one this page exists for. A message nobody
+    // received, with the reason it will not be retried, has to be visible
+    // without anybody going looking for it.
+    {
+      path: '/messages',
+      as: 'owner',
+      expect: ['Messages', 'Outbound', 'failed', 'will never arrive'],
+    },
     {
       path: '/portal/book',
       as: 'customer',

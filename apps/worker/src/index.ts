@@ -14,6 +14,8 @@
  *      rather than waited for.
  *   4. Drive automation: turn a service falling due into a reminder somebody
  *      can act on, and carry out the actions rules have already queued.
+ *   5. Send. Everything upstream writes a row to `message_logs`; this is the
+ *      only thing in the product that hands one to a provider.
  *
  * The fourth is the one that acts without a person in the room, so it is
  * written the most defensively. Nothing here decides whether a rule should
@@ -34,6 +36,8 @@ import {
   verifyChain,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
+
+import { sendQueuedMessages, TRANSPORTS } from './messages';
 
 const POLL_INTERVAL_MS = Number(process.env.WORKER_POLL_MS ?? 5_000);
 const BATCH_SIZE = Number(process.env.WORKER_BATCH ?? 25);
@@ -545,6 +549,10 @@ async function tick(iteration: number): Promise<void> {
   // that delay was somebody's deliberate choice.
   await runDueAutomationActions();
 
+  // Then send whatever that produced, in the same tick, so a message written
+  // this second goes out this second rather than on the next pass.
+  await sendQueuedMessages();
+
   // Every minute at the default interval.
   if (iteration % 12 === 0) {
     await closeAbandonedTimeEntries();
@@ -558,7 +566,15 @@ async function tick(iteration: number): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  log('worker.started', { pollMs: POLL_INTERVAL_MS, batch: BATCH_SIZE });
+  // The transports are named on start-up because "console" in production is
+  // the difference between a workshop's reminders going out and being written
+  // to a log nobody reads, and it is otherwise invisible.
+  log('worker.started', {
+    pollMs: POLL_INTERVAL_MS,
+    batch: BATCH_SIZE,
+    mail: TRANSPORTS.EMAIL.name,
+    sms: TRANSPORTS.SMS.name,
+  });
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.on(signal, () => {

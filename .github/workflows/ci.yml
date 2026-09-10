@@ -164,6 +164,12 @@ jobs:
       - name: Verify automation cannot act twice, and consent leaves a trail
         run: npx tsx infra/scripts/verify-automation.ts
 
+      # Rows were being written to message_logs and nothing ever moved them.
+      # Everything looked healthy and not one customer heard a word, so the
+      # check is that a message put in comes out, not that a sender exists.
+      - name: Verify a queued message actually leaves the building
+        run: npx tsx infra/scripts/verify-messaging.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -11,7 +11,13 @@ import { type Money, money, sum, zero } from '../shared/money';
  * receive Wednesday's send because the segment was computed on Monday.
  */
 
-export type Channel = 'EMAIL' | 'SMS';
+// The channel a permission is held for is the same channel a message is
+// delivered on, so there is one definition of it and it lives with delivery.
+// Two identical-looking types for one idea is how a consent check ends up
+// being made against the wrong one.
+import type { Channel } from '../messaging/delivery';
+
+export type { Channel };
 
 export interface ConsentState {
   email: boolean;

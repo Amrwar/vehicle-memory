@@ -257,6 +257,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2400 — Outbound messaging
+
+| Ref     | Requirement                                                                                                               | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2401 | Every message the system writes MUST be visible, with its state and the reason for that state.                            | 5.2   |
+| FR-2402 | A queued message MUST be handed to a provider, and the provider and time MUST be recorded against it.                     | 5.2   |
+| FR-2403 | An address that cannot work MUST fail once, not be retried.                                                               | 5.2   |
+| FR-2404 | A transient failure MUST be retried with capped, jittered backoff, and MUST be given up on rather than retried forever.   | 5.2   |
+| FR-2405 | A text MUST NOT be delivered outside sending hours; it MUST be held rather than dropped or failed.                        | 5.2   |
+| FR-2406 | An address MUST be normalised at the moment of sending, not at the moment of queueing.                                    | 5.2   |
+| FR-2407 | A message template MUST refuse an unknown placeholder when written and a missing value when built, never at the customer. | 5.2   |
+| FR-2408 | Addresses MUST be redacted wherever they are logged or displayed on a workshop screen.                                    | 5.2   |
+| FR-2409 | The transport MUST be configurable without a code change, and the configured transport MUST be stated at start-up.        | 5.2   |
+
 ## FR-2300 — The customer's own side
 
 | Ref     | Requirement                                                                                                                   | Phase |

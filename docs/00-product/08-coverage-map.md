@@ -17,16 +17,24 @@ being specific about the gaps rather than generous about the ticks.
 
 ## Customer-facing side
 
-| Capability               | Status | Where it is                                                                                                                                                                 |
-| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it.                             |
-| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                                                  |
-| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                                                    |
-| Receive confirmation     | Built  | Transactional email and SMS through the outbox, every message logged with delivery status (FR-1501, FR-1502).                                                               |
-| Receive updates          | Built  | Messages queued at the four stages that change something for the customer, and `/portal/updates`, where every visit says in plain words what is happening and what is owed. |
-| View invoice and history | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).          |
-| Approve or decline work  | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                    |
-| Pay online               | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                       |
+| Capability               | Status | Where it is                                                                                                                                                                       |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it.                                   |
+| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                                                        |
+| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                                                          |
+| Receive confirmation     | Built  | Written to `message_logs` by the flow that caused it, then handed to a provider by the worker. Console, SMTP and Twilio transports; `/messages` shows what went and what did not. |
+| Receive updates          | Built  | Messages queued at the four stages that change something for the customer, and `/portal/updates`, where every visit says in plain words what is happening and what is owed.       |
+| View invoice and history | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).                |
+| Approve or decline work  | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                          |
+| Pay online               | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                             |
+
+**A second correction, found later.** "Receive confirmation" and "Receive
+updates" were both marked built on the strength of rows appearing in
+`message_logs`. Nothing ever read that table. Every confirmation, reminder,
+quote link and automation action the product had "sent" since Phase 1 was
+sitting in it unsent, and nothing anywhere reported a problem, because from
+the writing side everything had worked. Sending is now real, and
+`verify:messaging` puts a message in and asserts it comes out.
 
 **A correction.** Three rows in this table were marked built before they were.
 "View invoice and history" cited portal invoices, and there was no such page.

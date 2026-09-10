@@ -7,6 +7,44 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 5.2 - Sending.**
+
+Nothing sent. Since Phase 1 the product had been writing rows to
+`message_logs` and nothing had ever read that table. Every confirmation,
+reminder, quote link, automation action and campaign it had "sent" was sitting
+in it unsent. Two environment variables named a mail and an SMS transport and
+no code read either of them. Nothing reported a problem, because from the
+writing side everything had worked.
+
+- One transport interface, three implementations: console, SMTP for email, and
+  Twilio for texts over plain HTTP rather than the SDK. No domain code imports
+  a vendor, and changing provider is an environment variable.
+- Console is a real transport rather than a no-op. It writes the message where
+  it can be read and reports success, so the queue drains and every state after
+  sending can be exercised without a provider account. It is also the default,
+  and the worker names its transports in its start-up line, because "console"
+  in production is otherwise invisible.
+- A permanent failure is not retried. An address with no @ in it will not start
+  working on the fourth attempt. SMTP signals this with a 5xx and HTTP with a
+  4xx, which are opposite conventions, so the classifier is told the protocol.
+- Retries are capped and jittered. Without jitter every message queued during
+  an outage retries in the same instant when it ends.
+- Texts are held between 20:00 and 08:00. An email overnight waits in an inbox;
+  a text lights up a phone on a bedside table.
+- Addresses are normalised at the moment of sending, because a customer record
+  can be edited between queueing and sending.
+- Templates refuse an unknown placeholder when written and a missing value when
+  built. "Hi {{firstName}}, your Vauxhall is ready" is the message every
+  template system sends once.
+- A text's real cost is counted. One curly apostrophe pasted from a word
+  processor drops the whole message out of the GSM alphabet and turns one
+  segment into three.
+- `/messages` separates failed, held and stuck. They look alike and need
+  completely different responses: a wrong address, nothing at all, and a worker
+  that is not running.
+- `verify:messaging` puts a message in and asserts it comes out. It is the
+  check that would have caught this.
+
 **Phase 5.1 - The customer's own side.**
 
 The coverage map said this column was built. It was not: three buttons on the

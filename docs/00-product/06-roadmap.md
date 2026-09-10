@@ -473,6 +473,65 @@ against the wrong requirements.
 
 ---
 
+## Phase 5.2 — Sending
+
+**Done.**
+
+|           |                                                                                                       |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| **Entry** | Phase 5.1 complete. Everything that should write to a customer does.                                  |
+| **Exit**  | A message written to the queue reaches a provider, and a workshop can see what went and what did not. |
+
+**The gap this closed.** Nothing sent. Since Phase 1 the product had been
+writing rows to `message_logs` and nothing had ever read that table. Every
+confirmation, service reminder, quote link, automation action and campaign the
+system had "sent" was sitting in it. Two environment variables named a mail
+and an SMS transport and no code read either of them.
+
+Nothing reported a problem, because from the writing side everything had
+worked. This is the shape of failure the whole product is built to avoid, and
+it had been sitting in the middle of it for months, marked built in the
+coverage map on the strength of the rows appearing.
+
+**What is built.** One interface, three implementations, and no domain code
+anywhere imports a vendor. Console is the default and is a real transport
+rather than a no-op: it writes the message where it can be read and reports
+success, so the queue drains and every state after sending can be exercised
+without a provider account. SMTP covers email, because every provider worth
+using speaks it and picking a vendor is not a decision the code gets to make.
+Twilio covers texts, over plain HTTP rather than the SDK.
+
+The decisions all live in the domain layer and are tested without a network:
+
+- A permanent failure is not retried. An address with no @ in it will not
+  start working on the fourth attempt, and treating it as transient burns six
+  attempts, buries the real failures and delays everything queued behind it.
+  SMTP says so with a 5xx and HTTP with a 4xx, which are opposite conventions,
+  so the classifier is told the protocol rather than guessing from the number.
+- Retries are capped and jittered. Without jitter every message queued during
+  an outage retries in the same instant when it ends, and the retry storm is
+  the second outage.
+- Texts are held between 20:00 and 08:00. An email arriving overnight sits in
+  an inbox until morning; a text lights up a phone on a bedside table, and a
+  garage that does that once does not get a third message read.
+- Addresses are normalised at the moment of sending rather than of queueing,
+  because a customer record can be edited in between and the address that
+  matters is the one that is true now.
+- A template refuses an unknown placeholder when it is written and a missing
+  value when the message is built. "Hi {{firstName}}, your Vauxhall is ready"
+  is the message every template system sends once.
+- Addresses are redacted wherever they are logged or shown. Logs get pasted
+  into tickets, and a workshop screen is open all day in a room people walk
+  through.
+
+**Visibility.** `/messages` separates three states that look alike and need
+completely different responses. Failed needs somebody to fix an address. Held
+is working exactly as intended and needs nobody. Queued with its time passed
+means the worker is not running, which is the one worth interrupting a morning
+for, because nothing at all is going out.
+
+---
+
 ## Phase 6 — Intelligence
 
 **Weeks 45–52 and continuing.**

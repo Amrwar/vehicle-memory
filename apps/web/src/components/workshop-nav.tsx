@@ -116,6 +116,7 @@ const GROUPS: Group[] = [
       { href: '/settings', label: 'Settings', icon: 'settings', permission: 'settings:read' },
       { href: '/settings/team', label: 'Team', icon: 'team', permission: 'settings:read' },
       { href: '/automation', label: 'Automation', icon: 'automation', permission: 'settings:read' },
+      { href: '/messages', label: 'Messages', icon: 'messages', permission: 'settings:read' },
       { href: '/audit', label: 'Audit log', icon: 'audit', permission: 'audit:read' },
     ],
   },

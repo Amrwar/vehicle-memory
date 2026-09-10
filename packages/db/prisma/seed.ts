@@ -1846,6 +1846,10 @@ async function main() {
 
   await seedAutomation(org.id);
 
+  /* --- what has actually been sent ---------------------------------------- */
+
+  await seedMessages(org.id);
+
   /* --- the quote link the customer was sent ------------------------------- */
 
   // The estimate is the one thing a customer has to answer, and most of them
@@ -2996,5 +3000,90 @@ async function seedAutomation(orgId: string) {
   await prisma.customer.updateMany({
     where: { id: { in: reachable.map((customer) => customer.id) } },
     data: { lastMarketedAt: day(-9, 10, 0) },
+  });
+}
+
+/**
+ * The outbound log, including the parts nobody wants to look at.
+ *
+ * A demo where every message succeeded teaches nothing. The three rows that
+ * matter here are the failure nobody will retry, the one still being retried,
+ * and the text held overnight, because those are the three states a workshop
+ * has to be able to tell apart on a Monday morning.
+ */
+async function seedMessages(orgId: string) {
+  await prisma.messageLog.createMany({
+    data: [
+      {
+        orgId,
+        channel: 'EMAIL',
+        toAddress: 'maria@example.test',
+        subject: 'Your BMW 320d is ready to collect',
+        body: 'Your car is ready. We are open until 6pm today and from 8am tomorrow.',
+        status: 'SENT',
+        provider: 'smtp',
+        providerRef: '<a1b2c3@carnet.local>',
+        sentAt: day(-1, 16, 40),
+        attempts: 1,
+        relatedType: 'Job',
+        relatedId: null,
+      },
+      {
+        orgId,
+        channel: 'SMS',
+        toAddress: '+447700900123',
+        body: 'Your MOT is due next month. Book at /portal/book and we will have a slot ready.',
+        status: 'SENT',
+        provider: 'twilio',
+        providerRef: 'SM9f8e7d6c',
+        sentAt: day(-3, 9, 15),
+        attempts: 1,
+        relatedType: 'ServiceSchedule',
+        relatedId: null,
+      },
+      // The one worth seeing. A wrong address will not start working on the
+      // fourth attempt, so it was not tried a fourth time.
+      {
+        orgId,
+        channel: 'EMAIL',
+        toAddress: 'j.okafor@invalid',
+        subject: 'Your invoice INV-1039 is overdue',
+        body: 'Invoice INV-1039 is now 21 days overdue. Please get in touch.',
+        status: 'FAILED',
+        provider: 'smtp',
+        error: 'Will not be retried: 550 No such mailbox',
+        attempts: 1,
+        relatedType: 'Invoice',
+        relatedId: null,
+      },
+      // Still being retried. The provider was down, not the address wrong.
+      {
+        orgId,
+        channel: 'EMAIL',
+        toAddress: 'fleet@northgatelogistics.test',
+        subject: 'Your estimate is ready',
+        body: 'There is a quote waiting for your answer.',
+        status: 'QUEUED',
+        attempts: 2,
+        error: 'Connection reset by peer',
+        availableAt: day(0, 12, 0),
+        relatedType: 'Estimate',
+        relatedId: null,
+      },
+      // Held rather than failed: written at night, and a garage that wakes
+      // somebody at three in the morning does not get a third message read.
+      {
+        orgId,
+        channel: 'SMS',
+        toAddress: '+447700900456',
+        body: 'Your car passed its MOT. Ready whenever suits you.',
+        status: 'QUEUED',
+        attempts: 0,
+        error: 'Texts are held between 20:00 and 8:00 so nobody is woken by their garage.',
+        availableAt: day(1, 8, 0),
+        relatedType: 'Job',
+        relatedId: null,
+      },
+    ],
   });
 }

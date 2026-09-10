@@ -51,10 +51,18 @@ export type NavIconName =
   | 'expenses'
   | 'banking'
   | 'automation'
+  | 'messages'
   | 'crm'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // An envelope, with the line that says it left.
+  messages: (
+    <>
+      <rect x="2.6" y="4.4" width="14.8" height="11.2" rx="1.6" />
+      <path d="M2.6 6.2 10 11l7.4-4.8" />
+    </>
+  ),
   // A rule: something happens, a decision is taken, something follows.
   automation: (
     <>

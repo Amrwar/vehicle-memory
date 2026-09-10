@@ -169,6 +169,24 @@ were unbuilt remainder of Phase 3, was also stale. Both shipped in Phase 4.8.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Outbound messaging
+
+| Req     | Story | Schema                           | Implementation          | Test                  | Status |
+| ------- | ----- | -------------------------------- | ----------------------- | --------------------- | ------ |
+| FR-2401 | —     | `MessageLog.status`, `.error`    | `/messages`             | `smoke.ts`            | Done   |
+| FR-2402 | —     | `MessageLog.provider`, `.sentAt` | `sendQueuedMessages()`  | `verify-messaging.ts` | Done   |
+| FR-2403 | —     | `MessageLog.attempts`            | `classifyFailure()`     | `verify-messaging.ts` | Done   |
+| FR-2404 | —     | `MessageLog.availableAt`         | `afterFailure()`        | `messaging.test.ts`   | Done   |
+| FR-2405 | —     | `MessageLog.availableAt`         | `quietHours()`          | `verify-messaging.ts` | Done   |
+| FR-2406 | —     | —                                | `normaliseFor()`        | `messaging.test.ts`   | Done   |
+| FR-2407 | —     | —                                | `render()`              | `messaging.test.ts`   | Done   |
+| FR-2408 | —     | —                                | `redact()`              | `messaging.test.ts`   | Done   |
+| FR-2409 | —     | —                                | `configureTransports()` | `verify-messaging.ts` | Done   |
+
+Nothing in the web application sends. It writes rows; the worker drains them.
+A "send now" button anywhere in the workshop interface would be lying about
+where the work happens.
+
 ## The customer's own side
 
 | Req     | Story | Schema                                 | Implementation              | Test               | Status |
@@ -282,15 +300,16 @@ details without a provider behind it would be worse than not having one.
 | Inventory and procurement (Phase 2)       | 19                  | 18                     |
 | Finance and ledger                        | 12                  | 12                     |
 | People and multi-site                     | 13                  | 13                     |
+| Outbound messaging                        | 9                   | 9                      |
 | The customer's own side                   | 9                   | 9                      |
 | Automation and customer relationships     | 11                  | 11                     |
 | Expenses, banking and period close        | 6                   | 6                      |
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **138**             | **135 (98%)**          |
+| **Total**                                 | **147**             | **144 (98%)**          |
 
-The requirements document lists 222 requirements. 84 of
+The requirements document lists 231 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

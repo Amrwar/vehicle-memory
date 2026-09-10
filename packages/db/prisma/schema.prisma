@@ -1604,6 +1604,12 @@ model MessageLog {
   provider    String?
   providerRef String?
   error       String?
+  /// How many times sending has been attempted. A message is given up on
+  /// rather than retried forever: past the limit somebody has to look.
+  attempts    Int            @default(0)
+  /// Not before this. Carries both the retry backoff and the quiet-hours
+  /// hold, because from the sender's side they are the same instruction.
+  availableAt DateTime       @default(now())
   relatedType String?
   relatedId   String?
   sentAt      DateTime?
@@ -1613,6 +1619,8 @@ model MessageLog {
 
   @@index([orgId, createdAt])
   @@index([relatedType, relatedId])
+  /// The sweeper's query: what is due, oldest first.
+  @@index([status, availableAt])
   @@map("message_logs")
 }
 

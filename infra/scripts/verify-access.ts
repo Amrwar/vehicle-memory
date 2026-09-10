@@ -48,6 +48,7 @@ const PAGES = [
   '/reminders',
   '/crm',
   '/automation',
+  '/messages',
   '/ledger',
   '/financials',
   '/expenses',
