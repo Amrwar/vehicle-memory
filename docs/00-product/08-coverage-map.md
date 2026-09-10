@@ -48,18 +48,18 @@ being specific about the gaps rather than generous about the ticks.
 
 ## ERP and business side
 
-| Capability                 | Status  | Where it is                                                                                                                                                                                    |
-| -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accounting                 | Partial | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close are Phase 4.8.               |
-| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                               |
-| Expenses                   | Phased  | Nothing yet. Rent and wages are posted as journal entries by hand. Capture, approval and receipts are Phase 4.8.                                                                               |
-| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission. Export to a payroll provider is Phase 4.8.                                                                       |
-| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                            |
-| Supplier management        | Built   | As above.                                                                                                                                                                                      |
-| CRM                        | Phased  | Customer records, vehicles and history exist. Segments, campaigns, retention and lifetime value do not. Phase 5.                                                                               |
-| Reports and analytics      | Partial | Operational reporting and financial statements are built. Revenue by service type, parts profitability by category, technician league tables, source of business and CSV export are Phase 4.7. |
-| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                    |
-| Users and role permissions | Built   | `/settings/team`. Invite, change a role, move somebody between sites, remove a leaver. Nobody can grant a role above their own or change their own.                                            |
+| Capability                 | Status  | Where it is                                                                                                                                                                                                                                      |
+| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Accounting                 | Built   | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close landed in Phase 4.8.                                                           |
+| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                                                                                 |
+| Expenses                   | Built   | Capture with a category and a receipt, approval by somebody other than the claimant, input tax separated for reclaim, and money paid personally recorded as owed back rather than as leaving the bank.                                           |
+| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission. Export to a payroll provider still needs a named target format, and inventing one produces a file nobody accepts.                                                  |
+| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                                                                              |
+| Supplier management        | Built   | As above.                                                                                                                                                                                                                                        |
+| CRM                        | Built   | Segments with the reachable count beside the segment count, campaigns that recheck consent per recipient at the moment of sending, a permanent consent trail written by the database, retention by cohort and lifetime value.                    |
+| Reports and analytics      | Built   | Operational reporting, financial statements, revenue by service type with cost, parts profitability including anything sold below cost, retention against each customer's own rhythm, source of business by conversion, and hardened CSV export. |
+| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                                                                      |
+| Users and role permissions | Built   | `/settings/team`. Invite, change a role, move somebody between sites, remove a leaver. Nobody can grant a role above their own or change their own.                                                                                              |
 
 ---
 
@@ -77,8 +77,12 @@ provider: point of sale, the estimates list, business reporting and CSV export.
 Phase 4.8 is done apart from the payroll export, which is waiting on a named
 provider format: expense capture, bank reconciliation and period close.
 
-**Phase 5 — Customer lifecycle.** CRM proper: segments, campaigns with consent,
-retention and lifetime value, and the automation engine that connects a
+Phase 5 is done: the automation engine, CRM with per-channel consent and a
+permanent consent trail, retention by cohort, and suggestions drawn from a
+vehicle's own history when it arrives.
+
+**Phase 5 — Customer lifecycle. Done.** CRM proper: segments, campaigns with
+consent, retention and lifetime value, and the automation engine that connects a
 reminder to a booking without anybody touching it.
 
 ---

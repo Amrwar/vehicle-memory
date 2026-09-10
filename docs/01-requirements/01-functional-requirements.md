@@ -257,6 +257,22 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2200 — Automation and customer relationships
+
+| Ref     | Requirement                                                                                                                      | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2201 | A rule MUST be a trigger, conditions and actions, and MUST NOT be able to trigger another rule.                                  | 5     |
+| FR-2202 | A rule MUST NOT act on the same subject twice inside its cooldown, and the cooldown MUST be enforced by the database.            | 5     |
+| FR-2203 | A rule that could never fire MUST be refused when it is written, not when it runs.                                               | 5     |
+| FR-2204 | Every evaluation MUST be recorded, including the ones that decided not to act, with the reason.                                  | 5     |
+| FR-2205 | Marketing MUST be gated on per-channel consent; transactional messages about a customer's own work MUST NOT be.                  | 5     |
+| FR-2206 | Consent MUST be rechecked at the moment of sending, never taken from when the audience was built.                                | 5     |
+| FR-2207 | Every change to a marketing permission MUST be recorded permanently, and the record MUST NOT be editable or deletable.           | 5     |
+| FR-2208 | A campaign MUST report who was held back and why, not only who was reached.                                                      | 5     |
+| FR-2209 | Retention MUST be reported by the cohort a customer joined in, and a cohort MUST NOT be shown at a month it has not yet reached. | 5     |
+| FR-2210 | A service falling due MUST produce a message that offers a booking, without staff action.                                        | 5     |
+| FR-2211 | On arrival, the system MUST suggest work from the vehicle's own history, and every suggestion MUST carry the reason it appeared. | 5     |
+
 ## FR-2100 — Expenses, banking and period close
 
 | Ref     | Requirement                                                                                                                 | Phase |

@@ -292,6 +292,18 @@ async function main() {
       expect: ['Service reminders', 'Due', 'How this works'],
     },
     {
+      path: '/crm',
+      as: 'advisor',
+      expect: ['Relationships', 'Segments', 'Retention by cohort', 'Campaigns'],
+    },
+    // The held-back run is the row this page exists for, so the smoke test
+    // asserts the column that shows it rather than only the page title.
+    {
+      path: '/automation',
+      as: 'owner',
+      expect: ['Automation', 'About to happen', 'Rules', 'What happened', 'held back'],
+    },
+    {
       path: '/portal/book',
       as: 'customer',
       expect: ['When suits you?', 'What needs doing?', 'Which vehicle?'],

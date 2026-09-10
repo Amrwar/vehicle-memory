@@ -56,6 +56,7 @@ const GROUPS: Group[] = [
       { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
       { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
       { href: '/reminders', label: 'Reminders', icon: 'reminders', permission: 'customer:read' },
+      { href: '/crm', label: 'Relationships', icon: 'crm', permission: 'customer:read' },
     ],
   },
   {
@@ -114,6 +115,7 @@ const GROUPS: Group[] = [
     items: [
       { href: '/settings', label: 'Settings', icon: 'settings', permission: 'settings:read' },
       { href: '/settings/team', label: 'Team', icon: 'team', permission: 'settings:read' },
+      { href: '/automation', label: 'Automation', icon: 'automation', permission: 'settings:read' },
       { href: '/audit', label: 'Audit log', icon: 'audit', permission: 'audit:read' },
     ],
   },

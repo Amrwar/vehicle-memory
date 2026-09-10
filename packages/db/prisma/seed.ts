@@ -1839,6 +1839,10 @@ async function main() {
 
   await seedBanking(org.id, ahmed!.id);
 
+  /* --- rules that run on their own, and the people they reach ------------- */
+
+  await seedAutomation(org.id);
+
   /* --- a shared passport link -------------------------------------------- */
 
   await prisma.passportShare.create({
@@ -2769,3 +2773,206 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+/**
+ * Automation, consent and one campaign that has already gone out.
+ *
+ * The interesting rows here are the ones that did not work. A rule that has
+ * been held back for a fortnight, and a campaign where a third of the segment
+ * was suppressed, are what the pages exist to show; a demo where everything
+ * fired cleanly teaches nobody how to read them.
+ */
+async function seedAutomation(orgId: string) {
+  const thankYou = await prisma.automationRule.create({
+    data: {
+      orgId,
+      name: 'Thank the customer',
+      trigger: 'job.completed',
+      conditions: [{ field: 'job.total', is: 'gte', value: 10_000 }],
+      actions: [{ kind: 'send.email', target: 'Thanks for your visit', delayHours: 24 }],
+      cooldownHours: 24 * 30,
+    },
+  });
+
+  const chase = await prisma.automationRule.create({
+    data: {
+      orgId,
+      name: 'Chase an overdue invoice',
+      trigger: 'invoice.overdue',
+      conditions: [{ field: 'invoice.daysOverdue', is: 'gte', value: 14 }],
+      actions: [
+        { kind: 'task.create', target: 'Ring about the overdue invoice', delayHours: 0 },
+        { kind: 'send.email', target: 'Your invoice is overdue', delayHours: 2 },
+      ],
+      cooldownHours: 24 * 7,
+    },
+  });
+
+  // Written, considered, and switched off. Somebody decided a text about a
+  // missed appointment reads as a telling-off, and the record of that decision
+  // is more useful than a deleted rule.
+  await prisma.automationRule.create({
+    data: {
+      orgId,
+      name: 'Follow up a missed appointment',
+      trigger: 'booking.missed',
+      conditions: [],
+      actions: [{ kind: 'send.sms', target: 'Sorry we missed you', delayHours: 3 }],
+      isActive: false,
+      cooldownHours: 24 * 14,
+    },
+  });
+
+  const paidJob = await prisma.job.findFirst({
+    where: { orgId, status: 'PAID' },
+    select: { id: true, customerId: true },
+  });
+
+  if (paidJob) {
+    const fired = await prisma.automationRun.create({
+      data: {
+        ruleId: thankYou.id,
+        subjectType: 'Job',
+        subjectId: paidJob.id,
+        customerId: paidJob.customerId,
+        firedAt: day(-2, 17, 5),
+      },
+    });
+
+    await prisma.automationAction.create({
+      data: {
+        runId: fired.id,
+        kind: 'send.email',
+        target: 'Thanks for your visit',
+        dueAt: day(-1, 17, 5),
+        status: 'DONE',
+        doneAt: day(-1, 17, 6),
+      },
+    });
+  }
+
+  const openInvoice = await prisma.invoice.findFirst({
+    where: { orgId, number: 'INV-1036' },
+    select: { id: true, customerId: true },
+  });
+
+  if (openInvoice) {
+    // Fired, then stopped by its own condition. This is the row that answers
+    // "why has this rule sent nothing", and without it the rule is
+    // indistinguishable from one nobody has triggered.
+    await prisma.automationRun.create({
+      data: {
+        ruleId: chase.id,
+        subjectType: 'Invoice',
+        subjectId: openInvoice.id,
+        customerId: openInvoice.customerId,
+        firedAt: day(-1, 8, 0),
+        blockedBy: 'invoice.daysOverdue',
+        reason: 'Days overdue is 9, and the rule needs it is at least 14.',
+      },
+    });
+
+    const chasing = await prisma.automationRun.create({
+      data: {
+        ruleId: chase.id,
+        subjectType: 'Invoice',
+        subjectId: openInvoice.id,
+        customerId: openInvoice.customerId,
+        firedAt: day(0, 7, 30),
+      },
+    });
+
+    await prisma.automationAction.createMany({
+      data: [
+        {
+          runId: chasing.id,
+          kind: 'task.create',
+          target: 'Ring about the overdue invoice',
+          dueAt: day(0, 7, 30),
+        },
+        {
+          runId: chasing.id,
+          kind: 'send.email',
+          target: 'Your invoice is overdue',
+          dueAt: day(0, 9, 30),
+        },
+      ],
+    });
+  }
+
+  /* --- consent, and the campaign it gates --------------------------------- */
+
+  const customers = await prisma.customer.findMany({
+    where: { orgId },
+    select: { id: true, email: true },
+    orderBy: { displayName: 'asc' },
+  });
+
+  // Not everybody agreed, and that is the point. The consent trail is written
+  // by a database trigger, so these updates leave a record without the seed
+  // writing one.
+  for (const [index, customer] of customers.entries()) {
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        marketingEmailConsent: index % 3 !== 0 && Boolean(customer.email),
+        marketingSmsConsent: index % 4 === 1,
+      },
+    });
+  }
+
+  const campaign = await prisma.campaign.create({
+    data: {
+      orgId,
+      name: 'Winter check offer',
+      channel: 'EMAIL',
+      segment: [{ kind: 'lapsed', days: 180 }],
+      subject: 'A free winter check while the weather turns',
+      body: 'It has been a while. Bring the car in before the cold sets in and we will check the battery, the tyres and the antifreeze at no charge.',
+      status: 'SENT',
+      sentAt: day(-9, 10, 0),
+      plannedRecipients: 0,
+      plannedSuppressed: 0,
+    },
+  });
+
+  const reachable = await prisma.customer.findMany({
+    where: { orgId, marketingEmailConsent: true, email: { not: null } },
+    select: { id: true },
+  });
+
+  const held = await prisma.customer.findMany({
+    where: { orgId, OR: [{ marketingEmailConsent: false }, { email: null }] },
+    select: { id: true, email: true, marketingEmailConsent: true },
+  });
+
+  await prisma.campaignRecipient.createMany({
+    data: [
+      ...reachable.map((customer) => ({
+        campaignId: campaign.id,
+        customerId: customer.id,
+        status: 'SENT',
+        sentAt: day(-9, 10, 0),
+      })),
+      ...held.map((customer) => ({
+        campaignId: campaign.id,
+        customerId: customer.id,
+        status: 'SUPPRESSED',
+        reason: customer.email
+          ? 'They have not agreed to marketing by email.'
+          : 'No email address on this customer.',
+      })),
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.campaign.update({
+    where: { id: campaign.id },
+    data: { plannedRecipients: reachable.length, plannedSuppressed: held.length },
+  });
+
+  await prisma.customer.updateMany({
+    where: { id: { in: reachable.map((customer) => customer.id) } },
+    data: { lastMarketedAt: day(-9, 10, 0) },
+  });
+}

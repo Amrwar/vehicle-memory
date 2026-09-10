@@ -46,6 +46,8 @@ const PAGES = [
   '/transfers',
   '/people',
   '/reminders',
+  '/crm',
+  '/automation',
   '/ledger',
   '/financials',
   '/expenses',

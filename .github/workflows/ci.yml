@@ -158,6 +158,12 @@ jobs:
       - name: Verify the bank reconciles and a period can close
         run: npx tsx infra/scripts/verify-banking.ts
 
+      # Automation is the one feature that acts without a person in the room,
+      # so the rules that stop it acting twice belong in the database rather
+      # than only in the code that happens to call it.
+      - name: Verify automation cannot act twice, and consent leaves a trail
+        run: npx tsx infra/scripts/verify-automation.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

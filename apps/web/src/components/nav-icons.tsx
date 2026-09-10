@@ -50,9 +50,29 @@ export type NavIconName =
   | 'estimates'
   | 'expenses'
   | 'banking'
+  | 'automation'
+  | 'crm'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // A rule: something happens, a decision is taken, something follows.
+  automation: (
+    <>
+      <circle cx="4.4" cy="10" r="2.2" />
+      <path d="M6.6 10h3.2l2.4-3.6h3" />
+      <path d="M6.6 10h3.2l2.4 3.6h3" />
+      <circle cx="16.4" cy="6.4" r="1.6" />
+      <circle cx="16.4" cy="13.6" r="1.6" />
+    </>
+  ),
+  // People, and the line between the ones you keep and the ones you lose.
+  crm: (
+    <>
+      <circle cx="7" cy="6.4" r="2.6" />
+      <path d="M2.8 15.4c0-2.4 1.9-4 4.2-4s4.2 1.6 4.2 4" />
+      <path d="M13.4 5.6h4.2M13.4 9.2h4.2M13.4 12.8h2.6" />
+    </>
+  ),
   dashboard: (
     <>
       <rect x="2.6" y="2.6" width="6.2" height="6.2" rx="1.2" />

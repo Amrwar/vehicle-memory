@@ -12,11 +12,27 @@
  *      logged in does not book fourteen hours of labour cost.
  *   3. Audit vehicle chains on a rolling basis, so tampering is detected
  *      rather than waited for.
+ *   4. Drive automation: turn a service falling due into a reminder somebody
+ *      can act on, and carry out the actions rules have already queued.
+ *
+ * The fourth is the one that acts without a person in the room, so it is
+ * written the most defensively. Nothing here decides whether a rule should
+ * fire; that lives in the domain layer and is tested there. This file only
+ * carries out decisions already made, and records what it did.
  */
 
 import 'dotenv/config';
 
-import { projectServiceDue, verifyChain } from '@carnet/core';
+import {
+  type Action,
+  type ConsentState,
+  evaluate,
+  mayNotify,
+  projectServiceDue,
+  type Rule,
+  schedule as scheduleActions,
+  verifyChain,
+} from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 const POLL_INTERVAL_MS = Number(process.env.WORKER_POLL_MS ?? 5_000);
@@ -223,7 +239,30 @@ async function queueServiceReminders(): Promise<number> {
       reminderSentAt: null,
       OR: [{ dueAt: { lte: horizon } }, { dueKm: { not: null } }],
     },
-    include: { vehicle: { select: { lastOdometerKm: true } } },
+    include: {
+      vehicle: {
+        select: {
+          lastOdometerKm: true,
+          // The most recent job is how a vehicle reaches a customer: a vehicle
+          // belongs to a VIN, not to any one workshop's address book.
+          jobs: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: {
+              customer: {
+                select: {
+                  id: true,
+                  email: true,
+                  mobile: true,
+                  marketingEmailConsent: true,
+                  marketingSmsConsent: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     take: 50,
   });
 
@@ -241,6 +280,44 @@ async function queueServiceReminders(): Promise<number> {
 
     if (!projection.projectedDueAt || projection.projectedDueAt > horizon) continue;
 
+    // The reminder has to reach somebody, and it has to give them somewhere to
+    // go. A message saying a service is due that offers no way to book it puts
+    // the work back on the customer to ring during opening hours, which is
+    // exactly where the appointment gets lost.
+    const owner = schedule.vehicle.jobs[0]?.customer ?? null;
+
+    if (owner && schedule.orgId) {
+      // Transactional: it is about their own vehicle, so marketing consent
+      // does not gate it. Only the absence of an address does.
+      const decision = mayNotify({ channel: 'EMAIL', consent: consentOf(owner) });
+
+      if (decision.allowed) {
+        await prisma.messageLog.create({
+          data: {
+            orgId: schedule.orgId,
+            channel: 'EMAIL',
+            toAddress: owner.email ?? '',
+            subject: schedule.name + ' is due on your vehicle',
+            body:
+              schedule.name +
+              ' is coming due. Pick a time that suits you at /portal/book and we will have the parts ready.',
+            status: 'QUEUED',
+            relatedType: 'ServiceSchedule',
+            relatedId: schedule.id,
+          },
+        });
+      }
+
+      await fireEvent({
+        orgId: schedule.orgId,
+        event: 'service.due',
+        subjectType: 'ServiceSchedule',
+        subjectId: schedule.id,
+        customerId: owner.id,
+        facts: { 'vehicle.mileage': schedule.vehicle.lastOdometerKm ?? 0 },
+      });
+    }
+
     await prisma.serviceSchedule.update({
       where: { id: schedule.id },
       data: { reminderSentAt: new Date() },
@@ -253,6 +330,209 @@ async function queueServiceReminders(): Promise<number> {
 }
 
 /* ---------------------------------------------------------------------------
+   Automation
+   --------------------------------------------------------------------------- */
+
+function consentOf(customer: {
+  email: string | null;
+  mobile: string | null;
+  marketingEmailConsent: boolean;
+  marketingSmsConsent: boolean;
+}): ConsentState {
+  return {
+    email: customer.marketingEmailConsent,
+    sms: customer.marketingSmsConsent,
+    hasEmail: Boolean(customer.email),
+    hasMobile: Boolean(customer.mobile),
+  };
+}
+
+/**
+ * Runs one event past every rule listening for it, and queues what fires.
+ *
+ * Written against Prisma here rather than shared with the web application,
+ * which is the convention this worker already follows: the domain layer holds
+ * every decision and each caller does its own recording. The two call sites
+ * genuinely differ, because the web one writes an audit entry against the
+ * person who caused the event and there is no person here.
+ */
+async function fireEvent(input: {
+  orgId: string;
+  event: Rule['trigger'];
+  subjectType: string;
+  subjectId: string;
+  customerId?: string | null;
+  facts: Record<string, number>;
+}): Promise<number> {
+  const now = new Date();
+
+  const rows = await prisma.automationRule.findMany({
+    where: { orgId: input.orgId, trigger: input.event, isActive: true },
+  });
+
+  let fired = 0;
+
+  for (const row of rows) {
+    const rule: Rule = {
+      id: row.id,
+      name: row.name,
+      trigger: row.trigger as Rule['trigger'],
+      conditions: (row.conditions ?? []) as unknown as Rule['conditions'],
+      actions: (row.actions ?? []) as unknown as Action[],
+      isActive: row.isActive,
+      cooldownHours: row.cooldownHours,
+    };
+
+    const previous = await prisma.automationRun.findFirst({
+      where: {
+        ruleId: rule.id,
+        subjectType: input.subjectType,
+        subjectId: input.subjectId,
+        blockedBy: null,
+      },
+      orderBy: { firedAt: 'desc' },
+      select: { firedAt: true },
+    });
+
+    const decision = evaluate(rule, input.facts, {
+      event: input.event,
+      now,
+      lastRunAt: previous?.firedAt ?? null,
+    });
+
+    // The run is written either way. A rule that has been quietly failing a
+    // condition for a fortnight looks identical, from outside, to one nobody
+    // has triggered, and the two need completely different responses.
+    const run = await prisma.automationRun.create({
+      data: {
+        ruleId: rule.id,
+        subjectType: input.subjectType,
+        subjectId: input.subjectId,
+        customerId: input.customerId ?? null,
+        firedAt: now,
+        blockedBy: decision.fires ? null : (decision.blockedBy?.field ?? 'rule'),
+        reason: decision.fires ? null : decision.reason,
+      },
+    });
+
+    if (!decision.fires) continue;
+
+    await prisma.automationAction.createMany({
+      data: scheduleActions(decision.actions, now).map((planned) => ({
+        runId: run.id,
+        kind: planned.action.kind,
+        target: planned.action.target,
+        dueAt: planned.dueAt,
+      })),
+    });
+
+    fired += 1;
+  }
+
+  return fired;
+}
+
+/**
+ * Carries out the actions rules queued once their delay has passed.
+ *
+ * Every message written here is transactional: it concerns work on the
+ * customer's own vehicle, so it goes to the address they gave rather than
+ * being gated on marketing consent. That distinction belongs to the domain
+ * layer, which is why mayNotify is asked rather than a flag being read.
+ *
+ * A failure marks the row FAILED with its reason and moves on. Retrying a
+ * message forever is how one bad address becomes forty sends.
+ */
+async function runDueAutomationActions(): Promise<number> {
+  const due = await prisma.automationAction.findMany({
+    where: { status: 'PENDING', dueAt: { lte: new Date() } },
+    orderBy: { dueAt: 'asc' },
+    take: BATCH_SIZE,
+    include: { run: { include: { rule: { select: { orgId: true, name: true } } } } },
+  });
+
+  let done = 0;
+
+  for (const action of due) {
+    try {
+      const customer = action.run.customerId
+        ? await prisma.customer.findUnique({
+            where: { id: action.run.customerId },
+            select: {
+              email: true,
+              mobile: true,
+              marketingEmailConsent: true,
+              marketingSmsConsent: true,
+            },
+          })
+        : null;
+
+      if (action.kind !== 'send.email' && action.kind !== 'send.sms') {
+        // Tasks and tags stay inside the building, so there is nothing that
+        // can fail on the way out.
+        await prisma.automationAction.update({
+          where: { id: action.id },
+          data: { status: 'DONE', doneAt: new Date() },
+        });
+        done += 1;
+        continue;
+      }
+
+      const channel = action.kind === 'send.email' ? 'EMAIL' : 'SMS';
+
+      if (!customer) {
+        await prisma.automationAction.update({
+          where: { id: action.id },
+          data: { status: 'FAILED', error: 'The rule fired about nobody in particular.' },
+        });
+        continue;
+      }
+
+      const decision = mayNotify({ channel, consent: consentOf(customer) });
+
+      if (!decision.allowed) {
+        await prisma.automationAction.update({
+          where: { id: action.id },
+          data: { status: 'FAILED', error: decision.reason },
+        });
+        continue;
+      }
+
+      const message = await prisma.messageLog.create({
+        data: {
+          orgId: action.run.rule.orgId,
+          channel,
+          toAddress: (channel === 'EMAIL' ? customer.email : customer.mobile) ?? '',
+          subject: action.target,
+          body: action.target,
+          status: 'QUEUED',
+          relatedType: 'AutomationAction',
+          relatedId: action.id,
+        },
+      });
+
+      await prisma.automationAction.update({
+        where: { id: action.id },
+        data: { status: 'DONE', doneAt: new Date(), messageId: message.id },
+      });
+
+      done += 1;
+    } catch (error) {
+      await prisma.automationAction.update({
+        where: { id: action.id },
+        data: {
+          status: 'FAILED',
+          error: error instanceof Error ? error.message : String(error),
+        },
+      });
+    }
+  }
+
+  if (done > 0) log('automation.actions.done', { count: done });
+  return done;
+}
+
+/* ---------------------------------------------------------------------------
    Loop
    --------------------------------------------------------------------------- */
 
@@ -260,6 +540,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function tick(iteration: number): Promise<void> {
   await dispatchOutbox();
+
+  // Every poll. A queued action is already late once its delay has passed, and
+  // that delay was somebody's deliberate choice.
+  await runDueAutomationActions();
 
   // Every minute at the default interval.
   if (iteration % 12 === 0) {

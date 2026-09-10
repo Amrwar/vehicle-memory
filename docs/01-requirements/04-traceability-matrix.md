@@ -163,6 +163,26 @@ of what is true.
 | FR-1704 | —     | —                                 | `/group` spread panel       | `multisite.test.ts` | Done   |
 | FR-1705 | —     | `StockMovement.referenceType`     | `netInterSite()`            | `multisite.test.ts` | Done   |
 
+## Automation and customer relationships
+
+| Req     | Story | Schema                                | Implementation          | Test                   | Status |
+| ------- | ----- | ------------------------------------- | ----------------------- | ---------------------- | ------ |
+| FR-2201 | —     | `AutomationRule`                      | `assertRuleSound()`     | `automation.test.ts`   | Done   |
+| FR-2202 | —     | `automation_runs_respect_cooldown`    | `evaluate()`            | `verify-automation.ts` | Done   |
+| FR-2203 | —     | `automation_rules_has_actions`        | `assertRuleSound()`     | `verify-automation.ts` | Done   |
+| FR-2204 | —     | `AutomationRun.blockedBy`, `.reason`  | `fireEvent()`           | `verify-automation.ts` | Done   |
+| FR-2205 | —     | `Customer.marketing*Consent`          | `mayMarket()`           | `automation.test.ts`   | Done   |
+| FR-2206 | —     | `Customer.lastMarketedAt`             | `sendCampaign()`        | `automation.test.ts`   | Done   |
+| FR-2207 | —     | `consent_changes_immutable` trigger   | `carnet_record_consent` | `verify-automation.ts` | Done   |
+| FR-2208 | —     | `CampaignRecipient.status`, `.reason` | `planCampaign()`        | `verify-automation.ts` | Done   |
+| FR-2209 | —     | —                                     | `cohorts()`             | `automation.test.ts`   | Done   |
+| FR-2210 | —     | `ServiceSchedule.reminderSentAt`      | `queueServiceReminders` | `automation.test.ts`   | Done   |
+| FR-2211 | —     | `InspectionResult`, `EstimateLine`    | `suggestOnArrival()`    | `arrival.test.ts`      | Done   |
+
+The engine drives itself. A service falling due writes a message offering a
+booking and fires `service.due`; the worker carries out queued actions on
+every poll. Nothing between a reminder and the car arriving needs a person.
+
 ## Expenses, banking and period close
 
 | Req     | Story | Schema                                     | Implementation       | Test                | Status |
@@ -228,23 +248,35 @@ details without a provider behind it would be worse than not having one.
 
 ## Coverage summary
 
-| Area                       | Requirements in Phase 1 | Traced  | Automated test |
-| -------------------------- | ----------------------- | ------- | -------------- |
-| Foundation                 | 9                       | 9       | 9              |
-| Customers and vehicles     | 13                      | 13      | 12             |
-| Passport                   | 13                      | 13      | 13             |
-| Booking and job            | 20                      | 20      | 19             |
-| Inspection and estimate    | 15                      | 15      | 15             |
-| Invoice and payment        | 8                       | 8       | 8              |
-| Portal, dashboard, notify  | 14                      | 14      | 11             |
-| Inventory and procurement  | 18                      | 18      | 18             |
-| Finance and ledger         | 13                      | 13      | 13             |
-| People and multi-site      | 13                      | 13      | 13             |
-| Front door and billing     | 6                       | 6       | 6              |
-| Administration and booking | 7                       | 7       | 7              |
-| **Total**                  | **149**                 | **149** | **144 (97%)**  |
+| Area                                      | Traced individually | With an automated test |
+| ----------------------------------------- | ------------------- | ---------------------- |
+| Foundation                                | 10                  | 9                      |
+| Customers and vehicles                    | 8                   | 8                      |
+| Vehicle passport                          | 12                  | 11                     |
+| Booking, job, inspection, estimate        | 11                  | 11                     |
+| Invoicing, portal, reporting              | 4                   | 4                      |
+| Inventory and procurement (Phase 2)       | 19                  | 18                     |
+| Finance and ledger                        | 13                  | 13                     |
+| People and multi-site                     | 13                  | 13                     |
+| Automation and customer relationships     | 11                  | 11                     |
+| Expenses, banking and period close        | 6                   | 6                      |
+| Counter sales and business reporting      | 10                  | 10                     |
+| Administration and the customer's journey | 7                   | 7                      |
+| Front door and billing                    | 6                   | 6                      |
+| **Total**                                 | **130**             | **127 (98%)**          |
 
-The five without automated coverage are visual and interaction concerns
-verified by usability testing rather than assertion. They are named in the
-[testing strategy](../04-engineering/04-testing-strategy.md) section 7 so the
-gap is deliberate and visible rather than accidental.
+The requirements document lists 213 requirements. 84 of
+them do not have a row of their own above.
+
+That gap is not a claim that they are untested. It is Phase 1 and 2 work that
+was traced by section rather than by requirement, before this matrix settled
+into one row per requirement, and the earlier phases' acceptance tests cover
+it. What it does mean is that this table cannot be read as a coverage figure
+for the product, only for the requirements traced individually, and an earlier
+version of this page did read it that way: it claimed 149 of 149 traced at
+97% automated, against a matrix that held 130 rows. The claim was arithmetic
+about a table that no longer existed.
+
+Closing the gap means one row per requirement for the earlier phases, which is
+a piece of work in its own right and is named here so it stays visible rather
+than being quietly implied by a percentage.

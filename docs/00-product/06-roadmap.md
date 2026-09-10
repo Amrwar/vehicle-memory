@@ -352,11 +352,60 @@ Self-service booking and point of sale moved earlier, to Phases 4.6 and 4.7,
 because both turned out to be things a workshop needs before it needs
 automation.
 
+**Built.** The engine is trigger, conditions and actions, with three
+constraints that come from how these things fail rather than from how they
+work.
+
+A rule cannot trigger a rule. Chained automation is impossible to reason about
+after the third link and impossible to debug at all: somebody sees a message go
+out and no rule they can find sent it. Every run here comes from a real event.
+
+Every rule is rate limited per subject, and the limit is a database trigger
+rather than a check in the code that happens to call it. The failure mode of
+automation is not doing nothing, it is doing something forty times to one
+person, and by then the messages have been sent.
+
+A rule that could never fire is refused when it is written. A condition on days
+overdue attached to job completion is unknowable at that moment, so the rule
+would sit there looking healthy and never act, which is worse than an error.
+
+**Every evaluation is recorded, including the ones that decided not to act.**
+This is the part most of these engines leave out. A rule quietly failing a
+condition for a fortnight looks identical, from a dashboard, to a rule nobody
+has triggered, and the two need completely different responses. The automation
+page leads with what is queued, because that is the only moment anything can
+still be stopped.
+
+**Consent.** Marketing is gated per channel and rechecked for every recipient
+at the moment of sending, never taken from when the audience was built. Lists
+go stale between the two, and somebody who withdrew consent on Tuesday must not
+receive Wednesday's send. Transactional messages, which are about work on the
+customer's own vehicle, are not gated on marketing consent at all: conflating
+the two either spams people who opted out or silences the confirmation somebody
+is waiting for.
+
+Every change to a permission is written by a database trigger and cannot be
+edited or deleted afterwards. A boolean on a customer row proves nothing; it
+shows the current state and no history, and the one occasion it matters is the
+occasion somebody asks how you came to have permission.
+
+**What the loop actually does now.** A service falling due writes a message
+that offers a booking and fires `service.due` at the rules. The worker carries
+out queued actions on every poll. Nothing between the reminder going out and
+the car arriving needs a person.
+
+**What it found.** The traceability matrix's coverage summary was wrong. It
+claimed 149 requirements traced at 97% automated, against a matrix that held
+130 rows, and the requirements document had grown to 213. The summary was
+arithmetic about a table that had stopped existing. It now counts what is
+actually there and names the gap, which is that 84 requirements from the early
+phases were traced by section rather than one row each.
+
 The loop this closes:
 
 ```
   Vehicle approaching service interval (time or projected mileage)
-        -> Reminder sent
+        -> Reminder sent, carrying a booking link
         -> Customer books online
         -> Booking created, capacity checked
         -> Job created on arrival

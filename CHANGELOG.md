@@ -7,6 +7,55 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 5 - Customer lifecycle and automation.**
+
+The engine that acts without a person in the room, and the CRM it drives.
+
+- Rules are trigger, conditions and actions. A rule cannot trigger a rule,
+  because chained automation is impossible to reason about after the third link
+  and impossible to debug at all.
+- Every rule is rate limited per subject by a database trigger, not only by the
+  code that calls it. The failure mode of automation is not doing nothing, it
+  is doing something forty times to one person.
+- A rule that could never fire is refused when it is written. A condition on
+  days overdue attached to job completion is unknowable at that moment, so the
+  rule would look healthy and never act.
+- Every evaluation is recorded, including the ones that decided not to act,
+  with the reason. A rule quietly failing a condition for a fortnight looks
+  identical, from a dashboard, to a rule nobody has triggered.
+- Segments report the reachable count beside the segment count. A list of 480
+  where 90 never agreed and 40 have no address is a send of 350, and the
+  difference is normally discovered after somebody decided it was worth doing.
+- Consent is per channel and rechecked for every recipient at the moment of
+  sending. Transactional messages, about work on the customer's own vehicle,
+  are never gated on marketing consent.
+- Every change to a marketing permission is written by a database trigger and
+  cannot afterwards be edited or deleted. A boolean proves nothing; the one
+  occasion it matters is the occasion somebody asks how you got permission.
+- Retention is reported by cohort, and a cohort is not shown at a month it has
+  not yet reached. An overall retention rate moves with acquisition and says
+  nothing about whether the customers you had are staying.
+- On arrival, work is suggested from the vehicle's own history, each suggestion
+  carrying the reason it appeared. A list of parts with no explanation reads as
+  an upsell and gets ignored.
+- `verify:automation` proves the database refuses what it should: acting twice
+  inside a cooldown, a rule with no actions, an action queue that lies about
+  its own state, a suppression with no reason, and any attempt to rewrite
+  consent history.
+
+**Fixed.**
+
+- The traceability matrix claimed 149 requirements traced at 97% automated,
+  against a matrix holding 130 rows, while the requirements document had grown
+  to 213. The summary was arithmetic about a table that had stopped existing.
+  It now counts what is there and names the 84 early-phase requirements traced
+  by section rather than individually.
+- The coverage map still described Phases 4.7 and 4.8 as future work months
+  after they shipped.
+- A delay of exactly twenty-four hours rendered as "after 1 days" in the
+  sentence describing a rule, which is the sort of thing that makes somebody
+  distrust every other number on the page.
+
 **Phase 4.9 - Revision.**
 
 No new features. A pass over everything built so far, with the checkable half

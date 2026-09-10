@@ -28,25 +28,25 @@ datasource db {
 // ===========================================================================
 
 model Organization {
-  id           String   @id @default(cuid())
-  slug         String   @unique
-  name         String
-  legalName    String?
-  taxNumber    String?
-  email        String?
-  phone        String?
-  website      String?
-  baseCurrency String   @default("GBP")
-  timezone     String   @default("Europe/London")
-  locale       String   @default("en-GB")
-  plan         OrgPlan  @default(CORE)
-  logoUrl      String?
+  id                     String   @id @default(cuid())
+  slug                   String   @unique
+  name                   String
+  legalName              String?
+  taxNumber              String?
+  email                  String?
+  phone                  String?
+  website                String?
+  baseCurrency           String   @default("GBP")
+  timezone               String   @default("Europe/London")
+  locale                 String   @default("en-GB")
+  plan                   OrgPlan  @default(CORE)
+  logoUrl                String?
   // Work exceeding an approved estimate by more than this fraction needs
   // re-approval. FR-812.
-  reapprovalThresholdPct Decimal @default(10.0) @db.Decimal(5, 2)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  reapprovalThresholdPct Decimal  @default(10.0) @db.Decimal(5, 2)
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   locations           Location[]
   memberships         Membership[]
@@ -94,6 +94,8 @@ model Organization {
   tillSessions        TillSession[]
   expenses            Expense[]
   bankAccounts        BankAccount[]
+  automationRules     AutomationRule[]
+  campaigns           Campaign[]
 
   @@index([isActive])
   @@map("organizations")
@@ -106,33 +108,33 @@ enum OrgPlan {
 }
 
 model Location {
-  id           String   @id @default(cuid())
-  orgId        String
-  name         String
-  code         String
-  addressLine1 String?
-  addressLine2 String?
-  locality     String?
-  region       String?
-  postcode     String?
-  country      String   @default("GB")
-  phone        String?
-  timezone     String?
+  id                 String   @id @default(cuid())
+  orgId              String
+  name               String
+  code               String
+  addressLine1       String?
+  addressLine2       String?
+  locality           String?
+  region             String?
+  postcode           String?
+  country            String   @default("GB")
+  phone              String?
+  timezone           String?
   // Total technician hours the site can absorb per day. FR-509.
-  dailyCapacityHours Decimal @default(40.0) @db.Decimal(6, 2)
-  isDefault    Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  dailyCapacityHours Decimal  @default(40.0) @db.Decimal(6, 2)
+  isDefault          Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  org         Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  bays        Bay[]
-  bookings    Booking[]
-  jobs        Job[]
-  memberships Membership[]
-  warehouses  Warehouse[]
-  employees   Employee[]
-  attendance  AttendanceRecord[]
+  org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  bays         Bay[]
+  bookings     Booking[]
+  jobs         Job[]
+  memberships  Membership[]
+  warehouses   Warehouse[]
+  employees    Employee[]
+  attendance   AttendanceRecord[]
   counterSales CounterSale[]
   tillSessions TillSession[]
   expenses     Expense[]
@@ -176,39 +178,39 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  memberships       Membership[]
-  sessions          Session[]
-  auditLogs         AuditLog[]
-  jobsCreated       Job[]              @relation("JobCreatedBy")
-  jobTechnicians    JobTechnician[]
-  jobStatusEvents   JobStatusEvent[]
-  jobNotes          JobNote[]
-  jobAttachments    JobAttachment[]
-  jobTasksDone      JobTask[]
-  jobFollowUps      JobFollowUp[]
-  timeEntries       TimeEntry[]
-  qualityChecks     QualityCheck[]
-  inspections       Inspection[]
-  estimatesCreated  Estimate[]
-  paymentsRecorded  Payment[]
-  bookingTechnician Booking[]
+  memberships         Membership[]
+  sessions            Session[]
+  auditLogs           AuditLog[]
+  jobsCreated         Job[]                @relation("JobCreatedBy")
+  jobTechnicians      JobTechnician[]
+  jobStatusEvents     JobStatusEvent[]
+  jobNotes            JobNote[]
+  jobAttachments      JobAttachment[]
+  jobTasksDone        JobTask[]
+  jobFollowUps        JobFollowUp[]
+  timeEntries         TimeEntry[]
+  qualityChecks       QualityCheck[]
+  inspections         Inspection[]
+  estimatesCreated    Estimate[]
+  paymentsRecorded    Payment[]
+  bookingTechnician   Booking[]
   // Passport
-  ownedVehicles     VehicleOwnership[]
-  vehicleAccess     VehicleAccessGrant[]
-  vehicleEvents     VehicleEvent[]
-  passportShares    PassportShare[]
+  ownedVehicles       VehicleOwnership[]
+  vehicleAccess       VehicleAccessGrant[]
+  vehicleEvents       VehicleEvent[]
+  passportShares      PassportShare[]
   // Portal identity: a customer record in a workshop may point at this user
-  customerProfiles  Customer[]
-  purchaseApprovals PurchaseRequest[]  @relation("PurchaseApprovedBy")
+  customerProfiles    Customer[]
+  purchaseApprovals   PurchaseRequest[]    @relation("PurchaseApprovedBy")
   // Phase 4
   employeeRecord      Employee?
-  invitationsSent     Invitation[]    @relation("InvitationSender")
-  counterSales        CounterSale[]   @relation("CounterSaleSeller")
-  tillSessions        TillSession[]   @relation("TillOperator")
-  expensesApproved    Expense[]       @relation("ExpenseApprover")
-  timesheetApprovals  Timesheet[]     @relation("TimesheetApprover")
-  transfersDispatched StockTransfer[] @relation("TransferDispatcher")
-  transfersReceived   StockTransfer[] @relation("TransferReceiver")
+  invitationsSent     Invitation[]         @relation("InvitationSender")
+  counterSales        CounterSale[]        @relation("CounterSaleSeller")
+  tillSessions        TillSession[]        @relation("TillOperator")
+  expensesApproved    Expense[]            @relation("ExpenseApprover")
+  timesheetApprovals  Timesheet[]          @relation("TimesheetApprover")
+  transfersDispatched StockTransfer[]      @relation("TransferDispatcher")
+  transfersReceived   StockTransfer[]      @relation("TransferReceiver")
 
   @@index([isActive])
   @@map("users")
@@ -323,9 +325,9 @@ model OutboxEvent {
 /// A physical vehicle. Exists independently of any owner or workshop.
 /// Globally unique by VIN. ADR-0004.
 model Vehicle {
-  id                    String    @id @default(cuid())
-  vin                   String    @unique
-  vinValid              Boolean   @default(true)
+  id                    String        @id @default(cuid())
+  vin                   String        @unique
+  vinValid              Boolean       @default(true)
   registration          String?
   registrationRegion    String?
   registrationExpiresAt DateTime?
@@ -345,8 +347,8 @@ model Vehicle {
 
   /// Denormalised chain head: the hash of the most recent event. Lets us
   /// append without reading the whole chain. FR-403.
-  chainHead    String?
-  eventCount   Int    @default(0)
+  chainHead      String?
+  eventCount     Int       @default(0)
   lastOdometerKm Int?
   lastOdometerAt DateTime?
 
@@ -398,7 +400,7 @@ model VehicleEvent {
 
   type         VehicleEventType
   occurredAt   DateTime
-  recordedAt   DateTime         @default(now())
+  recordedAt   DateTime          @default(now())
   verification VerificationLevel @default(WORKSHOP_RECORDED)
 
   title      String
@@ -419,15 +421,15 @@ model VehicleEvent {
   hash     String
   prevHash String?
 
-  supersedesId String? @unique
+  supersedesId   String? @unique
   supersededById String? @unique
 
-  vehicle      Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  recordedByOrg Organization? @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
-  recordedByUser User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
-  supersedes   VehicleEvent? @relation("EventSupersession", fields: [supersedesId], references: [id], onDelete: SetNull)
-  supersededBy VehicleEvent? @relation("EventSupersession")
-  attachments  VehicleEventAttachment[]
+  vehicle        Vehicle                  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  recordedByOrg  Organization?            @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
+  recordedByUser User?                    @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  supersedes     VehicleEvent?            @relation("EventSupersession", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy   VehicleEvent?            @relation("EventSupersession")
+  attachments    VehicleEventAttachment[]
 
   @@unique([vehicleId, sequence])
   @@index([vehicleId, occurredAt(sort: Desc)])
@@ -457,14 +459,14 @@ enum VehicleEventType {
 
 /// How much weight a reader should give an event. FR-407.
 enum VerificationLevel {
-  SELF_REPORTED     // the owner said so
+  SELF_REPORTED // the owner said so
   WORKSHOP_RECORDED // a workshop entered it during work
   WORKSHOP_VERIFIED // a workshop entered it with photographic evidence
-  AUTHORITY         // a registry, manufacturer or insurer supplied it
+  AUTHORITY // a registry, manufacturer or insurer supplied it
 }
 
 model VehicleEventAttachment {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   eventId   String
   kind      AttachmentKind @default(PHOTO)
   url       String
@@ -472,7 +474,7 @@ model VehicleEventAttachment {
   mimeType  String
   sizeBytes Int
   caption   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime       @default(now())
 
   event VehicleEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -489,17 +491,17 @@ enum AttachmentKind {
 
 /// Who held the vehicle, and when. At most one open row per vehicle. V5.
 model VehicleOwnership {
-  id         String    @id @default(cuid())
-  vehicleId  String
+  id          String    @id @default(cuid())
+  vehicleId   String
   /// Portal identity of the owner, when they have an account.
   ownerUserId String?
   /// Display name, kept even when no account exists and after erasure.
-  ownerName  String?
-  ownerKind  OwnerKind @default(PRIVATE)
-  startedAt  DateTime
-  endedAt    DateTime?
-  source     String?
-  createdAt  DateTime  @default(now())
+  ownerName   String?
+  ownerKind   OwnerKind @default(PRIVATE)
+  startedAt   DateTime
+  endedAt     DateTime?
+  source      String?
+  createdAt   DateTime  @default(now())
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   owner   User?   @relation(fields: [ownerUserId], references: [id], onDelete: SetNull)
@@ -520,15 +522,15 @@ enum OwnerKind {
 /// Every odometer reading ever taken, including implausible ones.
 /// An impossible reading is evidence, not an error. FR-307, invariant V7.
 model OdometerReading {
-  id         String   @id @default(cuid())
-  vehicleId  String
-  km         Int
-  readAt     DateTime
-  source     OdometerSource @default(WORKSHOP)
-  anomaly    OdometerAnomaly @default(NONE)
-  jobRef     String?
+  id              String          @id @default(cuid())
+  vehicleId       String
+  km              Int
+  readAt          DateTime
+  source          OdometerSource  @default(WORKSHOP)
+  anomaly         OdometerAnomaly @default(NONE)
+  jobRef          String?
   recordedByOrgId String?
-  createdAt  DateTime @default(now())
+  createdAt       DateTime        @default(now())
 
   vehicle Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   org     Organization? @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
@@ -555,13 +557,13 @@ enum OdometerAnomaly {
 /// A workshop's or person's right to read or write a vehicle's passport.
 /// A workshop earns write access by servicing the vehicle. FR-409.
 model VehicleAccessGrant {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   vehicleId   String
   orgId       String?
   userId      String?
   scope       AccessScope @default(READ)
   reason      GrantReason @default(SERVICED)
-  grantedAt   DateTime  @default(now())
+  grantedAt   DateTime    @default(now())
   expiresAt   DateTime?
   revokedAt   DateTime?
   /// A previous owner may read only the period they owned the vehicle. FR-412.
@@ -593,19 +595,19 @@ enum GrantReason {
 
 /// An anonymous, expiring, revocable link to one vehicle's passport. FR-409.
 model PassportShare {
-  id          String    @id @default(cuid())
-  vehicleId   String
-  tokenHash   String    @unique
-  label       String?
+  id              String    @id @default(cuid())
+  vehicleId       String
+  tokenHash       String    @unique
+  label           String?
   createdByUserId String?
-  expiresAt   DateTime
-  revokedAt   DateTime?
-  openCount   Int       @default(0)
-  lastOpenedAt DateTime?
-  createdAt   DateTime  @default(now())
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  openCount       Int       @default(0)
+  lastOpenedAt    DateTime?
+  createdAt       DateTime  @default(now())
 
-  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  createdBy User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  vehicle   Vehicle               @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy User?                 @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
   accesses  PassportShareAccess[]
 
   @@index([vehicleId])
@@ -627,14 +629,14 @@ model PassportShareAccess {
 }
 
 model Recall {
-  id           String   @id @default(cuid())
-  campaignRef  String   @unique
+  id           String         @id @default(cuid())
+  campaignRef  String         @unique
   manufacturer String
   title        String
   description  String?
   severity     RecallSeverity @default(STANDARD)
   issuedAt     DateTime
-  createdAt    DateTime @default(now())
+  createdAt    DateTime       @default(now())
 
   vehicles VehicleRecall[]
 
@@ -649,13 +651,13 @@ enum RecallSeverity {
 }
 
 model VehicleRecall {
-  id                String   @id @default(cuid())
-  vehicleId         String
-  recallId          String
-  status            RecallStatus @default(OPEN)
-  completedAt       DateTime?
-  completedByOrgId  String?
-  createdAt         DateTime @default(now())
+  id               String       @id @default(cuid())
+  vehicleId        String
+  recallId         String
+  status           RecallStatus @default(OPEN)
+  completedAt      DateTime?
+  completedByOrgId String?
+  createdAt        DateTime     @default(now())
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   recall  Recall  @relation(fields: [recallId], references: [id], onDelete: Cascade)
@@ -676,41 +678,47 @@ enum RecallStatus {
 // ===========================================================================
 
 model Customer {
-  id           String       @id @default(cuid())
-  orgId        String
-  kind         CustomerKind @default(INDIVIDUAL)
-  displayName  String
-  firstName    String?
-  lastName     String?
-  companyName  String?
-  taxNumber    String?
-  email        String?
-  mobile       String?
-  phone        String?
-  addressLine1 String?
-  addressLine2 String?
-  locality     String?
-  region       String?
-  postcode     String?
-  country      String       @default("GB")
-  sourceOfBusiness String?
-  notes        String?
-  marketingEmailConsent Boolean @default(false)
-  marketingSmsConsent   Boolean @default(false)
+  id                    String       @id @default(cuid())
+  orgId                 String
+  kind                  CustomerKind @default(INDIVIDUAL)
+  displayName           String
+  firstName             String?
+  lastName              String?
+  companyName           String?
+  taxNumber             String?
+  email                 String?
+  mobile                String?
+  phone                 String?
+  addressLine1          String?
+  addressLine2          String?
+  locality              String?
+  region                String?
+  postcode              String?
+  country               String       @default("GB")
+  sourceOfBusiness      String?
+  notes                 String?
+  marketingEmailConsent Boolean      @default(false)
+  marketingSmsConsent   Boolean      @default(false)
+  /// When a marketing message last went out. The floor between sends is
+  /// measured from here, so a campaign cannot pester somebody a rule already
+  /// contacted this week.
+  lastMarketedAt        DateTime?
   /// Portal login, when the customer has one.
-  portalUserId String?
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  portalUserId          String?
+  isActive              Boolean      @default(true)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  portalUser User?        @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
-  bookings   Booking[]
-  counterSales CounterSale[]
-  jobs       Job[]         @relation("JobCustomer")
-  billedJobs Job[]         @relation("JobBillTo")
-  invoices   Invoice[]
-  payments   Payment[]
+  org                Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  portalUser         User?               @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  bookings           Booking[]
+  counterSales       CounterSale[]
+  jobs               Job[]               @relation("JobCustomer")
+  billedJobs         Job[]               @relation("JobBillTo")
+  invoices           Invoice[]
+  payments           Payment[]
+  consentChanges     ConsentChange[]
+  campaignRecipients CampaignRecipient[]
 
   @@index([orgId, isActive])
   @@index([orgId, mobile])
@@ -725,16 +733,16 @@ enum CustomerKind {
 }
 
 model JobType {
-  id                  String  @id @default(cuid())
-  orgId               String
-  name                String
-  colour              String  @default("#2a41d8")
-  requiresQualityCheck Boolean @default(false)
-  defaultHours        Decimal? @db.Decimal(6, 2)
-  sortOrder           Int     @default(0)
-  isActive            Boolean @default(true)
+  id                   String   @id @default(cuid())
+  orgId                String
+  name                 String
+  colour               String   @default("#2a41d8")
+  requiresQualityCheck Boolean  @default(false)
+  defaultHours         Decimal? @db.Decimal(6, 2)
+  sortOrder            Int      @default(0)
+  isActive             Boolean  @default(true)
 
-  org  Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   jobs JobJobType[]
 
   @@unique([orgId, name])
@@ -756,16 +764,16 @@ model Tag {
 
 /// Catalogue of standard services with book times. FR-615.
 model ServiceItem {
-  id          String   @id @default(cuid())
-  orgId       String
-  code        String
-  name        String
-  description String?
-  category    String?
-  defaultHours Decimal @default(1.0) @db.Decimal(6, 2)
-  defaultPrice Decimal @default(0) @db.Decimal(12, 2)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  orgId        String
+  code         String
+  name         String
+  description  String?
+  category     String?
+  defaultHours Decimal  @default(1.0) @db.Decimal(6, 2)
+  defaultPrice Decimal  @default(0) @db.Decimal(12, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -774,27 +782,27 @@ model ServiceItem {
 }
 
 model Booking {
-  id           String        @id @default(cuid())
-  orgId        String
-  locationId   String
-  customerId   String
-  vehicleId    String
-  bayId        String?
-  technicianId String?
-  status       BookingStatus @default(SCHEDULED)
-  startAt      DateTime
-  endAt        DateTime
-  estimatedHours Decimal     @default(1.0) @db.Decimal(6, 2)
-  description  String
-  notes        String?
-  source       BookingSource @default(PHONE)
-  jobId        String?       @unique
+  id             String        @id @default(cuid())
+  orgId          String
+  locationId     String
+  customerId     String
+  vehicleId      String
+  bayId          String?
+  technicianId   String?
+  status         BookingStatus @default(SCHEDULED)
+  startAt        DateTime
+  endAt          DateTime
+  estimatedHours Decimal       @default(1.0) @db.Decimal(6, 2)
+  description    String
+  notes          String?
+  source         BookingSource @default(PHONE)
+  jobId          String?       @unique
   reminderSentAt DateTime?
-  confirmedAt  DateTime?
-  cancelledAt  DateTime?
-  cancelReason String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  confirmedAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   location   Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
@@ -832,66 +840,66 @@ enum BookingSource {
 
 /// The central aggregate. Everything in the workshop hangs off the Job.
 model Job {
-  id             String    @id @default(cuid())
-  orgId          String
-  locationId     String
+  id               String    @id @default(cuid())
+  orgId            String
+  locationId       String
   /// Per-organisation sequential job number.
-  number         Int
-  customerId     String
-  vehicleId      String
-  bayId          String?
+  number           Int
+  customerId       String
+  vehicleId        String
+  bayId            String?
   billToCustomerId String?
-  status         JobStatus @default(DRAFT)
+  status           JobStatus @default(DRAFT)
 
-  shortDescription String
-  details          String?
-  diagnosis        String?
+  shortDescription    String
+  details             String?
+  diagnosis           String?
   customerOrderNumber String?
-  sourceOfBusiness String?
+  sourceOfBusiness    String?
 
   odometerInKm   Int?
   odometerOutKm  Int?
   estimatedHours Decimal? @db.Decimal(6, 2)
 
-  receivedAt  DateTime?
-  promisedAt  DateTime?
-  pickUpAt    DateTime?
-  startedAt   DateTime?
-  completedAt DateTime?
-  invoicedAt  DateTime?
-  cancelledAt DateTime?
+  receivedAt   DateTime?
+  promisedAt   DateTime?
+  pickUpAt     DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  invoicedAt   DateTime?
+  cancelledAt  DateTime?
   cancelReason String?
 
   courtesyVehicleNote String?
-  createdByUserId String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdByUserId     String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  location   Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  customer   Customer     @relation("JobCustomer", fields: [customerId], references: [id], onDelete: Cascade)
-  billTo     Customer?    @relation("JobBillTo", fields: [billToCustomerId], references: [id], onDelete: SetNull)
-  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  bay        Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
-  createdBy  User?        @relation("JobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location  Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  customer  Customer     @relation("JobCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  billTo    Customer?    @relation("JobBillTo", fields: [billToCustomerId], references: [id], onDelete: SetNull)
+  vehicle   Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bay       Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
+  createdBy User?        @relation("JobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
 
-  booking      Booking?
-  technicians  JobTechnician[]
-  jobTypes     JobJobType[]
-  tags         JobTag[]
-  statusEvents JobStatusEvent[]
-  tasks        JobTask[]
-  labourLines  JobLabourLine[]
-  partLines    JobPartLine[]
-  feeLines     JobFeeLine[]
-  notes        JobNote[]
-  attachments  JobAttachment[]
-  timeEntries  TimeEntry[]
-  qualityChecks QualityCheck[]
-  followUps    JobFollowUp[]
-  inspections  Inspection[]
-  estimates    Estimate[]
-  invoices     Invoice[]
+  booking          Booking?
+  technicians      JobTechnician[]
+  jobTypes         JobJobType[]
+  tags             JobTag[]
+  statusEvents     JobStatusEvent[]
+  tasks            JobTask[]
+  labourLines      JobLabourLine[]
+  partLines        JobPartLine[]
+  feeLines         JobFeeLine[]
+  notes            JobNote[]
+  attachments      JobAttachment[]
+  timeEntries      TimeEntry[]
+  qualityChecks    QualityCheck[]
+  followUps        JobFollowUp[]
+  inspections      Inspection[]
+  estimates        Estimate[]
+  invoices         Invoice[]
   purchaseRequests PurchaseRequest[]
 
   @@unique([orgId, number])
@@ -995,14 +1003,14 @@ model JobTask {
 /// Charged time. Distinct from TimeEntry, which is worked time. See the
 /// ubiquitous language in docs/02-design/01-domain-model.md section 2.
 model JobLabourLine {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   jobId       String
   description String
-  hours       Decimal @db.Decimal(8, 2)
-  rate        Decimal @db.Decimal(10, 2)
-  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  hours       Decimal  @db.Decimal(8, 2)
+  rate        Decimal  @db.Decimal(10, 2)
+  discountPct Decimal  @default(0) @db.Decimal(5, 2)
   taxRateId   String?
-  sortOrder   Int     @default(0)
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
 
   job     Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
@@ -1013,23 +1021,23 @@ model JobLabourLine {
 }
 
 model JobPartLine {
-  id          String  @id @default(cuid())
+  id          String         @id @default(cuid())
   jobId       String
   productId   String?
   partNumber  String?
   description String
-  quantity    Decimal @default(1) @db.Decimal(10, 3)
-  unitCost    Decimal @default(0) @db.Decimal(12, 4)
-  unitPrice   Decimal @default(0) @db.Decimal(12, 2)
-  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  quantity    Decimal        @default(1) @db.Decimal(10, 3)
+  unitCost    Decimal        @default(0) @db.Decimal(12, 4)
+  unitPrice   Decimal        @default(0) @db.Decimal(12, 2)
+  discountPct Decimal        @default(0) @db.Decimal(5, 2)
   taxRateId   String?
   status      PartLineStatus @default(REQUESTED)
-  sortOrder   Int     @default(0)
-  createdAt   DateTime @default(now())
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
 
-  job     Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+  job          Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  product      Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  taxRate      TaxRate?           @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
   reservations StockReservation[]
 
   @@index([jobId])
@@ -1060,12 +1068,12 @@ model JobFeeLine {
 }
 
 model JobNote {
-  id              String   @id @default(cuid())
-  jobId           String
-  authorUserId    String?
-  body            String
-  isCustomerVisible Boolean @default(false)
-  createdAt       DateTime @default(now())
+  id                String   @id @default(cuid())
+  jobId             String
+  authorUserId      String?
+  body              String
+  isCustomerVisible Boolean  @default(false)
+  createdAt         DateTime @default(now())
 
   job    Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
   author User? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
@@ -1075,17 +1083,17 @@ model JobNote {
 }
 
 model JobAttachment {
-  id             String   @id @default(cuid())
-  jobId          String
-  kind           AttachmentKind @default(PHOTO)
-  url            String
-  filename       String
-  mimeType       String
-  sizeBytes      Int
-  caption        String?
-  isCustomerVisible Boolean @default(true)
-  uploadedByUserId String?
-  createdAt      DateTime @default(now())
+  id                String         @id @default(cuid())
+  jobId             String
+  kind              AttachmentKind @default(PHOTO)
+  url               String
+  filename          String
+  mimeType          String
+  sizeBytes         Int
+  caption           String?
+  isCustomerVisible Boolean        @default(true)
+  uploadedByUserId  String?
+  createdAt         DateTime       @default(now())
 
   job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
   uploadedBy User? @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
@@ -1117,12 +1125,12 @@ model TimeEntry {
 }
 
 model QualityCheck {
-  id            String   @id @default(cuid())
-  jobId         String
+  id              String   @id @default(cuid())
+  jobId           String
   checkedByUserId String
-  passed        Boolean
-  notes         String?
-  createdAt     DateTime @default(now())
+  passed          Boolean
+  notes           String?
+  createdAt       DateTime @default(now())
 
   job       Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   checkedBy User @relation(fields: [checkedByUserId], references: [id], onDelete: Cascade)
@@ -1160,7 +1168,7 @@ model InspectionTemplate {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org         Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
   sections    InspectionTemplateSection[]
   inspections Inspection[]
 
@@ -1182,13 +1190,13 @@ model InspectionTemplateSection {
 }
 
 model InspectionTemplateItem {
-  id        String @id @default(cuid())
-  sectionId String
-  name      String
-  guidance  String?
+  id              String          @id @default(cuid())
+  sectionId       String
+  name            String
+  guidance        String?
   measurementType MeasurementType @default(NONE)
-  position  WheelPosition?
-  sortOrder Int    @default(0)
+  position        WheelPosition?
+  sortOrder       Int             @default(0)
 
   section InspectionTemplateSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   results InspectionResult[]
@@ -1219,17 +1227,17 @@ enum WheelPosition {
 }
 
 model Inspection {
-  id               String           @id @default(cuid())
-  jobId            String
-  templateId       String?
-  status           InspectionStatus @default(DRAFT)
+  id                String           @id @default(cuid())
+  jobId             String
+  templateId        String?
+  status            InspectionStatus @default(DRAFT)
   performedByUserId String?
-  startedAt        DateTime         @default(now())
-  completedAt      DateTime?
-  notes            String?
-  passCount        Int              @default(0)
-  advisoryCount    Int              @default(0)
-  criticalCount    Int              @default(0)
+  startedAt         DateTime         @default(now())
+  completedAt       DateTime?
+  notes             String?
+  passCount         Int              @default(0)
+  advisoryCount     Int              @default(0)
+  criticalCount     Int              @default(0)
 
   job         Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
   template    InspectionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
@@ -1246,24 +1254,24 @@ enum InspectionStatus {
 }
 
 model InspectionResult {
-  id             String   @id @default(cuid())
-  inspectionId   String
-  templateItemId String?
-  sectionName    String
-  itemName       String
-  severity       Severity @default(NOT_CHECKED)
-  note           String?
-  measurementValue Decimal? @db.Decimal(10, 2)
-  measurementType  MeasurementType @default(NONE)
-  position       WheelPosition?
+  id                String          @id @default(cuid())
+  inspectionId      String
+  templateItemId    String?
+  sectionName       String
+  itemName          String
+  severity          Severity        @default(NOT_CHECKED)
+  note              String?
+  measurementValue  Decimal?        @db.Decimal(10, 2)
+  measurementType   MeasurementType @default(NONE)
+  position          WheelPosition?
   recommendedAction String?
-  estimatedCost  Decimal? @db.Decimal(12, 2)
-  sortOrder      Int      @default(0)
-  createdAt      DateTime @default(now())
+  estimatedCost     Decimal?        @db.Decimal(12, 2)
+  sortOrder         Int             @default(0)
+  createdAt         DateTime        @default(now())
 
-  inspection   Inspection              @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
-  templateItem InspectionTemplateItem? @relation(fields: [templateItemId], references: [id], onDelete: SetNull)
-  photos       InspectionPhoto[]
+  inspection    Inspection              @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  templateItem  InspectionTemplateItem? @relation(fields: [templateItemId], references: [id], onDelete: SetNull)
+  photos        InspectionPhoto[]
   estimateLines EstimateLine[]
 
   @@index([inspectionId, sortOrder])
@@ -1300,33 +1308,33 @@ model InspectionPhoto {
 // ===========================================================================
 
 model Estimate {
-  id            String         @id @default(cuid())
-  orgId         String
-  jobId         String
-  version       Int            @default(1)
-  status        EstimateStatus @default(DRAFT)
-  currency      String         @default("GBP")
-  subtotal      Decimal        @default(0) @db.Decimal(12, 2)
-  discountTotal Decimal        @default(0) @db.Decimal(12, 2)
-  taxTotal      Decimal        @default(0) @db.Decimal(12, 2)
-  total         Decimal        @default(0) @db.Decimal(12, 2)
-  notes         String?
-  validUntil    DateTime?
-  sentAt        DateTime?
-  decidedAt     DateTime?
-  supersedesId  String?        @unique
+  id              String         @id @default(cuid())
+  orgId           String
+  jobId           String
+  version         Int            @default(1)
+  status          EstimateStatus @default(DRAFT)
+  currency        String         @default("GBP")
+  subtotal        Decimal        @default(0) @db.Decimal(12, 2)
+  discountTotal   Decimal        @default(0) @db.Decimal(12, 2)
+  taxTotal        Decimal        @default(0) @db.Decimal(12, 2)
+  total           Decimal        @default(0) @db.Decimal(12, 2)
+  notes           String?
+  validUntil      DateTime?
+  sentAt          DateTime?
+  decidedAt       DateTime?
+  supersedesId    String?        @unique
   createdByUserId String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  job        Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  createdBy  User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
-  supersedes Estimate?    @relation("EstimateVersions", fields: [supersedesId], references: [id], onDelete: SetNull)
-  supersededBy Estimate?  @relation("EstimateVersions")
-  lines      EstimateLine[]
-  shares     EstimateShare[]
-  approvals  EstimateApproval[]
+  org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job          Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdBy    User?              @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  supersedes   Estimate?          @relation("EstimateVersions", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy Estimate?          @relation("EstimateVersions")
+  lines        EstimateLine[]
+  shares       EstimateShare[]
+  approvals    EstimateApproval[]
 
   @@unique([jobId, version])
   @@index([orgId, status])
@@ -1344,20 +1352,20 @@ enum EstimateStatus {
 }
 
 model EstimateLine {
-  id          String       @id @default(cuid())
-  estimateId  String
-  kind        LineKind     @default(LABOUR)
-  description String
-  detail      String?
-  quantity    Decimal      @default(1) @db.Decimal(10, 3)
-  unitPrice   Decimal      @default(0) @db.Decimal(12, 2)
-  unitCost    Decimal      @default(0) @db.Decimal(12, 4)
-  discountPct Decimal      @default(0) @db.Decimal(5, 2)
-  taxRateId   String?
-  lineTotal   Decimal      @default(0) @db.Decimal(12, 2)
-  decision    LineDecision @default(PENDING)
-  isOptional  Boolean      @default(false)
-  sortOrder   Int          @default(0)
+  id                 String       @id @default(cuid())
+  estimateId         String
+  kind               LineKind     @default(LABOUR)
+  description        String
+  detail             String?
+  quantity           Decimal      @default(1) @db.Decimal(10, 3)
+  unitPrice          Decimal      @default(0) @db.Decimal(12, 2)
+  unitCost           Decimal      @default(0) @db.Decimal(12, 4)
+  discountPct        Decimal      @default(0) @db.Decimal(5, 2)
+  taxRateId          String?
+  lineTotal          Decimal      @default(0) @db.Decimal(12, 2)
+  decision           LineDecision @default(PENDING)
+  isOptional         Boolean      @default(false)
+  sortOrder          Int          @default(0)
   inspectionResultId String?
 
   estimate         Estimate          @relation(fields: [estimateId], references: [id], onDelete: Cascade)
@@ -1384,16 +1392,16 @@ enum LineDecision {
 
 /// The secure link sent to the customer. Unguessable, expiring, revocable.
 model EstimateShare {
-  id         String    @id @default(cuid())
+  id         String         @id @default(cuid())
   estimateId String
-  tokenHash  String    @unique
+  tokenHash  String         @unique
   channel    MessageChannel
   sentTo     String
   expiresAt  DateTime
   revokedAt  DateTime?
   openedAt   DateTime?
-  openCount  Int       @default(0)
-  createdAt  DateTime  @default(now())
+  openCount  Int            @default(0)
+  createdAt  DateTime       @default(now())
 
   estimate Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
 
@@ -1432,7 +1440,7 @@ model TaxRate {
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
 
-  org           Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org           Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   labourLines   JobLabourLine[]
   partLines     JobPartLine[]
   feeLines      JobFeeLine[]
@@ -1487,11 +1495,11 @@ model Invoice {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  job      Job?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  customer Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  lines    InvoiceLine[]
-  payments Payment[]
+  org         Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job         Job?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  customer    Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lines       InvoiceLine[]
+  payments    Payment[]
   creditNotes CreditNote[]
 
   @@unique([orgId, number])
@@ -1531,17 +1539,17 @@ model InvoiceLine {
 }
 
 model Payment {
-  id           String        @id @default(cuid())
-  orgId        String
-  invoiceId    String?
-  customerId   String
-  amount       Decimal       @db.Decimal(12, 2)
-  method       PaymentMethod @default(CARD)
-  reference    String?
-  receivedAt   DateTime      @default(now())
-  notes        String?
+  id               String        @id @default(cuid())
+  orgId            String
+  invoiceId        String?
+  customerId       String
+  amount           Decimal       @db.Decimal(12, 2)
+  method           PaymentMethod @default(CARD)
+  reference        String?
+  receivedAt       DateTime      @default(now())
+  notes            String?
   recordedByUserId String?
-  createdAt    DateTime      @default(now())
+  createdAt        DateTime      @default(now())
 
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   invoice    Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
@@ -1624,20 +1632,20 @@ enum MessageStatus {
 
 /// Next service due, by date and by projected mileage. FR-1504.
 model ServiceSchedule {
-  id               String   @id @default(cuid())
-  orgId            String?
-  vehicleId        String
-  name             String
-  intervalMonths   Int?
-  intervalKm       Int?
-  lastPerformedAt  DateTime?
-  lastPerformedKm  Int?
-  dueAt            DateTime?
-  dueKm            Int?
-  reminderSentAt   DateTime?
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String    @id @default(cuid())
+  orgId           String?
+  vehicleId       String
+  name            String
+  intervalMonths  Int?
+  intervalKm      Int?
+  lastPerformedAt DateTime?
+  lastPerformedKm Int?
+  dueAt           DateTime?
+  dueKm           Int?
+  reminderSentAt  DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   org     Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
   vehicle Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
@@ -1667,31 +1675,31 @@ model ProductCategory {
 }
 
 model Product {
-  id            String  @id @default(cuid())
-  orgId         String
-  categoryId    String?
-  partNumber    String
-  name          String
-  description   String?
-  brand         String?
-  unit          String  @default("each")
-  costPrice     Decimal @default(0) @db.Decimal(12, 4)
-  sellPrice     Decimal @default(0) @db.Decimal(12, 2)
-  reorderPoint  Decimal @default(0) @db.Decimal(12, 3)
-  reorderQty    Decimal @default(0) @db.Decimal(12, 3)
-  barcode       String?
-  isStocked     Boolean @default(true)
-  isActive      Boolean @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  orgId        String
+  categoryId   String?
+  partNumber   String
+  name         String
+  description  String?
+  brand        String?
+  unit         String   @default("each")
+  costPrice    Decimal  @default(0) @db.Decimal(12, 4)
+  sellPrice    Decimal  @default(0) @db.Decimal(12, 2)
+  reorderPoint Decimal  @default(0) @db.Decimal(12, 3)
+  reorderQty   Decimal  @default(0) @db.Decimal(12, 3)
+  barcode      String?
+  isStocked    Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  org          Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  category     ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  stockLevels  StockLevel[]
-  movements    StockMovement[]
-  reservations StockReservation[]
-  jobPartLines JobPartLine[]
-  poLines      PurchaseOrderLine[]
+  org           Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category      ProductCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  stockLevels   StockLevel[]
+  movements     StockMovement[]
+  reservations  StockReservation[]
+  jobPartLines  JobPartLine[]
+  poLines       PurchaseOrderLine[]
   transferLines StockTransferLine[]
   saleLines     CounterSaleLine[]
 
@@ -1708,26 +1716,26 @@ model Warehouse {
   code       String
   isDefault  Boolean @default(false)
 
-  org          Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  location     Location?         @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location     Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
   stockLevels  StockLevel[]
   movements    StockMovement[]
   reservations StockReservation[]
-  transfersOut StockTransfer[]   @relation("TransferOrigin")
-  transfersIn  StockTransfer[]   @relation("TransferDestination")
+  transfersOut StockTransfer[]    @relation("TransferOrigin")
+  transfersIn  StockTransfer[]    @relation("TransferDestination")
 
   @@unique([orgId, code])
   @@map("warehouses")
 }
 
 model StockLevel {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   productId   String
   warehouseId String
-  onHand      Decimal @default(0) @db.Decimal(12, 3)
-  reserved    Decimal @default(0) @db.Decimal(12, 3)
+  onHand      Decimal  @default(0) @db.Decimal(12, 3)
+  reserved    Decimal  @default(0) @db.Decimal(12, 3)
   /// Weighted average cost. FR-1005.
-  avgCost     Decimal @default(0) @db.Decimal(12, 4)
+  avgCost     Decimal  @default(0) @db.Decimal(12, 4)
   binLocation String?
   updatedAt   DateTime @updatedAt
 
@@ -1739,18 +1747,18 @@ model StockLevel {
 }
 
 model StockMovement {
-  id          String       @id @default(cuid())
-  orgId       String
-  productId   String
-  warehouseId String
-  type        MovementType
-  quantity    Decimal      @db.Decimal(12, 3)
-  unitCost    Decimal      @default(0) @db.Decimal(12, 4)
-  balanceAfter Decimal     @default(0) @db.Decimal(12, 3)
+  id            String       @id @default(cuid())
+  orgId         String
+  productId     String
+  warehouseId   String
+  type          MovementType
+  quantity      Decimal      @db.Decimal(12, 3)
+  unitCost      Decimal      @default(0) @db.Decimal(12, 4)
+  balanceAfter  Decimal      @default(0) @db.Decimal(12, 3)
   referenceType String?
   referenceId   String?
-  reason      String?
-  createdAt   DateTime     @default(now())
+  reason        String?
+  createdAt     DateTime     @default(now())
 
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -1772,13 +1780,13 @@ enum MovementType {
 }
 
 model StockReservation {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   productId     String
   warehouseId   String
   jobPartLineId String?
-  quantity      Decimal  @db.Decimal(12, 3)
+  quantity      Decimal   @db.Decimal(12, 3)
   releasedAt    DateTime?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
   product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   warehouse   Warehouse    @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
@@ -1789,18 +1797,18 @@ model StockReservation {
 }
 
 model Supplier {
-  id           String  @id @default(cuid())
-  orgId        String
-  name         String
-  accountRef   String?
-  email        String?
-  phone        String?
-  addressLine1 String?
-  locality     String?
-  postcode     String?
-  paymentTermsDays Int  @default(30)
-  isActive     Boolean @default(true)
-  createdAt    DateTime @default(now())
+  id               String   @id @default(cuid())
+  orgId            String
+  name             String
+  accountRef       String?
+  email            String?
+  phone            String?
+  addressLine1     String?
+  locality         String?
+  postcode         String?
+  paymentTermsDays Int      @default(30)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
 
   org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   purchaseOrders PurchaseOrder[]
@@ -1811,19 +1819,19 @@ model Supplier {
 }
 
 model PurchaseRequest {
-  id           String        @id @default(cuid())
-  orgId        String
-  jobId        String?
+  id                String                @id @default(cuid())
+  orgId             String
+  jobId             String?
   requestedByUserId String?
-  status       PurchaseRequestStatus @default(PENDING)
-  notes        String?
-  approvedByUserId String?
-  approvedAt   DateTime?
-  createdAt    DateTime      @default(now())
+  status            PurchaseRequestStatus @default(PENDING)
+  notes             String?
+  approvedByUserId  String?
+  approvedAt        DateTime?
+  createdAt         DateTime              @default(now())
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  job        Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  approvedBy User?        @relation("PurchaseApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  org        Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job        Job?            @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  approvedBy User?           @relation("PurchaseApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   orders     PurchaseOrder[]
 
   @@index([orgId, status])
@@ -1838,23 +1846,23 @@ enum PurchaseRequestStatus {
 }
 
 model PurchaseOrder {
-  id          String   @id @default(cuid())
-  orgId       String
-  number      String
-  supplierId  String
-  requestId   String?
-  status      PurchaseOrderStatus @default(DRAFT)
-  expectedAt  DateTime?
-  subtotal    Decimal  @default(0) @db.Decimal(12, 2)
-  taxTotal    Decimal  @default(0) @db.Decimal(12, 2)
-  total       Decimal  @default(0) @db.Decimal(12, 2)
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String              @id @default(cuid())
+  orgId      String
+  number     String
+  supplierId String
+  requestId  String?
+  status     PurchaseOrderStatus @default(DRAFT)
+  expectedAt DateTime?
+  subtotal   Decimal             @default(0) @db.Decimal(12, 2)
+  taxTotal   Decimal             @default(0) @db.Decimal(12, 2)
+  total      Decimal             @default(0) @db.Decimal(12, 2)
+  notes      String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 
-  org      Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  supplier Supplier         @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  request  PurchaseRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  org      Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier Supplier            @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  request  PurchaseRequest?    @relation(fields: [requestId], references: [id], onDelete: SetNull)
   lines    PurchaseOrderLine[]
   receipts GoodsReceipt[]
   bills    SupplierBill[]
@@ -1883,8 +1891,8 @@ model PurchaseOrderLine {
   unitCost    Decimal @default(0) @db.Decimal(12, 4)
   sortOrder   Int     @default(0)
 
-  order    PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product  Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order        PurchaseOrder      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
   receiptLines GoodsReceiptLine[]
 
   @@index([orderId])
@@ -1906,11 +1914,11 @@ model GoodsReceipt {
 }
 
 model GoodsReceiptLine {
-  id         String  @id @default(cuid())
-  receiptId  String
+  id          String  @id @default(cuid())
+  receiptId   String
   orderLineId String
-  quantity   Decimal @db.Decimal(12, 3)
-  unitCost   Decimal @default(0) @db.Decimal(12, 4)
+  quantity    Decimal @db.Decimal(12, 3)
+  unitCost    Decimal @default(0) @db.Decimal(12, 4)
 
   receipt   GoodsReceipt      @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   orderLine PurchaseOrderLine @relation(fields: [orderLineId], references: [id], onDelete: Cascade)
@@ -1920,19 +1928,19 @@ model GoodsReceiptLine {
 }
 
 model SupplierBill {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   orgId      String
   supplierId String
   orderId    String?
   reference  String
   status     BillStatus @default(AWAITING)
-  subtotal   Decimal  @default(0) @db.Decimal(12, 2)
-  taxTotal   Decimal  @default(0) @db.Decimal(12, 2)
-  total      Decimal  @default(0) @db.Decimal(12, 2)
-  amountPaid Decimal  @default(0) @db.Decimal(12, 2)
+  subtotal   Decimal    @default(0) @db.Decimal(12, 2)
+  taxTotal   Decimal    @default(0) @db.Decimal(12, 2)
+  total      Decimal    @default(0) @db.Decimal(12, 2)
+  amountPaid Decimal    @default(0) @db.Decimal(12, 2)
   billedAt   DateTime
   dueAt      DateTime?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime   @default(now())
 
   org      Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   supplier Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
@@ -1983,13 +1991,13 @@ enum AccountType {
 }
 
 model FiscalPeriod {
-  id        String   @id @default(cuid())
-  orgId     String
-  name      String
-  startsAt  DateTime
-  endsAt    DateTime
-  isClosed  Boolean  @default(false)
-  closedAt  DateTime?
+  id       String    @id @default(cuid())
+  orgId    String
+  name     String
+  startsAt DateTime
+  endsAt   DateTime
+  isClosed Boolean   @default(false)
+  closedAt DateTime?
 
   org     Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   entries JournalEntry[]
@@ -2014,11 +2022,11 @@ model JournalEntry {
   reversesId  String?  @unique
   createdAt   DateTime @default(now())
 
-  org      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  period   FiscalPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
-  reverses JournalEntry? @relation("EntryReversal", fields: [reversesId], references: [id], onDelete: SetNull)
+  org        Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  period     FiscalPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
+  reverses   JournalEntry? @relation("EntryReversal", fields: [reversesId], references: [id], onDelete: SetNull)
   reversedBy JournalEntry? @relation("EntryReversal")
-  lines    JournalLine[]
+  lines      JournalLine[]
 
   @@index([orgId, postedAt])
   @@index([sourceType, sourceId])
@@ -2042,15 +2050,16 @@ model JournalLine {
   @@map("journal_lines")
 }
 
-/* ===========================================================================
-   PEOPLE — Phase 4
-
-   The workshop side of a person, separate from the login account. A user is
-   how somebody signs in; an employee is what they cost, when they are here,
-   and what they are qualified to sign off. Those have different lifetimes: an
-   employment record must survive long after an account is disabled, because
-   last year's job costs are built on it.
-   =========================================================================== */
+/**
+ * ===========================================================================
+ * PEOPLE — Phase 4
+ * The workshop side of a person, separate from the login account. A user is
+ * how somebody signs in; an employee is what they cost, when they are here,
+ * and what they are qualified to sign off. Those have different lifetimes: an
+ * employment record must survive long after an account is disabled, because
+ * last year's job costs are built on it.
+ * ===========================================================================
+ */
 
 enum EmploymentType {
   EMPLOYEE
@@ -2087,7 +2096,7 @@ model Employee {
   absences         Absence[]
   certifications   Certification[]
   commissionAwards CommissionAward[]
-  expenseClaims    Expense[]         @relation("ExpenseClaimant")
+  expenseClaims    Expense[]          @relation("ExpenseClaimant")
 
   @@unique([orgId, reference])
   @@index([orgId, isActive])
@@ -2295,14 +2304,15 @@ model CommissionAward {
   @@map("commission_awards")
 }
 
-/* ===========================================================================
-   MULTI-SITE — Phase 4
-
-   Stock moving between warehouses in the same organisation. Three quantities,
-   not two: sent, received, and the difference sitting in a van. Without the
-   third, stock that has left one site and not reached the other disappears
-   from every report and reads as shrinkage at the next stocktake.
-   =========================================================================== */
+/**
+ * ===========================================================================
+ * MULTI-SITE — Phase 4
+ * Stock moving between warehouses in the same organisation. Three quantities,
+ * not two: sent, received, and the difference sitting in a van. Without the
+ * third, stock that has left one site and not reached the other disappears
+ * from every report and reads as shrinkage at the next stocktake.
+ * ===========================================================================
+ */
 
 enum TransferStatus {
   DRAFT
@@ -2358,16 +2368,16 @@ model StockTransferLine {
   @@map("stock_transfer_lines")
 }
 
-/* ===========================================================================
-   TEAM — Phase 4.6
-
-   Until this existed, the only way to add a second user was a database write,
-   which means in practice a workshop could not add its second user.
-
-   An invitation is a capability, so only the digest of its token is stored,
-   the same treatment as a session and a passport share link. A database
-   disclosure must not hand somebody a way into a workshop.
-   =========================================================================== */
+/**
+ * ===========================================================================
+ * TEAM — Phase 4.6
+ * Until this existed, the only way to add a second user was a database write,
+ * which means in practice a workshop could not add its second user.
+ * An invitation is a capability, so only the digest of its token is stored,
+ * the same treatment as a session and a passport share link. A database
+ * disclosure must not hand somebody a way into a workshop.
+ * ===========================================================================
+ */
 
 model Invitation {
   id              String    @id @default(cuid())
@@ -2392,16 +2402,16 @@ model Invitation {
   @@map("invitations")
 }
 
-/* ===========================================================================
-   COUNTER SALES — Phase 4.7
-
-   A sale with no job behind it. Somebody wants a bulb, pays, and leaves.
-
-   The three things a job normally anchors have to work without it: the ledger
-   posting, the stock movement and the cost. Cash and card are recorded
-   separately because they arrive on different days, and a bank reconciliation
-   that cannot tell them apart is not a reconciliation.
-   =========================================================================== */
+/**
+ * ===========================================================================
+ * COUNTER SALES — Phase 4.7
+ * A sale with no job behind it. Somebody wants a bulb, pays, and leaves.
+ * The three things a job normally anchors have to work without it: the ledger
+ * posting, the stock movement and the cost. Cash and card are recorded
+ * separately because they arrive on different days, and a bank reconciliation
+ * that cannot tell them apart is not a reconciliation.
+ * ===========================================================================
+ */
 
 enum CounterSaleStatus {
   OPEN
@@ -2417,37 +2427,37 @@ enum TenderKind {
 }
 
 model CounterSale {
-  id           String            @id @default(cuid())
-  orgId        String
-  locationId   String?
+  id            String            @id @default(cuid())
+  orgId         String
+  locationId    String?
   /// Optional. Most counter sales are to somebody who never gives a name.
-  customerId   String?
-  reference    String
-  status       CounterSaleStatus @default(OPEN)
-  soldByUserId String?
+  customerId    String?
+  reference     String
+  status        CounterSaleStatus @default(OPEN)
+  soldByUserId  String?
   tillSessionId String?
-  subtotal     Decimal           @default(0) @db.Decimal(12, 2)
-  discountTotal Decimal          @default(0) @db.Decimal(12, 2)
-  taxTotal     Decimal           @default(0) @db.Decimal(12, 2)
-  total        Decimal           @default(0) @db.Decimal(12, 2)
+  subtotal      Decimal           @default(0) @db.Decimal(12, 2)
+  discountTotal Decimal           @default(0) @db.Decimal(12, 2)
+  taxTotal      Decimal           @default(0) @db.Decimal(12, 2)
+  total         Decimal           @default(0) @db.Decimal(12, 2)
   /// Weighted average cost of everything on the sale, at the moment of sale.
-  costTotal    Decimal           @default(0) @db.Decimal(12, 2)
-  changeGiven  Decimal           @default(0) @db.Decimal(12, 2)
-  refundedTotal Decimal          @default(0) @db.Decimal(12, 2)
+  costTotal     Decimal           @default(0) @db.Decimal(12, 2)
+  changeGiven   Decimal           @default(0) @db.Decimal(12, 2)
+  refundedTotal Decimal           @default(0) @db.Decimal(12, 2)
   /// Set when this sale reverses another. A refund is never loose cash.
   refundsSaleId String?
-  note         String?
-  soldAt       DateTime?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  note          String?
+  soldAt        DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
-  org         Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  location    Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
-  customer    Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  soldBy      User?              @relation("CounterSaleSeller", fields: [soldByUserId], references: [id], onDelete: SetNull)
-  tillSession TillSession?       @relation(fields: [tillSessionId], references: [id], onDelete: SetNull)
-  refundsSale CounterSale?       @relation("SaleRefund", fields: [refundsSaleId], references: [id], onDelete: SetNull)
-  refundedBy  CounterSale[]      @relation("SaleRefund")
+  org         Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location    Location?           @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  customer    Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  soldBy      User?               @relation("CounterSaleSeller", fields: [soldByUserId], references: [id], onDelete: SetNull)
+  tillSession TillSession?        @relation(fields: [tillSessionId], references: [id], onDelete: SetNull)
+  refundsSale CounterSale?        @relation("SaleRefund", fields: [refundsSaleId], references: [id], onDelete: SetNull)
+  refundedBy  CounterSale[]       @relation("SaleRefund")
   lines       CounterSaleLine[]
   tenders     CounterSaleTender[]
 
@@ -2458,22 +2468,22 @@ model CounterSale {
 }
 
 model CounterSaleLine {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   saleId      String
   /// Null for a one-off item or a service with nothing on the shelf.
   productId   String?
   kind        LineKind
   description String
-  quantity    Decimal @db.Decimal(12, 3)
-  unitPrice   Decimal @db.Decimal(12, 2)
+  quantity    Decimal  @db.Decimal(12, 3)
+  unitPrice   Decimal  @db.Decimal(12, 2)
   /// Weighted average at the moment of sale, frozen here. Recomputing later
   /// would change what a sale in March cost when a delivery arrives in June.
-  unitCost    Decimal @default(0) @db.Decimal(12, 4)
-  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  unitCost    Decimal  @default(0) @db.Decimal(12, 4)
+  discountPct Decimal  @default(0) @db.Decimal(5, 2)
   taxRateId   String?
-  taxAmount   Decimal @default(0) @db.Decimal(12, 2)
-  lineTotal   Decimal @default(0) @db.Decimal(12, 2)
-  sortOrder   Int     @default(0)
+  taxAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  lineTotal   Decimal  @default(0) @db.Decimal(12, 2)
+  sortOrder   Int      @default(0)
 
   sale    CounterSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product Product?    @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -2522,13 +2532,14 @@ model TillSession {
   @@map("till_sessions")
 }
 
-/* ===========================================================================
-   EXPENSES AND BANKING — Phase 4.8
-
-   The ledger balances against itself. Reconciliation is what makes it balance
-   against reality: until the bank agrees, a trial balance proves the
-   arithmetic was consistent, not that it was right.
-   =========================================================================== */
+/**
+ * ===========================================================================
+ * EXPENSES AND BANKING — Phase 4.8
+ * The ledger balances against itself. Reconciliation is what makes it balance
+ * against reality: until the bank agrees, a trial balance proves the
+ * arithmetic was consistent, not that it was right.
+ * ===========================================================================
+ */
 
 enum ExpenseCategory {
   PREMISES
@@ -2563,29 +2574,29 @@ enum PaidFrom {
 /// hand-written journal entries, which works exactly as long as the person
 /// writing them knows double-entry.
 model Expense {
-  id          String          @id @default(cuid())
-  orgId       String
-  locationId  String?
-  reference   String
-  category    ExpenseCategory
-  status      ExpenseStatus   @default(DRAFT)
-  supplier    String
-  description String?
-  net         Decimal         @db.Decimal(12, 2)
-  tax         Decimal         @default(0) @db.Decimal(12, 2)
-  incurredAt  DateTime
-  paidFrom    PaidFrom        @default(BANK)
+  id                  String          @id @default(cuid())
+  orgId               String
+  locationId          String?
+  reference           String
+  category            ExpenseCategory
+  status              ExpenseStatus   @default(DRAFT)
+  supplier            String
+  description         String?
+  net                 Decimal         @db.Decimal(12, 2)
+  tax                 Decimal         @default(0) @db.Decimal(12, 2)
+  incurredAt          DateTime
+  paidFrom            PaidFrom        @default(BANK)
   /// A photograph or PDF. Required above a threshold, because an overhead
   /// figure built on remembered amounts cannot be defended to anybody.
-  receiptUrl  String?
+  receiptUrl          String?
   /// Set when somebody spent their own money and is owed it back.
   claimedByEmployeeId String?
   approvedByUserId    String?
-  approvedAt  DateTime?
-  paidAt      DateTime?
-  rejectedReason String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  approvedAt          DateTime?
+  paidAt              DateTime?
+  rejectedReason      String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   location   Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
@@ -2599,21 +2610,21 @@ model Expense {
 }
 
 model BankAccount {
-  id            String   @id @default(cuid())
-  orgId         String
-  name          String
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
   /// Last four digits only. The full number is never needed here and storing
   /// it turns a workshop database into something worth stealing.
-  last4         String?
-  sortCode      String?
+  last4       String?
+  sortCode    String?
   /// Which ledger account this maps to, so a reconciliation knows what to
   /// compare against.
-  accountCode   String   @default("1000")
-  currency      String   @default("GBP")
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
+  accountCode String   @default("1000")
+  currency    String   @default("GBP")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
-  org        Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org        Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   statements BankStatement[]
 
   @@unique([orgId, name])
@@ -2637,23 +2648,195 @@ model BankStatement {
 }
 
 model BankStatementLine {
-  id          String   @id @default(cuid())
-  statementId String
-  postedOn    DateTime
-  description String
-  reference   String?
+  id             String    @id @default(cuid())
+  statementId    String
+  postedOn       DateTime
+  description    String
+  reference      String?
   /// Positive is money in, negative is money out.
-  amount      Decimal  @db.Decimal(14, 2)
+  amount         Decimal   @db.Decimal(14, 2)
   /// The journal entry this was matched to, once somebody accepted it.
   matchedEntryId String?
-  matchedAt   DateTime?
+  matchedAt      DateTime?
   /// How the match was arrived at, kept so a reviewer can see the reasoning
   /// rather than only the result.
-  matchReason String?
+  matchReason    String?
 
   statement BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
 
   @@index([statementId, postedOn])
   @@index([matchedEntryId])
   @@map("bank_statement_lines")
+}
+
+/**
+ * ===========================================================================
+ * Automation and CRM (Phase 5)
+ * ===========================================================================
+ */
+
+/// A rule is trigger, conditions and actions. Deliberately not a graph: a rule
+/// cannot trigger a rule, because chained automation is impossible to reason
+/// about after the third link and impossible to debug at all.
+model AutomationRule {
+  id            String   @id @default(cuid())
+  orgId         String
+  name          String
+  trigger       String
+  /// Every condition must hold. Stored as written so the sentence shown on the
+  /// page and the sentence evaluated are the same object.
+  conditions    Json     @default("[]")
+  actions       Json
+  isActive      Boolean  @default(true)
+  /// The same subject cannot be acted on again inside this window. The floor
+  /// is one hour and it is enforced in the database, not only in code.
+  cooldownHours Int      @default(24)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  org  Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  runs AutomationRun[]
+
+  @@unique([orgId, name])
+  @@index([orgId, trigger, isActive])
+  @@map("automation_rules")
+}
+
+/// One firing, against one subject. Written whether or not anything was sent,
+/// because "why did this not fire" is the question people actually ask.
+model AutomationRun {
+  id          String   @id @default(cuid())
+  ruleId      String
+  /// The thing the rule fired about: a job, an invoice, a vehicle.
+  subjectType String
+  subjectId   String
+  /// The customer the actions reach, when there is one.
+  customerId  String?
+  firedAt     DateTime @default(now())
+  /// Empty when it fired. Filled with the reason when it did not, so the page
+  /// can show a rule that is quietly doing nothing.
+  blockedBy   String?
+  reason      String?
+
+  rule    AutomationRule     @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  actions AutomationAction[]
+
+  @@index([ruleId, firedAt])
+  @@index([ruleId, subjectType, subjectId, firedAt])
+  @@map("automation_runs")
+}
+
+enum AutomationActionStatus {
+  PENDING
+  DONE
+  FAILED
+  CANCELLED
+}
+
+/// A scheduled action, waiting for its delay to elapse. Kept as a row rather
+/// than a timer so a restart does not lose it and a person can see what is
+/// about to happen and stop it.
+model AutomationAction {
+  id        String                 @id @default(cuid())
+  runId     String
+  kind      String
+  target    String
+  dueAt     DateTime
+  status    AutomationActionStatus @default(PENDING)
+  doneAt    DateTime?
+  error     String?
+  /// The message this became, once it was sent.
+  messageId String?
+
+  run AutomationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([status, dueAt])
+  @@index([runId])
+  @@map("automation_actions")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SENDING
+  SENT
+  CANCELLED
+}
+
+/// A segment and a message. The segment is stored as its rules rather than as
+/// a list of people, because a list goes stale and consent withdrawn on
+/// Tuesday must stop Wednesday's send.
+model Campaign {
+  id                String         @id @default(cuid())
+  orgId             String
+  name              String
+  channel           MessageChannel
+  segment           Json
+  subject           String?
+  body              String
+  status            CampaignStatus @default(DRAFT)
+  /// What the plan said when somebody pressed send, kept because a campaign
+  /// cannot be undone and the count is the thing they were shown.
+  plannedRecipients Int?
+  plannedSuppressed Int?
+  sentAt            DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  org        Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  recipients CampaignRecipient[]
+
+  @@index([orgId, status])
+  @@map("campaigns")
+}
+
+model CampaignRecipient {
+  id         String    @id @default(cuid())
+  campaignId String
+  customerId String
+  /// SENT, or SUPPRESSED with the reason it was held back. Suppressions are
+  /// kept, not discarded: the gap between the list and the send is the number
+  /// worth knowing.
+  status     String
+  reason     String?
+  sentAt     DateTime?
+  messageId  String?
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, customerId])
+  @@index([campaignId, status])
+  @@map("campaign_recipients")
+}
+
+enum ConsentSource {
+  SIGNUP
+  PORTAL
+  STAFF
+  IMPORT
+  UNSUBSCRIBE
+}
+
+/// Every change to a marketing permission, kept forever.
+///
+/// Consent is only worth anything if you can show when it was given and by
+/// what route. A boolean on a customer row proves nothing: it shows the
+/// current state and no history, and the one time it matters is the time
+/// somebody asks how you came to have it. Written by a database trigger, so a
+/// flag cannot be flipped without the trail.
+model ConsentChange {
+  id         String         @id @default(cuid())
+  customerId String
+  channel    MessageChannel
+  granted    Boolean
+  source     ConsentSource  @default(STAFF)
+  /// Who did it, when a person did.
+  actorId    String?
+  note       String?
+  changedAt  DateTime       @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, changedAt])
+  @@map("consent_changes")
 }
