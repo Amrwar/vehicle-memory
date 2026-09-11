@@ -257,6 +257,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3100 — The vehicle's own condition
+
+| Ref     | Requirement                                                                                                                        | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3101 | A vehicle MUST carry a health score, and every figure behind it MUST be shown with the evidence that produced it.                  | 10    |
+| FR-3102 | A measure with no evidence MUST be excluded from the score and named, never counted as a pass or a failure.                        | 10    |
+| FR-3103 | The score MUST belong to the vehicle: nothing in it may measure what was spent at, or how recently it visited, one workshop.       | 10    |
+| FR-3104 | A vehicle MUST be readable as components with ages, derived from what was fitted rather than stored as a second record.            | 10    |
+| FR-3105 | A component MUST be aged by time and by distance, and reported by whichever has gone further.                                      | 10    |
+| FR-3106 | A part MUST only be claimed as a known component when the record says so plainly; anything else MUST stay an ordinary part.        | 10    |
+| FR-3107 | What is likely due MUST be stated in distance as well as date, from this vehicle's own mileage rate and its own service intervals. | 10    |
+| FR-3108 | A prediction MUST state what it was built from and how confident it is, and MUST refuse rather than guess without a mileage rate.  | 10    |
+| FR-3109 | Opening a job MUST flag cover still running on that vehicle, with the job that created it and who would pay.                       | 10    |
+| FR-3110 | A page that cannot render immediately MUST show the product rather than a spinner, and MUST stop for reduced motion.               | 10    |
+
 ## FR-3000 — Warranty, fleets and the whole story
 
 | Ref     | Requirement                                                                                                                   | Phase |

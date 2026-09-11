@@ -183,6 +183,13 @@ jobs:
       - name: Verify warranty cover, claims and who owes what
         run: npx tsx infra/scripts/verify-warranty.ts
 
+      # The condition of a vehicle is derived rather than stored, which moves
+      # the risk from the arithmetic to the queries feeding it. The unit tests
+      # cover the sums; this covers the joins, and that a score is never built
+      # from evidence the vehicle does not have.
+      - name: Verify a vehicle's condition is derived from the right records
+        run: npx tsx infra/scripts/verify-condition.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

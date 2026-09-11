@@ -64,20 +64,23 @@ says why.
 
 ## 4. Vehicle management
 
-| Item                       | Status  | Note                                          |
-| -------------------------- | ------- | --------------------------------------------- |
-| Its own profile            | Built   | `/vehicles/[id]`, and `/portal/vehicles/[id]` |
-| VIN, plate, make, model    | Built   |                                               |
-| Mileage, engine, fuel      | Built   |                                               |
-| Service and repair history | Built   | Every visit, across workshops                 |
-| Parts replaced             | Built   | Through job lines                             |
-| Inspections                | Built   | Carried out on a tablet, sent to the customer |
-| Upcoming maintenance       | Built   | Service schedules                             |
-| Warranty information       | Built   | On the vehicle, and in full at `/warranty`    |
-| Insurance information      | Missing |                                               |
-| Photos                     | Missing |                                               |
-| Documents                  | Missing |                                               |
-| Maintenance timeline       | Partial | Listed by visit, not drawn as a lifetime      |
+| Item                       | Status  | Note                                                |
+| -------------------------- | ------- | --------------------------------------------------- |
+| Its own profile            | Built   | `/vehicles/[id]`, and `/portal/vehicles/[id]`       |
+| VIN, plate, make, model    | Built   |                                                     |
+| Mileage, engine, fuel      | Built   |                                                     |
+| Service and repair history | Built   | Every visit, across workshops                       |
+| Parts replaced             | Built   | Through job lines                                   |
+| Inspections                | Built   | Carried out on a tablet, sent to the customer       |
+| Upcoming maintenance       | Built   | Service schedules                                   |
+| Warranty information       | Built   | On the vehicle, and in full at `/warranty`          |
+| Insurance information      | Missing |                                                     |
+| Photos                     | Missing |                                                     |
+| Documents                  | Missing |                                                     |
+| Maintenance timeline       | Built   | Components with ages, on `/vehicles/[id]/condition` |
+| Health score               | Built   | With every factor and its evidence shown            |
+| Predicted maintenance      | Built   | In distance as well as date, from this vehicle      |
+| Component history          | Built   | Battery, brakes, tyres, belt, each with an age      |
 
 ## 5. Digital vehicle inspection
 
@@ -291,8 +294,8 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 77           |
-| Partial | 4            |
+| Built   | 81           |
+| Partial | 3            |
 | Missing | 16           |
 
 <!-- counts:end -->

@@ -222,6 +222,21 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## The vehicle's own condition
+
+| Req     | Story | Schema                            | Implementation       | Test                  | Status |
+| ------- | ----- | --------------------------------- | -------------------- | --------------------- | ------ |
+| FR-3101 | —     | derived                           | `healthOf()`         | `condition.test.ts`   | Done   |
+| FR-3102 | —     | derived                           | `healthOf()` skip    | `condition.test.ts`   | Done   |
+| FR-3103 | —     | —                                 | `HealthInput`        | `verify-condition.ts` | Done   |
+| FR-3104 | —     | `JobPartLine`, `Job.odometerInKm` | `componentsFrom()`   | `verify-condition.ts` | Done   |
+| FR-3105 | —     | `Vehicle.lastOdometerKm`          | `componentsFrom()`   | `condition.test.ts`   | Done   |
+| FR-3106 | —     | —                                 | `classifyPart()`     | `condition.test.ts`   | Done   |
+| FR-3107 | —     | `OdometerReading`                 | `predictDue()`       | `verify-condition.ts` | Done   |
+| FR-3108 | —     | —                                 | `ownInterval()`      | `condition.test.ts`   | Done   |
+| FR-3109 | —     | `Warranty`                        | `coverWorthChecking` | `verify-condition.ts` | Done   |
+| FR-3110 | —     | —                                 | `LoadingCar`         | `verify-access.ts`    | Done   |
+
 ## Warranty, fleets and the whole story
 
 | Req     | Story | Schema                                  | Implementation      | Test                 | Status |
@@ -389,6 +404,7 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| The vehicle's own condition               | 10                  | 10                     |
 | Warranty, fleets and the whole story      | 9                   | 9                      |
 | The diary and the floor                   | 6                   | 6                      |
 | Suppliers and counter bookings            | 6                   | 6                      |
@@ -399,9 +415,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **194**             | **191 (98%)**          |
+| **Total**                                 | **204**             | **201 (99%)**          |
 
-The requirements document lists 278 requirements. 84 of
+The requirements document lists 288 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

@@ -28,8 +28,10 @@ import { notFound } from 'next/navigation';
 
 import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
+import { HealthDial } from '@/components/health-dial';
 import { requireSession } from '@/lib/guard';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
+import { conditionOf } from '@/lib/condition';
 import { coverForVehicle } from '@/lib/warranty';
 
 export const dynamic = 'force-dynamic';
@@ -81,7 +83,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
 
   if (!vehicle) notFound();
 
-  const [jobs, verification, covers] = await Promise.all([
+  const [jobs, verification, covers, condition] = await Promise.all([
     db.job.findMany({
       where: { vehicleId: id },
       orderBy: { createdAt: 'desc' },
@@ -90,6 +92,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
     }),
     verifyVehicleChain(id),
     coverForVehicle(orgId, id),
+    conditionOf(orgId, id),
   ]);
 
   const kmPerDay = averageKmPerDay(
@@ -336,6 +339,34 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
                 ))}
               </ul>
             )}
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="Condition"
+              description="Derived from what is on record, not stored anywhere."
+            />
+            <CardBody className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+              <HealthDial score={condition.health.score} band={condition.health.band} size={104} />
+              <div>
+                <p className="text-[13px] leading-relaxed">{condition.health.summary}</p>
+                {condition.soon.length > 0 ? (
+                  <p className="mt-2 text-[12px] text-(--text-soft)">
+                    Next likely: {condition.soon[0]!.label}
+                    {condition.soon[0]!.kmAway != null
+                      ? ` in about ${Math.abs(condition.soon[0]!.kmAway).toLocaleString('en-GB')} km`
+                      : ''}
+                    .
+                  </p>
+                ) : null}
+                <Link
+                  href={`/vehicles/${id}/condition`}
+                  className="mt-2 inline-block text-[12px] font-medium text-(--brand-text) hover:underline"
+                >
+                  The whole working
+                </Link>
+              </div>
+            </CardBody>
           </Card>
 
           <Card>

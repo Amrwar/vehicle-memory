@@ -37,6 +37,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { coverWorthChecking } from '@/lib/condition';
 import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
@@ -62,7 +63,7 @@ export async function generateMetadata({
  */
 export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { db, user } = await requireSession('job:read');
+  const { db, user, orgId } = await requireSession('job:read');
 
   const job = await db.job.findUnique({
     where: { id },
@@ -105,6 +106,12 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   });
 
   if (!job) notFound();
+
+  // Cover on this vehicle that is still running and has nothing claimed
+  // against it. The moment somebody needs to know is the moment the job is
+  // open, not a month later when the invoice is written and the part has been
+  // paid for twice.
+  const cover = await coverWorthChecking(orgId, job.vehicle.id);
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
   const stages = progressFor(job.status as JobStatus, reached);
@@ -222,6 +229,25 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
           </>
         }
       />
+
+      {cover.length > 0 ? (
+        <Alert tone="info" title="This vehicle has work still under warranty" className="mb-5">
+          <ul className="mt-1 grid gap-1">
+            {cover.map((entry) => (
+              <li key={entry.id}>
+                <strong className="font-semibold">{entry.description}</strong>, fitted on job{' '}
+                <Link href={`/jobs/${entry.jobId}`} className="underline">
+                  #{entry.jobNumber}
+                </Link>{' '}
+                on {entry.startedOn.toLocaleDateString('en-GB')}.
+                {entry.supplierName
+                  ? ` ${entry.supplierName} still covers the part, so check before charging for it.`
+                  : ' No supplier behind it, so any replacement falls on the workshop.'}
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      ) : null}
 
       {job.status === 'AWAITING_APPROVAL' ? (
         <Alert tone="warning" title="Waiting on the customer" className="mb-5">

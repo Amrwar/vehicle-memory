@@ -7,6 +7,53 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 10 - The vehicle's own condition.**
+
+The first work in the product that belongs to the vehicle rather than to the
+workshop. Every fact it uses was already being written; none of it was ever
+read as the state of the car.
+
+- A vehicle is now a set of components with ages. The battery went in on a
+  particular day, at a particular mileage, and is a particular number of
+  months old. Front and rear brakes are separate, because they wear at
+  different rates and calling them one component would age both from whichever
+  was done last and report the rear pads as new.
+- Derived, not stored. A component table would be a second account of what was
+  fitted and would disagree with the job lines the first time somebody
+  corrected one. Correct a line now and the condition corrects itself.
+- Classification is conservative and refuses to guess. "Brake fluid" contains
+  the word brake, so a rule for discs running first would have reset the disc
+  age at every fluid change. Anything the text does not say plainly stays an
+  ordinary part: an invented battery age is worse than no battery age.
+- A health score out of a hundred, and the whole working under it. Six
+  measures, each with its own score, its weight and the sentence of evidence
+  that produced it.
+- A measure with no evidence is excluded and named, not counted as zero and
+  not counted as full marks. A car with no inspection on record has not failed
+  an inspection. The remaining weights are renormalised and the page states
+  how much of the score was actually available.
+- The score belongs to the vehicle. Nothing in it measures what was spent at
+  this workshop or how recently the car came here, so a well-kept vehicle
+  maintained elsewhere does not read as a worse one.
+- One ruined component outweighs nine good ones. An average would call a car
+  with a timing belt at twice its life healthy, and it is not.
+- Predictions are in distance as well as date: brake fluid in about 1,200 km
+  rather than a service due in two months. Where a vehicle has replaced a part
+  often enough to have its own interval, that interval is used and quoted
+  back; where it has not, a general figure is used and said to be general.
+  Without a mileage rate it refuses the distance rather than inventing one.
+- Confidence falls with how far out a prediction reaches, because every one of
+  them is a straight line through a habit that changes.
+- Opening a job now flags cover still running on that vehicle, with the job
+  that fitted the part and who would pay for it. Phase 9 recorded the cover;
+  this is what makes somebody look without being asked.
+- Pages that have to wait now show a car being driven rather than a spinner,
+  drawn in the product's own colours, and it stops for anybody whose system
+  asks for reduced motion.
+- A fix carried over from the first day of this work: two part lines on one
+  job were being read as two replacements a few kilometres apart, which
+  quietly shortened every predicted interval after them.
+
 **Phase 9 - Warranty, fleets and the whole story.**
 
 Three sets of records the product already held, turned into something a person
