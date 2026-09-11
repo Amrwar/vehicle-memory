@@ -58,3 +58,6 @@ apps/web/public/uploads/
 # Python bytecode from the documentation scripts.
 __pycache__/
 *.pyc
+
+# Photographs written by the local file store during development.
+.storage/

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { PhotoCapture } from '@/components/photo-capture';
 import { requireSession } from '@/lib/guard';
 import {
   completeInspection,
@@ -311,6 +312,16 @@ export default async function InspectPage({
                           </div>
                         </form>
                       )}
+                      {/* Outside the form on purpose: the upload is its own
+                          exchange, and a file input inside a server action
+                          would be posted along with the answer. A photograph
+                          can only be attached once the item has been recorded,
+                          because it hangs off that row. */}
+                      {!done && result ? (
+                        <div className="mt-3 border-t border-(--border) pt-3">
+                          <PhotoCapture resultId={result.resultId} count={result.photoCount ?? 0} />
+                        </div>
+                      ) : null}
                     </CardBody>
                   </Card>
                 );

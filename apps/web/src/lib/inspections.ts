@@ -14,6 +14,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { readUrlFor } from './storage';
 
 /**
  * Inspections, against the database.
@@ -182,7 +183,8 @@ export async function inspectionFor(orgId: string, inspectionId: string) {
 
   const items = await itemsOf(inspection.templateId);
 
-  const results: RecordedResult[] = inspection.results.map((row) => ({
+  const results: (RecordedResult & { resultId: string })[] = inspection.results.map((row) => ({
+    resultId: row.id,
     templateItemId: row.templateItemId ?? '',
     severity: row.severity as RecordedResult['severity'],
     note: row.note,
@@ -414,6 +416,84 @@ export async function completeInspection(input: {
     lines: lines.length,
     summary: describeCompletion(loaded.progress),
   };
+}
+
+/* ---------------------------------------------------------------------------
+   Photographs
+   --------------------------------------------------------------------------- */
+
+/**
+ * Records a photograph that has already been uploaded.
+ *
+ * The file went straight from the browser to the store; nothing of it passed
+ * through here. This writes the row that says where it is and what it belongs
+ * to, and it is the only step that touches the database.
+ *
+ * A photograph is what turns "your brake pads are worn" into something a
+ * customer can see for themselves, which is the difference between a quote
+ * that gets approved and one that gets a second opinion.
+ */
+export async function attachPhoto(input: {
+  orgId: string;
+  userId: string;
+  resultId: string;
+  key: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  caption?: string | null;
+}) {
+  const result = await prisma.inspectionResult.findFirstOrThrow({
+    where: { id: input.resultId, inspection: { job: { orgId: input.orgId } } },
+    select: { id: true, inspection: { select: { id: true, status: true } } },
+  });
+
+  if (result.inspection.status === 'COMPLETED') {
+    throw new InspectionError(
+      'ALREADY_COMPLETE',
+      'This inspection has gone to the customer, so nothing more can be added to it.',
+    );
+  }
+
+  const photo = await prisma.inspectionPhoto.create({
+    data: {
+      resultId: result.id,
+      url: input.key,
+      filename: input.filename.slice(0, 200),
+      mimeType: input.mimeType,
+      sizeBytes: input.sizeBytes,
+      caption: input.caption?.trim() || null,
+    },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'inspection.photo.added',
+    entityType: 'Inspection',
+    entityId: result.inspection.id,
+    after: { resultId: result.id, bytes: input.sizeBytes },
+  });
+
+  return photo.id;
+}
+
+/** The photographs on one inspection, with links that can actually be opened. */
+export async function photosFor(orgId: string, inspectionId: string) {
+  const rows = await prisma.inspectionPhoto.findMany({
+    where: { result: { inspectionId, inspection: { job: { orgId } } } },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, resultId: true, url: true, caption: true },
+  });
+
+  return Promise.all(
+    rows.map(async (row) => ({
+      id: row.id,
+      resultId: row.resultId,
+      caption: row.caption,
+      src: await readUrlFor(row.url),
+    })),
+  );
 }
 
 /* ---------------------------------------------------------------------------

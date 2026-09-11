@@ -95,9 +95,16 @@ Completing it turns what was found into quote lines in one transaction, each
 linked to the measurement behind it, and moves the job to waiting on the
 customer. `verify:inspection` walks the whole path.
 
-Photographs are the one part still absent. They need a file store, which is a
-vendor decision nobody has made, and a camera button that silently loses what
-it captures would be worse than not having one.
+Photographs work. The file goes straight from the camera to the store with a
+short-lived signed URL and never passes through the server, because a workshop
+picture is commonly three or four megabytes and a serverless request body caps
+well below that. The row is written only once the store confirms it holds the
+bytes.
+
+The store speaks S3, which R2, Amazon, Backblaze and MinIO all understand, so
+the vendor is a URL and two keys. R2 is the recommendation: inspection
+photographs are read far more often than written, and it charges nothing for
+egress.
 
 ## 6. Smart estimates
 
@@ -117,17 +124,17 @@ share links the owner controls. Repair tracking is the status timeline on
 
 ## 8. Technician app
 
-| Item                         | Status  | Note                                      |
-| ---------------------------- | ------- | ----------------------------------------- |
-| My jobs, mobile-first        | Built   | `/shop`                                   |
-| Start and stop the clock     | Built   | Was a button with no action until Phase 7 |
-| View instructions            | Built   |                                           |
-| View the inspection          | Built   | From the technician's own job list        |
-| Add notes                    | Built   |                                           |
-| Add or request parts         | Built   | Raises a purchase request against the job |
-| Upload photos                | Missing | Needs a file store choosing               |
-| Mark a task complete         | Built   |                                           |
-| Report an additional problem | Built   | Any item can be marked and quoted         |
+| Item                         | Status | Note                                       |
+| ---------------------------- | ------ | ------------------------------------------ |
+| My jobs, mobile-first        | Built  | `/shop`                                    |
+| Start and stop the clock     | Built  | Was a button with no action until Phase 7  |
+| View instructions            | Built  |                                            |
+| View the inspection          | Built  | From the technician's own job list         |
+| Add notes                    | Built  |                                            |
+| Add or request parts         | Built  | Raises a purchase request against the job  |
+| Upload photos                | Built  | Straight from the camera to the file store |
+| Mark a task complete         | Built  |                                            |
+| Report an additional problem | Built  | Any item can be marked and quoted          |
 
 Two buttons on this page do nothing when pressed. They are listed as missing
 rather than partial for that reason.
@@ -252,9 +259,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 48           |
+| Built   | 49           |
 | Partial | 8            |
-| Missing | 27           |
+| Missing | 26           |
 
 <!-- counts:end -->
 

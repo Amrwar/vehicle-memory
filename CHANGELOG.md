@@ -7,6 +7,32 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 7.1 - Inspection photographs.**
+
+The one part of the inspection left absent, because it needed a file store
+choosing. It now needs no choosing: the store speaks S3, which Cloudflare R2,
+Amazon, Backblaze and MinIO all understand, so the vendor is a URL and two
+keys rather than a code change. The same reasoning as picking SMTP over one
+email provider.
+
+- The file never passes through the server. The browser is handed a signed URL
+  valid for five minutes and uploads straight to the store, because a workshop
+  photograph is commonly three or four megabytes and a serverless request body
+  caps well below that. A server that proxied them would fail on exactly the
+  close-up pictures somebody took to prove a point.
+- The row is written only once the store confirms the bytes. A row pointing at
+  a file that is not there is the failure discovered when the customer asks to
+  see the picture.
+- Local disk is the default and is for development only. It refuses to run
+  when the store is set to S3 rather than quietly writing to a disk a
+  serverless host discards.
+- Reading is signed too, for an hour. An inspection photograph is a picture of
+  somebody's car with the registration in it, and an open bucket is one
+  somebody eventually indexes.
+- R2 is the recommendation. These photographs are read far more than written,
+  since every customer opens their report and every future buyer opens the
+  passport, and R2 charges nothing for egress where the others bill it.
+
 **Phase 7 - Digital vehicle inspection, and controls that do something.**
 
 Six inspection tables have existed since Phase 1 with nothing able to write to
