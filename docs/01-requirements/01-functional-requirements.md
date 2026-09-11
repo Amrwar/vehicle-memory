@@ -257,6 +257,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3400 — Proof of everything, and parts that fit
+
+| Ref     | Requirement                                                                                                                     | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3401 | Any audited record MUST be readable as its own history, oldest first, with who, what, when and what changed.                    | 13    |
+| FR-3402 | A history MUST show only fields that actually changed, and MUST NEVER display a credential, token or hash at any depth.         | 13    |
+| FR-3403 | A history MUST be scoped to the organisation, and MUST be refused outright for a type not on the readable list.                 | 13    |
+| FR-3404 | A part MUST be recordable as fitting named vehicles, with the source of the claim.                                              | 13    |
+| FR-3405 | Fitment MUST have three states. No data recorded MUST NOT read as fitting.                                                      | 13    |
+| FR-3406 | A job MUST warn where a part does not fit the vehicle, and MUST stay silent where it does.                                      | 13    |
+| FR-3407 | A fitment MUST name a make, MUST have a year range that runs forwards, and MUST NOT be recorded twice for the same description. | 13    |
+| FR-3408 | The audit log MUST remain immutable: no row may be altered or deleted by anybody.                                               | 13    |
+
 ## FR-3300 — The workshop plans itself
 
 | Ref     | Requirement                                                                                                              | Phase |

@@ -13,6 +13,8 @@ import {
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   KeyValue,
   Money,
   PageHeader,
@@ -24,11 +26,12 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
+import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +54,68 @@ export async function generateMetadata({
  * forty, and hiding that distinction is how people learn to distrust the
  * whole feature.
  */
-export default async function PartPage({ params }: { params: Promise<{ id: string }> }) {
+/**
+ * Records what this part fits. FR-3404.
+ *
+ * Typed by a person, because guessing fitment puts wrong parts on cars and
+ * the one who finds out is braking. When a fitment provider is wired in this
+ * is where its rows land too, distinguished by their source rather than by
+ * being somewhere else.
+ */
+async function addFitment(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+
+  const productId = String(formData.get('productId') ?? '');
+  const year = (name: string) => {
+    const raw = String(formData.get(name) ?? '').trim();
+    return raw ? Number(raw) : null;
+  };
+
+  try {
+    await recordFitment({
+      orgId,
+      userId: user.userId,
+      productId,
+      make: String(formData.get('make') ?? ''),
+      model: String(formData.get('model') ?? ''),
+      yearFrom: year('yearFrom'),
+      yearTo: year('yearTo'),
+      engineCode: String(formData.get('engineCode') ?? ''),
+      source: 'WORKSHOP',
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'That could not be recorded.';
+    redirect(`/parts/${productId}?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect(`/parts/${productId}`);
+}
+
+async function dropFitment(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+
+  const productId = String(formData.get('productId') ?? '');
+
+  await removeFitment({
+    orgId,
+    userId: user.userId,
+    fitmentId: String(formData.get('fitmentId') ?? ''),
+  });
+
+  redirect(`/parts/${productId}`);
+}
+
+export default async function PartPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { id } = await params;
   const { db, orgId } = await requireSession('inventory:read');
 
@@ -75,6 +139,9 @@ export default async function PartPage({ params }: { params: Promise<{ id: strin
   });
 
   if (!product) notFound();
+
+  const { error } = await searchParams;
+  const fitments = await fitmentsFor(orgId, id);
 
   const level = product.stockLevels[0];
   const position = {
@@ -308,6 +375,81 @@ export default async function PartPage({ params }: { params: Promise<{ id: strin
           ) : null}
         </aside>
       </div>
+
+      <Card className="mt-5 overflow-hidden">
+        <CardHeader
+          title="What it fits"
+          description="Nothing recorded is not the same as fits anything. A part with no rows here raises no warning either way."
+        />
+
+        {error ? (
+          <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
+            {error}
+          </CardBody>
+        ) : null}
+
+        {fitments.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            Nobody has recorded what this part fits. Until somebody does, putting it on a job raises
+            no warning, because silence here means unknown rather than approved.
+          </CardBody>
+        ) : (
+          <ul className="divide-y divide-(--border)">
+            {fitments.map((fitment) => (
+              <li
+                key={fitment.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5"
+              >
+                <div className="min-w-0">
+                  <span className="text-[13px] font-medium">
+                    {fitment.make}
+                    {fitment.model ? ` ${fitment.model}` : ''}
+                    {fitment.yearFrom || fitment.yearTo
+                      ? ` ${fitment.yearFrom ?? ''}–${fitment.yearTo ?? ''}`
+                      : ''}
+                  </span>
+                  <span className="block text-[11px] text-(--text-faint)">
+                    {fitment.engineCode ? `Engine ${fitment.engineCode} · ` : ''}
+                    {fitment.source.toLowerCase()} · {fitment.createdBy?.name ?? 'unknown'}
+                  </span>
+                </div>
+
+                <form action={dropFitment}>
+                  <input type="hidden" name="productId" value={id} />
+                  <input type="hidden" name="fitmentId" value={fitment.id} />
+                  <Button type="submit" size="sm" variant="secondary">
+                    Remove
+                  </Button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form action={addFitment} className="border-t border-(--border)">
+          <input type="hidden" name="productId" value={id} />
+          <CardBody className="grid gap-3 sm:grid-cols-[1fr_1fr_5rem_5rem_1fr_auto] sm:items-end">
+            <Field label="Make">
+              <Input name="make" required placeholder="Honda" />
+            </Field>
+            <Field label="Model" hint="Blank means every model.">
+              <Input name="model" placeholder="Civic" />
+            </Field>
+            <Field label="From">
+              <Input type="number" name="yearFrom" min={1885} max={2200} placeholder="2018" />
+            </Field>
+            <Field label="To">
+              <Input type="number" name="yearTo" min={1885} max={2200} placeholder="2022" />
+            </Field>
+            <Field label="Engine" hint="Where one model spans two.">
+              <Input name="engineCode" placeholder="L15B7" />
+            </Field>
+            <Button type="submit" variant="primary">
+              Record
+            </Button>
+          </CardBody>
+        </form>
+      </Card>
     </>
   );
 }

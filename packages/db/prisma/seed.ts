@@ -1872,6 +1872,10 @@ async function main() {
 
   await seedMessages(org.id);
 
+  /* --- what the parts fit (Phase 13) -------------------------------------- */
+
+  await seedFitment(org.id, products);
+
   /* --- who can do what, and when they are here (Phase 12) ----------------- */
 
   await seedSkillsAndPatterns(org.id, { employees: employeeRefs, jobTypeByName });
@@ -3551,5 +3555,71 @@ async function seedSkillsAndPatterns(
         },
       });
     }
+  }
+}
+
+/**
+ * What the parts fit. Phase 13.
+ *
+ * Only some of them, deliberately. A seeded database where every part has
+ * fitment data would show the feature working and hide the state a real
+ * workshop is in on its first day, which is that most parts have none. The
+ * screens have to read well in both, and the BMW pads carry a claim that
+ * excludes the Toyota so the warning itself can be seen doing something.
+ */
+async function seedFitment(orgId: string, products: { id: string; partNumber: string }[]) {
+  const claims: {
+    partNumber: string;
+    make: string;
+    model?: string;
+    yearFrom?: number;
+    yearTo?: number;
+    source: 'MANUFACTURER' | 'SUPPLIER' | 'WORKSHOP' | 'OBSERVED';
+  }[] = [
+    // A real catalogue claim, narrow enough to exclude the wrong car.
+    {
+      partNumber: '34116794300',
+      make: 'BMW',
+      model: 'X5',
+      yearFrom: 2018,
+      yearTo: 2023,
+      source: 'MANUFACTURER',
+    },
+    {
+      partNumber: '34116864059',
+      make: 'BMW',
+      model: '320d',
+      yearFrom: 2015,
+      yearTo: 2021,
+      source: 'MANUFACTURER',
+    },
+    { partNumber: 'TOY-0W20-5L', make: 'Toyota', source: 'SUPPLIER' },
+    {
+      partNumber: '04152-YZZA1',
+      make: 'Toyota',
+      model: 'Corolla',
+      yearFrom: 2018,
+      source: 'SUPPLIER',
+    },
+    // Recorded by somebody here rather than a catalogue, which is worth less
+    // and is shown as worth less.
+    { partNumber: '87139-0D070', make: 'Toyota', model: 'Corolla', source: 'WORKSHOP' },
+  ];
+
+  for (const claim of claims) {
+    const product = products.find((entry) => entry.partNumber === claim.partNumber);
+    if (!product) continue;
+
+    await prisma.partFitment.create({
+      data: {
+        orgId,
+        productId: product.id,
+        make: claim.make,
+        model: claim.model ?? null,
+        yearFrom: claim.yearFrom ?? null,
+        yearTo: claim.yearTo ?? null,
+        source: claim.source,
+      },
+    });
   }
 }

@@ -204,6 +204,12 @@ jobs:
       - name: Verify capacity, skills and the proposed day
         run: npx tsx infra/scripts/verify-planning.ts
 
+      # Two ways this leaks. One workshop reading another's history by
+      # guessing an id, and a secret some caller writes into an audit payload
+      # years from now reaching a screen. Both are checked against real rows.
+      - name: Verify a record's history, and that a part belongs on the car
+        run: npx tsx infra/scripts/verify-provenance.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

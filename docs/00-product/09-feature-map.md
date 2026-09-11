@@ -153,8 +153,17 @@ quantity, minimum stock, bin location, weighted average cost, reservations,
 stocktakes, and every movement traceable. Multi-location with transfers and
 in-transit stock counted in group value.
 
-Missing: which vehicles a part fits. That needs a fitment source, and guessing
-it puts wrong parts on cars.
+| Item                   | Status  | Where                                            |
+| ---------------------- | ------- | ------------------------------------------------ |
+| Which vehicles it fits | Built   | On the part, with the source of each claim       |
+| Warning on a job       | Built   | Fires on a mismatch, silent on a match           |
+| No data recorded       | Built   | Reads as unknown, never as fitting               |
+| A fitment feed         | Missing | Needs a provider. Rows are typed by a person now |
+
+The three states matter more than the feature. A screen that showed nothing
+when it had no data would teach somebody that no warning means the part is
+right, and the day it has data for one part and not another, the silence would
+mean two different things with no way to tell which.
 
 ## 10. Purchasing
 
@@ -301,6 +310,18 @@ makes this mostly a question of routing rather than of new arithmetic.
 role. The grouping differs from the one proposed, mostly because several
 proposed sections do not exist yet.
 
+## 21.5 The record's own history
+
+| Item                           | Status | Where                                          |
+| ------------------------------ | ------ | ---------------------------------------------- |
+| Any record read as a life      | Built  | `/audit/[type]/[id]`, oldest first             |
+| Who, what, when, before, after | Built  | Recorded since Phase 1, now readable           |
+| What actually changed          | Built  | Field by field, unchanged fields left out      |
+| Where it came from             | Built  | Device and address, no guessed location        |
+| Credentials on screen          | Built  | Redacted at any depth, by the shape of the key |
+| The chain behind a vehicle     | Built  | Shown apart, because it is a stronger claim    |
+| Immutability                   | Built  | The database refuses to alter or delete a row  |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -321,9 +342,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 94           |
+| Built   | 104          |
 | Partial | 3            |
-| Missing | 17           |
+| Missing | 18           |
 
 <!-- counts:end -->
 

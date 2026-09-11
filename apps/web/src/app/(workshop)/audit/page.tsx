@@ -16,6 +16,7 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 import { requireSession } from '@/lib/guard';
+import { READABLE } from '@/lib/provenance';
 
 export const metadata: Metadata = { title: 'Audit log' };
 export const dynamic = 'force-dynamic';
@@ -138,7 +139,16 @@ export default async function AuditPage({
                       </Badge>
                     </Td>
                     <Td className="text-(--text-soft)">
-                      {entry.entityType}
+                      {READABLE[entry.entityType] ? (
+                        <Link
+                          href={`/audit/${entry.entityType}/${entry.entityId}`}
+                          className="hover:text-(--brand-text) hover:underline"
+                        >
+                          {entry.entityType}
+                        </Link>
+                      ) : (
+                        entry.entityType
+                      )}
                       <span className="datum ml-2 text-[11px] text-(--text-faint)">
                         {entry.entityId.slice(-8)}
                       </span>

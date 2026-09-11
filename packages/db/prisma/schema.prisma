@@ -99,6 +99,7 @@ model Organization {
   warranties          Warranty[]
   skills              Skill[]
   workingPatterns     WorkingPattern[]
+  partFitments        PartFitment[]
 
   @@index([isActive])
   @@map("organizations")
@@ -217,6 +218,7 @@ model User {
   warranties          Warranty[]
   warrantyClaims      WarrantyClaim[]
   skillAssessments    EmployeeSkill[]
+  partFitments        PartFitment[]
 
   @@index([isActive])
   @@map("users")
@@ -1721,6 +1723,7 @@ model Product {
   transferLines StockTransferLine[]
   saleLines     CounterSaleLine[]
   warranties    Warranty[]
+  fitments      PartFitment[]
 
   @@unique([orgId, partNumber])
   @@index([orgId, isActive])
@@ -2359,6 +2362,52 @@ model WorkingPattern {
   @@unique([employeeId, weekday])
   @@index([orgId, weekday])
   @@map("working_patterns")
+}
+
+/// Where a fitment claim came from, which changes how much it is worth.
+enum FitmentSource {
+  /// The manufacturer's own catalogue.
+  MANUFACTURER
+  /// A supplier's catalogue.
+  SUPPLIER
+  /// Somebody here typed it in.
+  WORKSHOP
+  /// Inferred from this workshop having fitted one before.
+  OBSERVED
+}
+
+/// Which vehicles a part fits.
+///
+/// Deliberately not inferred from anything. Guessing which pads fit a
+/// particular car puts the wrong pads on it, and the person who finds out is
+/// braking. Until a fitment provider is wired in these rows come from a
+/// person, and the absence of a row means nobody has said rather than that
+/// the part does not fit.
+model PartFitment {
+  id         String        @id @default(cuid())
+  orgId      String
+  productId  String
+  make       String
+  model      String?
+  /// Inclusive. Null at either end is open in that direction.
+  yearFrom   Int?
+  yearTo     Int?
+  /// Narrows further where one model spans two engines.
+  engineCode String?
+  source     FitmentSource @default(WORKSHOP)
+  note       String?
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdBy User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([orgId, make, model])
+  @@map("part_fitments")
 }
 
 enum CommissionBasis {

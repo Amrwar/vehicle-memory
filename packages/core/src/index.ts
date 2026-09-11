@@ -4,6 +4,7 @@ export * from './passport/index';
 export * from './vehicle/index';
 export * from './pricing/index';
 export * from './inspection/index';
+export * from './audit/index';
 export * from './inventory/index';
 export * from './accounting/index';
 export * from './scheduling/index';

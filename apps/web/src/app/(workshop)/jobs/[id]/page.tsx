@@ -38,6 +38,7 @@ import { notFound } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
+import { fitmentWarningsForJob } from '@/lib/provenance';
 import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
@@ -111,7 +112,12 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   // against it. The moment somebody needs to know is the moment the job is
   // open, not a month later when the invoice is written and the part has been
   // paid for twice.
-  const cover = await coverWorthChecking(orgId, job.vehicle.id);
+  const [cover, misfits] = await Promise.all([
+    coverWorthChecking(orgId, job.vehicle.id),
+    // Only the lines worth interrupting somebody for. A screen that confirmed
+    // every correct part would train them to dismiss the one that matters.
+    fitmentWarningsForJob(orgId, job.id),
+  ]);
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
   const stages = progressFor(job.status as JobStatus, reached);
@@ -220,6 +226,9 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
         description={job.shortDescription}
         actions={
           <>
+            <Link href={`/audit/Job/${job.id}`}>
+              <Button variant="secondary">How this came to be</Button>
+            </Link>
             <Link href={`/vehicles/${job.vehicle.id}`}>
               <Button>Vehicle passport</Button>
             </Link>
@@ -229,6 +238,24 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
           </>
         }
       />
+
+      {misfits.length > 0 ? (
+        <Alert
+          tone={
+            misfits.some((entry) => entry.result.verdict === 'DOES_NOT_FIT') ? 'danger' : 'warning'
+          }
+          title="Check these parts against this vehicle"
+          className="mb-5"
+        >
+          <ul className="mt-1 grid gap-1">
+            {misfits.map((entry) => (
+              <li key={entry.lineId}>
+                <strong className="font-semibold">{entry.description}</strong> {entry.result.why}
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      ) : null}
 
       {cover.length > 0 ? (
         <Alert tone="info" title="This vehicle has work still under warranty" className="mb-5">

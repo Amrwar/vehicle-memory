@@ -95,9 +95,14 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
         title={customer.displayName}
         description={customer.sourceOfBusiness ? `Source: ${customer.sourceOfBusiness}` : undefined}
         actions={
-          <Link href={`/jobs/new?customer=${customer.id}`}>
-            <Button variant="primary">New job</Button>
-          </Link>
+          <>
+            <Link href={`/audit/Customer/${customer.id}`}>
+              <Button variant="secondary">How this came to be</Button>
+            </Link>
+            <Link href={`/jobs/new?customer=${customer.id}`}>
+              <Button variant="primary">New job</Button>
+            </Link>
+          </>
         }
       />
 

@@ -82,6 +82,7 @@ const PAGES = [
   '/plan',
   '/skills',
   '/patterns',
+  '/audit',
   '/fleet',
   '/bookings/new',
   '/suppliers/new',

@@ -145,6 +145,9 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
         description={vehicle.variant ?? undefined}
         actions={
           <>
+            <Link href={`/audit/Vehicle/${vehicle.id}`}>
+              <Button variant="secondary">How this came to be</Button>
+            </Link>
             <Link href={`/vehicles/${vehicle.id}/report`}>
               <Button>Buyer report</Button>
             </Link>

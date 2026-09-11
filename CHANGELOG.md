@@ -7,6 +7,51 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 13 - Proof of everything, and parts that fit.**
+
+The product is sold on the claim that its records can be trusted. A claim like
+that is only worth something if anybody can open a record and read how it came
+to be what it is.
+
+- Any audited record now has its own page: created, changed, sent, approved,
+  converted, with who did it, when, from what kind of device, and what each
+  action actually changed. All of it has been recorded since Phase 1 and
+  nothing ever read it back except one page mixing the whole organisation
+  together. That page answers what happened this morning; this one answers
+  what happened to this quote, which is the question somebody asks while a
+  customer is on the telephone disputing it.
+- Read oldest first, unlike the customer thread. A thread is caught up with; a
+  life is read from the beginning, because the question is how it got here.
+- Only fields that actually moved are shown. An entry listing forty unchanged
+  fields buries the one that changed, which is the reason it was opened.
+- No credential ever reaches the screen. Audit payloads are written by many
+  callers over years, and the day one includes a token is the day this page
+  would publish it. Redaction is by the shape of the key at any depth, not a
+  list of names that would be out of date the first time somebody added a
+  field.
+- A history is scoped to the organisation and refused outright for a record
+  type nobody put on the readable list, because the type arrives from a URL.
+- A vehicle's hash chain is shown beside its audit history and never mixed
+  into it. One says a person did something; the other says a fact was recorded
+  and cannot now be altered. Presenting them as one list would make the weaker
+  claim look like the stronger one.
+- Parts can now record which vehicles they fit, with the source of each claim,
+  and a job warns when a part does not fit the car it is going on.
+- Three states, never two. It fits, it does not fit, or nobody has said. A
+  screen that showed nothing when it had no data would teach somebody that no
+  warning means the part is right, and the day it has data for one part and
+  not another, the silence would mean two different things.
+- A workshop's own observation is rated below a supplier catalogue and says so.
+  Presenting both as "fits" would be lying by omission.
+- A missing year on a vehicle never excludes a part. Reporting a perfectly
+  good part as wrong is what makes people stop reading the warnings.
+- Four rules sit in the database: a fitment names a make, its years run
+  forwards and fall inside the years cars have existed, and the same claim
+  cannot be recorded twice for one part whatever the capitals.
+- The audit log's immutability, which has been enforced by a trigger since
+  Phase 1, is now actually tested: the probe tries to delete its own rows and
+  the database refuses.
+
 **Phase 12 - The workshop plans itself.**
 
 Every capacity decision in the product has been standing on a figure called
