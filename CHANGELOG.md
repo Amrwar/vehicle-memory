@@ -7,6 +7,53 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 9 - Warranty, fleets and the whole story.**
+
+Three sets of records the product already held, turned into something a person
+can act on.
+
+- `/warranty` records what the workshop is standing behind: the part or the
+  labour, the job that fitted it, the date it started, the term in months and
+  the mileage allowance. Cover ends on time or on distance, whichever comes
+  first.
+- The supplier's own term is recorded beside the workshop's, and that is the
+  point of the screen. The expensive mistake is quiet: replace a part under
+  your own warranty while the supplier's warranty on the same part is still
+  running, absorb the cost, and never claim it back. Nothing in an ordinary
+  system points that out, because nothing holds both dates in one place.
+- The figure at the top of the page is not the value of the claims. It is the
+  part of them nobody else will cover, which is the only number that comes out
+  of the workshop's own pocket.
+- A claim outside cover is allowed, because a workshop does them and should.
+  What it may not be is invisible: it is recorded as goodwill and carries a
+  stated reason, which is what a manager reads when the goodwill adds up to a
+  month's profit.
+- One warranty carries at most one open claim. Two means two people chasing
+  the same supplier about the same part, and the second is how a workshop gets
+  told it has already been dealt with.
+- Six rules sit in the database rather than only in the code that writes
+  these rows, because a warranty outlives the code: a term of at least a
+  month, a mileage allowance only with the reading it counts from, a void only
+  with a person a time and a reason, goodwill only with a reason, a settled
+  claim only with a time and an outcome, and one open claim per warranty.
+  `verify-warranty.ts` proves each of the six by trying it.
+- Recording supplier months without naming a supplier used to produce cover
+  that read as a term somebody owed and claimed nothing back. It is now
+  dropped rather than stored.
+- `/fleet` reads company customers with more than one vehicle. There is no
+  fleet record, deliberately: a second place for a vehicle to belong is an
+  eventual argument about which one is right. A fleet is ordered by what needs
+  deciding, not by registration, so a quote nobody has answered sits above a
+  van that is fine.
+- A customer page now carries the whole story: every visit, quote, decision,
+  invoice, payment, booking and message on one thread, newest first. All of it
+  existed already, on four separate screens, and anybody asking what happened
+  with a customer had to hold the dates in their head.
+- Messages are shown separately from that thread because they are matched on
+  the address rather than joined on an id. Mixing a certain record with a
+  probable one makes the whole thing less trustworthy than either.
+- The vehicle page shows what is still covered on that vehicle.
+
 **Phase 8 - The diary and the floor.**
 
 The diary had one view, a week laid out by bay. That answers "is Thursday

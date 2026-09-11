@@ -49,18 +49,18 @@ says why.
 
 ## 3. Customer CRM
 
-| Item                    | Status  | Where                                                |
-| ----------------------- | ------- | ---------------------------------------------------- |
-| Contact, vehicles, jobs | Built   | `/customers/[id]`                                    |
-| Invoices, payments      | Built   | Same page                                            |
-| Quotes                  | Built   | Same page                                            |
-| Communication history   | Partial | `/messages` is org-wide, not per customer            |
-| Notes                   | Built   | On the customer and on jobs                          |
-| Loyalty points          | Missing | See section 17                                       |
-| Service reminders       | Built   | `/reminders`                                         |
-| Customer lifetime value | Built   | `/crm`, by cohort                                    |
-| Preferred technician    | Missing |                                                      |
-| Customer timeline       | Missing | The events exist; nothing renders them as one thread |
+| Item                    | Status  | Where                                                  |
+| ----------------------- | ------- | ------------------------------------------------------ |
+| Contact, vehicles, jobs | Built   | `/customers/[id]`                                      |
+| Invoices, payments      | Built   | Same page                                              |
+| Quotes                  | Built   | Same page                                              |
+| Communication history   | Built   | On the customer, matched on the address it was sent to |
+| Notes                   | Built   | On the customer and on jobs                            |
+| Loyalty points          | Missing | See section 17                                         |
+| Service reminders       | Built   | `/reminders`                                           |
+| Customer lifetime value | Built   | `/crm`, by cohort                                      |
+| Preferred technician    | Missing |                                                        |
+| Customer timeline       | Built   | "The whole story" on `/customers/[id]`, newest first   |
 
 ## 4. Vehicle management
 
@@ -73,7 +73,7 @@ says why.
 | Parts replaced             | Built   | Through job lines                             |
 | Inspections                | Built   | Carried out on a tablet, sent to the customer |
 | Upcoming maintenance       | Built   | Service schedules                             |
-| Warranty information       | Missing | See section 14                                |
+| Warranty information       | Built   | On the vehicle, and in full at `/warranty`    |
 | Insurance information      | Missing |                                               |
 | Photos                     | Missing |                                               |
 | Documents                  | Missing |                                               |
@@ -193,13 +193,38 @@ does, a menu on the card also does, for a keyboard or a phone.
 
 ## 14. Warranty management
 
-**Missing entirely.** No model, no page. Parts warranty, labour warranty,
-expiry, claims.
+| Item                      | Status | Where                                             |
+| ------------------------- | ------ | ------------------------------------------------- |
+| Parts and labour warranty | Built  | `/warranty`, cover recorded as a job closes       |
+| Expiry by time            | Built  | Month arithmetic that survives month-ends         |
+| Expiry by distance        | Built  | Refused without the reading it counts from        |
+| What is running out       | Built  | Inside thirty days, at the top of the page        |
+| Claims                    | Built  | One open at a time, settled with a stated outcome |
+| Goodwill outside cover    | Built  | Allowed, recorded as goodwill, reason required    |
+| Supplier's own cover      | Built  | Held beside the workshop's, so it can be claimed  |
+| What the workshop carries | Built  | The part of open claims nobody else will cover    |
+
+The screen exists for one quiet, expensive mistake: replacing a part under the
+workshop's own warranty while the supplier's warranty on the same part is
+still running, absorbing the cost, and never claiming it back. No ordinary
+system points that out, because nothing holds both dates in one place.
 
 ## 15. Fleet management
 
-**Missing entirely.** A company with fifty vehicles is currently fifty
-unrelated customer records.
+| Item                     | Status  | Where                                          |
+| ------------------------ | ------- | ---------------------------------------------- |
+| Company accounts         | Built   | `/fleet`, a company with more than one vehicle |
+| Vehicles per account     | Built   | Derived from what the company has brought in   |
+| Off the road right now   | Built   | In the workshop at this minute                 |
+| Due and overdue services | Built   | The number a fleet manager is measured on      |
+| Waiting on a decision    | Built   | Quotes nobody at the company has answered      |
+| Spend                    | Built   | Last thirty days, and per vehicle              |
+| Fleet pricing agreements | Missing | Rates are per organisation, not per account    |
+| Consolidated invoicing   | Missing | One invoice per job, not one per fleet a month |
+
+There is no separate fleet record, deliberately. A fleet is a company customer
+with several vehicles, and inventing another entity would give a vehicle two
+places to belong and an eventual argument about which one is right.
 
 ## 16. Communication centre
 
@@ -266,9 +291,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 60           |
-| Partial | 5            |
-| Missing | 18           |
+| Built   | 77           |
+| Partial | 4            |
+| Missing | 16           |
 
 <!-- counts:end -->
 

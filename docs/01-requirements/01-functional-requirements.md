@@ -257,6 +257,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3000 — Warranty, fleets and the whole story
+
+| Ref     | Requirement                                                                                                                   | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3001 | The system MUST record what the workshop stands behind, on what date and to what mileage, and MUST show what is running out.  | 9     |
+| FR-3002 | Cover MUST end on time or on distance, whichever comes first, and distance MUST NOT count without the reading it starts from. | 9     |
+| FR-3003 | The supplier's own term MUST be recorded alongside the workshop's, so a claim recoverable from a supplier is never absorbed.  | 9     |
+| FR-3004 | A claim outside cover MUST be allowed, MUST be recorded as goodwill, and MUST carry a stated reason.                          | 9     |
+| FR-3005 | One warranty MUST carry at most one open claim, and a settled claim MUST carry a time and an outcome.                         | 9     |
+| FR-3006 | Cover MUST NOT be voided without a person, a time and a reason.                                                               | 9     |
+| FR-3010 | A company with more than one vehicle MUST be readable as a fleet, without a separate record of ownership to maintain.         | 9     |
+| FR-3011 | A fleet MUST be ordered by what needs deciding, not by registration.                                                          | 9     |
+| FR-3012 | A customer's visits, quotes, decisions, invoices, payments and messages MUST be readable as one thread, newest first.         | 9     |
+
 ## FR-2900 — The diary and the floor
 
 | Ref     | Requirement                                                                                                       | Phase |

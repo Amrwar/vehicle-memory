@@ -176,6 +176,13 @@ jobs:
       - name: Verify an inspection becomes a quote
         run: npx tsx infra/scripts/verify-inspection.ts
 
+      # A warranty is a promise the workshop is held to a year after everybody
+      # has forgotten making it, so the rows outlive the code that wrote them.
+      # The check is that the database itself refuses the six shapes of row
+      # that would make the warranty book lie.
+      - name: Verify warranty cover, claims and who owes what
+        run: npx tsx infra/scripts/verify-warranty.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

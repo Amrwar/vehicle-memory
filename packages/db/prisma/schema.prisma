@@ -96,6 +96,7 @@ model Organization {
   bankAccounts        BankAccount[]
   automationRules     AutomationRule[]
   campaigns           Campaign[]
+  warranties          Warranty[]
 
   @@index([isActive])
   @@map("organizations")
@@ -211,6 +212,8 @@ model User {
   timesheetApprovals  Timesheet[]          @relation("TimesheetApprover")
   transfersDispatched StockTransfer[]      @relation("TransferDispatcher")
   transfersReceived   StockTransfer[]      @relation("TransferReceiver")
+  warranties          Warranty[]
+  warrantyClaims      WarrantyClaim[]
 
   @@index([isActive])
   @@map("users")
@@ -364,6 +367,7 @@ model Vehicle {
   bookings         Booking[]
   jobs             Job[]
   serviceSchedules ServiceSchedule[]
+  warranties       Warranty[]
 
   @@index([registration])
   @@index([make, model, year])
@@ -901,6 +905,8 @@ model Job {
   estimates        Estimate[]
   invoices         Invoice[]
   purchaseRequests PurchaseRequest[]
+  warranties       Warranty[]
+  warrantyClaims   WarrantyClaim[]   @relation("ClaimRemedy")
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -1710,6 +1716,7 @@ model Product {
   poLines       PurchaseOrderLine[]
   transferLines StockTransferLine[]
   saleLines     CounterSaleLine[]
+  warranties    Warranty[]
 
   @@unique([orgId, partNumber])
   @@index([orgId, isActive])
@@ -1821,6 +1828,7 @@ model Supplier {
   org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   purchaseOrders PurchaseOrder[]
   bills          SupplierBill[]
+  warranties     Warranty[]
 
   @@unique([orgId, name])
   @@map("suppliers")
@@ -2847,4 +2855,112 @@ model ConsentChange {
 
   @@index([customerId, changedAt])
   @@map("consent_changes")
+}
+
+/**
+ * ===========================================================================
+ * Warranty (Phase 9)
+ * ===========================================================================
+ */
+
+enum CoverKind {
+  PART
+  LABOUR
+}
+
+/// What a workshop stands behind, and for how long.
+///
+/// Cover runs from the day the work was done, not the day the part was sold,
+/// and it runs out two ways: a period and a distance, whichever comes first. A
+/// van reaches twenty thousand miles in five months, so a check that reads
+/// only the calendar gives away a year of free parts.
+model Warranty {
+  id             String    @id @default(cuid())
+  orgId          String
+  jobId          String
+  vehicleId      String
+  kind           CoverKind
+  description    String
+  /// The part it covers, where it covers one.
+  productId      String?
+  /// When the work was done. Cover is measured from here.
+  startedOn      DateTime
+  months         Int
+  /// Mileage allowance, where the warranty has one.
+  km             Int?
+  /// The odometer at fitting, needed to measure distance since.
+  startedAtKm    Int?
+  /// What the customer was charged, split because a supplier warrants the
+  /// component and never the hour spent fitting it again.
+  partsValue     Decimal   @default(0) @db.Decimal(12, 2)
+  labourValue    Decimal   @default(0) @db.Decimal(12, 2)
+  /// The supplier standing behind it, and for how long. This is what turns a
+  /// goodwill repair into a recoverable one.
+  supplierId     String?
+  supplierMonths Int?
+  /// Set when somebody voids it. The reason is required by a check
+  /// constraint: a warranty that stopped applying for no stated reason is
+  /// indistinguishable from one somebody cancelled to avoid a claim.
+  voidedAt       DateTime?
+  voidedReason   String?
+  voidedByUserId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  org      Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job      Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  product  Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  supplier Supplier?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  voidedBy User?           @relation(fields: [voidedByUserId], references: [id], onDelete: SetNull)
+  claims   WarrantyClaim[]
+
+  @@index([orgId, startedOn])
+  @@index([vehicleId])
+  @@index([jobId])
+  @@map("warranties")
+}
+
+enum ClaimStatus {
+  OPEN
+  ACCEPTED
+  REJECTED
+  SETTLED
+}
+
+/// Somebody saying the work did not hold.
+///
+/// A claim can be raised against expired cover, because a workshop does settle
+/// those out of goodwill and that decision is worth recording rather than
+/// hiding. What the database insists on is that a goodwill claim says why.
+model WarrantyClaim {
+  id             String      @id @default(cuid())
+  warrantyId     String
+  status         ClaimStatus @default(OPEN)
+  /// What the customer reported.
+  complaint      String
+  /// Why it is being entertained at all, when cover had run out.
+  goodwillReason String?
+  /// True when the cover had already expired at the moment it was raised.
+  outsideCover   Boolean     @default(false)
+  /// What the workshop expects to carry once the supplier has paid whatever
+  /// they will. Recorded at the time, because supplier cover moves on.
+  exposure       Decimal     @default(0) @db.Decimal(12, 2)
+  recoverable    Decimal     @default(0) @db.Decimal(12, 2)
+  /// Set when the supplier has been asked, and what they said.
+  supplierRef    String?
+  outcome        String?
+  raisedByUserId String?
+  raisedAt       DateTime    @default(now())
+  settledAt      DateTime?
+  /// The job that put it right, where one was raised.
+  remedyJobId    String?
+
+  warranty  Warranty @relation(fields: [warrantyId], references: [id], onDelete: Cascade)
+  raisedBy  User?    @relation(fields: [raisedByUserId], references: [id], onDelete: SetNull)
+  remedyJob Job?     @relation("ClaimRemedy", fields: [remedyJobId], references: [id], onDelete: SetNull)
+
+  @@index([warrantyId, raisedAt])
+  @@index([status])
+  @@map("warranty_claims")
 }

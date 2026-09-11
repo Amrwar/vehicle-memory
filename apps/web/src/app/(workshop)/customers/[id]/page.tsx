@@ -19,6 +19,7 @@ import { notFound } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { messagesFor, timelineFor } from '@/lib/timeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,13 @@ export async function generateMetadata({
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { db, orgId } = await requireSession('customer:read');
+
+  const { id: customerId } = await params;
+
+  const [timeline, messages] = await Promise.all([
+    timelineFor(orgId, customerId),
+    messagesFor(orgId, customerId),
+  ]);
 
   const customer = await db.customer.findUnique({
     where: { id },
@@ -267,6 +275,91 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
           </Card>
         </aside>
       </div>
+
+      {/* Everything that has happened, as one thread.
+
+          Each of these events was already in the database and each lived on
+          its own screen: visits under jobs, quotes under estimates, money
+          under payments. Somebody asking "what happened with this customer"
+          had to open four pages and hold the dates in their head. */}
+      <Card className="mt-6 overflow-hidden">
+        <CardHeader
+          title="The whole story"
+          description="Every visit, quote, decision and payment, newest first."
+        />
+        {timeline.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            Nothing has happened yet. The thread fills itself as this customer is dealt with.
+          </CardBody>
+        ) : (
+          <ol className="divide-y divide-(--border-soft)">
+            {timeline.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5"
+              >
+                <span className="w-24 shrink-0 text-[12px] tabular-nums text-(--text-faint)">
+                  {entry.at.toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: '2-digit',
+                  })}
+                </span>
+
+                <span className="min-w-0 flex-1 text-[13px]">
+                  {entry.href ? (
+                    <Link href={entry.href} className="hover:text-(--brand-text) hover:underline">
+                      {entry.title}
+                    </Link>
+                  ) : (
+                    entry.title
+                  )}
+                  {entry.detail ? (
+                    <span className="ml-2 text-[11px] text-(--text-faint)">{entry.detail}</span>
+                  ) : null}
+                </span>
+
+                {entry.amount !== null && entry.amount !== undefined ? (
+                  <span className="text-[13px] font-medium tabular-nums">
+                    <Money amount={entry.amount} />
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        )}
+      </Card>
+
+      {/* Kept apart from the thread above on purpose. These are matched on the
+          address rather than joined on an id, and mixing a certain record with
+          a probable one would make both less trustworthy. */}
+      {messages.length > 0 ? (
+        <Card className="mt-6 overflow-hidden">
+          <CardHeader
+            title="What they were sent"
+            description="Matched on the address on file, so it is a close record rather than a certain one."
+          />
+          <ul className="divide-y divide-(--border-soft)">
+            {messages.map((message) => (
+              <li key={message.id} className="px-4 py-2.5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-[13px] font-medium">
+                    {message.subject ?? message.body.slice(0, 60)}
+                  </span>
+                  <span className="text-[11px] text-(--text-faint)">
+                    {message.channel.toLowerCase()} ·{' '}
+                    {(message.sentAt ?? message.createdAt).toLocaleDateString('en-GB')}
+                    {message.status === 'FAILED' ? ' · did not arrive' : ''}
+                  </span>
+                </div>
+                {message.error ? (
+                  <p className="mt-0.5 text-[11px] text-(--danger)">{message.error}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
     </>
   );
 }

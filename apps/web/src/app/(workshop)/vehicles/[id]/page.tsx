@@ -30,6 +30,7 @@ import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
+import { coverForVehicle } from '@/lib/warranty';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +81,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
 
   if (!vehicle) notFound();
 
-  const [jobs, verification] = await Promise.all([
+  const [jobs, verification, covers] = await Promise.all([
     db.job.findMany({
       where: { vehicleId: id },
       orderBy: { createdAt: 'desc' },
@@ -88,6 +89,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
       include: { customer: { select: { displayName: true } } },
     }),
     verifyVehicleChain(id),
+    coverForVehicle(orgId, id),
   ]);
 
   const kmPerDay = averageKmPerDay(
@@ -330,6 +332,41 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
                     <p className="datum text-[11px] text-(--text-faint)">
                       {job.createdAt.toLocaleDateString('en-GB')}
                     </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="Under warranty"
+              description="What this workshop is still standing behind on this vehicle."
+            />
+            {covers.length === 0 ? (
+              <CardBody className="text-[13px] text-(--text-soft)">
+                Nothing recorded. Cover is written as a job closes.
+              </CardBody>
+            ) : (
+              <ul className="divide-y divide-(--border)">
+                {covers.map((entry) => (
+                  <li key={entry.row.id} className="px-4 py-2.5 text-[13px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium">{entry.row.description}</span>
+                      <Badge
+                        tone={
+                          entry.status.active
+                            ? entry.status.daysLeft <= 30
+                              ? 'warning'
+                              : 'success'
+                            : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {entry.status.active ? `${entry.status.daysLeft}d left` : 'expired'}
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-(--text-faint)">{entry.status.summary}</p>
                   </li>
                 ))}
               </ul>

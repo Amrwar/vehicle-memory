@@ -55,10 +55,12 @@ const GROUPS: Group[] = [
       { href: '/floor', label: 'The floor', icon: 'floor', permission: 'diary:read' },
       { href: '/jobs', label: 'Jobs', icon: 'jobs', permission: 'job:read' },
       { href: '/inspections', label: 'Inspections', icon: 'inspections', permission: 'job:read' },
+      { href: '/warranty', label: 'Warranty', icon: 'warranty', permission: 'job:read' },
       { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
       { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
       { href: '/reminders', label: 'Reminders', icon: 'reminders', permission: 'customer:read' },
       { href: '/crm', label: 'Relationships', icon: 'crm', permission: 'customer:read' },
+      { href: '/fleet', label: 'Fleets', icon: 'fleet', permission: 'customer:read' },
     ],
   },
   {

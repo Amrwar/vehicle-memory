@@ -1872,6 +1872,20 @@ async function main() {
 
   await seedMessages(org.id);
 
+  /* --- a fleet, and the cover the workshop stands behind (Phase 9) -------- */
+
+  await seedFleetAndWarranty(org.id, {
+    locationId: location.id,
+    bayIds: bays.map((bay) => bay.id),
+    customerId: pennine.id,
+    transitId: transit.id,
+    supplierId: euroCarParts.id,
+    ownerUserId: ahmed!.id,
+    technicianUserId: john!.id,
+    advisorUserId: sara!.id,
+    firstJobNumber: 10_483,
+  });
+
   /* --- the quote link the customer was sent ------------------------------- */
 
   // The estimate is the one thing a customer has to answer, and most of them
@@ -1909,8 +1923,9 @@ async function main() {
     Organisation   ${org.name}
     Prior workshop ${priorWorkshop.name} (wrote 7 entries to the BMW's passport)
     Users          ${[ahmed, sara, john, mike, fatima, maria, david].length}
-    Vehicles       4
-    Jobs           2 (one awaiting approval, one paid)
+    Vehicles       6 (three of them one company's fleet)
+    Jobs           6 (two awaiting approval, one in progress, three closed)
+    Warranty       4 covers, one claim open and one goodwill claim settled
     Parts          ${productSpecs.length} across 3 categories, 2 below reorder point
     Suppliers      2, with one part-received order and one disputed bill
 
@@ -3107,5 +3122,306 @@ async function seedMessages(orgId: string) {
         relatedId: null,
       },
     ],
+  });
+}
+
+/**
+ * A fleet, and the cover the workshop is standing behind. Phase 9.
+ *
+ * Two screens in this phase are empty on a seeded database without this, and
+ * an empty screen teaches nobody anything about what it is for. The fleet
+ * pages only earn their place once one company has several vehicles, and the
+ * warranty book only shows its point once one claim is recoverable from a
+ * supplier and another is not.
+ *
+ * So the shapes here are the four a workshop actually meets: cover that is
+ * live, cover running out this month, cover whose supplier still covers the
+ * part, and cover that expired before the customer came back. The last is the
+ * expensive one, and it is the one nothing else in the system would show.
+ */
+async function seedFleetAndWarranty(
+  orgId: string,
+  refs: {
+    locationId: string;
+    bayIds: string[];
+    customerId: string;
+    transitId: string;
+    supplierId: string;
+    ownerUserId: string;
+    technicianUserId: string;
+    advisorUserId: string;
+    firstJobNumber: number;
+  },
+) {
+  /* --- two more vans, so the company is a fleet --------------------------- */
+
+  const vivaro = await prisma.vehicle.create({
+    data: {
+      vin: 'W0LF7ACB8K8600001',
+      registration: 'BX70 KHT',
+      make: 'Vauxhall',
+      model: 'Vivaro',
+      variant: '2.0 Turbo D 2900 Sportive',
+      year: 2020,
+      fuelType: 'DIESEL',
+      transmission: 'MANUAL',
+      bodyType: 'Panel van',
+      colour: 'White',
+      lastOdometerKm: 118_240,
+      firstRegisteredAt: day(-1_820),
+    },
+  });
+
+  const combo = await prisma.vehicle.create({
+    data: {
+      vin: 'W0VF7ACB2M8600002',
+      registration: 'BJ21 OYD',
+      make: 'Vauxhall',
+      model: 'Combo Cargo',
+      variant: '1.5 Turbo D 2300 Sportive',
+      year: 2021,
+      fuelType: 'DIESEL',
+      transmission: 'MANUAL',
+      bodyType: 'Panel van',
+      colour: 'White',
+      lastOdometerKm: 74_900,
+      firstRegisteredAt: day(-1_500),
+    },
+  });
+
+  await prisma.vehicleOwnership.createMany({
+    data: [
+      {
+        vehicleId: vivaro.id,
+        ownerName: 'Pennine Plumbing Ltd',
+        ownerKind: 'COMPANY',
+        startedAt: day(-1_820),
+      },
+      {
+        vehicleId: combo.id,
+        ownerName: 'Pennine Plumbing Ltd',
+        ownerKind: 'COMPANY',
+        startedAt: day(-1_500),
+      },
+    ],
+  });
+
+  // One van overdue, one due inside the month. A fleet manager is measured on
+  // downtime, so an overdue van is their problem before it is the workshop's.
+  await prisma.serviceSchedule.createMany({
+    data: [
+      {
+        orgId,
+        vehicleId: vivaro.id,
+        name: 'Annual service',
+        intervalMonths: 12,
+        intervalKm: 25_000,
+        lastPerformedAt: day(-400),
+        lastPerformedKm: 92_000,
+        dueAt: day(-35),
+        dueKm: 117_000,
+      },
+      {
+        orgId,
+        vehicleId: combo.id,
+        name: 'Annual service',
+        intervalMonths: 12,
+        intervalKm: 25_000,
+        lastPerformedAt: day(-350),
+        lastPerformedKm: 51_000,
+        dueAt: day(18),
+        dueKm: 76_000,
+      },
+    ],
+  });
+
+  /* --- the visits behind those vans --------------------------------------- */
+
+  const vivaroJob = await prisma.job.create({
+    data: {
+      orgId,
+      locationId: refs.locationId,
+      number: refs.firstJobNumber,
+      customerId: refs.customerId,
+      vehicleId: vivaro.id,
+      status: 'AWAITING_APPROVAL',
+      shortDescription: 'Clutch judder under load',
+      details: 'Driver reports judder pulling away with a full van.',
+      diagnosis:
+        'Clutch plate contaminated by a weeping crankshaft seal. Both need doing together.',
+      odometerInKm: 118_240,
+      estimatedHours: 6,
+      receivedAt: day(-2, 8, 20),
+      promisedAt: day(1, 17, 0),
+      createdByUserId: refs.advisorUserId,
+      technicians: { create: [{ userId: refs.technicianUserId, isPrimary: true }] },
+    },
+  });
+
+  const comboJob = await prisma.job.create({
+    data: {
+      orgId,
+      locationId: refs.locationId,
+      number: refs.firstJobNumber + 1,
+      customerId: refs.customerId,
+      vehicleId: combo.id,
+      bayId: refs.bayIds[2],
+      status: 'IN_PROGRESS',
+      shortDescription: 'Front discs and pads',
+      details: 'Grinding at low speed, worse in the wet.',
+      odometerInKm: 74_900,
+      estimatedHours: 2.5,
+      receivedAt: day(0, 8, 5),
+      promisedAt: day(0, 16, 0),
+      createdByUserId: refs.advisorUserId,
+      technicians: { create: [{ userId: refs.technicianUserId, isPrimary: true }] },
+    },
+  });
+
+  const transitJob = await prisma.job.create({
+    data: {
+      orgId,
+      locationId: refs.locationId,
+      number: refs.firstJobNumber + 2,
+      customerId: refs.customerId,
+      vehicleId: refs.transitId,
+      status: 'PAID',
+      shortDescription: 'Battery and alternator belt',
+      details: 'Van would not start after standing over a weekend.',
+      odometerInKm: 146_500,
+      estimatedHours: 1.5,
+      receivedAt: day(-210, 8, 30),
+      completedAt: day(-210, 12, 10),
+      createdByUserId: refs.advisorUserId,
+      technicians: { create: [{ userId: refs.technicianUserId, isPrimary: true }] },
+    },
+  });
+
+  // The visit the expired cover came from. Dated properly, because a warranty
+  // that starts before the job that created it is the first thing anybody
+  // reading the record would stop and query.
+  const springsJob = await prisma.job.create({
+    data: {
+      orgId,
+      locationId: refs.locationId,
+      number: refs.firstJobNumber + 3,
+      customerId: refs.customerId,
+      vehicleId: vivaro.id,
+      status: 'PAID',
+      shortDescription: 'Rear coil springs',
+      details: 'Sitting low at the back, laden and unladen.',
+      odometerInKm: 96_800,
+      estimatedHours: 2,
+      receivedAt: day(-440, 8, 15),
+      completedAt: day(-440, 11, 40),
+      createdByUserId: refs.advisorUserId,
+      technicians: { create: [{ userId: refs.technicianUserId, isPrimary: true }] },
+    },
+  });
+
+  await prisma.documentSequence.update({
+    where: { orgId_kind: { orgId, kind: 'JOB' } },
+    data: { next: refs.firstJobNumber + 4 },
+  });
+
+  /* --- what the workshop is standing behind -------------------------------- */
+
+  const covers = await Promise.all([
+    // Live, and the supplier still covers the part. This is the row the whole
+    // screen exists for: replace it under the workshop's own warranty without
+    // looking, and the part is never claimed back from anybody.
+    prisma.warranty.create({
+      data: {
+        orgId,
+        jobId: transitJob.id,
+        vehicleId: refs.transitId,
+        kind: 'PART',
+        description: 'Battery, 096 AGM',
+        startedOn: day(-210),
+        months: 24,
+        km: 60_000,
+        startedAtKm: 146_500,
+        partsValue: 96,
+        labourValue: 45,
+        supplierId: refs.supplierId,
+        supplierMonths: 36,
+      },
+    }),
+    // Runs out inside the month. A reason to invite the van back in while the
+    // workshop is still the one who would put it right.
+    prisma.warranty.create({
+      data: {
+        orgId,
+        jobId: comboJob.id,
+        vehicleId: combo.id,
+        kind: 'LABOUR',
+        description: 'Front brake overhaul, labour',
+        startedOn: day(-345),
+        months: 12,
+        partsValue: 0,
+        labourValue: 180,
+      },
+    }),
+    // Expired eleven weeks ago. The customer will still ask, and somebody has
+    // to decide whether to do it anyway and say so where it can be counted.
+    prisma.warranty.create({
+      data: {
+        orgId,
+        jobId: springsJob.id,
+        vehicleId: vivaro.id,
+        kind: 'PART',
+        description: 'Rear coil springs, pair',
+        startedOn: day(-440),
+        months: 12,
+        partsValue: 148,
+        labourValue: 120,
+      },
+    }),
+    prisma.warranty.create({
+      data: {
+        orgId,
+        jobId: vivaroJob.id,
+        vehicleId: vivaro.id,
+        kind: 'PART',
+        description: 'Water pump and thermostat',
+        startedOn: day(-95),
+        months: 24,
+        km: 40_000,
+        startedAtKm: 111_000,
+        partsValue: 132,
+        labourValue: 210,
+        supplierId: refs.supplierId,
+        supplierMonths: 24,
+      },
+    }),
+  ]);
+
+  // One claim open against a supplier nobody has chased, and one goodwill
+  // claim already settled. The first is money outstanding, the second money
+  // spent on purpose, and a manager needs both to add up somewhere.
+  await prisma.warrantyClaim.create({
+    data: {
+      warrantyId: covers[0]!.id,
+      complaint: 'Will not hold charge overnight. Tested at 8.2V under load.',
+      outsideCover: false,
+      exposure: 45,
+      recoverable: 96,
+      raisedByUserId: refs.advisorUserId,
+    },
+  });
+
+  await prisma.warrantyClaim.create({
+    data: {
+      warrantyId: covers[2]!.id,
+      complaint: 'Nearside spring snapped. Eleven weeks outside the warranty.',
+      outsideCover: true,
+      goodwillReason: 'Six years a customer, and a spring should not fail in one.',
+      exposure: 268,
+      recoverable: 0,
+      status: 'SETTLED',
+      outcome: 'Replaced free of charge. Parts absorbed, labour absorbed.',
+      settledAt: day(-20),
+      raisedByUserId: refs.ownerUserId,
+    },
   });
 }

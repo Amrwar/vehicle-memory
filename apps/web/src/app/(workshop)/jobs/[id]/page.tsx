@@ -134,7 +134,12 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   ];
 
   const totals = calculateTotals(lines);
-  const inspection = job.inspections[0];
+  // The most recent one that actually has something in it. Taking the newest
+  // regardless meant an inspection somebody opened and abandoned hid the
+  // completed one underneath it, so the job page showed nothing was found on a
+  // vehicle where ten things were.
+  const inspection =
+    job.inspections.find((entry) => entry.results.length > 0) ?? job.inspections[0];
   const estimate = job.estimates[0];
   const invoice = job.invoices[0];
 

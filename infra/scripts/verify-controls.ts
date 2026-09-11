@@ -76,6 +76,8 @@ const PAGES = [
   '/insights',
   '/inspections',
   '/floor',
+  '/warranty',
+  '/fleet',
   '/bookings/new',
   '/suppliers/new',
   '/counter',

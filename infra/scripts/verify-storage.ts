@@ -71,10 +71,13 @@ async function main() {
 
   const cookie = `carnet_session=${token}`;
 
-  // A draft inspection to hang the photograph from. Created here and removed
-  // at the end, so the demonstration data is untouched.
+  // A draft inspection to hang the photograph from, on a job that has none of
+  // its own. An earlier version took the newest job regardless and, when a run
+  // was interrupted before its cleanup, left an empty draft sitting on top of
+  // the seeded inspection, which the job page then showed instead of the real
+  // one. Probes must not be able to change what a page says.
   const job = await prisma.job.findFirstOrThrow({
-    where: { orgId: org.id },
+    where: { orgId: org.id, inspections: { none: {} } },
     select: { id: true },
     orderBy: { createdAt: 'desc' },
   });

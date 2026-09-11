@@ -55,6 +55,8 @@ export type NavIconName =
   | 'insights'
   | 'inspections'
   | 'floor'
+  | 'fleet'
+  | 'warranty'
   | 'crm'
   | 'audit';
 
@@ -67,6 +69,22 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <rect x="11.2" y="3.2" width="6.4" height="5.6" rx="1" />
       <rect x="2.4" y="11.2" width="6.4" height="5.6" rx="1" />
       <rect x="11.2" y="11.2" width="6.4" height="5.6" rx="1" />
+    </>
+  ),
+  // Three vans in a row: a company, not a person.
+  fleet: (
+    <>
+      <rect x="1.6" y="7.4" width="5" height="5" rx="1" />
+      <rect x="7.5" y="7.4" width="5" height="5" rx="1" />
+      <rect x="13.4" y="7.4" width="5" height="5" rx="1" />
+      <path d="M2.6 13.8h15" />
+    </>
+  ),
+  // A shield: what the workshop stands behind.
+  warranty: (
+    <>
+      <path d="M10 2.4 16.6 5v5.2c0 3.4-2.6 6.2-6.6 7.4-4-1.2-6.6-4-6.6-7.4V5z" />
+      <path d="M7.2 9.8 9.4 12l3.6-4" />
     </>
   ),
   // A clipboard with a tick: what was looked at, and what was found.

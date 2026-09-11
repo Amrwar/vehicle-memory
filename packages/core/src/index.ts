@@ -13,6 +13,7 @@ export * from './automation/index';
 export * from './portal/index';
 export * from './messaging/index';
 export * from './intelligence/index';
+export * from './warranty/index';
 export * from './banking/index';
 export * from './pos/index';
 export * from './team/index';
