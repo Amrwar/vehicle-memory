@@ -18,34 +18,34 @@ says why.
 
 ## 1. Dashboard
 
-| Item                       | Status  | Where                                                        |
-| -------------------------- | ------- | ------------------------------------------------------------ |
-| Today's appointments       | Built   | `/dashboard`, `/diary`                                       |
-| Cars currently in the shop | Built   | `/dashboard`, jobs by status                                 |
-| Jobs waiting for approval  | Built   | `/dashboard`, and the count on the sidebar                   |
-| Jobs waiting for parts     | Partial | Reservations exist; not surfaced as its own dashboard row    |
-| Jobs overdue               | Partial | Promised dates exist; no overdue tile                        |
-| Today's revenue            | Built   | `/dashboard`                                                 |
-| Outstanding invoices       | Built   | `/payments`, aged debt on `/financials`                      |
-| Low-stock parts            | Built   | `/parts`, below reorder point                                |
-| Technician workload        | Built   | `/people`, utilisation and productivity                      |
-| Upcoming service reminders | Built   | `/reminders`                                                 |
-| Customer satisfaction      | Missing | Nothing collects it. See section 18.                         |
-| Profit margin              | Built   | `/reports/business`, by service type                         |
-| Activity feed              | Missing | The audit log records everything; nothing reads it as a feed |
+| Item                       | Status  | Where                                          |
+| -------------------------- | ------- | ---------------------------------------------- |
+| Today's appointments       | Built   | `/dashboard`, `/diary`                         |
+| Cars currently in the shop | Built   | `/dashboard`, jobs by status                   |
+| Jobs waiting for approval  | Built   | `/dashboard`, and the count on the sidebar     |
+| Jobs waiting for parts     | Built   | Approved with nothing on the shelf             |
+| Jobs overdue               | Built   | Past the promised date and unfinished          |
+| Today's revenue            | Built   | `/dashboard`                                   |
+| Outstanding invoices       | Built   | `/payments`, aged debt on `/financials`        |
+| Low-stock parts            | Built   | `/parts`, below reorder point                  |
+| Technician workload        | Built   | `/people`, utilisation and productivity        |
+| Upcoming service reminders | Built   | `/reminders`                                   |
+| Customer satisfaction      | Missing | Nothing collects it. See section 18.           |
+| Profit margin              | Built   | `/reports/business`, by service type           |
+| Activity feed              | Built   | Read from the audit log, which already held it |
 
 ## 2. Workshop calendar
 
-| Item                | Status  | Note                                               |
-| ------------------- | ------- | -------------------------------------------------- |
-| Week view           | Built   | `/diary`, bay lanes with capacity                  |
-| Day view            | Missing |                                                    |
-| Month view          | Missing |                                                    |
-| Technician view     | Missing | The data is there; the view is not                 |
-| Bay view            | Partial | Week view is laid out by bay                       |
-| Location view       | Missing | Multi-site exists; the diary does not filter by it |
-| Drag between bays   | Missing | Every move is a form today                         |
-| Drag between people | Missing |                                                    |
+| Item                | Status | Note                                 |
+| ------------------- | ------ | ------------------------------------ |
+| Week view           | Built  | `/diary`, bay lanes with capacity    |
+| Day view            | Built  | Lanes by bay                         |
+| Month view          | Built  | Lanes by week                        |
+| Technician view     | Built  | Including work nobody is assigned to |
+| Bay view            | Built  | Every bay, including the empty ones  |
+| Location view       | Built  | A lane per site                      |
+| Drag between bays   | Built  | Capacity checked on the drop         |
+| Drag between people | Built  | Two places at once is refused        |
 
 ## 3. Customer CRM
 
@@ -180,9 +180,16 @@ Missing: payroll export, which waits on a named target format.
 
 ## 13. Service bay management
 
-**Missing as a board.** Bays exist, jobs are assigned to them, and the diary
-lays the week out in bay lanes. There is no visual floor plan and nothing can
-be dragged.
+**Built.** `/floor` shows what is in each bay at this minute, not what is
+booked into it today, because a workshop's own answer to "where is that car"
+is to walk out and look and the screen version is only worth having if it says
+the same thing. A bay past its slot is marked, which is the one thing walking
+out does not tell you.
+
+Cards are dragged between bays and people in the diary. The drop runs the same
+capacity check that guards making a booking: a shared bay warns and goes
+through, a technician in two places at once is refused. Everything the drag
+does, a menu on the card also does, for a keyboard or a phone.
 
 ## 14. Warranty management
 
@@ -259,9 +266,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 49           |
-| Partial | 8            |
-| Missing | 26           |
+| Built   | 60           |
+| Partial | 5            |
+| Missing | 18           |
 
 <!-- counts:end -->
 

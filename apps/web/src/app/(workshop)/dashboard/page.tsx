@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Card,
+  CardBody,
   CardHeader,
   EmptyState,
   Money,
@@ -38,42 +39,81 @@ export default async function DashboardPage() {
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = new Date(startOfDay.getTime() + 86_400_000);
 
-  const [todaysJobs, inShop, awaitingApproval, paymentsToday, todaysBookings, approvals] =
-    await Promise.all([
-      db.job.count({ where: { createdAt: { gte: startOfDay, lt: endOfDay } } }),
-      db.job.count({ where: { status: { in: [...IN_SHOP_STATUSES] } } }),
-      db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
-      db.payment.aggregate({
-        where: { receivedAt: { gte: startOfDay, lt: endOfDay } },
-        _sum: { amount: true },
-      }),
-      db.booking.findMany({
-        where: { startAt: { gte: startOfDay, lt: endOfDay } },
-        orderBy: { startAt: 'asc' },
-        take: 12,
-        include: {
-          customer: { select: { displayName: true } },
-          vehicle: { select: { id: true, make: true, model: true, registration: true } },
-          technician: { select: { name: true } },
-          bay: { select: { name: true } },
-          job: { select: { id: true, number: true, status: true } },
+  const [
+    todaysJobs,
+    inShop,
+    awaitingApproval,
+    paymentsToday,
+    todaysBookings,
+    approvals,
+    waitingForParts,
+    overdue,
+    activity,
+  ] = await Promise.all([
+    db.job.count({ where: { createdAt: { gte: startOfDay, lt: endOfDay } } }),
+    db.job.count({ where: { status: { in: [...IN_SHOP_STATUSES] } } }),
+    db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
+    db.payment.aggregate({
+      where: { receivedAt: { gte: startOfDay, lt: endOfDay } },
+      _sum: { amount: true },
+    }),
+    db.booking.findMany({
+      where: { startAt: { gte: startOfDay, lt: endOfDay } },
+      orderBy: { startAt: 'asc' },
+      take: 12,
+      include: {
+        customer: { select: { displayName: true } },
+        vehicle: { select: { id: true, make: true, model: true, registration: true } },
+        technician: { select: { name: true } },
+        bay: { select: { name: true } },
+        job: { select: { id: true, number: true, status: true } },
+      },
+    }),
+    db.job.findMany({
+      where: { status: 'AWAITING_APPROVAL' },
+      orderBy: { updatedAt: 'asc' },
+      take: 6,
+      include: {
+        customer: { select: { displayName: true } },
+        vehicle: { select: { make: true, model: true, registration: true } },
+        estimates: {
+          orderBy: { version: 'desc' },
+          take: 1,
+          select: { total: true, sentAt: true, currency: true },
         },
-      }),
-      db.job.findMany({
-        where: { status: 'AWAITING_APPROVAL' },
-        orderBy: { updatedAt: 'asc' },
-        take: 6,
-        include: {
-          customer: { select: { displayName: true } },
-          vehicle: { select: { make: true, model: true, registration: true } },
-          estimates: {
-            orderBy: { version: 'desc' },
-            take: 1,
-            select: { total: true, sentAt: true, currency: true },
-          },
-        },
-      }),
-    ]);
+      },
+    }),
+    // Work that cannot proceed because something is on order. A job blocked
+    // on a part looks identical, on every other screen, to one somebody has
+    // simply not started.
+    db.job.count({
+      where: {
+        status: { in: ['APPROVED', 'IN_PROGRESS'] },
+        partLines: { some: { product: { stockLevels: { some: { onHand: { lte: 0 } } } } } },
+      },
+    }),
+    // Past the day it was promised for and still not finished. The figure
+    // nobody keeps and every customer remembers.
+    db.job.count({
+      where: {
+        promisedAt: { lt: new Date() },
+        status: { notIn: ['COMPLETED', 'INVOICED', 'PAID', 'CANCELLED'] },
+      },
+    }),
+    // The audit log already records everything a feed would show, and
+    // nothing has ever read it that way.
+    db.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 12,
+      select: {
+        id: true,
+        action: true,
+        entityType: true,
+        createdAt: true,
+        actor: { select: { name: true } },
+      },
+    }),
+  ]);
 
   const revenueToday = Number(paymentsToday._sum.amount ?? 0);
   const greeting = greetingFor(new Date());
@@ -124,6 +164,68 @@ export default async function DashboardPage() {
           />
         </Link>
       </StatRow>
+
+      <StatRow className="mb-6">
+        <Link href="/purchasing" className="group">
+          <StatTile
+            label="Waiting for parts"
+            value={waitingForParts}
+            tone={waitingForParts > 0 ? 'warning' : 'neutral'}
+            note="Approved, and nothing on the shelf"
+          />
+        </Link>
+        <Link href="/jobs" className="group">
+          <StatTile
+            label="Past the promise"
+            value={overdue}
+            tone={overdue > 0 ? 'danger' : 'neutral'}
+            note="Due back and not finished"
+          />
+        </Link>
+        <Link href="/floor" className="group">
+          <StatTile label="The floor" value="Open" note="What is in each bay now" />
+        </Link>
+        <Link href="/reminders" className="group">
+          <StatTile label="Reminders" value="Due" note="What is about to be sent" />
+        </Link>
+      </StatRow>
+
+      {/* What has happened, from the audit log. Every action in the product
+          already writes to it and nothing had ever read it as a feed, so the
+          one record of what the workshop did today was invisible to the people
+          who did it. */}
+      <Card className="mb-6">
+        <CardHeader
+          title="What's happening"
+          description="Everything the workshop has done, newest first."
+        />
+        <CardBody className="p-0">
+          {activity.length === 0 ? (
+            <p className="px-4 py-6 text-[13px] text-(--text-soft)">Nothing recorded yet today.</p>
+          ) : (
+            <ul className="divide-y divide-(--border-soft)">
+              {activity.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5"
+                >
+                  <span className="text-[13px]">
+                    <span className="font-medium">{entry.actor?.name ?? 'The system'}</span>{' '}
+                    <span className="text-(--text-soft)">{entry.action.replace(/[._]/g, ' ')}</span>{' '}
+                    <span className="text-(--text-faint)">{entry.entityType.toLowerCase()}</span>
+                  </span>
+                  <span className="text-[11px] tabular-nums text-(--text-faint)">
+                    {entry.createdAt.toLocaleTimeString('en-GB', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardBody>
+      </Card>
 
       {approvals.length > 0 ? (
         <Card className="mb-6 border-(--warning)">

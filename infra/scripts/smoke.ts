@@ -121,7 +121,7 @@ async function main() {
       as: 'owner',
       expect: ['Awaiting approval', 'Today in the workshop', 'Approvals needed'],
     },
-    { path: '/diary', as: 'owner', expect: ['Diary', 'Brake system repair', 'Capacity'] },
+    { path: '/diary', as: 'owner', expect: ['Diary', 'By person', 'By bay', 'Booked in'] },
     { path: '/jobs', as: 'owner', expect: ['Jobs', '10482', 'Brake system repair'] },
     {
       path: `/jobs/${job.id}`,

@@ -7,6 +7,35 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 8 - The diary and the floor.**
+
+The diary had one view, a week laid out by bay. That answers "is Thursday
+full" and cannot answer "what is Ahmed doing" or "what is happening at
+Bradford", which are the same rows arranged differently.
+
+- Six views: day, week, month, by person, by bay, by site. Each is an address,
+  so a view can be sent to a colleague.
+- Every lane appears even when empty, and the empty ones are the point. A free
+  bay on Thursday is what somebody is looking for, and a view that draws only
+  what exists hides exactly that. Work with no bay and work with nobody
+  assigned each get their own lane and are never hidden: the second is the
+  work that will not get done.
+- Cards drag between bays and people. The drop runs the same capacity check
+  that guards making a booking, so a shared bay warns and goes through while a
+  technician in two places at once is refused. A diary that accepts any drop
+  and complains later manufactures double bookings faster than paper did.
+- The card moves on screen the instant it is released and moves back with the
+  reason if the server refuses. Anything else teaches somebody to distrust
+  what they see.
+- Everything dragging does, a menu on the card also does, for a keyboard, a
+  screen reader or a phone. Neither is the fallback.
+- `/floor` shows what is in each bay at this minute rather than what is booked
+  today, and marks anything past its slot.
+- The dashboard gained the three rows the feature map named as missing: work
+  blocked on parts, work past its promised date, and what the workshop has
+  done today. The last is read from the audit log, which has recorded every
+  action since Phase 1 and which nothing had ever read as a feed.
+
 **Phase 7.1 - Inspection photographs.**
 
 The one part of the inspection left absent, because it needed a file store

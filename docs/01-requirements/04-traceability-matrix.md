@@ -222,6 +222,43 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## The diary and the floor
+
+| Req     | Story | Schema                       | Implementation | Test            | Status |
+| ------- | ----- | ---------------------------- | -------------- | --------------- | ------ |
+| FR-2901 | —     | `Booking`, `Bay`             | `rangeFor()`   | `views.test.ts` | Done   |
+| FR-2902 | —     | —                            | `lanesFor()`   | `views.test.ts` | Done   |
+| FR-2903 | —     | —                            | `DiaryBoard`   | `smoke.ts`      | Done   |
+| FR-2904 | —     | —                            | `assertMove()` | `views.test.ts` | Done   |
+| FR-2905 | —     | `Bay`, `Booking.endAt`       | `floorAt()`    | `views.test.ts` | Done   |
+| FR-2906 | —     | `AuditLog`, `Job.promisedAt` | `/dashboard`   | `smoke.ts`      | Done   |
+
+## Suppliers and counter bookings
+
+| Req     | Story | Schema                     | Implementation       | Test                 | Status |
+| ------- | ----- | -------------------------- | -------------------- | -------------------- | ------ |
+| FR-2801 | —     | `Supplier`, `GoodsReceipt` | `supplierDetail()`   | `verify-controls.ts` | Done   |
+| FR-2802 | —     | `suppliers` unique name    | `createSupplier()`   | `verify-controls.ts` | Done   |
+| FR-2803 | —     | `Booking.status`           | `/bookings/[id]`     | `verify-controls.ts` | Done   |
+| FR-2804 | —     | `Booking.source`           | `createBooking()`    | `verify-empty.ts`    | Done   |
+| FR-2805 | —     | `PurchaseOrderLine`        | `supplierDetail()`   | `verify-controls.ts` | Done   |
+| FR-2806 | —     | —                          | `verify-controls.ts` | `verify-controls.ts` | Done   |
+
+## Carrying out an inspection
+
+| Req     | Story | Schema                            | Implementation         | Test                   | Status |
+| ------- | ----- | --------------------------------- | ---------------------- | ---------------------- | ------ |
+| FR-2701 | —     | `Inspection`, `InspectionResult`  | `/shop/inspect/[id]`   | `verify-inspection.ts` | Done   |
+| FR-2702 | —     | —                                 | `recordResult()`       | `verify-inspection.ts` | Done   |
+| FR-2703 | —     | —                                 | `assertResultSound()`  | `carry-out.test.ts`    | Done   |
+| FR-2704 | —     | —                                 | `describeCompletion()` | `carry-out.test.ts`    | Done   |
+| FR-2705 | —     | `Inspection.status`               | `/inspections`         | `verify-empty.ts`      | Done   |
+| FR-2706 | —     | `EstimateLine.inspectionResultId` | `completeInspection()` | `verify-inspection.ts` | Done   |
+| FR-2707 | —     | —                                 | `assertCompletable()`  | `verify-inspection.ts` | Done   |
+| FR-2708 | —     | `InspectionPhoto`                 | `ticketFor()`          | `verify-storage.ts`    | Done   |
+| FR-2709 | —     | —                                 | S3-compatible driver   | `verify-storage.ts`    | Done   |
+| FR-2710 | —     | —                                 | `readUrlFor()`         | `verify-storage.ts`    | Done   |
+
 ## The customer's own side
 
 | Req     | Story | Schema                                 | Implementation              | Test               | Status |
@@ -338,15 +375,18 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| The diary and the floor                   | 6                   | 6                      |
+| Suppliers and counter bookings            | 6                   | 6                      |
+| Carrying out an inspection                | 10                  | 10                     |
 | The customer's own side                   | 9                   | 9                      |
 | Automation and customer relationships     | 11                  | 11                     |
 | Expenses, banking and period close        | 6                   | 6                      |
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **163**             | **160 (98%)**          |
+| **Total**                                 | **185**             | **182 (98%)**          |
 
-The requirements document lists 247 requirements. 84 of
+The requirements document lists 269 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

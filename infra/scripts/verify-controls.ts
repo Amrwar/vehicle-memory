@@ -53,6 +53,9 @@ const ALLOWED = [
   // The years on the home page's vehicle, which select an entry on its record.
   // Each is a real button with a handler in a client component, and each is
   // also what makes that scene readable without the canvas.
+  // The diary's own move menu on each card, which is the keyboard route to
+  // the same thing dragging does.
+  'Move',
   '2022',
   '2023',
   'Mar 2024',
@@ -72,6 +75,7 @@ const PAGES = [
   '/reports/business',
   '/insights',
   '/inspections',
+  '/floor',
   '/bookings/new',
   '/suppliers/new',
   '/counter',

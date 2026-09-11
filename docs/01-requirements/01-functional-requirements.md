@@ -257,6 +257,43 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-2900 — The diary and the floor
+
+| Ref     | Requirement                                                                                                       | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2901 | The diary MUST be readable by day, week, month, technician, bay and site.                                         | 8     |
+| FR-2902 | Every lane MUST be shown even when empty, including work with no bay or nobody assigned.                          | 8     |
+| FR-2903 | A booking MUST be movable by dragging, and by a control that needs no pointer.                                    | 8     |
+| FR-2904 | A move MUST run the same capacity check as making a booking, and MUST refuse only what is impossible.             | 8     |
+| FR-2905 | The floor MUST show what occupies each bay at this moment, and MUST mark anything past its slot.                  | 8     |
+| FR-2906 | The dashboard MUST show work blocked on parts, work past its promised date, and what the workshop has done today. | 8     |
+
+## FR-2800 — Suppliers and counter bookings
+
+| Ref     | Requirement                                                                                         | Phase |
+| ------- | --------------------------------------------------------------------------------------------------- | ----- |
+| FR-2801 | A supplier MUST be readable on its own page, showing measured lead time, lateness and what is owed. | 7     |
+| FR-2802 | A supplier MUST be addable with a name alone, and a duplicate name MUST be refused with its reason. | 7     |
+| FR-2803 | A booking MUST be readable on its own page, and movable through its states in one press each.       | 7     |
+| FR-2804 | A booking MUST be takeable over the counter, with the bay and technician optional.                  | 7     |
+| FR-2805 | Purchase price history MUST be visible per supplier, with the change since the previous price.      | 7     |
+| FR-2806 | Every control in the product MUST do something, and every link MUST resolve.                        | 7     |
+
+## FR-2700 — Carrying out an inspection
+
+| Ref     | Requirement                                                                                                   | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-2701 | A technician MUST be able to carry out an inspection from a tablet, one item at a time.                       | 7     |
+| FR-2702 | Each answer MUST be saved as it is given, not held until the end.                                             | 7     |
+| FR-2703 | An amber or red item MUST carry a measurement, a note or a recommendation before it can be recorded.          | 7     |
+| FR-2704 | An inspection MUST be completable with items unchecked, and the customer MUST be told which were not checked. | 7     |
+| FR-2705 | Inspections left open MUST be visible, because each is work done and not charged for.                         | 7     |
+| FR-2706 | Completing an inspection MUST create the quote lines in the same transaction, linked to what was found.       | 7     |
+| FR-2707 | A completed inspection MUST NOT be editable.                                                                  | 7     |
+| FR-2708 | A photograph MUST upload directly to the file store, and MUST be recorded only once the store holds it.       | 7.1   |
+| FR-2709 | The file store MUST be reachable by a protocol rather than tied to one vendor.                                | 7.1   |
+| FR-2710 | Photographs MUST be served by signed links rather than from a public bucket.                                  | 7.1   |
+
 ## FR-2600 — What the record supports saying
 
 | Ref     | Requirement                                                                                    | Phase |

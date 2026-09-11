@@ -54,10 +54,21 @@ export type NavIconName =
   | 'messages'
   | 'insights'
   | 'inspections'
+  | 'floor'
   | 'crm'
   | 'audit';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  // Four bays seen from above, which is how somebody at the counter pictures
+  // the building.
+  floor: (
+    <>
+      <rect x="2.4" y="3.2" width="6.4" height="5.6" rx="1" />
+      <rect x="11.2" y="3.2" width="6.4" height="5.6" rx="1" />
+      <rect x="2.4" y="11.2" width="6.4" height="5.6" rx="1" />
+      <rect x="11.2" y="11.2" width="6.4" height="5.6" rx="1" />
+    </>
+  ),
   // A clipboard with a tick: what was looked at, and what was found.
   inspections: (
     <>
