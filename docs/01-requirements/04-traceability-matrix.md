@@ -222,6 +222,19 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## The passport leaves the workshop
+
+| Req     | Story | Schema                                    | Implementation          | Test                 | Status |
+| ------- | ----- | ----------------------------------------- | ----------------------- | -------------------- | ------ |
+| FR-3201 | P5    | `vehicle_ownerships_one_open_per_vehicle` | `transferOwnership()`   | `verify-handover.ts` | Done   |
+| FR-3202 | P5    | `VehicleEvent.payload`                    | `transferEvent()`       | `verify-handover.ts` | Done   |
+| FR-3203 | P5    | derived                                   | `buildReport()`         | `handover.test.ts`   | Done   |
+| FR-3204 | P5    | `PassportShare.tokenHash`                 | `/verify`, `/p/[token]` | `smoke.ts`           | Done   |
+| FR-3205 | —     | `Recall`, `VehicleRecall`                 | `/recalls`              | `verify-empty.ts`    | Done   |
+| FR-3206 | —     | —                                         | `assertTransferable()`  | `handover.test.ts`   | Done   |
+| FR-3207 | P5    | append-only trigger                       | schema trigger          | `verify-handover.ts` | Done   |
+| FR-3208 | P5    | —                                         | `buildReport()`         | `handover.test.ts`   | Done   |
+
 ## The vehicle's own condition
 
 | Req     | Story | Schema                            | Implementation       | Test                  | Status |
@@ -404,6 +417,7 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| The passport leaves the workshop          | 8                   | 8                      |
 | The vehicle's own condition               | 10                  | 10                     |
 | Warranty, fleets and the whole story      | 9                   | 9                      |
 | The diary and the floor                   | 6                   | 6                      |
@@ -415,9 +429,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **204**             | **201 (99%)**          |
+| **Total**                                 | **212**             | **209 (99%)**          |
 
-The requirements document lists 288 requirements. 84 of
+The requirements document lists 296 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

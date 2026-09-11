@@ -257,6 +257,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3200 — The passport leaves the workshop
+
+| Ref     | Requirement                                                                                                                     | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3201 | A vehicle MUST be transferable to a new owner, closing one ownership and opening exactly one other.                             | 11    |
+| FR-3202 | No owner's name MUST enter the append-only chain, so that a permanent record can still honour an erasure request.               | 11    |
+| FR-3203 | A seller MUST be able to produce a report stating what the record says, what it does not cover, and whether it is intact.       | 11    |
+| FR-3204 | A buyer with no account MUST be able to check the same figures from a code, seeing nothing about any owner.                     | 11    |
+| FR-3205 | Manufacturer recalls MUST be readable against the vehicles a workshop sees, and the page MUST say it is a record, not a source. | 11    |
+| FR-3206 | A transfer MUST be refused when it is dated before the seller's purchase, in the future, or to the same owner.                  | 11    |
+| FR-3207 | A vehicle that has a recorded history MUST NOT be deletable, while the personal rows attached to it MUST be.                    | 11    |
+| FR-3208 | A report MUST distinguish a record that could not be checked from one that has been altered.                                    | 11    |
+
 ## FR-3100 — The vehicle's own condition
 
 | Ref     | Requirement                                                                                                                        | Phase |

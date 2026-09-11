@@ -74,6 +74,10 @@ says why.
 | Inspections                | Built   | Carried out on a tablet, sent to the customer       |
 | Upcoming maintenance       | Built   | Service schedules                                   |
 | Warranty information       | Built   | On the vehicle, and in full at `/warranty`          |
+| Ownership transfer         | Built   | History stays, the previous owner does not          |
+| Buyer report               | Built   | What it says, what it misses, whether intact        |
+| Public verification        | Built   | A code at `/verify`, no account needed              |
+| Recalls                    | Built   | `/recalls`, honest about being a record             |
 | Insurance information      | Missing |                                                     |
 | Photos                     | Missing |                                                     |
 | Documents                  | Missing |                                                     |
@@ -294,7 +298,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 81           |
+| Built   | 85           |
 | Partial | 3            |
 | Missing | 16           |
 

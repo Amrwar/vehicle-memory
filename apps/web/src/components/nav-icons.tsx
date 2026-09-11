@@ -57,6 +57,7 @@ export type NavIconName =
   | 'floor'
   | 'fleet'
   | 'warranty'
+  | 'recalls'
   | 'crm'
   | 'audit';
 
@@ -78,6 +79,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <rect x="7.5" y="7.4" width="5" height="5" rx="1" />
       <rect x="13.4" y="7.4" width="5" height="5" rx="1" />
       <path d="M2.6 13.8h15" />
+    </>
+  ),
+  // A warning triangle: somebody else's problem that becomes yours.
+  recalls: (
+    <>
+      <path d="M10 3.2 18 16.4H2z" />
+      <path d="M10 8v3.4" />
+      <path d="M10 13.6v.6" />
     </>
   ),
   // A shield: what the workshop stands behind.

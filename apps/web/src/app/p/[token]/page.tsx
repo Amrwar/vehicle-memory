@@ -17,6 +17,7 @@ import { MileageFindings } from '@/components/mileage-findings';
 import { mileageFindings } from '@/lib/insights';
 
 import { hashShareToken } from '@/lib/auth';
+import { reportFor } from '@/lib/handover';
 import { verifyVehicleChain } from '@/lib/passport';
 
 export const dynamic = 'force-dynamic';
@@ -99,6 +100,12 @@ export default async function PublicPassportPage({
   // between garages; one workshop's own records agree with themselves almost
   // by definition.
   const mileage = await mileageFindings(vehicle.id);
+
+  // The same report the seller sees on their own screen, from the same
+  // function. Two implementations of "what this record says" would eventually
+  // say different things to the two people in the transaction, and the one
+  // who lost by it would be the buyer.
+  const report = await reportFor(vehicle.id);
 
   // Only the contradictions count here. A thin patch of history is worth
   // knowing and is not something the vehicle did.
@@ -193,6 +200,56 @@ export default async function PublicPassportPage({
             ]}
           />
         </section>
+
+        {report ? (
+          <section className="mt-5 grid gap-4">
+            <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
+              <h2 className="font-display text-[15px] font-semibold">
+                What this record amounts to
+              </h2>
+              <p className="mt-1 text-[13px] leading-relaxed">{report.verdict}</p>
+            </div>
+
+            <div className="rounded-(--radius-lg) border border-(--warning) bg-(--surface) p-4">
+              <h2 className="font-display text-[15px] font-semibold">What it does not cover</h2>
+              <ul className="mt-2 grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
+                {report.gaps.map((gap) => (
+                  <li key={gap}>{gap}</li>
+                ))}
+              </ul>
+            </div>
+
+            {report.questions.length > 0 ? (
+              <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
+                <h2 className="font-display text-[15px] font-semibold">Worth asking the seller</h2>
+                <ul className="mt-2 grid gap-2 text-[13px] leading-relaxed">
+                  {report.questions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
+              <h2 className="font-display text-[15px] font-semibold">Who has owned it</h2>
+              <ul className="mt-2 grid gap-1.5 text-[13px] text-(--text-soft)">
+                {report.owners.map((owner) => (
+                  <li key={owner.position}>
+                    Owner {owner.position}, kept it{' '}
+                    {owner.months < 24
+                      ? `${owner.months} month${owner.months === 1 ? '' : 's'}`
+                      : `${Math.floor(owner.months / 12)} years`}
+                    {owner.current ? ' and still has it' : ''}.
+                  </li>
+                ))}
+                {report.owners.length === 0 ? <li>No ownership on record.</li> : null}
+              </ul>
+              <p className="mt-2 text-[12px] text-(--text-faint)">
+                No owner is named here, past or present. That is theirs, not the vehicle&rsquo;s.
+              </p>
+            </div>
+          </section>
+        ) : null}
 
         {/* The whole record read at once, rather than a count of rows already
             flagged. A rollback with two years of normal driving after it

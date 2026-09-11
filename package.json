@@ -40,6 +40,7 @@
     "verify:storage": "tsx infra/scripts/verify-storage.ts",
     "verify:warranty": "tsx infra/scripts/verify-warranty.ts",
     "verify:condition": "tsx infra/scripts/verify-condition.ts",
+    "verify:handover": "tsx infra/scripts/verify-handover.ts",
     "docs:deck": "python infra/scripts/build_deck.py",
     "docs:business-case": "python infra/scripts/update-business-case.py",
     "docs:all": "npm run docs:deck && npm run docs:business-case",

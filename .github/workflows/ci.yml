@@ -190,6 +190,13 @@ jobs:
       - name: Verify a vehicle's condition is derived from the right records
         run: npx tsx infra/scripts/verify-condition.ts
 
+      # A sale is where the two promises of this product meet: a history that
+      # survives it, and an owner who does not. The check is that no name
+      # reaches the chain, that the chain still verifies afterwards, and that a
+      # vehicle with a history cannot be deleted at all.
+      - name: Verify a vehicle changes hands without taking its owner with it
+        run: npx tsx infra/scripts/verify-handover.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

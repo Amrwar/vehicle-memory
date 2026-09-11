@@ -7,6 +7,50 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 11 - The passport leaves the workshop.**
+
+Where the append-only chain stops being technically interesting and starts
+being the reason somebody pays more for one car than another.
+
+- Selling a car is now something the product does. One transaction closes the
+  outgoing ownership and opens the incoming one, because a vehicle with two
+  open owners and a vehicle with none are both states nothing else knows how
+  to read.
+- No owner's name goes into the chain. Who owned the car lives in the
+  ownership record, where an erasure request can reach it. A hash computed
+  over somebody's name is a hash that cannot honour one, and that separation
+  is the only reason this record can be both permanent and erasable.
+- A transfer is refused when it is dated before the seller bought the car,
+  dated in the future, or made out to the owner who already has it. A day's
+  grace on the future check, because recording yesterday evening's sale from a
+  timezone west of London is not a mistake.
+- Open work stops a transfer and says what confirming it anyway would mean,
+  rather than either blocking outright or quietly moving somebody's bill.
+- The buyer's report has three parts and they are always in this order: what
+  the record says, what it does not cover, and whether it is intact. The
+  middle part earns the other two. A report listing twenty-seven service
+  events and saying nothing about the four years before them is built to be
+  misread, and the person it misleads is the one with the money.
+- There is no score on it. A number invites comparison between two cars whose
+  records cover completely different things, and the comparison would be wrong
+  in a way nobody could see.
+- It distinguishes a record that could not be checked from one that has been
+  altered. Collapsing those two either accuses a clean record or excuses a
+  tampered one.
+- A buyer with no account enters a code at `/verify` and reads the same
+  figures, produced by the same function the seller's screen uses. Two
+  implementations would eventually tell the two people in a transaction
+  different things, and the buyer would be the one who lost by it.
+- The code is random, expires in ninety days, and only its fingerprint is
+  stored. It is shown once, because a code retrievable from a screen weeks
+  later outlives the sale it was made for.
+- `/recalls` matches known campaigns against the vehicles a workshop has seen,
+  and says on the page that it is a record rather than a source: a vehicle
+  showing nothing there has not been checked and cleared, it has not been
+  checked. The manufacturer feed is a later integration.
+- The vehicle page's "Share history" button, which had nothing behind it since
+  Phase 1, is now two links that go somewhere.
+
 **Phase 10 - The vehicle's own condition.**
 
 The first work in the product that belongs to the vehicle rather than to the

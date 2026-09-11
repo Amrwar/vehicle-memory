@@ -53,6 +53,7 @@ const PAGES = [
   '/inspections',
   '/floor',
   '/warranty',
+  '/recalls',
   '/fleet',
   '/bookings/new',
   '/suppliers/new',
