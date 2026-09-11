@@ -237,10 +237,21 @@ async function main() {
     });
 
     // A redirect is a real answer: it is how a role without permission is sent
-    // somewhere it can use.
-    if (response.status === 200 || (response.status >= 300 && response.status < 400)) continue;
+    // somewhere it can use. A redirect to the sign-in page is not, because the
+    // session above is a real one, and anything sending it to /login is a
+    // route that does not exist behind a guard.
+    if (response.status >= 300 && response.status < 400) {
+      const to = response.headers.get('location') ?? '';
+      if (to.includes('/login')) {
+        fail(from, 'links somewhere that sends a signed-in person to sign in again', link);
+      }
+      continue;
+    }
 
-    fail(from, 'links somewhere that does not exist', `${link} -> ${response.status}`);
+    if (response.status !== 200) {
+      fail(from, 'links somewhere that does not exist', `${link} -> ${response.status}`);
+      continue;
+    }
   }
 
   await prisma.session.deleteMany({ where: { tokenHash } });

@@ -7,6 +7,30 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Fixed: the new job button went nowhere.**
+
+Four screens have linked to `/jobs/new` since Phase 1 and there was never a
+page there. The address matched the job detail route with an id of "new", so
+pressing it rendered a detail page for a job that does not exist rather than
+failing in a way anybody would notice. It was found by somebody pressing it.
+
+- `/jobs/new` is now a real page. It asks for what somebody standing at a
+  counter knows: whose car, which car, what it is in for, the mileage and when
+  it is promised. The bay, the estimate and the inspection come from the job's
+  own page afterwards, because a form demanding them now would be filled in
+  with guesses.
+- Arriving from a customer or a vehicle preselects that side, which is how the
+  page is mostly reached.
+- The job number is taken inside the same transaction as the job, so a number
+  cannot be allocated and then abandoned. A gap in a job sequence is the first
+  thing somebody asks about a year later.
+- A mileage reading goes onto the vehicle as well as the job, so the passport
+  and everything derived from it see it immediately. A reading lower than the
+  last one is refused with both figures named, rather than written.
+- The control check that should have caught this had a hole: it treated any
+  redirect as a real answer, so a link sending a signed-in person to the login
+  page counted as working. It now fails on exactly that.
+
 **Phase 14 - The technician's own device.**
 
 Workshops have bad wi-fi, and the parts of the building with the worst signal

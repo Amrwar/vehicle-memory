@@ -7,6 +7,7 @@ export * from './inspection/index';
 export * from './audit/index';
 export * from './inventory/index';
 export * from './offline/index';
+export * from './retention/index';
 export * from './accounting/index';
 export * from './scheduling/index';
 export * from './people/index';
