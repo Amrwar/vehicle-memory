@@ -245,6 +245,13 @@ jobs:
       - name: Every control does something, every link goes somewhere
         run: npx tsx infra/scripts/verify-controls.ts http://localhost:3000
 
+      # The upload path has three parties and any one can be wrong in a way
+      # the other two cannot see. Nothing in the application's own logs
+      # distinguishes "the store refused it" from "nobody tried", which is how
+      # a camera button comes to look like it works for a fortnight.
+      - name: A photograph reaches the store and comes back
+        run: npx tsx infra/scripts/verify-storage.ts http://localhost:3000
+
   # -------------------------------------------------------------------------
   # Supply chain. Critical findings block the merge (NFR-409).
   # -------------------------------------------------------------------------
