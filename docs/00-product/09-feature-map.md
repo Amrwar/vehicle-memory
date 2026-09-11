@@ -275,26 +275,45 @@ places to belong and an eventual argument about which one is right.
 
 ## 16. Communication centre
 
-**Partial.** Everything outbound is recorded and now actually sends, with the
-state of each message visible. There is no inbound: no unified inbox, no reply
-from a customer landing against a job, no WhatsApp.
+**Built, except WhatsApp.** Everything outbound is recorded and sends, with
+the state of each message visible. Replies now arrive too: `/inbox` receives
+them, matches each to a customer and a job with a stated confidence, and orders
+them by what has to be dealt with rather than by arrival.
+
+Nothing is acted on automatically. A reply that looks like "yes" goes to the
+top for somebody to read, because work worth thousands of pounds does not rest
+on a pattern match.
+
+Missing: WhatsApp, and a provider actually delivering inbound messages. The
+endpoint that receives them exists and is authenticated.
 
 ## 17. Marketing and retention
 
-| Item                | Status  | Where                                      |
-| ------------------- | ------- | ------------------------------------------ |
-| Automated campaigns | Built   | `/automation`, trigger and conditions      |
-| Customer segments   | Built   | `/crm`, with the reachable count           |
-| Campaigns           | Built   | Consent rechecked at the moment of sending |
-| Loyalty programme   | Missing |                                            |
-| Coupons             | Missing |                                            |
-| Referrals           | Missing |                                            |
-| Gift cards          | Missing |                                            |
+| Item                | Status  | Where                                            |
+| ------------------- | ------- | ------------------------------------------------ |
+| Automated campaigns | Built   | `/automation`, trigger and conditions            |
+| Customer segments   | Built   | `/crm`, with the reachable count                 |
+| Campaigns           | Built   | Consent rechecked at the moment of sending       |
+| Loyalty programme   | Built   | Points as a sum of entries, never a stored total |
+| Referrals           | Built   | A code both sides are paid for, once, on a visit |
+| Coupons             | Missing |                                                  |
+| Gift cards          | Missing |                                                  |
 
 ## 18. Reviews and reputation
 
-**Missing entirely.** Nothing asks, nothing records, nothing routes a good
-rating to a public review and a poor one to a private conversation.
+| Item                   | Status  | Where                                             |
+| ---------------------- | ------- | ------------------------------------------------- |
+| Asking after a job     | Built   | `/reputation`, a day after the work, once per job |
+| Routing by the answer  | Built   | Five invited publicly, three or less opens a talk |
+| Who was not asked, why | Built   | The list that explains a low review count         |
+| Satisfaction           | Built   | Refused below five answers rather than swinging   |
+| Closing a complaint    | Built   | With a stated outcome, enforced by the database   |
+| Posting to Google      | Missing | Needs a place to send them. The invitation exists |
+
+The routing is the feature and it is the thing businesses get backwards.
+Asking everybody for a public review collects the one-star ones you could have
+fixed. Asking privately first gives the unhappy customer a conversation
+instead, which is what they wanted and is worth more than the review.
 
 ## 19. AI inside the workflow
 
@@ -350,9 +369,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 109          |
-| Partial | 3            |
-| Missing | 18           |
+| Built   | 117          |
+| Partial | 2            |
+| Missing | 16           |
 
 <!-- counts:end -->
 

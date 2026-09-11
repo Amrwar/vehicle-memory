@@ -52,7 +52,7 @@ export function balanceOf(entries: readonly Entry[], now = new Date()): number {
 }
 
 /** Points about to lapse, which is the only reason to mention them. */
-export function expiringWithin(
+export function pointsExpiringWithin(
   entries: readonly Entry[],
   days: number,
   now = new Date(),

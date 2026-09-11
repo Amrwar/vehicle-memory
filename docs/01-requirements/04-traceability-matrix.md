@@ -222,6 +222,25 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## What people say afterwards
+
+| Req     | Story | Schema                                 | Implementation       | Test                  | Status |
+| ------- | ----- | -------------------------------------- | -------------------- | --------------------- | ------ |
+| FR-3601 | —     | `DocumentSequence`                     | `createJob()`        | `verify-controls.ts`  | Done   |
+| FR-3602 | —     | —                                      | `createJob()`        | `verify-controls.ts`  | Done   |
+| FR-3603 | —     | `OdometerReading`                      | `createJob()`        | `verify-controls.ts`  | Done   |
+| FR-3604 | —     | —                                      | `JobError`           | `verify-controls.ts`  | Done   |
+| FR-3605 | —     | —                                      | `verify-controls.ts` | `verify-controls.ts`  | Done   |
+| FR-3701 | —     | `review_requests_jobId_key`            | `shouldAsk()`        | `verify-retention.ts` | Done   |
+| FR-3702 | —     | `ReviewRouting`                        | `routeRating()`      | `retention.test.ts`   | Done   |
+| FR-3703 | —     | —                                      | `askable()`          | `verify-retention.ts` | Done   |
+| FR-3704 | —     | —                                      | `satisfactionOf()`   | `retention.test.ts`   | Done   |
+| FR-3705 | —     | `InboundMessage.confidence`            | `matchInbound()`     | `inbound.test.ts`     | Done   |
+| FR-3706 | —     | —                                      | `priorityOf()`       | `verify-retention.ts` | Done   |
+| FR-3707 | —     | `inbound_messages` unique provider ref | `receiveInbound()`   | `verify-retention.ts` | Done   |
+| FR-3708 | —     | `loyalty_entries_move_something`       | `balanceOf()`        | `retention.test.ts`   | Done   |
+| FR-3709 | —     | `referrals_are_between_two_people`     | `assertCreditable()` | `verify-retention.ts` | Done   |
+
 ## The technician's own device
 
 | Req     | Story | Schema                            | Implementation      | Test                | Status |
@@ -459,6 +478,7 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
 | Proof of everything, and parts that fit   | 8                   | 8                      |
 | The workshop plans itself                 | 10                  | 10                     |
@@ -474,9 +494,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **239**             | **236 (99%)**          |
+| **Total**                                 | **253**             | **250 (99%)**          |
 
-The requirements document lists 323 requirements. 84 of
+The requirements document lists 337 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

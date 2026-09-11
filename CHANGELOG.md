@@ -7,6 +7,57 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 15 - What people say afterwards.**
+
+Reviews routed by the answer, points, referrals, and replies finally arriving.
+
+- The product asks how a job went, a day after the work rather than as the
+  invoice prints: asking before somebody has driven the car measures the
+  reception desk, not the repair.
+- The routing is the feature, and it is the thing businesses get backwards.
+  Asking everybody for a public review collects the one-star ones you could
+  have fixed. A five is invited to say so publicly; a four is thanked and
+  asked what would have made it a five; three or less opens a conversation
+  with somebody who can put it right, which is what that customer wanted and
+  is worth more than the review would have been.
+- Nobody is asked twice about one job, enforced by a unique index rather than
+  by the code that happens to write it. Nobody is asked twice within ninety
+  days, because a customer who comes in monthly should not be asked monthly.
+  And nobody is asked while they are waiting to hear back about a complaint,
+  which reads as though nobody is listening.
+- Every customer who was not asked is listed with the reason. Without that
+  list, a low review count reads as a broken feature.
+- Satisfaction is not averaged below five answers. One unhappy customer moves
+  a figure built on three by a star and a half, and a number that swings like
+  that reads as a measurement rather than the anecdote it is.
+- Closing a complaint requires saying what happened. "Resolved" with nothing
+  against it means nothing to whoever reads it next, and the database refuses
+  it.
+- Replies now arrive. `/inbox` receives them, matches each to a customer and a
+  job with a stated confidence, and never files one silently against a guess:
+  a reply against the wrong job is worse than one against nothing, because
+  somebody reads it about another car.
+- Two customers on one address is ordinary and produces a question rather than
+  a choice. A quoted job number is certain. One customer with one job open is
+  probable. Everything else says so.
+- The inbox is ordered by what has to be acted on. Somebody asking to be left
+  alone goes first; somebody apparently approving work goes next. Nothing is
+  acted on automatically, because work worth thousands of pounds does not rest
+  on a pattern match.
+- A message delivered twice by a provider is one row. Every webhook retries,
+  and a duplicate reply reads as a customer repeating themselves.
+- Loyalty points are the sum of their entries rather than a total somebody
+  edits, so the balance can never drift from the history that produced it.
+  Whole numbers throughout, floored on both earning and redemption, because
+  rounding up hands out points nobody spent.
+- A redemption worth more than the bill is refused rather than clamped.
+  Quietly using fewer points than somebody asked for produces a bill they find
+  out about at the counter.
+- A referral credits both sides in one transaction, once, and only after the
+  referred customer has actually had work done. A scheme that pays on sign-up
+  pays for email addresses. Codes avoid every character that gets misheard
+  over a counter.
+
 **Fixed: the new job button went nowhere.**
 
 Four screens have linked to `/jobs/new` since Phase 1 and there was never a

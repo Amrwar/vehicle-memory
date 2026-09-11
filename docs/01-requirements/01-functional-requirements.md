@@ -257,6 +257,30 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3600 — Opening a job
+
+| Ref     | Requirement                                                                                                       | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3601 | A job MUST be openable from a page of its own, reachable from the jobs list, a customer and a vehicle.            | 15    |
+| FR-3602 | The job number MUST be allocated in the same transaction as the job, so none is taken and abandoned.              | 15    |
+| FR-3603 | A mileage reading taken at booking-in MUST reach the vehicle as well as the job.                                  | 15    |
+| FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
+| FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
+
+## FR-3700 — What people say afterwards
+
+| Ref     | Requirement                                                                                                           | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3701 | The system MUST ask how a job went, and MUST NOT ask twice about one job or twice in a quiet period.                  | 15    |
+| FR-3702 | A rating MUST be routed: a top rating invited to say so publicly, anything lower opening a private conversation.      | 15    |
+| FR-3703 | Every customer not asked MUST be listed with the reason, so a low count is explained rather than mysterious.          | 15    |
+| FR-3704 | Satisfaction MUST NOT be averaged below a stated minimum number of answers.                                           | 15    |
+| FR-3705 | A reply from a customer MUST be received, matched with a stated confidence, and never filed silently against a guess. | 15    |
+| FR-3706 | The inbox MUST be ordered by what has to be acted on, not by arrival, and MUST NOT act on anything automatically.     | 15    |
+| FR-3707 | A message delivered twice by a provider MUST be one row.                                                              | 15    |
+| FR-3708 | Loyalty points MUST be the sum of their entries, MUST be whole, and MUST be floored on both earning and redemption.   | 15    |
+| FR-3709 | A referral MUST credit both sides exactly once, MUST refuse a self-referral, and MUST pay only after real spending.   | 15    |
+
 ## FR-3500 — The technician's own device
 
 | Ref     | Requirement                                                                                                                  | Phase |

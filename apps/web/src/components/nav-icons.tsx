@@ -61,6 +61,8 @@ export type NavIconName =
   | 'capacity'
   | 'plan'
   | 'skills'
+  | 'reputation'
+  | 'inbox'
   | 'crm'
   | 'audit';
 
@@ -108,6 +110,19 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <rect x="2.6" y="2.6" width="14.8" height="14.8" rx="1.6" />
       <path d="M7.5 2.6v14.8" />
       <path d="M2.6 7.5h14.8" />
+    </>
+  ),
+  // A star, outlined: what people said.
+  reputation: (
+    <>
+      <path d="M10 2.8l2.3 4.7 5.2.75-3.75 3.65.9 5.15L10 14.6l-4.65 2.45.9-5.15L2.5 8.25l5.2-.75z" />
+    </>
+  ),
+  // A tray with something landing in it.
+  inbox: (
+    <>
+      <path d="M2.8 11.4h4l1.2 2.2h4l1.2-2.2h4" />
+      <path d="M4.6 3.6h10.8l1.8 7.8v4.2a1.2 1.2 0 0 1-1.2 1.2H4a1.2 1.2 0 0 1-1.2-1.2v-4.2z" />
     </>
   ),
   // A warning triangle: somebody else's problem that becomes yours.

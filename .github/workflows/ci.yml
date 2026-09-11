@@ -216,6 +216,13 @@ jobs:
       - name: Verify work recorded with no signal survives being sent twice
         run: npx tsx infra/scripts/verify-offline.ts
 
+      # What embarrasses a workshop here is not arithmetic: asking the same
+      # customer twice, paying a referral to one person on both sides, or
+      # filing a reply against the wrong car. All three are checked against
+      # real rows.
+      - name: Verify asking, points, referrals and the inbox
+        run: npx tsx infra/scripts/verify-retention.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

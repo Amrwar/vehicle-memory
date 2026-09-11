@@ -101,6 +101,10 @@ model Organization {
   workingPatterns     WorkingPattern[]
   partFitments        PartFitment[]
   syncedActions       SyncedAction[]
+  reviewRequests      ReviewRequest[]
+  loyaltyEntries      LoyaltyEntry[]
+  referrals           Referral[]
+  inboundMessages     InboundMessage[]
 
   @@index([isActive])
   @@map("organizations")
@@ -221,6 +225,9 @@ model User {
   skillAssessments    EmployeeSkill[]
   partFitments        PartFitment[]
   syncedActions       SyncedAction[]
+  reviewsResolved     ReviewRequest[]
+  loyaltyEntries      LoyaltyEntry[]
+  inboundHandled      InboundMessage[]
 
   @@index([isActive])
   @@map("users")
@@ -730,6 +737,11 @@ model Customer {
   payments           Payment[]
   consentChanges     ConsentChange[]
   campaignRecipients CampaignRecipient[]
+  reviewRequests     ReviewRequest[]
+  loyaltyEntries     LoyaltyEntry[]
+  referralsMade      Referral[]          @relation("ReferralsMade")
+  referralsUsed      Referral[]          @relation("ReferralsUsed")
+  inboundMessages    InboundMessage[]
 
   @@index([orgId, isActive])
   @@index([orgId, mobile])
@@ -915,6 +927,10 @@ model Job {
   purchaseRequests PurchaseRequest[]
   warranties       Warranty[]
   warrantyClaims   WarrantyClaim[]   @relation("ClaimRemedy")
+  reviewRequest    ReviewRequest?
+  loyaltyEntries   LoyaltyEntry[]
+  referrals        Referral[]
+  inboundMessages  InboundMessage[]
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -2446,6 +2462,160 @@ model SyncedAction {
   @@index([orgId, appliedAt])
   @@index([subjectId])
   @@map("synced_actions")
+}
+
+/// Where a rating was routed. The whole point of asking.
+enum ReviewRouting {
+  PENDING
+  PUBLIC_INVITE
+  THANKS_ONLY
+  PRIVATE_CONVERSATION
+}
+
+/// One customer asked how a job went.
+///
+/// One per job, enforced by a unique index. Asking twice about the same repair
+/// is how a workshop teaches somebody to ignore it.
+model ReviewRequest {
+  id         String @id @default(cuid())
+  orgId      String
+  jobId      String @unique
+  customerId String
+
+  /// Only the digest is stored, as with every capability in this product.
+  tokenHash String   @unique
+  channel   String   @default("EMAIL")
+  sentAt    DateTime @default(now())
+  expiresAt DateTime
+
+  /// Null until they answer. One to five.
+  rating      Int?
+  comment     String?
+  respondedAt DateTime?
+
+  routing ReviewRouting @default(PENDING)
+
+  /// Set when somebody followed the public invitation.
+  publicOpenedAt DateTime?
+
+  /// A poor rating is a conversation, and this is how it closes.
+  resolvedAt       DateTime?
+  resolvedByUserId String?
+  resolutionNote   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job        Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  resolvedBy User?        @relation(fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, sentAt])
+  @@index([orgId, routing])
+  @@index([customerId, sentAt])
+  @@map("review_requests")
+}
+
+/// One movement of points, positive or negative.
+///
+/// The balance is the sum of these rather than a figure somebody edits, so it
+/// can never drift from the history that produced it.
+model LoyaltyEntry {
+  id         String @id @default(cuid())
+  orgId      String
+  customerId String
+
+  /// Whole points. Positive awards, negative spends.
+  points Int
+  reason String
+
+  jobId     String?
+  /// Awards lapse; spends never do.
+  expiresAt DateTime?
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer  Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  job       Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  createdBy User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, customerId, createdAt])
+  @@index([expiresAt])
+  @@map("loyalty_entries")
+}
+
+/// A code one customer gives another.
+model Referral {
+  id                 String @id @default(cuid())
+  orgId              String
+  referrerCustomerId String
+
+  /// Said out loud over a counter, so no character that gets misheard.
+  code String
+
+  referredCustomerId String?
+  referredJobId      String?
+  usedAt             DateTime?
+
+  /// Set once, when both sides have been paid.
+  creditedAt DateTime?
+  points     Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  referrer Customer     @relation("ReferralsMade", fields: [referrerCustomerId], references: [id], onDelete: Cascade)
+  referred Customer?    @relation("ReferralsUsed", fields: [referredCustomerId], references: [id], onDelete: SetNull)
+  job      Job?         @relation(fields: [referredJobId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, code])
+  @@index([orgId, creditedAt])
+  @@map("referrals")
+}
+
+/// Something a customer sent in.
+///
+/// Matched to a customer and a job with a stated confidence rather than a
+/// silent assignment: a reply filed against the wrong job is worse than one
+/// filed against nothing, because somebody reads it about another car.
+model InboundMessage {
+  id      String @id @default(cuid())
+  orgId   String
+  channel String @default("SMS")
+
+  fromAddress String
+  subject     String?
+  body        String
+  receivedAt  DateTime @default(now())
+
+  /// The provider's own id, so the same message delivered twice is recognised.
+  providerRef String?
+
+  customerId String?
+  jobId      String?
+  /// CERTAIN, PROBABLE, POSSIBLE or NONE.
+  confidence String  @default("NONE")
+  matchNote  String?
+
+  handledAt       DateTime?
+  handledByUserId String?
+
+  createdAt DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer  Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  job       Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  handledBy User?        @relation(fields: [handledByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, providerRef])
+  @@index([orgId, receivedAt])
+  @@index([orgId, handledAt])
+  @@index([jobId])
+  @@map("inbound_messages")
 }
 
 enum CommissionBasis {
