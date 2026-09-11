@@ -349,6 +349,23 @@ proposed sections do not exist yet.
 | The chain behind a vehicle     | Built  | Shown apart, because it is a stronger claim    |
 | Immutability                   | Built  | The database refuses to alter or delete a row  |
 
+## 21.8 Getting in, and mail coming back
+
+| Item                     | Status  | Where                                              |
+| ------------------------ | ------- | -------------------------------------------------- |
+| Password reset           | Built   | `/forgot`, one hour, single use, ends all sessions |
+| No account enumeration   | Built   | The same answer whether the address exists or not  |
+| Email verification       | Built   | `/verify-email`, three days, opening twice is fine |
+| Unverified banner        | Built   | Says what is lost, never locks anybody out         |
+| Rate limiting            | Built   | Five an hour, and the limit reveals nothing        |
+| Inbound mail from Resend | Built   | Signature verified over the exact request body     |
+| Customer sign-up         | Missing | Customers get a portal account from the workshop   |
+
+A reset link and a verification link are the same mechanism with different
+windows, so they are one table and one set of rules. The windows differ
+because a reset is a key to an account and a verification is only proof of an
+address.
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -369,9 +386,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 117          |
+| Built   | 123          |
 | Partial | 2            |
-| Missing | 16           |
+| Missing | 17           |
 
 <!-- counts:end -->
 

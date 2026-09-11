@@ -267,6 +267,28 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-3900 — Getting in, and proving the address
+
+| Ref     | Requirement                                                                                                      | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3901 | A password reset MUST answer identically whether or not the address has an account.                              | 16    |
+| FR-3902 | A reset link MUST be single use, MUST expire within an hour, and MUST end every session when redeemed.           | 16    |
+| FR-3903 | Issuing a link MUST retire any previous live one for the same person and purpose.                                | 16    |
+| FR-3904 | An unverified address MUST be surfaced with what is actually lost, and MUST NOT lock anybody out of the product. | 16    |
+| FR-3905 | A verification link MUST last three days, and opening it twice MUST NOT read as an error.                        | 16    |
+| FR-3906 | A new password MUST meet a stated length and MUST NOT contain the address it protects or an obvious word.        | 16    |
+| FR-3907 | Requests MUST be rate limited per person per hour, and the limit MUST NOT reveal that the address exists.        | 16    |
+| FR-3908 | Only the digest of a link MUST be stored.                                                                        | 16    |
+
+## FR-3800 — Mail coming back
+
+| Ref     | Requirement                                                                                                    | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3801 | Inbound mail MUST be accepted from a provider webhook whose signature is verified over the exact request body. | 16    |
+| FR-3802 | A replayed webhook MUST be refused on its timestamp even with a valid signature.                               | 16    |
+| FR-3803 | The workshop a message belongs to MUST be read from the recipient address, never from the body.                | 16    |
+| FR-3804 | With no webhook secret configured, inbound mail MUST be refused rather than accepted.                          | 16    |
+
 ## FR-3700 — What people say afterwards
 
 | Ref     | Requirement                                                                                                           | Phase |

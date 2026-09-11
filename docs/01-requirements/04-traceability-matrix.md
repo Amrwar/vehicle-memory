@@ -222,6 +222,23 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## Getting in, and mail coming back
+
+| Req     | Story | Schema                             | Implementation           | Test                    | Status |
+| ------- | ----- | ---------------------------------- | ------------------------ | ----------------------- | ------ |
+| FR-3901 | A1    | —                                  | `requestReset()`         | `verify-credentials.ts` | Done   |
+| FR-3902 | A1    | `AuthToken.usedAt`                 | `redeemReset()`          | `verify-credentials.ts` | Done   |
+| FR-3903 | A1    | `auth_tokens_one_live_per_purpose` | `issue()`                | `verify-credentials.ts` | Done   |
+| FR-3904 | A1    | `User.emailVerifiedAt`             | `unverifiedWarning()`    | `tokens.test.ts`        | Done   |
+| FR-3905 | A1    | —                                  | `redeemVerification()`   | `verify-credentials.ts` | Done   |
+| FR-3906 | A1    | —                                  | `checkPassword()`        | `tokens.test.ts`        | Done   |
+| FR-3907 | A1    | —                                  | `assertNotFlooding()`    | `verify-credentials.ts` | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`            | `digest()`               | `verify-credentials.ts` | Done   |
+| FR-3801 | —     | —                                  | `/api/inbound/resend`    | `smoke.ts`              | Done   |
+| FR-3802 | —     | —                                  | `verify()` tolerance     | `smoke.ts`              | Done   |
+| FR-3803 | —     | `Organization.slug`                | `organisationFor()`      | `smoke.ts`              | Done   |
+| FR-3804 | —     | —                                  | `INBOUND_WEBHOOK_SECRET` | `smoke.ts`              | Done   |
+
 ## What people say afterwards
 
 | Req     | Story | Schema                                 | Implementation       | Test                  | Status |
@@ -478,6 +495,7 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| Getting in, and mail coming back          | 12                  | 12                     |
 | What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
 | Proof of everything, and parts that fit   | 8                   | 8                      |
@@ -494,9 +512,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **253**             | **250 (99%)**          |
+| **Total**                                 | **265**             | **262 (99%)**          |
 
-The requirements document lists 337 requirements. 84 of
+The requirements document lists 349 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

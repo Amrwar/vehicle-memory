@@ -7,6 +7,46 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 16 - Getting in, and mail coming back.**
+
+The two things that have been waiting on a sending domain since Phase 5, now
+that there is one.
+
+- Password reset at `/forgot`. The form answers identically whether or not the
+  address has an account, and says on the page that it does so. A form that
+  replies "no such account" is how somebody enumerates a customer list, and it
+  takes about an hour.
+- A reset link lasts one hour, works once, and ends every session when it is
+  redeemed. Somebody resetting a password is often doing it because they think
+  another person has it, and leaving that person signed in defeats the point.
+- Issuing a link retires the previous one, enforced by a partial unique index
+  rather than by the code that happens to write it. Without that rule every
+  link ever sent stays live until it expires on its own, and the window is no
+  longer the hour it claims: it is the whole history of requests.
+- Only the digest of a link is stored, the same rule every other capability in
+  this product follows.
+- A new password is judged on length rather than character classes. Twelve
+  characters somebody remembers beats eight with a digit and a symbol written
+  on a card taped to the monitor, and the composition rules are what produce
+  the card. A password containing the address it protects is refused, since
+  that is one guess away from everybody who has ever been emailed.
+- Requests are limited to five an hour, and hitting the limit is silent,
+  because telling somebody they have asked too often is itself confirmation
+  the address exists.
+- Email verification at `/verify-email`, lasting three days. Opening the link
+  twice is not an error: the outcome the person wanted has happened.
+- The reset link proves the address as a side effect. Whoever set the password
+  read mail sent there.
+- An unverified address gets a banner that says what is actually lost, which
+  is hearing about bounces, rather than threatening to lock anybody out.
+  Nothing on the first day, because somebody who signed up an hour ago has not
+  ignored anything yet.
+- Inbound mail arrives at a Resend-shaped endpoint that verifies the signature
+  over the exact bytes of the request, refuses a replay on its timestamp even
+  with a valid signature, and reads the workshop from the recipient address
+  rather than from the body, so a sender cannot claim to be writing to
+  somebody else's workshop.
+
 **Phase 15 - What people say afterwards.**
 
 Reviews routed by the answer, points, referrals, and replies finally arriving.

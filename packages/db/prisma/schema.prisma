@@ -228,6 +228,7 @@ model User {
   reviewsResolved     ReviewRequest[]
   loyaltyEntries      LoyaltyEntry[]
   inboundHandled      InboundMessage[]
+  authTokens          AuthToken[]
 
   @@index([isActive])
   @@map("users")
@@ -2616,6 +2617,37 @@ model InboundMessage {
   @@index([orgId, handledAt])
   @@index([jobId])
   @@map("inbound_messages")
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// A one-time link sent to an address.
+///
+/// Email verification and password reset are the same mechanism with
+/// different windows, so they are one table. Only the digest is stored: a
+/// link that leaks cannot be read back out of the database, which is the same
+/// rule every other capability in this product follows.
+model AuthToken {
+  id      String       @id @default(cuid())
+  userId  String
+  purpose TokenPurpose
+
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  /// Where it was asked for, so a flood has a shape somebody can look at.
+  requestedIp String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, createdAt])
+  @@index([expiresAt])
+  @@map("auth_tokens")
 }
 
 enum CommissionBasis {

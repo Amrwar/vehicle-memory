@@ -60,6 +60,11 @@ const schema = z.object({
   // close people's timesheets, so an open URL would hand both to anybody.
   CRON_SECRET: z.string().min(16).optional(),
 
+  // Signs the inbound mail webhook. Absent means inbound is refused outright,
+  // which is the right failure: the endpoint writes rows into a workshop's
+  // inbox, and an inbox anybody can write to is one nobody can trust.
+  INBOUND_WEBHOOK_SECRET: z.string().min(16).optional(),
+
   MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
   MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),

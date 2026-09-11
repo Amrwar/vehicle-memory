@@ -20,6 +20,7 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { VerifyBanner } from '@/components/verify-banner';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Dashboard' };
@@ -32,7 +33,12 @@ export const dynamic = 'force-dynamic';
  * 7:40am and needs to know what requires him, not how last quarter went.
  * Every figure links to the records behind it (FR-1402).
  */
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ verification?: string }>;
+}) {
+  const notice = await searchParams;
   const { db, user } = await requireSession('job:read');
 
   const startOfDay = new Date();
@@ -120,6 +126,8 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <VerifyBanner sent={notice.verification === 'sent'} />
+
       <PageHeader
         eyebrow={new Date().toLocaleDateString('en-GB', {
           weekday: 'long',

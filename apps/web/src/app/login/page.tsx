@@ -1,6 +1,7 @@
 import { landingPathFor } from '@carnet/core';
 import { Alert, Button, Field, Input } from '@carnet/ui';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { currentUser, signIn } from '@/lib/auth';
@@ -139,6 +140,12 @@ export default async function LoginPage({
               Sign in
             </Button>
           </form>
+
+          <p className="mt-4 text-center text-[13px]">
+            <Link href="/forgot" className="font-medium text-(--brand-text) hover:underline">
+              Forgotten your password?
+            </Link>
+          </p>
 
           <div className="mt-8 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-3.5">
             <p className="eyebrow mb-2">Demo accounts</p>

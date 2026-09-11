@@ -223,6 +223,13 @@ jobs:
       - name: Verify asking, points, referrals and the inbox
         run: npx tsx infra/scripts/verify-retention.ts
 
+      # Every mistake this feature makes is a quiet one: a link alive after
+      # use, an old link left live when a new one is issued, a form that says
+      # which addresses have accounts, or a reset that leaves the thief signed
+      # in. None of them produces an error anybody would see.
+      - name: Verify password reset and email verification
+        run: npx tsx infra/scripts/verify-credentials.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
