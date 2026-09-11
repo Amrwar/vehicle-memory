@@ -257,6 +257,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3500 — The technician's own device
+
+| Ref     | Requirement                                                                                                                  | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3501 | A technician MUST be able to record work with no connection, and nothing recorded MUST be lost.                              | 14    |
+| FR-3502 | Every queued action MUST carry an id generated on the device, so a retry is recognised rather than applied twice.            | 14    |
+| FR-3503 | A queued action MUST be classed as a fact, an addition or a claim, and only a claim MUST be able to conflict.                | 14    |
+| FR-3504 | Actions MUST replay in the order they happened, not the order they arrived, and the result MUST NOT depend on batch order.   | 14    |
+| FR-3505 | Nothing MUST be applied to a job invoiced while the device was offline.                                                      | 14    |
+| FR-3506 | A refused action MUST come back with a sentence saying why, and MUST stay on the device rather than being discarded.         | 14    |
+| FR-3507 | The set of actions a device may queue MUST be closed, and anything else MUST be refused.                                     | 14    |
+| FR-3508 | The shop floor MUST be installable and MUST open with no signal; what is cached MUST NOT include money or anybody's address. | 14    |
+| FR-3509 | An action recorded in the future or older than a fortnight MUST be refused rather than applied silently.                     | 14    |
+
 ## FR-3400 — Proof of everything, and parts that fit
 
 | Ref     | Requirement                                                                                                                     | Phase |

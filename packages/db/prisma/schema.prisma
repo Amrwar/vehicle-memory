@@ -100,6 +100,7 @@ model Organization {
   skills              Skill[]
   workingPatterns     WorkingPattern[]
   partFitments        PartFitment[]
+  syncedActions       SyncedAction[]
 
   @@index([isActive])
   @@map("organizations")
@@ -219,6 +220,7 @@ model User {
   warrantyClaims      WarrantyClaim[]
   skillAssessments    EmployeeSkill[]
   partFitments        PartFitment[]
+  syncedActions       SyncedAction[]
 
   @@index([isActive])
   @@map("users")
@@ -2408,6 +2410,42 @@ model PartFitment {
   @@index([productId])
   @@index([orgId, make, model])
   @@map("part_fitments")
+}
+
+/// One action a device recorded offline and the server has since applied.
+///
+/// Exists for one reason: a flush interrupted halfway must not write
+/// everything again when the signal comes back. The device generates the id
+/// before it sends anything, and this table is the record of which ids have
+/// already been honoured.
+///
+/// Only applied actions are kept. A conflict stays on the device with the
+/// reason it was refused, because the person holding the device is the one who
+/// has to decide what to do about it, and a row here would make the retry read
+/// as a duplicate and disappear.
+model SyncedAction {
+  id String @id @default(cuid())
+
+  orgId  String
+  userId String?
+
+  /// Generated on the device. Unique within a workshop.
+  clientId  String
+  type      String
+  /// The job, inspection or vehicle it happened to.
+  subjectId String
+
+  /// When it happened on the device, which is not when it arrived.
+  recordedAt DateTime
+  appliedAt  DateTime @default(now())
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, clientId])
+  @@index([orgId, appliedAt])
+  @@index([subjectId])
+  @@map("synced_actions")
 }
 
 enum CommissionBasis {

@@ -7,6 +7,53 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 14 - The technician's own device.**
+
+Workshops have bad wi-fi, and the parts of the building with the worst signal
+are the parts with the cars in them.
+
+- The shop floor installs on a phone and opens with no connection. Scoped to
+  `/shop` alone: nobody wants an icon on their home screen that opens a
+  ledger, and a stale invoice list is far worse than a stale job list.
+- Jobs, the clock, notes, part requests, odometer readings and inspection
+  findings all work with nothing connected. What is recorded is kept on the
+  device and sent the moment there is a signal.
+- The reconciling is the whole difficulty and is where this is usually got
+  wrong. Two devices editing one job cannot be resolved by last-write-wins:
+  the record a customer is billed from is a sequence of claims about what
+  happened, not a document, and the later claim is not automatically the true
+  one.
+- So every queued action is one of three kinds. A fact happened at a moment
+  and is simply true, and facts never conflict. An addition appends without
+  replacing, so two notes from two devices both survive. A claim asserts the
+  state of something, and it is the only kind that can genuinely disagree.
+- A claim is resolved by whether its transition is still legal against what
+  the server holds, never by which arrived last. A move somebody else already
+  made counts as done rather than as a conflict, because the world is already
+  as the action asked for.
+- Every action carries an id the device generated before anything was sent.
+  That is the only thing that makes a retry safe: without it a flush
+  interrupted halfway writes the entire morning again when the signal returns.
+  The check replays exactly that against a real database.
+- Actions replay in the order they happened rather than the order they
+  arrived, and ties break on the device id, so the same two devices produce
+  the same timeline whichever way round the batch was sent.
+- Nothing lands on a job that was invoiced while the device was away. Time
+  appearing on a job after the customer has paid is a bill that has to be
+  reissued, and it is the one case worth blocking even a plain fact for.
+- Nothing is discarded quietly. Every action comes back applied, recognised as
+  a duplicate, or refused with a sentence, and a refusal stays on the device
+  for the person holding it to deal with.
+- The list of actions a device may queue is closed. A queue that accepted
+  whatever the client sent would be a write API with no schema, and these
+  arrive from a browser that has been offline and may have been tampered with.
+- A device is given only what the person carrying it needs: their own open
+  jobs, the vehicles, and the inspection they are working through. No money
+  and nobody's address leaves the building on a phone.
+- Notes are kept as rows of their own with the moment they were written, not
+  the moment they arrived. A note written at nine and sent at five belongs at
+  nine, or the job reads as though nothing happened all day.
+
 **Phase 13 - Proof of everything, and parts that fit.**
 
 The product is sold on the claim that its records can be trusted. A claim like

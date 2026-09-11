@@ -142,9 +142,17 @@ share links the owner controls. Repair tracking is the status timeline on
 | Upload photos                | Built  | Straight from the camera to the file store |
 | Mark a task complete         | Built  |                                            |
 | Report an additional problem | Built  | Any item can be marked and quoted          |
+| Installs on a phone          | Built  | Scoped to `/shop`, nothing else            |
+| Works with no signal         | Built  | Jobs, clock, notes, inspection findings    |
+| Nothing lost when offline    | Built  | Queued on the device, sent on reconnection |
+| Retry writes it once         | Built  | An id generated before anything is sent    |
+| Conflicts explained          | Built  | Kept on the device with the reason         |
 
-Two buttons on this page do nothing when pressed. They are listed as missing
-rather than partial for that reason.
+The reconciling is the part worth reading about. Two devices editing one job
+cannot be resolved by last-write-wins, because the record a customer is billed
+from is a sequence of claims about what happened rather than a document, and
+the later claim is not automatically the true one. Every queued action is
+therefore a fact, an addition or a claim, and only the third can conflict.
 
 ## 9. Parts and inventory
 
@@ -342,7 +350,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 104          |
+| Built   | 109          |
 | Partial | 3            |
 | Missing | 18           |
 

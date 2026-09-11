@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/guard';
 import { startInspection } from '@/lib/inspections';
 import { requestPart, ShopFloorError, toggleClock } from '@/lib/shopfloor';
+import { OutboxStatus } from '@/components/outbox';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My jobs' };
@@ -171,6 +172,8 @@ export default async function ShopFloorPage({
       </header>
 
       <main id="main" className="mx-auto max-w-3xl px-4 py-4">
+        <OutboxStatus />
+
         {notice.error ? (
           <div className="mb-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">
             <p className="text-[14px] text-(--danger)">{notice.error}</p>

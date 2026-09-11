@@ -210,6 +210,12 @@ jobs:
       - name: Verify a record's history, and that a part belongs on the car
         run: npx tsx infra/scripts/verify-provenance.ts
 
+      # The promise of offline work is that nothing is lost. The way it breaks
+      # is a flush interrupted halfway and retried, writing the whole morning
+      # twice, so that is what this replays against a real database.
+      - name: Verify work recorded with no signal survives being sent twice
+        run: npx tsx infra/scripts/verify-offline.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

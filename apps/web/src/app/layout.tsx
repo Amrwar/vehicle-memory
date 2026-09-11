@@ -42,6 +42,11 @@ export const metadata: Metadata = {
   description:
     'Workshop management with a portable vehicle history that follows the car, not the owner or the garage.',
   applicationName: 'Carnet',
+  // The manifest is scoped to the shop floor, so installing puts the
+  // technician's own screens on a home screen and nothing else. Nobody wants
+  // an icon that opens a ledger.
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { capable: true, title: 'Carnet', statusBarStyle: 'black-translucent' },
   robots: { index: false, follow: false },
 };
 
