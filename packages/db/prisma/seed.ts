@@ -1841,7 +1841,7 @@ async function main() {
 
   /* --- people ------------------------------------------------------------- */
 
-  await seedPeople(org.id, {
+  const employeeRefs = await seedPeople(org.id, {
     locationId: location.id,
     bradfordId: bradford.id,
     ahmedId: ahmed!.id,
@@ -1871,6 +1871,10 @@ async function main() {
   /* --- what has actually been sent ---------------------------------------- */
 
   await seedMessages(org.id);
+
+  /* --- who can do what, and when they are here (Phase 12) ----------------- */
+
+  await seedSkillsAndPatterns(org.id, { employees: employeeRefs, jobTypeByName });
 
   /* --- a fleet, and the cover the workshop stands behind (Phase 9) -------- */
 
@@ -2552,6 +2556,10 @@ async function seedPeople(
       },
     ],
   });
+
+  // Returned so later seeding can find somebody by reference rather than by
+  // display name, which is the thing most likely to be edited.
+  return employees;
 }
 
 /**
@@ -3424,4 +3432,124 @@ async function seedFleetAndWarranty(
       raisedByUserId: refs.ownerUserId,
     },
   });
+}
+
+/**
+ * Skills, and when people are actually here. Phase 12.
+ *
+ * Four screens are blank on a seeded database without this, and a blank
+ * capacity page teaches nobody what capacity is for. The shape is chosen to
+ * show the two things worth seeing on the first morning: a skill that rests
+ * on one person, and a skill nobody has at all.
+ */
+async function seedSkillsAndPatterns(
+  orgId: string,
+  refs: {
+    employees: Map<string, string>;
+    jobTypeByName: Map<string, { id: string }>;
+  },
+) {
+  const specs = [
+    { name: 'Servicing', note: 'Oil, filters, fluids, the routine work.' },
+    { name: 'Brakes', note: 'Pads, discs, fluid, ABS faults.' },
+    { name: 'Diagnostics', note: 'Fault codes, live data, electrical tracing.' },
+    { name: 'MOT testing', note: 'Class 4 and class 7.' },
+    { name: 'Air conditioning', note: 'Regas and leak detection. Needs the certificate.' },
+    { name: 'Electric vehicles', note: 'High voltage. Nobody touches one without this.' },
+  ];
+
+  const skills = new Map<string, string>();
+
+  for (const [index, spec] of specs.entries()) {
+    const skill = await prisma.skill.create({
+      data: { orgId, name: spec.name, note: spec.note, sortOrder: index },
+      select: { id: true },
+    });
+    skills.set(spec.name, skill.id);
+  }
+
+  // Deliberately uneven. Air conditioning rests on one person and nobody is
+  // signed off on electric vehicles at all, which is precisely what the
+  // matrix exists to show: the first is a problem the day he is ill, the
+  // second is work that has to go out of the door today.
+  const signOffs: Record<string, Record<string, 'LEARNING' | 'COMPETENT' | 'EXPERT'>> = {
+    'EMP-001': {
+      Servicing: 'EXPERT',
+      Brakes: 'EXPERT',
+      Diagnostics: 'COMPETENT',
+      'MOT testing': 'EXPERT',
+    },
+    'EMP-002': {
+      Servicing: 'COMPETENT',
+      Brakes: 'COMPETENT',
+      Diagnostics: 'EXPERT',
+      'Air conditioning': 'COMPETENT',
+    },
+    'EMP-004': {
+      Servicing: 'COMPETENT',
+      Brakes: 'LEARNING',
+    },
+  };
+
+  for (const [reference, held] of Object.entries(signOffs)) {
+    const employeeId = refs.employees.get(reference);
+    if (!employeeId) continue;
+
+    for (const [skillName, level] of Object.entries(held)) {
+      const skillId = skills.get(skillName);
+      if (!skillId) continue;
+
+      await prisma.employeeSkill.create({
+        data: { employeeId, skillId, level, assessedOn: day(-120) },
+      });
+    }
+  }
+
+  const requirements: { jobType: string; skill: string; level: 'COMPETENT' | 'EXPERT' }[] = [
+    { jobType: 'Brake repair', skill: 'Brakes', level: 'COMPETENT' },
+    { jobType: 'Major Service', skill: 'Servicing', level: 'COMPETENT' },
+    { jobType: 'Interim Service', skill: 'Servicing', level: 'COMPETENT' },
+    { jobType: 'Diagnostics', skill: 'Diagnostics', level: 'COMPETENT' },
+    { jobType: 'MOT preparation', skill: 'MOT testing', level: 'EXPERT' },
+  ];
+
+  for (const requirement of requirements) {
+    const jobType = refs.jobTypeByName.get(requirement.jobType);
+    const skillId = skills.get(requirement.skill);
+    if (!jobType || !skillId) continue;
+
+    await prisma.jobTypeSkill.create({
+      data: { jobTypeId: jobType.id, skillId, minimumLevel: requirement.level },
+    });
+  }
+
+  // A full-timer, one who finishes at one on Friday, and one who is not in on
+  // Wednesdays. Capacity that could not tell those three apart is capacity
+  // nobody should promise a customer against.
+  const patterns: Record<string, { weekday: number; start: number; end: number }[]> = {
+    'EMP-001': [1, 2, 3, 4, 5].map((weekday) => ({ weekday, start: 8 * 60, end: 17 * 60 })),
+    'EMP-002': [
+      ...[1, 2, 3, 4].map((weekday) => ({ weekday, start: 8 * 60, end: 17 * 60 })),
+      { weekday: 5, start: 8 * 60, end: 13 * 60 },
+    ],
+    'EMP-004': [1, 2, 4, 5].map((weekday) => ({ weekday, start: 9 * 60, end: 17 * 60 })),
+  };
+
+  for (const [reference, week] of Object.entries(patterns)) {
+    const employeeId = refs.employees.get(reference);
+    if (!employeeId) continue;
+
+    for (const pattern of week) {
+      await prisma.workingPattern.create({
+        data: {
+          orgId,
+          employeeId,
+          weekday: pattern.weekday,
+          startMinute: pattern.start,
+          endMinute: pattern.end,
+          breakMinutes: 30,
+        },
+      });
+    }
+  }
 }

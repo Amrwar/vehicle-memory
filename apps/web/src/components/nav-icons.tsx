@@ -58,6 +58,9 @@ export type NavIconName =
   | 'fleet'
   | 'warranty'
   | 'recalls'
+  | 'capacity'
+  | 'plan'
+  | 'skills'
   | 'crm'
   | 'audit';
 
@@ -79,6 +82,32 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <rect x="7.5" y="7.4" width="5" height="5" rx="1" />
       <rect x="13.4" y="7.4" width="5" height="5" rx="1" />
       <path d="M2.6 13.8h15" />
+    </>
+  ),
+  // A column chart: how full each day is.
+  capacity: (
+    <>
+      <path d="M3.6 16.4V9.8" />
+      <path d="M8 16.4V4.6" />
+      <path d="M12.4 16.4v-8.8" />
+      <path d="M16.8 16.4v-4.4" />
+    </>
+  ),
+  // A list with a tick beside the first line: a day laid out.
+  plan: (
+    <>
+      <path d="M3 5.6h5.6" />
+      <path d="M3 10h9.4" />
+      <path d="M3 14.4h7.4" />
+      <path d="M14.2 5 16 6.8l2.4-3" />
+    </>
+  ),
+  // A grid: people down one side, what they can do across the top.
+  skills: (
+    <>
+      <rect x="2.6" y="2.6" width="14.8" height="14.8" rx="1.6" />
+      <path d="M7.5 2.6v14.8" />
+      <path d="M2.6 7.5h14.8" />
     </>
   ),
   // A warning triangle: somebody else's problem that becomes yours.

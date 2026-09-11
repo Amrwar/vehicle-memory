@@ -197,6 +197,13 @@ jobs:
       - name: Verify a vehicle changes hands without taking its owner with it
         run: npx tsx infra/scripts/verify-handover.ts
 
+      # A wrong capacity figure does not appear as an error. It appears as a
+      # day promised to a customer that cannot be kept, so the check is about
+      # which rows are counted: not the bookkeeper's hours, not an unapproved
+      # holiday, and never work given to somebody not signed off on it.
+      - name: Verify capacity, skills and the proposed day
+        run: npx tsx infra/scripts/verify-planning.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -183,7 +183,30 @@ provider.
 effective-dated pay rates, commission, certifications, jobs completed, hours,
 revenue and the utilisation, efficiency and productivity triple.
 
+| Item              | Status | Where                                               |
+| ----------------- | ------ | --------------------------------------------------- |
+| Skill matrix      | Built  | `/skills`, at three levels with the date signed off |
+| Skill gaps        | Built  | A skill only one person holds is named              |
+| Working hours     | Built  | `/patterns`, one row per person per weekday         |
+| Holiday deduction | Built  | Approved absence comes off capacity automatically   |
+
 Missing: payroll export, which waits on a named target format.
+
+## 12.5 Capacity and scheduling
+
+| Item                   | Status  | Where                                             |
+| ---------------------- | ------- | ------------------------------------------------- |
+| Capacity by day        | Built   | `/capacity`, from people and bays, seven days out |
+| Which constraint binds | Built   | People or bays, named rather than averaged        |
+| Overbooking            | Built   | By how much, and why                              |
+| Automatic scheduling   | Built   | `/plan`, skill-aware, with every reason shown     |
+| What cannot be placed  | Built   | Five reasons, each said plainly                   |
+| Accepting a proposal   | Missing | It proposes; writing it to the diary comes later  |
+
+The risk here is not the screen. A schedule that is subtly wrong is worse than
+a blank one, because somebody works to it. So skill is a hard constraint, every
+line carries the sentence that put it there, and nothing is written until a
+person says so.
 
 ## 13. Service bay management
 
@@ -298,9 +321,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 85           |
+| Built   | 94           |
 | Partial | 3            |
-| Missing | 16           |
+| Missing | 17           |
 
 <!-- counts:end -->
 

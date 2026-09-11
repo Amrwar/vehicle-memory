@@ -7,6 +7,53 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 12 - The workshop plans itself.**
+
+Every capacity decision in the product has been standing on a figure called
+daily capacity hours, typed once onto a site record. It knew nothing about
+part-time hours, nothing about the apprentice who is not in on Wednesdays, and
+nothing about anybody's holiday.
+
+- Capacity is now arithmetic over working patterns and approved absences.
+  `/capacity` shows seven days, each with what its people can do, what its
+  bays can hold, and what has already been promised.
+- People and bays are kept apart and the binding constraint is named. Six
+  technicians and one ramp is a one-ramp workshop, and the answer to that is
+  not another technician. A single blended number could never say so.
+- Somebody who is away is taken out rather than counted idle. Their
+  utilisation reads as nothing, not as nought per cent, which on a page would
+  look like a person standing about.
+- An unapproved holiday does not reduce capacity. A request is not a plan.
+- A workshop names its own skills, because a truck garage and a tyre bay do
+  not share a vocabulary. People are signed off at three levels with the date
+  of the assessment, which is what makes it evidence rather than an opinion
+  somebody typed in 2019.
+- The matrix keeps a column for a skill nobody holds, because the gap is the
+  point, and it names any skill only one person holds. That is the skill the
+  workshop loses the day they are ill, and nothing else in the product would
+  ever have said so.
+- Withdrawing a sign-off deletes the row rather than storing a "cannot". A row
+  asserting an absence and no row at all are two ways of writing one fact, and
+  they would eventually disagree.
+- `/plan` proposes a whole day. Work promised soonest first; within the same
+  promise the longest job, because packing the long ones first is what stops a
+  six-hour clutch being the thing left at four o'clock.
+- Skill is a hard constraint, never a preference. A job nobody is signed off
+  on comes back unplaced saying so, rather than going to whoever was free and
+  being discovered at half past eight by a person holding a set of keys.
+- Among people who can do it, the least loaded, and among equals the one whose
+  sign-off is lowest while still sufficient. An expert kept free is an expert
+  available for whatever comes through the door at eleven.
+- Every line carries its reason and everything left over says which of five
+  things it is. A schedule that cannot be disagreed with cannot be trusted.
+- Work whose parts are not on the shelf is never scheduled. Putting it in the
+  day would promise a day nobody can keep.
+- Nothing is written. It proposes and a person accepts, the same rule the
+  arrival suggestions and the mileage findings follow.
+- Five rules sit in the database: an ISO weekday, a shift that ends after it
+  starts and fits inside a day, a break shorter than the shift, a skill with a
+  name, and a sign-off not dated in the future.
+
 **Phase 11 - The passport leaves the workshop.**
 
 Where the append-only chain stops being technically interesting and starts

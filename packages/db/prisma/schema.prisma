@@ -97,6 +97,8 @@ model Organization {
   automationRules     AutomationRule[]
   campaigns           Campaign[]
   warranties          Warranty[]
+  skills              Skill[]
+  workingPatterns     WorkingPattern[]
 
   @@index([isActive])
   @@map("organizations")
@@ -214,6 +216,7 @@ model User {
   transfersReceived   StockTransfer[]      @relation("TransferReceiver")
   warranties          Warranty[]
   warrantyClaims      WarrantyClaim[]
+  skillAssessments    EmployeeSkill[]
 
   @@index([isActive])
   @@map("users")
@@ -746,8 +749,9 @@ model JobType {
   sortOrder            Int      @default(0)
   isActive             Boolean  @default(true)
 
-  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  jobs JobJobType[]
+  org    Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  jobs   JobJobType[]
+  skills JobTypeSkill[]
 
   @@unique([orgId, name])
   @@map("job_types")
@@ -2113,6 +2117,8 @@ model Employee {
   certifications   Certification[]
   commissionAwards CommissionAward[]
   expenseClaims    Expense[]          @relation("ExpenseClaimant")
+  skills           EmployeeSkill[]
+  workingPatterns  WorkingPattern[]
 
   @@unique([orgId, reference])
   @@index([orgId, isActive])
@@ -2249,6 +2255,110 @@ model Certification {
 
   @@index([orgId, expiresOn])
   @@map("certifications")
+}
+
+/// What a technician can do, and how well. Phase 12.
+///
+/// A workshop with "technician" as the only distinction produces a rota
+/// somebody has to redo by hand every morning, because the rota does not know
+/// that only one of them is an MOT tester.
+enum SkillLevel {
+  LEARNING
+  COMPETENT
+  EXPERT
+}
+
+/// A kind of work somebody can be signed off on. Named by the workshop, not
+/// by us: a truck garage and a tyre bay do not share a vocabulary.
+model Skill {
+  id        String  @id @default(cuid())
+  orgId     String
+  name      String
+  /// Shown under the name on the matrix, so "EV" can say what it covers.
+  note      String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org       Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  employees EmployeeSkill[]
+  jobTypes  JobTypeSkill[]
+
+  @@unique([orgId, name])
+  @@index([orgId, isActive])
+  @@map("skills")
+}
+
+/// One person signed off on one skill.
+///
+/// The absence of a row means they cannot do it. That is deliberate: a
+/// NONE level would be a row asserting an absence, and the two would
+/// eventually disagree.
+model EmployeeSkill {
+  id               String     @id @default(cuid())
+  employeeId       String
+  skillId          String
+  level            SkillLevel @default(COMPETENT)
+  /// When somebody last said this was true, which is what makes it evidence
+  /// rather than an opinion typed in 2019.
+  assessedOn       DateTime   @default(now())
+  assessedByUserId String?
+  note             String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  assessedBy User?    @relation(fields: [assessedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, skillId])
+  @@index([skillId, level])
+  @@map("employee_skills")
+}
+
+/// What a kind of work needs before somebody may be given it.
+model JobTypeSkill {
+  id           String     @id @default(cuid())
+  jobTypeId    String
+  skillId      String
+  minimumLevel SkillLevel @default(COMPETENT)
+  createdAt    DateTime   @default(now())
+
+  jobType JobType @relation(fields: [jobTypeId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([jobTypeId, skillId])
+  @@map("job_type_skills")
+}
+
+/// When somebody is contracted to be here.
+///
+/// Replaces the single `dailyCapacityHours` figure on a site, which was a
+/// number typed once and knew nothing about holidays, part-time hours or the
+/// apprentice at college on Fridays. One row per person per weekday they
+/// work; a weekday with no row is a day they are not in.
+model WorkingPattern {
+  id           String @id @default(cuid())
+  orgId        String
+  employeeId   String
+  /// ISO weekday: 1 is Monday, 7 is Sunday.
+  weekday      Int
+  /// Minutes from midnight, local to the site.
+  startMinute  Int
+  endMinute    Int
+  breakMinutes Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  employee Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, weekday])
+  @@index([orgId, weekday])
+  @@map("working_patterns")
 }
 
 enum CommissionBasis {

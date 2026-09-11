@@ -257,6 +257,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-1704 | Group reporting MUST report the spread between sites, not only the aggregate.                                                             | 4     |
 | FR-1705 | Movements between sites in the same group MUST be identifiable so they can be excluded from group figures.                                | 4     |
 
+## FR-3300 — The workshop plans itself
+
+| Ref     | Requirement                                                                                                              | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-3301 | Capacity MUST be computed from working patterns and approved absences, never from a figure typed on a site record.       | 12    |
+| FR-3302 | People and bays MUST be reported separately, and the binding constraint MUST be named.                                   | 12    |
+| FR-3303 | A workshop MUST be able to record its own skills and sign people off at a stated level, with the date of the assessment. | 12    |
+| FR-3304 | The matrix MUST keep a column for a skill nobody holds, and MUST name a skill only one person holds.                     | 12    |
+| FR-3305 | The system MUST be able to propose a day, and MUST NOT propose work to somebody not signed off on it.                    | 12    |
+| FR-3306 | Every line of a proposal MUST carry the reason it is where it is, and everything left over MUST say why.                 | 12    |
+| FR-3307 | A proposal MUST NOT write anything. A person accepts it.                                                                 | 12    |
+| FR-3308 | Work whose parts are not on the shelf MUST NOT be scheduled.                                                             | 12    |
+| FR-3309 | A working pattern MUST be a real shift: an ISO weekday, an end after its start, and a break shorter than the shift.      | 12    |
+| FR-3310 | Withdrawing a sign-off MUST remove the record rather than storing an inability.                                          | 12    |
+
 ## FR-3200 — The passport leaves the workshop
 
 | Ref     | Requirement                                                                                                                     | Phase |
