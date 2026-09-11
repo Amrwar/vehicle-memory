@@ -572,6 +572,19 @@ compared in constant time, a signed-in workshop owner is refused exactly like
 a stranger, and a deployment that forgets to set the secret refuses everything
 rather than exposing the routes.
 
+**What this got wrong.** The schedule was written at one minute, which Vercel's
+Hobby tier refuses: one cron run a day is the limit there. The refusal happens
+at deploy time, so every deployment from that commit onwards failed, and the
+live site sat five commits behind for most of a day while the repository looked
+perfectly healthy. Nothing in CI catches this, because CI never deploys.
+
+The committed schedule is now daily, which every plan accepts, and the real
+driver on Hobby is a scheduled workflow in the repository calling the same
+routes every ten minutes for nothing. On Pro the schedule goes back up and the
+workflow is deleted. The lesson is the ordinary one: a platform limit is part
+of the design, and picking the value that only works on the plan somebody else
+is paying for is how a deployment pipeline stops without telling anybody.
+
 ---
 
 ## Phase 6 — Intelligence

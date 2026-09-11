@@ -1,0 +1,47 @@
+# Drives the background work on a plan whose own scheduler cannot.
+#
+# Vercel's Hobby tier allows one cron run a day, which is useless for a booking
+# confirmation. This runs the same route far more often, for nothing, and can
+# be deleted the day the account moves to Pro and the schedule in vercel.json
+# is turned back up.
+#
+# A scheduled workflow is best effort: GitHub delays them under load, and will
+# disable one on a repository with no activity for sixty days. That is
+# acceptable here because nothing is lost by a late run, only delayed: every
+# job claims its work before doing it, and a message waits in the queue.
+
+name: Dispatch
+
+on:
+  schedule:
+    # Every ten minutes. The floor GitHub honours in practice is around five.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  # Never two at once. The jobs are safe to overlap, but a backlog of queued
+  # runs is noise rather than throughput.
+  group: dispatch
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: Send what is due
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch
+        run: |
+          for job in dispatch hourly; do
+            code=$(curl -s -o /tmp/out -w '%{http_code}' \
+              -H "authorization: Bearer $CRON_SECRET" \
+              "$SITE_URL/api/cron/$job")
+
+            echo "$job -> $code $(cat /tmp/out)"
+
+            # A failure here means messages are not going out, which is worth
+            # a red mark rather than a line in a log nobody reads.
+            if [ "$code" != "200" ]; then exit 1; fi
+          done
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
