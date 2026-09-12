@@ -8,6 +8,7 @@ import {
   type VehicleEventType,
 } from '@carnet/core';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -30,6 +31,7 @@ import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
 import { HealthDial } from '@/components/health-dial';
 import { requireSession } from '@/lib/guard';
+import { networkStatementFor } from '@/lib/network';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 import { conditionOf } from '@/lib/condition';
 import { coverForVehicle } from '@/lib/warranty';
@@ -60,12 +62,23 @@ export async function generateMetadata({
  * client, not the tenant-scoped one, because a vehicle is not owned by a
  * workshop (ADR-0004). Access is checked explicitly instead.
  */
-export default async function VehiclePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function VehiclePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ adopted?: string; registered?: string; warning?: string }>;
+}) {
   const { id } = await params;
+  const notice = await searchParams;
   const { db, orgId } = await requireSession('vehicle:read');
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
+
+  // Where the history came from, in one sentence. The network's whole point
+  // is that this is often "somewhere else", and the page says so.
+  const network = await networkStatementFor(orgId, id);
 
   const vehicle = await prisma.vehicle.findUnique({
     where: { id },
@@ -160,6 +173,31 @@ export default async function VehiclePage({ params }: { params: Promise<{ id: st
           </>
         }
       />
+
+      {notice.adopted ? (
+        <Alert tone="success" className="mb-5">
+          This vehicle is on your books now. Its history is below, and what you record continues it.
+        </Alert>
+      ) : null}
+
+      {notice.registered ? (
+        <Alert tone={notice.warning ? 'warning' : 'success'} className="mb-5">
+          {notice.warning ??
+            'Added. Nobody on the network had seen this vehicle; its history starts here.'}
+        </Alert>
+      ) : null}
+
+      {/* The network, in one sentence. Another workshop's entries are on the
+          timeline below with their commercial detail withheld: what was done,
+          when and at what mileage, never what it cost or who did it. */}
+      <Card className={`mb-5 ${network.otherEntries > 0 ? 'border-(--brand)' : ''}`}>
+        <CardBody className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[14px] leading-relaxed">{network.statement}</p>
+          <Link href="/vehicles/find" className="text-[13px] text-(--brand-text) hover:underline">
+            Find another vehicle
+          </Link>
+        </CardBody>
+      </Card>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="grid gap-5">

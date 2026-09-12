@@ -1,6 +1,7 @@
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { grantServicingAccess, orgCanReadVehicle } from './passport';
 
 /**
  * Opening a job.
@@ -140,6 +141,12 @@ export async function createJob(input: {
     });
   }
 
+  // Servicing the vehicle is what entitles this workshop to write to its
+  // history. Recorded as a grant rather than inferred from the job, so the
+  // entitlement survives the job being cancelled and can be revoked on its
+  // own. Until Phase 18 nothing called this, and access rested on "has a job".
+  await grantServicingAccess(input.orgId, input.vehicleId);
+
   await audit({
     orgId: input.orgId,
     actorUserId: input.userId,
@@ -153,6 +160,21 @@ export async function createJob(input: {
 }
 
 /** Everything the form needs to be filled in without typing an id. */
+/**
+ * A vehicle arriving on the form by id that no customer here has had a job
+ * on yet: one just taken on from the network, or just registered. Offered
+ * only if the organisation is entitled to read it.
+ */
+export async function vehicleOption(orgId: string, vehicleId: string) {
+  if (!vehicleId) return null;
+  if (!(await orgCanReadVehicle(orgId, vehicleId))) return null;
+
+  return prisma.vehicle.findUnique({
+    where: { id: vehicleId },
+    select: { id: true, make: true, model: true, year: true, registration: true },
+  });
+}
+
 export async function jobFormOptions(orgId: string) {
   const [customers, jobTypes, technicians] = await Promise.all([
     prisma.customer.findMany({

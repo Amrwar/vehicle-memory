@@ -271,6 +271,13 @@ jobs:
       - name: Verify questions are answered from the records, or refused
         run: npx tsx infra/scripts/verify-answers.ts
 
+      # A vehicle another workshop keeps is found by plate or VIN, taken on,
+      # and its chain continued; their commercial detail is withheld; an API
+      # key reads the organisation's own records and nothing beyond, and a
+      # revoked one reads nothing.
+      - name: Verify the network and the API
+        run: npx tsx --tsconfig apps/web/tsconfig.json infra/scripts/verify-network.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -112,6 +112,7 @@ model Organization {
   suppressedAddresses SuppressedAddress[]
   deliveryEvents      DeliveryEvent[]
   vehicleClaims       VehicleClaim[]
+  apiKeys             ApiKey[]
 
   @@index([isActive])
   @@map("organizations")
@@ -212,6 +213,7 @@ model User {
   refundsRecorded     Refund[]             @relation("RefundRecorder")
   supplierPaymentsRecorded SupplierPayment[] @relation("SupplierPaymentRecorder")
   payrollRunsCreated  PayrollRun[]         @relation("PayrollRunCreator")
+  apiKeysCreated      ApiKey[]             @relation("ApiKeyCreator")
   bookingTechnician   Booking[]
   // Passport
   ownedVehicles       VehicleOwnership[]
@@ -1781,6 +1783,32 @@ model FleetAgreement {
 
   @@index([orgId])
   @@map("fleet_agreements")
+}
+
+/// A key that lets something the workshop already runs read its records. Phase 18.
+///
+/// The token is shown once and only its digest is stored, the same treatment
+/// as a session or a share link. A key belongs to one organisation and can
+/// read only that organisation's records plus the vehicle histories it is
+/// entitled to, exactly as a signed-in owner could.
+model ApiKey {
+  id              String    @id @default(cuid())
+  orgId           String
+  name            String
+  /// The first characters of the token, so a key can be recognised in a list
+  /// without the token being recoverable.
+  prefix          String
+  keyHash         String    @unique
+  createdByUserId String?
+  lastUsedAt      DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User?        @relation("ApiKeyCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, revokedAt])
+  @@map("api_keys")
 }
 
 // ===========================================================================

@@ -16,7 +16,7 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
-import { createJob, JobError, jobFormOptions } from '@/lib/jobs';
+import { createJob, JobError, jobFormOptions, vehicleOption } from '@/lib/jobs';
 
 export const metadata: Metadata = { title: 'Open a job' };
 export const dynamic = 'force-dynamic';
@@ -83,6 +83,11 @@ export default async function NewJobPage({
     options.customers.find((entry) => entry.id === customer) ??
     options.customers.find((entry) => entry.vehicles.some((row) => row.id === vehicle));
 
+  // A vehicle nobody here has had a job on yet, just found on the network or
+  // just added, is offered on its own so the first job can be opened.
+  const known = options.customers.some((entry) => entry.vehicles.some((row) => row.id === vehicle));
+  const newcomer = vehicle && !known ? await vehicleOption(orgId, vehicle) : null;
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -106,7 +111,7 @@ export default async function NewJobPage({
       {options.customers.length === 0 ? (
         <EmptyState
           title="No customers yet"
-          description="A job belongs to somebody. Add a customer and their vehicle first, and this fills in."
+          description="A job belongs to somebody. Add a customer first, then find or add their vehicle, and this fills in."
           action={
             <Link
               href="/customers"
@@ -135,10 +140,17 @@ export default async function NewJobPage({
 
                 <Field
                   label="Vehicle"
-                  hint="Vehicles this workshop has seen for the customers above."
+                  hint="Vehicles this workshop has seen for the customers above. A car that is new here is found or added first."
                 >
                   <Select name="vehicleId" defaultValue={vehicle ?? ''} required>
                     <option value="">Choose a vehicle</option>
+                    {newcomer ? (
+                      <option value={newcomer.id}>
+                        {[newcomer.year, newcomer.make, newcomer.model].filter(Boolean).join(' ')}
+                        {newcomer.registration ? ` · ${newcomer.registration}` : ''} — first job
+                        here
+                      </option>
+                    ) : null}
                     {options.customers.flatMap((entry) =>
                       entry.vehicles.map((row) => (
                         <option key={`${entry.id}-${row.id}`} value={row.id}>

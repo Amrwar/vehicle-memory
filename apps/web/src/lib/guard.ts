@@ -124,7 +124,15 @@ export async function audit(input: {
   after?: unknown;
 }): Promise<void> {
   try {
-    const headerList = await headers();
+    // Outside a request, from a job or a verification script, there are no
+    // headers. The record is still written: an audit trail with holes where
+    // the automation acted is not an audit trail.
+    let headerList: Awaited<ReturnType<typeof headers>> | null = null;
+    try {
+      headerList = await headers();
+    } catch {
+      headerList = null;
+    }
     await prisma.auditLog.create({
       data: {
         orgId: input.orgId ?? null,
@@ -134,8 +142,8 @@ export async function audit(input: {
         entityId: input.entityId,
         before: (input.before ?? undefined) as never,
         after: (input.after ?? undefined) as never,
-        ip: headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
-        userAgent: headerList.get('user-agent') ?? null,
+        ip: headerList?.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+        userAgent: headerList?.get('user-agent') ?? null,
       },
     });
   } catch (error) {

@@ -1,9 +1,13 @@
 import { humaniseRole, type Role } from '@carnet/core';
 import {
+  Alert,
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
+  Field,
+  Input,
   KeyValue,
   Money,
   PageHeader,
@@ -15,8 +19,10 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { requireSession } from '@/lib/guard';
+import { ApiKeyError, apiKeysFor, createApiKey, revokeApiKey } from '@/lib/api-keys';
+import { can, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Settings' };
 export const dynamic = 'force-dynamic';
@@ -28,8 +34,50 @@ export const dynamic = 'force-dynamic';
  * questions are "what is our approval threshold" or "who has access", and
  * those are answerable without a single form.
  */
-export default async function SettingsPage() {
+/**
+ * API keys. FR-4507.
+ *
+ * The token is shown once, on the page the mint returns to, and never again:
+ * only its hash is kept. Somebody who loses it makes another and revokes the
+ * old one, which is what the list is for.
+ */
+async function mint(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    const key = await createApiKey({
+      orgId,
+      userId: user.userId,
+      name: String(formData.get('name') ?? ''),
+    });
+    redirect(`/settings?token=${encodeURIComponent(key.token)}#api`);
+  } catch (error) {
+    if (error instanceof ApiKeyError) {
+      redirect(`/settings?problem=${encodeURIComponent(error.message)}#api`);
+    }
+    throw error;
+  }
+}
+
+async function revoke(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+  await revokeApiKey({ orgId, userId: user.userId, keyId: String(formData.get('keyId') ?? '') });
+  redirect('/settings#api');
+}
+
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string; problem?: string }>;
+}) {
   const { db, user, orgId } = await requireSession('settings:read');
+  const { token, problem } = await searchParams;
+  const mayWrite = can(user.role, 'settings:write');
+  const apiKeys = await apiKeysFor(orgId);
 
   const org = await db.organization.findFirstOrThrow({
     where: { id: orgId },
@@ -265,6 +313,90 @@ export default async function SettingsPage() {
                 </div>
               );
             })}
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-2" id="api">
+          <CardHeader
+            title="API keys"
+            description="For accounting software and anything else that reads this workshop's jobs, invoices and vehicles"
+          />
+          <CardBody className="grid gap-4">
+            {token ? (
+              <Alert tone="success" title="Your new key. Copy it now; it is not shown again.">
+                <code className="mt-1 block break-all rounded-(--radius-xs) bg-(--surface-sunk) px-2 py-1 font-mono text-[13px] select-all">
+                  {token}
+                </code>
+              </Alert>
+            ) : null}
+            {problem ? <Alert tone="danger">{problem}</Alert> : null}
+
+            {apiKeys.length === 0 ? (
+              <p className="text-[13px] text-(--text-soft)">No keys yet.</p>
+            ) : (
+              <TableWrap>
+                <Table>
+                  <thead>
+                    <tr>
+                      <Th>Name</Th>
+                      <Th>Starts with</Th>
+                      <Th>Made by</Th>
+                      <Th>Last used</Th>
+                      <Th>State</Th>
+                      <Th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {apiKeys.map((key) => (
+                      <Tr key={key.id}>
+                        <Td>{key.name}</Td>
+                        <Td className="font-mono text-[12px]">{key.prefix}…</Td>
+                        <Td>{key.createdBy?.name ?? 'Somebody since removed'}</Td>
+                        <Td>
+                          {key.lastUsedAt ? key.lastUsedAt.toLocaleDateString('en-GB') : 'Never'}
+                        </Td>
+                        <Td>
+                          {key.revokedAt ? (
+                            <Badge tone="neutral">Revoked</Badge>
+                          ) : (
+                            <Badge tone="success">Live</Badge>
+                          )}
+                        </Td>
+                        <Td className="text-right">
+                          {mayWrite && !key.revokedAt ? (
+                            <form action={revoke}>
+                              <input type="hidden" name="keyId" value={key.id} />
+                              <Button type="submit" variant="ghost" size="sm">
+                                Revoke
+                              </Button>
+                            </form>
+                          ) : null}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </TableWrap>
+            )}
+
+            {mayWrite ? (
+              <form action={mint} className="flex flex-wrap items-end gap-3">
+                <Field label="Name for a new key" className="min-w-0 flex-1">
+                  <Input name="name" required maxLength={60} placeholder="Xero sync" />
+                </Field>
+                <Button type="submit" variant="primary">
+                  Make a key
+                </Button>
+              </form>
+            ) : null}
+
+            <p className="text-[12px] leading-relaxed text-(--text-faint)">
+              Send it as <code className="font-mono">Authorization: Bearer cn_…</code> to{' '}
+              <code className="font-mono">/api/v1/jobs</code>,{' '}
+              <code className="font-mono">/api/v1/invoices</code> and{' '}
+              <code className="font-mono">/api/v1/vehicles/&lt;vin&gt;</code>. A key sees what this
+              workshop sees and nothing beyond it.
+            </p>
           </CardBody>
         </Card>
 

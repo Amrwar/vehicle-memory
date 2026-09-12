@@ -1,6 +1,7 @@
 import { prisma } from '@carnet/db';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   Mileage,
@@ -73,6 +74,11 @@ export default async function VehiclesPage({
         eyebrow="Workshop"
         title="Vehicles"
         description="Vehicles this workshop has serviced or been granted access to."
+        actions={
+          <Link href="/vehicles/find">
+            <Button variant="primary">Find or add a vehicle</Button>
+          </Link>
+        }
       />
 
       <form className="mb-4" action="/vehicles">
@@ -90,7 +96,7 @@ export default async function VehiclesPage({
         {vehicles.length === 0 ? (
           <EmptyState
             title="No vehicles yet"
-            description="A vehicle appears here the first time you create a job for it."
+            description="A vehicle appears here once it is found on the network or added, or the first time you open a job for it."
           />
         ) : (
           <TableWrap className="rounded-none border-0">
