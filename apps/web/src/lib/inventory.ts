@@ -270,9 +270,13 @@ async function defaultWarehouseId(
   const job = await tx.job.findUnique({ where: { id: jobId }, select: { orgId: true } });
   if (!job) return null;
 
+  // Warehouses carry no timestamp, so the tiebreak is the code. The previous
+  // version ordered by a column that did not exist, cast to `never` to get
+  // past the compiler, and was never reached because nothing in the product
+  // completed a job until Phase 16.
   const warehouse = await tx.warehouse.findFirst({
     where: { orgId: job.orgId },
-    orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' } as never],
+    orderBy: [{ isDefault: 'desc' }, { code: 'asc' }],
     select: { id: true },
   });
 

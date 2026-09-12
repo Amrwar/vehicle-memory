@@ -349,6 +349,41 @@ export function postCreditNote(input: {
 }
 
 /* ---------------------------------------------------------------------------
+   Refund
+   --------------------------------------------------------------------------- */
+
+/**
+ * Money going back to a customer.
+ *
+ * The credit note has already taken the sale out of revenue and reduced what
+ * the customer owed. If they had paid, that leaves them owed money, sitting as
+ * a credit balance on receivable. The refund clears it: receivable comes back
+ * to nought and the bank goes down by the same amount. Nothing touches revenue
+ * here, because the credit note already did, and doing it twice is how a
+ * refund is double-counted.
+ */
+export function postRefund(input: {
+  refundId: string;
+  reference: string;
+  amount: Money;
+  method: PaymentMethod;
+  refundedAt: Date;
+  reason: string;
+}): JournalEntryDraft {
+  return finalise({
+    reference: input.reference,
+    description: `Refund to customer: ${input.reason}`,
+    sourceType: 'Refund',
+    sourceId: input.refundId,
+    postedAt: input.refundedAt,
+    lines: [
+      debitLine(ACCOUNT.RECEIVABLE, input.amount, 'Credit balance cleared'),
+      creditLine(accountForMethod(input.method), input.amount, input.method.toLowerCase()),
+    ],
+  });
+}
+
+/* ---------------------------------------------------------------------------
    Reversal
    --------------------------------------------------------------------------- */
 

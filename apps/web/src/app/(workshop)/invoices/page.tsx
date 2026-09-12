@@ -194,16 +194,12 @@ export default async function InvoicesPage({
                 {rows.map(({ invoice, outstanding, overdue, daysOverdue }) => (
                   <Tr key={invoice.id}>
                     <Td className="datum">
-                      {invoice.job ? (
-                        <Link
-                          href={`/jobs/${invoice.job.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {invoice.number}
-                        </Link>
-                      ) : (
-                        <span className="font-medium">{invoice.number}</span>
-                      )}
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {invoice.number}
+                      </Link>
                     </Td>
                     <Td>
                       <Link href={`/customers/${invoice.customer.id}`} className="hover:underline">

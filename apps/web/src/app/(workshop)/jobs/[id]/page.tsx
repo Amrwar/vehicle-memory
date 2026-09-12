@@ -3,6 +3,7 @@ import {
   humanise,
   type JobStatus,
   jobProfit,
+  JobTransitionError,
   money,
   progressFor,
   summarise,
@@ -39,6 +40,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
 import { QuoteError, sendEstimate } from '@/lib/estimates';
+import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { can, requireSession } from '@/lib/guard';
 
@@ -68,6 +70,55 @@ async function send(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?sent=1`);
+}
+
+/**
+ * Moves the job on.
+ *
+ * Every button in the header that changes the status lands here, with the
+ * target status in the form. The rules are the lifecycle's own and the refusal
+ * it gives is shown verbatim, because "the customer has not approved the
+ * estimate yet" is more use than a disabled button.
+ */
+async function move(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await moveJob({
+      orgId,
+      userId: user.userId,
+      jobId,
+      to: String(formData.get('to') ?? '') as JobStatus,
+      note: String(formData.get('note') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof JobTransitionError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/jobs/${jobId}`);
+}
+
+/** Issues the invoice for a completed job and goes to it. */
+async function issue(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('invoice:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  let invoiceId: string;
+
+  try {
+    invoiceId = await issueInvoice({ orgId, userId: user.userId, jobId });
+  } catch (error) {
+    if (!(error instanceof JobTransitionError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}`);
 }
 
 export async function generateMetadata({
@@ -108,7 +159,9 @@ export default async function JobPage({
       bay: { select: { name: true } },
       location: { select: { name: true } },
       technicians: { include: { user: { select: { id: true, name: true } } } },
-      jobTypes: { include: { jobType: { select: { name: true, colour: true } } } },
+      jobTypes: {
+        include: { jobType: { select: { name: true, colour: true, requiresQualityCheck: true } } },
+      },
       statusEvents: {
         orderBy: { createdAt: 'asc' },
         include: { actor: { select: { name: true } } },
@@ -274,6 +327,67 @@ export default async function JobPage({
                   Send the quote
                 </Button>
               </form>
+            ) : null}
+
+            {/* The next step, and only the next step. A row of every possible
+                status is a state machine drawn on the screen; one button that
+                says what happens next is a job moving through a workshop. */}
+            {can(user.role, 'job:write') &&
+            ['RECEIVED', 'DIAGNOSED', 'APPROVED'].includes(job.status) ? (
+              <form action={move}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <input type="hidden" name="to" value="IN_PROGRESS" />
+                <Button type="submit" variant="primary">
+                  Start the work
+                </Button>
+              </form>
+            ) : null}
+
+            {can(user.role, 'job:write') && job.status === 'IN_PROGRESS' ? (
+              <form action={move}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <input
+                  type="hidden"
+                  name="to"
+                  value={
+                    job.jobTypes.some((entry) => entry.jobType.requiresQualityCheck)
+                      ? 'QUALITY_CHECK'
+                      : 'COMPLETED'
+                  }
+                />
+                <Button type="submit" variant="primary">
+                  {job.jobTypes.some((entry) => entry.jobType.requiresQualityCheck)
+                    ? 'Send for quality check'
+                    : 'Mark completed'}
+                </Button>
+              </form>
+            ) : null}
+
+            {can(user.role, 'job:write') && job.status === 'QUALITY_CHECK' ? (
+              <form action={move}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <input type="hidden" name="to" value="COMPLETED" />
+                <Button type="submit" variant="primary">
+                  Mark completed
+                </Button>
+              </form>
+            ) : null}
+
+            {can(user.role, 'invoice:write') && job.status === 'COMPLETED' && !invoice ? (
+              <form action={issue}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <Button type="submit" variant="primary">
+                  Issue the invoice
+                </Button>
+              </form>
+            ) : null}
+
+            {invoice ? (
+              <Link href={`/invoices/${invoice.id}`}>
+                <Button variant={invoice.status === 'PAID' ? 'secondary' : 'primary'}>
+                  {invoice.status === 'PAID' ? `Invoice ${invoice.number}` : 'Take payment'}
+                </Button>
+              </Link>
             ) : null}
           </>
         }
@@ -748,6 +862,12 @@ export default async function JobPage({
                     currency={invoice.currency}
                   />
                 </div>
+                <Link
+                  href={`/invoices/${invoice.id}`}
+                  className="mt-1 text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Open the invoice
+                </Link>
               </CardBody>
             </Card>
           ) : null}

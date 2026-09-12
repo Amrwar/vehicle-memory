@@ -337,11 +337,24 @@ export async function recordDecision(input: {
       lines: {
         select: {
           id: true,
+          kind: true,
           description: true,
+          detail: true,
+          quantity: true,
+          unitPrice: true,
+          unitCost: true,
+          discountPct: true,
+          taxRateId: true,
           lineTotal: true,
           isOptional: true,
           decision: true,
+          sortOrder: true,
           inspectionResult: { select: { severity: true } },
+        },
+      },
+      job: {
+        select: {
+          _count: { select: { labourLines: true, partLines: true, feeLines: true } },
         },
       },
     },
@@ -393,6 +406,67 @@ export async function recordDecision(input: {
       where: { id: estimate.jobId },
       data: { status: outcome.status === 'DECLINED' ? 'ESTIMATED' : 'APPROVED' },
     });
+
+    // What the customer approved becomes the work on the job.
+    //
+    // Until this existed, an approved estimate changed the job's status and
+    // nothing else: the job still had no labour, parts or fees on it, so the
+    // profitability card read zero and there was nothing to invoice. The lines
+    // are copied once, only when the job has none, so a job priced by hand at
+    // the counter is never overwritten by a later approval.
+    const alreadyLined =
+      estimate.job._count.labourLines +
+        estimate.job._count.partLines +
+        estimate.job._count.feeLines >
+      0;
+
+    if (!alreadyLined && outcome.approvedIds.length > 0) {
+      const approved = estimate.lines
+        .filter((line) => outcome.approvedIds.includes(line.id))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+      for (const [index, line] of approved.entries()) {
+        const description = line.detail ? `${line.description} (${line.detail})` : line.description;
+
+        if (line.kind === 'LABOUR') {
+          await tx.jobLabourLine.create({
+            data: {
+              jobId: estimate.jobId,
+              description,
+              hours: line.quantity,
+              rate: line.unitPrice,
+              discountPct: line.discountPct,
+              taxRateId: line.taxRateId,
+              sortOrder: index,
+            },
+          });
+        } else if (line.kind === 'PART') {
+          await tx.jobPartLine.create({
+            data: {
+              jobId: estimate.jobId,
+              description,
+              quantity: line.quantity,
+              unitPrice: line.unitPrice,
+              unitCost: line.unitCost,
+              discountPct: line.discountPct,
+              taxRateId: line.taxRateId,
+              status: 'REQUESTED',
+              sortOrder: index,
+            },
+          });
+        } else if (line.kind === 'FEE') {
+          await tx.jobFeeLine.create({
+            data: {
+              jobId: estimate.jobId,
+              description,
+              amount: Number(line.unitPrice) * Number(line.quantity),
+              taxRateId: line.taxRateId,
+              sortOrder: index,
+            },
+          });
+        }
+      }
+    }
   });
 
   await audit({
