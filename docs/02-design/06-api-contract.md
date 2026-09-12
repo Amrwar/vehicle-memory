@@ -1,5 +1,47 @@
 # API Contract
 
+## 0. What exists today
+
+Phase 18 shipped the first three endpoints, read-only, authenticated by an
+organisation API key. Everything below §0 remains the contract for the surface
+that does not exist yet, and where the two disagree, this section is what is
+running.
+
+| Method | Path                     | Returns                                                                                           |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/jobs`           | The organisation's jobs updated since a date, newest first, with customer, vehicle, invoices      |
+| GET    | `/api/v1/invoices`       | The organisation's invoices updated since a date, with lines and payments, amounts as strings     |
+| GET    | `/api/v1/vehicles/{vin}` | A vehicle's passport as the organisation is entitled to read it, other workshops' detail withheld |
+
+**Authentication.** `Authorization: Bearer cn_…`. A key is minted on the
+Settings page, shown once, stored as a SHA-256 digest, and belongs to one
+organisation. Tenancy comes from the key and is never a parameter. A missing
+header is `401`; an unknown or revoked key is `403` with `{ "error":
+"REVOKED" }` or `{ "error": "UNKNOWN" }`. Every use stamps `lastUsedAt` on
+the key so the list on the Settings page shows which keys are alive.
+
+**Windows.** `since=YYYY-MM-DD` on the collections, defaulting to thirty days
+back and capped at a year back, with at most two hundred rows per call. An
+integration that wants more moves `since` forward. This is deliberately
+simpler than the cursor pagination in §2 and will be replaced by it when a
+consumer needs the stability cursors give.
+
+**Entitlement.** The vehicle endpoint returns what a signed-in member of the
+same organisation sees on the vehicle's page and nothing more. A vehicle the
+organisation has no grant on is `404`, not `403`, so the endpoint does not
+confirm which VINs are on the network. Entries recorded by another workshop
+have `jobId`, `jobNumber`, `performedBy` and `inspectionId` removed from
+their `detail` (`WITHHELD_KEYS` in `@carnet/core`); what was fitted, when,
+at what mileage and how it was verified is never withheld. Each entry carries
+`recordedBy` (the workshop's name) and `recordedHere`.
+
+**Money.** Amounts are decimal strings (`"1509.00"`), never floats.
+
+**Write access.** None, deliberately. The first integration that needs to
+write will name what it needs to write, and that is the moment to design it.
+
+`npm run verify:network` exercises all three endpoints against a database.
+
 ## 1. Scope
 
 Phase 1 has no public API. The application uses server components and server
@@ -155,7 +197,9 @@ supported for twelve months with `Sunset` headers.
 
 `docs/02-design/openapi.yaml` is the machine-readable contract and is generated
 from the route handlers, so it cannot drift from the implementation (NFR-705).
-It does not yet exist because the endpoints do not; it lands with Phase 3.5.
+It does not yet exist. The three read endpoints in §0 are small enough to be
+read in full from their route handlers; the generated document lands with the
+first write endpoint.
 
 ---
 

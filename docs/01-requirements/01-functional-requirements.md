@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4500 — The network
+
+| Ref     | Requirement                                                                                                                                                                                                  | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-4501 | A vehicle MUST be findable across the network by registration or VIN, and a registration that has been on more than one vehicle MUST be refused with the VIN named as the way in.                            | 18    |
+| FR-4502 | Before a workshop takes a vehicle on it MUST be told that history exists, how many entries there are and which workshops kept them, and MUST NOT be shown the entries.                                       | 18    |
+| FR-4503 | Taking a vehicle on MUST grant read access on the grounds it is to be serviced, opening a job MUST widen that to write, and both MUST be audited.                                                            | 18    |
+| FR-4504 | Another workshop's entries MUST be shown with its commercial detail withheld: job identifiers, internal job numbers and named staff. Nothing about the vehicle itself MUST be withheld.                      | 18    |
+| FR-4505 | What a second workshop records MUST continue the vehicle's one chain, verifiable end to end, and MUST NOT start a second history for the same VIN.                                                           | 18    |
+| FR-4506 | A vehicle new to the network MUST be added by VIN; a VIN already on the network MUST be refused with the way in; a VIN whose check digit does not add up MUST be recorded as typed and flagged, not refused. | 18    |
+| FR-4507 | An API key MUST belong to one organisation, MUST be shown exactly once, MUST be stored only as a digest, and MUST be revocable in a list that names it and shows when it was last used.                      | 18    |
+| FR-4508 | The API MUST read only what the organisation is entitled to see, with the same withholding as the page, and a vehicle outside that entitlement MUST be not found rather than forbidden.                      | 18    |
+| FR-4509 | Every collection endpoint MUST be bounded by a time window and a row cap, and a revoked or unknown key MUST read nothing.                                                                                    | 18    |
+
 ## FR-4400 — Answers rather than pages
 
 | Ref     | Requirement                                                                                                                                              | Phase |

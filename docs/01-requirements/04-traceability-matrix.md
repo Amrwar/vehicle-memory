@@ -286,6 +286,15 @@ where the work happens.
 | FR-4406 | —     | —                                                              | `verifyAgainstFacts()`, `polish()`           | `summary.test.ts`, `verify-answers.ts`   | Done   |
 | FR-4407 | —     | —                                                              | `sendCustomerSummary()` is a person's action | `verify-controls.ts`                     | Done   |
 | FR-4408 | —     | —                                                              | `/ask` page copy                             | `verify-empty.ts`                        | Done   |
+| FR-4501 | —     | `vehicles_registration_normalised`                             | `findOnNetwork()`                            | `verify-network.ts`                      | Done   |
+| FR-4502 | —     | —                                                              | `summariseNetwork()`                         | `network.test.ts`, `verify-network.ts`   | Done   |
+| FR-4503 | —     | `VehicleAccessGrant`                                           | `adoptVehicle()`, `grantServicingAccess()`   | `verify-network.ts`                      | Done   |
+| FR-4504 | —     | —                                                              | `redactForNetwork()`, `WITHHELD_KEYS`        | `network.test.ts`, `verify-network.ts`   | Done   |
+| FR-4505 | —     | `VehicleEvent.prevHash`                                        | `writeJobCompletion()`                       | `verify-network.ts`                      | Done   |
+| FR-4506 | —     | `Vehicle.vinValid`                                             | `registerVehicle()`                          | `verify-network.ts`                      | Done   |
+| FR-4507 | —     | `ApiKey`                                                       | `issueApiKey()`, `createApiKey()`            | `api-keys.test.ts`, `verify-network.ts`  | Done   |
+| FR-4508 | —     | —                                                              | `/api/v1/vehicles/[vin]`, `networkHistory()` | `verify-network.ts`                      | Done   |
+| FR-4509 | —     | —                                                              | `sinceFrom()`, `assertKeyUsable()`           | `api-keys.test.ts`, `verify-network.ts`  | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                        | `verify-credentials.ts`                  | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                   | `verify-credentials.ts`                  | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                        | `smoke.ts`                               | Done   |
@@ -571,9 +580,10 @@ details without a provider behind it would be worse than not having one.
 | The money cycle                           | 9                   | 9                      |
 | Suppliers, payroll and fleets             | 10                  | 10                     |
 | Answers rather than pages                 | 8                   | 8                      |
-| **Total**                                 | **314**             | **311 (99%)**          |
+| The network                               | 9                   | 9                      |
+| **Total**                                 | **323**             | **320 (99%)**          |
 
-The requirements document lists 398 requirements. 84 of
+The requirements document lists 407 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

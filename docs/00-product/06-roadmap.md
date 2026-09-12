@@ -1013,6 +1013,31 @@ nobody uses.
 **Exit.** A vehicle serviced at one Carnet workshop arrives at another and its
 history is there, with the first workshop's commercial detail withheld.
 
+**Status.** The exit condition holds and is proved by `npm run verify:network`.
+A workshop that has never seen a car types its plate or VIN into "Find a
+vehicle" and is told, before it touches the car, that history exists, how
+much, and which workshops kept it. Not the entries: those come once it takes
+the car on, which grants read access on the grounds the car is to be
+serviced; opening the first job widens that to write. What it then reads is
+every service, part, inspection and mileage reading with its verification,
+and none of the other workshop's job numbers, internal identifiers or named
+staff. What it records continues the vehicle's one chain, and the chain still
+verifies end to end. A car new to the network is added by VIN; a VIN already
+on the network is refused with the way in, and a check digit that does not
+add up is a warning rather than a refusal, because the workshop has the car
+and the algorithm does not. The vehicle's page carries one sentence saying
+where its history came from.
+
+The API is three read-only endpoints under a per-organisation key: jobs,
+invoices and a vehicle's passport, the last with exactly the withholding the
+page applies. Keys are minted on Settings, shown once, stored as digests,
+revocable in a list that names them. There is no write access yet and the
+[contract](../02-design/06-api-contract.md) says why.
+
+The marketplace is not built, as planned. Nothing here decides anything on a
+workshop's behalf, and nothing another workshop wrote can be edited by the
+one reading it.
+
 ---
 
 ## Running throughout — the four things that are not features
