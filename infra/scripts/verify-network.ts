@@ -21,7 +21,7 @@
 
 import 'dotenv/config';
 
-import { ApiKeyError, NetworkError, WITHHELD_KEYS } from '@carnet/core';
+import { ApiKeyError, NetworkError, validateVin, WITHHELD_KEYS } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { GET as getInvoices } from '../../apps/web/src/app/api/v1/invoices/route';
@@ -47,8 +47,17 @@ const TAG = 'verify-network probe';
 /** Fixed across runs: a vehicle with events cannot be deleted, so it is reused. */
 const NETWORK_VIN = 'ZZPRBNET000000001';
 const NETWORK_PLATE = 'PR08 NET';
-/** Fresh each run: it never gets events, so it can be removed. */
-const NEW_VIN = `ZZPRBNEW${String(Date.now()).slice(-9)}`;
+/**
+ * Fresh each run: it never gets events, so it can be removed. Chosen so its
+ * check digit does not add up, because the probe asserts that is a warning;
+ * one VIN in eleven happens to pass, and CI found the one that did.
+ */
+const NEW_VIN = (() => {
+  for (let n = Date.now(); ; n += 1) {
+    const vin = `ZZPRBNEW${String(n).slice(-9)}`;
+    if (!validateVin(vin).checkDigitValid) return vin;
+  }
+})();
 
 let failures = 0;
 
