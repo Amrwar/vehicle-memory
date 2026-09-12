@@ -1,0 +1,347 @@
+/* ===========================================================================
+   The passport as a document. Phase 23.
+
+   A physical object does not change colour with the operating system, so the
+   paper, the ink, the cover and the foil are defined once, on :root, and are
+   deliberately not redefined for dark mode. The chrome around the document
+   follows the theme; the document itself is always the same document.
+   =========================================================================== */
+
+:root {
+  --passport-cover: #0f2a2e;
+  --passport-cover-edge: #0a1f22;
+  --passport-cover-sheen: rgb(255 255 255 / 0.06);
+  --passport-foil: #d9b36c;
+  --passport-foil-deep: #8a5f1d;
+  --passport-foil-light: #f2dfae;
+  --passport-paper: #f4f0e6;
+  --passport-paper-deep: #e9e3d3;
+  --passport-paper-edge: #d8d0bc;
+  --passport-ink: #1a2022;
+  --passport-ink-soft: #4d5a5c;
+  --passport-ink-faint: #7d8a8c;
+  --passport-guilloche: rgb(31 97 103 / 0.16);
+  --passport-guilloche-warm: rgb(154 109 36 / 0.12);
+  --passport-stamp-verified: #1f6167;
+  --passport-stamp-recorded: #1f5f8b;
+  --passport-stamp-owner: #8a5f1d;
+  --passport-stamp-alert: #973030;
+  --passport-stamp-cancel: #6d797b;
+  --font-document: var(--font-fraunces), 'Fraunces', Georgia, 'Times New Roman', serif;
+}
+
+/* ---------------------------------------------------------------- cover */
+
+.passport-cover {
+  position: relative;
+  color: var(--passport-foil);
+  background:
+    radial-gradient(120% 80% at 30% 10%, var(--passport-cover-sheen), transparent 60%),
+    repeating-linear-gradient(135deg, rgb(255 255 255 / 0.018) 0 2px, transparent 2px 5px),
+    linear-gradient(160deg, #143a3f, var(--passport-cover) 55%, var(--passport-cover-edge));
+  border-radius: 8px 14px 14px 8px;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    inset 6px 0 12px -8px rgb(0 0 0 / 0.55),
+    0 24px 48px -24px rgb(0 0 0 / 0.55),
+    0 2px 6px rgb(0 0 0 / 0.25);
+}
+
+.passport-cover::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgb(217 179 108 / 0.35);
+  border-radius: 4px 9px 9px 4px;
+  pointer-events: none;
+}
+
+.passport-foil-text {
+  font-family: var(--font-document);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.22em;
+  background: linear-gradient(
+    100deg,
+    var(--passport-foil-deep) 0%,
+    var(--passport-foil) 35%,
+    var(--passport-foil-light) 50%,
+    var(--passport-foil) 65%,
+    var(--passport-foil-deep) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
+}
+
+.passport-foil-stroke {
+  stroke: var(--passport-foil);
+}
+
+.passport-foil-fill {
+  fill: var(--passport-foil);
+}
+
+/* ---------------------------------------------------------------- pages */
+
+.passport-page {
+  /* Anything rendered on the page reads the paper's own tokens, whatever the
+     theme around it: a component that asks for --surface gets paper, one
+     that asks for --text gets ink. The document stays the document. */
+  --ground: var(--passport-paper);
+  --surface: var(--passport-paper);
+  --surface-sunk: var(--passport-paper-deep);
+  --surface-raised: var(--passport-paper);
+  --border: var(--passport-paper-edge);
+  --border-strong: rgb(26 32 34 / 0.28);
+  --text: var(--passport-ink);
+  --text-soft: var(--passport-ink-soft);
+  --text-faint: var(--passport-ink-faint);
+  --text-inverse: var(--passport-paper);
+  --brand: var(--passport-stamp-verified);
+  --brand-text: var(--passport-stamp-verified);
+  --brand-soft: rgb(31 97 103 / 0.1);
+  --accent: var(--passport-stamp-owner);
+  --accent-text: var(--passport-stamp-owner);
+  --accent-soft: rgb(138 95 29 / 0.1);
+  --success: #2c6e4b;
+  --success-soft: rgb(44 110 75 / 0.1);
+  --warning: #9a6a12;
+  --warning-soft: rgb(154 106 18 / 0.1);
+  --danger: var(--passport-stamp-alert);
+  --danger-soft: rgb(151 48 48 / 0.08);
+  --info: var(--passport-stamp-recorded);
+  --info-soft: rgb(31 95 139 / 0.1);
+  position: relative;
+  color: var(--passport-ink);
+  background-color: var(--passport-paper);
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.5), transparent 40%),
+    repeating-radial-gradient(circle at 0 0, var(--passport-guilloche) 0 1px, transparent 1px 9px),
+    repeating-radial-gradient(
+      circle at 100% 100%,
+      var(--passport-guilloche-warm) 0 1px,
+      transparent 1px 11px
+    );
+  border: 1px solid var(--passport-paper-edge);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 40px rgb(120 100 60 / 0.06),
+    0 1px 2px rgb(15 21 22 / 0.08),
+    0 12px 32px -20px rgb(15 21 22 / 0.35);
+}
+
+/* The perforated inner margin where the page meets the spine. */
+.passport-page-bound::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 14px;
+  border-left: 1px dashed rgb(26 32 34 / 0.18);
+  pointer-events: none;
+}
+
+.passport-document {
+  font-family: var(--font-document);
+  color: var(--passport-ink);
+}
+
+.passport-label {
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--passport-ink-faint);
+}
+
+.passport-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--passport-ink);
+  letter-spacing: 0.02em;
+}
+
+.passport-mrz {
+  font-family: var(--font-mono);
+  font-size: clamp(9px, 1.9vw, 13.5px);
+  line-height: 1.55;
+  letter-spacing: 0.1em;
+  color: var(--passport-ink);
+  white-space: pre;
+  overflow-x: auto;
+  background: linear-gradient(180deg, transparent, rgb(26 32 34 / 0.03));
+  border-top: 1px solid rgb(26 32 34 / 0.12);
+}
+
+/* ---------------------------------------------------------------- photo */
+
+.passport-photo {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.6), transparent 60%),
+    repeating-linear-gradient(0deg, rgb(31 97 103 / 0.08) 0 1px, transparent 1px 4px),
+    var(--passport-paper-deep);
+  border: 1px solid rgb(26 32 34 / 0.18);
+  box-shadow:
+    inset 0 0 0 4px var(--passport-paper),
+    inset 0 0 0 5px rgb(26 32 34 / 0.12);
+}
+
+/* ---------------------------------------------------------------- stamps */
+
+.passport-stamp {
+  --stamp-ink: var(--passport-stamp-recorded);
+  position: relative;
+  color: var(--stamp-ink);
+  border: 2px solid var(--stamp-ink);
+  border-radius: 10px;
+  padding: 10px 12px 9px;
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgb(255 255 255 / 0.35), transparent 70%), transparent;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4);
+  /* Ink never sits perfectly. Slight rotation and a worn edge. */
+  mask-image: radial-gradient(140% 140% at 50% 50%, black 60%, rgb(0 0 0 / 0.86) 100%);
+}
+
+.passport-stamp::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--stamp-ink);
+  border-radius: 7px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.passport-stamp[data-ink='verified'] {
+  --stamp-ink: var(--passport-stamp-verified);
+}
+.passport-stamp[data-ink='recorded'] {
+  --stamp-ink: var(--passport-stamp-recorded);
+}
+.passport-stamp[data-ink='owner'] {
+  --stamp-ink: var(--passport-stamp-owner);
+}
+.passport-stamp[data-ink='alert'] {
+  --stamp-ink: var(--passport-stamp-alert);
+}
+.passport-stamp[data-ink='cancel'] {
+  --stamp-ink: var(--passport-stamp-cancel);
+}
+
+.passport-stamp-cancelled::after {
+  content: 'CANCELLED';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--passport-stamp-alert);
+  transform: rotate(-12deg);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.passport-stamp-title {
+  font-family: var(--font-document);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.12em;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+/* ---------------------------------------------------------------- seal */
+
+.passport-seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  color: #2a2418;
+  background: conic-gradient(
+    from 210deg,
+    #f2dfae,
+    #b8863b 18%,
+    #f7ecd0 36%,
+    #9a6d24 52%,
+    #e8d0a0 70%,
+    #7c5620 86%,
+    #f2dfae
+  );
+  box-shadow:
+    inset 0 0 0 3px rgb(255 255 255 / 0.55),
+    inset 0 0 0 5px rgb(90 62 20 / 0.35),
+    0 6px 14px -8px rgb(0 0 0 / 0.5);
+}
+
+.passport-seal[data-state='broken'] {
+  background: conic-gradient(from 210deg, #f4e4e4, #b53b3b 30%, #f4e4e4 60%, #7a2727, #f4e4e4);
+  color: #4a1616;
+}
+
+.passport-seal-ring {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px dashed rgb(60 40 10 / 0.5);
+}
+
+/* ---------------------------------------------------------------- booklet */
+
+.passport-booklet {
+  perspective: 1600px;
+}
+
+.passport-booklet-body {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.passport-booklet-cover {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.passport-booklet[data-open='true'] .passport-booklet-cover {
+  /* Swings open, then settles out of the way so the page has the column. */
+  transform: rotateY(-168deg);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 900ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 350ms ease 550ms;
+}
+
+/* Ink presses into paper; on any other ground it is just ink. */
+.passport-page .passport-stamp {
+  mix-blend-mode: multiply;
+}
+
+.passport-booklet-inside {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passport-booklet-body,
+  .passport-booklet-cover {
+    transition: none;
+  }
+}

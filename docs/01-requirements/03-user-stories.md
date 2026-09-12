@@ -2,7 +2,7 @@
 
 Stories grouped by epic. Each carries acceptance criteria in Given / When /
 Then form, a size in points, and the functional requirements it satisfies.
-Epics A to J are Phase 1. Epics K to S were written as Phases 15.1 to 22
+Epics A to J are Phase 1. Epics K to T were written as Phases 15.1 to 23
 shipped, one epic per phase, and are what those phases' verification scripts
 check. Phases 2 to 15 are traced by requirement rather than by story, a gap the
 [traceability matrix](04-traceability-matrix.md) names.
@@ -814,6 +814,32 @@ that** the assistant is accountable and cannot run up a bill.
 
 ---
 
+## Epic T — The passport, designed (Phase 23)
+
+### T1 — A document I recognise
+
+**As** David **I want** the shared history to read as a passport **so that**
+I know in a second what it is and why I should believe it.
+**Size** 8 · **Satisfies** FR-5001, FR-5002, FR-5003, FR-5004
+
+- **Given** a share link, **when** I open it, **then** I see a cover, an
+  identity page with a machine-readable zone, observations, and stamps.
+- **Given** any stamp, **when** I read it, **then** it names who pressed it,
+  what kind of entry it is, the date and the mileage, and no owner's name.
+
+### T2 — I can get back, and I can pick it up
+
+**As** anybody **I want** the passport on the home page to be an object I can
+open, and a way back from a shared passport **so that** I am never stranded.
+**Size** 5 · **Satisfies** FR-5005, FR-5006
+
+- **Given** the home page, **when** I press "Open the passport", **then** the
+  cover opens on the identity page and the entries are also buttons.
+- **Given** a shared passport reached from this site, **when** I press Back,
+  **then** I return where I came from; from elsewhere, to the front door.
+
+---
+
 ## Story map
 
 ```
@@ -843,6 +869,7 @@ that** the assistant is accountable and cannot run up a bill.
   O2 the API         P2 accept plan   Q2 preferred technician R2 breach R5 openapi
                                                               R3 rate limit
   S1 read the job back   S2 draft, I send   S3 the budget
+  T1 a passport I recognise   T2 the way back, the booklet
 ```
 
 The bottom row is the differentiator. Everything above it is table stakes that

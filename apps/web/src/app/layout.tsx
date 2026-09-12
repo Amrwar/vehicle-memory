@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import type { Metadata, Viewport } from 'next';
-import { Archivo, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
+import { Archivo, Fraunces, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
 
 import { THEME_SCRIPT } from '@/components/theme-toggle';
 
@@ -25,6 +25,16 @@ const sans = Public_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-public-sans',
+  display: 'swap',
+});
+
+// The passport's own face: an engraved, document serif for the cover and the
+// identity page, used nowhere else. Loaded here so it is self-hosted and the
+// content security policy needs no font host.
+const document = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-fraunces',
   display: 'swap',
 });
 
@@ -71,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en-GB"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${document.variable}`}
       suppressHydrationWarning
     >
       <head>

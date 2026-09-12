@@ -200,9 +200,17 @@ export default async function VehiclePage({
       <Card className={`mb-5 ${network.otherEntries > 0 ? 'border-(--brand)' : ''}`}>
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[14px] leading-relaxed">{network.statement}</p>
-          <Link href="/vehicles/find" className="text-[13px] text-(--brand-text) hover:underline">
-            Find another vehicle
-          </Link>
+          <span className="flex flex-wrap gap-4">
+            <Link
+              href={`/vehicles/${vehicle.id}/passport`}
+              className="text-[13px] font-medium text-(--brand-text) hover:underline"
+            >
+              See it as the next owner will
+            </Link>
+            <Link href="/vehicles/find" className="text-[13px] text-(--brand-text) hover:underline">
+              Find another vehicle
+            </Link>
+          </span>
         </CardBody>
       </Card>
 

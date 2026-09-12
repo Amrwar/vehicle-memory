@@ -4,3 +4,4 @@ export * from './transfer';
 export * from './report';
 export * from './network';
 export * from './documents';
+export * from './mrz';

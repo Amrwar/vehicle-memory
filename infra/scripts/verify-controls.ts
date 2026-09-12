@@ -191,6 +191,11 @@ function deadButtons(html: string): string[] {
     // A disabled control is inert on purpose and says so to a screen reader.
     if (/\bdisabled\b/i.test(attributes)) continue;
 
+    // A button that declares its own state (pressed, expanded) is a client
+    // control by definition: nothing but a handler could change that state.
+    // The passport booklet's open control and its stamps are these.
+    if (/\baria-(pressed|expanded)=/i.test(attributes)) continue;
+
     const end = html.indexOf('</button>', pattern.lastIndex);
     const label = html
       .slice(pattern.lastIndex, end === -1 ? pattern.lastIndex : end)

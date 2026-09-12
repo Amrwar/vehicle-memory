@@ -64,27 +64,28 @@ says why.
 
 ## 4. Vehicle management
 
-| Item                       | Status | Note                                                |
-| -------------------------- | ------ | --------------------------------------------------- |
-| Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`       |
-| VIN, plate, make, model    | Built  |                                                     |
-| Mileage, engine, fuel      | Built  |                                                     |
-| Service and repair history | Built  | Every visit, across workshops                       |
-| Parts replaced             | Built  | Through job lines                                   |
-| Inspections                | Built  | Carried out on a tablet, sent to the customer       |
-| Upcoming maintenance       | Built  | Service schedules                                   |
-| Warranty information       | Built  | On the vehicle, and in full at `/warranty`          |
-| Ownership transfer         | Built  | History stays, the previous owner does not          |
-| Buyer report               | Built  | What it says, what it misses, whether intact        |
-| Public verification        | Built  | A code at `/verify`, no account needed              |
-| Recalls                    | Built  | `/recalls`, honest about being a record             |
-| Insurance information      | Built  | A document with a policy reference and an expiry    |
-| Photos                     | Built  | Paperwork of kind photograph, on the vehicle        |
-| Documents                  | Built  | Belong to the car; workshop and owner both see them |
-| Maintenance timeline       | Built  | Components with ages, on `/vehicles/[id]/condition` |
-| Health score               | Built  | With every factor and its evidence shown            |
-| Predicted maintenance      | Built  | In distance as well as date, from this vehicle      |
-| Component history          | Built  | Battery, brakes, tyres, belt, each with an age      |
+| Item                       | Status | Note                                                                                        |
+| -------------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`                                               |
+| VIN, plate, make, model    | Built  |                                                                                             |
+| Mileage, engine, fuel      | Built  |                                                                                             |
+| Service and repair history | Built  | Every visit, across workshops                                                               |
+| Parts replaced             | Built  | Through job lines                                                                           |
+| Inspections                | Built  | Carried out on a tablet, sent to the customer                                               |
+| Upcoming maintenance       | Built  | Service schedules                                                                           |
+| Warranty information       | Built  | On the vehicle, and in full at `/warranty`                                                  |
+| Ownership transfer         | Built  | History stays, the previous owner does not                                                  |
+| Buyer report               | Built  | What it says, what it misses, whether intact                                                |
+| Public verification        | Built  | A code at `/verify`, no account needed                                                      |
+| Reads as a passport        | Built  | Cover, identity page with a checking zone, stamps; one document for every reader (Phase 23) |
+| Recalls                    | Built  | `/recalls`, honest about being a record                                                     |
+| Insurance information      | Built  | A document with a policy reference and an expiry                                            |
+| Photos                     | Built  | Paperwork of kind photograph, on the vehicle                                                |
+| Documents                  | Built  | Belong to the car; workshop and owner both see them                                         |
+| Maintenance timeline       | Built  | Components with ages, on `/vehicles/[id]/condition`                                         |
+| Health score               | Built  | With every factor and its evidence shown                                                    |
+| Predicted maintenance      | Built  | In distance as well as date, from this vehicle                                              |
+| Component history          | Built  | Battery, brakes, tyres, belt, each with an age                                              |
 
 ## 5. Digital vehicle inspection
 
@@ -397,7 +398,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 144          |
+| Built    | 145          |
 | Partial  | 1            |
 | Missing  | 5            |
 | Deferred | 1            |

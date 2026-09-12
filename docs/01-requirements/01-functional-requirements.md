@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5000 — The passport, designed
+
+| Ref     | Requirement                                                                                                                                                                                   | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5001 | The shared passport, the owner's copy and the workshop's preview MUST be rendered by one component, so every reader sees the same document.                                                   | 23    |
+| FR-5002 | The identity page MUST carry a machine-readable zone of two forty-four character lines with ICAO 9303 check digits that verify.                                                               | 23    |
+| FR-5003 | Every entry MUST be shown as a stamp naming who recorded it, its kind, date and mileage, inked by verification level, with its kind also in words; a superseded entry MUST read as cancelled. | 23    |
+| FR-5004 | No owner MUST be named anywhere on the document, including on a transfer stamp whose underlying entry names the parties.                                                                      | 23    |
+| FR-5005 | A shared passport MUST offer a way back: the browser's history when the reader came from this site, the front door otherwise.                                                                 | 23    |
+| FR-5006 | The home page MUST open with an openable passport whose contents are also present as text and real buttons, and which respects a request for reduced motion.                                  | 23    |
+
 ## FR-4900 — The assistant inside the workflow
 
 | Ref     | Requirement                                                                                                                                                                                           | Phase |

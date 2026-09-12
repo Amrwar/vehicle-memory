@@ -1192,6 +1192,34 @@ built, for the reason ADR-0013 gives.
 
 ---
 
+## Phase 23 — The passport, designed
+
+Twenty-two phases built a record that belongs to the car and rendered it as a
+list in a card, which is what a history looks like when it belongs to a
+database. This phase makes it look like what it is.
+
+**Exit.** The passport reads as a passport to somebody who has never used
+Carnet: a cover, an identity page, stamps. The home page opens with one. The
+way back from a shared passport works. Every part of the design carries a
+fact, and the [design rationale](../02-design/10-passport-design.md) says why
+each choice was made.
+
+**Status.** Built. The home page's hero is a passport that tilts toward the
+pointer and opens on a press, with the demonstration vehicle turning in its
+photograph window, the chosen entry pressed on the page as a stamp, and a
+machine-readable zone that checks the way a travel document's does. The
+shared passport, the owner's copy in the portal and the workshop's "as the
+next owner will see it" view are one component: cover, particulars with the
+seal and the zone, observations, mileage, and a page of stamps per year, each
+stamp inked by how well evidenced the entry is and tilted by a value derived
+from its id. A transfer stamp names nobody, which the previous page did not
+manage. The paper, ink and foil are defined once and do not follow the theme,
+because a document does not. The controls crawl learned that a button which
+declares its state is live, the machine-readable zone has unit tests, and
+every crawl and probe still passes.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

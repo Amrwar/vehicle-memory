@@ -19,6 +19,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { DocumentRemove, DocumentUpload } from '@/components/document-upload';
 import { PortalShell } from '@/components/portal-shell';
+import { PassportCover } from '@carnet/ui';
 import { documentsFor, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
@@ -114,6 +115,22 @@ export default async function PortalVehiclePage({
         <Mileage km={vehicle.lastOdometerKm} /> · {vehicle.eventCount} entries on record
         {vehicle.colour ? ` · ${vehicle.colour}` : ''}
       </p>
+
+      <Link
+        href={`/portal/vehicles/${vehicle.id}/passport`}
+        className="group mt-5 block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--border-focus)"
+        aria-label="Open the vehicle's passport"
+      >
+        <PassportCover
+          className="min-h-[150px] rounded-(--radius-lg) transition-transform group-hover:-translate-y-0.5"
+          title="Vehicle Passport"
+          footer={
+            <p className="passport-foil-text text-[10px] opacity-90">
+              {vehicle.eventCount} entries · open the passport
+            </p>
+          }
+        />
+      </Link>
 
       {link ? (
         <Alert tone="success" className="mt-4" title="Your link is ready">

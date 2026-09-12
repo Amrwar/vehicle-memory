@@ -11,7 +11,7 @@ Legend: **Done** implemented and tested · **Partial** implemented, test gap
 recorded · **Planned** in a later phase.
 
 The story column names a story in [user stories](03-user-stories.md) where one
-exists: epics A to J for Phase 1, K to S for Phases 15.1 to 22. Where it reads
+exists: epics A to J for Phase 1, K to T for Phases 15.1 to 23. Where it reads
 P2 or P5 it names the persona the requirement was written for, from phases
 traced before stories were written for them; where it reads — there is neither,
 and the requirement is traced by code and test alone.
@@ -330,6 +330,12 @@ where the work happens.
 | FR-4905 | S3    | `Organization.assistantTokenBudget`                            | `assistantBudget()`, `budgetFor()`, `setAssistantBudget()`    | `assistant.test.ts`, `verify-assistant.ts` | Done   |
 | FR-4906 | S2    | —                                                              | `compose()` in `lib/ai.ts`, `verifyAgainstFacts()`            | `summary.test.ts`, `verify-assistant.ts`   | Done   |
 | FR-4907 | S1    | —                                                              | `askAssistant()`                                              | `verify-assistant.ts`                      | Done   |
+| FR-5001 | T1    | —                                                              | `VehiclePassport` in `components/vehicle-passport.tsx`        | `verify-controls.ts`, `verify-access.ts`   | Done   |
+| FR-5002 | T1    | —                                                              | `mrzLines()`, `mrzVerify()`                                   | `mrz.test.ts`                              | Done   |
+| FR-5003 | T1    | —                                                              | `PassportStamp`, `inkFor()`, `stampTilt()`                    | `verify-access.ts`                         | Done   |
+| FR-5004 | T1    | —                                                              | `detailFor()`, `authorityFor()`                               | reviewed on the page                       | Done   |
+| FR-5005 | T2    | —                                                              | `BackToOrigin`                                                | `verify-controls.ts`                       | Done   |
+| FR-5006 | T2    | —                                                              | `PassportBooklet`                                             | `verify-controls.ts`, `verify-access.ts`   | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                         | `verify-credentials.ts`                    | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                    | `verify-credentials.ts`                    | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                         | `smoke.ts`                                 | Done   |
@@ -620,9 +626,10 @@ details without a provider behind it would be worse than not having one.
 | The vehicle's paperwork                   | 8                   | 8                      |
 | Before general availability               | 6                   | 6                      |
 | The assistant inside the workflow         | 7                   | 7                      |
-| **Total**                                 | **352**             | **349 (99%)**          |
+| The passport, designed                    | 6                   | 5                      |
+| **Total**                                 | **358**             | **354 (99%)**          |
 
-The requirements document lists 436 requirements. 84 of
+The requirements document lists 442 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

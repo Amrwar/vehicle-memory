@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MarketingFooter, MarketingHeader, Section, SectionHead } from '@/components/marketing';
-import { PassportHero } from '@/components/passport-hero';
+import { PassportBooklet } from '@/components/passport-booklet';
 import { currentUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
@@ -76,13 +76,13 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* The claim, in three dimensions. The vehicle itself with its
-                record attached to the parts it was written about, which is the
-                one thing on this page a competitor cannot copy: they have no
-                record that belongs to the car. Everything it shows is also
-                below it as text and as buttons, so the canvas is decoration in
-                the strict sense and carries aria-hidden. */}
-            <PassportHero />
+            {/* The claim, as an object. A passport you can open, with the
+                vehicle turning in its photograph window and its real entries
+                pressed as stamps. The one thing on this page a competitor
+                cannot copy: they have no record that belongs to the car.
+                Everything it shows is also text and buttons, so the canvas
+                inside it is decoration in the strict sense. */}
+            <PassportBooklet />
           </div>
         </section>
 

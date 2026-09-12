@@ -194,3 +194,9 @@ The words are design material.
 ---
 
 _Next: [Wireframes](09-wireframes.md)._
+
+## 11. The passport
+
+The passport pages have their own paper, ink, cover and foil, defined once and
+not redefined for dark mode, and their own face, Fraunces, used nowhere else.
+Every choice and the fact it carries is in [The passport, designed](10-passport-design.md).
