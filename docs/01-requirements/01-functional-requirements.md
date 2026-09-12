@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4000 — After a message leaves
+
+| Ref     | Requirement                                                                                                | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4001 | Delivery, bounce and complaint events MUST be recorded against the message they concern.                   | 17    |
+| FR-4002 | A permanent bounce MUST suppress the address; a temporary one MUST NOT.                                    | 17    |
+| FR-4003 | A spam complaint MUST suppress the address and withdraw marketing consent on every channel.                | 17    |
+| FR-4004 | A suppression MUST only be lifted by a person, with a stated reason.                                       | 17    |
+| FR-4005 | The send path MUST consult suppressions at the moment of sending, not when the message was queued.         | 17    |
+| FR-4006 | A webhook delivered twice MUST produce one event and suppress once.                                        | 17    |
+| FR-4007 | An event MUST NOT downgrade a message that has already been delivered.                                     | 17    |
+| FR-4008 | Each message MUST carry a reply address routing to the workshop that sent it, not to the sending identity. | 17    |
+
 ## FR-3900 — Getting in, and proving the address
 
 | Ref     | Requirement                                                                                                      | Phase |

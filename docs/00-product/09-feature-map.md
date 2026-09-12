@@ -359,6 +359,10 @@ proposed sections do not exist yet.
 | Unverified banner        | Built   | Says what is lost, never locks anybody out         |
 | Rate limiting            | Built   | Five an hour, and the limit reveals nothing        |
 | Inbound mail from Resend | Built   | Signature verified over the exact request body     |
+| Delivery confirmed       | Built   | Sent means accepted; delivered means it arrived    |
+| Bounces and complaints   | Built   | Permanent bounces suppress, temporary ones do not  |
+| Suppressed addresses     | Built   | On `/messages`, lifted by a person with a reason   |
+| Replies per workshop     | Built   | Reply-To carries the workshop, not the sender      |
 | Customer sign-up         | Missing | Customers get a portal account from the workshop   |
 
 A reset link and a verification link are the same mechanism with different
@@ -386,7 +390,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 123          |
+| Built   | 127          |
 | Partial | 2            |
 | Missing | 17           |
 

@@ -1,9 +1,12 @@
 import {
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   PageHeader,
   StatRow,
   StatTile,
@@ -14,7 +17,9 @@ import {
   Tr,
 } from '@carnet/ui';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
+import { deliverability, lift, suppressions } from '@/lib/deliverability';
 import { requireSession } from '@/lib/guard';
 import { outbound, outboundSummary } from '@/lib/messages';
 
@@ -44,10 +49,49 @@ function when(date: Date): string {
   });
 }
 
-export default async function MessagesPage() {
+/**
+ * Lets an address be used again. FR-4004.
+ *
+ * A person, and a reason. An address that starts working is usually one
+ * somebody corrected, and correcting it is the moment to say so; a suppression
+ * that lifted itself would put the workshop straight back to bouncing off the
+ * same mailbox and losing more reputation doing it.
+ */
+async function unsuppress(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  const note = String(formData.get('note') ?? '').trim();
+
+  if (!note) {
+    redirect('/messages?error=' + encodeURIComponent('Say why it is safe to send there again.'));
+  }
+
+  await lift({
+    orgId,
+    userId: user.userId,
+    suppressionId: String(formData.get('suppressionId') ?? ''),
+    note,
+  });
+
+  redirect('/messages');
+}
+
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const notice = await searchParams;
   const { orgId } = await requireSession('settings:read');
 
-  const [messages, summary] = await Promise.all([outbound(orgId), outboundSummary(orgId)]);
+  const [messages, summary, health, blocked] = await Promise.all([
+    outbound(orgId),
+    outboundSummary(orgId),
+    deliverability(orgId),
+    suppressions(orgId),
+  ]);
 
   return (
     <>
@@ -169,6 +213,60 @@ export default async function MessagesPage() {
               </tbody>
             </Table>
           </TableWrap>
+        )}
+      </Card>
+
+      <Card className="mt-5 overflow-hidden">
+        <CardHeader
+          title="Addresses nothing is sent to"
+          description="A mailbox that does not exist today will not exist tomorrow, and carrying on is how a sender's reputation goes."
+        />
+
+        {notice.error ? (
+          <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
+            {notice.error}
+          </CardBody>
+        ) : null}
+
+        <CardBody className="border-b border-(--border) text-[13px] leading-relaxed text-(--text-soft)">
+          {health.summary}
+        </CardBody>
+
+        {blocked.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            Nothing is suppressed. Addresses appear here after a permanent bounce or a spam
+            complaint.
+          </CardBody>
+        ) : (
+          <ul className="divide-y divide-(--border)">
+            {blocked.map((row) => (
+              <li key={row.id} className="px-4 py-3">
+                <div className="flex flex-wrap items-baseline gap-x-3">
+                  <span className="datum text-[13px] font-medium">{row.address}</span>
+                  <Badge tone={row.reason === 'COMPLAINT' ? 'danger' : 'warning'} size="sm">
+                    {row.reason === 'COMPLAINT' ? 'marked as spam' : 'permanent bounce'}
+                  </Badge>
+                  <span className="ml-auto text-[11px] text-(--text-faint)">
+                    {row.createdAt.toLocaleDateString('en-GB')}
+                  </span>
+                </div>
+
+                {row.detail ? (
+                  <p className="mt-0.5 text-[12px] text-(--text-faint)">{row.detail}</p>
+                ) : null}
+
+                <form action={unsuppress} className="mt-2 flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="suppressionId" value={row.id} />
+                  <Field label="Why it is safe again" className="min-w-[16rem] flex-1">
+                    <Input name="note" required placeholder="Corrected the address with them" />
+                  </Field>
+                  <Button type="submit" size="sm" variant="secondary">
+                    Send there again
+                  </Button>
+                </form>
+              </li>
+            ))}
+          </ul>
         )}
       </Card>
     </>

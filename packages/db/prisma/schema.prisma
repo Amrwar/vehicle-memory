@@ -105,6 +105,8 @@ model Organization {
   loyaltyEntries      LoyaltyEntry[]
   referrals           Referral[]
   inboundMessages     InboundMessage[]
+  suppressedAddresses SuppressedAddress[]
+  deliveryEvents      DeliveryEvent[]
 
   @@index([isActive])
   @@map("organizations")
@@ -229,6 +231,7 @@ model User {
   loyaltyEntries      LoyaltyEntry[]
   inboundHandled      InboundMessage[]
   authTokens          AuthToken[]
+  suppressionsLifted  SuppressedAddress[]
 
   @@index([isActive])
   @@map("users")
@@ -1646,7 +1649,8 @@ model MessageLog {
   sentAt      DateTime?
   createdAt   DateTime       @default(now())
 
-  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  deliveryEvents DeliveryEvent[]
 
   @@index([orgId, createdAt])
   @@index([relatedType, relatedId])
@@ -2648,6 +2652,70 @@ model AuthToken {
   @@index([userId, purpose, createdAt])
   @@index([expiresAt])
   @@map("auth_tokens")
+}
+
+enum SuppressionReason {
+  HARD_BOUNCE
+  COMPLAINT
+  MANUAL
+}
+
+/// An address nothing may be sent to.
+///
+/// A mailbox that does not exist today will not exist tomorrow, and carrying on
+/// sending to it is how a sender's reputation is destroyed: providers read a
+/// high bounce rate as evidence the list was bought rather than earned, and
+/// start filing everything else as spam.
+///
+/// Lifted by a person, never automatically. An address that starts working
+/// again is usually an address somebody corrected, and correcting it is the
+/// moment to say so.
+model SuppressedAddress {
+  id      String            @id @default(cuid())
+  orgId   String
+  address String
+  reason  SuppressionReason
+  /// What the provider actually said, kept for whoever has to explain it.
+  detail  String?
+
+  liftedAt       DateTime?
+  liftedByUserId String?
+  liftedNote     String?
+
+  createdAt DateTime @default(now())
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  liftedBy User?        @relation(fields: [liftedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@map("suppressed_addresses")
+}
+
+/// One thing a provider said about a message after it left.
+///
+/// Kept as its own rows rather than folded into the message, because a single
+/// message produces several and they arrive out of order. The message carries
+/// the conclusion; this carries the account of how it got there.
+model DeliveryEvent {
+  id           String  @id @default(cuid())
+  orgId        String
+  messageLogId String?
+
+  event       String
+  detail      String?
+  /// The provider's own id for the event, so a retried webhook is one row.
+  providerRef String?
+
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  messageLog MessageLog?  @relation(fields: [messageLogId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, providerRef])
+  @@index([messageLogId, occurredAt])
+  @@index([orgId, event, occurredAt])
+  @@map("delivery_events")
 }
 
 enum CommissionBasis {

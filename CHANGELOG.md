@@ -7,6 +7,49 @@ Changelog, versioning per Semantic Versioning.
 
 ### Added
 
+**Phase 17 - After a message leaves.**
+
+The queue has recorded messages as SENT since Phase 5, and SENT only ever
+meant a provider took it at the door. The dashboard banner added yesterday
+promises a workshop we will tell them when a customer cannot be reached, and
+until now that was a sentence the product could not keep.
+
+- Delivery, bounce and complaint events are recorded against the message they
+  concern. A message that reached somebody now says DELIVERED, which is a
+  different claim from SENT and the first time the product could make it.
+- A permanent bounce suppresses the address. A mailbox that does not exist
+  today will not exist tomorrow, and carrying on is how a sender's reputation
+  goes: providers read a high bounce rate as evidence the list was bought
+  rather than earned, and start filing everything else as spam.
+- A temporary bounce does not. A full mailbox is fixed by teatime, and
+  suppressing would lose a real customer over a fault that cured itself.
+- Where the reason is not clear enough to call either way, nothing is
+  suppressed and the message says so. Guessing hard loses a customer; guessing
+  soft costs one more send.
+- A spam complaint suppresses the address and withdraws marketing consent on
+  every channel. Somebody pressing that button has asked to be left alone in
+  the only way the interface gives them, and suppressing without withdrawing
+  consent would keep asking the question they have just answered.
+- An event never downgrades a message that already arrived. Providers deliver
+  events out of order, and a delay notice arriving after a delivery must not
+  turn a message that reached somebody into one that did not.
+- A webhook delivered twice produces one event and suppresses once. Every
+  provider retries, and a duplicate bounce reads as two customers failing
+  rather than one.
+- The send path consults suppressions at the moment of sending rather than
+  when the message was queued, because a reminder queued on Monday night and
+  sent on Tuesday morning has to respect a bounce recorded overnight.
+- A suppression is lifted only by a person, with a stated reason, enforced by
+  the database. An address that starts working is usually one somebody
+  corrected, and correcting it is the moment to say so.
+- Every email now carries a reply address belonging to the workshop that sent
+  it rather than to the one verified sending identity, so a customer replying
+  reaches the inbox built in Phase 15 and lands against their own job.
+- A probe found something worth keeping: a customer who has withdrawn consent
+  cannot be deleted, because the consent record is the evidence a workshop
+  would produce if anybody disputed being contacted. That is now asserted
+  rather than assumed.
+
 **Phase 16 - Getting in, and mail coming back.**
 
 The two things that have been waiting on a sending domain since Phase 5, now

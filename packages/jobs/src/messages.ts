@@ -48,7 +48,23 @@ export async function sendQueuedMessages(): Promise<number> {
     where: { status: 'QUEUED', availableAt: { lte: new Date() } },
     orderBy: { availableAt: 'asc' },
     take: BATCH_SIZE,
+    include: { org: { select: { slug: true } } },
   });
+
+  // Suppressed addresses are read once for the batch rather than per message.
+  // A morning's reminders are mostly to different people, and one query for
+  // the whole list beats sixty asking the same question.
+  const suppressed = new Set(
+    (
+      await prisma.suppressedAddress.findMany({
+        where: {
+          liftedAt: null,
+          orgId: { in: [...new Set(due.map((message) => message.orgId))] },
+        },
+        select: { address: true },
+      })
+    ).map((row) => row.address),
+  );
 
   let sent = 0;
 
@@ -78,6 +94,23 @@ export async function sendQueuedMessages(): Promise<number> {
     }
 
     const to = normaliseFor(channel, message.toAddress);
+
+    // Checked here rather than when the message was written, because a
+    // suppression can arrive in between: a reminder queued on Monday night and
+    // sent on Tuesday morning has to respect a bounce recorded overnight.
+    if (to && suppressed.has(to.trim().toLowerCase())) {
+      await prisma.messageLog.update({
+        where: { id: message.id },
+        data: {
+          status: 'SUPPRESSED',
+          error:
+            'Not sent: that address is suppressed after a permanent bounce or a spam complaint.',
+        },
+      });
+
+      log('message.suppressed', { id: message.id, to });
+      continue;
+    }
 
     if (!to) {
       // Not a failure to retry. The address will not become valid on its own,
@@ -113,6 +146,13 @@ export async function sendQueuedMessages(): Promise<number> {
         to,
         subject: message.subject,
         body: message.body,
+        // Replies reach the workshop that sent it rather than the one address
+        // the domain is verified for. The left-hand side is the workshop's own
+        // slug, which is what the inbound endpoint reads to file the reply.
+        replyTo:
+          channel === 'EMAIL' && process.env.REPLY_DOMAIN
+            ? `${message.org.slug}@${process.env.REPLY_DOMAIN}`
+            : null,
       });
 
       await prisma.messageLog.update({

@@ -222,6 +222,19 @@ Nothing in the web application sends. It writes rows; the worker drains them.
 A "send now" button anywhere in the workshop interface would be lying about
 where the work happens.
 
+## After a message leaves
+
+| Req     | Story | Schema                                   | Implementation          | Test                       | Status |
+| ------- | ----- | ---------------------------------------- | ----------------------- | -------------------------- | ------ |
+| FR-4001 | —     | `DeliveryEvent`                          | `recordDeliveryEvent()` | `verify-deliverability.ts` | Done   |
+| FR-4002 | —     | `SuppressedAddress`                      | `bounceKind()`          | `events.test.ts`           | Done   |
+| FR-4003 | —     | `ConsentRecord`                          | `reactTo()`             | `verify-deliverability.ts` | Done   |
+| FR-4004 | —     | `suppressed_addresses_lift_is_explained` | `lift()`                | `verify-deliverability.ts` | Done   |
+| FR-4005 | —     | —                                        | `sendQueuedMessages()`  | `verify-deliverability.ts` | Done   |
+| FR-4006 | —     | `delivery_events` unique provider ref    | `recordDeliveryEvent()` | `verify-deliverability.ts` | Done   |
+| FR-4007 | —     | —                                        | `reactTo()`             | `events.test.ts`           | Done   |
+| FR-4008 | —     | `Organization.slug`                      | `REPLY_DOMAIN`          | `verify-deliverability.ts` | Done   |
+
 ## Getting in, and mail coming back
 
 | Req     | Story | Schema                             | Implementation           | Test                    | Status |
@@ -495,6 +508,7 @@ details without a provider behind it would be worse than not having one.
 | What the record supports saying           | 10                  | 10                     |
 | Scheduled work                            | 6                   | 6                      |
 | Outbound messaging                        | 9                   | 9                      |
+| After a message leaves                    | 8                   | 8                      |
 | Getting in, and mail coming back          | 12                  | 12                     |
 | What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
@@ -512,9 +526,9 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **265**             | **262 (99%)**          |
+| **Total**                                 | **273**             | **270 (99%)**          |
 
-The requirements document lists 349 requirements. 84 of
+The requirements document lists 357 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

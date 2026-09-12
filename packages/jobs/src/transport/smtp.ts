@@ -50,6 +50,7 @@ export class SmtpTransport implements Transport {
       const info = await this.connection().sendMail({
         from: this.config.from,
         to: message.to,
+        replyTo: message.replyTo ?? undefined,
         subject: message.subject ?? '',
         text: message.body,
       });

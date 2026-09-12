@@ -12,6 +12,31 @@ const config: NextConfig = {
 
   typedRoutes: false,
 
+  /**
+   * One address for every page.
+   *
+   * Both names serve the site, which is two addresses for every page: search
+   * engines read them as duplicates and links get shared inconsistently. The
+   * bare domain wins because it is what SITE_URL and every link inside an
+   * email already use.
+   *
+   * Done here rather than in a hosting panel so it is reviewable, travels with
+   * the code, and survives a move to somewhere else.
+   */
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.carnetpassport.com' }],
+        destination: 'https://carnetpassport.com/:path*',
+        // Permanent, so browsers and search engines stop asking. Worth being
+        // sure before shipping: a 308 is cached for a long time and is
+        // awkward to take back.
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { prisma } from '@carnet/db';
 import { NextResponse } from 'next/server';
 
+import { readDeliveryPayload, recordDeliveryEvent } from '@/lib/deliverability';
 import { env } from '@/lib/env';
 import { receiveInbound } from '@/lib/retention';
 
@@ -92,6 +93,23 @@ async function organisationFor(to: string): Promise<string | null> {
   return org?.id ?? null;
 }
 
+/**
+ * Which workshop a delivery event belongs to.
+ *
+ * Found through the message that was sent, not through the address itself: the
+ * recipient of a bounce is a customer, and two workshops may both have a
+ * customer at the same address. The message says which of them sent it.
+ */
+async function organisationForSender(address: string): Promise<string | null> {
+  const message = await prisma.messageLog.findFirst({
+    where: { toAddress: address.trim().toLowerCase() },
+    orderBy: { createdAt: 'desc' },
+    select: { orgId: true },
+  });
+
+  return message?.orgId ?? null;
+}
+
 export async function POST(request: Request) {
   const secret = env().INBOUND_WEBHOOK_SECRET;
 
@@ -126,6 +144,27 @@ export async function POST(request: Request) {
   }
 
   const data = (payload.data ?? payload) as Record<string, unknown>;
+
+  const kind = String(payload.type ?? data.type ?? '');
+
+  // Two quite different things arrive on one webhook. A reply from a customer
+  // is a message to file; a bounce or a complaint is a fact about an address.
+  // Only the first has a body worth reading, so they part company here.
+  if (kind && !kind.includes('received')) {
+    const delivery = readDeliveryPayload(payload);
+
+    // Which workshop an event belongs to is read from the recipient, exactly
+    // as an inbound reply is, because the provider has no idea who we are.
+    const orgId = delivery.toAddress ? await organisationForSender(delivery.toAddress) : null;
+
+    if (!orgId) {
+      return NextResponse.json({ received: false, reason: 'No workshop for that address.' });
+    }
+
+    const result = await recordDeliveryEvent({ orgId, ...delivery });
+
+    return NextResponse.json({ received: true, ...result });
+  }
 
   // A provider sends `to` as an array when a message had several recipients.
   const recipients = Array.isArray(data.to) ? data.to.map(String) : [String(data.to ?? '')];

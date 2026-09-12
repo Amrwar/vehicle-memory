@@ -69,6 +69,13 @@ const schema = z.object({
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
   MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),
 
+  // Where replies go. The product sends as one verified address for every
+  // workshop, and a reply has to reach the workshop that sent it, so each
+  // message carries a Reply-To of <workshop slug>@<this domain>. Absent means
+  // replies go back to MAIL_FROM, which is right for a single-workshop install
+  // and wrong for a network.
+  REPLY_DOMAIN: z.string().optional(),
+
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
 
   FEATURE_CUSTOMER_PORTAL: z.coerce.boolean().default(true),

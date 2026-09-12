@@ -21,6 +21,15 @@ export interface Outbound {
   to: string;
   subject: string | null;
   body: string;
+  /**
+   * Where a reply should go, when that is somewhere other than the sender.
+   *
+   * The product sends as one address for every workshop, because that is the
+   * one the domain is verified for, but a reply has to reach the workshop that
+   * sent it. Reply-To is how the two are kept apart without pretending to be
+   * an address the domain cannot sign for.
+   */
+  replyTo?: string | null;
 }
 
 export interface SendResult {

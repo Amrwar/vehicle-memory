@@ -230,6 +230,13 @@ jobs:
       - name: Verify password reset and email verification
         run: npx tsx infra/scripts/verify-credentials.ts
 
+      # SENT only ever meant a provider took it at the door. The ways this
+      # breaks are quiet: a retried webhook suppressing twice, a full mailbox
+      # treated as permanent and a real customer cut off, or a suppression
+      # nothing consults at the moment of sending.
+      - name: Verify bounces, complaints and suppressed addresses
+        run: npx tsx infra/scripts/verify-deliverability.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
