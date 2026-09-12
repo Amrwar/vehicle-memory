@@ -166,11 +166,16 @@ export default async function PortalPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-[17px] font-semibold">My vehicles</h2>
             {ownerships.length > 0 ? (
-              <Link href="/portal/book">
-                <Button size="sm" variant="primary">
-                  Book a visit
-                </Button>
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link href="/portal/claim">
+                  <Button size="sm">Add another car</Button>
+                </Link>
+                <Link href="/portal/book">
+                  <Button size="sm" variant="primary">
+                    Book a visit
+                  </Button>
+                </Link>
+              </div>
             ) : null}
           </div>
 
@@ -178,7 +183,12 @@ export default async function PortalPage() {
             <EmptyState
               className="mt-3 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
               title="No vehicles yet"
-              description="Your workshop can link a vehicle to your account."
+              description="Add your car by entering its registration. The garage that last worked on it confirms the car is yours."
+              action={
+                <Link href="/portal/claim">
+                  <Button variant="primary">Add your car</Button>
+                </Link>
+              }
             />
           ) : (
             <ul className="mt-3 grid gap-3">

@@ -322,6 +322,21 @@ export default async function HomePage() {
                 See pricing
               </Link>
             </div>
+
+            {/* The other half of the promise. Everything above is addressed to
+                a workshop, and a driver who read this far deserves a door of
+                their own rather than being left to work out that the trial is
+                not for them. */}
+            <p className="mt-8 text-[14px] leading-relaxed text-(--color-petrol-200)">
+              Not a workshop?{' '}
+              <Link
+                href="/signup/customer"
+                className="text-(--color-brass-300) underline underline-offset-2"
+              >
+                Keep your own car&rsquo;s history
+              </Link>{' '}
+              instead. Free, and the record follows the car when you sell it.
+            </p>
           </div>
         </section>
       </main>

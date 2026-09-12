@@ -63,6 +63,7 @@ export type NavIconName =
   | 'skills'
   | 'reputation'
   | 'inbox'
+  | 'claims'
   | 'crm'
   | 'audit';
 
@@ -123,6 +124,15 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <path d="M2.8 11.4h4l1.2 2.2h4l1.2-2.2h4" />
       <path d="M4.6 3.6h10.8l1.8 7.8v4.2a1.2 1.2 0 0 1-1.2 1.2H4a1.2 1.2 0 0 1-1.2-1.2v-4.2z" />
+    </>
+  ),
+  // A key being handed over: somebody asking for a car that is theirs.
+  claims: (
+    <>
+      <circle cx="6.4" cy="10" r="3" />
+      <path d="M9.4 10h8" />
+      <path d="M14.2 10v2.8" />
+      <path d="M17.4 10v2.2" />
     </>
   ),
   // A warning triangle: somebody else's problem that becomes yours.

@@ -14,6 +14,7 @@ import { prisma } from '@carnet/db';
 import { hashPassword } from './auth';
 import { audit } from './guard';
 import { env } from './env';
+import { pushNow } from './outbound';
 
 /**
  * Proving an address, and getting back in when the password is gone.
@@ -31,7 +32,7 @@ function digest(token: string): string {
 }
 
 /** Where a link should point, whatever the deployment is called today. */
-function siteUrl(): string {
+export function siteUrl(): string {
   return (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 }
 
@@ -110,9 +111,7 @@ export async function requestReset(email: string, ip?: string | null): Promise<v
     },
   });
 
-  // Nothing to send through: the outbound queue belongs to an organisation,
-  // and somebody with no membership has no workshop to send on behalf of.
-  if (!user || user.memberships.length === 0) return;
+  if (!user) return;
 
   let token: string;
 
@@ -125,9 +124,12 @@ export async function requestReset(email: string, ip?: string | null): Promise<v
     throw error;
   }
 
-  await prisma.messageLog.create({
+  const queued = await prisma.messageLog.create({
     data: {
-      orgId: user.memberships[0]!.orgId,
+      // Null for a customer who has signed up and is not yet attached to any
+      // workshop. Requiring an organisation here quietly broke password reset
+      // for every portal account, because a customer never has a membership.
+      orgId: user.memberships[0]?.orgId ?? null,
       channel: 'EMAIL',
       toAddress: user.email,
       subject: 'Setting a new password',
@@ -144,7 +146,10 @@ export async function requestReset(email: string, ip?: string | null): Promise<v
       relatedType: 'PasswordReset',
       relatedId: user.id,
     },
+    select: { id: true },
   });
+
+  await pushNow(queued.id);
 }
 
 /**
@@ -221,13 +226,13 @@ export async function requestVerification(userId: string, ip?: string | null): P
     },
   });
 
-  if (!user || user.emailVerifiedAt || user.memberships.length === 0) return false;
+  if (!user || user.emailVerifiedAt) return false;
 
   const token = await issue({ userId: user.id, purpose: 'EMAIL_VERIFICATION', ip });
 
-  await prisma.messageLog.create({
+  const queued = await prisma.messageLog.create({
     data: {
-      orgId: user.memberships[0]!.orgId,
+      orgId: user.memberships[0]?.orgId ?? null,
       channel: 'EMAIL',
       toAddress: user.email,
       subject: 'Confirm your email address',
@@ -244,7 +249,11 @@ export async function requestVerification(userId: string, ip?: string | null): P
       relatedType: 'EmailVerification',
       relatedId: user.id,
     },
+    select: { id: true },
   });
+
+  // Somebody is looking at "check your inbox" right now.
+  await pushNow(queued.id);
 
   return true;
 }

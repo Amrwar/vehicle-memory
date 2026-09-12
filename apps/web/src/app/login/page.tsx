@@ -147,6 +147,21 @@ export default async function LoginPage({
             </Link>
           </p>
 
+          {/* Both doors, named for who walks through them. A driver told only
+              to "sign up" lands on a form asking for their workshop's VAT
+              arrangements and concludes the product is not for them. */}
+          <p className="mt-5 text-center text-[13px] leading-relaxed text-(--text-faint)">
+            No account yet?{' '}
+            <Link href="/signup/customer" className="text-(--brand-text) hover:underline">
+              Keep your car&rsquo;s history
+            </Link>{' '}
+            as a driver, or{' '}
+            <Link href="/signup" className="text-(--brand-text) hover:underline">
+              open a workshop
+            </Link>
+            .
+          </p>
+
           <div className="mt-8 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-3.5">
             <p className="eyebrow mb-2">Demo accounts</p>
             <ul className="grid gap-1.5 text-[12px] text-(--text-soft)">

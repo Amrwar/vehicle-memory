@@ -107,6 +107,7 @@ model Organization {
   inboundMessages     InboundMessage[]
   suppressedAddresses SuppressedAddress[]
   deliveryEvents      DeliveryEvent[]
+  vehicleClaims       VehicleClaim[]
 
   @@index([isActive])
   @@map("organizations")
@@ -232,6 +233,8 @@ model User {
   inboundHandled      InboundMessage[]
   authTokens          AuthToken[]
   suppressionsLifted  SuppressedAddress[]
+  vehicleClaims       VehicleClaim[]
+  claimsDecided       VehicleClaim[]       @relation("ClaimDecider")
 
   @@index([isActive])
   @@map("users")
@@ -386,6 +389,7 @@ model Vehicle {
   jobs             Job[]
   serviceSchedules ServiceSchedule[]
   warranties       Warranty[]
+  claims           VehicleClaim[]
 
   @@index([registration])
   @@index([make, model, year])
@@ -1628,8 +1632,13 @@ model CreditNote {
 // ===========================================================================
 
 model MessageLog {
-  id          String         @id @default(cuid())
-  orgId       String
+  id String @id @default(cuid())
+
+  /// Null for a message the platform sends on nobody's behalf: a password
+  /// reset for a customer who has not yet been attached to any workshop. A
+  /// workshop's own message list filters on this, so a platform message
+  /// correctly appears in none of them.
+  orgId       String?
   channel     MessageChannel
   toAddress   String
   subject     String?
@@ -1649,7 +1658,7 @@ model MessageLog {
   sentAt      DateTime?
   createdAt   DateTime       @default(now())
 
-  org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org            Organization?   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   deliveryEvents DeliveryEvent[]
 
   @@index([orgId, createdAt])
@@ -2716,6 +2725,48 @@ model DeliveryEvent {
   @@index([messageLogId, occurredAt])
   @@index([orgId, event, occurredAt])
   @@map("delivery_events")
+}
+
+enum VehicleClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// A customer asking for a vehicle to be put on their account.
+///
+/// A VIN is visible through a windscreen and a plate from further away, so
+/// neither is evidence of anything. Every claim is answered by a person at the
+/// workshop that serviced the vehicle, and the product never decides one on its
+/// own: it has no way to tell an owner from somebody who walked past the car.
+model VehicleClaim {
+  id        String @id @default(cuid())
+  userId    String
+  vehicleId String
+  /// The workshop being asked. The one that last worked on it.
+  orgId     String
+
+  status VehicleClaimStatus @default(PENDING)
+  /// Anything the customer offered to help identify themselves.
+  note   String?
+
+  askedAt DateTime @default(now())
+
+  decidedAt       DateTime?
+  decidedByUserId String?
+  /// Required on a refusal. A no with nothing behind it produces a phone call.
+  reason          String?
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  decidedBy User?        @relation("ClaimDecider", fields: [decidedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, status, askedAt])
+  @@index([userId, askedAt])
+  @@index([vehicleId])
+  @@map("vehicle_claims")
 }
 
 enum CommissionBasis {
