@@ -10,6 +10,8 @@ import {
   toneFor,
   toNumber,
   type PriceableLine,
+  DRAFT_KINDS,
+  describeExchange,
 } from '@carnet/core';
 import {
   Alert,
@@ -41,6 +43,7 @@ import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
 import { QuoteError, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
+import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { can, requireSession } from '@/lib/guard';
@@ -149,6 +152,74 @@ async function sendSummary(formData: FormData) {
   );
 }
 
+/**
+ * The assistant, on the job. FR-4901, FR-4902.
+ *
+ * Two things it does here: explains where the job stands, for somebody
+ * picking it up cold, and drafts a message to the customer from the job's
+ * own facts. Sending is a separate press; the assistant only wrote the words.
+ */
+async function explain(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:read');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    const { exchangeId } = await explainFor({ orgId, userId: user.userId, jobId });
+    redirect(`/jobs/${jobId}?exchange=${exchangeId}#assistant`);
+  } catch (error) {
+    if (error instanceof AssistantError) {
+      redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+}
+
+async function draft(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    const { exchangeId } = await draftFor({
+      orgId,
+      userId: user.userId,
+      jobId,
+      kind: String(formData.get('kind') ?? '') as never,
+    });
+    redirect(`/jobs/${jobId}?exchange=${exchangeId}#assistant`);
+  } catch (error) {
+    if (error instanceof AssistantError) {
+      redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+}
+
+async function sendDrafted(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await sendDraft({
+      orgId,
+      userId: user.userId,
+      exchangeId: String(formData.get('exchangeId') ?? ''),
+      text: String(formData.get('text') ?? ''),
+    });
+    redirect(`/jobs/${jobId}?summary=sent#assistant`);
+  } catch (error) {
+    if (error instanceof AssistantError) {
+      redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -173,7 +244,7 @@ export default async function JobPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ sent?: string; problem?: string; summary?: string }>;
+  searchParams: Promise<{ sent?: string; problem?: string; summary?: string; exchange?: string }>;
 }) {
   const { id } = await params;
   const notice = await searchParams;
@@ -277,6 +348,9 @@ export default async function JobPage({
   const summary = ['COMPLETED', 'INVOICED', 'PAID'].includes(job.status)
     ? await customerSummaryFor(orgId, job.id)
     : null;
+
+  const exchanges = await exchangesFor(orgId, { jobId: job.id, limit: 10 });
+  const shown = exchanges.find((entry) => entry.id === notice.exchange) ?? null;
 
   const clockedMinutes = job.timeEntries.reduce((total, entry) => total + (entry.minutes ?? 0), 0);
 
@@ -779,6 +853,105 @@ export default async function JobPage({
               </ul>
             </Card>
           ) : null}
+
+          <Card id="assistant">
+            <CardHeader
+              title="Assistant"
+              description="Reads the job back, or drafts a message from it. It writes; you send."
+            />
+            <CardBody className="grid gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <form action={explain}>
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <Button type="submit" variant="secondary" size="sm">
+                    Where does this job stand?
+                  </Button>
+                </form>
+                {can(user.role, 'job:write') ? (
+                  <form action={draft} className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="jobId" value={job.id} />
+                    <select
+                      name="kind"
+                      aria-label="Kind of message to draft"
+                      defaultValue={
+                        job.status === 'AWAITING_APPROVAL'
+                          ? 'WAITING_ON_APPROVAL'
+                          : ['COMPLETED', 'INVOICED', 'QUALITY_CHECK'].includes(job.status)
+                            ? 'READY'
+                            : 'PROGRESS'
+                      }
+                      className="h-8 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 text-[13px]"
+                    >
+                      {DRAFT_KINDS.map((entry) => (
+                        <option key={entry.kind} value={entry.kind}>
+                          {entry.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button type="submit" variant="secondary" size="sm">
+                      Draft a message
+                    </Button>
+                  </form>
+                ) : null}
+              </div>
+
+              {shown ? (
+                <div className="grid gap-2 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-3">
+                  <p className="text-[12px] text-(--text-soft)">{describeExchange(shown)}</p>
+                  <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-(--text)">
+                    {shown.reply}
+                  </pre>
+                  {shown.kind === 'DRAFT' && !shown.sentMessageId && can(user.role, 'job:write') ? (
+                    <form action={sendDrafted} className="grid gap-2">
+                      <input type="hidden" name="jobId" value={job.id} />
+                      <input type="hidden" name="exchangeId" value={shown.id} />
+                      <textarea
+                        name="text"
+                        defaultValue={shown.reply}
+                        rows={4}
+                        aria-label="The message as it will be sent"
+                        className="w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) p-2 text-[13px] leading-relaxed"
+                      />
+                      <div className="flex justify-end">
+                        <Button type="submit" variant="primary" size="sm">
+                          Send this to {job.customer.displayName.split(' ')[0]}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : shown.sentMessageId ? (
+                    <p className="text-[12px] text-(--success)">Sent.</p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {exchanges.length > 0 ? (
+                <ul className="divide-y divide-(--border) text-[12px] text-(--text-soft)">
+                  {exchanges.slice(0, 5).map((exchange) => (
+                    <li key={exchange.id} className="flex flex-wrap items-center gap-2 py-1.5">
+                      <Link
+                        href={`/jobs/${job.id}?exchange=${exchange.id}#assistant`}
+                        className="font-medium text-(--text) hover:underline"
+                      >
+                        {exchange.prompt}
+                      </Link>
+                      <span>{exchange.user?.name ?? 'Somebody'}</span>
+                      <span className="datum">
+                        {exchange.createdAt.toLocaleString('en-GB', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                      {exchange.sentMessageId ? (
+                        <Badge tone="success" size="sm">
+                          sent
+                        </Badge>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </CardBody>
+          </Card>
 
           {summary ? (
             <Card>

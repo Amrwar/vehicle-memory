@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { ApiKeyError, apiKeysFor, createApiKey, revokeApiKey } from '@/lib/api-keys';
+import { AssistantError, assistantUsage, setAssistantBudget } from '@/lib/assistant';
 import { can, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Settings' };
@@ -62,6 +63,27 @@ async function mint(formData: FormData) {
   }
 }
 
+async function budget(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await setAssistantBudget({
+      orgId,
+      userId: user.userId,
+      tokens: Number(String(formData.get('tokens') ?? '').replace(/[^\d]/g, '')),
+    });
+  } catch (error) {
+    if (error instanceof AssistantError) {
+      redirect(`/settings?problem=${encodeURIComponent(error.message)}#assistant`);
+    }
+    throw error;
+  }
+
+  redirect('/settings?saved=assistant#assistant');
+}
+
 async function revoke(formData: FormData) {
   'use server';
 
@@ -73,12 +95,13 @@ async function revoke(formData: FormData) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string; problem?: string }>;
+  searchParams: Promise<{ token?: string; problem?: string; saved?: string }>;
 }) {
   const { db, user, orgId } = await requireSession('settings:read');
-  const { token, problem } = await searchParams;
+  const { token, problem, saved } = await searchParams;
   const mayWrite = can(user.role, 'settings:write');
   const apiKeys = await apiKeysFor(orgId);
+  const assistant = await assistantUsage(orgId);
 
   const org = await db.organization.findFirstOrThrow({
     where: { id: orgId },
@@ -363,6 +386,49 @@ export default async function SettingsPage({
                 </div>
               );
             })}
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-2" id="assistant">
+          <CardHeader
+            title="Assistant"
+            description={
+              assistant.transport === 'anthropic'
+                ? `A model (${assistant.model}) tidies drafts within the budget below; every figure is checked against the record first.`
+                : 'No model is configured, so the assistant uses the plain text it composes from the record. That is a complete feature, not a degraded one.'
+            }
+          />
+          <CardBody className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+            <div className="grid gap-1 text-[13px]">
+              <p>{assistant.budget.statement}</p>
+              <p className="text-(--text-soft)">
+                {assistant.exchanges} exchange{assistant.exchanges === 1 ? '' : 's'} this month:{' '}
+                {assistant.byKind.QUESTION} question{assistant.byKind.QUESTION === 1 ? '' : 's'},{' '}
+                {assistant.byKind.DRAFT} draft{assistant.byKind.DRAFT === 1 ? '' : 's'},{' '}
+                {assistant.byKind.EXPLAIN} explanation{assistant.byKind.EXPLAIN === 1 ? '' : 's'}.
+                {assistant.costMinor > 0
+                  ? ` Roughly $${(assistant.costMinor / 100).toFixed(2)} at list prices.`
+                  : ' Nothing spent on a model.'}
+              </p>
+              {saved === 'assistant' ? (
+                <p className="text-[12px] text-(--success)">Budget saved.</p>
+              ) : null}
+            </div>
+            {mayWrite ? (
+              <form action={budget} className="flex flex-wrap items-end gap-2">
+                <Field label="Monthly token budget" hint="0 switches the model off">
+                  <Input
+                    name="tokens"
+                    inputMode="numeric"
+                    defaultValue={assistant.budget.used + assistant.budget.remaining}
+                    className="w-40 font-mono"
+                  />
+                </Field>
+                <Button type="submit" variant="secondary" size="sm">
+                  Save
+                </Button>
+              </form>
+            ) : null}
           </CardBody>
         </Card>
 

@@ -312,6 +312,13 @@ jobs:
       - name: Verify the breached-password check
         run: npx tsx infra/scripts/verify-hardening.ts
 
+      # The assistant composes from the record and decides nothing: a question
+      # is routed as the Ask page routes it, a draft and an explanation carry
+      # no figure the job does not, every exchange is recorded with its cost,
+      # a spent budget falls back to the plain text, and a draft is sent once.
+      - name: Verify the assistant
+        run: npx tsx infra/scripts/verify-assistant.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

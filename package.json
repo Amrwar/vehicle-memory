@@ -58,6 +58,7 @@
     "verify:headers": "tsx infra/scripts/verify-headers.ts",
     "verify:backup": "tsx infra/scripts/verify-backup.ts",
     "verify:hardening": "tsx infra/scripts/verify-hardening.ts",
+    "verify:assistant": "tsx infra/scripts/verify-assistant.ts",
     "docs:openapi": "tsx --tsconfig apps/web/tsconfig.json infra/scripts/build-openapi.ts",
     "docs:openapi:check": "tsx --tsconfig apps/web/tsconfig.json infra/scripts/build-openapi.ts --check",
     "docs:deck": "python infra/scripts/build_deck.py",

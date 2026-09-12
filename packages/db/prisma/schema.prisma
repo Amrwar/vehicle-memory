@@ -44,6 +44,9 @@ model Organization {
   // Work exceeding an approved estimate by more than this fraction needs
   // re-approval. FR-812.
   reapprovalThresholdPct Decimal  @default(10.0) @db.Decimal(5, 2)
+  /// Model tokens the assistant may spend in a calendar month. Beyond it the
+  /// assistant keeps working on the plain, composed text. FR-4904.
+  assistantTokenBudget   Int      @default(1000000)
   isActive               Boolean  @default(true)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -113,6 +116,7 @@ model Organization {
   deliveryEvents      DeliveryEvent[]
   vehicleClaims       VehicleClaim[]
   apiKeys             ApiKey[]
+  assistantExchanges  AssistantExchange[]
   vehicleDocuments    VehicleDocument[]
 
   @@index([isActive])
@@ -219,6 +223,7 @@ model User {
   supplierPaymentsRecorded SupplierPayment[] @relation("SupplierPaymentRecorder")
   payrollRunsCreated  PayrollRun[]         @relation("PayrollRunCreator")
   apiKeysCreated      ApiKey[]             @relation("ApiKeyCreator")
+  assistantExchanges AssistantExchange[]
   documentsUploaded  VehicleDocument[] @relation("DocumentUploader")
   preferredBy        Customer[]        @relation("PreferredTechnician")
   bookingTechnician   Booking[]
@@ -1847,6 +1852,43 @@ enum VehicleDocumentKind {
   SERVICE_RECORD
   PURCHASE_INVOICE
   OTHER
+}
+
+/// One exchange with the assistant. Phase 22.
+///
+/// The prompt, the reply, whether a model touched it and what it cost, so an
+/// owner can see what the assistant is doing and what it is spending. The
+/// reply is what the person saw; a model's rejected output is not kept.
+model AssistantExchange {
+  id           String        @id @default(cuid())
+  orgId        String
+  userId       String?
+  kind         AssistantKind
+  prompt       String
+  reply        String
+  /// Null when no model was involved.
+  model        String?
+  inputTokens  Int           @default(0)
+  outputTokens Int           @default(0)
+  polished     Boolean       @default(false)
+  rejected     String?
+  relatedType  String?
+  relatedId    String?
+  /// Set when a drafted message was sent, so a draft cannot be sent twice.
+  sentMessageId String?
+  createdAt    DateTime      @default(now())
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@map("assistant_exchanges")
+}
+
+enum AssistantKind {
+  QUESTION
+  DRAFT
+  EXPLAIN
 }
 
 model ApiKey {

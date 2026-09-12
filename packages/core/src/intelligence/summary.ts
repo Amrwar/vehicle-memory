@@ -113,6 +113,8 @@ const TOKEN = /\d[\d,.]*\d(?![A-Za-z0-9-])|\d(?![A-Za-z0-9-])|[A-Z0-9][A-Z0-9-]*
 export function verifyAgainstFacts(
   text: string,
   facts: SummaryFacts,
+  /** Further facts the text may repeat: a job number, a closing time, a date. */
+  extra: readonly (string | number | null | undefined)[] = [],
 ): { ok: boolean; unsupported: string[] } {
   const allowed = new Set<string>();
 
@@ -128,6 +130,7 @@ export function verifyAgainstFacts(
   };
 
   addNumber(facts.odometerKm);
+  for (const value of extra) addNumber(value);
   addNumber(facts.total);
   addNumber(facts.registration);
   // A plate is a code, not a figure, but it is one the text may repeat.

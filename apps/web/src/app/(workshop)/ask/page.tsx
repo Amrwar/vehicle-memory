@@ -1,9 +1,9 @@
-import { COVERAGE, formatFigure } from '@carnet/core';
+import { COVERAGE, describeExchange, formatFigure } from '@carnet/core';
 import { Alert, Button, Card, CardBody, CardHeader, Input, PageHeader } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { answer } from '@/lib/answers';
+import { askAssistant, exchangesFor } from '@/lib/assistant';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Ask' };
@@ -22,10 +22,15 @@ export const dynamic = 'force-dynamic';
  * the way in, and nothing is stored. An owner's questions are their own.
  */
 export default async function AskPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { orgId } = await requireSession('report:operational');
+  const { orgId, user } = await requireSession('report:operational');
   const { q } = await searchParams;
 
-  const asked = q?.trim() ? await answer(orgId, q.trim()) : null;
+  // Asked through the assistant so the exchange is recorded; the answer is
+  // the same one the router gives.
+  const asked = q?.trim()
+    ? (await askAssistant({ orgId, userId: user.userId, question: q.trim() })).asked
+    : null;
+  const recent = await exchangesFor(orgId, { limit: 12 });
 
   return (
     <>
@@ -97,6 +102,51 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
               .
             </p>
           </CardBody>
+        </Card>
+      ) : null}
+
+      {recent.length > 0 ? (
+        <Card className="mb-5">
+          <CardHeader
+            title="Recently asked"
+            description="Every exchange with the assistant, here and on jobs, with what each cost"
+          />
+          <ul className="divide-y divide-(--border)">
+            {recent.map((exchange) => (
+              <li key={exchange.id} className="grid gap-0.5 px-4 py-2.5 text-[13px]">
+                <div className="flex flex-wrap items-center gap-2">
+                  {exchange.relatedType === 'Job' && exchange.relatedId ? (
+                    <Link
+                      href={`/jobs/${exchange.relatedId}?exchange=${exchange.id}#assistant`}
+                      className="font-medium hover:underline"
+                    >
+                      {exchange.prompt}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/ask?q=${encodeURIComponent(exchange.prompt)}`}
+                      className="font-medium hover:underline"
+                    >
+                      {exchange.prompt}
+                    </Link>
+                  )}
+                  <span className="text-(--text-faint)">{exchange.user?.name ?? 'Somebody'}</span>
+                  <span className="datum text-[12px] text-(--text-faint)">
+                    {exchange.createdAt.toLocaleString('en-GB', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                </div>
+                <p className="text-[12px] text-(--text-soft)">
+                  {describeExchange(exchange)}
+                  {exchange.inputTokens + exchange.outputTokens > 0
+                    ? ` ${(exchange.inputTokens + exchange.outputTokens).toLocaleString('en-GB')} tokens.`
+                    : ''}
+                </p>
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
 

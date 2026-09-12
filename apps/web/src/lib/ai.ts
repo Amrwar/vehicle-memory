@@ -27,7 +27,11 @@ export interface Composed {
   polished: boolean;
   /** Why the model's version was not used, when it was not. */
   rejected: string | null;
+  /** What the call cost, whether or not its output was used. Zero when no model was called. */
+  usage: { model: string | null; inputTokens: number; outputTokens: number };
 }
+
+const NO_USAGE = { model: null, inputTokens: 0, outputTokens: 0 };
 
 /** The facts a summary may restate, straight from the job. */
 export async function summaryFactsFor(orgId: string, jobId: string): Promise<SummaryFacts | null> {
@@ -126,11 +130,45 @@ export async function customerSummaryFor(orgId: string, jobId: string): Promise<
  * missing key, a timeout or a non-200 all mean the same thing: the plain text.
  */
 async function polish(plain: string, facts: SummaryFacts): Promise<Composed> {
+  return compose({
+    plain,
+    facts,
+    system:
+      'You rewrite a workshop job summary for the customer so it reads naturally. Keep every fact exactly as given. Do not add any number, price, part number, measurement, recommendation or reassurance that is not in the text. Do not remove the closing line. Plain text, no headings, no markdown.',
+  });
+}
+
+/**
+ * The one door to the model. Phase 22 widened it from summaries to anything
+ * composed from facts: the caller hands over the plain text, the facts it was
+ * composed from, any further tokens the text may repeat, and the instruction.
+ * The model's version is used only if every number and code in it is on the
+ * record; otherwise the plain text is, with the reason. `allowModel` lets the
+ * caller switch the model off for this call, for a spent budget.
+ */
+export async function compose(input: {
+  plain: string;
+  facts: SummaryFacts;
+  system: string;
+  allowances?: readonly (string | number | null | undefined)[];
+  allowModel?: boolean;
+  maxTokens?: number;
+}): Promise<Composed> {
+  const { plain, facts } = input;
   const transport = process.env.AI_TRANSPORT ?? 'none';
   const key = process.env.ANTHROPIC_API_KEY;
 
   if (transport !== 'anthropic' || !key) {
-    return { text: plain, polished: false, rejected: null };
+    return { text: plain, polished: false, rejected: null, usage: NO_USAGE };
+  }
+
+  if (input.allowModel === false) {
+    return {
+      text: plain,
+      polished: false,
+      rejected: 'This month’s token budget is spent.',
+      usage: NO_USAGE,
+    };
   }
 
   try {
@@ -147,9 +185,8 @@ async function polish(plain: string, facts: SummaryFacts): Promise<Composed> {
       },
       body: JSON.stringify({
         model: process.env.AI_MODEL ?? 'claude-sonnet-5',
-        max_tokens: 600,
-        system:
-          'You rewrite a workshop job summary for the customer so it reads naturally. Keep every fact exactly as given. Do not add any number, price, part number, measurement, recommendation or reassurance that is not in the text. Do not remove the closing line. Plain text, no headings, no markdown.',
+        max_tokens: input.maxTokens ?? 600,
+        system: input.system,
         messages: [{ role: 'user', content: plain }],
       }),
     });
@@ -157,30 +194,48 @@ async function polish(plain: string, facts: SummaryFacts): Promise<Composed> {
     clearTimeout(timer);
 
     if (!response.ok) {
-      return { text: plain, polished: false, rejected: `The model answered ${response.status}.` };
+      return {
+        text: plain,
+        polished: false,
+        rejected: `The model answered ${response.status}.`,
+        usage: NO_USAGE,
+      };
     }
 
-    const body = (await response.json()) as { content?: { type: string; text?: string }[] };
+    const body = (await response.json()) as {
+      model?: string;
+      content?: { type: string; text?: string }[];
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
+    const usage = {
+      model: body.model ?? process.env.AI_MODEL ?? 'claude-sonnet-5',
+      inputTokens: body.usage?.input_tokens ?? 0,
+      outputTokens: body.usage?.output_tokens ?? 0,
+    };
     const text = body.content?.find((part) => part.type === 'text')?.text?.trim();
 
-    if (!text) return { text: plain, polished: false, rejected: 'The model returned nothing.' };
+    if (!text) {
+      return { text: plain, polished: false, rejected: 'The model returned nothing.', usage };
+    }
 
-    const check = verifyAgainstFacts(text, facts);
+    const check = verifyAgainstFacts(text, facts, input.allowances ?? []);
 
     if (!check.ok) {
       return {
         text: plain,
         polished: false,
         rejected: `The model added figures the job does not have: ${check.unsupported.join(', ')}.`,
+        usage,
       };
     }
 
-    return { text, polished: true, rejected: null };
+    return { text, polished: true, rejected: null, usage };
   } catch (error) {
     return {
       text: plain,
       polished: false,
       rejected: error instanceof Error ? error.message : 'The model could not be reached.',
+      usage: NO_USAGE,
     };
   }
 }
