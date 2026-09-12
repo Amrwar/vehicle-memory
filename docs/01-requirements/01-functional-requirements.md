@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4600 — The workshop configures itself
+
+| Ref     | Requirement                                                                                                                                                                                                                 | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4601 | An owner MUST be able to change the organisation's trading and legal names, tax number, contact details and re-approval threshold, and a threshold outside 0 to 100 MUST be refused.                                        | 19    |
+| FR-4602 | An owner MUST be able to change the site's name, code, address, telephone and daily capacity, and a code MUST be normalised to letters and digits the diary can show.                                                       | 19    |
+| FR-4603 | A site MUST carry opening hours that open before they close, and planning MUST place work inside them rather than inside hours assumed in code.                                                                             | 19    |
+| FR-4604 | Bays, tax rates and kinds of work MUST be added, edited and retired but never deleted, a retired one MUST take no new work and keep reading the same on old work, and a duplicate MUST be refused.                          | 19    |
+| FR-4605 | There MUST be exactly one default tax rate at any time, the default MUST NOT be retired, and a rate that has been invoiced MUST NOT have its percentage changed.                                                            | 19    |
+| FR-4606 | Accepting the day's plan MUST write one booking per placed job with the plan's technician, bay and times, MUST move rather than duplicate on a second acceptance, and the next proposal MUST treat those bookings as fixed. | 19    |
+| FR-4607 | A document prefix MUST be changeable and MUST apply only from the next number; the counter MUST NOT be changeable.                                                                                                          | 19    |
+| FR-4608 | Every settings change and every plan acceptance MUST be audited with who, when, what it was and what it became.                                                                                                             | 19    |
+
 ## FR-4500 — The network
 
 | Ref     | Requirement                                                                                                                                                                                                  | Phase |

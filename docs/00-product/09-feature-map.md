@@ -115,12 +115,12 @@ egress.
 
 ## 6. Smart estimates
 
-| Item                           | Status  | Note                                            |
-| ------------------------------ | ------- | ----------------------------------------------- |
-| Estimate with parts and labour | Built   | `/estimates`, tax per line                      |
-| Built from an inspection       | Partial | The mapping exists in core; no screen drives it |
-| Customer approves digitally    | Built   | `/e/[token]`, line by line                      |
-| Re-approval when work grows    | Built   | Threshold per organisation                      |
+| Item                           | Status | Note                                         |
+| ------------------------------ | ------ | -------------------------------------------- |
+| Estimate with parts and labour | Built  | `/estimates`, tax per line                   |
+| Built from an inspection       | Built  | Completing an inspection drafts the estimate |
+| Customer approves digitally    | Built  | `/e/[token]`, line by line                   |
+| Re-approval when work grows    | Built  | Threshold per organisation                   |
 
 ## 7. Customer portal
 
@@ -175,14 +175,14 @@ mean two different things with no way to tell which.
 
 ## 10. Purchasing
 
-| Item                    | Status  | Note                                              |
-| ----------------------- | ------- | ------------------------------------------------- |
-| Low stock to suggestion | Built   | `/purchasing`                                     |
-| Purchase orders         | Built   | With approval thresholds                          |
-| Goods received          | Built   | Partial receipts handled                          |
-| Supplier invoices       | Built   | Three-way match                                   |
-| Supplier payments       | Missing |                                                   |
-| Price history           | Built   | On each supplier, with the change since last time |
+| Item                    | Status | Note                                              |
+| ----------------------- | ------ | ------------------------------------------------- |
+| Low stock to suggestion | Built  | `/purchasing`                                     |
+| Purchase orders         | Built  | With approval thresholds                          |
+| Goods received          | Built  | Partial receipts handled                          |
+| Supplier invoices       | Built  | Three-way match                                   |
+| Supplier payments       | Built  | `/payables`, allocated oldest-due first, remitted |
+| Price history           | Built  | On each supplier, with the change since last time |
 
 ## 11. Financial ERP
 
@@ -211,14 +211,14 @@ Missing: payroll export, which waits on a named target format.
 
 ## 12.5 Capacity and scheduling
 
-| Item                   | Status  | Where                                             |
-| ---------------------- | ------- | ------------------------------------------------- |
-| Capacity by day        | Built   | `/capacity`, from people and bays, seven days out |
-| Which constraint binds | Built   | People or bays, named rather than averaged        |
-| Overbooking            | Built   | By how much, and why                              |
-| Automatic scheduling   | Built   | `/plan`, skill-aware, with every reason shown     |
-| What cannot be placed  | Built   | Five reasons, each said plainly                   |
-| Accepting a proposal   | Missing | It proposes; writing it to the diary comes later  |
+| Item                   | Status | Where                                             |
+| ---------------------- | ------ | ------------------------------------------------- |
+| Capacity by day        | Built  | `/capacity`, from people and bays, seven days out |
+| Which constraint binds | Built  | People or bays, named rather than averaged        |
+| Overbooking            | Built  | By how much, and why                              |
+| Automatic scheduling   | Built  | `/plan`, skill-aware, with every reason shown     |
+| What cannot be placed  | Built  | Five reasons, each said plainly                   |
+| Accepting a proposal   | Built  | One press writes it to the diary; next run fixed  |
 
 The risk here is not the screen. A schedule that is subtly wrong is worse than
 a blank one, because somebody works to it. So skill is a hard constraint, every
@@ -258,16 +258,16 @@ system points that out, because nothing holds both dates in one place.
 
 ## 15. Fleet management
 
-| Item                     | Status  | Where                                          |
-| ------------------------ | ------- | ---------------------------------------------- |
-| Company accounts         | Built   | `/fleet`, a company with more than one vehicle |
-| Vehicles per account     | Built   | Derived from what the company has brought in   |
-| Off the road right now   | Built   | In the workshop at this minute                 |
-| Due and overdue services | Built   | The number a fleet manager is measured on      |
-| Waiting on a decision    | Built   | Quotes nobody at the company has answered      |
-| Spend                    | Built   | Last thirty days, and per vehicle              |
-| Fleet pricing agreements | Missing | Rates are per organisation, not per account    |
-| Consolidated invoicing   | Missing | One invoice per job, not one per fleet a month |
+| Item                     | Status | Where                                          |
+| ------------------------ | ------ | ---------------------------------------------- |
+| Company accounts         | Built  | `/fleet`, a company with more than one vehicle |
+| Vehicles per account     | Built  | Derived from what the company has brought in   |
+| Off the road right now   | Built  | In the workshop at this minute                 |
+| Due and overdue services | Built  | The number a fleet manager is measured on      |
+| Waiting on a decision    | Built  | Quotes nobody at the company has answered      |
+| Spend                    | Built  | Last thirty days, and per vehicle              |
+| Fleet pricing agreements | Built  | Per company: labour and parts discounts, terms |
+| Consolidated invoicing   | Built  | One invoice per fleet per month, job per line  |
 
 There is no separate fleet record, deliberately. A fleet is a company customer
 with several vehicles, and inventing another entity would give a vehicle two
@@ -327,9 +327,10 @@ fault is not a small error.
 
 ## 20. Owner command centre
 
-**Missing.** Asking a question in words and getting an answer from the data.
-Every figure it would need is already computed somewhere in the product, which
-makes this mostly a question of routing rather than of new arithmetic.
+**Built.** Asking a question in words and getting an answer from the data, at
+`/ask`. A closed vocabulary routed to calculations the product already trusts,
+with the working shown; anything outside it is refused with the list of what
+can be asked. No model is involved.
 
 ## 21. Sidebar organisation
 
@@ -351,19 +352,19 @@ proposed sections do not exist yet.
 
 ## 21.8 Getting in, and mail coming back
 
-| Item                     | Status  | Where                                              |
-| ------------------------ | ------- | -------------------------------------------------- |
-| Password reset           | Built   | `/forgot`, one hour, single use, ends all sessions |
-| No account enumeration   | Built   | The same answer whether the address exists or not  |
-| Email verification       | Built   | `/verify-email`, three days, opening twice is fine |
-| Unverified banner        | Built   | Says what is lost, never locks anybody out         |
-| Rate limiting            | Built   | Five an hour, and the limit reveals nothing        |
-| Inbound mail from Resend | Built   | Signature verified over the exact request body     |
-| Delivery confirmed       | Built   | Sent means accepted; delivered means it arrived    |
-| Bounces and complaints   | Built   | Permanent bounces suppress, temporary ones do not  |
-| Suppressed addresses     | Built   | On `/messages`, lifted by a person with a reason   |
-| Replies per workshop     | Built   | Reply-To carries the workshop, not the sender      |
-| Customer sign-up         | Missing | Customers get a portal account from the workshop   |
+| Item                     | Status | Where                                              |
+| ------------------------ | ------ | -------------------------------------------------- |
+| Password reset           | Built  | `/forgot`, one hour, single use, ends all sessions |
+| No account enumeration   | Built  | The same answer whether the address exists or not  |
+| Email verification       | Built  | `/verify-email`, three days, opening twice is fine |
+| Unverified banner        | Built  | Says what is lost, never locks anybody out         |
+| Rate limiting            | Built  | Five an hour, and the limit reveals nothing        |
+| Inbound mail from Resend | Built  | Signature verified over the exact request body     |
+| Delivery confirmed       | Built  | Sent means accepted; delivered means it arrived    |
+| Bounces and complaints   | Built  | Permanent bounces suppress, temporary ones do not  |
+| Suppressed addresses     | Built  | On `/messages`, lifted by a person with a reason   |
+| Replies per workshop     | Built  | Reply-To carries the workshop, not the sender      |
+| Customer sign-up         | Built  | `/signup/customer`, then claim a vehicle by plate  |
 
 A reset link and a verification link are the same mechanism with different
 windows, so they are one table and one set of rules. The windows differ
@@ -390,9 +391,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 127          |
-| Partial | 2            |
-| Missing | 17           |
+| Built   | 134          |
+| Partial | 1            |
+| Missing | 11           |
 
 <!-- counts:end -->
 

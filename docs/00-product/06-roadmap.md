@@ -1040,6 +1040,46 @@ one reading it.
 
 ---
 
+## Phase 19 — The workshop configures itself
+
+Eighteen phases in, the settings page still said "editing these is not built
+yet". A workshop being handed the product has to be able to change its own
+trading name, site, bays, tax rates and kinds of work without anybody at
+Carnet touching a database, and every one of those changes has to be in the
+audit log with what it was before, because "who changed the VAT rate" is the
+question that gets asked six months later.
+
+Two things the planner needed from the same page. Opening hours, which it had
+assumed as eight to six in code with a comment saying where to change it when
+they arrived. And a way to accept what it proposed: it explained a whole day
+and then somebody typed the result into the diary by hand.
+
+And the feature map told the truth again. Several rows still said Missing for
+things Phases 15 to 18 built.
+
+**Exit.** An owner changes every setting the product reads without help, each
+change is audited, and the plan for a day is written into the diary with one
+press.
+
+**Status.** Built and proved by `npm run verify:settings`. Settings has three
+editing pages: the organisation (details that go on the paperwork, the
+re-approval threshold, document prefixes), the site (address, opening hours,
+daily capacity, bays) and the catalogue (tax rates, kinds of work). Nothing is
+deleted: a bay, a rate or a kind of work that has been used is retired and
+keeps reading the same on the work it was used for. A tax rate that has been
+invoiced cannot have its percentage changed, because the lines priced at it
+would re-price under a document already sent; there is always exactly one
+default. Bad values are refused at the form with the reason. Every save is
+audited with before and after.
+
+The planner reads the site's own hours. Accepting a day's plan writes each
+placement into the diary as a booking against its job, with the technician,
+bay and times the plan chose; accepting again moves rather than doubles, and
+the next proposal treats what is in the diary as fixed. The audit log records
+that too. The feature map was corrected and its counts rebuilt.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the
