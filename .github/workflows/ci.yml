@@ -237,6 +237,20 @@ jobs:
       - name: Verify bounces, complaints and suppressed addresses
         run: npx tsx infra/scripts/verify-deliverability.ts
 
+      # The one feature where a bug hands a stranger somebody's service
+      # history, declined-work list and annual mileage, from nothing but a
+      # number plate read through a windscreen. Most of these checks assert
+      # that nothing happened.
+      - name: Verify customer sign-up and vehicle claims
+        run: npx tsx infra/scripts/verify-claims.ts
+
+      # Four controls sat on the product with nothing behind them: new
+      # customer, new part, new order, send the quote. This exercises the write
+      # paths that now answer them, and asserts a message somebody is waiting
+      # on does not sit in the queue for a sweep that runs once a day.
+      - name: Verify the write paths behind every button
+        run: npx tsx infra/scripts/verify-records.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

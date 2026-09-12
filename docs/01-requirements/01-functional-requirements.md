@@ -267,6 +267,25 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4100 — Customers with accounts, and the buttons that led nowhere
+
+| Ref     | Requirement                                                                                                                                    | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4101 | A driver MUST be able to create an account with no workshop involved, and that account MUST start with no vehicles on it.                      | 15.1  |
+| FR-4102 | A vehicle MUST reach a self-registered account only through a request a person at the workshop that last serviced it approves.                 | 15.1  |
+| FR-4103 | A request MUST accept a plate or a VIN however typed, MUST refuse when the plate has been on more than one vehicle, and MUST be an index seek. | 15.1  |
+| FR-4104 | A refusal MUST say why, MUST be recorded by whom and when, and a request MUST NOT be answered twice.                                           | 15.1  |
+| FR-4105 | A pending request MUST NOT reveal which workshop is considering it, and a person MUST NOT hold more than three open requests.                  | 15.1  |
+| FR-4106 | A workshop owner whose address is unproven MUST be held at a confirmation page and MUST NOT reach any workshop screen.                         | 15.1  |
+| FR-4107 | A message a person is waiting on MUST be pushed to the provider immediately after it is queued, with the queue remaining the record.           | 15.1  |
+| FR-4108 | A customer MUST be creatable from the product with a name and one way to reach them, and a likely duplicate MUST be shown before saving.       | 15.1  |
+| FR-4109 | A part MUST be creatable from the product, its number normalised, a duplicate number refused, and a stocked part given a stock row.            | 15.1  |
+| FR-4110 | A purchase order MUST be creatable by hand as a draft, numbered from the sequence, with blank lines dropped and a nothing-order refused.       | 15.1  |
+| FR-4111 | A quote MUST be sendable to the customer by a single-use link whose digest alone is stored, MUST NOT be sent twice, and MUST move the job.     | 15.1  |
+| FR-4112 | Inviting a colleague MUST queue the invitation email the page says is on its way.                                                              | 15.1  |
+| FR-4113 | A campaign message MUST be addressed to the customer's mailbox or number, and a consenting customer with neither MUST be recorded as held.     | 15.1  |
+| FR-4114 | The link checker MUST detect a page that does not exist by the framework's not-found signal, not by the status code.                           | 15.1  |
+
 ## FR-4000 — After a message leaves
 
 | Ref     | Requirement                                                                                                | Phase |
@@ -282,16 +301,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 
 ## FR-3900 — Getting in, and proving the address
 
-| Ref     | Requirement                                                                                                      | Phase |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | ----- |
-| FR-3901 | A password reset MUST answer identically whether or not the address has an account.                              | 16    |
-| FR-3902 | A reset link MUST be single use, MUST expire within an hour, and MUST end every session when redeemed.           | 16    |
-| FR-3903 | Issuing a link MUST retire any previous live one for the same person and purpose.                                | 16    |
-| FR-3904 | An unverified address MUST be surfaced with what is actually lost, and MUST NOT lock anybody out of the product. | 16    |
-| FR-3905 | A verification link MUST last three days, and opening it twice MUST NOT read as an error.                        | 16    |
-| FR-3906 | A new password MUST meet a stated length and MUST NOT contain the address it protects or an obvious word.        | 16    |
-| FR-3907 | Requests MUST be rate limited per person per hour, and the limit MUST NOT reveal that the address exists.        | 16    |
-| FR-3908 | Only the digest of a link MUST be stored.                                                                        | 16    |
+| Ref     | Requirement                                                                                                                                                          | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-3901 | A password reset MUST answer identically whether or not the address has an account.                                                                                  | 16    |
+| FR-3902 | A reset link MUST be single use, MUST expire within an hour, and MUST end every session when redeemed.                                                               | 16    |
+| FR-3903 | Issuing a link MUST retire any previous live one for the same person and purpose.                                                                                    | 16    |
+| FR-3904 | An unverified address MUST be surfaced with what is actually lost. A driver's account MUST stay usable; a workshop owner's is held at a confirmation page (FR-4106). | 16    |
+| FR-3905 | A verification link MUST last three days, and opening it twice MUST NOT read as an error.                                                                            | 16    |
+| FR-3906 | A new password MUST meet a stated length and MUST NOT contain the address it protects or an obvious word.                                                            | 16    |
+| FR-3907 | Requests MUST be rate limited per person per hour, and the limit MUST NOT reveal that the address exists.                                                            | 16    |
+| FR-3908 | Only the digest of a link MUST be stored.                                                                                                                            | 16    |
 
 ## FR-3800 — Mail coming back
 

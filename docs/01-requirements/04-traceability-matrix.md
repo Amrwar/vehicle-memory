@@ -237,20 +237,34 @@ where the work happens.
 
 ## Getting in, and mail coming back
 
-| Req     | Story | Schema                             | Implementation           | Test                    | Status |
-| ------- | ----- | ---------------------------------- | ------------------------ | ----------------------- | ------ |
-| FR-3901 | A1    | —                                  | `requestReset()`         | `verify-credentials.ts` | Done   |
-| FR-3902 | A1    | `AuthToken.usedAt`                 | `redeemReset()`          | `verify-credentials.ts` | Done   |
-| FR-3903 | A1    | `auth_tokens_one_live_per_purpose` | `issue()`                | `verify-credentials.ts` | Done   |
-| FR-3904 | A1    | `User.emailVerifiedAt`             | `unverifiedWarning()`    | `tokens.test.ts`        | Done   |
-| FR-3905 | A1    | —                                  | `redeemVerification()`   | `verify-credentials.ts` | Done   |
-| FR-3906 | A1    | —                                  | `checkPassword()`        | `tokens.test.ts`        | Done   |
-| FR-3907 | A1    | —                                  | `assertNotFlooding()`    | `verify-credentials.ts` | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`            | `digest()`               | `verify-credentials.ts` | Done   |
-| FR-3801 | —     | —                                  | `/api/inbound/resend`    | `smoke.ts`              | Done   |
-| FR-3802 | —     | —                                  | `verify()` tolerance     | `smoke.ts`              | Done   |
-| FR-3803 | —     | `Organization.slug`                | `organisationFor()`      | `smoke.ts`              | Done   |
-| FR-3804 | —     | —                                  | `INBOUND_WEBHOOK_SECRET` | `smoke.ts`              | Done   |
+| Req     | Story | Schema                                | Implementation           | Test                    | Status |
+| ------- | ----- | ------------------------------------- | ------------------------ | ----------------------- | ------ |
+| FR-3901 | A1    | —                                     | `requestReset()`         | `verify-credentials.ts` | Done   |
+| FR-3902 | A1    | `AuthToken.usedAt`                    | `redeemReset()`          | `verify-credentials.ts` | Done   |
+| FR-3903 | A1    | `auth_tokens_one_live_per_purpose`    | `issue()`                | `verify-credentials.ts` | Done   |
+| FR-3904 | A1    | `User.emailVerifiedAt`                | `unverifiedWarning()`    | `tokens.test.ts`        | Done   |
+| FR-3905 | A1    | —                                     | `redeemVerification()`   | `verify-credentials.ts` | Done   |
+| FR-3906 | A1    | —                                     | `checkPassword()`        | `tokens.test.ts`        | Done   |
+| FR-4101 | P4    | —                                     | `registerCustomer()`     | `verify-claims.ts`      | Done   |
+| FR-4102 | P4    | `vehicle_claims_one_open_each`        | `claimVehicle()`         | `verify-claims.ts`      | Done   |
+| FR-4103 | P4    | `vehicles_registration_normalised`    | `identifierKind()`       | `verify-claims.ts`      | Done   |
+| FR-4104 | A1    | `vehicle_claims_refusal_is_explained` | `decideClaim()`          | `verify-claims.ts`      | Done   |
+| FR-4105 | P4    | —                                     | `describeClaim()`        | `claims.test.ts`        | Done   |
+| FR-4106 | A1    | `User.emailVerifiedAt`                | `(workshop)/layout.tsx`  | `verify-empty.ts`       | Done   |
+| FR-4107 | —     | —                                     | `sendMessageNow()`       | `verify-records.ts`     | Done   |
+| FR-4108 | A2    | —                                     | `createCustomer()`       | `verify-records.ts`     | Done   |
+| FR-4109 | A2    | `products_orgId_partNumber_key`       | `createProduct()`        | `verify-records.ts`     | Done   |
+| FR-4110 | A2    | —                                     | `createPurchaseOrder()`  | `verify-records.ts`     | Done   |
+| FR-4111 | A2    | `EstimateShare.tokenHash`             | `sendEstimate()`         | `verify-records.ts`     | Done   |
+| FR-4112 | A1    | —                                     | `inviteColleague()`      | `verify-team.ts`        | Done   |
+| FR-4113 | A1    | —                                     | `sendCampaign()`         | `verify-automation.ts`  | Done   |
+| FR-4114 | —     | —                                     | `NOT_FOUND_MARKER`       | `verify-controls.ts`    | Done   |
+| FR-3907 | A1    | —                                     | `assertNotFlooding()`    | `verify-credentials.ts` | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`               | `digest()`               | `verify-credentials.ts` | Done   |
+| FR-3801 | —     | —                                     | `/api/inbound/resend`    | `smoke.ts`              | Done   |
+| FR-3802 | —     | —                                     | `verify()` tolerance     | `smoke.ts`              | Done   |
+| FR-3803 | —     | `Organization.slug`                   | `organisationFor()`      | `smoke.ts`              | Done   |
+| FR-3804 | —     | —                                     | `INBOUND_WEBHOOK_SECRET` | `smoke.ts`              | Done   |
 
 ## What people say afterwards
 
@@ -526,9 +540,10 @@ details without a provider behind it would be worse than not having one.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **273**             | **270 (99%)**          |
+| Customers with accounts, and dead buttons | 14                  | 14                     |
+| **Total**                                 | **287**             | **284 (99%)**          |
 
-The requirements document lists 357 requirements. 84 of
+The requirements document lists 371 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

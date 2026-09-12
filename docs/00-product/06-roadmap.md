@@ -853,6 +853,56 @@ and an owner builds a rule without help.
 
 ---
 
+## Phase 15.1 — Customers with accounts, and the buttons that led nowhere
+
+Two pieces of work that arrived together because one exposed the other.
+
+**A driver signs up.** Until now a portal account existed only because a
+workshop made one, which is the safest arrangement and also the reason a
+customer who changes garages loses the history the product promised would
+follow the car. Self-registration fixes that without weakening what it rests
+on: a plate is readable from across a car park and a VIN through the
+windscreen, so entering one proves nothing and grants nothing. A new account
+starts empty. A vehicle appears on it only when the workshop that last
+serviced the car looks at the name and approves the request, and a refusal
+has to say why. Three open requests at a time, a pending request never names
+the garage, and the plate lookup is an index seek so it stays instant as the
+network grows.
+
+**The email must be confirmed first.** Everything inside a workshop sends
+things in the workshop's name. An address nobody has proven is how a stranger
+opens a business under somebody else's and starts emailing from it, so the
+workshop is now held at a confirmation page until the link is opened. Invited
+colleagues arrive already confirmed; only the person who has just signed up
+ever sees it.
+
+**Nothing waits for the sweep.** The queue that sends messages is drained by a
+scheduled job that, on the current hosting plan, runs once a day. A service
+reminder can wait for that. A password reset, a confirmation link, an
+invitation or a quote cannot, and every one of them did: the row was written
+and nobody received anything until the next morning. Those paths now queue the
+row and push it straight out, with the queue still the record and the retry.
+
+**Four controls with nothing behind them.** "New customer", "New part", "New
+order" and "Send estimate" had sat on their pages as links to an error screen
+or buttons wired to nothing. The crawler meant to catch this read a 200 and
+moved on, because the framework streams the not-found screen inside a payload
+the status code never sees. The checker now reads the framework's own
+not-found digest, and the four pages exist. Sending a quote is the one that
+mattered most: no customer had ever been sent one from the product.
+
+**Two quiet defects.** Inviting a colleague never queued the email the page
+said was on its way. A campaign wrote each customer's id into the address
+field, so every campaign message failed at the provider while the campaign
+reported itself as sent. Both now have a check that would have caught them.
+
+**Exit.** A driver signs up, enters a plate, and sees nothing until the garage
+approves. A new workshop cannot see its dashboard until the link is opened,
+and the link arrives within the minute. Every link on every page leads to a
+page, and the checker fails if one does not.
+
+---
+
 ## Phase 16 — Filling in the ERP
 
 The remaining accounting and purchasing gaps, each small on its own.
