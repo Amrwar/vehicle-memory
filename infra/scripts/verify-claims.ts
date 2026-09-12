@@ -76,7 +76,6 @@ async function forget() {
   await prisma.messageLog.deleteMany({ where: { toAddress: { in: [PROBE, STRANGER] } } });
   await prisma.authToken.deleteMany({ where: { user: { email: { in: [PROBE, STRANGER] } } } });
   await prisma.session.deleteMany({ where: { user: { email: { in: [PROBE, STRANGER] } } } });
-  await prisma.auditLog.deleteMany({ where: { actor: { email: { in: [PROBE, STRANGER] } } } });
   await prisma.user.deleteMany({ where: { email: { in: [PROBE, STRANGER] } } });
   await prisma.vehicle.deleteMany({ where: { vin: 'VFYCLAIMSNOWORK01' } });
 }
