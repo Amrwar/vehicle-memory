@@ -86,6 +86,7 @@ const PAGES = [
   '/fleet',
   '/reputation',
   '/inbox',
+  '/claims',
   '/bookings/new',
   '/suppliers/new',
   '/counter',
@@ -108,7 +109,28 @@ const PAGES = [
   '/group',
 ];
 
-const PUBLIC_PAGES = ['/', '/pricing', '/signup', '/login', '/p/demo-share-token'];
+const PUBLIC_PAGES = [
+  '/',
+  '/pricing',
+  '/signup',
+  '/signup/customer',
+  '/login',
+  '/forgot',
+  '/p/demo-share-token',
+];
+
+/**
+ * The mark Next.js leaves in a streamed response when `notFound()` was called.
+ *
+ * Not the visible words on the not-found screen: those are present in every
+ * page's payload, because the framework ships the not-found boundary with each
+ * layout so a client-side navigation can render it. What distinguishes a page
+ * that actually threw is the framework's own error digest for it, which only
+ * appears when the segment was replaced. Measured against a real page and a
+ * dead one before being relied on: zero occurrences on the first, several on
+ * the second.
+ */
+const NOT_FOUND_MARKER = 'NEXT_HTTP_ERROR_FALLBACK;404';
 
 /** Strips the React payload Next.js inlines, which carries the markup again. */
 function withoutScripts(html: string): string {
@@ -252,6 +274,26 @@ async function main() {
 
     if (response.status !== 200) {
       fail(from, 'links somewhere that does not exist', `${link} -> ${response.status}`);
+      continue;
+    }
+
+    // A 200 is not proof the page exists.
+    //
+    // `notFound()` inside a server component renders the not-found screen, and
+    // by the time it is called the response has usually already been committed
+    // as 200. So a link to a route that does not exist answers 200 and this
+    // check passed. That is exactly how `/jobs/new` and `/customers/new` both
+    // reached production as buttons that led to an error page: the crawler
+    // followed them, got a 200, and said everything was fine.
+    //
+    // The body is what tells the truth, so the body is what is read. The raw
+    // body, not the stripped one: the shell arrives first as visible markup,
+    // and the not-found screen arrives afterwards inside the streamed payload
+    // that lives in script tags. Stripping those would strip the evidence.
+    const body = await response.text();
+
+    if (body.includes(NOT_FOUND_MARKER)) {
+      fail(from, 'links to a page that does not exist', `${link} -> not found`);
       continue;
     }
   }

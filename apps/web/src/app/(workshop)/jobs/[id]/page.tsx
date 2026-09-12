@@ -34,14 +34,41 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
+import { QuoteError, sendEstimate } from '@/lib/estimates';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Sends the current quote to the customer.
+ *
+ * The button has been on this page since Phase 1. Until now nothing answered
+ * it, so the only quote any customer ever opened was the seeded one.
+ */
+async function send(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('estimate:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await sendEstimate({
+      orgId,
+      userId: user.userId,
+      estimateId: String(formData.get('estimateId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof QuoteError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/jobs/${jobId}?sent=1`);
+}
 
 export async function generateMetadata({
   params,
@@ -62,8 +89,15 @@ export async function generateMetadata({
  * parts, the photographs, the invoice and the passport entries without
  * navigating between ten modules (story E1).
  */
-export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function JobPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ sent?: string; problem?: string }>;
+}) {
   const { id } = await params;
+  const notice = await searchParams;
   const { db, user, orgId } = await requireSession('job:read');
 
   const job = await db.job.findUnique({
@@ -232,12 +266,31 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
             <Link href={`/vehicles/${job.vehicle.id}`}>
               <Button>Vehicle passport</Button>
             </Link>
-            {estimate && job.status === 'ESTIMATED' ? (
-              <Button variant="primary">Send estimate</Button>
+            {estimate && estimate.status === 'DRAFT' && can(user.role, 'estimate:write') ? (
+              <form action={send}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <input type="hidden" name="estimateId" value={estimate.id} />
+                <Button type="submit" variant="primary">
+                  Send the quote
+                </Button>
+              </form>
             ) : null}
           </>
         }
       />
+
+      {notice.sent ? (
+        <Alert tone="success" className="mb-5">
+          The quote is on its way to {job.customer.displayName}. The job is waiting on their answer,
+          and you will see it here the moment they give one.
+        </Alert>
+      ) : null}
+
+      {notice.problem ? (
+        <Alert tone="danger" className="mb-5">
+          {notice.problem}
+        </Alert>
+      ) : null}
 
       {misfits.length > 0 ? (
         <Alert
