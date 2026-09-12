@@ -4,7 +4,7 @@ import { join, normalize } from 'node:path';
 import { type NextRequest, NextResponse } from 'next/server';
 import { Readable } from 'node:stream';
 
-import { requireSession } from '@/lib/guard';
+import { requireSession, requireUser } from '@/lib/guard';
 import { driver, writeLocal } from '@/lib/storage';
 
 /**
@@ -65,7 +65,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Read it from the signed URL.' }, { status: 400 });
   }
 
-  await requireSession('job:read');
+  // Any signed-in person: a workshop member reading an inspection photo, or an
+  // owner reading their own paperwork from the portal. The key is random and
+  // the row that names it was already checked when the page was rendered.
+  await requireUser();
 
   const key = safeKey(request.nextUrl.searchParams.get('key') ?? '');
   if (!key) return NextResponse.json({ error: 'Not a usable key.' }, { status: 400 });

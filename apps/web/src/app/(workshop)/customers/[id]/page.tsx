@@ -1,6 +1,7 @@
 import { humanise, toneFor, type JobStatus } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -15,10 +16,11 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
-import { requireSession } from '@/lib/guard';
+import { CustomerError, setPreferredTechnician } from '@/lib/customers';
+import { can, requireSession } from '@/lib/guard';
 import { messagesFor, timelineFor } from '@/lib/timeline';
 
 export const dynamic = 'force-dynamic';
@@ -41,9 +43,39 @@ export async function generateMetadata({
  * One screen answering every question about a customer, so Sara does not have
  * to navigate away while they are on the phone (story B2).
  */
-export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
+async function prefer(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  try {
+    await setPreferredTechnician({
+      orgId,
+      userId: user.userId,
+      customerId,
+      technicianUserId: String(formData.get('technicianUserId') ?? '') || null,
+    });
+  } catch (error) {
+    if (error instanceof CustomerError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/customers/${customerId}?saved=preference`);
+}
+
+export default async function CustomerPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string; problem?: string }>;
+}) {
   const { id } = await params;
-  const { db, orgId } = await requireSession('customer:read');
+  const { saved, problem } = await searchParams;
+  const { db, orgId, user } = await requireSession('customer:read');
 
   const { id: customerId } = await params;
 
@@ -68,6 +100,13 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   });
 
   if (!customer) notFound();
+
+  const technicians = await prisma.user.findMany({
+    where: { memberships: { some: { orgId, role: 'TECHNICIAN', isActive: true } } },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  });
+  const mayEditCustomer = can(user.role, 'customer:write');
 
   // Vehicles reached through this customer's jobs at this workshop. A vehicle
   // is global, so it is fetched separately rather than joined off the tenant.
@@ -105,6 +144,17 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
           </>
         }
       />
+
+      {saved ? (
+        <Alert tone="success" className="mb-5">
+          Saved.
+        </Alert>
+      ) : null}
+      {problem ? (
+        <Alert tone="danger" className="mb-5">
+          {problem}
+        </Alert>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="grid gap-5">
@@ -240,6 +290,48 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
         </div>
 
         <aside className="grid content-start gap-5">
+          <Card>
+            <CardHeader
+              title="Preferences"
+              description="Preselected on a new job; the diary has the last word"
+            />
+            <CardBody>
+              <form action={prefer} className="grid gap-2">
+                <input type="hidden" name="customerId" value={customer.id} />
+                <label
+                  className="text-[12px] font-medium text-(--text-soft)"
+                  htmlFor="preferred-technician"
+                >
+                  Asks for
+                </label>
+                <select
+                  id="preferred-technician"
+                  name="technicianUserId"
+                  defaultValue={customer.preferredTechnicianUserId ?? ''}
+                  disabled={!mayEditCustomer}
+                  className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
+                >
+                  <option value="">Nobody in particular</option>
+                  {technicians.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
+                </select>
+                {mayEditCustomer ? (
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    className="justify-self-start"
+                  >
+                    Save preference
+                  </Button>
+                ) : null}
+              </form>
+            </CardBody>
+          </Card>
+
           <Card className={outstanding > 0 ? 'border-(--warning)' : undefined}>
             <CardHeader title="Account" />
             <CardBody className="grid gap-2 text-[13px]">

@@ -2,6 +2,7 @@ import { normaliseVin, summariseNetwork } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { apiRefusal, authenticateApiKey } from '@/lib/api-keys';
+import { documentsFor } from '@/lib/documents';
 import { networkHistory } from '@/lib/network';
 
 /**
@@ -45,6 +46,7 @@ export async function GET(request: Request, context: { params: Promise<{ vin: st
     }
 
     const summary = summariseNetwork(history, orgId);
+    const documents = await documentsFor(vehicle.id, { orgId, userId: 'api', ownsVehicle: false });
 
     return Response.json({
       vehicle: {
@@ -64,6 +66,20 @@ export async function GET(request: Request, context: { params: Promise<{ vin: st
         otherWorkshops: summary.otherWorkshops,
         statement: summary.statement,
       },
+      // The paperwork, with links that expire in an hour. Readable by any
+      // workshop entitled to the vehicle: it is the car's, like the events.
+      documents: documents.map((document) => ({
+        id: document.id,
+        kind: document.kind,
+        title: document.title,
+        reference: document.reference,
+        issuedAt: document.issuedAt,
+        expiresAt: document.expiresAt,
+        expiry: document.expiry,
+        mimeType: document.mimeType,
+        addedBy: document.addedBy,
+        url: document.url,
+      })),
       events: history.map((event) => ({
         id: event.id,
         type: event.type,

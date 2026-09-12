@@ -200,3 +200,50 @@ export async function updateCustomer(input: {
     },
   });
 }
+
+/**
+ * The technician this customer asks for. FR-4706.
+ *
+ * Preselected when a job is opened for them; never enforced, because the
+ * person they want may be off that day and the diary knows that better.
+ */
+export async function setPreferredTechnician(input: {
+  orgId: string;
+  userId: string;
+  customerId: string;
+  technicianUserId: string | null;
+}): Promise<void> {
+  const customer = await prisma.customer.findFirst({
+    where: { id: input.customerId, orgId: input.orgId },
+    select: { id: true, preferredTechnicianUserId: true },
+  });
+  if (!customer) throw new CustomerError('NOT_FOUND', 'That customer is not in this workshop.');
+
+  if (input.technicianUserId) {
+    const technician = await prisma.membership.findFirst({
+      where: {
+        orgId: input.orgId,
+        userId: input.technicianUserId,
+        role: 'TECHNICIAN',
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    if (!technician) throw new CustomerError('NOT_FOUND', 'That person is not a technician here.');
+  }
+
+  await prisma.customer.update({
+    where: { id: customer.id },
+    data: { preferredTechnicianUserId: input.technicianUserId },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'customer.preferred_technician',
+    entityType: 'Customer',
+    entityId: customer.id,
+    before: { technicianUserId: customer.preferredTechnicianUserId },
+    after: { technicianUserId: input.technicianUserId },
+  });
+}

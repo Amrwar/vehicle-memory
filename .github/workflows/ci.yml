@@ -285,6 +285,13 @@ jobs:
       - name: Verify settings and plan acceptance
         run: npx tsx infra/scripts/verify-settings.ts
 
+      # Paperwork belongs to the car: the servicing workshop and the owner see
+      # it, a stranger does not; bad files are refused with the reason; removal
+      # keeps the row and its reason; the latest MOT decides the cover; and the
+      # customer's preferred technician reaches the new-job form.
+      - name: Verify the vehicle's paperwork
+        run: npx tsx infra/scripts/verify-documents.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

@@ -15,7 +15,8 @@
 
 export class CustomerError extends Error {
   constructor(
-    readonly code: 'NO_NAME' | 'NO_CONTACT' | 'BAD_EMAIL' | 'BAD_MOBILE' | 'DUPLICATE',
+    readonly code:
+      'NO_NAME' | 'NO_CONTACT' | 'BAD_EMAIL' | 'BAD_MOBILE' | 'DUPLICATE' | 'NOT_FOUND',
     message: string,
   ) {
     super(message);

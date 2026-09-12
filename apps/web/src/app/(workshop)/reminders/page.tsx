@@ -16,10 +16,12 @@ import {
   Th,
   Tr,
 } from '@carnet/ui';
+import { describeExpiry, documentKindLabel } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { remindersDue } from '@/lib/booking';
+import { paperworkDue } from '@/lib/documents';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Reminders' };
@@ -46,7 +48,10 @@ export default async function RemindersPage({
   const { days } = await searchParams;
   const window = Math.max(1, Number(days ?? 30) || 30);
 
-  const due = await remindersDue(orgId, window);
+  const [due, paperwork] = await Promise.all([
+    remindersDue(orgId, window),
+    paperworkDue(orgId, 45),
+  ]);
 
   const overdue = due.filter((entry) => entry.overdue);
   const unreachable = due.filter((entry) => entry.unreachable);
@@ -187,6 +192,47 @@ export default async function RemindersPage({
               </tbody>
             </Table>
           </TableWrap>
+        )}
+      </Card>
+
+      <Card className="mt-5">
+        <CardHeader
+          title="Paperwork running out"
+          description="The latest MOT or insurance on file for a vehicle this workshop looks after, within forty-five days or already gone"
+        />
+        {paperwork.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            Nothing on file is running out. Paperwork is added on the vehicle&rsquo;s page, or by
+            the owner from their portal.
+          </CardBody>
+        ) : (
+          <ul className="divide-y divide-(--border)">
+            {paperwork.map((row) => (
+              <li
+                key={row.documentId}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
+              >
+                <Badge tone={row.state === 'EXPIRED' ? 'danger' : 'warning'} size="sm">
+                  {documentKindLabel(row.kind)}
+                </Badge>
+                <Link href={`/vehicles/${row.vehicleId}`} className="font-medium hover:underline">
+                  {row.vehicle}
+                  {row.registration ? ` · ${row.registration}` : ''}
+                </Link>
+                {row.customer ? (
+                  <Link
+                    href={`/customers/${row.customer.id}`}
+                    className="text-(--text-soft) hover:underline"
+                  >
+                    {row.customer.displayName}
+                  </Link>
+                ) : null}
+                <span className="ml-auto text-[12px] text-(--text-soft)">
+                  {describeExpiry(row.expiresAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </Card>
 

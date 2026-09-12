@@ -1,4 +1,4 @@
-import { customerProgressFor } from '@carnet/core';
+import { customerProgressFor, describeExpiry, documentKindLabel } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -17,7 +17,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { DocumentRemove, DocumentUpload } from '@/components/document-upload';
 import { PortalShell } from '@/components/portal-shell';
+import { documentsFor, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
 
@@ -92,6 +94,11 @@ export default async function PortalVehiclePage({
   if (!vehicle) notFound();
 
   const shares = await sharesFor(user.userId, vehicle.id);
+  const actor = { orgId: null, userId: user.userId, ownsVehicle: true };
+  const [documents, paperwork] = await Promise.all([
+    documentsFor(vehicle.id, actor),
+    paperworkFor(vehicle.id),
+  ]);
   const name = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ');
 
   return (
@@ -278,6 +285,60 @@ export default async function PortalVehiclePage({
           </ul>
         ) : null}
       </section>
+
+      <Card className="mt-5">
+        <CardHeader title="Paperwork" description={paperwork.statement} />
+        {documents.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            Keep the registration certificate, the MOT and the insurance here and they go with the
+            car. A workshop that services it sees them; nobody else does.
+          </CardBody>
+        ) : (
+          <ul className="divide-y divide-(--border)">
+            {documents.map((document) => (
+              <li
+                key={document.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
+              >
+                <Badge tone="neutral" size="sm">
+                  {documentKindLabel(document.kind)}
+                </Badge>
+                {document.url ? (
+                  <a
+                    href={document.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="min-w-0 flex-1 truncate font-medium hover:underline"
+                  >
+                    {document.title}
+                  </a>
+                ) : (
+                  <span className="min-w-0 flex-1 truncate font-medium">{document.title}</span>
+                )}
+                {document.expiresAt ? (
+                  <Badge
+                    tone={
+                      document.expiry === 'EXPIRED'
+                        ? 'danger'
+                        : document.expiry === 'SOON'
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                    size="sm"
+                  >
+                    {describeExpiry(document.expiresAt)}
+                  </Badge>
+                ) : null}
+                <span className="text-[12px] text-(--text-faint)">{document.addedBy}</span>
+                <DocumentRemove vehicleId={vehicle.id} documentId={document.id} />
+              </li>
+            ))}
+          </ul>
+        )}
+        <CardBody className="border-t border-(--border)">
+          <DocumentUpload vehicleId={vehicle.id} />
+        </CardBody>
+      </Card>
     </PortalShell>
   );
 }

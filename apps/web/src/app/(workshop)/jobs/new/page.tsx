@@ -197,8 +197,18 @@ export default async function NewJobPage({
                     </Select>
                   </Field>
 
-                  <Field label="Technician" hint="Optional. Can be left for the diary.">
-                    <Select name="technicianUserId" defaultValue="">
+                  <Field
+                    label="Technician"
+                    hint={
+                      chosen?.preferredTechnicianUserId
+                        ? 'Preselected: the person this customer asks for.'
+                        : 'Optional. Can be left for the diary.'
+                    }
+                  >
+                    <Select
+                      name="technicianUserId"
+                      defaultValue={chosen?.preferredTechnicianUserId ?? ''}
+                    >
                       <option value="">Nobody yet</option>
                       {options.technicians.map((person) => (
                         <option key={person.id} value={person.id}>

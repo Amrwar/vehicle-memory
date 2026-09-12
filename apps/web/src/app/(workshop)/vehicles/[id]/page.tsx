@@ -1,6 +1,8 @@
 import {
   averageKmPerDay,
   humanise,
+  describeExpiry,
+  documentKindLabel,
   humaniseEventType,
   projectServiceDue,
   toneFor,
@@ -30,7 +32,9 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
 import { HealthDial } from '@/components/health-dial';
-import { requireSession } from '@/lib/guard';
+import { can, requireSession } from '@/lib/guard';
+import { DocumentUpload, DocumentRemove } from '@/components/document-upload';
+import { documentsFor, paperworkFor } from '@/lib/documents';
 import { networkStatementFor } from '@/lib/network';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 import { conditionOf } from '@/lib/condition';
@@ -71,7 +75,7 @@ export default async function VehiclePage({
 }) {
   const { id } = await params;
   const notice = await searchParams;
-  const { db, orgId } = await requireSession('vehicle:read');
+  const { db, orgId, user } = await requireSession('vehicle:read');
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
@@ -79,6 +83,9 @@ export default async function VehiclePage({
   // Where the history came from, in one sentence. The network's whole point
   // is that this is often "somewhere else", and the page says so.
   const network = await networkStatementFor(orgId, id);
+  const actor = { orgId, userId: user.userId, ownsVehicle: false };
+  const [documents, paperwork] = await Promise.all([documentsFor(id, actor), paperworkFor(id)]);
+  const mayAddDocuments = can(user.role, 'vehicle:write');
 
   const vehicle = await prisma.vehicle.findUnique({
     where: { id },
@@ -353,6 +360,108 @@ export default async function VehiclePage({
               </CardBody>
             </Card>
           ) : null}
+
+          <Card>
+            <CardHeader
+              title="Paperwork"
+              description={paperwork.statement}
+              action={
+                paperwork.mot !== 'NONE' || paperwork.insurance !== 'NONE' ? (
+                  <span className="flex flex-wrap gap-1.5">
+                    {paperwork.mot !== 'NONE' ? (
+                      <Badge
+                        tone={
+                          paperwork.mot === 'EXPIRED'
+                            ? 'danger'
+                            : paperwork.mot === 'SOON'
+                              ? 'warning'
+                              : 'success'
+                        }
+                        size="sm"
+                      >
+                        MOT {describeExpiry(paperwork.motExpiresAt).toLowerCase()}
+                      </Badge>
+                    ) : null}
+                    {paperwork.insurance !== 'NONE' ? (
+                      <Badge
+                        tone={
+                          paperwork.insurance === 'EXPIRED'
+                            ? 'danger'
+                            : paperwork.insurance === 'SOON'
+                              ? 'warning'
+                              : 'success'
+                        }
+                        size="sm"
+                      >
+                        Insurance {describeExpiry(paperwork.insuranceExpiresAt).toLowerCase()}
+                      </Badge>
+                    ) : null}
+                  </span>
+                ) : undefined
+              }
+            />
+            {documents.length === 0 ? (
+              <CardBody className="text-[13px] text-(--text-soft)">
+                Nothing on file yet. The registration certificate, the MOT and the insurance are the
+                three worth having; a photograph of damage before repair is the fourth.
+              </CardBody>
+            ) : (
+              <ul className="divide-y divide-(--border)">
+                {documents.map((document) => (
+                  <li
+                    key={document.id}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
+                  >
+                    <Badge tone="neutral" size="sm">
+                      {documentKindLabel(document.kind)}
+                    </Badge>
+                    {document.url ? (
+                      <a
+                        href={document.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="min-w-0 flex-1 truncate font-medium hover:underline"
+                      >
+                        {document.title}
+                      </a>
+                    ) : (
+                      <span className="min-w-0 flex-1 truncate font-medium">{document.title}</span>
+                    )}
+                    {document.reference ? (
+                      <span className="datum text-[12px] text-(--text-soft)">
+                        {document.reference}
+                      </span>
+                    ) : null}
+                    {document.expiresAt ? (
+                      <Badge
+                        tone={
+                          document.expiry === 'EXPIRED'
+                            ? 'danger'
+                            : document.expiry === 'SOON'
+                              ? 'warning'
+                              : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {describeExpiry(document.expiresAt)}
+                      </Badge>
+                    ) : null}
+                    <span className="text-[12px] text-(--text-faint)">
+                      {document.addedBy} · {document.createdAt.toLocaleDateString('en-GB')}
+                    </span>
+                    {document.mayRemove && mayAddDocuments ? (
+                      <DocumentRemove vehicleId={vehicle.id} documentId={document.id} />
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {mayAddDocuments ? (
+              <CardBody className="border-t border-(--border)">
+                <DocumentUpload vehicleId={vehicle.id} />
+              </CardBody>
+            ) : null}
+          </Card>
 
           <Card>
             <CardHeader title="Jobs at this workshop" />

@@ -113,6 +113,7 @@ model Organization {
   deliveryEvents      DeliveryEvent[]
   vehicleClaims       VehicleClaim[]
   apiKeys             ApiKey[]
+  vehicleDocuments    VehicleDocument[]
 
   @@index([isActive])
   @@map("organizations")
@@ -218,6 +219,8 @@ model User {
   supplierPaymentsRecorded SupplierPayment[] @relation("SupplierPaymentRecorder")
   payrollRunsCreated  PayrollRun[]         @relation("PayrollRunCreator")
   apiKeysCreated      ApiKey[]             @relation("ApiKeyCreator")
+  documentsUploaded  VehicleDocument[] @relation("DocumentUploader")
+  preferredBy        Customer[]        @relation("PreferredTechnician")
   bookingTechnician   Booking[]
   // Passport
   ownedVehicles       VehicleOwnership[]
@@ -403,6 +406,7 @@ model Vehicle {
   serviceSchedules ServiceSchedule[]
   warranties       Warranty[]
   claims           VehicleClaim[]
+  documents        VehicleDocument[]
 
   @@index([registration])
   @@index([make, model, year])
@@ -744,12 +748,15 @@ model Customer {
   lastMarketedAt        DateTime?
   /// Portal login, when the customer has one.
   portalUserId          String?
+  /// The technician this customer asks for. Preselected on a new job. FR-4706.
+  preferredTechnicianUserId String?
   isActive              Boolean      @default(true)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
   org                Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
   portalUser         User?               @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  preferredTechnician User?              @relation("PreferredTechnician", fields: [preferredTechnicianUserId], references: [id], onDelete: SetNull)
   bookings           Booking[]
   counterSales       CounterSale[]
   jobs               Job[]               @relation("JobCustomer")
@@ -1797,6 +1804,51 @@ model FleetAgreement {
 /// as a session or a share link. A key belongs to one organisation and can
 /// read only that organisation's records plus the vehicle histories it is
 /// entitled to, exactly as a signed-in owner could.
+/// The vehicle's paperwork. Phase 20.
+///
+/// Documents belong to the car, not to the workshop that scanned them, so a
+/// workshop with read access to the vehicle sees them and so does the owner.
+/// Nothing is deleted: a removed document keeps its row and its reason.
+model VehicleDocument {
+  id               String              @id @default(cuid())
+  vehicleId        String
+  kind             VehicleDocumentKind
+  title            String
+  /// Policy number, certificate number, receipt number.
+  reference        String?
+  issuedAt         DateTime?
+  expiresAt        DateTime?
+  fileKey          String
+  filename         String
+  mimeType         String
+  sizeBytes        Int
+  note             String?
+  /// The workshop that added it, or null when the owner did from the portal.
+  uploadedByOrgId  String?
+  uploadedByUserId String?
+  removedAt        DateTime?
+  removedReason    String?
+  createdAt        DateTime            @default(now())
+
+  vehicle       Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  uploadedByOrg Organization? @relation(fields: [uploadedByOrgId], references: [id], onDelete: SetNull)
+  uploadedBy    User?         @relation("DocumentUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, kind])
+  @@index([vehicleId, expiresAt])
+  @@map("vehicle_documents")
+}
+
+enum VehicleDocumentKind {
+  PHOTO
+  REGISTRATION_CERTIFICATE
+  MOT_CERTIFICATE
+  INSURANCE
+  SERVICE_RECORD
+  PURCHASE_INVOICE
+  OTHER
+}
+
 model ApiKey {
   id              String    @id @default(cuid())
   orgId           String

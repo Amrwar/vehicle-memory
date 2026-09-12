@@ -184,6 +184,7 @@ export async function jobFormOptions(orgId: string) {
       select: {
         id: true,
         displayName: true,
+        preferredTechnicianUserId: true,
         jobs: {
           orderBy: { createdAt: 'desc' },
           take: 8,
@@ -214,6 +215,7 @@ export async function jobFormOptions(orgId: string) {
     customers: customers.map((customer) => ({
       id: customer.id,
       name: customer.displayName,
+      preferredTechnicianUserId: customer.preferredTechnicianUserId,
       vehicles: [
         ...new Map(
           customer.jobs

@@ -49,6 +49,8 @@ export class StorageError extends Error {
 
 /** What a camera on a phone produces, and nothing else. */
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+/** Paperwork is a PDF or a picture of the paper. Phase 20. */
+const DOCUMENT_TYPES = [...ALLOWED_TYPES, 'application/pdf'];
 
 /** Above this, something has gone wrong or somebody is uploading a video. */
 export const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
@@ -93,11 +95,16 @@ export async function ticketFor(input: {
   filename: string;
   contentType: string;
   sizeBytes: number;
+  /** Photographs only, or paperwork too. Photographs by default. */
+  accept?: 'photo' | 'document';
 }): Promise<UploadTicket> {
-  if (!ALLOWED_TYPES.includes(input.contentType)) {
+  const allowed = input.accept === 'document' ? DOCUMENT_TYPES : ALLOWED_TYPES;
+  if (!allowed.includes(input.contentType)) {
     throw new StorageError(
       'BAD_TYPE',
-      `${input.contentType || 'That file'} is not a photograph. Use a picture from the camera.`,
+      input.accept === 'document'
+        ? `${input.contentType || 'That file'} is not a PDF or a picture of the paper.`
+        : `${input.contentType || 'That file'} is not a photograph. Use a picture from the camera.`,
     );
   }
 
