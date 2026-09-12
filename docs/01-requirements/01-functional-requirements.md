@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4700 — The vehicle's paperwork
+
+| Ref     | Requirement                                                                                                                                                                                             | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4701 | A vehicle MUST carry documents by kind (photograph, registration certificate, MOT certificate, insurance, service record, purchase invoice, other), each titled, with an optional reference and expiry. | 20    |
+| FR-4702 | A document MUST be readable and addable by any workshop entitled to read the vehicle and by its current owner, and MUST be invisible to anybody else rather than refused.                               | 20    |
+| FR-4703 | A document MUST be a PDF or a picture of the paper, a photograph MUST be a picture, an untitled or oversized file MUST be refused with the reason, and an expiry before the issue MUST be refused.      | 20    |
+| FR-4704 | The file MUST be stored before the row is recorded, and the row MUST name what was stored, its size and who added it.                                                                                   | 20    |
+| FR-4705 | The latest live MOT and insurance MUST decide the vehicle's cover, an older certificate MUST NOT count as a lapse, and paperwork running out MUST be listed with the service reminders.                 | 20    |
+| FR-4706 | A customer MAY name a preferred technician, who MUST be a technician of the workshop, and the preference MUST be preselected when a job is opened for that customer.                                    | 20    |
+| FR-4707 | A document MUST be removable only by the workshop that added it or the vehicle's owner, MUST require a reason, and MUST keep its row with the reason.                                                   | 20    |
+| FR-4708 | Every addition and removal of a document MUST be audited, and the API's vehicle endpoint MUST return the documents with links that expire.                                                              | 20    |
+
 ## FR-4600 — The workshop configures itself
 
 | Ref     | Requirement                                                                                                                                                                                                                 | Phase |

@@ -18,21 +18,21 @@ says why.
 
 ## 1. Dashboard
 
-| Item                       | Status  | Where                                          |
-| -------------------------- | ------- | ---------------------------------------------- |
-| Today's appointments       | Built   | `/dashboard`, `/diary`                         |
-| Cars currently in the shop | Built   | `/dashboard`, jobs by status                   |
-| Jobs waiting for approval  | Built   | `/dashboard`, and the count on the sidebar     |
-| Jobs waiting for parts     | Built   | Approved with nothing on the shelf             |
-| Jobs overdue               | Built   | Past the promised date and unfinished          |
-| Today's revenue            | Built   | `/dashboard`                                   |
-| Outstanding invoices       | Built   | `/payments`, aged debt on `/financials`        |
-| Low-stock parts            | Built   | `/parts`, below reorder point                  |
-| Technician workload        | Built   | `/people`, utilisation and productivity        |
-| Upcoming service reminders | Built   | `/reminders`                                   |
-| Customer satisfaction      | Missing | Nothing collects it. See section 18.           |
-| Profit margin              | Built   | `/reports/business`, by service type           |
-| Activity feed              | Built   | Read from the audit log, which already held it |
+| Item                       | Status | Where                                          |
+| -------------------------- | ------ | ---------------------------------------------- |
+| Today's appointments       | Built  | `/dashboard`, `/diary`                         |
+| Cars currently in the shop | Built  | `/dashboard`, jobs by status                   |
+| Jobs waiting for approval  | Built  | `/dashboard`, and the count on the sidebar     |
+| Jobs waiting for parts     | Built  | Approved with nothing on the shelf             |
+| Jobs overdue               | Built  | Past the promised date and unfinished          |
+| Today's revenue            | Built  | `/dashboard`                                   |
+| Outstanding invoices       | Built  | `/payments`, aged debt on `/financials`        |
+| Low-stock parts            | Built  | `/parts`, below reorder point                  |
+| Technician workload        | Built  | `/people`, utilisation and productivity        |
+| Upcoming service reminders | Built  | `/reminders`                                   |
+| Customer satisfaction      | Built  | From reviews, refused below five answers       |
+| Profit margin              | Built  | `/reports/business`, by service type           |
+| Activity feed              | Built  | Read from the audit log, which already held it |
 
 ## 2. Workshop calendar
 
@@ -59,32 +59,32 @@ says why.
 | Loyalty points          | Missing | See section 17                                         |
 | Service reminders       | Built   | `/reminders`                                           |
 | Customer lifetime value | Built   | `/crm`, by cohort                                      |
-| Preferred technician    | Missing |                                                        |
+| Preferred technician    | Built   | On the customer, preselected on a new job              |
 | Customer timeline       | Built   | "The whole story" on `/customers/[id]`, newest first   |
 
 ## 4. Vehicle management
 
-| Item                       | Status  | Note                                                |
-| -------------------------- | ------- | --------------------------------------------------- |
-| Its own profile            | Built   | `/vehicles/[id]`, and `/portal/vehicles/[id]`       |
-| VIN, plate, make, model    | Built   |                                                     |
-| Mileage, engine, fuel      | Built   |                                                     |
-| Service and repair history | Built   | Every visit, across workshops                       |
-| Parts replaced             | Built   | Through job lines                                   |
-| Inspections                | Built   | Carried out on a tablet, sent to the customer       |
-| Upcoming maintenance       | Built   | Service schedules                                   |
-| Warranty information       | Built   | On the vehicle, and in full at `/warranty`          |
-| Ownership transfer         | Built   | History stays, the previous owner does not          |
-| Buyer report               | Built   | What it says, what it misses, whether intact        |
-| Public verification        | Built   | A code at `/verify`, no account needed              |
-| Recalls                    | Built   | `/recalls`, honest about being a record             |
-| Insurance information      | Missing |                                                     |
-| Photos                     | Missing |                                                     |
-| Documents                  | Missing |                                                     |
-| Maintenance timeline       | Built   | Components with ages, on `/vehicles/[id]/condition` |
-| Health score               | Built   | With every factor and its evidence shown            |
-| Predicted maintenance      | Built   | In distance as well as date, from this vehicle      |
-| Component history          | Built   | Battery, brakes, tyres, belt, each with an age      |
+| Item                       | Status | Note                                                |
+| -------------------------- | ------ | --------------------------------------------------- |
+| Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`       |
+| VIN, plate, make, model    | Built  |                                                     |
+| Mileage, engine, fuel      | Built  |                                                     |
+| Service and repair history | Built  | Every visit, across workshops                       |
+| Parts replaced             | Built  | Through job lines                                   |
+| Inspections                | Built  | Carried out on a tablet, sent to the customer       |
+| Upcoming maintenance       | Built  | Service schedules                                   |
+| Warranty information       | Built  | On the vehicle, and in full at `/warranty`          |
+| Ownership transfer         | Built  | History stays, the previous owner does not          |
+| Buyer report               | Built  | What it says, what it misses, whether intact        |
+| Public verification        | Built  | A code at `/verify`, no account needed              |
+| Recalls                    | Built  | `/recalls`, honest about being a record             |
+| Insurance information      | Built  | A document with a policy reference and an expiry    |
+| Photos                     | Built  | Paperwork of kind photograph, on the vehicle        |
+| Documents                  | Built  | Belong to the car; workshop and owner both see them |
+| Maintenance timeline       | Built  | Components with ages, on `/vehicles/[id]/condition` |
+| Health score               | Built  | With every factor and its evidence shown            |
+| Predicted maintenance      | Built  | In distance as well as date, from this vehicle      |
+| Component history          | Built  | Battery, brakes, tyres, belt, each with an age      |
 
 ## 5. Digital vehicle inspection
 
@@ -391,9 +391,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 134          |
+| Built   | 139          |
 | Partial | 1            |
-| Missing | 11           |
+| Missing | 6            |
 
 <!-- counts:end -->
 

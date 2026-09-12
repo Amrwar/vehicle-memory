@@ -237,78 +237,86 @@ where the work happens.
 
 ## Getting in, and mail coming back
 
-| Req     | Story | Schema                                                         | Implementation                                | Test                                     | Status |
-| ------- | ----- | -------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------- | ------ |
-| FR-3901 | A1    | —                                                              | `requestReset()`                              | `verify-credentials.ts`                  | Done   |
-| FR-3902 | A1    | `AuthToken.usedAt`                                             | `redeemReset()`                               | `verify-credentials.ts`                  | Done   |
-| FR-3903 | A1    | `auth_tokens_one_live_per_purpose`                             | `issue()`                                     | `verify-credentials.ts`                  | Done   |
-| FR-3904 | A1    | `User.emailVerifiedAt`                                         | `unverifiedWarning()`                         | `tokens.test.ts`                         | Done   |
-| FR-3905 | A1    | —                                                              | `redeemVerification()`                        | `verify-credentials.ts`                  | Done   |
-| FR-3906 | A1    | —                                                              | `checkPassword()`                             | `tokens.test.ts`                         | Done   |
-| FR-4101 | P4    | —                                                              | `registerCustomer()`                          | `verify-claims.ts`                       | Done   |
-| FR-4102 | P4    | `vehicle_claims_one_open_each`                                 | `claimVehicle()`                              | `verify-claims.ts`                       | Done   |
-| FR-4103 | P4    | `vehicles_registration_normalised`                             | `identifierKind()`                            | `verify-claims.ts`                       | Done   |
-| FR-4104 | A1    | `vehicle_claims_refusal_is_explained`                          | `decideClaim()`                               | `verify-claims.ts`                       | Done   |
-| FR-4105 | P4    | —                                                              | `describeClaim()`                             | `claims.test.ts`                         | Done   |
-| FR-4106 | A1    | `User.emailVerifiedAt`                                         | `(workshop)/layout.tsx`                       | `verify-empty.ts`                        | Done   |
-| FR-4107 | —     | —                                                              | `sendMessageNow()`                            | `verify-records.ts`                      | Done   |
-| FR-4108 | A2    | —                                                              | `createCustomer()`                            | `verify-records.ts`                      | Done   |
-| FR-4109 | A2    | `products_orgId_partNumber_key`                                | `createProduct()`                             | `verify-records.ts`                      | Done   |
-| FR-4110 | A2    | —                                                              | `createPurchaseOrder()`                       | `verify-records.ts`                      | Done   |
-| FR-4111 | A2    | `EstimateShare.tokenHash`                                      | `sendEstimate()`                              | `verify-records.ts`                      | Done   |
-| FR-4112 | A1    | —                                                              | `inviteColleague()`                           | `verify-team.ts`                         | Done   |
-| FR-4113 | A1    | —                                                              | `sendCampaign()`                              | `verify-automation.ts`                   | Done   |
-| FR-4114 | —     | —                                                              | `NOT_FOUND_MARKER`                            | `verify-controls.ts`                     | Done   |
-| FR-4201 | E2    | `JobStatusEvent`                                               | `moveJob()`                                   | `verify-money.ts`                        | Done   |
-| FR-4202 | E2    | `StockMovement`, `VehicleEvent`                                | `moveJob()` on COMPLETED                      | `verify-money.ts`                        | Done   |
-| FR-4203 | E1    | `JobLabourLine`, `JobPartLine`                                 | `recordDecision()`                            | `verify-money.ts`                        | Done   |
-| FR-4204 | G1    | `Invoice`, `invoices_orgId_number_key`                         | `issueInvoice()`                              | `verify-money.ts`                        | Done   |
-| FR-4205 | G1    | `Job.invoicedAt`                                               | `issueInvoice()`                              | `verify-money.ts`                        | Done   |
-| FR-4206 | G2    | `Payment`                                                      | `recordPayment()`                             | `verify-money.ts`                        | Done   |
-| FR-4207 | G3    | `CreditNote`                                                   | `raiseCreditNote()`                           | `verify-money.ts`                        | Done   |
-| FR-4208 | G3    | `refunds_amount_is_positive`                                   | `recordRefund()`                              | `verify-money.ts`                        | Done   |
-| FR-4209 | —     | —                                                              | `postEntry()`                                 | `invoicing.test.ts`, `verify-money.ts`   | Done   |
-| FR-4301 | —     | `SupplierBill`, `supplier_bills_orgId_reference_key`           | `bookBill()`                                  | `verify-erp.ts`                          | Done   |
-| FR-4302 | —     | `BillStatus`                                                   | `approveBill()`, `disputeBill()`              | `verify-erp.ts`                          | Done   |
-| FR-4303 | —     | `SupplierPaymentAllocation`                                    | `allocateAcrossBills()`                       | `payables.test.ts`, `verify-erp.ts`      | Done   |
-| FR-4304 | —     | `SupplierPayment`                                              | `paySupplier()`, `remittanceAdvice()`         | `verify-erp.ts`                          | Done   |
-| FR-4305 | —     | `PayrollRun`, `Timesheet.payrollRunId`                         | `runPayroll()`                                | `verify-erp.ts`                          | Done   |
-| FR-4306 | —     | —                                                              | `PAYROLL_COLUMNS`                             | `payroll.test.ts`                        | Done   |
-| FR-4307 | —     | `payroll_runs_paid_has_a_time`                                 | `markPayrollPaid()`                           | `verify-erp.ts`                          | Done   |
-| FR-4308 | —     | `FleetAgreement`, `fleet_agreements_discounts_are_percentages` | `saveFleetAgreement()`                        | `fleet.test.ts`, `verify-erp.ts`         | Done   |
-| FR-4309 | —     | `InvoiceLine.jobId`                                            | `consolidateMonth()`                          | `verify-erp.ts`                          | Done   |
-| FR-4310 | —     | —                                                              | `assertConsolidatable()`                      | `fleet.test.ts`, `verify-erp.ts`         | Done   |
-| FR-4401 | —     | —                                                              | `parseQuestion()`, `COVERAGE`                 | `questions.test.ts`, `verify-answers.ts` | Done   |
-| FR-4402 | —     | —                                                              | `answer()`                                    | `verify-answers.ts`                      | Done   |
-| FR-4403 | —     | —                                                              | `refusal()`                                   | `questions.test.ts`, `verify-answers.ts` | Done   |
-| FR-4404 | —     | —                                                              | `observeRevenue()`                            | `observations.test.ts`                   | Done   |
-| FR-4405 | —     | —                                                              | `customerSummary()`                           | `summary.test.ts`                        | Done   |
-| FR-4406 | —     | —                                                              | `verifyAgainstFacts()`, `polish()`            | `summary.test.ts`, `verify-answers.ts`   | Done   |
-| FR-4407 | —     | —                                                              | `sendCustomerSummary()` is a person's action  | `verify-controls.ts`                     | Done   |
-| FR-4408 | —     | —                                                              | `/ask` page copy                              | `verify-empty.ts`                        | Done   |
-| FR-4501 | —     | `vehicles_registration_normalised`                             | `findOnNetwork()`                             | `verify-network.ts`                      | Done   |
-| FR-4502 | —     | —                                                              | `summariseNetwork()`                          | `network.test.ts`, `verify-network.ts`   | Done   |
-| FR-4503 | —     | `VehicleAccessGrant`                                           | `adoptVehicle()`, `grantServicingAccess()`    | `verify-network.ts`                      | Done   |
-| FR-4504 | —     | —                                                              | `redactForNetwork()`, `WITHHELD_KEYS`         | `network.test.ts`, `verify-network.ts`   | Done   |
-| FR-4505 | —     | `VehicleEvent.prevHash`                                        | `writeJobCompletion()`                        | `verify-network.ts`                      | Done   |
-| FR-4506 | —     | `Vehicle.vinValid`                                             | `registerVehicle()`                           | `verify-network.ts`                      | Done   |
-| FR-4507 | —     | `ApiKey`                                                       | `issueApiKey()`, `createApiKey()`             | `api-keys.test.ts`, `verify-network.ts`  | Done   |
-| FR-4508 | —     | —                                                              | `/api/v1/vehicles/[vin]`, `networkHistory()`  | `verify-network.ts`                      | Done   |
-| FR-4509 | —     | —                                                              | `sinceFrom()`, `assertKeyUsable()`            | `api-keys.test.ts`, `verify-network.ts`  | Done   |
-| FR-4601 | —     | —                                                              | `updateOrganisation()`                        | `settings.test.ts`, `verify-settings.ts` | Done   |
-| FR-4602 | —     | —                                                              | `updateSite()`, `normaliseCode()`             | `settings.test.ts`, `verify-settings.ts` | Done   |
-| FR-4603 | —     | `locations_open_before_close`                                  | `gather()` reads the site's hours             | `verify-settings.ts`                     | Done   |
-| FR-4604 | —     | —                                                              | `saveBay()`, `saveTaxRate()`, `saveJobType()` | `verify-settings.ts`                     | Done   |
-| FR-4605 | —     | —                                                              | `setDefaultTaxRate()`, `setTaxRateActive()`   | `verify-settings.ts`                     | Done   |
-| FR-4606 | —     | `Booking.jobId` unique, `BookingSource.PLAN`                   | `acceptPlan()`, `diaryDraftsFor()`            | `accept.test.ts`, `verify-settings.ts`   | Done   |
-| FR-4607 | —     | —                                                              | `setNumberingPrefix()`                        | `verify-settings.ts`                     | Done   |
-| FR-4608 | —     | `AuditLog`                                                     | `audit()` on every settings write             | `verify-settings.ts`                     | Done   |
-| FR-3907 | A1    | —                                                              | `assertNotFlooding()`                         | `verify-credentials.ts`                  | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                    | `verify-credentials.ts`                  | Done   |
-| FR-3801 | —     | —                                                              | `/api/inbound/resend`                         | `smoke.ts`                               | Done   |
-| FR-3802 | —     | —                                                              | `verify()` tolerance                          | `smoke.ts`                               | Done   |
-| FR-3803 | —     | `Organization.slug`                                            | `organisationFor()`                           | `smoke.ts`                               | Done   |
-| FR-3804 | —     | —                                                              | `INBOUND_WEBHOOK_SECRET`                      | `smoke.ts`                               | Done   |
+| Req     | Story | Schema                                                         | Implementation                                 | Test                                       | Status |
+| ------- | ----- | -------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------ | ------ |
+| FR-3901 | A1    | —                                                              | `requestReset()`                               | `verify-credentials.ts`                    | Done   |
+| FR-3902 | A1    | `AuthToken.usedAt`                                             | `redeemReset()`                                | `verify-credentials.ts`                    | Done   |
+| FR-3903 | A1    | `auth_tokens_one_live_per_purpose`                             | `issue()`                                      | `verify-credentials.ts`                    | Done   |
+| FR-3904 | A1    | `User.emailVerifiedAt`                                         | `unverifiedWarning()`                          | `tokens.test.ts`                           | Done   |
+| FR-3905 | A1    | —                                                              | `redeemVerification()`                         | `verify-credentials.ts`                    | Done   |
+| FR-3906 | A1    | —                                                              | `checkPassword()`                              | `tokens.test.ts`                           | Done   |
+| FR-4101 | P4    | —                                                              | `registerCustomer()`                           | `verify-claims.ts`                         | Done   |
+| FR-4102 | P4    | `vehicle_claims_one_open_each`                                 | `claimVehicle()`                               | `verify-claims.ts`                         | Done   |
+| FR-4103 | P4    | `vehicles_registration_normalised`                             | `identifierKind()`                             | `verify-claims.ts`                         | Done   |
+| FR-4104 | A1    | `vehicle_claims_refusal_is_explained`                          | `decideClaim()`                                | `verify-claims.ts`                         | Done   |
+| FR-4105 | P4    | —                                                              | `describeClaim()`                              | `claims.test.ts`                           | Done   |
+| FR-4106 | A1    | `User.emailVerifiedAt`                                         | `(workshop)/layout.tsx`                        | `verify-empty.ts`                          | Done   |
+| FR-4107 | —     | —                                                              | `sendMessageNow()`                             | `verify-records.ts`                        | Done   |
+| FR-4108 | A2    | —                                                              | `createCustomer()`                             | `verify-records.ts`                        | Done   |
+| FR-4109 | A2    | `products_orgId_partNumber_key`                                | `createProduct()`                              | `verify-records.ts`                        | Done   |
+| FR-4110 | A2    | —                                                              | `createPurchaseOrder()`                        | `verify-records.ts`                        | Done   |
+| FR-4111 | A2    | `EstimateShare.tokenHash`                                      | `sendEstimate()`                               | `verify-records.ts`                        | Done   |
+| FR-4112 | A1    | —                                                              | `inviteColleague()`                            | `verify-team.ts`                           | Done   |
+| FR-4113 | A1    | —                                                              | `sendCampaign()`                               | `verify-automation.ts`                     | Done   |
+| FR-4114 | —     | —                                                              | `NOT_FOUND_MARKER`                             | `verify-controls.ts`                       | Done   |
+| FR-4201 | E2    | `JobStatusEvent`                                               | `moveJob()`                                    | `verify-money.ts`                          | Done   |
+| FR-4202 | E2    | `StockMovement`, `VehicleEvent`                                | `moveJob()` on COMPLETED                       | `verify-money.ts`                          | Done   |
+| FR-4203 | E1    | `JobLabourLine`, `JobPartLine`                                 | `recordDecision()`                             | `verify-money.ts`                          | Done   |
+| FR-4204 | G1    | `Invoice`, `invoices_orgId_number_key`                         | `issueInvoice()`                               | `verify-money.ts`                          | Done   |
+| FR-4205 | G1    | `Job.invoicedAt`                                               | `issueInvoice()`                               | `verify-money.ts`                          | Done   |
+| FR-4206 | G2    | `Payment`                                                      | `recordPayment()`                              | `verify-money.ts`                          | Done   |
+| FR-4207 | G3    | `CreditNote`                                                   | `raiseCreditNote()`                            | `verify-money.ts`                          | Done   |
+| FR-4208 | G3    | `refunds_amount_is_positive`                                   | `recordRefund()`                               | `verify-money.ts`                          | Done   |
+| FR-4209 | —     | —                                                              | `postEntry()`                                  | `invoicing.test.ts`, `verify-money.ts`     | Done   |
+| FR-4301 | —     | `SupplierBill`, `supplier_bills_orgId_reference_key`           | `bookBill()`                                   | `verify-erp.ts`                            | Done   |
+| FR-4302 | —     | `BillStatus`                                                   | `approveBill()`, `disputeBill()`               | `verify-erp.ts`                            | Done   |
+| FR-4303 | —     | `SupplierPaymentAllocation`                                    | `allocateAcrossBills()`                        | `payables.test.ts`, `verify-erp.ts`        | Done   |
+| FR-4304 | —     | `SupplierPayment`                                              | `paySupplier()`, `remittanceAdvice()`          | `verify-erp.ts`                            | Done   |
+| FR-4305 | —     | `PayrollRun`, `Timesheet.payrollRunId`                         | `runPayroll()`                                 | `verify-erp.ts`                            | Done   |
+| FR-4306 | —     | —                                                              | `PAYROLL_COLUMNS`                              | `payroll.test.ts`                          | Done   |
+| FR-4307 | —     | `payroll_runs_paid_has_a_time`                                 | `markPayrollPaid()`                            | `verify-erp.ts`                            | Done   |
+| FR-4308 | —     | `FleetAgreement`, `fleet_agreements_discounts_are_percentages` | `saveFleetAgreement()`                         | `fleet.test.ts`, `verify-erp.ts`           | Done   |
+| FR-4309 | —     | `InvoiceLine.jobId`                                            | `consolidateMonth()`                           | `verify-erp.ts`                            | Done   |
+| FR-4310 | —     | —                                                              | `assertConsolidatable()`                       | `fleet.test.ts`, `verify-erp.ts`           | Done   |
+| FR-4401 | —     | —                                                              | `parseQuestion()`, `COVERAGE`                  | `questions.test.ts`, `verify-answers.ts`   | Done   |
+| FR-4402 | —     | —                                                              | `answer()`                                     | `verify-answers.ts`                        | Done   |
+| FR-4403 | —     | —                                                              | `refusal()`                                    | `questions.test.ts`, `verify-answers.ts`   | Done   |
+| FR-4404 | —     | —                                                              | `observeRevenue()`                             | `observations.test.ts`                     | Done   |
+| FR-4405 | —     | —                                                              | `customerSummary()`                            | `summary.test.ts`                          | Done   |
+| FR-4406 | —     | —                                                              | `verifyAgainstFacts()`, `polish()`             | `summary.test.ts`, `verify-answers.ts`     | Done   |
+| FR-4407 | —     | —                                                              | `sendCustomerSummary()` is a person's action   | `verify-controls.ts`                       | Done   |
+| FR-4408 | —     | —                                                              | `/ask` page copy                               | `verify-empty.ts`                          | Done   |
+| FR-4501 | —     | `vehicles_registration_normalised`                             | `findOnNetwork()`                              | `verify-network.ts`                        | Done   |
+| FR-4502 | —     | —                                                              | `summariseNetwork()`                           | `network.test.ts`, `verify-network.ts`     | Done   |
+| FR-4503 | —     | `VehicleAccessGrant`                                           | `adoptVehicle()`, `grantServicingAccess()`     | `verify-network.ts`                        | Done   |
+| FR-4504 | —     | —                                                              | `redactForNetwork()`, `WITHHELD_KEYS`          | `network.test.ts`, `verify-network.ts`     | Done   |
+| FR-4505 | —     | `VehicleEvent.prevHash`                                        | `writeJobCompletion()`                         | `verify-network.ts`                        | Done   |
+| FR-4506 | —     | `Vehicle.vinValid`                                             | `registerVehicle()`                            | `verify-network.ts`                        | Done   |
+| FR-4507 | —     | `ApiKey`                                                       | `issueApiKey()`, `createApiKey()`              | `api-keys.test.ts`, `verify-network.ts`    | Done   |
+| FR-4508 | —     | —                                                              | `/api/v1/vehicles/[vin]`, `networkHistory()`   | `verify-network.ts`                        | Done   |
+| FR-4509 | —     | —                                                              | `sinceFrom()`, `assertKeyUsable()`             | `api-keys.test.ts`, `verify-network.ts`    | Done   |
+| FR-4601 | —     | —                                                              | `updateOrganisation()`                         | `settings.test.ts`, `verify-settings.ts`   | Done   |
+| FR-4602 | —     | —                                                              | `updateSite()`, `normaliseCode()`              | `settings.test.ts`, `verify-settings.ts`   | Done   |
+| FR-4603 | —     | `locations_open_before_close`                                  | `gather()` reads the site's hours              | `verify-settings.ts`                       | Done   |
+| FR-4604 | —     | —                                                              | `saveBay()`, `saveTaxRate()`, `saveJobType()`  | `verify-settings.ts`                       | Done   |
+| FR-4605 | —     | —                                                              | `setDefaultTaxRate()`, `setTaxRateActive()`    | `verify-settings.ts`                       | Done   |
+| FR-4606 | —     | `Booking.jobId` unique, `BookingSource.PLAN`                   | `acceptPlan()`, `diaryDraftsFor()`             | `accept.test.ts`, `verify-settings.ts`     | Done   |
+| FR-4607 | —     | —                                                              | `setNumberingPrefix()`                         | `verify-settings.ts`                       | Done   |
+| FR-4608 | —     | `AuditLog`                                                     | `audit()` on every settings write              | `verify-settings.ts`                       | Done   |
+| FR-4701 | —     | `VehicleDocument`, `VehicleDocumentKind`                       | `addDocument()`                                | `verify-documents.ts`                      | Done   |
+| FR-4702 | —     | —                                                              | `mayHandleDocuments()`                         | `verify-documents.ts`                      | Done   |
+| FR-4703 | —     | `vehicle_documents_expire_after_issue`                         | `assertDocumentAcceptable()`                   | `documents.test.ts`, `verify-documents.ts` | Done   |
+| FR-4704 | —     | `vehicle_documents_have_bytes`                                 | `/api/vehicle-documents` ticket then record    | `verify-documents.ts`                      | Done   |
+| FR-4705 | —     | —                                                              | `paperworkSummary()`, `paperworkDue()`         | `documents.test.ts`, `verify-documents.ts` | Done   |
+| FR-4706 | —     | `Customer.preferredTechnicianUserId`                           | `setPreferredTechnician()`, `jobFormOptions()` | `verify-documents.ts`                      | Done   |
+| FR-4707 | —     | `vehicle_documents_removal_is_explained`                       | `assertRemovable()`, `removeDocument()`        | `documents.test.ts`, `verify-documents.ts` | Done   |
+| FR-4708 | —     | `AuditLog`                                                     | `audit()`, `/api/v1/vehicles/[vin]`            | `verify-documents.ts`                      | Done   |
+| FR-3907 | A1    | —                                                              | `assertNotFlooding()`                          | `verify-credentials.ts`                    | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                     | `verify-credentials.ts`                    | Done   |
+| FR-3801 | —     | —                                                              | `/api/inbound/resend`                          | `smoke.ts`                                 | Done   |
+| FR-3802 | —     | —                                                              | `verify()` tolerance                           | `smoke.ts`                                 | Done   |
+| FR-3803 | —     | `Organization.slug`                                            | `organisationFor()`                            | `smoke.ts`                                 | Done   |
+| FR-3804 | —     | —                                                              | `INBOUND_WEBHOOK_SECRET`                       | `smoke.ts`                                 | Done   |
 
 ## What people say afterwards
 
@@ -590,9 +598,10 @@ details without a provider behind it would be worse than not having one.
 | Answers rather than pages                 | 8                   | 8                      |
 | The network                               | 9                   | 9                      |
 | The workshop configures itself            | 8                   | 8                      |
-| **Total**                                 | **331**             | **328 (99%)**          |
+| The vehicle's paperwork                   | 8                   | 8                      |
+| **Total**                                 | **339**             | **336 (99%)**          |
 
-The requirements document lists 415 requirements. 84 of
+The requirements document lists 423 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

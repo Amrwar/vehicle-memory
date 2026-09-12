@@ -1080,6 +1080,48 @@ that too. The feature map was corrected and its counts rebuilt.
 
 ---
 
+## Phase 20 — The vehicle's paperwork
+
+A car comes with paper. The registration certificate, the MOT certificate,
+the insurance schedule, the receipts, and the photograph somebody took of the
+dent before it was repaired. Twenty phases in, none of it had anywhere to
+live in the passport, so it lived in a glovebox, and the feature map said so
+in three rows marked Missing.
+
+Documents follow the same rule as events: they belong to the car. A workshop
+that may read the vehicle may read its paperwork, and so may the owner from
+the portal; a stranger gets nothing, not a refusal that confirms the car
+exists. What differs from events is that a document can be removed, because a
+scan of the wrong car is not history, it is a mistake. A removed document
+keeps its row and its reason, so the removal is history.
+
+And one small thing the customer section still lacked: the technician a
+customer asks for.
+
+**Exit.** An owner or a workshop puts the vehicle's paperwork on the
+passport, the MOT and insurance running out are visible where reminders are
+read, and a customer's preferred technician is preselected on their next job.
+
+**Status.** Built and proved by `npm run verify:documents`. A Paperwork card
+on the vehicle's page and on the owner's portal page takes a PDF or a picture
+of the paper, by kind, with a reference and an expiry for the two kinds that
+have one; the file goes straight to the store on a short-lived ticket the way
+inspection photographs do, and the row is recorded only once the bytes are
+confirmed. The latest live MOT and insurance decide the vehicle's cover and
+appear as badges at the top of the card; an old certificate under a newer one
+is history, not a lapse. The reminders page lists the paperwork running out
+on the vehicles the workshop looks after, next to the services due. The API's
+vehicle endpoint returns the documents with links that expire in an hour.
+Removal is for the workshop that added a document or the owner, needs a
+reason, and is audited. Every addition is audited too.
+
+A customer's preferred technician is set on their page and preselected when a
+job is opened for them; the diary has the last word. The feature map's last
+three vehicle rows, the satisfaction row and the preferred-technician row now
+read Built, and the counts were rebuilt.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the
