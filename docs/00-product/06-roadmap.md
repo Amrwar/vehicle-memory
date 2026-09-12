@@ -1122,6 +1122,41 @@ read Built, and the counts were rebuilt.
 
 ---
 
+## Phase 21 — Before general availability
+
+The security model and the deployment guide each ended in a checklist of
+things to do before real customers, and twenty phases in, most boxes were
+still empty. Not because the work was hard, but because none of it is a
+feature anybody asks for until the day it is missing.
+
+**Exit.** Every response carries a Content Security Policy with a per-request
+nonce; a password that has already leaked is refused; an integration cannot
+call faster than the database should answer; a backup is restored and checked
+on every push, not trusted; and the API is described by a document generated
+from its handlers.
+
+**Status.** Built and proved by `verify:headers`, `verify:hardening`,
+`verify:backup` and additions to `verify:network`. A proxy stamps every page
+with a policy that runs scripts only with that request's nonce and forbids
+inline scripts; the one inline script the product writes, the theme stamp,
+carries the nonce; the probe reads the header and the page and checks they
+agree. Sign-up, customer sign-up and password reset refuse a password that
+appears in a known breach, by k-anonymity against Have I Been Pwned so the
+password never leaves the server, and fail open with a log line when the
+service is unreachable. An organisation key is limited to a thousand calls an
+hour, answered with 429 and Retry-After beyond that. The database is dumped,
+restored into a fresh one and compared row for row and chain for chain on
+every push, with the server's own tools so versions cannot disagree. The API
+document is generated from a registry beside the handlers, served at
+`/api/v1/openapi.json`, committed to docs, and CI fails when a handler has no
+entry or the copy is behind.
+
+What remains on the checklist needs a third party: a penetration test, a data
+processing agreement with each sub-processor, content scanning of uploaded
+files, and error tracking wired to a paid service.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

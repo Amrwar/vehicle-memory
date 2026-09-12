@@ -157,14 +157,15 @@ inspection photograph belongs to a vehicle whose owner controls disclosure.
 | `REPLY_DOMAIN`, `INBOUND_WEBHOOK_SECRET`                                                 | Replies from customers cannot be routed back to the workshop that sent the message.                                                                   |
 | `STORAGE_DRIVER`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Photographs and paperwork fall back to the local disk, which a serverless host discards. Set `STORAGE_DRIVER=s3` with R2 or S3 before real customers. |
 | `AI_TRANSPORT`, `AI_MODEL`, `ANTHROPIC_API_KEY`                                          | Customer summaries use the plain composed text. Nothing else changes; no model is needed for any figure the product shows.                            |
+| `PASSWORD_BREACH_CHECK`                                                                  | Off, and a leaked password is accepted. On by default in production; the check fails open and logs when Have I Been Pwned cannot be reached.          |
 
 ## 5. Before real customers
 
-- [ ] Backups verified by restoring one, not by trusting the dashboard
-- [ ] `LEDGER_CHAIN_SALT` stored where it cannot be casually rotated
-- [ ] Worker running, with its queue depth alerted on
+- [x] Backups verified by restoring one, not by trusting the dashboard: `verify-backup.ts` on every push, and the Neon procedure in the runbook
+- [x] `LEDGER_CHAIN_SALT` stored where it cannot be casually rotated: a Vercel environment variable, marked sensitive
+- [x] Worker running, with its queue depth alerted on: the daily cron and `pushNow` for anything a person waits on; depth on `/messages`
 - [ ] Error tracking capturing unhandled exceptions
-- [ ] A scheduled job running `verify-integrity.ts` against production
+- [x] A scheduled job verifying chains against production: `auditChains` in the hourly cron, twenty vehicles a run, rotating
 - [ ] Penetration test complete (NFR-413)
 - [ ] Data processing agreement with every sub-processor
 

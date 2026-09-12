@@ -141,16 +141,16 @@ read back through signed URLs that expire in an hour.
 
 ## 9. Threat model
 
-| #   | Threat                             | Mitigation                                           | Residual                                                                                          |
-| --- | ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| T1  | Credential stuffing                | Rate limiting, bcrypt, no enumeration                | Weak passwords chosen by users. Add a breached-password check.                                    |
-| T2  | Cross-tenant access via id         | Data-layer scoping, 404 not 403                      | The update/delete gap in section 4.                                                               |
-| T3  | Session theft on a shared tablet   | Short idle expiry, server-side revocation            | Physical access to an unlocked tablet.                                                            |
-| T4  | Share-link leakage                 | Expiry, revocation, no personal details              | A forwarded link works until it expires. Accepted: it is what sharing means.                      |
-| T5  | Ledger tampering by an insider     | Append-only trigger, hash chain, salt                | Someone with both database write access and the salt. Mitigated by external anchoring in Phase 5. |
-| T6  | Malicious file upload              | Type and size validation, served through a handler   | Content-level malware. Add scanning before general availability.                                  |
-| T7  | VIN collision merging two vehicles | Format and check-digit validation, duplicate warning | A determined mistype. On the risk register.                                                       |
-| T8  | Denial of service                  | Rate limiting, pagination on every list              | Volumetric attack. Handled at the edge.                                                           |
+| #   | Threat                             | Mitigation                                                                    | Residual                                                                                          |
+| --- | ---------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| T1  | Credential stuffing                | Rate limiting, bcrypt, no enumeration, breached-password check                | Weak passwords that have not leaked yet.                                                          |
+| T2  | Cross-tenant access via id         | Data-layer scoping, 404 not 403                                               | The update/delete gap in section 4.                                                               |
+| T3  | Session theft on a shared tablet   | Short idle expiry, server-side revocation                                     | Physical access to an unlocked tablet.                                                            |
+| T4  | Share-link leakage                 | Expiry, revocation, no personal details                                       | A forwarded link works until it expires. Accepted: it is what sharing means.                      |
+| T5  | Ledger tampering by an insider     | Append-only trigger, hash chain, salt                                         | Someone with both database write access and the salt. Mitigated by external anchoring in Phase 5. |
+| T6  | Malicious file upload              | Type and size validation, served through a handler                            | Content-level malware. Add scanning before general availability.                                  |
+| T7  | VIN collision merging two vehicles | Format and check-digit validation, duplicate warning                          | A determined mistype. On the risk register.                                                       |
+| T8  | Denial of service                  | Rate limiting, pagination on every list, a thousand API calls an hour per key | Volumetric attack. Handled at the edge.                                                           |
 
 ## 10. Privacy: erasure and the vehicle
 
@@ -177,11 +177,18 @@ keeps the chain intact and the fact preserved.
 ## 11. Before general availability
 
 - [ ] Penetration test, high findings resolved (NFR-413)
-- [ ] Dependency scanning blocking on critical (NFR-409)
-- [ ] Secret scanning in CI
+- [x] Dependency scanning blocking on critical (NFR-409): `npm audit --audit-level=critical` in CI
+- [x] Secret scanning in CI: the committed-secrets check in the audit job
 - [ ] Security review of `lib/auth.ts` by someone who did not write it
-- [ ] Backup restoration tested end to end
+- [x] Backup restoration tested end to end: `verify-backup.ts`, on every push (Phase 21)
 - [ ] Incident response runbook exercised
+- [x] Content Security Policy with per-request nonces on every page (Phase 21)
+- [x] Breached-password check at every point a password is set (Phase 21)
+- [x] Rate limit on organisation API keys (Phase 21)
+
+The threat model's residuals move accordingly: T1's "add a breached-password
+check" is done; T8 gains a per-key limit; T6, content scanning of uploads,
+still waits on a provider.
 
 ---
 

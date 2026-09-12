@@ -78,15 +78,25 @@ Jobs still complete while the outbox is backed up. That is the design.
 
 ## Restoring a backup
 
-Tested quarterly (NFR-306). Untested backups are not backups.
+Tested on every push, not quarterly (NFR-306): `npm run verify:backup` dumps
+the seeded database, restores it into a fresh one and checks every row and
+every chain came back. Untested backups are not backups, and this one is
+tested more often than anybody would remember to.
 
-1. Provision a new instance.
-2. Restore the nightly base, then replay WAL to the target time.
-3. Run `verify-integrity.ts`. **Chains must verify after restore.**
-4. Compare row counts on the largest tables against the pre-incident metrics.
-5. Repoint the application. Announce.
+In production the database is Neon, which keeps a point-in-time history.
 
-RTO 1 hour, RPO 5 minutes.
+1. In the Neon console, create a branch from the production branch at the
+   target time (Restore → point in time). This is the restored copy; the
+   original is untouched.
+2. Against the branch's connection string, run
+   `npx tsx infra/scripts/verify-integrity.ts`. **Chains must verify.**
+3. Compare row counts on the largest tables (`jobs`, `vehicle_events`,
+   `journal_lines`, `message_logs`) against the original.
+4. Repoint `DATABASE_URL` in Vercel at the branch, redeploy, announce. Keep
+   the original branch until the incident is closed.
+
+RTO 1 hour, RPO 5 minutes. `LEDGER_CHAIN_SALT` is not in the database and is
+not restored with it; it must be the same value or step 2 fails everywhere.
 
 ## A customer asks to be erased
 

@@ -2,7 +2,7 @@
 
 Stories grouped by epic. Each carries acceptance criteria in Given / When /
 Then form, a size in points, and the functional requirements it satisfies.
-Epics A to J are Phase 1. Epics K to Q were written as Phases 15.1 to 20
+Epics A to J are Phase 1. Epics K to R were written as Phases 15.1 to 21
 shipped, one epic per phase, and are what those phases' verification scripts
 check. Phases 2 to 15 are traced by requirement rather than by story, a gap the
 [traceability matrix](04-traceability-matrix.md) names.
@@ -720,6 +720,59 @@ that** I am not asked every time.
 
 ---
 
+## Epic R — Before general availability (Phase 21)
+
+### R1 — Every page defends itself
+
+**As** an owner **I want** every page to carry a strict Content Security Policy
+**so that** a script nobody at Carnet wrote cannot run in my workshop's browser.
+**Size** 5 · **Satisfies** FR-4801, FR-4806
+
+- **Given** any page, **when** it is served, **then** the policy names a nonce
+  that only this request's scripts carry, and no inline script runs without it.
+- **Given** two requests, **when** their headers are compared, **then** the
+  nonces differ.
+
+### R2 — No leaked passwords
+
+**As** any person setting a password **I want** to be told if it has already
+leaked **so that** my account is not protected by a password on a public list.
+**Size** 3 · **Satisfies** FR-4802
+
+- **Given** a password in a known breach, **when** I set it, **then** it is
+  refused and I am told how often it has appeared and what to do instead.
+- **Given** the range service is down, **when** I set a password, **then** the
+  sign-up completes and the gap is logged.
+
+### R3 — A key cannot flood the database
+
+**As** an owner **I want** an integration limited to a thousand calls an hour
+**so that** one badly written sync cannot slow the workshop down.
+**Size** 2 · **Satisfies** FR-4803
+
+- **Given** a key that has made its thousand calls, **when** it calls again,
+  **then** it gets 429 with Retry-After, and an hour later it works again.
+
+### R4 — The backup is proven, not trusted
+
+**As** an owner **I want** the backup restored and checked automatically **so
+that** the day we need it is not the first time anybody tried.
+**Size** 5 · **Satisfies** FR-4804
+
+- **Given** the seeded database, **when** CI runs, **then** a dump is restored
+  into a fresh database and every row and every vehicle's chain match.
+
+### R5 — The API describes itself
+
+**As** an integrator **I want** an OpenAPI document that cannot drift from the
+endpoints **so that** what I build against is what is running.
+**Size** 3 · **Satisfies** FR-4805
+
+- **Given** the API, **when** I fetch `/api/v1/openapi.json`, **then** every
+  endpoint is described, and CI fails if a handler has no entry.
+
+---
+
 ## Story map
 
 ```
@@ -745,8 +798,9 @@ that** I am not asked every time.
   K1 claim a car     L1 lifecycle     M1 payables      N1 ask
   K2 confirm email   L2 pay/credit    M2 payroll       N2 summary
   K3 dead buttons                     M3 fleets
-  O1 the network     P1 settings      Q1 paperwork
-  O2 the API         P2 accept plan   Q2 preferred technician
+  O1 the network     P1 settings      Q1 paperwork            R1 CSP    R4 backup drill
+  O2 the API         P2 accept plan   Q2 preferred technician R2 breach R5 openapi
+                                                              R3 rate limit
 ```
 
 The bottom row is the differentiator. Everything above it is table stakes that

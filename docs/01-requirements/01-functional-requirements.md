@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4800 — Before general availability
+
+| Ref     | Requirement                                                                                                                                                                                                                                     | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4801 | Every page response MUST carry a Content Security Policy that runs scripts only with a per-request nonce, forbids inline scripts without it, and sets object-src, base-uri and frame-ancestors.                                                 | 21    |
+| FR-4802 | A password that appears in a known breach MUST be refused at sign-up, customer sign-up and reset, checked by k-anonymity so the password never leaves the server, and the check MUST fail open with a log line when the service is unreachable. | 21    |
+| FR-4803 | An organisation API key MUST be limited to a fixed number of calls per hour, and a call beyond it MUST be answered 429 with Retry-After and a reason.                                                                                           | 21    |
+| FR-4804 | A backup MUST be restored into a fresh database and compared with the original row for row and chain for chain by an automated drill that runs in CI, using the server's own tools.                                                             | 21    |
+| FR-4805 | The API MUST be described by a document generated from a registry beside its handlers, served by the API itself, committed to docs, and CI MUST fail when a handler has no entry or the copy is behind.                                         | 21    |
+| FR-4806 | The security headers the security model lists MUST be present on every response and checked by a probe against the running application.                                                                                                         | 21    |
+
 ## FR-4700 — The vehicle's paperwork
 
 | Ref     | Requirement                                                                                                                                                                                             | Phase |
