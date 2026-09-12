@@ -70,6 +70,8 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/claims', expectsGuidance: ['Nobody has asked'] },
   { path: '/payables', expectsGuidance: ['Nothing is owed'] },
   { path: '/payroll', expectsGuidance: ['Nothing waiting'] },
+  { path: '/ask', expectsGuidance: ['What the records can answer'] },
+  { path: '/ask?q=Who+owes+us+money%3F', expectsGuidance: ['owed to you'] },
   { path: '/bookings/new', expectsGuidance: ['No customers yet'] },
   { path: '/suppliers/new', expectsGuidance: ['Add a supplier'] },
   { path: '/ledger', expectsGuidance: ['fills itself'] },

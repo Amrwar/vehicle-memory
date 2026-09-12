@@ -89,6 +89,8 @@ const PAGES = [
   '/claims',
   '/payables',
   '/payroll',
+  '/ask',
+  '/ask?q=What+did+we+take+this+month%3F',
   '/bookings/new',
   '/suppliers/new',
   '/counter',

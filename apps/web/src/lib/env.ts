@@ -78,6 +78,14 @@ const schema = z.object({
 
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
 
+  // Generated text is a port, like mail. 'none' means every summary is the
+  // plain one composed from the record, which is a complete feature rather
+  // than a degraded one. 'anthropic' lets a model tidy the prose, and its
+  // output is checked against the record before a customer sees it.
+  AI_TRANSPORT: z.enum(['none', 'anthropic']).default('none'),
+  AI_MODEL: z.string().default('claude-sonnet-5'),
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+
   FEATURE_CUSTOMER_PORTAL: z.coerce.boolean().default(true),
   FEATURE_VEHICLE_PASSPORT: z.coerce.boolean().default(true),
   FEATURE_INVENTORY: z.coerce.boolean().default(false),

@@ -66,6 +66,7 @@ export type NavIconName =
   | 'claims'
   | 'payables'
   | 'payroll'
+  | 'ask'
   | 'crm'
   | 'audit';
 
@@ -135,6 +136,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M9.4 10h8" />
       <path d="M14.2 10v2.8" />
       <path d="M17.4 10v2.2" />
+    </>
+  ),
+  // A speech bubble with a question mark: a question in words.
+  ask: (
+    <>
+      <path d="M3 4.5h14v8.5h-6l-3.5 3v-3H3z" />
+      <path d="M8.2 7.6a1.9 1.9 0 0 1 3.7.5c0 1.2-1.9 1.4-1.9 2.5" />
+      <path d="M10 12.2v.1" />
     </>
   ),
   // An envelope leaving: money going out to a supplier, with a note in it.

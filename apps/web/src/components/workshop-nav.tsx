@@ -51,6 +51,7 @@ const GROUPS: Group[] = [
     label: 'Workshop',
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: 'dashboard', permission: 'job:read' },
+      { href: '/ask', label: 'Ask', icon: 'ask', permission: 'report:operational' },
       { href: '/diary', label: 'Diary', icon: 'diary', permission: 'diary:read' },
       { href: '/floor', label: 'The floor', icon: 'floor', permission: 'diary:read' },
       { href: '/jobs', label: 'Jobs', icon: 'jobs', permission: 'job:read' },

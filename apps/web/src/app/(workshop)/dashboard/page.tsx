@@ -21,6 +21,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { VerifyBanner } from '@/components/verify-banner';
+import { revenueObservations } from '@/lib/answers';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Dashboard' };
@@ -39,7 +40,12 @@ export default async function DashboardPage({
   searchParams: Promise<{ verification?: string }>;
 }) {
   const notice = await searchParams;
-  const { db, user } = await requireSession('job:read');
+  const { db, user, orgId } = await requireSession('job:read');
+
+  // Arithmetic with a sentence around it: this month against last, from the
+  // same figures the reports page shows. No model, and never a percentage on
+  // a base too small to mean anything.
+  const observations = await revenueObservations(orgId);
 
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -197,6 +203,28 @@ export default async function DashboardPage({
           <StatTile label="Reminders" value="Due" note="What is about to be sent" />
         </Link>
       </StatRow>
+
+      {/* This month in sentences, and the door to asking anything else. */}
+      <Card className="mb-6">
+        <CardHeader
+          title="This month"
+          description="Arithmetic with a sentence around it, from the same figures as the reports."
+          action={
+            <Link href="/ask">
+              <Button size="sm" variant="primary">
+                Ask a question
+              </Button>
+            </Link>
+          }
+        />
+        <CardBody>
+          <ul className="grid gap-1.5 text-[14px] leading-relaxed">
+            {observations.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </CardBody>
+      </Card>
 
       {/* What has happened, from the audit log. Every action in the product
           already writes to it and nothing had ever read it as a feed, so the

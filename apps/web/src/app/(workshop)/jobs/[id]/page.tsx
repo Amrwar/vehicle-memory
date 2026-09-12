@@ -40,6 +40,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
 import { QuoteError, sendEstimate } from '@/lib/estimates';
+import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { can, requireSession } from '@/lib/guard';
@@ -121,6 +122,33 @@ async function issue(formData: FormData) {
   redirect(`/invoices/${invoiceId}`);
 }
 
+/**
+ * Sends the customer the summary exactly as it appears on the page.
+ *
+ * The text is composed from the job's own lines and findings, and where a
+ * model has tidied it the result has been checked against the record before
+ * it was shown. What the staff member read is what the customer gets.
+ */
+async function sendSummary(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  const sent = await sendCustomerSummary({
+    orgId,
+    userId: user.userId,
+    jobId,
+    text: String(formData.get('text') ?? ''),
+  });
+
+  redirect(
+    sent
+      ? `/jobs/${jobId}?summary=sent`
+      : `/jobs/${jobId}?problem=${encodeURIComponent('The customer has no email address or mobile number on file, so there is nowhere to send it.')}`,
+  );
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -145,7 +173,7 @@ export default async function JobPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ sent?: string; problem?: string }>;
+  searchParams: Promise<{ sent?: string; problem?: string; summary?: string }>;
 }) {
   const { id } = await params;
   const notice = await searchParams;
@@ -242,6 +270,13 @@ export default async function JobPage({
     job.inspections.find((entry) => entry.results.length > 0) ?? job.inspections[0];
   const estimate = job.estimates[0];
   const invoice = job.invoices[0];
+
+  // Written for the customer once the work is done, from the job's own lines
+  // and findings. Composed on every render rather than stored, so it always
+  // matches the record it restates.
+  const summary = ['COMPLETED', 'INVOICED', 'PAID'].includes(job.status)
+    ? await customerSummaryFor(orgId, job.id)
+    : null;
 
   const clockedMinutes = job.timeEntries.reduce((total, entry) => total + (entry.minutes ?? 0), 0);
 
@@ -403,6 +438,13 @@ export default async function JobPage({
       {notice.problem ? (
         <Alert tone="danger" className="mb-5">
           {notice.problem}
+        </Alert>
+      ) : null}
+
+      {notice.summary === 'sent' ? (
+        <Alert tone="success" className="mb-5">
+          The summary is on its way to {job.customer.displayName}, word for word as it appears
+          below.
         </Alert>
       ) : null}
 
@@ -735,6 +777,35 @@ export default async function JobPage({
                   </li>
                 ))}
               </ul>
+            </Card>
+          ) : null}
+
+          {summary ? (
+            <Card>
+              <CardHeader
+                title="Summary for the customer"
+                description={
+                  summary.polished
+                    ? 'Tidied by a model and checked against the job: every figure in it is on the record.'
+                    : summary.rejected
+                      ? `Plain version. ${summary.rejected}`
+                      : 'Composed from the job’s own lines and findings. Nothing here is not on the record.'
+                }
+              />
+              <CardBody className="grid gap-3">
+                <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-(--text)">
+                  {summary.text}
+                </pre>
+                {can(user.role, 'job:write') ? (
+                  <form action={sendSummary} className="flex justify-end">
+                    <input type="hidden" name="jobId" value={job.id} />
+                    <input type="hidden" name="text" value={summary.text} />
+                    <Button type="submit" variant="secondary">
+                      Send this to {job.customer.displayName.split(' ')[0]}
+                    </Button>
+                  </form>
+                ) : null}
+              </CardBody>
             </Card>
           ) : null}
 
