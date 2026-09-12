@@ -27,6 +27,8 @@ being specific about the gaps rather than generous about the ticks.
 | View invoice and history | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).                |
 | Approve or decline work  | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                          |
 | Pay online               | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                             |
+| Sign up and claim a car  | Built  | `/signup/customer`, then a request by plate or VIN that the workshop which last serviced the car approves or refuses with a reason (Phase 15.1).                                  |
+| Keep the paperwork       | Built  | `/portal/vehicles/[id]`: registration certificate, MOT, insurance, receipts and photographs, added by the owner or the workshop and seen by both (Phase 20).                      |
 
 **A second correction, found later.** "Receive confirmation" and "Receive
 updates" were both marked built on the strength of rows appearing in
@@ -50,60 +52,59 @@ way to find that out is to press the button rather than to read the schema.
 
 ## Workshop side
 
-| Capability        | Status | Where it is                                                                                     |
-| ----------------- | ------ | ----------------------------------------------------------------------------------------------- |
-| Calendar          | Built  | `/diary`, bay lanes with per-day capacity.                                                      |
-| Customers         | Built  | `/customers`, with vehicles, history and balance.                                               |
-| Vehicles          | Built  | `/vehicles`, with the passport, ownership and odometer history.                                 |
-| Work orders       | Built  | `/jobs`, fourteen statuses with guarded transitions.                                            |
-| Technicians       | Built  | `/people`, attendance, pay history, productivity.                                               |
-| Job cards         | Built  | `/shop`, the technician's own tablet surface.                                                   |
-| Parts             | Built  | `/parts`, weighted average cost, reservations, reorder.                                         |
-| Inventory         | Built  | Stock levels, movements, stocktakes, transfers between sites.                                   |
-| Suppliers         | Built  | `/suppliers`, with bills and three-way match.                                                   |
-| Quotes            | Built  | `/estimates`, ordered by how long somebody has been waiting rather than by value.               |
-| Invoices          | Built  | `/invoices`, gapless numbering, credit notes.                                                   |
-| Payments          | Built  | `/payments`, with allocation and aged debt.                                                     |
-| Service reminders | Built  | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner. |
+| Capability        | Status | Where it is                                                                                                                                                                     |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Calendar          | Built  | `/diary`, bay lanes with per-day capacity.                                                                                                                                      |
+| Customers         | Built  | `/customers`, with vehicles, history and balance.                                                                                                                               |
+| Vehicles          | Built  | `/vehicles`, with the passport, ownership and odometer history.                                                                                                                 |
+| Work orders       | Built  | `/jobs`, fourteen statuses with guarded transitions.                                                                                                                            |
+| Technicians       | Built  | `/people`, attendance, pay history, productivity.                                                                                                                               |
+| Job cards         | Built  | `/shop`, the technician's own tablet surface.                                                                                                                                   |
+| Parts             | Built  | `/parts`, weighted average cost, reservations, reorder.                                                                                                                         |
+| Inventory         | Built  | Stock levels, movements, stocktakes, transfers between sites.                                                                                                                   |
+| Suppliers         | Built  | `/suppliers`, with bills and three-way match.                                                                                                                                   |
+| Quotes            | Built  | `/estimates`, ordered by how long somebody has been waiting rather than by value.                                                                                               |
+| Invoices          | Built  | `/invoices`, gapless numbering, credit notes.                                                                                                                                   |
+| Payments          | Built  | `/payments`, with allocation and aged debt.                                                                                                                                     |
+| Service reminders | Built  | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner.                                                                                 |
+| Find a vehicle    | Built  | `/vehicles/find`: a car serviced at another Carnet workshop is found by plate or VIN, taken on, and its history continued with the other workshop's detail withheld (Phase 18). |
+| Plan the day      | Built  | `/plan` proposes with every reason shown, and one press writes the placements into the diary (Phase 19).                                                                        |
+| Settings          | Built  | `/settings`: the organisation, the site and its bays and hours, tax rates, kinds of work, document prefixes and API keys, every change audited (Phase 19).                      |
+| Ask               | Built  | `/ask`: a closed vocabulary of questions answered from the records with the working shown; anything else refused (Phase 17).                                                    |
 
 ## ERP and business side
 
-| Capability                 | Status  | Where it is                                                                                                                                                                                                                                      |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Accounting                 | Built   | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close landed in Phase 4.8.                                                           |
-| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                                                                                 |
-| Expenses                   | Built   | Capture with a category and a receipt, approval by somebody other than the claimant, input tax separated for reclaim, and money paid personally recorded as owed back rather than as leaving the bank.                                           |
-| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission. Export to a payroll provider still needs a named target format, and inventing one produces a file nobody accepts.                                                  |
-| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                                                                              |
-| Supplier management        | Built   | As above.                                                                                                                                                                                                                                        |
-| CRM                        | Built   | Segments with the reachable count beside the segment count, campaigns that recheck consent per recipient at the moment of sending, a permanent consent trail written by the database, retention by cohort and lifetime value.                    |
-| Reports and analytics      | Built   | Operational reporting, financial statements, revenue by service type with cost, parts profitability including anything sold below cost, retention against each customer's own rhythm, source of business by conversion, and hardened CSV export. |
-| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                                                                      |
-| Users and role permissions | Built   | `/settings/team`. Invite, change a role, move somebody between sites, remove a leaver. Nobody can grant a role above their own or change their own.                                                                                              |
+| Capability                 | Status  | Where it is                                                                                                                                                                                                                                                                                                |
+| -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accounting                 | Built   | Double-entry ledger, trial balance, profit and loss, balance sheet, VAT, ageing, all posting from the work itself. Bank accounts, reconciliation and period close landed in Phase 4.8.                                                                                                                     |
+| Purchasing                 | Built   | Requests, approval thresholds, orders, receipt, three-way match.                                                                                                                                                                                                                                           |
+| Expenses                   | Built   | Capture with a category and a receipt, approval by somebody other than the claimant, input tax separated for reclaim, and money paid personally recorded as owed back rather than as leaving the bank.                                                                                                     |
+| Payroll and employees      | Partial | Employees, dated pay rates, attendance, timesheets with approval, commission, and since Phase 16 a payroll run that produces one CSV row per person and posts gross wages when marked paid. Still partial because the file is Carnet's own layout; a named provider format is waiting on a named provider. |
+| Inventory                  | Built   | As above, including in-transit stock between sites.                                                                                                                                                                                                                                                        |
+| Supplier management        | Built   | As above.                                                                                                                                                                                                                                                                                                  |
+| CRM                        | Built   | Segments with the reachable count beside the segment count, campaigns that recheck consent per recipient at the moment of sending, a permanent consent trail written by the database, retention by cohort and lifetime value.                                                                              |
+| Reports and analytics      | Built   | Operational reporting, financial statements, revenue by service type with cost, parts profitability including anything sold below cost, retention against each customer's own rhythm, source of business by conversion, and hardened CSV export.                                                           |
+| Multi-branch management    | Built   | Sites, per-site permissions, transfers, consolidated reporting with spread.                                                                                                                                                                                                                                |
+| Users and role permissions | Built   | `/settings/team`. Invite, change a role, move somebody between sites, remove a leaver. Nobody can grant a role above their own or change their own.                                                                                                                                                        |
+| Suppliers owed             | Built   | `/payables`: bills approved, disputed, paid oldest-due first with a remittance advice (Phase 16).                                                                                                                                                                                                          |
+| Fleets                     | Built   | Agreements per company with discounts and terms, and one consolidated invoice per fleet per month (Phase 16).                                                                                                                                                                                              |
+| API                        | Built   | `/api/v1/jobs`, `/api/v1/invoices`, `/api/v1/vehicles/{vin}` under organisation keys minted on Settings, read-only by design (Phase 18).                                                                                                                                                                   |
 
 ---
 
 ## What this leaves
 
 Two rows above are not fully built, and both are waiting on a third party
-rather than on work:
+rather than on work: taking a card payment online, which needs a payment
+provider, and the payroll file in a provider's own layout, which needs a named
+provider. Everything else in these three tables is built and covered by a
+verification script or a crawl, and the [feature map](09-feature-map.md)
+counts the finer-grained capabilities the same way: 139 built, 1 partial, 6
+missing, with the six named.
 
-Phase 4.6 is done: inviting a colleague, changing a role, the reminders
-screen, and the booking flow a customer actually walks.
-
-Phase 4.7 is done apart from taking a card payment, which is waiting on a
-provider: point of sale, the estimates list, business reporting and CSV export.
-
-Phase 4.8 is done apart from the payroll export, which is waiting on a named
-provider format: expense capture, bank reconciliation and period close.
-
-Phase 5 is done: the automation engine, CRM with per-channel consent and a
-permanent consent trail, retention by cohort, and suggestions drawn from a
-vehicle's own history when it arrives.
-
-**Phase 5 — Customer lifecycle. Done.** CRM proper: segments, campaigns with
-consent, retention and lifetime value, and the automation engine that connects a
-reminder to a booking without anybody touching it.
+The phases these tables were last reconciled against are 1 to 20, the last
+shipped on 13 September 2026. The [roadmap](06-roadmap.md) carries a status
+paragraph under each.
 
 ---
 

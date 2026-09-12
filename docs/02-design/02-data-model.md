@@ -47,10 +47,23 @@ are not obvious from reading the schema.
                                                   JournalEntry -- JournalLine
 ```
 
-Phase 2 and 3 tables exist in the first migration even though their features
-are not built. Adding tables later is cheap; restructuring live data is not,
-and the relationships between a part line, a stock movement and a ledger
-posting are easier to get right when designed together.
+Phase 2 and 3 tables existed in the first migration before their features were
+built. Adding tables later is cheap; restructuring live data is not, and the
+relationships between a part line, a stock movement and a ledger posting are
+easier to get right when designed together.
+
+The diagram is the shape as first drawn. Later phases added to it without
+moving anything in it; the additions, by context:
+
+| Context  | Added since                                                                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Passport | `VehicleClaim` (a person asking to have a car on their account), `VehicleDocument` (paperwork, kind-typed, removable with a reason), `Warranty`, condition and prediction tables                                                    |
+| Workshop | `Employee`, `WorkingPattern`, `Absence`, `Skill`, `EmployeeSkill`, `JobTypeSkill`, `Timesheet`, `PayrollRun`, `FleetAgreement`, `Location.opensAtMinute/closesAtMinute`, `Customer.preferredTechnicianUserId`, `BookingSource.PLAN` |
+| Finance  | `Refund`, `CreditNote`, `SupplierPayment` and its allocations, `BankAccount`, `BankTransaction`, `Expense`, `CounterSale`, `TillSession`                                                                                            |
+| Identity | `ApiKey` (digest only, revocable), `AuthToken` (reset and verification, digest only), `MessageLog`, `SuppressedAddress`, `ConsentEvent`                                                                                             |
+
+`packages/db/prisma/schema.prisma` is the authority; this table says where to
+look, not what every column is.
 
 ## 2. Keys and identity
 
@@ -123,17 +136,24 @@ Never `float8`. See [ADR-0008](../03-adr/0008-money-as-integer-minor-units.md).
 Implemented in `20260909000100_invariants` and verified by
 `infra/scripts/verify-integrity.ts`, which actively tries to break each one:
 
-| Guarantee                             | Mechanism                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| Vehicle events are append-only        | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once |
-| Audit log is immutable                | `BEFORE UPDATE OR DELETE` trigger                                         |
-| One open ownership per vehicle        | Partial unique index `WHERE endedAt IS NULL`                              |
-| One open time entry per technician    | Partial unique index `WHERE endedAt IS NULL`                              |
-| Payments never exceed the invoice     | Deferred constraint trigger                                               |
-| Journal entries balance               | Deferred constraint trigger, checked at commit                            |
-| A journal line is a debit or a credit | `CHECK` constraint                                                        |
-| Odometer readings are non-negative    | `CHECK` constraint                                                        |
-| Booking ends after it starts          | `CHECK` constraint                                                        |
+| Guarantee                                                                         | Mechanism                                                                 |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Vehicle events are append-only                                                    | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once |
+| Audit log is immutable                                                            | `BEFORE UPDATE OR DELETE` trigger                                         |
+| One open ownership per vehicle                                                    | Partial unique index `WHERE endedAt IS NULL`                              |
+| One open time entry per technician                                                | Partial unique index `WHERE endedAt IS NULL`                              |
+| Payments never exceed the invoice                                                 | Deferred constraint trigger                                               |
+| Journal entries balance                                                           | Deferred constraint trigger, checked at commit                            |
+| A journal line is a debit or a credit                                             | `CHECK` constraint                                                        |
+| Odometer readings are non-negative                                                | `CHECK` constraint                                                        |
+| Booking ends after it starts                                                      | `CHECK` constraint                                                        |
+| A paid timesheet is final                                                         | `BEFORE UPDATE OR DELETE` trigger `timesheets_paid_are_final`             |
+| A refund, a credit and a refusal carry a reason                                   | `CHECK` constraints on `refunds`, `credit_notes` and `vehicle_claims`     |
+| One open claim per person per vehicle                                             | Partial unique index `vehicle_claims_one_open_each`                       |
+| A key is named                                                                    | `CHECK api_keys_are_named`                                                |
+| A site opens before it closes                                                     | `CHECK locations_open_before_close`                                       |
+| A document is named, has bytes, expires after issue, and is removed with a reason | Four `CHECK` constraints on `vehicle_documents`                           |
+| Consent history is append-only                                                    | `BEFORE UPDATE OR DELETE` trigger                                         |
 
 ## 7. Deletion
 
@@ -141,6 +161,14 @@ Operational records are hard-deleted; there are no `deletedAt` columns. A
 soft-delete flag is forgotten from a filter exactly once, and the result is a
 cross-tenant leak. History is preserved by the audit log and the append-only
 passport, which are better suited to it than a flag on every table.
+
+Three deliberate exceptions, each a state rather than a hidden delete, and each
+read through one function that applies the filter: an `ApiKey` is revoked
+(`revokedAt`), because the list of keys must still name what was revoked and
+when; a `VehicleDocument` is removed (`removedAt`, with a reason the database
+insists on), because a scan of the wrong car is a mistake and the removal is
+history; and a bay, tax rate or kind of work is retired (`isActive`), because
+old work must keep reading the way it did.
 
 Cascade rules follow ownership: deleting an organisation removes its
 tenant-scoped records; deleting a vehicle cascades to its events, which is

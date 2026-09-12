@@ -29,7 +29,7 @@ Read in this order if you are new to the project.
 | [Market & competition](00-product/03-market-and-competition.md) | Competitive landscape and the feature matrix vs. MechanicDesk      |
 | [Personas](00-product/04-personas.md)                           | The six people this software is for, and what each one needs       |
 | [MVP definition](00-product/05-mvp-definition.md)               | Exactly what is in and out of the first shippable release          |
-| [Roadmap](00-product/06-roadmap.md)                             | Phases 1 to 6, with entry and exit criteria                        |
+| [Roadmap](00-product/06-roadmap.md)                             | Phases 1 to 20, each with its exit condition and where it stands   |
 | [Business model](00-product/07-business-model.md)               | Pricing, unit economics, the data revenue-share                    |
 | [Coverage map](00-product/08-coverage-map.md)                   | Every capability, and whether somebody can actually do it          |
 
@@ -44,17 +44,17 @@ Read in this order if you are new to the project.
 
 ### 2. Design — how it is shaped
 
-| Doc                                                  | Contents                                                           |
-| ---------------------------------------------------- | ------------------------------------------------------------------ |
-| [Domain model](02-design/01-domain-model.md)         | Bounded contexts, aggregates, invariants, the ubiquitous language  |
-| [Data model & ERD](02-design/02-data-model.md)       | Every table, key, index and relationship                           |
-| [Architecture](02-design/03-architecture.md)         | C4 context/container/component, runtime, deployment                |
-| [State machines](02-design/04-state-machines.md)     | Job lifecycle, estimate approval, stock reservation, invoice       |
-| [Security model](02-design/05-security-model.md)     | Authn, authz, tenancy isolation, threat model, passport integrity  |
-| [API contract](02-design/06-api-contract.md)         | REST surface, conventions, errors; OpenAPI lives in `openapi.yaml` |
-| [Accounting model](02-design/07-accounting-model.md) | Chart of accounts and the exact journal postings each event makes  |
-| [Design system](02-design/08-design-system.md)       | Colour, type, spacing, elevation, components, dark mode, a11y      |
-| [Wireframes](02-design/09-wireframes.md)             | Every screen, annotated                                            |
+| Doc                                                  | Contents                                                                         |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Domain model](02-design/01-domain-model.md)         | Bounded contexts, aggregates, invariants, the ubiquitous language                |
+| [Data model & ERD](02-design/02-data-model.md)       | Every table, key, index and relationship                                         |
+| [Architecture](02-design/03-architecture.md)         | C4 context/container/component, runtime, deployment                              |
+| [State machines](02-design/04-state-machines.md)     | Job lifecycle, estimate approval, stock reservation, invoice                     |
+| [Security model](02-design/05-security-model.md)     | Authn, authz, tenancy isolation, threat model, passport integrity                |
+| [API contract](02-design/06-api-contract.md)         | The three live read endpoints and their keys, then the contract for what follows |
+| [Accounting model](02-design/07-accounting-model.md) | Chart of accounts and the exact journal postings each event makes                |
+| [Design system](02-design/08-design-system.md)       | Colour, type, spacing, elevation, components, dark mode, a11y                    |
+| [Wireframes](02-design/09-wireframes.md)             | Every screen, annotated                                                          |
 
 ### 3. Decisions
 
@@ -88,5 +88,18 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-This repository is at **Phase 1 — Workshop Core**. See the
-[roadmap](00-product/06-roadmap.md) for what that includes and what follows.
+Twenty phases have shipped, the last on 13 September 2026: the workshop core,
+inventory and procurement, the ledger, people and multi-site, automation and
+CRM, the customer's own side, the money cycle, payables and payroll, answers in
+words, the network between workshops with a read-only API, the workshop
+configuring itself, and the vehicle's paperwork. The
+[roadmap](00-product/06-roadmap.md) carries a status paragraph under each
+phase, the [feature map](00-product/09-feature-map.md) counts 139 capabilities
+built, 1 partial and 6 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 339
+requirements to code and tests. Every phase ends with the same checks, listed
+in the [testing strategy](04-engineering/04-testing-strategy.md).
+
+What has not happened is the thing the [MVP definition](00-product/05-mvp-definition.md)
+still asks for: four weeks in front of a real workshop. Everything above is
+evidence of effort, not of fit.

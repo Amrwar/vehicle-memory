@@ -104,9 +104,35 @@ Full instructions, including troubleshooting, are in
 - Purchase requests with an approval threshold, orders, partial receiving
 - Three-way match of supplier bills against what was ordered and what arrived
 
-Phases 3 to 6 (ERP, multi-site, automation, intelligence) are specified in the
-[roadmap](docs/00-product/06-roadmap.md), and their tables are already in the
-first migration so later migrations stay additive.
+**Eighteen further phases have shipped since**, each with its own verification
+script against a real database and the same crawls over every page. In the
+order they landed:
+
+- The double-entry ledger, financial statements, VAT, aged debt, bank
+  reconciliation, expenses and period close
+- People, skills, working patterns, attendance, timesheets and payroll runs
+- Multi-site: transfers, per-site permissions, consolidated reporting
+- The automation engine, CRM with per-channel consent, campaigns, retention
+- Digital inspections with photographs as the trust mechanism, warranty,
+  vehicle condition and predicted maintenance, the technician's own device
+- Counter sales, business reporting, the public front door and sign-up
+- Customers with their own accounts, claiming a vehicle by plate, portal
+  booking, and every dead button found and fixed
+- The money cycle end to end: lifecycle, invoicing, payment, credit, refund
+- Supplier bills and payments, payroll files, fleet agreements and monthly
+  consolidated invoices
+- Answers in words from the records, and a customer summary that says nothing
+  the job does not
+- The network: a car serviced at one Carnet workshop found at another with the
+  first workshop's commercial detail withheld, and a read-only API under
+  organisation keys
+- The workshop configuring itself, and the day's plan written into the diary
+- The vehicle's paperwork: registration, MOT, insurance, receipts and
+  photographs, belonging to the car
+
+The [roadmap](docs/00-product/06-roadmap.md) carries a status paragraph under
+each phase and the [feature map](docs/00-product/09-feature-map.md) counts what
+is built, partial and missing.
 
 ## The two decisions everything rests on
 

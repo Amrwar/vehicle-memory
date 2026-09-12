@@ -18,14 +18,56 @@ nothing ([ADR-0003](../03-adr/0003-monorepo-structure.md)).
 
 ## 2. What is tested where
 
-| Layer     | Tool                  | Tests                                                                                          |
-| --------- | --------------------- | ---------------------------------------------------------------------------------------------- |
-| Domain    | Vitest                | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion |
-| Data      | Vitest + Postgres     | Tenant isolation per entity, invariants, ledger append concurrency                             |
-| Routes    | Vitest + fetch        | Auth, permissions, redirects, rendered content                                                 |
-| Journeys  | Playwright            | Book to invoice, inspection to approval, passport share                                        |
-| Integrity | `verify-integrity.ts` | Actively tries to violate every database guarantee                                             |
-| Usability | Humans                | The four criteria in section 7                                                                 |
+| Layer      | Tool                                               | Tests                                                                                               |
+| ---------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Domain     | Vitest                                             | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion      |
+| Data       | Vitest + Postgres                                  | Tenant isolation per entity, invariants, ledger append concurrency                                  |
+| Routes     | Vitest + fetch                                     | Auth, permissions, redirects, rendered content                                                      |
+| Journeys   | Playwright                                         | Book to invoice, inspection to approval, passport share                                             |
+| Integrity  | `verify-integrity.ts`                              | Actively tries to violate every database guarantee                                                  |
+| Acceptance | `verify-*.ts`                                      | One script per phase, against a seeded database, asserting the phase's promise (below)              |
+| Crawls     | `verify-controls`, `verify-empty`, `verify-access` | Every page for every role: every control resolves, every page works empty, mechanical accessibility |
+| Usability  | Humans                                             | The four criteria in section 7                                                                      |
+
+### The verification scripts
+
+Each phase ends with a script that states the phase's promise as checks
+against a real database, cleans up after itself, and runs in CI. `npm run
+verify:<name>`.
+
+| Script         | Proves                                                                                        |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| integrity      | Every database guarantee refuses to be violated                                               |
+| inventory      | Reservation, average cost, receipts and the shortfall request                                 |
+| ledger         | Every posting balances and the statements agree with the journal                              |
+| signup         | Sign-up creates a complete workshop                                                           |
+| team           | Invite, change a role, remove a leaver, never above your own role                             |
+| counter        | Till sessions and counter sales post and reconcile                                            |
+| banking        | Reconciliation and period close                                                               |
+| automation     | Rules fire once, with consent rechecked at the moment of sending                              |
+| messaging      | A queued message actually leaves                                                              |
+| inspection     | Results, photographs, and the estimate drafted from findings                                  |
+| warranty       | Cover is found and a claim is filed against the right party                                   |
+| condition      | Health score, component ages and predictions from the vehicle's own history                   |
+| handover       | The technician's device syncs offline actions once, in order                                  |
+| planning       | Capacity, skills, patterns, absences and the proposed day                                     |
+| provenance     | Photographs and fitments carry their evidence; the audit log refuses deletion                 |
+| offline        | Queued actions replay without duplication                                                     |
+| retention      | Cohorts, lifetime value and lapsing customers                                                 |
+| credentials    | Reset and verification links are single-use digests                                           |
+| deliverability | Bounces suppress, complaints suppress, replies route back                                     |
+| claims         | A person claims a car by plate and the workshop decides, once                                 |
+| records        | Every "new" button creates the record it names                                                |
+| money          | The money cycle: lifecycle, invoice, payment, credit, refund, balanced throughout             |
+| erp            | Supplier bills and payments, payroll runs, fleet consolidation                                |
+| answers        | Every advertised question is answered from the records or refused                             |
+| network        | A vehicle found across workshops, adopted, continued; the API reads only what it may          |
+| settings       | Every setting saves, bad values are refused, nothing is deleted, the plan writes to the diary |
+| documents      | Paperwork belongs to the car: who sees it, who removes it, what the cover is                  |
+| storage        | Uploads land where the ticket says                                                            |
+| controls       | Every control on every page does something and every link goes somewhere                      |
+| empty          | Every page works with nothing in it, with a sentence saying what to do                        |
+| access         | The mechanical half of accessibility on every page                                            |
 
 ## 3. Coverage
 
@@ -106,7 +148,7 @@ failed.
 ## 8. In CI
 
 ```
-  format:check -> lint -> typecheck -> unit -> integration -> build -> e2e
+  format:check -> lint -> typecheck -> unit -> verify:* (seeded database) -> build -> crawl every page
 ```
 
 The whole pipeline must finish in under ten minutes (NFR-707). A slow pipeline

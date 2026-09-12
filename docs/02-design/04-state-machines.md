@@ -151,7 +151,38 @@ them.
 Reservation happens under a row lock, because available stock is on-hand minus
 reserved and two jobs must not both reserve the last set of pads.
 
-## 5. Why these are in the domain layer
+## 5. Payroll run (Phase 16)
+
+```
+   approved timesheets, one period
+              |
+              v
+        +-----------+   file produced   +----------+   marked paid   +------+
+        |   DRAFT   |------------------>| EXPORTED |---------------->| PAID |
+        +-----------+                   +----------+                 +------+
+```
+
+A run cannot be marked paid until its file has been produced, because paying
+against a file nobody has seen is how a person is paid twice. Marking it paid
+marks every sheet on it paid and posts gross wages against the bank; a paid
+sheet is then final, and the database refuses to change it.
+
+## 6. A document's life (Phase 20)
+
+```
+   file stored on a signed ticket
+              |
+              v  row recorded only once the bytes are confirmed
+        +-----------+   removed, with a reason    +-----------+
+        |   LIVE    |---------------------------->|  REMOVED  |
+        +-----------+                             +-----------+
+```
+
+There is no way back. A removed document keeps its row, its reason and its
+audit entry; a corrected scan is a new document. Only the workshop that added
+it or the vehicle's owner may remove it.
+
+## 7. Why these are in the domain layer
 
 Every one of these could have been expressed as conditional rendering. Putting
 them in `packages/core` buys three things:

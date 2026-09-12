@@ -47,6 +47,13 @@ change touches everything.
   +---------------------------------------------------------------+
 ```
 
+Two contexts were added later without moving the boundaries above. **People**
+(employees, skills, working patterns, timesheets, payroll runs) sits beside the
+workshop and feeds the planner and the ledger. **Access** (grants, claims,
+shares, API keys) sits between the passport and everything else: it is the
+one place that answers "may this organisation or person read this vehicle",
+and the network of Phase 18 is that question asked between workshops.
+
 ### The boundary that matters most
 
 **Vehicle Passport is not tenant-scoped. Everything else is.**
@@ -65,27 +72,32 @@ vehicle record.** Access is mediated, always.
 Terms used in code exactly as defined here. Where the industry uses a word
 loosely, we pick one meaning and hold it.
 
-| Term             | Definition                                                                          | Not to be confused with              |
-| ---------------- | ----------------------------------------------------------------------------------- | ------------------------------------ |
-| **Vehicle**      | A physical car, identified by VIN, existing independently of any owner or workshop. | The customer's record of it          |
-| **Passport**     | The complete, append-only event history of one vehicle.                             | A report, which is a rendering of it |
-| **Event**        | One immutable fact about a vehicle at a point in time.                              | A job, which is workshop work        |
-| **Customer**     | A party, person or company, in a commercial relationship with one workshop.         | Owner                                |
-| **Owner**        | The party who holds the vehicle during a period. May not be a customer of anyone.   | Customer                             |
-| **Booking**      | A reserved future slot.                                                             | Job                                  |
-| **Job**          | One visit's work on one vehicle. The central operational aggregate.                 | Booking, invoice                     |
-| **Inspection**   | A structured assessment producing per-item results.                                 | Diagnosis                            |
-| **Diagnosis**    | The technician's conclusion about a fault.                                          | Inspection                           |
-| **Finding**      | One inspection item result requiring action.                                        | Recommendation                       |
-| **Estimate**     | A priced proposal requiring customer approval.                                      | Quote, invoice                       |
-| **Approval**     | A recorded customer decision on an estimate.                                        | Acceptance of the work               |
-| **Labour line**  | Time to be charged, at a rate.                                                      | Time entry                           |
-| **Time entry**   | Actual clocked time, used for cost.                                                 | Labour line                          |
-| **Part line**    | A part to be charged on a job.                                                      | Stock movement                       |
-| **Invoice**      | An issued, immutable demand for payment.                                            | Estimate                             |
-| **Bay**          | A physical work position. Constrains scheduling.                                    | Location                             |
-| **Location**     | A physical site within an organisation.                                             | Organisation                         |
-| **Organisation** | The tenant. One business.                                                           | Location                             |
+| Term             | Definition                                                                                                           | Not to be confused with                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Vehicle**      | A physical car, identified by VIN, existing independently of any owner or workshop.                                  | The customer's record of it                    |
+| **Passport**     | The complete, append-only event history of one vehicle.                                                              | A report, which is a rendering of it           |
+| **Event**        | One immutable fact about a vehicle at a point in time.                                                               | A job, which is workshop work                  |
+| **Customer**     | A party, person or company, in a commercial relationship with one workshop.                                          | Owner                                          |
+| **Owner**        | The party who holds the vehicle during a period. May not be a customer of anyone.                                    | Customer                                       |
+| **Booking**      | A reserved future slot.                                                                                              | Job                                            |
+| **Job**          | One visit's work on one vehicle. The central operational aggregate.                                                  | Booking, invoice                               |
+| **Inspection**   | A structured assessment producing per-item results.                                                                  | Diagnosis                                      |
+| **Diagnosis**    | The technician's conclusion about a fault.                                                                           | Inspection                                     |
+| **Finding**      | One inspection item result requiring action.                                                                         | Recommendation                                 |
+| **Estimate**     | A priced proposal requiring customer approval.                                                                       | Quote, invoice                                 |
+| **Approval**     | A recorded customer decision on an estimate.                                                                         | Acceptance of the work                         |
+| **Labour line**  | Time to be charged, at a rate.                                                                                       | Time entry                                     |
+| **Time entry**   | Actual clocked time, used for cost.                                                                                  | Labour line                                    |
+| **Part line**    | A part to be charged on a job.                                                                                       | Stock movement                                 |
+| **Invoice**      | An issued, immutable demand for payment.                                                                             | Estimate                                       |
+| **Bay**          | A physical work position. Constrains scheduling.                                                                     | Location                                       |
+| **Location**     | A physical site within an organisation.                                                                              | Organisation                                   |
+| **Organisation** | The tenant. One business.                                                                                            | Location                                       |
+| **Access grant** | An organisation's entitlement to read or write one vehicle, earned by servicing it or by taking it on.               | A share, which is for a person with no account |
+| **Network**      | Vehicles found across workshops by plate or VIN, with each workshop's commercial detail withheld from the others.    | A marketplace, deliberately not built          |
+| **Claim**        | A person's request to have a vehicle on their own account, decided by the workshop that last serviced it.            | Ownership transfer                             |
+| **Document**     | A piece of the vehicle's paperwork: certificate, insurance, receipt or photograph. Belongs to the car.               | An event, which is a fact about work done      |
+| **API key**      | An organisation's credential for reading its own records without a person signed in. Shown once, stored as a digest. | A session                                      |
 
 Two distinctions earn their keep:
 

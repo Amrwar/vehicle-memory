@@ -20,16 +20,20 @@ is empty, and without the passport this is just another workshop system.**
 
 ## 2a. Where the product stands against this document
 
-The MVP defined below was delivered, and four further phases have shipped on
-top of it: inventory and procurement, the double-entry ledger and financial
-statements, people and multi-site, and the public front door with published
-pricing and organisation-creating sign-up.
+The MVP defined below was delivered, and nineteen further phases have shipped
+on top of it, the last on 13 September 2026: inventory and procurement, the
+ledger and financial statements, people and multi-site, automation and CRM,
+inspections and warranty, the technician's device, counter sales and business
+reporting, the front door, customers with accounts, the money cycle, payables
+and payroll, answers in words, the network between workshops with an API, the
+workshop configuring itself, and the vehicle's paperwork. The
+[roadmap](06-roadmap.md) carries the status of each.
 
 That means most of this document is now a record of what was decided rather
 than a plan for what to build. It is kept because the reasoning is still the
 reasoning, and because the hypotheses in section 2 have not yet been answered:
 nothing here has been in front of a real workshop for four weeks. Building more
-does not settle H1, H2 or H3, and it is worth being honest that shipping five
+does not settle H1, H2 or H3, and it is worth being honest that shipping twenty
 phases is evidence of effort rather than evidence of fit.
 
 [Coverage map](08-coverage-map.md) lists every capability and its actual state.
@@ -181,6 +185,14 @@ read path will be lightly used for a year.
 | Forecasting, AI diagnosis     | Requires data we will not have for a year                                                  | Phase 6        |
 | OBD telematics                | Hardware partnership                                                                       | Phase 6        |
 | Accounting integrations       | Nothing coherent to sync until Phase 3                                                     | Phase 3.5      |
+
+Where those rows stand now, phase by phase: inventory, purchasing and the
+ledger shipped in Phases 2 and 3; payroll, multi-location and point of sale in
+Phases 4 to 4.8; online self-service booking in the customer's portal in Phase
+4.6; accounting integration is a read-only API under organisation keys since
+Phase 18, with no write endpoints yet by design. Native apps, forecasting, AI
+diagnosis and OBD telematics remain out, and the roadmap says why each is
+still waiting.
 
 ## 6. Definition of MVP done
 

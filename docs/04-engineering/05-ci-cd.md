@@ -10,7 +10,8 @@
      +-- typecheck         tsc --build       ~45s
      +-- test              vitest + coverage ~30s   (Postgres service)
      +-- build             next build        ~90s
-     +-- integrity         chain + invariants ~15s  (seeded database)
+     +-- verify:*          one script per phase (seeded database)
+     +-- crawls            every page, every role, against the built app
      +-- audit             npm audit, secret scan
      |
      v

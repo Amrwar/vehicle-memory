@@ -145,13 +145,18 @@ inspection photograph belongs to a vehicle whose owner controls disclosure.
 
 ## 4. What each environment variable actually does
 
-| Variable              | Consequence of getting it wrong                                                  |
-| --------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`        | Nothing works                                                                    |
-| `DIRECT_DATABASE_URL` | Migrations hang against a pooled provider                                        |
-| `AUTH_SECRET`         | Sessions cannot be verified; everyone is signed out                              |
-| `LEDGER_CHAIN_SALT`   | **Every vehicle's history fails verification, permanently**                      |
-| `APP_URL`             | Links in email and SMS point at the wrong host. Inferred from Vercel when unset. |
+| Variable                                                                                 | Consequence of getting it wrong                                                                                                                       |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                                           | Nothing works                                                                                                                                         |
+| `DIRECT_DATABASE_URL`                                                                    | Migrations hang against a pooled provider                                                                                                             |
+| `AUTH_SECRET`                                                                            | Sessions cannot be verified; everyone is signed out                                                                                                   |
+| `LEDGER_CHAIN_SALT`                                                                      | **Every vehicle's history fails verification, permanently**                                                                                           |
+| `APP_URL`                                                                                | Links in email and SMS point at the wrong host. Inferred from Vercel when unset.                                                                      |
+| `CRON_SECRET`                                                                            | The daily cron cannot authenticate, so reminders, retention and outbox pushes stop.                                                                   |
+| `MAIL_TRANSPORT`, `MAIL_FROM`, `SMS_TRANSPORT`                                           | Messages stay in `message_logs` as queued, or go to the console. Real sending needs SMTP or Resend, and Twilio for SMS.                               |
+| `REPLY_DOMAIN`, `INBOUND_WEBHOOK_SECRET`                                                 | Replies from customers cannot be routed back to the workshop that sent the message.                                                                   |
+| `STORAGE_DRIVER`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Photographs and paperwork fall back to the local disk, which a serverless host discards. Set `STORAGE_DRIVER=s3` with R2 or S3 before real customers. |
+| `AI_TRANSPORT`, `AI_MODEL`, `ANTHROPIC_API_KEY`                                          | Customer summaries use the plain composed text. Nothing else changes; no model is needed for any figure the product shows.                            |
 
 ## 5. Before real customers
 

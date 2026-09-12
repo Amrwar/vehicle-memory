@@ -1,5 +1,14 @@
 # Project Proposal — Carnet
 
+> **Where this stands.** This is the proposal as it was made: the ask, the
+> cost, the timeline and the three phases it priced. It is kept as written
+> because the reasoning is the reasoning. What happened next is in the
+> [roadmap](06-roadmap.md): the three phases proposed here shipped, and
+> seventeen more followed, the last on 13 September 2026. Of the exclusions in
+> section 3.2, payroll, multi-location, self-service booking and a read-only
+> accounting API have since been built; native apps, AI diagnosis and OBD
+> telematics have not, for the reasons given there.
+
 |                 |                                  |
 | --------------- | -------------------------------- |
 | **Document**    | Commercial and delivery proposal |

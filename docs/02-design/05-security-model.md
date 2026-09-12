@@ -99,18 +99,47 @@ no account. The token _is_ the credential, so:
 - Rate limited, so a token cannot be brute-forced.
 - Never indexed: `robots: noindex` on every public page.
 
-## 7. Input and output
+## 7. Organisation API keys and the network
 
-| Control          | Implementation                                                                                       |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| Input validation | Zod schemas at every boundary. Client-side validation is a convenience, never a control.             |
-| SQL injection    | Parameterised queries only. Raw SQL uses tagged templates.                                           |
-| XSS              | React escapes by default. `dangerouslySetInnerHTML` is not used anywhere.                            |
-| CSRF             | SameSite=Lax plus origin checking on state-changing requests.                                        |
-| File upload      | Content-type and size validated, stored outside the web root, served through an authorising handler. |
-| Headers          | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.                              |
+Two things since Phase 18 let somebody read records without a signed-in person.
 
-## 8. Threat model
+**API keys.** `Authorization: Bearer cn_…` on `/api/v1/*`. A key belongs to one
+organisation, is minted on the Settings page by somebody with `settings:write`,
+is shown exactly once, and only its SHA-256 digest is stored, so a database
+disclosure does not yield working keys. Tenancy comes from the key and is never
+a parameter. A missing header is 401; an unknown or revoked key is 403 and says
+which. Every use stamps the key, so the list on Settings shows which are alive.
+The surface is read-only by design; the first integration that needs to write
+will name what it needs to write.
+
+**The network.** A workshop that has never seen a vehicle may find it by plate
+or VIN and is told that history exists, how much and who kept it, but not the
+entries. Taking the car on grants read access on the grounds it is to be
+serviced; opening a job widens that to write; both are audited. What it then
+reads is the vehicle's history with the other workshop's commercial detail
+withheld: job identifiers, internal job numbers, named staff and inspection
+ids (`WITHHELD_KEYS` in `@carnet/core`). Nothing about the car is withheld.
+A vehicle outside an organisation's entitlement is 404, not 403, on the API and
+on the page, so neither confirms which VINs exist.
+
+**Paperwork.** A vehicle's documents are readable and addable by any workshop
+entitled to read the vehicle and by its current owner, and invisible to anybody
+else. Removal is for the workshop that added a document or the owner, needs a
+reason, and keeps the row. Files are stored on a short-lived signed ticket and
+read back through signed URLs that expire in an hour.
+
+## 8. Input and output
+
+| Control          | Implementation                                                                                                                                                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Input validation | Zod schemas at every boundary. Client-side validation is a convenience, never a control.                                                                                                                                                |
+| SQL injection    | Parameterised queries only. Raw SQL uses tagged templates.                                                                                                                                                                              |
+| XSS              | React escapes by default. `dangerouslySetInnerHTML` is not used anywhere.                                                                                                                                                               |
+| CSRF             | SameSite=Lax plus origin checking on state-changing requests.                                                                                                                                                                           |
+| File upload      | Content-type and size validated, stored outside the web root, served through an authorising handler. Paperwork and photographs go straight to object storage on a five-minute signed ticket and are read through hour-long signed URLs. |
+| Headers          | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.                                                                                                                                                                 |
+
+## 9. Threat model
 
 | #   | Threat                             | Mitigation                                           | Residual                                                                                          |
 | --- | ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -123,7 +152,7 @@ no account. The token _is_ the credential, so:
 | T7  | VIN collision merging two vehicles | Format and check-digit validation, duplicate warning | A determined mistype. On the risk register.                                                       |
 | T8  | Denial of service                  | Rate limiting, pagination on every list              | Volumetric attack. Handled at the edge.                                                           |
 
-## 9. Privacy: erasure and the vehicle
+## 10. Privacy: erasure and the vehicle
 
 The subtle case, and the one most likely to be got wrong.
 
@@ -145,7 +174,7 @@ The passport ledger is append-only, so erasure cannot delete events. It
 supersedes those carrying personal identifiers with redacted versions, which
 keeps the chain intact and the fact preserved.
 
-## 10. Before general availability
+## 11. Before general availability
 
 - [ ] Penetration test, high findings resolved (NFR-413)
 - [ ] Dependency scanning blocking on critical (NFR-409)

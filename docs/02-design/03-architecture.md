@@ -28,6 +28,12 @@ Every external dependency is optional to the core workflow. If SMS, email or
 VIN decoding is down, a workshop can still book, inspect, estimate, repair,
 invoice and take payment (NFR-307).
 
+A fifth surface exists since Phase 18: `/api/v1/*`, route handlers that read an
+organisation's jobs, invoices and the vehicles it is entitled to, authenticated
+by an organisation key rather than a session. It reuses the same library
+functions the pages use, so the API and the page cannot disagree about what a
+workshop may see.
+
 ## 2. Containers
 
 ```

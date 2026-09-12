@@ -1,8 +1,11 @@
 # User Stories
 
-Phase 1 stories, grouped by epic. Each carries acceptance criteria in
-Given / When / Then form, a size in points, and the functional requirements it
-satisfies.
+Stories grouped by epic. Each carries acceptance criteria in Given / When /
+Then form, a size in points, and the functional requirements it satisfies.
+Epics A to J are Phase 1. Epics K to Q were written as Phases 15.1 to 20
+shipped, one epic per phase, and are what those phases' verification scripts
+check. Phases 2 to 15 are traced by requirement rather than by story, a gap the
+[traceability matrix](04-traceability-matrix.md) names.
 
 Sizing uses a modified Fibonacci scale: 1, 2, 3, 5, 8, 13. Anything estimated
 above 13 is split before it enters a sprint.
@@ -499,6 +502,224 @@ I know when it will be ready.
 
 ---
 
+## Epic K — Customers with accounts (Phase 15.1)
+
+### K1 — Sign up and claim my car
+
+**As** Maria **I want** an account of my own and to put my car on it **so that**
+I can see its history without waiting for a workshop to invite me.
+**Size** 8 · **Satisfies** FR-4101, FR-4102, FR-4103, FR-4104, FR-4105
+
+- **Given** no account, **when** I sign up at `/signup/customer`, **then** I have
+  an account with no vehicles on it.
+- **Given** my account, **when** I type my plate or VIN however it is written,
+  **then** a request goes to the workshop that last serviced the car, and I
+  cannot tell which workshop that is.
+- **Given** a plate that has been on two cars, **when** I ask, **then** I am
+  told to use the VIN instead.
+- **Given** my request, **when** the workshop refuses, **then** I am told why,
+  the refusal records who and when, and it cannot be answered twice.
+
+### K2 — Confirm my email before I run a workshop
+
+**As** a new workshop owner **I want** to be held until my address is proven
+**so that** nobody can run a workshop from an address that is not theirs.
+**Size** 3 · **Satisfies** FR-4106, FR-4107
+
+- **Given** a fresh workshop sign-up, **when** I try any workshop screen,
+  **then** I am held at the confirmation page.
+- **Given** the confirmation email, **when** it is queued, **then** it is
+  pushed to the provider at once rather than waiting for the daily cron.
+
+### K3 — Every button leads somewhere
+
+**As** any staff user **I want** every "new" button to create the record it
+names **so that** I never press something that silently does nothing.
+**Size** 5 · **Satisfies** FR-4108, FR-4109, FR-4110, FR-4111, FR-4112, FR-4113, FR-4114
+
+- **Given** the customers, parts and purchasing pages, **when** I press new,
+  **then** a form appears and saving it creates the record, with duplicates
+  shown before saving.
+- **Given** a draft quote, **when** I send it, **then** the customer receives a
+  single-use link and it cannot be sent twice.
+- **Given** an invitation, **when** I invite a colleague, **then** the email the
+  page promises is actually queued and pushed.
+
+## Epic L — The money cycle (Phase 16)
+
+### L1 — Move a job through its life and invoice it
+
+**As** Sara **I want** to start, complete and invoice a job from its own page
+**so that** the money follows the work without a second system.
+**Size** 8 · **Satisfies** FR-4201, FR-4202, FR-4203, FR-4204, FR-4205
+
+- **Given** a received job, **when** I start the work, complete it and issue
+  the invoice, **then** each move is refused with a reason if the lifecycle
+  forbids it, parts are consumed at average cost on completion, and the invoice
+  is numbered without a gap.
+- **Given** an approved estimate, **when** the customer approves, **then** the
+  approved lines land on the job once and never overwrite what was typed.
+
+### L2 — Take payment, credit and refund
+
+**As** Sara **I want** to record payments, credit notes and refunds against an
+invoice **so that** what the customer owes is always exactly right.
+**Size** 5 · **Satisfies** FR-4206, FR-4207, FR-4208, FR-4209
+
+- **Given** an outstanding invoice, **when** I record more than is owed,
+  **then** it is refused.
+- **Given** a credit note, **when** I raise it, **then** it carries a reason and
+  cannot exceed the invoice less earlier credits.
+- **Given** a refund, **when** I record it, **then** it is the lesser of what
+  was paid and what was credited, and the trial balance still balances.
+
+## Epic M — Suppliers, payroll and fleets (Phase 16)
+
+### M1 — Book and pay a supplier's bill
+
+**As** Sara **I want** to book a supplier's bill against its order, approve it
+and pay it **so that** what we owe is in the ledger and the supplier is told.
+**Size** 5 · **Satisfies** FR-4301, FR-4302, FR-4303, FR-4304
+
+- **Given** a purchase order, **when** I book the bill with the supplier's
+  reference, **then** it enters payables once.
+- **Given** approved bills, **when** I pay the supplier, **then** the payment is
+  allocated oldest-due first, every penny lands on a bill, and a remittance
+  advice names each.
+
+### M2 — Hand timesheets to payroll
+
+**As** an owner **I want** a period's approved timesheets as one payroll file
+**so that** wages are paid from what was actually worked.
+**Size** 5 · **Satisfies** FR-4305, FR-4306, FR-4307
+
+- **Given** approved timesheets, **when** I run payroll, **then** one CSV row
+  per person carries reference, name, period, ordinary and overtime hours and
+  gross pay, and the same sheet cannot be run twice.
+- **Given** an exported run, **when** I mark it paid, **then** every sheet on it
+  is paid, wages are posted against the bank, and a paid sheet is final.
+
+### M3 — One invoice per fleet a month
+
+**As** a fleet manager's supplier **I want** one consolidated invoice a month
+at agreed discounts **so that** the company pays once and sees every job.
+**Size** 5 · **Satisfies** FR-4308, FR-4309, FR-4310
+
+- **Given** a company customer, **when** I save an agreement, **then** it
+  carries labour and parts discounts, terms and whether a PO number is required.
+- **Given** a month's completed jobs, **when** I consolidate, **then** one
+  invoice names the job on every line at the agreed discount, and a job with
+  no PO number is refused by name when the agreement requires one.
+
+## Epic N — Answers rather than pages (Phase 17)
+
+### N1 — Ask a question in words
+
+**As** an owner **I want** to ask "what did we take this month" and get a
+figure with its working **so that** I am not hunting through pages.
+**Size** 5 · **Satisfies** FR-4401, FR-4402, FR-4403, FR-4404
+
+- **Given** a question the page advertises, **when** I ask it, **then** I get
+  the figure, the steps, and a link to the page that computes the same thing.
+- **Given** a question outside the vocabulary, **when** I ask it, **then** it is
+  refused with the list of what can be asked, never guessed at.
+
+### N2 — A summary for the customer
+
+**As** Sara **I want** a customer-ready summary of a completed job **so that**
+the customer understands what was done without my rewriting it.
+**Size** 3 · **Satisfies** FR-4405, FR-4406, FR-4407, FR-4408
+
+- **Given** a completed job, **when** I open its summary, **then** every number
+  and part number in it is on the job, or the plain version is used and the
+  reason shown.
+- **Given** the summary, **when** it exists, **then** nothing has changed on
+  the job: no status, posting or message follows from it without my action.
+
+## Epic O — The network (Phase 18)
+
+### O1 — Find a car another workshop keeps
+
+**As** Sara **I want** to find a car we have never seen by its plate **so that**
+its history is in front of me before it is on the ramp.
+**Size** 8 · **Satisfies** FR-4501, FR-4502, FR-4503, FR-4504, FR-4505, FR-4506
+
+- **Given** a plate or VIN, **when** I look it up, **then** I am told history
+  exists, how much and who kept it, but not the entries.
+- **Given** the car, **when** I take it on, **then** I can read its history with
+  the other workshop's job numbers, identifiers and staff withheld, and what I
+  record continues the same chain.
+- **Given** a car new to the network, **when** I add it by VIN, **then** a VIN
+  already on the network is refused with the way in, and a bad check digit is a
+  warning, not a refusal.
+
+### O2 — Read my records through a key
+
+**As** an owner with accounting software **I want** a key that reads our jobs
+and invoices **so that** the software can sync without a person signed in.
+**Size** 5 · **Satisfies** FR-4507, FR-4508, FR-4509
+
+- **Given** Settings, **when** I make a key, **then** it is shown once, stored
+  as a digest, and listed by name with its last use.
+- **Given** the key, **when** the software calls the API, **then** it sees only
+  what this workshop sees, bounded by a window and a row cap, and a revoked key
+  reads nothing.
+
+## Epic P — The workshop configures itself (Phase 19)
+
+### P1 — Change the workshop's own settings
+
+**As** an owner **I want** to change our details, site, hours, bays, tax rates
+and kinds of work myself **so that** nobody at Carnet has to touch a database.
+**Size** 8 · **Satisfies** FR-4601, FR-4602, FR-4603, FR-4604, FR-4605, FR-4607, FR-4608
+
+- **Given** a settings page, **when** I save a bad value, **then** it is
+  refused at the form with the reason.
+- **Given** a bay, rate or kind of work that has been used, **when** I retire
+  it, **then** it takes no new work and old work reads the same; the default
+  tax rate cannot be retired and an invoiced rate keeps its percentage.
+- **Given** any change, **when** it is saved, **then** the audit log has who,
+  when, what it was and what it became.
+
+### P2 — Write the plan into the diary
+
+**As** a manager **I want** the proposed day written into the diary with one
+press **so that** the morning meeting does not retype it.
+**Size** 5 · **Satisfies** FR-4606
+
+- **Given** a proposed day, **when** I accept it, **then** each placement is a
+  booking against its job with the plan's technician, bay and times.
+- **Given** an accepted day, **when** I accept again, **then** bookings move
+  rather than double, and the next proposal treats them as fixed.
+
+## Epic Q — The vehicle's paperwork (Phase 20)
+
+### Q1 — Keep the vehicle's paperwork
+
+**As** Maria **I want** the registration certificate, MOT, insurance and
+receipts kept with the car **so that** they are there whoever services it.
+**Size** 8 · **Satisfies** FR-4701, FR-4702, FR-4703, FR-4704, FR-4705, FR-4707, FR-4708
+
+- **Given** my vehicle, **when** I add a PDF or a picture of the paper by kind,
+  **then** it is stored before the row is recorded and shown to me and to the
+  workshop that services the car, and to nobody else.
+- **Given** an MOT running out, **when** the workshop opens reminders, **then**
+  it is listed, and an old certificate under a newer one is not counted.
+- **Given** a document, **when** I remove it, **then** a reason is required, the
+  row stays with it, and the removal is audited.
+
+### Q2 — Ask for my usual technician
+
+**As** Maria **I want** the workshop to know which technician I ask for **so
+that** I am not asked every time.
+**Size** 2 · **Satisfies** FR-4706
+
+- **Given** my customer record, **when** the workshop sets my preferred
+  technician, **then** that person is preselected on my next job, and the
+  diary has the last word.
+
+---
+
 ## Story map
 
 ```
@@ -518,6 +739,14 @@ I know when it will be ready.
                                            C5 transfer
 
   Cross-cutting: A1 sign in - A2 tenancy - A3 roles - J1 dashboard
+
+  LATER PHASES (15.1 to 20)
+  -------------------------
+  K1 claim a car     L1 lifecycle     M1 payables      N1 ask
+  K2 confirm email   L2 pay/credit    M2 payroll       N2 summary
+  K3 dead buttons                     M3 fleets
+  O1 the network     P1 settings      Q1 paperwork
+  O2 the API         P2 accept plan   Q2 preferred technician
 ```
 
 The bottom row is the differentiator. Everything above it is table stakes that
