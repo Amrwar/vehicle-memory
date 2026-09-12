@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { Mark } from '@/components/marketing';
 import { currentUser, startSession } from '@/lib/auth';
+import { requestVerification } from '@/lib/credentials';
 import { createWorkshop } from '@/lib/onboarding';
 
 export const metadata: Metadata = {
@@ -65,6 +66,12 @@ async function submit(formData: FormData) {
 
     redirect(`/signup?${params.toString()}`);
   }
+
+  // Sent here rather than inside createWorkshop, which runs in one transaction
+  // and has no business queueing a message that a rollback could not take
+  // back. A failure to send is not a failure to sign up: the banner on the
+  // dashboard offers the link again, so somebody is never stranded by it.
+  await requestVerification(outcome.userId!).catch(() => undefined);
 
   await startSession(outcome.userId!);
   redirect('/dashboard?welcome=1');
