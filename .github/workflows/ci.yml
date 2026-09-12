@@ -258,6 +258,12 @@ jobs:
       - name: Verify the money cycle
         run: npx tsx infra/scripts/verify-money.ts
 
+      # A supplier billed, approved and paid across two bills with a remittance
+      # advice; a period of hours handed to payroll as a file and marked paid;
+      # a fleet's month invoiced as one document at the agreed discount.
+      - name: Verify suppliers, payroll and fleet invoicing
+        run: npx tsx infra/scripts/verify-erp.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

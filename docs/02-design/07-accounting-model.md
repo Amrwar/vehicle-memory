@@ -150,6 +150,52 @@ Revenue is not touched here, because the credit note already reversed it.
 Touching it twice is how a refund is double-counted, and a refund without a
 credit note behind it is refused by the application and by the schema.
 
+### 3.10 Supplier bill booked
+
+The debt enters the books when the supplier's invoice is booked against the
+order. Stock and reclaimable input tax go up; payable goes up by the total:
+
+```
+  Dr  1200 Stock on hand                 100.00
+  Dr  2110 Tax receivable                 20.00
+      Cr  2000 Accounts payable                   120.00
+
+  source: SupplierBill sb_..., reference is the supplier's own invoice number
+```
+
+This is a deliberate departure from 3.4, which has stock debited when the
+goods arrive. The receipt path does not yet post, so the bill carries both
+sides for now. When receipt-time posting lands, booking the bill posts only the
+variance between what arrived and what was billed. Named here so it is a known
+gap rather than a surprise.
+
+### 3.11 Supplier paid
+
+One payment usually settles several bills. The allocation to each is stored,
+and the remittance advice sent to the supplier is that list:
+
+```
+  Dr  2000 Accounts payable              180.00
+      Cr  1000 Bank                                180.00
+
+  source: SupplierPayment sp_..., allocations to sb_... and sb_...
+```
+
+Cash comes out of 1010 rather than 1000.
+
+### 3.12 Wages
+
+Gross pay, when the payroll run is marked paid. The deductions between gross
+and net and the employer's own contributions belong to the payroll software's
+own journal and are posted from its report, not guessed at here:
+
+```
+  Dr  6000 Wages                        1591.25
+      Cr  1000 Bank                               1591.25
+
+  source: PayrollRun pr_..., one entry per run
+```
+
 ## 4. Job profitability
 
 Derived from the postings, not computed separately, so the figure on the job

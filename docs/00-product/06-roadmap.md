@@ -929,10 +929,23 @@ justifies it. Approving an estimate now puts the approved lines on the job,
 which is what made the rest possible. `npm run verify:money` walks the whole
 cycle and checks the ledger after every step.
 
-**Still open in this phase.** Supplier payments and remittances, payroll
-export, and fleet pricing with consolidated invoicing. Card payment through a
-provider still needs the provider chosen; card payments taken on the counter
-terminal are recorded today.
+**Status, part two: the edges.** A supplier's bill is booked against its
+order, approved by somebody who has checked it against the delivery, and paid,
+usually several at a time: the payment spreads oldest-due first across the
+approved bills, every penny lands on one, and the supplier is sent a
+remittance advice naming each. Approved timesheets for a period are handed to
+payroll as a plain CSV, once, and marking the run paid posts gross wages; the
+product never calculates tax, it hands hours to the software that does. A
+fleet has agreed terms, a labour and a parts discount applied at invoice time
+so the job keeps its list figures, and one invoice a month for everything
+completed, each line naming the vehicle and job it came from.
+`npm run verify:erp` walks all three and checks the ledger after each.
+
+**Still open in this phase.** Card payment through a provider needs the
+provider chosen; card payments taken on the counter terminal are recorded
+today. Stock is posted when the bill is booked rather than when the goods
+arrive, which the accounting model says is the wrong moment; receipt-time
+posting is the next correction.
 
 ---
 

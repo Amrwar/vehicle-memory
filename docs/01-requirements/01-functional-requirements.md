@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4300 — Suppliers, payroll and fleets
+
+| Ref     | Requirement                                                                                                                                                               | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4301 | A supplier's bill MUST be booked against a purchase order with the supplier's own reference, once, and MUST enter payables in the ledger.                                 | 16    |
+| FR-4302 | A bill MUST be approved by a person before it can be paid, and a disputed bill MUST NOT be paid until it is approved again.                                               | 16    |
+| FR-4303 | A supplier payment MUST allocate across that supplier's approved bills oldest-due first, MUST NOT exceed any bill, and every penny MUST land on a bill.                   | 16    |
+| FR-4304 | Paying a supplier MUST post payable down and bank or cash down, and MUST send the supplier a remittance advice naming each bill and amount.                               | 16    |
+| FR-4305 | A period's approved timesheets MUST be handed to payroll as one run producing a CSV with one row per person, and the same sheet MUST NOT be run twice.                    | 16    |
+| FR-4306 | The payroll file MUST carry reference, name, period, ordinary and overtime hours and gross pay, and MUST keep a leading zero on the reference.                            | 16    |
+| FR-4307 | Marking a run paid MUST mark every sheet on it paid, MUST post gross wages against the bank, and MUST require the run to have been exported first.                        | 16    |
+| FR-4308 | A fleet agreement MUST be for a company customer, with percentage discounts on labour and parts, payment terms, and whether a PO number is required.                      | 16    |
+| FR-4309 | A consolidated invoice MUST cover a calendar month's completed, uninvoiced jobs for one fleet, apply the agreed discount at invoice time, and name the job on every line. | 16    |
+| FR-4310 | Consolidation MUST refuse a job with no purchase order number when the agreement requires one, naming the job.                                                            | 16    |
+
 ## FR-4200 — The money cycle
 
 | Ref     | Requirement                                                                                                                                        | Phase |
