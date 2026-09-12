@@ -11,7 +11,9 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { pushNow } from './outbound';
 
 /**
  * The team, against the database.
@@ -89,6 +91,47 @@ export async function inviteColleague(input: {
     },
   });
 
+  // The link is also shown on screen, and both routes matter. Reading it out
+  // over the counter is how somebody standing in the workshop gets started
+  // without waiting on a mail server; the email is how somebody who is not in
+  // the building gets it at all. For a long time only the first existed, and
+  // the page said an email was on its way when nothing had been queued.
+  const [org, inviter] = await Promise.all([
+    prisma.organization.findUnique({ where: { id: input.orgId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: input.actorUserId }, select: { name: true } }),
+  ]);
+
+  const workshop = org?.name ?? 'a workshop';
+
+  const queued = await prisma.messageLog.create({
+    data: {
+      orgId: input.orgId,
+      channel: 'EMAIL',
+      toAddress: email,
+      subject: `${inviter?.name ?? 'Somebody'} has invited you to ${workshop}`,
+      body: [
+        'Hello.',
+        '',
+        `${inviter?.name ?? 'Somebody'} has invited you to join ${workshop} on Carnet as ${describeRole(input.role)}.`,
+        ...(input.message?.trim() ? ['', `They wrote: ${input.message.trim()}`] : []),
+        '',
+        'Open this link and set your own password. Nobody else, here included, ever sees it:',
+        '',
+        `${siteUrl()}/invite/${token}`,
+        '',
+        'The link works once and expires in seven days. If you were not expecting this, ignore it and nothing happens.',
+      ].join('\n'),
+      status: 'QUEUED',
+      relatedType: 'Invitation',
+      relatedId: invitation.id,
+    },
+    select: { id: true },
+  });
+
+  // The person who sent it is standing there waiting to be asked whether it
+  // arrived.
+  await pushNow(queued.id);
+
   await audit({
     orgId: input.orgId,
     actorUserId: input.actorUserId,
@@ -99,6 +142,24 @@ export async function inviteColleague(input: {
   });
 
   return { ok: true, token };
+}
+
+/** The role as somebody outside the product would say it. */
+function describeRole(role: Role): string {
+  switch (role) {
+    case 'OWNER':
+      return 'an owner';
+    case 'MANAGER':
+      return 'a manager';
+    case 'SERVICE_ADVISOR':
+      return 'a service advisor';
+    case 'TECHNICIAN':
+      return 'a technician';
+    case 'BOOKKEEPER':
+      return 'a bookkeeper';
+    default:
+      return 'a member of the team';
+  }
 }
 
 export async function revokeInvitation(input: {

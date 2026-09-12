@@ -102,6 +102,20 @@ async function main() {
     stored.tokenHash !== invite.token && stored.tokenHash.length === 64,
   );
 
+  // The invitation was created and shown on screen, and for a long time that
+  // was all that happened: the page said an email was on its way and nothing
+  // had been queued. Anybody invited who was not standing at the counter never
+  // heard.
+  const invitationEmail = await prisma.messageLog.findFirst({
+    where: { orgId: org.id, toAddress: NEW_EMAIL, relatedType: 'Invitation' },
+    orderBy: { createdAt: 'desc' },
+    select: { body: true, subject: true, status: true },
+  });
+
+  check('an email was queued to the person invited', Boolean(invitationEmail));
+  check('it carries the link they need', invitationEmail?.body.includes(invite.token!) ?? false);
+  check('and it names the workshop', invitationEmail?.subject.includes(org.name) ?? false);
+
   const duplicate = await inviteColleague({
     orgId: org.id,
     actorUserId: owner.userId,
@@ -241,6 +255,9 @@ async function main() {
 
   /* --- clean up ------------------------------------------------------------ */
 
+  await prisma.messageLog.deleteMany({
+    where: { orgId: org.id, toAddress: { contains: `-${stamp}@probeworkshop.test` } },
+  });
   await prisma.invitation.deleteMany({
     where: { orgId: org.id, email: { contains: `-${stamp}@probeworkshop.test` } },
   });

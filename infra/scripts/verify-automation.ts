@@ -16,6 +16,8 @@ import 'dotenv/config';
 
 import { prisma } from '@carnet/db';
 
+import { draftCampaign, sendCampaign } from '../../apps/web/src/lib/automation';
+
 let failures = 0;
 let checked = 0;
 
@@ -282,6 +284,117 @@ async function main() {
         },
       }),
     );
+  }
+
+  /* --- a campaign actually sent -------------------------------------------- */
+
+  // Sent through the real path rather than read from the seed. For a long time
+  // this path wrote each customer's id into the address field, so every
+  // campaign message failed at the provider as an unusable address while the
+  // campaign reported itself as sent. The seeded rows were hand-written and
+  // never showed it.
+  const staff = await prisma.user.findFirstOrThrow({
+    where: { memberships: { some: { orgId: org.id, role: 'OWNER' } } },
+    select: { id: true },
+  });
+
+  // Somebody the campaign can genuinely reach: consented, with an address, and
+  // at least one visit. The seeded campaign stamped everybody as marketed this
+  // week, so the floor between campaigns would hold them all back; the stamp
+  // is lifted for the probe and put back afterwards. Consent is never touched,
+  // because every change to it is written to an immutable trail and a probe
+  // has no business leaving entries in it.
+  const reachable = await prisma.customer.findMany({
+    where: {
+      orgId: org.id,
+      isActive: true,
+      marketingEmailConsent: true,
+      email: { not: null },
+      jobs: { some: {} },
+    },
+    select: { id: true, lastMarketedAt: true },
+  });
+
+  await prisma.customer.updateMany({
+    where: { id: { in: reachable.map((row) => row.id) } },
+    data: { lastMarketedAt: null },
+  });
+
+  const drafted = await draftCampaign({
+    orgId: org.id,
+    userId: staff.id,
+    name: `probe-send-${Date.now()}`,
+    channel: 'EMAIL',
+    segment: [{ kind: 'visits-at-least', count: 1 }],
+    subject: 'Probe campaign',
+    body: 'A probe. If you are reading this in an inbox, a test has escaped.',
+  });
+
+  let outcome: { sent: number; suppressed: number } | null = null;
+
+  if (reachable.length === 0) {
+    console.info(
+      '  skip  nobody seeded with consent, an address and a visit; the send path is not exercised',
+    );
+  } else {
+    try {
+      outcome = await sendCampaign({ orgId: org.id, userId: staff.id, campaignId: drafted.id });
+    } catch (error) {
+      fail('a campaign can be sent through the real path', String(error));
+    }
+  }
+
+  if (outcome) {
+    const queued = await prisma.messageLog.findMany({
+      where: { orgId: org.id, relatedType: 'Campaign', relatedId: drafted.id },
+      select: { toAddress: true },
+    });
+
+    checked += 1;
+    if (queued.length !== outcome.sent) {
+      fail(
+        'one message per recipient the campaign claims',
+        `${queued.length} against ${outcome.sent}`,
+      );
+    } else {
+      ok('one message per recipient the campaign claims', `${queued.length}`);
+    }
+
+    checked += 1;
+    const misaddressed = queued.filter((row) => !row.toAddress.includes('@'));
+    if (misaddressed.length > 0) {
+      fail(
+        'every message is addressed to a mailbox, not a customer id',
+        `${misaddressed.length} of ${queued.length} carry something that is not an address`,
+      );
+    } else {
+      ok('every message is addressed to a mailbox, not a customer id', `${queued.length} checked`);
+    }
+
+    const rows = await prisma.campaignRecipient.findMany({
+      where: { campaignId: drafted.id },
+      select: { status: true, reason: true },
+    });
+
+    checked += 1;
+    const noAddress = rows.filter((row) => row.reason?.includes('No email address'));
+    ok(
+      'somebody with consent and no address is recorded as suppressed, with the reason',
+      `${noAddress.length} held back for having nowhere to send to`,
+    );
+  }
+
+  // Nothing from this reaches a provider: the rows are removed before any
+  // sweep could run, and the customers' last-marketed stamps are put back so
+  // the floor between real campaigns is not moved by a probe.
+  await prisma.messageLog.deleteMany({ where: { relatedType: 'Campaign', relatedId: drafted.id } });
+  await prisma.campaignRecipient.deleteMany({ where: { campaignId: drafted.id } });
+  await prisma.campaign.delete({ where: { id: drafted.id } });
+  for (const row of reachable) {
+    await prisma.customer.update({
+      where: { id: row.id },
+      data: { lastMarketedAt: row.lastMarketedAt },
+    });
   }
 
   console.info(

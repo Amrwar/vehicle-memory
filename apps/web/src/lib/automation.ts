@@ -546,13 +546,18 @@ export async function sendCampaign(input: {
   const members = await segmentMembers(input.orgId, now);
   const segment = buildSegment(members, rules, channel);
 
-  const lastMarketed = new Map(
-    (
-      await prisma.customer.findMany({
-        where: { id: { in: segment.members.map((member) => member.customerId) } },
-        select: { id: true, lastMarketedAt: true },
-      })
-    ).map((row) => [row.id, row.lastMarketedAt]),
+  const people = await prisma.customer.findMany({
+    where: { id: { in: segment.members.map((member) => member.customerId) } },
+    select: { id: true, lastMarketedAt: true, email: true, mobile: true },
+  });
+
+  const lastMarketed = new Map(people.map((row) => [row.id, row.lastMarketedAt]));
+
+  // Where the message is actually going. This used to write the customer's id
+  // into the address field, so every campaign message reached the sender,
+  // failed as an unusable address, and reported itself as sent.
+  const addressOf = new Map(
+    people.map((row) => [row.id, (channel === 'EMAIL' ? row.email : row.mobile) ?? null]),
   );
 
   const sent: string[] = [];
@@ -569,8 +574,24 @@ export async function sendCampaign(input: {
       now,
     });
 
-    if (decision.allowed) sent.push(member.customerId);
-    else suppressed.push({ customerId: member.customerId, reason: decision.reason });
+    if (!decision.allowed) {
+      suppressed.push({ customerId: member.customerId, reason: decision.reason });
+      continue;
+    }
+
+    // Consent without an address is still nobody reached. Recording it as
+    // suppressed with the reason is the difference between a campaign that
+    // reports four hundred sent and one that says forty of them have no
+    // address on file, which is a list somebody can go and fix.
+    if (!addressOf.get(member.customerId)) {
+      suppressed.push({
+        customerId: member.customerId,
+        reason: `No ${channel === 'EMAIL' ? 'email address' : 'mobile number'} on their record.`,
+      });
+      continue;
+    }
+
+    sent.push(member.customerId);
   }
 
   if (sent.length === 0) {
@@ -603,7 +624,7 @@ export async function sendCampaign(input: {
       data: sent.map((customerId) => ({
         orgId: input.orgId,
         channel: campaign.channel,
-        toAddress: customerId,
+        toAddress: addressOf.get(customerId)!,
         subject: campaign.subject,
         body: campaign.body,
         status: 'QUEUED' as const,
