@@ -1157,6 +1157,41 @@ files, and error tracking wired to a paid service.
 
 ---
 
+## Phase 22 — The assistant inside the workflow
+
+Phase 17 put generated text inside the workflow under one rule: it composes
+from the record and decides nothing. This phase gives that rule a face. Three
+things a person can ask for, from the pages where the question arises, and a
+ledger of what every one of them cost.
+
+**Exit.** A person asks a question, gets a draft message for a customer, or
+gets a job read back to them, from the job's page or the Ask page; every
+exchange is recorded with who, what kind and what it cost; and nothing the
+assistant writes changes a record until a person presses the button that does.
+
+**Status.** Built and proved by `npm run verify:assistant`. On a job, "Where
+does this job stand?" reads the job's state back as sentences that say what is
+blocking before anything else; "Draft a message" writes a progress update, a
+request for a decision, or a ready-for-collection note from the job's own
+facts, and a person edits it and sends it, once, to the customer's own number
+or address. On the Ask page, every question goes through the assistant so the
+exchange is recorded, and the answer is the same one the router gave before.
+
+Where a model is configured (`AI_TRANSPORT=anthropic`), it may tidy a draft,
+and its version is used only if every number and code in it is on the job;
+otherwise the plain version is, with the reason shown. The model's usage is
+recorded on the exchange, the organisation has a monthly token budget set on
+Settings (zero switches the model off), and when the budget is spent the
+assistant keeps working on the plain text. The Settings card shows exchanges
+by kind, tokens used against the budget, and a rough cost at list prices. No
+model is configured in production today, and the plain path is a complete
+feature, not a degraded one.
+
+The service adviser that suggests where to look on a fault is still not
+built, for the reason ADR-0013 gives.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

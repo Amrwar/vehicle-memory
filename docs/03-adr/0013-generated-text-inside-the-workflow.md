@@ -61,3 +61,15 @@ the record is a liability wearing the product's name.
 - The model is configured as `AI_TRANSPORT=anthropic` with `ANTHROPIC_API_KEY`
   and defaults to `none`. Production runs on `none` until somebody decides
   otherwise.
+
+## Addendum, Phase 22
+
+The assistant built in Phase 22 stays inside this decision. It adds two uses
+of generated text, a job read back to staff and a drafted message to a
+customer, and both are composed from the record by code, with a model allowed
+only to tidy the prose and its version checked against the same facts. It
+adds accountability the decision implied but did not spell out: every exchange
+is recorded with who asked, what kind it was, the words shown and the tokens
+used, and each organisation sets a monthly token budget that, when spent,
+returns the assistant to the plain text rather than refusing. Sending a draft
+is a person's press. Fault suggestion remains unbuilt.

@@ -317,13 +317,19 @@ instead, which is what they wanted and is worth more than the review.
 
 ## 19. AI inside the workflow
 
-**Missing, and deliberately last.** The three uses named are a service adviser
-suggesting where to look, a job summary written for the customer, and revenue
-observations. All three are sound because none of them decides anything.
+| Item                          | Status   | Note                                                                                |
+| ----------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| Customer summary of a job     | Built    | Composed from the job; a model may tidy it, checked against the record (Phase 17)   |
+| Revenue observations          | Built    | Arithmetic with a sentence around it; silent under five jobs (Phase 17)             |
+| A job read back to staff      | Built    | "Where does this job stand?" on the job, what is blocking first (Phase 22)          |
+| Drafted messages to customers | Built    | Progress, decision, ready; no figure the job lacks; a person sends, once (Phase 22) |
+| Every exchange recorded       | Built    | Who, kind, words, tokens, cost; a monthly budget per workshop (Phase 22)            |
+| Fault suggestion              | Deferred | Needs a corpus of symptoms against confirmed causes that does not exist (ADR-0013)  |
 
-The suggestion feature needs a corpus of symptoms against confirmed causes.
-That corpus does not exist yet, and a confident wrong suggestion on a braking
-fault is not a small error.
+The rule across the section is the one ADR-0013 states: it composes from the
+record and decides nothing. Nothing it writes changes a record until a person
+presses the button that does, and where a model is involved its output is
+checked against the record before anybody sees it.
 
 ## 20. Owner command centre
 
@@ -389,11 +395,12 @@ the sections given a single verdict:
 
 _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
-| Status  | Capabilities |
-| ------- | ------------ |
-| Built   | 139          |
-| Partial | 1            |
-| Missing | 6            |
+| Status   | Capabilities |
+| -------- | ------------ |
+| Built    | 144          |
+| Partial  | 1            |
+| Missing  | 5            |
+| Deferred | 1            |
 
 <!-- counts:end -->
 

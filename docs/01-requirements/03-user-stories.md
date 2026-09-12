@@ -2,7 +2,7 @@
 
 Stories grouped by epic. Each carries acceptance criteria in Given / When /
 Then form, a size in points, and the functional requirements it satisfies.
-Epics A to J are Phase 1. Epics K to R were written as Phases 15.1 to 21
+Epics A to J are Phase 1. Epics K to S were written as Phases 15.1 to 22
 shipped, one epic per phase, and are what those phases' verification scripts
 check. Phases 2 to 15 are traced by requirement rather than by story, a gap the
 [traceability matrix](04-traceability-matrix.md) names.
@@ -773,6 +773,47 @@ endpoints **so that** what I build against is what is running.
 
 ---
 
+## Epic S — The assistant inside the workflow (Phase 22)
+
+### S1 — Read the job back to me
+
+**As** Sara **I want** a job's state read back in plain sentences **so that** I
+can pick up a colleague's job cold and know what is blocking it.
+**Size** 5 · **Satisfies** FR-4901, FR-4907
+
+- **Given** a job, **when** I ask where it stands, **then** the first sentence
+  says whose car, what it is in for and its state, and the next says what it
+  is waiting on, if anything.
+- **Given** a question on the Ask page, **when** I ask it, **then** it is
+  routed as before and the exchange is recorded.
+
+### S2 — Draft the message, I will send it
+
+**As** Sara **I want** a message to the customer drafted from the job **so
+that** I do not retype the same update thirty times a day.
+**Size** 8 · **Satisfies** FR-4902, FR-4903, FR-4906
+
+- **Given** a job, **when** I ask for a progress update, a request for a
+  decision or a ready note, **then** the draft carries no figure the job does
+  not have.
+- **Given** a draft, **when** I edit and send it, **then** it goes once, as
+  edited, to the customer's own number or address, and cannot be sent twice.
+- **Given** a model configured, **when** its version adds a figure, **then**
+  the plain version is used and the reason is shown.
+
+### S3 — Know what the assistant is doing and spending
+
+**As** an owner **I want** every exchange recorded and a monthly budget **so
+that** the assistant is accountable and cannot run up a bill.
+**Size** 3 · **Satisfies** FR-4904, FR-4905
+
+- **Given** any exchange, **when** it happens, **then** it is recorded with who,
+  what kind, the words shown and the tokens used, and audited.
+- **Given** a spent budget, **when** somebody asks for a draft, **then** they
+  get the plain text, not a refusal; zero switches the model off.
+
+---
+
 ## Story map
 
 ```
@@ -801,6 +842,7 @@ endpoints **so that** what I build against is what is running.
   O1 the network     P1 settings      Q1 paperwork            R1 CSP    R4 backup drill
   O2 the API         P2 accept plan   Q2 preferred technician R2 breach R5 openapi
                                                               R3 rate limit
+  S1 read the job back   S2 draft, I send   S3 the budget
 ```
 
 The bottom row is the differentiator. Everything above it is table stakes that

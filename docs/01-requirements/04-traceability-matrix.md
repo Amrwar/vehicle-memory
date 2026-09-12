@@ -11,7 +11,7 @@ Legend: **Done** implemented and tested · **Partial** implemented, test gap
 recorded · **Planned** in a later phase.
 
 The story column names a story in [user stories](03-user-stories.md) where one
-exists: epics A to J for Phase 1, K to R for Phases 15.1 to 21. Where it reads
+exists: epics A to J for Phase 1, K to S for Phases 15.1 to 22. Where it reads
 P2 or P5 it names the persona the requirement was written for, from phases
 traced before stories were written for them; where it reads — there is neither,
 and the requirement is traced by code and test alone.
@@ -323,6 +323,13 @@ where the work happens.
 | FR-4804 | R4    | —                                                              | `verify-backup.ts`                                            | `verify-backup.ts` in CI                   | Done   |
 | FR-4805 | R5    | —                                                              | `openApiDocument`, `/api/v1/openapi.json`, `build-openapi.ts` | `docs:openapi:check`, `verify-network.ts`  | Done   |
 | FR-4806 | R1    | —                                                              | `next.config.ts` headers, `REQUIRED_SECURITY_HEADERS`         | `verify-headers.ts`                        | Done   |
+| FR-4901 | S1    | `AssistantExchange`                                            | `explainJob()`, `explainFor()`                                | `assistant.test.ts`, `verify-assistant.ts` | Done   |
+| FR-4902 | S2    | —                                                              | `draftMessage()`, `draftFor()`, `draftAllowances()`           | `assistant.test.ts`, `verify-assistant.ts` | Done   |
+| FR-4903 | S2    | `AssistantExchange.sentMessageId`                              | `sendDraft()`                                                 | `verify-assistant.ts`                      | Done   |
+| FR-4904 | S3    | `AssistantExchange`, `assistant_exchanges_have_words`          | `record()` in `lib/assistant.ts`                              | `verify-assistant.ts`                      | Done   |
+| FR-4905 | S3    | `Organization.assistantTokenBudget`                            | `assistantBudget()`, `budgetFor()`, `setAssistantBudget()`    | `assistant.test.ts`, `verify-assistant.ts` | Done   |
+| FR-4906 | S2    | —                                                              | `compose()` in `lib/ai.ts`, `verifyAgainstFacts()`            | `summary.test.ts`, `verify-assistant.ts`   | Done   |
+| FR-4907 | S1    | —                                                              | `askAssistant()`                                              | `verify-assistant.ts`                      | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                         | `verify-credentials.ts`                    | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                    | `verify-credentials.ts`                    | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                         | `smoke.ts`                                 | Done   |
@@ -612,9 +619,10 @@ details without a provider behind it would be worse than not having one.
 | The workshop configures itself            | 8                   | 8                      |
 | The vehicle's paperwork                   | 8                   | 8                      |
 | Before general availability               | 6                   | 6                      |
-| **Total**                                 | **345**             | **342 (99%)**          |
+| The assistant inside the workflow         | 7                   | 7                      |
+| **Total**                                 | **352**             | **349 (99%)**          |
 
-The requirements document lists 429 requirements. 84 of
+The requirements document lists 436 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4900 — The assistant inside the workflow
+
+| Ref     | Requirement                                                                                                                                                                                           | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4901 | From a job's page a person MUST be able to have the job's state read back in sentences that name what is blocking first, composed from the job's own records.                                         | 22    |
+| FR-4902 | From a job's page a person MUST be able to draft a progress update, a request for a decision or a ready-for-collection message from the job's facts, and no figure in it MUST be absent from the job. | 22    |
+| FR-4903 | A drafted message MUST be sent only by a person's press, as edited on the screen, to the customer's own number or address, and MUST NOT be sent twice.                                                | 22    |
+| FR-4904 | Every exchange with the assistant MUST be recorded with who asked, its kind, the words shown, whether a model touched them, and the tokens used, and MUST be audited.                                 | 22    |
+| FR-4905 | Each organisation MUST have a monthly token budget the owner sets, zero MUST switch the model off, and a spent budget MUST fall back to the plain text rather than refuse.                            | 22    |
+| FR-4906 | A model's version of any text MUST be used only if every number and code in it is on the record; otherwise the plain version MUST be used and the reason shown.                                       | 22    |
+| FR-4907 | A question asked through the assistant MUST be routed exactly as the Ask page routes it and MUST reach the same figure.                                                                               | 22    |
+
 ## FR-4800 — Before general availability
 
 | Ref     | Requirement                                                                                                                                                                                                                                     | Phase |
