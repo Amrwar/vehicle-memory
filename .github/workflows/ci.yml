@@ -264,6 +264,13 @@ jobs:
       - name: Verify suppliers, payroll and fleet invoicing
         run: npx tsx infra/scripts/verify-erp.ts
 
+      # Every question the command centre advertises is answered with its
+      # working and agrees with the page that computes the same figure; a
+      # question it cannot answer is refused; and the customer summary says
+      # nothing the job does not.
+      - name: Verify questions are answered from the records, or refused
+        run: npx tsx infra/scripts/verify-answers.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

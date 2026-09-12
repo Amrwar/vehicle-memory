@@ -970,6 +970,28 @@ Nothing here decides anything.
 **Exit.** An owner asks a question in words and gets a figure with the
 reasoning behind it, or a plain statement that the data cannot answer it.
 
+**Status.** Built as routing, not intelligence. The Ask page recognises a
+closed vocabulary of twelve question shapes, in the words an owner would use,
+and maps each to a calculation the product already trusts: revenue and its
+split, gross margin from the ledger, money owed and owing, cash taken, cars
+in the shop, quotes waiting, stock value, best and lapsing customers,
+services due, wages. Every answer shows its working step by step and links to
+the page that computes the same figure. A question outside the vocabulary is
+refused with the list of what can be asked. No model is involved.
+
+Two of the three planned uses of generated text are in. The dashboard opens
+with the month in sentences, arithmetic with words around it, which states a
+comparison only when both sides have enough jobs to mean anything. A completed
+job carries a summary written for the customer, composed from its own lines
+and findings; with a model configured the prose may be tidied, and the result
+is checked so that every number and part number in it exists on the job, or
+the plain version is used and the reason shown. The third, a service adviser
+suggesting where to look on a fault, is deliberately not built, and the page
+says so. See [ADR-0013](../03-adr/0013-generated-text-inside-the-workflow.md).
+`npm run verify:answers` proves every advertised question is answered, the
+figures agree with their pages, nonsense is refused, and the summary says
+nothing the job does not.
+
 ---
 
 ## Phase 18 — The network

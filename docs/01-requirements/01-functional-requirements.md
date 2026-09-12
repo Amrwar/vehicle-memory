@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4400 — Answers rather than pages
+
+| Ref     | Requirement                                                                                                                                              | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4401 | A question in words MUST be routed to an existing calculation, never interpreted by a model, and the vocabulary MUST be published on the page.           | 17    |
+| FR-4402 | Every answer MUST show its working as steps and link to the page that computes the same figure.                                                          | 17    |
+| FR-4403 | A question outside the vocabulary MUST be refused with a plain statement and the list of what can be asked, never guessed at.                            | 17    |
+| FR-4404 | Revenue observations MUST be arithmetic with a sentence around it, and MUST NOT state a comparison when either side has fewer than five jobs.            | 17    |
+| FR-4405 | A customer summary MUST be composed from the job's own lines, parts, findings and declined items, and MUST contain no reassurance that is not a finding. | 17    |
+| FR-4406 | Where a model tidies the summary, its output MUST be checked so every number and part number appears on the job, or the plain text MUST be used.         | 17    |
+| FR-4407 | Generated text MUST decide nothing: no status, posting or message MUST result from it without a person's action.                                         | 17    |
+| FR-4408 | Fault suggestion MUST NOT be offered until a corpus of symptoms against confirmed causes exists, and the interface MUST say so.                          | 17    |
+
 ## FR-4300 — Suppliers, payroll and fleets
 
 | Ref     | Requirement                                                                                                                                                               | Phase |
