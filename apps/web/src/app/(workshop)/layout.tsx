@@ -1,4 +1,5 @@
 import { landingPathFor, surfaceFor } from '@carnet/core';
+import { prisma } from '@carnet/db';
 import { redirect } from 'next/navigation';
 
 import { Suspense } from 'react';
@@ -17,7 +18,23 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
     redirect(landingPathFor(user.role));
   }
 
-  const approvalsWaiting = await db.job.count({ where: { status: 'AWAITING_APPROVAL' } });
+  // Nothing inside until the address is proven.
+  //
+  // Everything in here sends things in the workshop's name: quotes, invoices,
+  // reminders to customers. An address nobody has confirmed is how a stranger
+  // opens a business under somebody else's name and starts emailing from it.
+  // Invited colleagues and seeded accounts arrive already confirmed, so the
+  // only person who ever sees the holding page is the one who has just signed
+  // up and has a link waiting in their inbox.
+  const [approvalsWaiting, account] = await Promise.all([
+    db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
+    prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { emailVerifiedAt: true },
+    }),
+  ]);
+
+  if (!account?.emailVerifiedAt) redirect('/confirm-email');
 
   return (
     <div className="min-h-dvh">

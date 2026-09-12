@@ -67,6 +67,7 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/fleet', expectsGuidance: ['No fleets yet'] },
   { path: '/reputation', expectsGuidance: ['Nobody has answered yet'] },
   { path: '/inbox', expectsGuidance: ['Nothing has come in'] },
+  { path: '/claims', expectsGuidance: ['Nobody has asked'] },
   { path: '/bookings/new', expectsGuidance: ['No customers yet'] },
   { path: '/suppliers/new', expectsGuidance: ['Add a supplier'] },
   { path: '/ledger', expectsGuidance: ['fills itself'] },
@@ -136,6 +137,34 @@ async function main() {
   });
 
   const cookie = `carnet_session=${token}`;
+
+  // A workshop whose owner has not opened the confirmation link is shown the
+  // holding page and nothing else. Everything inside sends things in the
+  // workshop's name, and an address nobody has proven is how a stranger opens
+  // a business under somebody else's. Checked here because this is the one
+  // probe that has a genuinely unconfirmed owner in its hands.
+  const held = await fetch(`${BASE}/dashboard`, { headers: { cookie }, redirect: 'manual' });
+  check(
+    'an unconfirmed owner is held at the confirmation page',
+    held.status >= 300 &&
+      held.status < 400 &&
+      (held.headers.get('location') ?? '').includes('/confirm-email'),
+    true,
+  );
+
+  const holding = await fetch(`${BASE}/confirm-email`, { headers: { cookie } });
+  check(
+    'and the holding page says where the link went',
+    (await holding.text()).includes(`empty-${stamp}@probeworkshop.test`),
+    true,
+  );
+
+  // The link is opened, as far as the database is concerned, and the rest of
+  // the probe walks the workshop as a confirmed owner would.
+  await prisma.user.update({
+    where: { id: outcome.userId! },
+    data: { emailVerifiedAt: new Date() },
+  });
 
   for (const page of PAGES) {
     const response = await fetch(`${BASE}${page.path}`, { headers: { cookie } });

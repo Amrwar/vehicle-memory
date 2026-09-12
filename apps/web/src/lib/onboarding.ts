@@ -150,9 +150,10 @@ export async function createWorkshop(
         email,
         name: input.contactName.trim(),
         passwordHash,
-        // Verification is a later step, not a gate on getting started. A
-        // workshop that cannot look around until it finds an email is a
-        // workshop that goes back to the spreadsheet.
+        // Proven by the link sent a moment after this commits. Until it is,
+        // the workshop layout shows the confirmation page and nothing else:
+        // an unproven address is how a stranger opens a workshop in somebody
+        // else's name, and the product sends invoices from it.
         emailVerifiedAt: null,
         memberships: {
           create: { orgId: org.id, role: 'OWNER', locationId: location.id },
