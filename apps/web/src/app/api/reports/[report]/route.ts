@@ -1,6 +1,7 @@
-import { csvFilename, csvHeaders, toCsv, type CsvColumn } from '@carnet/core';
+import { csvFilename, csvHeaders, PAYROLL_COLUMNS, toCsv, type CsvColumn } from '@carnet/core';
 
 import { requireSession } from '@/lib/guard';
+import { payrollFile } from '@/lib/payroll';
 import {
   bySource,
   partsProfitability,
@@ -26,7 +27,13 @@ const money = (minor: number) => (minor / 100).toFixed(2);
 
 export async function GET(request: Request, context: { params: Promise<{ report: string }> }) {
   const { report } = await context.params;
-  const { orgId } = await requireSession('report:operational');
+
+  // Wages are not an operational report. The people who see the ledger are
+  // not necessarily the people who see what everybody is paid, and the
+  // bookkeeper who runs payroll does not necessarily see the shop's reports.
+  const { orgId } = await requireSession(
+    report === 'payroll' ? 'payroll:read' : 'report:operational',
+  );
 
   const range = new URL(request.url).searchParams.get('range') ?? 'year';
   const period = periodFor(range);
@@ -73,6 +80,22 @@ export async function GET(request: Request, context: { params: Promise<{ report:
         { header: 'Average visit', value: (row) => money(row.averageMinor) },
         { header: 'Lapsing', value: (row) => (row.lapsing ? 'yes' : 'no') },
       ]);
+    }
+
+    case 'payroll': {
+      const runId = new URL(request.url).searchParams.get('run') ?? '';
+      const file = await payrollFile(orgId, runId);
+
+      if (!file) return new Response('No such payroll run.', { status: 404 });
+
+      return new Response(toCsv(file.rows, PAYROLL_COLUMNS), {
+        headers: csvHeaders(
+          csvFilename(
+            `Payroll ${file.run.periodEnd.toISOString().slice(0, 10)}`,
+            file.run.periodEnd,
+          ),
+        ),
+      });
     }
 
     case 'sources': {

@@ -87,6 +87,8 @@ const PAGES = [
   '/reputation',
   '/inbox',
   '/claims',
+  '/payables',
+  '/payroll',
   '/bookings/new',
   '/suppliers/new',
   '/counter',
@@ -131,6 +133,20 @@ const PUBLIC_PAGES = [
  * the second.
  */
 const NOT_FOUND_MARKER = 'NEXT_HTTP_ERROR_FALLBACK;404';
+
+/**
+ * The marks a streamed response carries when the page threw after the shell
+ * had already gone out.
+ *
+ * The shell and the loading skeleton arrive as visible markup with a 200; the
+ * page itself then fails inside the stream, and what the reader gets is a
+ * spinner that never resolves. Found the day a dev server was still holding a
+ * Prisma client from before a migration: every new page rendered its shell,
+ * threw on a model the old client did not know, and the crawler read a 200 and
+ * called it fine. In production the failure is a bare error digest; in
+ * development it is the message itself.
+ */
+const RENDER_ERROR_MARKERS = ['"digest":"', 'Cannot read properties of undefined', 'TypeError:'];
 
 /** Strips the React payload Next.js inlines, which carries the markup again. */
 function withoutScripts(html: string): string {
@@ -239,7 +255,15 @@ async function main() {
 
     checked += 1;
 
-    const html = withoutScripts(await response.text());
+    const raw = await response.text();
+
+    const errored = RENDER_ERROR_MARKERS.find((marker) => raw.includes(marker));
+    if (errored) {
+      fail(path, 'rendered its shell and then threw inside the stream', errored);
+      continue;
+    }
+
+    const html = withoutScripts(raw);
 
     const dead = deadButtons(html);
 

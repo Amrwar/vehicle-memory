@@ -24,8 +24,42 @@ import { revalidatePath } from 'next/cache';
 import { BackLink } from '@/components/back-link';
 import { audit, requireSession } from '@/lib/guard';
 import { receiveGoods } from '@/lib/inventory';
+import { bookBill, PayablesError } from '@/lib/payables';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Books the supplier's invoice against this order.
+ *
+ * Until Phase 16 a bill could only arrive through the seed. This is where the
+ * debt enters the books: stock and input tax up, payable up, and the bill sits
+ * awaiting somebody's approval before it can be paid.
+ */
+async function book(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const orderId = String(formData.get('orderId') ?? '');
+  const billed = String(formData.get('billedAt') ?? '');
+
+  try {
+    await bookBill({
+      orgId,
+      userId: user.userId,
+      orderId,
+      reference: String(formData.get('reference') ?? ''),
+      subtotal: Number(String(formData.get('subtotal') ?? '').replace(/[£,\s]/g, '')),
+      taxTotal: Number(String(formData.get('taxTotal') ?? '').replace(/[£,\s]/g, '')) || 0,
+      billedAt: billed ? new Date(`${billed}T12:00:00`) : new Date(),
+    });
+  } catch (error) {
+    if (!(error instanceof PayablesError)) throw error;
+    redirect(`/purchasing/${orderId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath(`/purchasing/${orderId}`);
+  redirect(`/purchasing/${orderId}?booked=1`);
+}
 
 export async function generateMetadata({
   params,
@@ -372,6 +406,50 @@ export default async function PurchaseOrderPage({
                 ]}
               />
             </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="Book the supplier's bill"
+              description="Their invoice number and figures, as printed"
+            />
+            <form action={book}>
+              <CardBody className="grid gap-3">
+                <input type="hidden" name="orderId" value={order.id} />
+                <label className="grid gap-1">
+                  <span className="eyebrow">Their invoice number</span>
+                  <Input name="reference" required placeholder="PMF-40128" className="font-mono" />
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-1">
+                    <span className="eyebrow">Net</span>
+                    <Input
+                      name="subtotal"
+                      inputMode="decimal"
+                      required
+                      defaultValue={toNumber(totals.subtotal).toFixed(2)}
+                      className="tabular-nums"
+                    />
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="eyebrow">VAT</span>
+                    <Input
+                      name="taxTotal"
+                      inputMode="decimal"
+                      defaultValue={(toNumber(totals.subtotal) * 0.2).toFixed(2)}
+                      className="tabular-nums"
+                    />
+                  </label>
+                </div>
+                <label className="grid gap-1">
+                  <span className="eyebrow">Dated</span>
+                  <Input name="billedAt" type="date" />
+                </label>
+                <Button type="submit" variant="secondary">
+                  Book the bill
+                </Button>
+              </CardBody>
+            </form>
           </Card>
 
           {order.bills.length > 0 ? (

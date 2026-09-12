@@ -1,23 +1,34 @@
 import {
+  Alert,
   Badge,
   Button,
   Card,
   CardBody,
+  CardHeader,
   EmptyState,
+  Field,
+  Input,
   Mileage,
   Money,
   PageHeader,
   Registration,
+  Select,
   StatRow,
   StatTile,
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
-import { fleetDetail } from '@/lib/fleet';
-import { requireSession } from '@/lib/guard';
+import {
+  consolidateMonth,
+  fleetAgreementFor,
+  fleetDetail,
+  FleetError,
+  saveFleetAgreement,
+} from '@/lib/fleet';
+import { can, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Fleet' };
 export const dynamic = 'force-dynamic';
@@ -36,12 +47,85 @@ function date(value: Date | null): string {
     : '—';
 }
 
-export default async function FleetDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { orgId } = await requireSession('customer:read');
-  const { id } = await params;
+/** Saves the fleet's terms. */
+async function saveTerms(formData: FormData) {
+  'use server';
 
-  const fleet = await fleetDetail(orgId, id);
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  try {
+    await saveFleetAgreement({
+      orgId,
+      userId: user.userId,
+      customerId,
+      agreement: {
+        labourDiscountPct: Number(formData.get('labourDiscountPct') ?? 0) || 0,
+        partsDiscountPct: Number(formData.get('partsDiscountPct') ?? 0) || 0,
+        paymentTermsDays: Number(formData.get('paymentTermsDays') ?? 30) || 30,
+        consolidateMonthly: formData.get('consolidateMonthly') === 'on',
+        purchaseOrderRequired: formData.get('purchaseOrderRequired') === 'on',
+        notes: String(formData.get('notes') ?? ''),
+      },
+    });
+  } catch (error) {
+    if (!(error instanceof FleetError)) throw error;
+    redirect(`/fleet/${customerId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/fleet/${customerId}?done=terms`);
+}
+
+/** Issues one invoice for a month of the fleet's completed work. */
+async function invoiceMonth(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('invoice:write');
+  const customerId = String(formData.get('customerId') ?? '');
+  const [year, month] = String(formData.get('month') ?? '')
+    .split('-')
+    .map((part) => Number(part));
+
+  let invoiceId: string;
+
+  try {
+    invoiceId = await consolidateMonth({
+      orgId,
+      userId: user.userId,
+      customerId,
+      year: year || new Date().getFullYear(),
+      month: month || new Date().getMonth() + 1,
+    });
+  } catch (error) {
+    if (!(error instanceof FleetError)) throw error;
+    redirect(`/fleet/${customerId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}`);
+}
+
+export default async function FleetDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ problem?: string; done?: string }>;
+}) {
+  const { orgId, user } = await requireSession('customer:read');
+  const { id } = await params;
+  const notice = await searchParams;
+
+  const [fleet, agreement] = await Promise.all([
+    fleetDetail(orgId, id),
+    fleetAgreementFor(orgId, id),
+  ]);
   if (!fleet) notFound();
+
+  // Last month by default: the month that has finished is the one to invoice.
+  const lastMonth = new Date();
+  lastMonth.setDate(1);
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const defaultMonth = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
 
   return (
     <>
@@ -167,6 +251,128 @@ export default async function FleetDetailPage({ params }: { params: Promise<{ id
           ))}
         </div>
       )}
+
+      {notice.problem ? (
+        <Alert tone="danger" className="mt-6">
+          {notice.problem}
+        </Alert>
+      ) : null}
+
+      {notice.done === 'terms' ? (
+        <Alert tone="success" className="mt-6">
+          Terms saved. They apply to every invoice raised for this fleet from now on.
+        </Alert>
+      ) : null}
+
+      {/* The two things a fleet negotiates and the one thing it cares about:
+          a discount on labour, a discount on parts, and not receiving fifty
+          invoices. Phase 9 named both as missing. */}
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <Card>
+          <CardHeader
+            title="Agreed terms"
+            description={
+              agreement
+                ? 'Applied at invoice time, so the job keeps its list figures.'
+                : 'None yet. Without terms this fleet pays list price like anybody else.'
+            }
+          />
+          <form action={saveTerms}>
+            <CardBody className="grid gap-3">
+              <input type="hidden" name="customerId" value={fleet.customer.id} />
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field label="Labour discount" hint="%">
+                  <Input
+                    name="labourDiscountPct"
+                    inputMode="decimal"
+                    defaultValue={agreement ? Number(agreement.labourDiscountPct) : 0}
+                    className="tabular-nums"
+                  />
+                </Field>
+                <Field label="Parts discount" hint="%">
+                  <Input
+                    name="partsDiscountPct"
+                    inputMode="decimal"
+                    defaultValue={agreement ? Number(agreement.partsDiscountPct) : 0}
+                    className="tabular-nums"
+                  />
+                </Field>
+                <Field label="Payment terms" hint="days">
+                  <Input
+                    name="paymentTermsDays"
+                    inputMode="numeric"
+                    defaultValue={agreement?.paymentTermsDays ?? 30}
+                    className="tabular-nums"
+                  />
+                </Field>
+              </div>
+              <label className="flex items-start gap-2.5 text-[13px] leading-relaxed">
+                <input
+                  type="checkbox"
+                  name="consolidateMonthly"
+                  defaultChecked={agreement?.consolidateMonthly ?? true}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
+                />
+                <span>One invoice a month for everything completed, rather than one per job</span>
+              </label>
+              <label className="flex items-start gap-2.5 text-[13px] leading-relaxed">
+                <input
+                  type="checkbox"
+                  name="purchaseOrderRequired"
+                  defaultChecked={agreement?.purchaseOrderRequired ?? false}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
+                />
+                <span>Their purchase order number must be on every job before it is invoiced</span>
+              </label>
+              <Field label="Notes" hint="Optional">
+                <Input name="notes" defaultValue={agreement?.notes ?? ''} />
+              </Field>
+              {can(user.role, 'customer:write') ? (
+                <Button type="submit" variant="secondary">
+                  {agreement ? 'Update the terms' : 'Save the terms'}
+                </Button>
+              ) : null}
+            </CardBody>
+          </form>
+        </Card>
+
+        <Card className={agreement ? 'border-(--brand)' : undefined}>
+          <CardHeader
+            title="Invoice a month"
+            description="Every job completed in the month, on one invoice, at the agreed terms."
+          />
+          <form action={invoiceMonth}>
+            <CardBody className="grid gap-3">
+              <input type="hidden" name="customerId" value={fleet.customer.id} />
+              <Field label="Month">
+                <Select name="month" defaultValue={defaultMonth}>
+                  {Array.from({ length: 6 }, (_, offset) => {
+                    const when = new Date();
+                    when.setDate(1);
+                    when.setMonth(when.getMonth() - offset);
+                    const value = `${when.getFullYear()}-${String(when.getMonth() + 1).padStart(2, '0')}`;
+                    return (
+                      <option key={value} value={value}>
+                        {when.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+                      </option>
+                    );
+                  })}
+                </Select>
+              </Field>
+              <p className="text-[13px] leading-relaxed text-(--text-soft)">
+                Jobs already invoiced on their own are left alone. Each line on the invoice names
+                the vehicle and the job it came from, so their accounts department can tie a line to
+                a van.
+              </p>
+              {can(user.role, 'invoice:write') ? (
+                <Button type="submit" variant="primary" disabled={!agreement}>
+                  {agreement ? 'Issue the month’s invoice' : 'Save the terms first'}
+                </Button>
+              ) : null}
+            </CardBody>
+          </form>
+        </Card>
+      </div>
     </>
   );
 }

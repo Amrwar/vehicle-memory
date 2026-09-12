@@ -64,6 +64,8 @@ export type NavIconName =
   | 'reputation'
   | 'inbox'
   | 'claims'
+  | 'payables'
+  | 'payroll'
   | 'crm'
   | 'audit';
 
@@ -133,6 +135,23 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M9.4 10h8" />
       <path d="M14.2 10v2.8" />
       <path d="M17.4 10v2.2" />
+    </>
+  ),
+  // An envelope leaving: money going out to a supplier, with a note in it.
+  payables: (
+    <>
+      <path d="M3 5.5h14v9.5H3z" />
+      <path d="M3 5.5l7 5.5 7-5.5" />
+      <path d="M10 15v3" />
+    </>
+  ),
+  // A pay slip: a sheet with two lines and a total.
+  payroll: (
+    <>
+      <path d="M5 2.8h10v14.4H5z" />
+      <path d="M7.5 6.5h5" />
+      <path d="M7.5 9.5h5" />
+      <path d="M7.5 13h3" />
     </>
   ),
   // A warning triangle: somebody else's problem that becomes yours.

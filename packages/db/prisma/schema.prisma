@@ -62,6 +62,9 @@ model Organization {
   payments            Payment[]
   creditNotes         CreditNote[]
   refunds             Refund[]
+  supplierPayments    SupplierPayment[]
+  payrollRuns         PayrollRun[]
+  fleetAgreements     FleetAgreement[]
   taxRates            TaxRate[]
   sequences           DocumentSequence[]
   messages            MessageLog[]
@@ -207,6 +210,8 @@ model User {
   estimatesCreated    Estimate[]
   paymentsRecorded    Payment[]
   refundsRecorded     Refund[]             @relation("RefundRecorder")
+  supplierPaymentsRecorded SupplierPayment[] @relation("SupplierPaymentRecorder")
+  payrollRunsCreated  PayrollRun[]         @relation("PayrollRunCreator")
   bookingTechnician   Booking[]
   // Passport
   ownedVehicles       VehicleOwnership[]
@@ -746,6 +751,7 @@ model Customer {
   invoices           Invoice[]
   payments           Payment[]
   refunds            Refund[]
+  fleetAgreement     FleetAgreement?
   consentChanges     ConsentChange[]
   campaignRecipients CampaignRecipient[]
   reviewRequests     ReviewRequest[]
@@ -935,6 +941,7 @@ model Job {
   inspections      Inspection[]
   estimates        Estimate[]
   invoices         Invoice[]
+  invoiceLines     InvoiceLine[]     @relation("InvoiceLineJob")
   purchaseRequests PurchaseRequest[]
   warranties       Warranty[]
   warrantyClaims   WarrantyClaim[]   @relation("ClaimRemedy")
@@ -1573,10 +1580,17 @@ model InvoiceLine {
   lineTotal   Decimal  @default(0) @db.Decimal(12, 2)
   sortOrder   Int      @default(0)
 
+  /// The job this line came from, when the invoice covers several. A
+  /// consolidated fleet invoice has one job behind each line and none behind
+  /// the invoice itself.
+  jobId       String?
+
   invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+  job     Job?     @relation("InvoiceLineJob", fields: [jobId], references: [id], onDelete: SetNull)
 
   @@index([invoiceId, sortOrder])
+  @@index([jobId])
   @@map("invoice_lines")
 }
 
@@ -1664,6 +1678,109 @@ model Refund {
   @@index([orgId, refundedAt])
   @@index([invoiceId])
   @@map("refunds")
+}
+
+/// Money going to a supplier. Phase 16.
+///
+/// One payment can settle several bills, and one bill can be settled by
+/// several payments, so the link between them is its own table with an
+/// amount on it. A remittance advice is a list of those allocations, which is
+/// why they are stored rather than derived.
+model SupplierPayment {
+  id               String        @id @default(cuid())
+  orgId            String
+  supplierId       String
+  amount           Decimal       @db.Decimal(12, 2)
+  method           PaymentMethod @default(BANK_TRANSFER)
+  reference        String?
+  paidAt           DateTime      @default(now())
+  note             String?
+  recordedByUserId String?
+  createdAt        DateTime      @default(now())
+
+  org         Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier    Supplier                    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  recordedBy  User?                       @relation("SupplierPaymentRecorder", fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  allocations SupplierPaymentAllocation[]
+
+  @@index([orgId, paidAt])
+  @@index([supplierId])
+  @@map("supplier_payments")
+}
+
+model SupplierPaymentAllocation {
+  id        String  @id @default(cuid())
+  paymentId String
+  billId    String
+  amount    Decimal @db.Decimal(12, 2)
+
+  payment SupplierPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  bill    SupplierBill    @relation(fields: [billId], references: [id], onDelete: Restrict)
+
+  @@unique([paymentId, billId])
+  @@index([billId])
+  @@map("supplier_payment_allocations")
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  EXPORTED
+  PAID
+}
+
+/// One pay period, exported once. Phase 16.
+///
+/// The product does not run payroll. It hands approved timesheets to whatever
+/// does, as a file, and records that it did. The run exists so the same
+/// timesheets cannot be handed over twice and so the wages posting has a
+/// single document behind it.
+model PayrollRun {
+  id              String           @id @default(cuid())
+  orgId           String
+  periodStart     DateTime
+  periodEnd       DateTime
+  status          PayrollRunStatus @default(DRAFT)
+  employeeCount   Int              @default(0)
+  gross           Decimal          @default(0) @db.Decimal(12, 2)
+  exportedAt      DateTime?
+  paidAt          DateTime?
+  createdByUserId String?
+  createdAt       DateTime         @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy  User?        @relation("PayrollRunCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  timesheets Timesheet[]
+
+  @@unique([orgId, periodStart, periodEnd])
+  @@index([orgId, status])
+  @@map("payroll_runs")
+}
+
+/// What a fleet customer has agreed. Phase 16.
+///
+/// One row per company customer, and only for those who have negotiated
+/// terms. Its absence means list price, which is how every other customer is
+/// treated and how a fleet without an agreement should be too.
+model FleetAgreement {
+  id                    String   @id @default(cuid())
+  orgId                 String
+  customerId            String   @unique
+  labourDiscountPct     Decimal  @default(0) @db.Decimal(5, 2)
+  partsDiscountPct      Decimal  @default(0) @db.Decimal(5, 2)
+  paymentTermsDays      Int      @default(30)
+  /// One invoice a month for everything completed, rather than one per job.
+  consolidateMonthly    Boolean  @default(true)
+  /// Whether their purchase order number has to be on every job.
+  purchaseOrderRequired Boolean  @default(false)
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("fleet_agreements")
 }
 
 // ===========================================================================
@@ -1903,9 +2020,10 @@ model Supplier {
   isActive         Boolean  @default(true)
   createdAt        DateTime @default(now())
 
-  org            Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org            Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   purchaseOrders PurchaseOrder[]
   bills          SupplierBill[]
+  payments       SupplierPayment[]
   warranties     Warranty[]
 
   @@unique([orgId, name])
@@ -2038,7 +2156,8 @@ model SupplierBill {
 
   org      Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   supplier Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  order    PurchaseOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  order       PurchaseOrder?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  allocations SupplierPaymentAllocation[]
 
   @@unique([orgId, reference])
   @@index([orgId, status])
@@ -2277,6 +2396,9 @@ model Timesheet {
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   employee   Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   approvedBy User?        @relation("TimesheetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  /// The run that handed this sheet to payroll. Set once, when it is exported.
+  payrollRunId String?
+  payrollRun   PayrollRun? @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
 
   @@unique([employeeId, periodStart])
   @@index([orgId, status])
