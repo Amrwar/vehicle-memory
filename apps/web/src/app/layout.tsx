@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import type { Metadata, Viewport } from 'next';
 import { Archivo, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
 
@@ -62,7 +63,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The per-request nonce the proxy set, so the one inline script the product
+  // writes itself is allowed by the policy the proxy sent.
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <html
       lang="en-GB"
@@ -72,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Stamps the stored theme on <html> before anything is drawn. Without
             it, a dark-mode user gets a white flash on every cold load. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
         <a

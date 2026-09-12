@@ -12,6 +12,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { hashPassword } from './auth';
+import { breachedPasswordProblem } from './breach';
 import { audit } from './guard';
 import { env } from './env';
 import { pushNow } from './outbound';
@@ -187,6 +188,9 @@ export async function redeemReset(input: {
   const check = checkPassword(input.password, row!.user.email);
 
   if (!check.ok) throw new TokenError('WEAK_PASSWORD', check.problem!);
+
+  const breached = await breachedPasswordProblem(input.password);
+  if (breached) throw new TokenError('WEAK_PASSWORD', breached);
 
   const passwordHash = await hashPassword(input.password);
 

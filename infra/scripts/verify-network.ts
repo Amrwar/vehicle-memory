@@ -21,11 +21,18 @@
 
 import 'dotenv/config';
 
-import { ApiKeyError, NetworkError, validateVin, WITHHELD_KEYS } from '@carnet/core';
+import {
+  API_CALLS_PER_WINDOW,
+  ApiKeyError,
+  NetworkError,
+  validateVin,
+  WITHHELD_KEYS,
+} from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { GET as getInvoices } from '../../apps/web/src/app/api/v1/invoices/route';
 import { GET as getJobs } from '../../apps/web/src/app/api/v1/jobs/route';
+import { GET as getOpenApi } from '../../apps/web/src/app/api/v1/openapi.json/route';
 import { GET as getVehicle } from '../../apps/web/src/app/api/v1/vehicles/[vin]/route';
 import { apiKeysFor, createApiKey, revokeApiKey } from '../../apps/web/src/lib/api-keys';
 import { createJob, vehicleOption } from '../../apps/web/src/lib/jobs';
@@ -480,6 +487,36 @@ async function main() {
   } finally {
     await prisma.vehicle.delete({ where: { id: theirsOnly.id } });
   }
+
+  console.info('\nA thousand calls an hour');
+
+  await prisma.apiKey.update({
+    where: { id: key.id },
+    data: { windowStartedAt: new Date(), windowCount: API_CALLS_PER_WINDOW },
+  });
+  const throttled = await getJobs(request('/api/v1/jobs', key.token));
+  check('the thousand-and-first call is refused', throttled.status, 429);
+  check('  with a Retry-After', Number(throttled.headers.get('retry-after')) > 0, true);
+  check('  and says why', ((await throttled.json()) as { error: string }).error, 'RATE_LIMITED');
+  await prisma.apiKey.update({
+    where: { id: key.id },
+    data: {
+      windowStartedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      windowCount: API_CALLS_PER_WINDOW,
+    },
+  });
+  const renewed = await getJobs(request('/api/v1/jobs', key.token));
+  check('an hour later the window has reset', renewed.status, 200);
+
+  console.info('\nThe document');
+  const doc = await getOpenApi();
+  const paths = Object.keys(((await doc.json()) as { paths: Record<string, unknown> }).paths);
+  check('the API document lists every endpoint', paths, [
+    '/jobs',
+    '/invoices',
+    '/vehicles/{vin}',
+    '/openapi.json',
+  ]);
 
   const used = await prisma.apiKey.findUniqueOrThrow({
     where: { id: key.id },

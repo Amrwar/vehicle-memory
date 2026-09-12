@@ -78,6 +78,14 @@ const schema = z.object({
 
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
 
+  // Refuse a password that has already leaked, by k-anonymity against Have I
+  // Been Pwned. On in production; off elsewhere so tests and probes do not
+  // call a third party. The check fails open and logs when the service is
+  // unreachable.
+  PASSWORD_BREACH_CHECK: z
+    .enum(['on', 'off'])
+    .default(process.env.NODE_ENV === 'production' ? 'on' : 'off'),
+
   // Generated text is a port, like mail. 'none' means every summary is the
   // plain one composed from the record, which is a complete feature rather
   // than a degraded one. 'anthropic' lets a model tidy the prose, and its

@@ -1,8 +1,10 @@
 import {
+  API_CALLS_PER_WINDOW,
   ApiKeyError,
   assertKeyNameable,
   assertKeyUsable,
   bearerToken,
+  decideRate,
   hashApiKey,
   issueApiKey,
 } from '@carnet/core';
@@ -106,12 +108,28 @@ export async function authenticateApiKey(
 
   const key = await prisma.apiKey.findUnique({
     where: { keyHash: hashApiKey(token) },
-    select: { id: true, orgId: true, revokedAt: true },
+    select: { id: true, orgId: true, revokedAt: true, windowStartedAt: true, windowCount: true },
   });
 
   assertKeyUsable(key);
 
-  await prisma.apiKey.update({ where: { id: key!.id }, data: { lastUsedAt: new Date() } });
+  // A thousand calls an hour per key. The window is written back with the
+  // use, so the count and the last use are one row touch.
+  const now = new Date();
+  const rate = decideRate(key!, now);
+
+  await prisma.apiKey.update({
+    where: { id: key!.id },
+    data: { lastUsedAt: now, ...rate.next },
+  });
+
+  if (!rate.allowed) {
+    throw new ApiKeyError(
+      'RATE_LIMITED',
+      `This key has made its ${API_CALLS_PER_WINDOW} calls this hour. Try again after ${rate.resetAt.toISOString()}.`,
+      rate.retryAfterSeconds,
+    );
+  }
 
   return { orgId: key!.orgId, keyId: key!.id };
 }
@@ -119,8 +137,19 @@ export async function authenticateApiKey(
 /** The shape every refusal takes, so an integrator can rely on it. */
 export function apiRefusal(error: unknown): Response {
   if (error instanceof ApiKeyError) {
-    const status = error.code === 'MISSING' ? 401 : error.code === 'NO_NAME' ? 400 : 403;
-    return Response.json({ error: error.code, message: error.message }, { status });
+    const status =
+      error.code === 'MISSING'
+        ? 401
+        : error.code === 'NO_NAME'
+          ? 400
+          : error.code === 'RATE_LIMITED'
+            ? 429
+            : 403;
+    const headers: Record<string, string> = {};
+    if (error.code === 'RATE_LIMITED' && error.retryAfterSeconds) {
+      headers['retry-after'] = String(error.retryAfterSeconds);
+    }
+    return Response.json({ error: error.code, message: error.message }, { status, headers });
   }
 
   return Response.json(

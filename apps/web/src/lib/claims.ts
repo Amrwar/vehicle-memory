@@ -14,6 +14,7 @@ import { prisma } from '@carnet/db';
 
 import { hashPassword } from './auth';
 import { requestVerification } from './credentials';
+import { breachedPasswordProblem } from './breach';
 import { audit } from './guard';
 import { pushNow } from './outbound';
 
@@ -54,6 +55,9 @@ export async function registerCustomer(input: {
   // that resets it.
   const password = checkPassword(input.password, email);
   if (!password.ok) throw new ClaimError('NO_REASON', password.problem!);
+
+  const breached = await breachedPasswordProblem(input.password);
+  if (breached) throw new ClaimError('NO_REASON', breached);
 
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
 

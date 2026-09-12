@@ -5,3 +5,6 @@ coverage
 packages/db/src/generated
 package-lock.json
 *.md.tpl
+
+# Generated from the registry beside the API handlers; formatted by JSON.stringify so the check can compare bytes.
+docs/02-design/openapi.json

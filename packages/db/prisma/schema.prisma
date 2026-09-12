@@ -1860,6 +1860,9 @@ model ApiKey {
   createdByUserId String?
   lastUsedAt      DateTime?
   revokedAt       DateTime?
+  /// Fixed-window rate limit: calls in the window that began at windowStartedAt. FR-4803.
+  windowStartedAt DateTime?
+  windowCount     Int       @default(0)
   createdAt       DateTime  @default(now())
 
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)

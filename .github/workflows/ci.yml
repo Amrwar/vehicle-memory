@@ -125,6 +125,16 @@ jobs:
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 
+      # The runbook says untested backups are not backups. Dump the seeded
+      # database with the server's own tools, restore into a fresh one, and
+      # check every row came back and every chain still verifies in the copy.
+      - name: Restore a backup and check it
+        env:
+          PG_DUMP: docker exec ${{ job.services.postgres.id }} pg_dump
+          PG_RESTORE: docker exec -i ${{ job.services.postgres.id }} pg_restore
+          PSQL: docker exec ${{ job.services.postgres.id }} psql
+        run: npx tsx infra/scripts/verify-backup.ts
+
       - name: Verify inventory arithmetic
         # Reseeds first: verify-integrity leaves an account row behind, and the
         # inventory check asserts on exact opening balances.
@@ -292,6 +302,16 @@ jobs:
       - name: Verify the vehicle's paperwork
         run: npx tsx infra/scripts/verify-documents.ts
 
+      # The API's document is generated from the registry beside the handlers
+      # and committed; a handler without an entry, or a stale copy, fails here.
+      - name: The API document describes every route
+        run: npm run docs:openapi:check
+
+      # A password that has already leaked is refused with a reason, and the
+      # check fails open when the range service cannot be reached.
+      - name: Verify the breached-password check
+        run: npx tsx infra/scripts/verify-hardening.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
@@ -341,6 +361,12 @@ jobs:
 
       - name: Smoke test every route, every role
         run: npx tsx infra/scripts/smoke.ts http://localhost:3000
+
+      # The security model promises a Content Security Policy on every page.
+      # Every response is checked for it, with a per-request nonce that the
+      # page's own inline script carries and no 'unsafe-inline' for scripts.
+      - name: Security headers on every response
+        run: npx tsx infra/scripts/verify-headers.ts http://localhost:3000
 
       # Empty states are the part nobody designs, because the demo data always
       # has rows. The first person to see them is a real workshop on their

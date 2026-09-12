@@ -10,6 +10,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { hashPassword } from './auth';
+import { breachedPasswordProblem } from './breach';
 
 /**
  * Opening a workshop.
@@ -89,6 +90,12 @@ export async function createWorkshop(
 
   const slug = uniqueSlug(input.workshopName, taken);
   const plan = planFor(options.plan ?? 'CORE').id;
+
+  // A password that has already leaked is refused the way a short one is:
+  // as a problem on the field, so the form says why.
+  const breached = await breachedPasswordProblem(input.password);
+  if (breached) return { ok: false, problems: [{ field: 'password', message: breached }] };
+
   const passwordHash = await hashPassword(input.password);
 
   const userId = await prisma.$transaction(async (tx) => {

@@ -35,8 +35,10 @@ export function bearerToken(header: string | null): string | null {
 
 export class ApiKeyError extends Error {
   constructor(
-    readonly code: 'NO_NAME' | 'REVOKED' | 'UNKNOWN' | 'MISSING',
+    readonly code: 'NO_NAME' | 'REVOKED' | 'UNKNOWN' | 'MISSING' | 'RATE_LIMITED',
     message: string,
+    /** For RATE_LIMITED: whole seconds until the window resets. */
+    readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = 'ApiKeyError';
