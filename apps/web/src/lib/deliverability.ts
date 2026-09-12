@@ -48,15 +48,24 @@ export async function recordDeliveryEvent(input: {
     if (seen) return { applied: false, reason: 'Already recorded.' };
   }
 
-  // Matched on the provider's reference where there is one, and otherwise on
-  // the address and the most recent message sent to it. The second is a guess
-  // and is only used because some providers omit the reference on complaints.
-  const message = input.messageRef
+  // Matched on the provider's reference first, then on the address.
+  //
+  // Both are needed, and the reason is worth writing down. The reference the
+  // queue stores is whatever the transport handed back, which over SMTP is the
+  // message id the mail server generated. The reference a webhook quotes is
+  // the provider's own id for the same message. They are two names for one
+  // thing and they do not match, so a reference lookup alone finds nothing and
+  // every delivery report floats free of the message it describes.
+  const byReference = input.messageRef
     ? await prisma.messageLog.findFirst({
         where: { orgId: input.orgId, providerRef: input.messageRef },
         select: { id: true, status: true, toAddress: true },
       })
-    : input.toAddress
+    : null;
+
+  const message =
+    byReference ??
+    (input.toAddress
       ? await prisma.messageLog.findFirst({
           where: {
             orgId: input.orgId,
@@ -66,7 +75,7 @@ export async function recordDeliveryEvent(input: {
           orderBy: { sentAt: 'desc' },
           select: { id: true, status: true, toAddress: true },
         })
-      : null;
+      : null);
 
   const address = (input.toAddress ?? message?.toAddress ?? '').trim().toLowerCase();
 

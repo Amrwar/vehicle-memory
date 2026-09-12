@@ -110,6 +110,54 @@ async function organisationForSender(address: string): Promise<string | null> {
   return message?.orgId ?? null;
 }
 
+/**
+ * The message itself, which the webhook does not carry.
+ *
+ * Resend sends metadata and nothing else: no body, no headers, no
+ * attachments. Without this call every reply arrives looking empty and is
+ * thrown away, which is not a failure anybody would see in a log.
+ *
+ * The key is the same secret the SMTP password holds, because with this
+ * provider they are one credential. Read from either, preferring the explicit
+ * one, so a deployment that sets both cannot have them drift apart.
+ */
+async function fetchReceivedEmail(id: string): Promise<{
+  from?: string;
+  to?: unknown;
+  subject?: string | null;
+  text?: string;
+} | null> {
+  if (!id) return null;
+
+  const key =
+    process.env.RESEND_API_KEY ??
+    (process.env.SMTP_PASSWORD?.startsWith('re_') ? process.env.SMTP_PASSWORD : undefined);
+
+  if (!key) return null;
+
+  try {
+    const response = await fetch(
+      `https://api.resend.com/emails/receiving/${encodeURIComponent(id)}`,
+      {
+        headers: { authorization: `Bearer ${key}` },
+      },
+    );
+
+    if (!response.ok) return null;
+
+    return (await response.json()) as {
+      from?: string;
+      to?: unknown;
+      subject?: string;
+      text?: string;
+    };
+  } catch {
+    // A provider having a bad minute is not a reason to refuse the webhook and
+    // have it retried forever. The row is simply not written.
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   const secret = env().INBOUND_WEBHOOK_SECRET;
 
@@ -166,11 +214,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ...result });
   }
 
-  // A provider sends `to` as an array when a message had several recipients.
-  const recipients = Array.isArray(data.to) ? data.to.map(String) : [String(data.to ?? '')];
+  // The webhook carries metadata only: no body, no headers, no attachments.
+  // The message itself has to be fetched, and without that step every reply
+  // arrives looking empty and is thrown away, which is exactly what happened
+  // the first time this was tried.
+  const full = await fetchReceivedEmail(String(data.email_id ?? data.id ?? ''));
 
-  const from = String(data.from ?? '');
-  const text = String(data.text ?? data.body ?? '').trim();
+  // A provider sends `to` as an array when a message had several recipients.
+  const addressed = full?.to ?? data.to;
+  const recipients = Array.isArray(addressed) ? addressed.map(String) : [String(addressed ?? '')];
+
+  const from = String(full?.from ?? data.from ?? '');
+  const text = String(full?.text ?? data.text ?? data.body ?? '').trim();
 
   if (!from || !text) {
     // Accepted rather than refused. A provider that gets an error retries, and
@@ -189,7 +244,7 @@ export async function POST(request: Request) {
       orgId,
       channel: 'EMAIL',
       fromAddress: /<([^>]+)>/.exec(from)?.[1] ?? from,
-      subject: data.subject ? String(data.subject) : null,
+      subject: full?.subject ?? (data.subject ? String(data.subject) : null),
       body: text,
       providerRef: String(payload.id ?? data.id ?? data.message_id ?? '') || null,
     });
