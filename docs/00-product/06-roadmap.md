@@ -915,6 +915,25 @@ consolidated fleet invoicing, which Phase 9 named as missing.
 **Exit.** A supplier is paid from the product, and a fleet gets one invoice a
 month rather than fourteen.
 
+**Status, part one: the money cycle.** Starting this phase exposed that the
+gaps were not at the edges. Nothing in the running product moved a job from
+approved to started, completed, invoiced or paid; no screen issued an invoice,
+took a payment or raised a credit note. The ledger had been posting since
+Phase 3 from documents only the seed ever wrote. So the first half of this
+phase is the cycle itself: the job page moves the job on with one button that
+says what happens next, completion consumes the parts at real cost and writes
+the passport, the invoice is issued from the job's lines with revenue split by
+kind, payments are taken against it until it settles, a credit note reverses
+in proportion, and a refund sends money back against the credit that
+justifies it. Approving an estimate now puts the approved lines on the job,
+which is what made the rest possible. `npm run verify:money` walks the whole
+cycle and checks the ledger after every step.
+
+**Still open in this phase.** Supplier payments and remittances, payroll
+export, and fleet pricing with consolidated invoicing. Card payment through a
+provider still needs the provider chosen; card payments taken on the counter
+terminal are recorded today.
+
 ---
 
 ## Phase 17 — Answers rather than pages

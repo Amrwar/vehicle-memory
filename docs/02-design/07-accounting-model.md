@@ -133,6 +133,23 @@ An issued invoice is never edited. A credit note reverses proportionally:
       Cr  1100 Accounts receivable                 492.00
 ```
 
+### 3.9 Refund
+
+The credit note has already taken the sale out of revenue and reduced what the
+customer owed. If they had paid, that leaves a credit balance on receivable.
+The refund clears it and nothing else:
+
+```
+  Dr  1100 Accounts receivable            24.00
+      Cr  1000 Bank                                 24.00
+
+  source: Refund rf_..., against CreditNote cn_..., reason carried from it
+```
+
+Revenue is not touched here, because the credit note already reversed it.
+Touching it twice is how a refund is double-counted, and a refund without a
+credit note behind it is refused by the application and by the schema.
+
 ## 4. Job profitability
 
 Derived from the postings, not computed separately, so the figure on the job

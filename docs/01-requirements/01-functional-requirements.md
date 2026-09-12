@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-4200 — The money cycle
+
+| Ref     | Requirement                                                                                                                                        | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-4201 | A job MUST be movable through its lifecycle from the job page, with the lifecycle's own refusals shown verbatim.                                   | 16    |
+| FR-4202 | Completing a job MUST consume its parts at weighted average cost, write that cost back to the lines, post the consumption, and write the passport. | 16    |
+| FR-4203 | Approving an estimate MUST place the approved lines on the job, once, and never overwrite lines already there.                                     | 16    |
+| FR-4204 | An invoice MUST be issued only from a completed, priced, uninvoiced job, numbered from the sequence, with revenue posted by line kind.             | 16    |
+| FR-4205 | Issuing an invoice MUST move the job to invoiced in the same transaction and tell the customer, naming the invoice.                                | 16    |
+| FR-4206 | A payment MUST never exceed what is outstanding, MUST post to the account for its method, and MUST settle the job when it settles the invoice.     | 16    |
+| FR-4207 | A credit note MUST carry a reason, MUST NOT exceed the invoice total less earlier credits, and MUST reverse revenue and tax in proportion.         | 16    |
+| FR-4208 | A refund MUST be for the lesser of what was paid and what was credited, less earlier refunds, and MUST clear receivable rather than revenue.       | 16    |
+| FR-4209 | The trial balance MUST balance after every step of the cycle.                                                                                      | 16    |
+
 ## FR-4100 — Customers with accounts, and the buttons that led nowhere
 
 | Ref     | Requirement                                                                                                                                    | Phase |
