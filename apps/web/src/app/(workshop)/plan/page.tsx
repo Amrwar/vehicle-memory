@@ -1,20 +1,30 @@
-import { Badge, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@carnet/ui';
-import { clock } from '@carnet/core';
+import { clock, PlanError } from '@carnet/core';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  PageHeader,
+} from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { requireSession } from '@/lib/guard';
-import { capacityOn, proposeDay } from '@/lib/planning';
+import { can, requireSession } from '@/lib/guard';
+import { acceptPlan, capacityOn, proposeDay } from '@/lib/planning';
 
 export const metadata: Metadata = { title: 'Plan the day' };
 export const dynamic = 'force-dynamic';
 
 /**
- * A proposed day, with the reasoning shown. FR-3305.
+ * A proposed day, with the reasoning shown. FR-3305, FR-4606.
  *
- * It proposes; a person accepts. Nothing on this page writes anything, which
- * is the same rule the arrival suggestions and the mileage findings follow
- * and the reason it can be useful before it is perfect.
+ * It proposes; a person accepts. Reading the page writes nothing. Pressing
+ * the one button writes each placement into the diary as a booking against
+ * its job, and the next proposal treats those as fixed.
  *
  * The left-over column is not a failure of the plan. It is the most useful
  * thing here: six jobs nobody can start, each saying which of the four
@@ -36,13 +46,37 @@ const REASON_LABEL = {
   TOO_LONG: 'too long for one day',
 } as const;
 
+async function accept(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('diary:write');
+  const on = String(formData.get('on') ?? '');
+  const date = on ? new Date(`${on}T09:00:00`) : new Date();
+  const back = (key: string, value: string) =>
+    redirect(`/plan?on=${on}&${key}=${encodeURIComponent(value)}`);
+
+  try {
+    const result = await acceptPlan({
+      orgId,
+      userId: user.userId,
+      locationId: user.locationId,
+      date,
+    });
+    back('accepted', result.message);
+  } catch (error) {
+    if (error instanceof PlanError) back('problem', error.message);
+    throw error;
+  }
+}
+
 export default async function PlanPage({
   searchParams,
 }: {
-  searchParams: Promise<{ on?: string }>;
+  searchParams: Promise<{ on?: string; accepted?: string; problem?: string }>;
 }) {
   const { orgId, user } = await requireSession('diary:read');
-  const { on } = await searchParams;
+  const { on, accepted, problem } = await searchParams;
+  const mayAccept = can(user.role, 'diary:write');
 
   // Nine in the morning rather than midnight, so a bare date does not land on
   // the previous day for anybody west of London.
@@ -88,14 +122,46 @@ export default async function PlanPage({
         }
       />
 
+      {accepted ? (
+        <Alert tone="success" className="mb-5">
+          {accepted}
+        </Alert>
+      ) : null}
+      {problem ? (
+        <Alert tone="danger" className="mb-5">
+          {problem}
+        </Alert>
+      ) : null}
+
       <Card className="mb-5">
-        <CardBody className="text-[13px] leading-relaxed">
-          <strong className="font-semibold">{plan.summary}</strong>{' '}
-          <span className="text-(--text-soft)">{capacity.summary}</span>
-          <p className="mt-2 text-[12px] text-(--text-faint)">
-            This is a proposal. Nothing has been written to the diary, nobody has been told, and
-            every line says why it is where it is so you can disagree with it.
-          </p>
+        <CardBody className="grid gap-3 text-[13px] leading-relaxed sm:grid-cols-[1fr_auto] sm:items-start">
+          <div>
+            <strong className="font-semibold">{plan.summary}</strong>{' '}
+            <span className="text-(--text-soft)">{capacity.summary}</span>
+            {plan.alreadyInDiary > 0 ? (
+              <p className="mt-1 text-(--text-soft)">
+                {plan.alreadyInDiary} job{plan.alreadyInDiary === 1 ? ' is' : 's are'} already in
+                the diary for this day from an earlier acceptance, and{' '}
+                {plan.alreadyInDiary === 1 ? 'is' : 'are'} left where{' '}
+                {plan.alreadyInDiary === 1 ? 'it was' : 'they were'}.
+              </p>
+            ) : null}
+            <p className="mt-2 text-[12px] text-(--text-faint)">
+              This is a proposal. Reading it writes nothing, and every line says why it is where it
+              is so you can disagree with it. Accepting writes each placement into the diary as a
+              booking against its job, between {clock(plan.openMinute)} and{' '}
+              {clock(plan.closeMinute)}, the site&rsquo;s hours.
+            </p>
+          </div>
+          {mayAccept && plan.assignments.length > 0 ? (
+            <form action={accept}>
+              <input type="hidden" name="on" value={iso(date)} />
+              <Button type="submit" variant="primary">
+                Write {plan.assignments.length} placement{plan.assignments.length === 1 ? '' : 's'}{' '}
+                to the diary
+              </Button>
+            </form>
+          ) : null}
         </CardBody>
       </Card>
 

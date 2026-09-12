@@ -1,0 +1,443 @@
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Field,
+  Input,
+  PageHeader,
+  Table,
+  TableWrap,
+  Td,
+  Th,
+  Tr,
+} from '@carnet/ui';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+
+import { BackLink } from '@/components/back-link';
+import { requireSession } from '@/lib/guard';
+import {
+  catalogueSettings,
+  saveJobType,
+  saveTaxRate,
+  setDefaultTaxRate,
+  setJobTypeActive,
+  SettingsError,
+  setTaxRateActive,
+} from '@/lib/settings';
+
+export const metadata: Metadata = { title: 'Tax rates and kinds of work' };
+export const dynamic = 'force-dynamic';
+
+/**
+ * Tax rates and kinds of work. FR-4604, FR-4605.
+ *
+ * Two lists every job reaches for. A tax rate that has been invoiced cannot
+ * have its percentage changed, because the lines priced at it would re-price
+ * underneath a document already sent; a new percentage is a new rate. There
+ * is always exactly one default. Kinds of work carry a colour for the diary,
+ * a default duration for the planner and whether a second pair of eyes is
+ * required before the car goes back.
+ */
+
+function back(problem: string): never {
+  redirect(`/settings/catalogue?problem=${encodeURIComponent(problem)}`);
+}
+
+async function saveRate(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await saveTaxRate({
+      orgId,
+      userId: user.userId,
+      taxRateId: String(formData.get('taxRateId') ?? '') || null,
+      name: String(formData.get('name') ?? ''),
+      rate: Number(formData.get('rate') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof SettingsError) back(error.message);
+    throw error;
+  }
+
+  redirect('/settings/catalogue?saved=rate');
+}
+
+async function makeDefault(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await setDefaultTaxRate({
+      orgId,
+      userId: user.userId,
+      taxRateId: String(formData.get('taxRateId') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof SettingsError) back(error.message);
+    throw error;
+  }
+
+  redirect('/settings/catalogue?saved=rate');
+}
+
+async function toggleRate(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await setTaxRateActive({
+      orgId,
+      userId: user.userId,
+      taxRateId: String(formData.get('taxRateId') ?? ''),
+      active: String(formData.get('active') ?? '') === 'yes',
+    });
+  } catch (error) {
+    if (error instanceof SettingsError) back(error.message);
+    throw error;
+  }
+
+  redirect('/settings/catalogue?saved=rate');
+}
+
+async function saveType(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+  const hours = String(formData.get('defaultHours') ?? '').trim();
+
+  try {
+    await saveJobType({
+      orgId,
+      userId: user.userId,
+      jobTypeId: String(formData.get('jobTypeId') ?? '') || null,
+      name: String(formData.get('name') ?? ''),
+      colour: String(formData.get('colour') ?? ''),
+      defaultHours: hours ? Number(hours) : null,
+      requiresQualityCheck: formData.get('requiresQualityCheck') === 'on',
+    });
+  } catch (error) {
+    if (error instanceof SettingsError) back(error.message);
+    throw error;
+  }
+
+  redirect('/settings/catalogue?saved=type');
+}
+
+async function toggleType(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await setJobTypeActive({
+      orgId,
+      userId: user.userId,
+      jobTypeId: String(formData.get('jobTypeId') ?? ''),
+      active: String(formData.get('active') ?? '') === 'yes',
+    });
+  } catch (error) {
+    if (error instanceof SettingsError) back(error.message);
+    throw error;
+  }
+
+  redirect('/settings/catalogue?saved=type');
+}
+
+export default async function CatalogueSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; problem?: string; rate?: string; type?: string }>;
+}) {
+  const { orgId } = await requireSession('settings:write');
+  const { saved, problem, rate: editRate, type: editType } = await searchParams;
+  const { taxRates, jobTypes } = await catalogueSettings(orgId);
+
+  const editingRate = taxRates.find((row) => row.id === editRate) ?? null;
+  const editingType = jobTypes.find((row) => row.id === editType) ?? null;
+
+  return (
+    <>
+      <div className="mb-3">
+        <BackLink href="/settings">Settings</BackLink>
+      </div>
+
+      <PageHeader
+        eyebrow="Settings"
+        title="Tax rates and kinds of work"
+        description="The two lists every job reaches for"
+      />
+
+      {saved ? (
+        <Alert tone="success" className="mb-5">
+          Saved. The change is in the audit log with what it was before.
+        </Alert>
+      ) : null}
+      {problem ? (
+        <Alert tone="danger" title="Not saved" className="mb-5">
+          {problem}
+        </Alert>
+      ) : null}
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-5 content-start">
+          <Card className="overflow-hidden">
+            <CardHeader title="Tax rates" description="Exactly one is the default for new lines" />
+            <TableWrap className="rounded-none border-0">
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Rate</Th>
+                    <Th className="text-right">%</Th>
+                    <Th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {taxRates.map((row) => (
+                    <Tr key={row.id}>
+                      <Td>
+                        {row.name}
+                        {row.isDefault ? (
+                          <Badge tone="brand" size="sm" className="ml-2">
+                            default
+                          </Badge>
+                        ) : null}
+                        {!row.isActive ? (
+                          <Badge tone="neutral" size="sm" className="ml-2">
+                            retired
+                          </Badge>
+                        ) : null}
+                      </Td>
+                      <Td className="datum text-right">{Number(row.rate)}</Td>
+                      <Td className="text-right whitespace-nowrap">
+                        {row.isActive ? (
+                          <a
+                            href={`/settings/catalogue?rate=${row.id}#rate`}
+                            className="mr-2 text-[13px] text-(--brand-text) hover:underline"
+                          >
+                            Edit
+                          </a>
+                        ) : null}
+                        {row.isActive && !row.isDefault ? (
+                          <form action={makeDefault} className="inline">
+                            <input type="hidden" name="taxRateId" value={row.id} />
+                            <Button type="submit" variant="ghost" size="sm">
+                              Make default
+                            </Button>
+                          </form>
+                        ) : null}
+                        {!row.isDefault ? (
+                          <form action={toggleRate} className="inline">
+                            <input type="hidden" name="taxRateId" value={row.id} />
+                            <input
+                              type="hidden"
+                              name="active"
+                              value={row.isActive ? 'no' : 'yes'}
+                            />
+                            <Button type="submit" variant="ghost" size="sm">
+                              {row.isActive ? 'Retire' : 'Restore'}
+                            </Button>
+                          </form>
+                        ) : null}
+                      </Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrap>
+          </Card>
+
+          <Card id="rate">
+            <CardHeader title={editingRate ? `Edit ${editingRate.name}` : 'Add a tax rate'} />
+            <form action={saveRate}>
+              {editingRate ? <input type="hidden" name="taxRateId" value={editingRate.id} /> : null}
+              <CardBody className="grid gap-4 sm:grid-cols-[1fr_8rem]">
+                <Field label="Name" hint="As it reads on the invoice">
+                  <Input
+                    name="name"
+                    defaultValue={editingRate?.name ?? ''}
+                    required
+                    maxLength={40}
+                    placeholder="VAT 20%"
+                  />
+                </Field>
+                <Field label="Percent">
+                  <Input
+                    name="rate"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step="0.001"
+                    defaultValue={editingRate ? Number(editingRate.rate) : ''}
+                    required
+                  />
+                </Field>
+              </CardBody>
+              <CardBody className="flex gap-2 border-t border-(--border)">
+                <Button type="submit" variant="primary">
+                  {editingRate ? 'Save rate' : 'Add rate'}
+                </Button>
+                {editingRate ? (
+                  <a
+                    href="/settings/catalogue"
+                    className="self-center text-[13px] text-(--text-soft) hover:underline"
+                  >
+                    Cancel
+                  </a>
+                ) : null}
+              </CardBody>
+            </form>
+            <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
+              A rate that has been invoiced keeps its percentage. Add the new one and retire the
+              old, so what was invoiced still reads the way it was sent.
+            </CardBody>
+          </Card>
+        </div>
+
+        <div className="grid gap-5 content-start">
+          <Card className="overflow-hidden">
+            <CardHeader
+              title="Kinds of work"
+              description="Colour for the diary, hours for the planner"
+            />
+            <TableWrap className="rounded-none border-0">
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Kind</Th>
+                    <Th className="text-right">Hours</Th>
+                    <Th>Checks</Th>
+                    <Th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobTypes.map((row) => (
+                    <Tr key={row.id}>
+                      <Td>
+                        <span
+                          aria-hidden
+                          className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
+                          style={{ backgroundColor: row.colour }}
+                        />
+                        {row.name}
+                        {!row.isActive ? (
+                          <Badge tone="neutral" size="sm" className="ml-2">
+                            retired
+                          </Badge>
+                        ) : null}
+                        <span className="ml-2 text-[12px] text-(--text-faint)">
+                          {row._count.jobs} job{row._count.jobs === 1 ? '' : 's'}
+                          {row._count.skills > 0
+                            ? ` · ${row._count.skills} skill${row._count.skills === 1 ? '' : 's'}`
+                            : ''}
+                        </span>
+                      </Td>
+                      <Td className="datum text-right">
+                        {row.defaultHours === null ? '—' : Number(row.defaultHours)}
+                      </Td>
+                      <Td className="text-(--text-soft)">
+                        {row.requiresQualityCheck ? 'Quality check' : '—'}
+                      </Td>
+                      <Td className="text-right whitespace-nowrap">
+                        {row.isActive ? (
+                          <a
+                            href={`/settings/catalogue?type=${row.id}#type`}
+                            className="mr-2 text-[13px] text-(--brand-text) hover:underline"
+                          >
+                            Edit
+                          </a>
+                        ) : null}
+                        <form action={toggleType} className="inline">
+                          <input type="hidden" name="jobTypeId" value={row.id} />
+                          <input type="hidden" name="active" value={row.isActive ? 'no' : 'yes'} />
+                          <Button type="submit" variant="ghost" size="sm">
+                            {row.isActive ? 'Retire' : 'Restore'}
+                          </Button>
+                        </form>
+                      </Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrap>
+          </Card>
+
+          <Card id="type">
+            <CardHeader
+              title={editingType ? `Edit ${editingType.name}` : 'Add a kind of work'}
+              description={editingType ? undefined : 'Skills it needs are set on the skills page'}
+            />
+            <form action={saveType}>
+              {editingType ? <input type="hidden" name="jobTypeId" value={editingType.id} /> : null}
+              <CardBody className="grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-[1fr_7rem_7rem]">
+                  <Field label="Name">
+                    <Input
+                      name="name"
+                      defaultValue={editingType?.name ?? ''}
+                      required
+                      maxLength={60}
+                      placeholder="Brake repair"
+                    />
+                  </Field>
+                  <Field label="Colour">
+                    <Input
+                      name="colour"
+                      type="color"
+                      defaultValue={editingType?.colour ?? '#2a41d8'}
+                      required
+                      className="h-9 p-1"
+                    />
+                  </Field>
+                  <Field label="Hours" hint="Usual">
+                    <Input
+                      name="defaultHours"
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="0.25"
+                      defaultValue={
+                        editingType?.defaultHours === null || editingType === null
+                          ? ''
+                          : Number(editingType.defaultHours)
+                      }
+                    />
+                  </Field>
+                </div>
+                <label className="flex items-center gap-2 text-[13px]">
+                  <input
+                    type="checkbox"
+                    name="requiresQualityCheck"
+                    defaultChecked={editingType?.requiresQualityCheck ?? false}
+                    className="h-4 w-4"
+                  />
+                  Needs a quality check before the car goes back
+                </label>
+              </CardBody>
+              <CardBody className="flex gap-2 border-t border-(--border)">
+                <Button type="submit" variant="primary">
+                  {editingType ? 'Save kind of work' : 'Add kind of work'}
+                </Button>
+                {editingType ? (
+                  <a
+                    href="/settings/catalogue"
+                    className="self-center text-[13px] text-(--text-soft) hover:underline"
+                  >
+                    Cancel
+                  </a>
+                ) : null}
+              </CardBody>
+            </form>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}

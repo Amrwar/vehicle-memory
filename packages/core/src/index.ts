@@ -22,3 +22,4 @@ export * from './pos/index';
 export * from './team/index';
 export * from './billing/index';
 export * from './access/index';
+export * from './settings/index';

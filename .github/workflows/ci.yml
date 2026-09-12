@@ -278,6 +278,13 @@ jobs:
       - name: Verify the network and the API
         run: npx tsx --tsconfig apps/web/tsconfig.json infra/scripts/verify-network.ts
 
+      # The workshop configures itself: every setting saves, every bad value
+      # is refused with its reason, nothing is deleted, one default tax rate
+      # survives, and each change is audited with its before and after. The
+      # accepted plan writes bookings the next proposal treats as fixed.
+      - name: Verify settings and plan acceptance
+        run: npx tsx infra/scripts/verify-settings.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------

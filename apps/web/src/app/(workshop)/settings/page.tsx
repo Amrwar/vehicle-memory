@@ -28,11 +28,12 @@ export const metadata: Metadata = { title: 'Settings' };
 export const dynamic = 'force-dynamic';
 
 /**
- * Settings, read-only for now.
+ * Settings, at a glance.
  *
  * Showing the configuration is worth doing before editing it: most support
  * questions are "what is our approval threshold" or "who has access", and
- * those are answerable without a single form.
+ * those are answerable without a single form. Since Phase 19 each card links
+ * to the page that edits it, and every edit is in the audit log.
  */
 /**
  * API keys. FR-4507.
@@ -113,7 +114,19 @@ export default async function SettingsPage({
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Organisation" />
+          <CardHeader
+            title="Organisation"
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/organisation"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit
+                </Link>
+              ) : undefined
+            }
+          />
           <CardBody>
             <KeyValue
               columns={2}
@@ -139,7 +152,20 @@ export default async function SettingsPage({
         </Card>
 
         <Card>
-          <CardHeader title="Location and bays" description={location?.name ?? 'No location'} />
+          <CardHeader
+            title="Location and bays"
+            description={location?.name ?? 'No location'}
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/site"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit
+                </Link>
+              ) : undefined
+            }
+          />
           <CardBody>
             {location ? (
               <>
@@ -229,7 +255,19 @@ export default async function SettingsPage({
         </Card>
 
         <Card>
-          <CardHeader title="Tax rates" />
+          <CardHeader
+            title="Tax rates"
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/catalogue"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit
+                </Link>
+              ) : undefined
+            }
+          />
           <ul className="divide-y divide-(--border)">
             {org.taxRates.map((rate) => (
               <li key={rate.id} className="flex items-center justify-between px-4 py-2.5">
@@ -253,7 +291,19 @@ export default async function SettingsPage({
         </Card>
 
         <Card>
-          <CardHeader title="Job types" />
+          <CardHeader
+            title="Job types"
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/catalogue#type"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit
+                </Link>
+              ) : undefined
+            }
+          />
           <ul className="divide-y divide-(--border)">
             {org.jobTypes.map((type) => (
               <li key={type.id} className="flex items-center justify-between px-4 py-2.5">
@@ -404,6 +454,16 @@ export default async function SettingsPage({
           <CardHeader
             title="Document numbering"
             description="Sequential and gapless per organisation"
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/organisation"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit prefixes
+                </Link>
+              ) : undefined
+            }
           />
           <CardBody className="flex flex-wrap gap-6">
             {org.sequences.map((sequence) => (
@@ -420,11 +480,11 @@ export default async function SettingsPage({
       </div>
 
       <p className="mt-6 text-[12px] text-(--text-faint)">
-        Editing these is not built yet.{' '}
+        Every change made here is recorded in{' '}
         <Link href="/audit" className="underline">
-          The audit log
+          the audit log
         </Link>{' '}
-        records every change once it is.
+        with what it was before.
       </p>
     </>
   );

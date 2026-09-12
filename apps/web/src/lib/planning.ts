@@ -1,9 +1,12 @@
 import {
   type AbsenceSpan,
+  assertPlanAcceptable,
   type Bay,
   capacityFor,
   type DayCapacity,
   type DayPlan,
+  describeAcceptance,
+  diaryDraftsFor,
   planDay,
   type Requirement,
   type SkillLevel,
@@ -60,7 +63,7 @@ async function gather(orgId: string, locationId: string | null, date: Date) {
   const from = startOfDay(date);
   const to = endOfDay(date);
 
-  const [employees, patterns, absences, bookings, jobs, bays] = await Promise.all([
+  const [employees, patterns, absences, bookings, jobs, bays, site] = await Promise.all([
     prisma.employee.findMany({
       where: {
         orgId,
@@ -117,6 +120,9 @@ async function gather(orgId: string, locationId: string | null, date: Date) {
         estimatedHours: true,
         promisedAt: true,
         bayId: true,
+        // A job the accepted plan already wrote into the diary for this day
+        // is fixed, not placed again.
+        booking: { select: { id: true, startAt: true, status: true } },
         technicians: { select: { userId: true } },
         jobTypes: {
           select: {
@@ -141,9 +147,20 @@ async function gather(orgId: string, locationId: string | null, date: Date) {
       orderBy: { sortOrder: 'asc' },
       select: { id: true, name: true, capability: true },
     }),
+
+    // The site's own hours, set on the settings page. Without a site chosen,
+    // the default one: hours are a property of a building, not of a person.
+    prisma.location.findFirst({
+      where: { orgId, isActive: true, ...(locationId ? { id: locationId } : {}) },
+      orderBy: { isDefault: 'desc' },
+      select: { id: true, name: true, opensAtMinute: true, closesAtMinute: true },
+    }),
   ]);
 
-  return { employees, patterns, absences, bookings, jobs, bays };
+  const openMinute = site?.opensAtMinute ?? DEFAULT_OPEN_MINUTE;
+  const closeMinute = site?.closesAtMinute ?? DEFAULT_CLOSE_MINUTE;
+
+  return { employees, patterns, absences, bookings, jobs, bays, site, openMinute, closeMinute };
 }
 
 export interface DayView extends DayCapacity {
@@ -152,26 +169,20 @@ export interface DayView extends DayCapacity {
 }
 
 /**
- * One day's capacity.
- *
- * The site's open hours are taken as eight to six rather than stored, because
- * the product has nowhere to put them yet and inventing a table for a single
- * pair of numbers would be worse than naming the assumption here. When
- * opening hours arrive, this is the one place that changes.
+ * Opening hours live on the site since Phase 19 and are read in `gather`.
+ * These are what a workshop with no site row yet gets, which was the
+ * assumption written into the code before then: eight to six.
  */
-const OPEN_MINUTE = 8 * 60;
-const CLOSE_MINUTE = 18 * 60;
+const DEFAULT_OPEN_MINUTE = 8 * 60;
+const DEFAULT_CLOSE_MINUTE = 18 * 60;
 
 export async function capacityOn(
   orgId: string,
   locationId: string | null,
   date: Date,
 ): Promise<DayView> {
-  const { employees, patterns, absences, bookings, jobs, bays } = await gather(
-    orgId,
-    locationId,
-    date,
-  );
+  const { employees, patterns, absences, bookings, jobs, bays, site, openMinute, closeMinute } =
+    await gather(orgId, locationId, date);
 
   const byUser = new Map(
     employees
@@ -195,10 +206,6 @@ export async function capacityOn(
     })),
   ];
 
-  const location = locationId
-    ? await prisma.location.findUnique({ where: { id: locationId }, select: { name: true } })
-    : null;
-
   const capacity = capacityFor({
     date,
     people: employees.map((employee) => ({
@@ -211,11 +218,11 @@ export async function capacityOn(
     })) satisfies WorkingPattern[],
     absences: absences satisfies AbsenceSpan[],
     bays: bays.length,
-    openMinutes: CLOSE_MINUTE - OPEN_MINUTE,
+    openMinutes: closeMinute - openMinute,
     booked,
   });
 
-  return { ...capacity, locationName: location?.name ?? null, bays: bays.length };
+  return { ...capacity, locationName: site?.name ?? null, bays: bays.length };
 }
 
 /** The next several days, for finding somewhere to move something to. */
@@ -247,16 +254,29 @@ export async function capacityAhead(
  * arrival suggestions and the mileage findings follow, and the reason this
  * can be useful before it is perfect.
  */
+export interface ProposedDay extends DayPlan {
+  date: Date;
+  /** Jobs the accepted plan already wrote into the diary for this day. */
+  alreadyInDiary: number;
+  openMinute: number;
+  closeMinute: number;
+}
+
 export async function proposeDay(
   orgId: string,
   locationId: string | null,
   date: Date,
-): Promise<DayPlan & { date: Date }> {
-  const { employees, patterns, absences, bookings, jobs, bays } = await gather(
-    orgId,
-    locationId,
-    date,
-  );
+): Promise<ProposedDay> {
+  const { employees, patterns, absences, bookings, jobs, bays, openMinute, closeMinute } =
+    await gather(orgId, locationId, date);
+
+  const from = startOfDay(date);
+  const to = endOfDay(date);
+  const fixed = (job: { booking: { startAt: Date; status: string } | null }) =>
+    job.booking !== null &&
+    job.booking.startAt >= from &&
+    job.booking.startAt <= to &&
+    (EXPECTED as readonly string[]).includes(job.booking.status);
 
   const weekday = weekdayOf(date);
 
@@ -311,34 +331,141 @@ export async function proposeDay(
       })),
   }));
 
-  const items: WorkItem[] = jobs.map((job) => {
-    const requirements: Requirement[] = job.jobTypes.flatMap((entry) =>
-      entry.jobType.skills.map((requirement) => ({
-        skillId: requirement.skill.id,
-        skillName: requirement.skill.name,
-        minimumLevel: requirement.minimumLevel as SkillLevel,
-      })),
-    );
+  const items: WorkItem[] = jobs
+    .filter((job) => !fixed(job))
+    .map((job) => {
+      const requirements: Requirement[] = job.jobTypes.flatMap((entry) =>
+        entry.jobType.skills.map((requirement) => ({
+          skillId: requirement.skill.id,
+          skillName: requirement.skill.name,
+          minimumLevel: requirement.minimumLevel as SkillLevel,
+        })),
+      );
 
-    return {
-      id: job.id,
-      label: `#${job.number} ${job.shortDescription}`,
-      minutes: Math.max(15, Math.round(Number(job.estimatedHours ?? 1) * 60)),
-      requirements,
-      promisedAt: job.promisedAt,
-      waitingOnParts: job.partLines.some((line) => line.status === 'REQUESTED'),
-    };
-  });
+      return {
+        id: job.id,
+        label: `#${job.number} ${job.shortDescription}`,
+        minutes: Math.max(15, Math.round(Number(job.estimatedHours ?? 1) * 60)),
+        requirements,
+        promisedAt: job.promisedAt,
+        waitingOnParts: job.partLines.some((line) => line.status === 'REQUESTED'),
+      };
+    });
 
   const plan = planDay({
     items,
     technicians,
     bays: bayList,
-    openMinute: OPEN_MINUTE,
-    closeMinute: CLOSE_MINUTE,
+    openMinute,
+    closeMinute,
   });
 
-  return { ...plan, date };
+  return {
+    ...plan,
+    date,
+    alreadyInDiary: jobs.filter(fixed).length,
+    openMinute,
+    closeMinute,
+  };
+}
+
+/**
+ * Writes the day's proposal into the diary. FR-4606.
+ *
+ * The plan is recomputed rather than taken from the page, so what is written
+ * is what the records say now, not what a tab showed an hour ago. One
+ * booking per job, keyed on the job: accepting again moves the bookings
+ * rather than doubling them. The job's bay is set at the same time so the
+ * floor and the diary agree.
+ */
+export async function acceptPlan(input: {
+  orgId: string;
+  userId: string;
+  locationId: string | null;
+  date: Date;
+}): Promise<{ written: number; unnamed: number; message: string; bookingIds: string[] }> {
+  const plan = await proposeDay(input.orgId, input.locationId, input.date);
+
+  assertPlanAcceptable({ date: input.date, now: new Date(), assignments: plan.assignments });
+
+  const employees = await prisma.employee.findMany({
+    where: { id: { in: plan.assignments.map((assignment) => assignment.employeeId) } },
+    select: { id: true, userId: true },
+  });
+  const userIdByEmployee = new Map(employees.map((employee) => [employee.id, employee.userId]));
+
+  const drafts = diaryDraftsFor(plan.assignments, input.date, userIdByEmployee);
+
+  const jobs = await prisma.job.findMany({
+    where: { id: { in: drafts.map((draft) => draft.jobId) }, orgId: input.orgId },
+    select: { id: true, customerId: true, vehicleId: true, locationId: true },
+  });
+  const jobById = new Map(jobs.map((job) => [job.id, job]));
+
+  const bookingIds = await prisma.$transaction(async (tx) => {
+    const ids: string[] = [];
+
+    for (const draft of drafts) {
+      const job = jobById.get(draft.jobId);
+      if (!job) continue;
+
+      const booking = await tx.booking.upsert({
+        where: { jobId: draft.jobId },
+        create: {
+          orgId: input.orgId,
+          locationId: job.locationId,
+          customerId: job.customerId,
+          vehicleId: job.vehicleId,
+          jobId: draft.jobId,
+          bayId: draft.bayId,
+          technicianId: draft.technicianUserId,
+          startAt: draft.startAt,
+          endAt: draft.endAt,
+          estimatedHours: draft.estimatedHours,
+          description: draft.description,
+          source: 'PLAN',
+          status: 'SCHEDULED',
+        },
+        update: {
+          bayId: draft.bayId,
+          technicianId: draft.technicianUserId,
+          startAt: draft.startAt,
+          endAt: draft.endAt,
+          estimatedHours: draft.estimatedHours,
+        },
+        select: { id: true },
+      });
+      ids.push(booking.id);
+
+      if (draft.bayId) {
+        await tx.job.update({ where: { id: draft.jobId }, data: { bayId: draft.bayId } });
+      }
+    }
+
+    return ids;
+  });
+
+  const unnamed = drafts.filter((draft) => draft.technicianUserId === null).length;
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'plan.accepted',
+    entityType: 'Location',
+    entityId: input.locationId ?? input.orgId,
+    after: {
+      date: input.date.toISOString().slice(0, 10),
+      written: bookingIds.length,
+      jobs: drafts.map((draft) => draft.jobId),
+    },
+  });
+
+  return {
+    written: bookingIds.length,
+    unnamed,
+    message: describeAcceptance(bookingIds.length, unnamed, input.date),
+    bookingIds,
+  };
 }
 
 /** Every person against every skill, gaps included. */

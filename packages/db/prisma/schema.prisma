@@ -139,6 +139,10 @@ model Location {
   timezone           String?
   // Total technician hours the site can absorb per day. FR-509.
   dailyCapacityHours Decimal  @default(40.0) @db.Decimal(6, 2)
+  /// Opening hours as minutes from midnight. Planning places work inside
+  /// them; before Phase 19 eight to six was assumed in code. FR-4603.
+  opensAtMinute      Int      @default(480)
+  closesAtMinute     Int      @default(1080)
   isDefault          Boolean  @default(false)
   isActive           Boolean  @default(true)
   createdAt          DateTime @default(now())
@@ -879,6 +883,8 @@ enum BookingSource {
   ONLINE
   RECALL
   REMINDER
+  /// Written to the diary by accepting the day's proposed plan.
+  PLAN
 }
 
 /// The central aggregate. Everything in the workshop hangs off the Job.

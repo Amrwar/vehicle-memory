@@ -71,6 +71,9 @@ const PAGES = [
   '/banking',
   '/settings',
   '/settings/team',
+  '/settings/organisation',
+  '/settings/site',
+  '/settings/catalogue',
   '/audit',
 ];
 

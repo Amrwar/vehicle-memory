@@ -81,6 +81,9 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/banking', expectsGuidance: ['Add a bank account'] },
   { path: '/settings', expectsGuidance: [] },
   { path: '/settings/team', expectsGuidance: [] },
+  { path: '/settings/organisation', expectsGuidance: [] },
+  { path: '/settings/site', expectsGuidance: [] },
+  { path: '/settings/catalogue', expectsGuidance: [] },
   { path: '/audit', expectsGuidance: [] },
   { path: '/group', expectsGuidance: ['at least two'] },
 ];
