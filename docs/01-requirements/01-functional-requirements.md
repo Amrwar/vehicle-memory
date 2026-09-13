@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5100 — Points, and the public face
+
+| Ref     | Requirement                                                                                                                                                                                                           | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5101 | A bill paid in full MUST earn a point a pound, floored, on the money the customer actually paid, once, however many payments settle it and whichever of them settles it.                                              | 24    |
+| FR-5102 | Points MUST come off a bill as a payment of their own kind, and the ledger MUST book that payment as the cost of the programme against what the customer owed, never as money into the bank.                          | 24    |
+| FR-5103 | A redemption MUST be refused with a sentence when the customer holds fewer points than asked, when the points are worth more than is owed, or when the bill could not take any payment; a refusal MUST spend nothing. | 24    |
+| FR-5104 | Staff MUST be able to give points by hand, as a whole number with a reason, and the reason MUST be what the customer reads.                                                                                           | 24    |
+| FR-5105 | The customer's page MUST show the balance as the sum of the entries, what it is worth, what is about to lapse and when, and the recent entries.                                                                       | 24    |
+| FR-5106 | A customer signed into the portal MUST see their points at each workshop that holds any, with what they are worth there and when they lapse, and nothing where they hold none.                                        | 24    |
+| FR-5107 | An organisation whose chart of accounts predates an account the standard chart later gained MUST receive that account the first time it is needed, without touching the accounts it has.                              | 24    |
+
 ## FR-5000 — The passport, designed
 
 | Ref     | Requirement                                                                                                                                                                                   | Phase |

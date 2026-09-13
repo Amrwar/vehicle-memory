@@ -154,7 +154,10 @@ export async function timelineFor(orgId: string, customerId: string, limit = 60)
       id: `pay-${payment.id}`,
       kind: 'PAYMENT',
       at: payment.receivedAt,
-      title: `Paid by ${payment.method.toLowerCase().replace(/_/g, ' ')}`,
+      title:
+        payment.method === 'LOYALTY'
+          ? 'Paid with points'
+          : `Paid by ${payment.method.toLowerCase().replace(/_/g, ' ')}`,
       amount: Number(payment.amount),
       href: '/payments',
     });

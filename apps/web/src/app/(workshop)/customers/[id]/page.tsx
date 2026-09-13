@@ -8,6 +8,8 @@ import {
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   KeyValue,
   Mileage,
   Money,
@@ -21,6 +23,13 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { CustomerError, setPreferredTechnician } from '@/lib/customers';
 import { can, requireSession } from '@/lib/guard';
+import {
+  awardByHand,
+  HAND_AWARD_CEILING,
+  loyaltyCardFor,
+  LoyaltyError,
+  methodLabel,
+} from '@/lib/loyalty';
 import { messagesFor, timelineFor } from '@/lib/timeline';
 
 export const dynamic = 'force-dynamic';
@@ -66,6 +75,35 @@ async function prefer(formData: FormData) {
   redirect(`/customers/${customerId}?saved=preference`);
 }
 
+/**
+ * Points given by hand. A goodwill gesture after a bad week, a referral the
+ * scheme could not see. The reason is required because it is what the
+ * customer reads in their history, and "points" is not a reason.
+ */
+async function award(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  try {
+    await awardByHand({
+      orgId,
+      userId: user.userId,
+      customerId,
+      points: Number(String(formData.get('points') ?? '').trim()),
+      reason: String(formData.get('reason') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof LoyaltyError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/customers/${customerId}?saved=points`);
+}
+
 export default async function CustomerPage({
   params,
   searchParams,
@@ -79,9 +117,10 @@ export default async function CustomerPage({
 
   const { id: customerId } = await params;
 
-  const [timeline, messages] = await Promise.all([
+  const [timeline, messages, points] = await Promise.all([
     timelineFor(orgId, customerId),
     messagesFor(orgId, customerId),
+    loyaltyCardFor(orgId, customerId),
   ]);
 
   const customer = await db.customer.findUnique({
@@ -147,7 +186,7 @@ export default async function CustomerPage({
 
       {saved ? (
         <Alert tone="success" className="mb-5">
-          Saved.
+          {saved === 'points' ? 'Points added. They can see them in the portal.' : 'Saved.'}
         </Alert>
       ) : null}
       {problem ? (
@@ -348,6 +387,112 @@ export default async function CustomerPage({
             </CardBody>
           </Card>
 
+          {/* Points. The balance is the sum of the entries, never a stored
+              figure, so what is shown here is what the history adds up to.
+              A bill paid in full earns a point a pound on its own; this form
+              is for the points a rule cannot see coming. */}
+          <Card className={points.expiring.points > 0 ? 'border-(--warning)' : undefined}>
+            <CardHeader
+              title="Points"
+              description={
+                points.balance > 0
+                  ? `Worth ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(points.valueMinor / 100)} off a bill`
+                  : `${points.perPound} point a pound on every bill paid in full`
+              }
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              <div className="flex items-baseline justify-between">
+                <span className="text-(--text-faint)">Balance</span>
+                <span className="font-display text-[22px] font-semibold tabular-nums">
+                  {points.balance.toLocaleString('en-GB')}
+                </span>
+              </div>
+              {points.expiring.points > 0 && points.expiring.on ? (
+                <p className="rounded-(--radius-sm) bg-(--warning-soft) px-2.5 py-1.5 text-[12px] text-(--warning)">
+                  {points.expiring.points.toLocaleString('en-GB')} lapse on{' '}
+                  {points.expiring.on.toLocaleDateString('en-GB', { dateStyle: 'medium' })}. Worth
+                  mentioning at the next visit.
+                </p>
+              ) : null}
+
+              {points.recent.length > 0 ? (
+                <ul className="divide-y divide-(--border-soft) border-t border-(--border-soft)">
+                  {points.recent.map((entry) => (
+                    <li
+                      key={entry.id}
+                      className="flex items-baseline justify-between gap-3 py-1.5 text-[12px]"
+                    >
+                      <span className="min-w-0 flex-1 truncate">
+                        {entry.job ? (
+                          <Link href={`/jobs/${entry.job.id}`} className="hover:underline">
+                            {entry.reason}
+                          </Link>
+                        ) : (
+                          entry.reason
+                        )}
+                        <time className="datum ml-1.5 text-(--text-faint)">
+                          {entry.createdAt.toLocaleDateString('en-GB')}
+                        </time>
+                      </span>
+                      <span
+                        className={
+                          entry.points < 0
+                            ? 'tabular-nums text-(--text-faint)'
+                            : 'tabular-nums font-medium'
+                        }
+                      >
+                        {entry.points > 0 ? '+' : ''}
+                        {entry.points.toLocaleString('en-GB')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[12px] text-(--text-faint)">
+                  Nothing earned yet. The first bill they pay in full starts it.
+                </p>
+              )}
+
+              {mayEditCustomer ? (
+                <form action={award} className="grid gap-2 border-t border-(--border-soft) pt-3">
+                  <input type="hidden" name="customerId" value={customer.id} />
+                  <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
+                    <Field label="Points" htmlFor="award-points">
+                      <Input
+                        id="award-points"
+                        name="points"
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={HAND_AWARD_CEILING}
+                        step={1}
+                        required
+                        className="tabular-nums"
+                      />
+                    </Field>
+                    <Field label="Why" htmlFor="award-reason">
+                      <Input
+                        id="award-reason"
+                        name="reason"
+                        required
+                        maxLength={120}
+                        placeholder="Sorry about the wait on Tuesday"
+                      />
+                    </Field>
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    className="justify-self-start"
+                  >
+                    Add points
+                  </Button>
+                </form>
+              ) : null}
+            </CardBody>
+          </Card>
+
           <Card>
             <CardHeader title="Recent payments" />
             {customer.payments.length === 0 ? (
@@ -361,7 +506,7 @@ export default async function CustomerPage({
                         <Money amount={Number(payment.amount)} />
                       </p>
                       <p className="datum text-[11px] text-(--text-faint)">
-                        {payment.method.toLowerCase().replace('_', ' ')} ·{' '}
+                        {methodLabel(payment.method)} ·{' '}
                         {payment.receivedAt.toLocaleDateString('en-GB')}
                       </p>
                     </div>

@@ -840,6 +840,39 @@ open, and a way back from a shared passport **so that** I am never stranded.
 
 ---
 
+## Epic U — Points, and the public face (Phase 24)
+
+### U1 — Points at the counter
+
+**As** Sara **I want** a customer's points to earn themselves and to come off
+a bill when I press the button **so that** the programme costs me a moment,
+not a spreadsheet.
+**Size** 5 · **Satisfies** FR-5101, FR-5102, FR-5103, FR-5104, FR-5105, FR-5107
+
+- **Given** a bill paid in full, **when** the last payment lands, **then** the
+  customer earns a point a pound on what they paid, once, and I did nothing.
+- **Given** an invoice with something owed and a customer with points,
+  **when** I open it, **then** I am offered the most they can use, and the
+  points come off the bill as a payment that the ledger books as the cost of
+  the programme.
+- **Given** more points than they have, or more than the bill, **when** I try,
+  **then** I am told in a sentence and nothing is spent.
+- **Given** a bad week, **when** I give points by hand, **then** I have to say
+  why, and that is what the customer reads.
+
+### U2 — My points, where I can see them
+
+**As** Maria **I want** to see the points I hold at each garage **so that** I
+know what they are worth and use them before they lapse.
+**Size** 3 · **Satisfies** FR-5106
+
+- **Given** the portal, **when** I hold points at a workshop, **then** I see
+  how many, what they are worth there, and when any lapse.
+- **Given** a workshop where I hold none, **when** I look, **then** it is not
+  listed; a row of zeros is a sales pitch.
+
+---
+
 ## Story map
 
 ```

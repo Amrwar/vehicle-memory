@@ -187,10 +187,15 @@ export function postPartsConsumed(input: {
    --------------------------------------------------------------------------- */
 
 export type PaymentMethod =
-  'CASH' | 'CARD' | 'BANK_TRANSFER' | 'ONLINE' | 'CHEQUE' | 'ACCOUNT' | 'OTHER';
+  'CASH' | 'CARD' | 'BANK_TRANSFER' | 'ONLINE' | 'CHEQUE' | 'ACCOUNT' | 'OTHER' | 'LOYALTY';
 
-/** Cash goes to the cash account; everything else lands in the bank. */
+/**
+ * Cash goes to the cash account; everything else lands in the bank. Points
+ * redeemed are not money in: they are the cost of the loyalty programme, so
+ * the debit goes to marketing and the customer's debt still comes down.
+ */
 export function accountForMethod(method: PaymentMethod): string {
+  if (method === 'LOYALTY') return ACCOUNT.LOYALTY_REWARDS;
   return method === 'CASH' ? ACCOUNT.CASH : ACCOUNT.BANK;
 }
 

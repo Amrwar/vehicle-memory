@@ -1645,6 +1645,8 @@ enum PaymentMethod {
   CHEQUE
   ACCOUNT
   OTHER
+  /// Loyalty points redeemed against the bill. Posts to marketing, not to the bank.
+  LOYALTY
 }
 
 /// An issued invoice is immutable. Corrections are credit notes. FR-907.

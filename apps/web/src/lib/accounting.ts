@@ -21,11 +21,19 @@ import { prisma } from '@carnet/db';
 
 /** Creates the chart of accounts for an organisation if it has none. */
 export async function ensureChartOfAccounts(orgId: string): Promise<number> {
-  const existing = await prisma.account.count({ where: { orgId } });
-  if (existing > 0) return 0;
+  // Fills in whatever the standard chart has that this organisation does not,
+  // so an account added to the chart in a later phase (loyalty rewards, in
+  // Phase 24) reaches every existing workshop the first time it is needed.
+  const existing = new Set(
+    (await prisma.account.findMany({ where: { orgId }, select: { code: true } })).map(
+      (row) => row.code,
+    ),
+  );
+  const missing = STANDARD_CHART.filter((account) => !existing.has(account.code));
+  if (missing.length === 0) return 0;
 
   await prisma.account.createMany({
-    data: STANDARD_CHART.map((account) => ({
+    data: missing.map((account) => ({
       orgId,
       code: account.code,
       name: account.name,
@@ -33,7 +41,7 @@ export async function ensureChartOfAccounts(orgId: string): Promise<number> {
     })),
   });
 
-  return STANDARD_CHART.length;
+  return missing.length;
 }
 
 export class LedgerError extends Error {

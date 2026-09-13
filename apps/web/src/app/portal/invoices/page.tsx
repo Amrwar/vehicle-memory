@@ -133,7 +133,9 @@ export default async function PortalInvoicesPage() {
                 <p className="mt-0.5 text-[13px] text-(--text-soft)">
                   {invoice.org.name} · {date(invoice.issuedAt)}
                   {invoice.payments[0]
-                    ? ` · paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`
+                    ? invoice.payments[0].method === 'LOYALTY'
+                      ? ' · paid with points'
+                      : ` · paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`
                     : ''}
                 </p>
               </li>

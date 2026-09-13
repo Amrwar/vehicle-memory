@@ -30,6 +30,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { awardForInvoice } from './retention';
 import { consumeForJob } from './inventory';
 import { pushNow } from './outbound';
 import { writeJobCompletion } from './passport';
@@ -550,6 +551,12 @@ export async function recordPayment(input: {
       receivedAt,
     }),
   );
+
+  // A bill paid in full earns points, once. Points redeemed against it are
+  // not money in and earn nothing.
+  if (next === 'PAID') {
+    await awardForInvoice({ orgId: input.orgId, userId: input.userId, invoiceId: invoice.id });
+  }
 
   await audit({
     orgId: input.orgId,

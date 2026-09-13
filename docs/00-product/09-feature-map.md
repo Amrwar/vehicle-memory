@@ -49,18 +49,18 @@ says why.
 
 ## 3. Customer CRM
 
-| Item                    | Status  | Where                                                  |
-| ----------------------- | ------- | ------------------------------------------------------ |
-| Contact, vehicles, jobs | Built   | `/customers/[id]`                                      |
-| Invoices, payments      | Built   | Same page                                              |
-| Quotes                  | Built   | Same page                                              |
-| Communication history   | Built   | On the customer, matched on the address it was sent to |
-| Notes                   | Built   | On the customer and on jobs                            |
-| Loyalty points          | Missing | See section 17                                         |
-| Service reminders       | Built   | `/reminders`                                           |
-| Customer lifetime value | Built   | `/crm`, by cohort                                      |
-| Preferred technician    | Built   | On the customer, preselected on a new job              |
-| Customer timeline       | Built   | "The whole story" on `/customers/[id]`, newest first   |
+| Item                    | Status | Where                                                              |
+| ----------------------- | ------ | ------------------------------------------------------------------ |
+| Contact, vehicles, jobs | Built  | `/customers/[id]`                                                  |
+| Invoices, payments      | Built  | Same page                                                          |
+| Quotes                  | Built  | Same page                                                          |
+| Communication history   | Built  | On the customer, matched on the address it was sent to             |
+| Notes                   | Built  | On the customer and on jobs                                        |
+| Loyalty points          | Built  | On the customer: balance, worth, lapsing, given by hand (Phase 24) |
+| Service reminders       | Built  | `/reminders`                                                       |
+| Customer lifetime value | Built  | `/crm`, by cohort                                                  |
+| Preferred technician    | Built  | On the customer, preselected on a new job                          |
+| Customer timeline       | Built  | "The whole story" on `/customers/[id]`, newest first               |
 
 ## 4. Vehicle management
 
@@ -290,15 +290,18 @@ endpoint that receives them exists and is authenticated.
 
 ## 17. Marketing and retention
 
-| Item                | Status  | Where                                            |
-| ------------------- | ------- | ------------------------------------------------ |
-| Automated campaigns | Built   | `/automation`, trigger and conditions            |
-| Customer segments   | Built   | `/crm`, with the reachable count                 |
-| Campaigns           | Built   | Consent rechecked at the moment of sending       |
-| Loyalty programme   | Built   | Points as a sum of entries, never a stored total |
-| Referrals           | Built   | A code both sides are paid for, once, on a visit |
-| Coupons             | Missing |                                                  |
-| Gift cards          | Missing |                                                  |
+| Item                 | Status  | Where                                                                       |
+| -------------------- | ------- | --------------------------------------------------------------------------- |
+| Automated campaigns  | Built   | `/automation`, trigger and conditions                                       |
+| Customer segments    | Built   | `/crm`, with the reachable count                                            |
+| Campaigns            | Built   | Consent rechecked at the moment of sending                                  |
+| Loyalty programme    | Built   | Points as a sum of entries, never a stored total                            |
+| Earning points       | Built   | A point a pound on a bill paid in full, once (Phase 24)                     |
+| Spending points      | Built   | Off the bill on the invoice page, booked as the programme's cost (Phase 24) |
+| Points in the portal | Built   | Per workshop, with what they are worth and when they lapse (Phase 24)       |
+| Referrals            | Built   | A code both sides are paid for, once, on a visit                            |
+| Coupons              | Missing |                                                                             |
+| Gift cards           | Missing |                                                                             |
 
 ## 18. Reviews and reputation
 
@@ -398,9 +401,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 145          |
+| Built    | 149          |
 | Partial  | 1            |
-| Missing  | 5            |
+| Missing  | 4            |
 | Deferred | 1            |
 
 <!-- counts:end -->

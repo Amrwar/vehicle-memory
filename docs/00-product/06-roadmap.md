@@ -1220,6 +1220,40 @@ every crawl and probe still passes.
 
 ---
 
+## Phase 24 — Points, and the public face
+
+The loyalty programme has existed since Phase 5 as arithmetic and rows: a
+balance that is the sum of its entries, a redemption that refuses rather than
+clamps, a referral paid on a visit rather than a sign-up. Nothing in the
+product awarded a point and nothing let anybody spend one. The feature map
+said so. This phase puts the programme in front of the two people it is for:
+the person at the counter, and the customer.
+
+**Exit.** A bill paid in full earns a point a pound, once, on the money the
+customer actually paid. Points come off a bill from the invoice page as a
+payment of their own kind, which the ledger books as the cost of the
+programme rather than as money in. Staff can give points by hand with a
+reason. The customer's page shows the balance, what it is worth and what is
+about to lapse; the portal shows the same to the customer, per workshop. Every
+refusal refuses with a sentence and spends nothing.
+
+**Status.** Built. `LOYALTY` is a payment method, posting to a new expense
+account, Loyalty rewards, that the chart of accounts now fills in for every
+organisation the first time it is missing. A payment that settles a bill
+awards points on the total less what the programme itself paid, keyed on the
+invoice so a retried request, a refund and repayment, or a second look earns
+nothing more. The invoice page offers "Use their points" only when there is a
+bill to put them against and something to put, defaulting to the most that
+can be used; the customer's page has a Points card with the recent entries
+and a form for the points a rule cannot see coming; the portal lists points
+per workshop with what they are worth and when they lapse. The timeline and
+the payment lists say "paid with points" rather than "loyalty". The
+verification script opens a job, invoices it, gives points, spends them,
+pays the rest, and checks the ledger, the balance, the once-only award and
+every refusal against a real database.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

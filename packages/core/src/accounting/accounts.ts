@@ -108,6 +108,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
   { code: '6000', name: 'Wages', type: 'EXPENSE', purpose: 'Payroll not attributed to a job' },
   { code: '6100', name: 'Premises', type: 'EXPENSE', purpose: 'Rent, rates, utilities' },
   {
+    code: '6400',
+    name: 'Loyalty rewards',
+    type: 'EXPENSE',
+    purpose: 'Points redeemed against bills: the cost of the programme',
+  },
+  {
     code: '6200',
     name: 'Stock adjustments',
     type: 'EXPENSE',
@@ -140,6 +146,7 @@ export const ACCOUNT = {
   COGS_LABOUR: '5010',
   WAGES: '6000',
   PREMISES: '6100',
+  LOYALTY_REWARDS: '6400',
   STOCK_ADJUSTMENT: '6200',
   OVERHEADS: '6300',
 } as const;

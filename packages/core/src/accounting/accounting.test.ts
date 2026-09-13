@@ -224,6 +224,22 @@ describe('payment received', () => {
     expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.CASH);
   });
 
+  // Points redeemed are not money in. Booking them to the bank would show
+  // cash the workshop never received; they are what the programme cost.
+  it('books points redeemed as the cost of the programme, not as cash', () => {
+    const posted = postPaymentReceived({
+      paymentId: 'pay_4',
+      reference: 'PAY-4',
+      amount: gbp('12.50'),
+      method: 'LOYALTY',
+      receivedAt: new Date(),
+    });
+    const debit = posted.lines.find((l) => l.debit.minor > 0)!;
+    expect(debit.accountCode).toBe(ACCOUNT.LOYALTY_REWARDS);
+    expect(accountType(ACCOUNT.LOYALTY_REWARDS)).toBe('EXPENSE');
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.RECEIVABLE);
+  });
+
   // Treating a deposit as revenue on receipt overstates a good month and
   // understates the one where the work is actually done.
   it('treats a deposit as a liability, not revenue', () => {

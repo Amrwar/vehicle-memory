@@ -31,6 +31,12 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
 import {
+  loyaltyCardFor,
+  LoyaltyError,
+  redeemAgainstInvoice,
+  spendableAgainst,
+} from '@/lib/loyalty';
+import {
   invoiceDetail,
   MoneyCycleError,
   raiseCreditNote,
@@ -68,6 +74,12 @@ const METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'ONLINE', label: 'Online' },
   { value: 'ACCOUNT', label: 'On account' },
 ];
+
+/** Points are not typed in as an amount; they have a form of their own below. */
+const METHOD_LABELS: Record<string, string> = {
+  ...Object.fromEntries(METHODS.map((m) => [m.value, m.label])),
+  LOYALTY: 'Points',
+};
 
 /**
  * One invoice: what it was for, what has been paid, and what has been put
@@ -111,6 +123,32 @@ async function pay(formData: FormData) {
   }
 
   redirect(`/invoices/${invoiceId}?done=paid`);
+}
+
+/**
+ * Points off the bill. Refused with a sentence when they have fewer than
+ * asked or the points are worth more than is owed, because the alternative
+ * is quietly using fewer and a customer finding out at the counter.
+ */
+async function redeem(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+
+  try {
+    await redeemAgainstInvoice({
+      orgId,
+      userId: user.userId,
+      invoiceId,
+      points: Number(String(formData.get('points') ?? '').trim()),
+    });
+  } catch (error) {
+    if (!(error instanceof LoyaltyError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}?done=redeemed`);
 }
 
 async function credit(formData: FormData) {
@@ -192,6 +230,11 @@ export default async function InvoicePage({
     money.credited.minor < money.total.minor;
   const mayRefund = can(user.role, 'payment:write') && money.owedBack.minor > 0;
 
+  // Points are only offered when there is a bill to put them against and
+  // something to put. A card with nothing to spend is a card to explain.
+  const points = mayPay ? await loyaltyCardFor(orgId, invoice.customer.id) : null;
+  const spendable = points ? spendableAgainst(points.balance, money.outstanding.minor) : 0;
+
   const format = (minor: number) =>
     new Intl.NumberFormat('en-GB', { style: 'currency', currency: invoice.currency }).format(
       minor / 100,
@@ -232,9 +275,11 @@ export default async function InvoicePage({
         <Alert tone="success" className="mb-5">
           {notice.done === 'paid'
             ? 'Payment recorded and posted to the ledger.'
-            : notice.done === 'credited'
-              ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
-              : 'Refund recorded. The customer has been told it is on its way.'}
+            : notice.done === 'redeemed'
+              ? 'Points taken off the bill and booked as the cost of the programme, not as money in.'
+              : notice.done === 'credited'
+                ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
+                : 'Refund recorded. The customer has been told it is on its way.'}
         </Alert>
       ) : null}
 
@@ -339,9 +384,7 @@ export default async function InvoicePage({
                             timeStyle: 'short',
                           })}
                         </Td>
-                        <Td>
-                          {METHODS.find((m) => m.value === payment.method)?.label ?? payment.method}
-                        </Td>
+                        <Td>{METHOD_LABELS[payment.method] ?? payment.method}</Td>
                         <Td className="datum">{payment.reference ?? '—'}</Td>
                         <Td>{payment.recordedBy?.name ?? '—'}</Td>
                         <Td numeric>
@@ -391,7 +434,7 @@ export default async function InvoicePage({
                           against {row.creditNote.number}
                         </Td>
                         <Td>
-                          {METHODS.find((m) => m.value === row.method)?.label ?? row.method}
+                          {METHOD_LABELS[row.method] ?? row.method}
                           {row.reference ? <span className="datum"> · {row.reference}</span> : null}
                         </Td>
                         <Td>
@@ -474,6 +517,47 @@ export default async function InvoicePage({
                   </Field>
                   <Button type="submit" variant="primary">
                     Record the payment
+                  </Button>
+                </CardBody>
+              </form>
+            </Card>
+          ) : null}
+
+          {points && spendable > 0 ? (
+            <Card>
+              <CardHeader
+                title="Use their points"
+                description={`${points.balance.toLocaleString('en-GB')} held, worth ${format(points.valueMinor)}`}
+              />
+              <form action={redeem}>
+                <CardBody className="grid gap-3">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <Field
+                    label="Points to use"
+                    hint={`Up to ${spendable.toLocaleString('en-GB')}, which is ${format(spendable)} off the bill`}
+                    htmlFor="redeem-points"
+                  >
+                    <Input
+                      id="redeem-points"
+                      name="points"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={spendable}
+                      step={1}
+                      defaultValue={spendable}
+                      className="tabular-nums"
+                      required
+                    />
+                  </Field>
+                  {points.expiring.points > 0 && points.expiring.on ? (
+                    <p className="text-[12px] text-(--warning)">
+                      {points.expiring.points.toLocaleString('en-GB')} of these lapse on{' '}
+                      {points.expiring.on.toLocaleDateString('en-GB', { dateStyle: 'medium' })}.
+                    </p>
+                  ) : null}
+                  <Button type="submit" variant="secondary">
+                    Take the points off
                   </Button>
                 </CardBody>
               </form>

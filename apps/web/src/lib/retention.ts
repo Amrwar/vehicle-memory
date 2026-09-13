@@ -753,3 +753,56 @@ export async function handleInbound(input: {
     after: { jobId: job?.id ?? null },
   });
 }
+
+/** A bill paid in full earns a point a pound, once. */
+export async function awardForInvoice(input: {
+  orgId: string;
+  userId: string;
+  invoiceId: string;
+}): Promise<number> {
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: input.invoiceId, orgId: input.orgId, status: 'PAID' },
+    select: { id: true, number: true, total: true, customerId: true, jobId: true },
+  });
+  if (!invoice) return 0;
+
+  const reason = `Invoice ${invoice.number} paid`;
+
+  // Once. A second payment on the same invoice, a refund and repayment, or a
+  // retried request all reach here; the reason is the idempotency key.
+  const already = await prisma.loyaltyEntry.findFirst({
+    where: { orgId: input.orgId, customerId: invoice.customerId, reason },
+    select: { id: true },
+  });
+  if (already) return 0;
+
+  // Points on money the customer actually paid: the total less what the
+  // programme itself paid, so redeeming points does not earn points.
+  const redeemed = await prisma.payment.aggregate({
+    where: { invoiceId: invoice.id, method: 'LOYALTY' },
+    _sum: { amount: true },
+  });
+  const paidMinor = Math.round((Number(invoice.total) - Number(redeemed._sum.amount ?? 0)) * 100);
+
+  const points = await awardPoints({
+    orgId: input.orgId,
+    userId: input.userId,
+    customerId: invoice.customerId,
+    amountMinor: paidMinor,
+    jobId: invoice.jobId,
+    reason,
+  });
+
+  if (points > 0) {
+    await audit({
+      orgId: input.orgId,
+      actorUserId: input.userId,
+      action: 'loyalty.awarded',
+      entityType: 'Customer',
+      entityId: invoice.customerId,
+      after: { points, invoice: invoice.number },
+    });
+  }
+
+  return points;
+}

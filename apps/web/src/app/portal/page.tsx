@@ -15,6 +15,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireUser } from '@/lib/guard';
+import { pointsForPortalUser } from '@/lib/loyalty';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My vehicles' };
@@ -64,6 +65,8 @@ export default async function PortalPage() {
       },
     },
   });
+
+  const points = await pointsForPortalUser(user.userId);
 
   const activeJobs = customers.flatMap((customer) =>
     customer.jobs
@@ -256,6 +259,46 @@ export default async function PortalPage() {
             </ul>
           )}
         </section>
+
+        {/* Points are per workshop, because each workshop runs its own
+            scheme and pays for it. Shown only where there is something to
+            show; a row of zeros is a sales pitch, not information. */}
+        {points.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="font-display text-[17px] font-semibold">Your points</h2>
+            <ul className="mt-3 grid gap-2">
+              {points.map((card) => (
+                <li
+                  key={card.customerId}
+                  className="flex flex-wrap items-center gap-3 rounded-(--radius-md) border border-(--border) bg-(--surface) px-3.5 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-medium">{card.workshop}</p>
+                    <p className="text-[12px] text-(--text-faint)">
+                      Worth <Money amount={card.valueMinor / 100} /> off your next bill there. Ask
+                      at the counter to use them.
+                    </p>
+                    {card.expiring.points > 0 && card.expiring.on ? (
+                      <p className="mt-1 text-[12px] text-(--warning)">
+                        {card.expiring.points.toLocaleString('en-GB')} expire on{' '}
+                        {card.expiring.on.toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                        .
+                      </p>
+                    ) : null}
+                  </div>
+                  <p className="font-display text-[22px] font-semibold tabular-nums">
+                    {card.balance.toLocaleString('en-GB')}
+                    <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="mt-8">
           <h2 className="font-display text-[17px] font-semibold">Recent work</h2>
