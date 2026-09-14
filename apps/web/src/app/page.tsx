@@ -58,7 +58,7 @@ export default async function HomePage() {
                     'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
                   )}
                 >
-                  Start a 30-day trial
+                  Start a 14-day trial
                 </Link>
                 <Link
                   href="/p/demo-share-token"
@@ -313,7 +313,7 @@ export default async function HomePage() {
                 href="/signup"
                 className="rounded-(--radius-md) bg-(--color-brass-400) px-5 py-3 text-[15px] font-medium text-(--color-petrol-950) shadow-sm transition-opacity hover:opacity-90"
               >
-                Start a 30-day trial
+                Start a 14-day trial
               </Link>
               <Link
                 href="/pricing"

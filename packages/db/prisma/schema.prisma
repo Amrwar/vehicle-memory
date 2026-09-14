@@ -47,6 +47,21 @@ model Organization {
   subscribedAt           DateTime?
   suspendedAt            DateTime?
   cancelledAt            DateTime?
+  /// The subscription, billed through the payment provider. Phase 32.6. The
+  /// provider's references, what it last said, the card it holds, and when
+  /// the workshop accepted the terms that say the card is charged.
+  billingProvider        String?
+  billingCustomerRef     String?
+  billingSubscriptionRef String?   @unique
+  billingCheckoutRef     String?   @unique
+  billingStatus          String?
+  billingCardBrand       String?
+  billingCardLast4       String?
+  currentPeriodEnd       DateTime?
+  billingPayload         Json?
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  trialReminderSentAt    DateTime?
   logoUrl                String?
   // Work exceeding an approved estimate by more than this fraction needs
   // re-approval. FR-812.
@@ -132,6 +147,7 @@ model Organization {
   paymentAttempts     PaymentAttempt[]
 
   @@index([isActive])
+  @@index([billingCustomerRef])
   @@map("organizations")
 }
 

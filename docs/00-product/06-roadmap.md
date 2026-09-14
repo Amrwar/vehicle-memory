@@ -1615,6 +1615,47 @@ carries the new home, the rewards page and the directory.
 
 ---
 
+## Phase 32.6 — The subscription, billed
+
+**Scope.** A card before the trial, through the provider; a 14-day trial;
+the card charged automatically when the trial ends unless the workshop
+cancels first, said in plain words on the sign-up form, in the terms, in a
+reminder three days before, and on the billing page; a billing page with
+the card, the next charge as a date and an amount, and the invoices;
+cancelling in two presses, ending at the end of what was paid for.
+
+**Exit.** A workshop opens, adds a card, sees its trial end date and the
+amount it will pay, is reminded, is charged, sees the invoice, and can
+cancel; nothing about any of it surprises them.
+
+**Status.** Built, from the owner's own words: "it should be clear about
+anything, we don't need to fraud our clients". The trial is fourteen days,
+not thirty. Sign-up carries a required box that says, beside the button,
+the price per bay, the plan, the day the card is charged and that
+cancelling is two presses from Settings; the version of the terms accepted
+is recorded on the organisation. The provider seam grew five calls (open a
+subscription checkout that takes a card and starts a trial, ask what the
+subscription is, cancel at the period's end, the provider's billing portal,
+its invoices), behind which the stub takes a pretend card at a page of
+ours and Stripe opens a subscription Checkout with `trial_period_days` and
+`payment_method_collection=always`. Until the card is on file the
+workshop is read-only and the subscription page says why; workshops that
+started a trial before this phase are treated as on a plan. The state now
+reads the provider's status too: past due keeps writing and asks for a new
+card; cancelled on a plan stays open to the period's end; cancelled on a
+trial closes now and is never charged. Three days before the trial ends
+the hourly job sends the owner one email naming the card, the plan, the
+amount and the date. A paid invoice and a failed one each tell the owner.
+The billing page shows the card, the next charge as a date and an amount,
+the plan's price times the bays, and the provider's invoices, with the
+provider's portal for changing the card. The verification script opens a
+workshop, adds a card, is reminded once, is charged through the signed
+webhook, fails a charge and recovers, cancels on a plan and on a trial,
+and reads the terms and the sign-up form for the sentences that matter.
+Payment for the plan is still in pounds until prices are localised.
+
+---
+
 ## Phase 33 — Data in, data out
 
 **Scope.** Import from CSV for customers, vehicles, parts, suppliers and

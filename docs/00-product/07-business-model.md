@@ -37,8 +37,12 @@ Rationale for the shape:
   defensible against the value of knowing which jobs are profitable.
 
 **Free tier:** none for workshops. Free workshop tiers attract customers who
-will never pay and generate support load. Instead, a 30-day trial with full
-Complete functionality and real onboarding help.
+will never pay and generate support load. Instead, a 14-day trial with full
+functionality, a card taken before it starts and charged when it ends unless
+the workshop cancels first (Phase 32.6). The charge is stated on the sign-up
+form, in the terms, in a reminder three days before, and on the billing page:
+a trial that turns into a charge quietly is a refund and a chargeback, not
+revenue.
 
 **These figures are enforced, not described.** The table above is transcribed
 into `packages/core/src/billing/plans.ts`, which is what the pricing page

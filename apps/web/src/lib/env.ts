@@ -70,6 +70,11 @@ const schema = z.object({
   PAYMENT_WEBHOOK_SECRET: z.string().min(16).optional(),
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // The provider's own recurring prices per plan, per bay per month. Without
+  // them the subscription checkout prices the plan inline from core.
+  STRIPE_PRICE_CORE: z.string().min(1).optional(),
+  STRIPE_PRICE_COMPLETE: z.string().min(1).optional(),
+  STRIPE_PRICE_GROUP: z.string().min(1).optional(),
 
   MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),

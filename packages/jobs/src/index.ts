@@ -5,3 +5,4 @@ export { dispatchOutbox } from './outbox';
 export { queueServiceReminders } from './reminders';
 export { closeAbandonedTimeEntries } from './shifts';
 export { log } from './log';
+export { remindTrialsEnding } from './billing';

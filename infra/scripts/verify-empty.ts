@@ -137,6 +137,9 @@ async function main() {
   }
 
   const org = await prisma.organization.findFirstOrThrow({ where: { slug: outcome.orgSlug! } });
+  // A workshop with no card on file is read-only (Phase 32.6); this one is a
+  // fixture for empty pages, not for billing, so it is put on a plan.
+  await prisma.organization.update({ where: { id: org.id }, data: { subscribedAt: new Date() } });
 
   const token = randomBytes(32).toString('base64url');
   await prisma.session.create({

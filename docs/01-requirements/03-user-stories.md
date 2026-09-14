@@ -1137,6 +1137,48 @@ never reached us is found by me and not by the customer.
 - **Given** everything agrees, **when** I reconcile, **then** the page says
   so and changes nothing.
 
+## Epic AD — The subscription, billed (Phase 32.6)
+
+### AD1 — Nothing about the charge surprises me
+
+**As** a workshop owner opening Carnet **I want** to be told, before I add
+a card, exactly when and how much it will be charged and how to stop it
+**so that** the trial is a trial and not a trap.
+**Size** 5 · **Satisfies** FR-6001, FR-6002, FR-6003
+
+- **Given** the sign-up form, **when** I read the box beside the button,
+  **then** it names the plan, the price per bay, the day the card is charged,
+  and that cancelling is two presses from Settings.
+- **Given** the trial has three days left, **when** the hourly job runs,
+  **then** I get one email with the card, the amount and the date, and not a
+  second one.
+- **Given** I skipped the card, **when** I open the workshop, **then** it is
+  read-only with a button to add the card and a sentence saying nothing is
+  charged until the trial ends.
+
+### AD2 — The billing page tells me everything
+
+**As** Ahmed **I want** one page with the card, the next charge, the
+invoices and the cancel button **so that** I never have to email anybody to
+find out what I am paying.
+**Size** 3 · **Satisfies** FR-6004, FR-6005
+
+- **Given** a card on file, **when** I open Settings, Subscription, **then**
+  I see the card's last four digits, the next charge as an amount on a date,
+  and every invoice with its status.
+- **Given** a charge fails, **when** I open the page, **then** it says so,
+  tells me to update the card, and the workshop still works.
+
+### AD3 — Cancelling is two presses and does what it says
+
+**As** Ahmed **I want** cancelling to stop the next charge and keep what I
+paid for **so that** leaving costs nothing more than the month I used.
+**Size** 2 · **Satisfies** FR-6006, FR-6007
+
+- **Given** a plan, **when** I cancel, **then** the page says the workshop
+  stays open until the paid period ends, and no next charge is scheduled.
+- **Given** a trial, **when** I cancel, **then** the card is never charged.
+
 ---
 
 ## Story map

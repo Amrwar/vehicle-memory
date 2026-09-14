@@ -103,7 +103,7 @@ comes with conversations, and the payroll file in a provider's own layout,
 which needs a named provider. Card payment itself runs against a stub
 provider and Stripe behind the same seam. Everything else in these three tables is built and covered by a
 verification script or a crawl, and the [feature map](09-feature-map.md)
-counts the finer-grained capabilities the same way: 164 built, 4 partial, 20
+counts the finer-grained capabilities the same way: 165 built, 4 partial, 20
 missing, each named and assigned a phase.
 
 The phases these tables were last reconciled against are 1 to 32, the last

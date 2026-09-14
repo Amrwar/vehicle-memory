@@ -252,7 +252,7 @@ export function uniqueSlug(name: string, taken: ReadonlySet<string>): string {
  * enough to run a real month-end, which is the point at which a workshop can
  * actually tell whether the accounting is worth paying for.
  */
-export const TRIAL_DAYS = 30;
+export const TRIAL_DAYS = 14;
 
 export function trialEndsOn(from: Date = new Date()): Date {
   const end = new Date(from);

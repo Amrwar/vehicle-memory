@@ -392,6 +392,13 @@ where the work happens.
 | FR-5905 | AC2   | `Refund.providerRef`                                            | `refundThroughProvider()` from `recordRefund()`, `assertRefundableThroughProvider()`                                | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
 | FR-5906 | AC3   | —                                                               | `reconcileAttempts()`, `reconcileFor()`, `/payments/card`                                                           | `attempts.test.ts`, `verify-payments.ts`, `verify-controls.ts`   | Done   |
 | FR-5907 | AC3   | —                                                               | `parseWebhook()` per provider, `/api/payments/webhook`                                                              | `verify-payments.ts`                                             | Done   |
+| FR-6001 | AD1   | `Organization.billingSubscriptionRef`, `trialEndsAt`            | `subscriptionStateOf()` AWAITING_CARD, `startTrialCheckout()`, `TRIAL_DAYS`                                         | `subscription.test.ts`, `billing.test.ts`, `verify-billing.ts`   | Done   |
+| FR-6002 | AD1   | `Organization.termsAcceptedAt`, `termsVersion`                  | the sign-up action's `agree` box, `createWorkshop()` options, `/terms`                                              | `verify-billing.ts`, `verify-signup.ts`                          | Done   |
+| FR-6003 | AD1   | `Organization.trialReminderSentAt`                              | `trialReminderDue()`, `remindTrialsEnding()`, the hourly cron                                                       | `subscription.test.ts`, `verify-billing.ts`                      | Done   |
+| FR-6004 | AD2   | `Organization.billingStatus`, `subscribedAt`                    | `applyBillingEvent()`, `subscriptionStateOf()` PAST_DUE                                                             | `subscription.test.ts`, `verify-billing.ts`                      | Done   |
+| FR-6005 | AD2   | `Organization.billingCardBrand/Last4`, `currentPeriodEnd`       | `billingOverview()`, `monthlyChargeFor()`, `billingPortalLink()`, `/settings/subscription`                          | `verify-billing.ts`, `verify-controls.ts`                        | Done   |
+| FR-6006 | AD3   | `Organization.cancelledAt` in the future                        | `cancelSubscription()`, `subscriptionStateOf()` cancel-at-period-end                                                | `subscription.test.ts`, `verify-billing.ts`                      | Done   |
+| FR-6007 | AD3   | —                                                               | `parseWebhook()` subscription and invoice events, `syncBillingFromProvider()`                                       | `verify-billing.ts`                                              | Done   |
 | FR-3907 | A1    | —                                                               | `assertNotFlooding()`                                                                                               | `verify-credentials.ts`                                          | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                         | `digest()`                                                                                                          | `verify-credentials.ts`                                          | Done   |
 | FR-3801 | —     | —                                                               | `/api/inbound/resend`                                                                                               | `smoke.ts`                                                       | Done   |
@@ -634,7 +641,8 @@ not having one.
 | FR-1805 | —     | `AuditLog`     | `org.created` on sign-up           | `verify-signup.ts` | Done   |
 | FR-1806 | —     | `audit_logs`   | erasure permitted, rewrite refused | `verify-signup.ts` | Done   |
 
-Payment collection is deliberately absent: the trial takes no card, and taking
+Payment collection is now present (Phase 32.6): a card at sign-up, charged when the
+trial ends. Before that it was deliberately absent: the trial took no card, and taking
 one is Phase 4.7 alongside point of sale. A billing page that collects card
 details without a provider behind it would be worse than not having one.
 
@@ -692,9 +700,10 @@ details without a provider behind it would be worse than not having one.
 | Money owed ahead                                   | 6                   | 6                      |
 | Permissions at the resource, and the plan enforced | 7                   | 7                      |
 | Card payment through a provider                    | 7                   | 7                      |
-| **Total**                                          | **414**             | **408 (99%)**          |
+| The subscription, billed                           | 7                   | 7                      |
+| **Total**                                          | **421**             | **415 (99%)**          |
 
-The requirements document lists 498 requirements. 84 of
+The requirements document lists 505 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

@@ -411,6 +411,7 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Card payment through a provider         | Built   | A seam with a stub and Stripe; "Pay now" in the portal; failed with a reason; reconciliation names differences (Phase 32) |
 | Payment links                           | Partial | "Pay now" in the portal; a link sent in a message comes with conversations (Phase 36)                                     |
 | Workshop directory and booking anywhere | Built   | Every workshop on Carnet, findable; booking at a new one makes the customer its customer (Phase 32.5)                     |
+| Subscription lifecycle, billed          | Built   | Card before a 14-day trial, charged when it ends unless cancelled, reminded, past due, cancel at period end (Phase 32.6)  |
 | Authorisation tried per role            | Built   | Every page as every role, every action read, another workshop's records not found: `verify-authz.ts` (Phase 31)           |
 | Plan limits enforced server side        | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled states (Phase 31)                 |
 | Data import                             | Missing | Phase 33                                                                                                                  |
@@ -443,7 +444,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 164          |
+| Built    | 165          |
 | Partial  | 4            |
 | Missing  | 19           |
 | Deferred | 1            |

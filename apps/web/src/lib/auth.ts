@@ -4,6 +4,7 @@ import {
   type Role,
   safeLocale,
   type Subscription,
+  subscriptionDatesOf,
   subscriptionStateOf,
 } from '@carnet/core';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
@@ -246,6 +247,8 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
                   subscribedAt: true,
                   suspendedAt: true,
                   cancelledAt: true,
+                  billingSubscriptionRef: true,
+                  billingStatus: true,
                 },
               },
             },
@@ -280,7 +283,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
           timezone: membership.org.timezone,
         }
       : DEFAULT_REGION,
-    subscription: membership ? subscriptionStateOf(membership.org) : null,
+    subscription: membership ? subscriptionStateOf(subscriptionDatesOf(membership.org)) : null,
   };
 });
 

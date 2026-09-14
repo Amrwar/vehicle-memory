@@ -59,7 +59,7 @@ const DEFAULT_JOB_TYPES = [
 
 export async function createWorkshop(
   input: SignupInput,
-  options: { plan?: PlanId; acceptConsumerEmail?: boolean } = {},
+  options: { plan?: PlanId; acceptConsumerEmail?: boolean; termsVersion?: string | null } = {},
 ): Promise<SignupOutcome> {
   const problems = validateSignup(input);
 
@@ -113,6 +113,8 @@ export async function createWorkshop(
         plan,
         country: region.country,
         trialEndsAt: trialEndsOn(),
+        termsAcceptedAt: options.termsVersion ? new Date() : null,
+        termsVersion: options.termsVersion ?? null,
         baseCurrency: region.currency,
         locale: region.locale,
         timezone: region.timezone,

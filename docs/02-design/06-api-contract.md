@@ -197,7 +197,11 @@ of a checkout. It is verified by the provider behind the seam (Stripe's
 body with `PAYMENT_WEBHOOK_SECRET`) and fails closed: 401 when unsigned or
 unconfigured, 400 when signed and unreadable, 200 with `{ outcome }` otherwise,
 where the outcome is `recorded`, `moved`, `unchanged` or `unknown`. Applying
-an event is idempotent.
+an event is idempotent. Since Phase 32.6 the same endpoint reads the provider's
+subscription events (`customer.subscription.*`, and a subscription-mode
+`checkout.session.completed`) and its invoice events (`invoice.paid`,
+`invoice.payment_failed`) for the workshop's own subscription; a subscription
+event is followed by asking the provider for the whole record.
 
 ## 5. Versioning
 

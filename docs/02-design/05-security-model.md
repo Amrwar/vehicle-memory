@@ -165,6 +165,19 @@ provider's key is read from the environment and never stored; the
 customer's card never touches this system, because the checkout is the
 provider's page.
 
+### 7.2 The subscription, and consent to the charge (Phase 32.6)
+
+The workshop's own card never touches Carnet: the provider's checkout takes
+it, and Carnet stores the provider's references, the brand and the last
+four digits. What Carnet does store, deliberately, is consent: the version
+of the terms accepted at sign-up and when, because the sentence "the card is
+charged when the trial ends unless you cancel" is the one a dispute turns
+on. The same sentence appears on the form beside the button, on the terms
+page, in the welcome email, in a reminder three days before, and on the
+billing page, and the reminder is sent once and recorded. A provider's
+subscription event is followed by asking the provider for the whole
+record; a partial event never sets a card or a date on its own.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

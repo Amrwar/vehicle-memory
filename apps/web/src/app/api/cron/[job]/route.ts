@@ -4,6 +4,7 @@ import {
   dispatchOutbox,
   log,
   queueServiceReminders,
+  remindTrialsEnding,
   runDueAutomationActions,
   sendQueuedMessages,
 } from '@carnet/jobs';
@@ -67,8 +68,9 @@ const JOBS: Record<Job, () => Promise<Record<string, number>>> = {
     const shifts = await closeAbandonedTimeEntries();
     await auditChains();
     const reminders = await queueServiceReminders();
+    const trials = await remindTrialsEnding();
 
-    return { shifts, reminders };
+    return { shifts, reminders, trials };
   },
 };
 

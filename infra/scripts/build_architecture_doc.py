@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 32.5"
+AFTER_PHASE = "Phase 32.6"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -374,7 +374,8 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("reputation", "Reviews and reputation.", "Workshop"),
     ("ask", "Ask: a question in words, answered from the workshop's own data.", "Workshop"),
     ("settings-organisation", "Organisation settings, where the region is changed.", "Workshop"),
-    ("subscription", "The subscription page: where the workshop stands and what its plan allows.", "Workshop"),
+    ("terms", "The terms: the trial, the charge that follows it, cancelling, the data.", "Public"),
+    ("subscription", "The billing page: the card, the next charge as a date and an amount, the invoices.", "Workshop"),
     ("portal", "The customer's home on a phone: what needs them first, then their cars.", "Customer"),
     ("portal-desktop", "The same home on a desktop, two columns under a persistent navigation.", "Customer"),
     ("portal-rewards", "Rewards: points per workshop and the referral code.", "Customer"),
@@ -403,6 +404,7 @@ VERIFY_TEXT = {
     "verify-referrals": "a code redeemed at sign-up and the reward settled on the first paid bill",
     "verify-backup": "a backup taken and restored, and the restored database answering",
     "verify-headers": "the security headers and the content security policy on every surface",
+    "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
 }
 
@@ -699,7 +701,13 @@ def build() -> None:
 
     doc.add_heading("6.10 The subscription and the plan", level=2)
     diagram(doc, "flow-subscription", "The subscription's states, read from four dates on the organisation.", max_h=11)
-    para(doc, "Sign-up sets trialEndsAt. The state is read from the dates each time a session is made and is never "
+    para(doc, "Sign-up records the terms accepted and opens the provider's subscription checkout: the card goes on "
+              "file before the fourteen-day trial starts, and until it does the workshop is read-only. The trial's end "
+              "date is the provider's, because it is the day the provider charges the card; three days before, the "
+              "hourly job sends the owner one reminder with the amount and the date. A paid invoice event makes the "
+              "workshop active, a failed one marks it past due and tells the owner, cancelling on a plan ends at the "
+              "period's end and on a trial ends at once. The state is read from the dates and the provider's last word "
+              "each time a session is made and is never "
               "stored. A lapsed or cancelled workshop keeps reading and exporting and loses writing; nothing is deleted "
               "in any state; choosing a plan reopens it. The plan's limits (sites, bays, vehicles) and features (the "
               "ledger, payroll, transfers, the API) are enforced inside the functions that make or do the thing, with "

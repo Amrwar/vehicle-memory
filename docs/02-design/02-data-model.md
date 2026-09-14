@@ -174,6 +174,13 @@ provider's words, and `providerPayload` as the stub provider's own memory,
 kept apart from ours so reconciliation has two records to compare. A
 `Refund` sent back through the provider carries `attemptId` and the
 provider's `providerRef` for it.
+
+The organisation's subscription (Phase 32.6): `billingProvider`,
+`billingCustomerRef`, `billingSubscriptionRef` (unique; its presence is "a card
+is on file"), `billingCheckoutRef`, `billingStatus` as the provider last said
+it, `billingCardBrand` and `billingCardLast4`, `currentPeriodEnd`,
+`billingPayload` as the stub provider's own memory, `termsAcceptedAt` and
+`termsVersion`, and `trialReminderSentAt` so the reminder goes once.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

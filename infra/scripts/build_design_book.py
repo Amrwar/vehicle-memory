@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 32.5.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 32.6.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -546,6 +546,23 @@ def build() -> None:
         works="A person who visits twice a year should never have to learn a layout. Everything is one tap away and the first thing on the screen is the thing that needs them, with the button that finishes it.",
         shots=[("portal", "The home, on a phone.", 7.0), ("portal-desktop", "The home, on a desktop.", 16.4), ("portal-rewards", "Rewards, on their own page.", 7.0), ("portal-workshops", "The workshop directory.", 7.0)],
         source="docs/02-design/09-wireframes.md, section 11; 08-design-system.md, section 7",
+    )
+
+    design(
+        doc,
+        title="The charge, said before the card",
+        when="Phase 32.6, 14 September 2026.",
+        why="The owner asked for a trial that could not be mistaken for a trap: the card first, "
+            "fourteen days, and the charge said in plain words everywhere it could be. The design "
+            "problem is where to put a sentence nobody wants to read so that everybody reads it.",
+        meaning=[
+            "On the sign-up form the terms are a box beside the button, not a footnote under it, and the box itself says the plan, the price per bay, the day the card is charged and that cancelling is two presses. The button says what happens next: create the workshop and add a card.",
+            "The terms page leads with the same sentence in bold, then cancelling, then what happens when a payment fails, then the data. Seven short sections, no legal register.",
+            "The billing page states the next charge as an amount on a date, the card by its last four digits, and the invoices as a table with the provider's PDF. A workshop without a card sees one button and one sentence: nothing is charged until the trial ends.",
+        ],
+        works="A sentence repeated in the same words in five places is a sentence nobody can claim not to have seen. The reminder three days before, once, is the same sentence with a date and an amount in it.",
+        shots=[("signup", "Sign-up, with the terms beside the button.", 16.4), ("terms", "The terms, in plain words.", 12.0), ("subscription", "The billing page: card, next charge, invoices.", 16.4)],
+        source="docs/02-design/04-state-machines.md, section 9; 05-security-model.md, section 7.2",
     )
 
     # 11. Counter

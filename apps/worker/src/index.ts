@@ -23,6 +23,7 @@ import {
   dispatchOutbox,
   log,
   queueServiceReminders,
+  remindTrialsEnding,
   runDueAutomationActions,
   sendQueuedMessages,
   TRANSPORTS,
@@ -58,6 +59,7 @@ async function tick(iteration: number): Promise<void> {
   // Every hour.
   if (iteration % 720 === 0) {
     await queueServiceReminders();
+    await remindTrialsEnding();
   }
 }
 

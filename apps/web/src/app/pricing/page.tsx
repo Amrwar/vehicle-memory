@@ -181,8 +181,8 @@ export default async function PricingPage({
           </div>
 
           <p className="mt-6 text-center text-[13px] text-(--text-faint)">
-            Prices exclude VAT. The trial creates a real workshop with your data in it, and needs no
-            card.
+            Prices exclude VAT. The trial creates a real workshop with your data in it. A card is
+            added at sign-up and charged only when the trial ends, unless you cancel first.
           </p>
         </Section>
 
@@ -274,7 +274,7 @@ export default async function PricingPage({
               },
               {
                 q: 'What happens at the end of the trial?',
-                a: `The workshop and everything in it stays. After ${TRIAL_DAYS} days you pick a plan to keep using it. Nothing is deleted while you decide, and the passports you have written stay readable to the vehicles that own them.`,
+                a: `You add a card when you open the workshop; nothing is charged for ${TRIAL_DAYS} days. On the day the trial ends the card is charged for the first month of the plan you chose, and monthly after that, unless you cancelled before then, which takes two presses from Settings. We remind you by email three days before. Nothing is ever deleted: a cancelled workshop still reads and exports everything.`,
               },
               {
                 q: 'Why per bay rather than per user?',

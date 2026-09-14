@@ -1,5 +1,6 @@
-import { PLAN_ORDER, PLANS, type PlanId, TRIAL_DAYS, COUNTRIES } from '@carnet/core';
+import { PLAN_ORDER, PLANS, type PlanId, TERMS_VERSION, TRIAL_DAYS, COUNTRIES } from '@carnet/core';
 import { Alert, Button, Field, Input, Select } from '@carnet/ui';
+import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -8,10 +9,11 @@ import { Mark } from '@/components/marketing';
 import { currentUser, startSession } from '@/lib/auth';
 import { requestVerification } from '@/lib/credentials';
 import { createWorkshop } from '@/lib/onboarding';
+import { startTrialCheckout } from '@/lib/billing';
 
 export const metadata: Metadata = {
   title: 'Start a workshop',
-  description: `Open a Carnet workshop. ${TRIAL_DAYS} days free, no card.`,
+  description: `Open a Carnet workshop. ${TRIAL_DAYS} days free; the card is charged only when the trial ends, and only if you have not cancelled.`,
   robots: { index: true, follow: true },
 };
 
@@ -36,6 +38,21 @@ async function submit(formData: FormData) {
     ? (planParam as PlanId)
     : 'CORE';
 
+  // The terms are a box, not a footnote. Without it nothing is created.
+  if (formData.get('agree') !== 'on') {
+    const params = new URLSearchParams({
+      plan: plan.toLowerCase(),
+      country: String(formData.get('country') ?? 'GB'),
+      workshopName: String(formData.get('workshopName') ?? ''),
+      contactName: String(formData.get('contactName') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      phone: String(formData.get('phone') ?? ''),
+      sites: String(formData.get('sites') ?? 1),
+      problems: 'agree:Tick the box to say you have read how the trial and the charge work.',
+    });
+    redirect(`/signup?${params.toString()}`);
+  }
+
   const outcome = await createWorkshop(
     {
       workshopName: String(formData.get('workshopName') ?? ''),
@@ -51,6 +68,7 @@ async function submit(formData: FormData) {
       // The second submission carries the acknowledgement, so a personal
       // address warns once and then gets out of the way.
       acceptConsumerEmail: formData.get('acceptPersonalEmail') === 'on',
+      termsVersion: TERMS_VERSION,
     },
   );
 
@@ -76,7 +94,15 @@ async function submit(formData: FormData) {
   await requestVerification(outcome.userId!).catch(() => undefined);
 
   await startSession(outcome.userId!);
-  redirect('/dashboard?welcome=1');
+
+  // The card, before the trial. The provider's page says what the card is
+  // for; coming back without one leaves the workshop waiting, not deleted.
+  const org = await prisma.organization.findUniqueOrThrow({
+    where: { slug: outcome.orgSlug! },
+    select: { id: true },
+  });
+  const { url } = await startTrialCheckout({ orgId: org.id, userId: outcome.userId! });
+  redirect(url);
 }
 
 export default async function SignupPage({
@@ -133,7 +159,7 @@ export default async function SignupPage({
 
           <ul className="mt-7 grid gap-3">
             {[
-              `${TRIAL_DAYS} days, no card, and the workshop is yours to keep`,
+              `${TRIAL_DAYS} days free. Your card is charged only when the trial ends, and only if you have not cancelled`,
               'Set up with bays, job types and VAT already configured',
               'Every job you put through writes a permanent vehicle history',
             ].map((line) => (
@@ -166,7 +192,7 @@ export default async function SignupPage({
             Open your workshop
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
-            {`${TRIAL_DAYS} days on ${PLANS[plan].name}. No card, and nothing is deleted when the trial ends.`}
+            {`${TRIAL_DAYS} days free on ${PLANS[plan].name}. You add a card on the next page; it is charged on the day the trial ends unless you cancel before, and nothing is ever deleted.`}
           </p>
 
           {problems.length > 0 ? (
@@ -286,19 +312,39 @@ export default async function SignupPage({
               <Select name="plan" defaultValue={plan}>
                 {PLAN_ORDER.map((id) => (
                   <option key={id} value={id}>
-                    {PLANS[id].name} — £{PLANS[id].price.minor / 100} per bay, per month
+                    {PLANS[id].name} — £{PLANS[id].priceMonthly.minor / 100} per bay, per month,
+                    paid monthly
                   </option>
                 ))}
               </Select>
             </Field>
 
+            <label className="flex items-start gap-2.5 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) px-3 py-2.5 text-[13px] leading-relaxed">
+              <input
+                type="checkbox"
+                name="agree"
+                required
+                className="mt-1 h-4 w-4 accent-(--brand)"
+              />
+              <span>
+                I have read the{' '}
+                <Link href="/terms" className="text-(--brand-text) underline" target="_blank">
+                  terms
+                </Link>
+                . The trial is free for {TRIAL_DAYS} days. On the day it ends, the card I add next
+                is charged £{PLANS[plan].priceMonthly.minor / 100} per bay per month for the{' '}
+                {PLANS[plan].name} plan, and monthly after that, unless I cancel before then. I can
+                cancel at any time from Settings.
+              </span>
+            </label>
+
             <Button type="submit" variant="primary" size="lg" block className="mt-1">
-              Create the workshop
+              Create the workshop and add a card
             </Button>
 
             <p className="text-center text-[12px] leading-relaxed text-(--text-faint)">
-              By continuing you agree that this is a demonstration system and the data you enter is
-              seeded alongside sample records.
+              Nothing is charged today. You will be reminded by email three days before the trial
+              ends, with the date and the amount.
             </p>
           </form>
 

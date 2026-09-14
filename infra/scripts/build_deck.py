@@ -559,7 +559,7 @@ def build() -> Path:
             text(slide, feature, x + Inches(0.3), top, width - Inches(0.6), Inches(0.3),
                  size=12, colour=PETROL_200 if featured else SOFT)
 
-    text(slide, 'Staff accounts are unlimited on every plan. 30-day trial, no card.',
+    text(slide, 'Staff accounts are unlimited on every plan. 14-day trial; the card goes on first and is charged only when the trial ends.',
          MARGIN, Inches(6.5), Inches(11), Inches(0.3), size=12, colour=FAINT)
 
     numbered(slide)

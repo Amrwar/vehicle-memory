@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6000 — The subscription, billed
+
+| Ref     | Requirement                                                                                                                                                                                      | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-6001 | The trial MUST be fourteen days, and MUST start only once a card is on file with the provider; until then the workshop MUST be read-only and the subscription page MUST say why.                 | 32.6  |
+| FR-6002 | Sign-up MUST carry a required acceptance of the terms that states, beside the button, the plan, the price, the day the card is charged and how to cancel; the version accepted MUST be recorded. | 32.6  |
+| FR-6003 | The card MUST be charged automatically when the trial ends unless the workshop cancelled before, and the owner MUST be reminded by email three days before, once, with the amount and the date.  | 32.6  |
+| FR-6004 | A paid charge MUST make the workshop active and tell the owner; a failed charge MUST leave it writing, mark it past due, and tell the owner; nothing is deleted in any state.                    | 32.6  |
+| FR-6005 | The billing page MUST show the card on file, the next charge as a date and an amount, the plan's price times the bays, the provider's invoices, and a way to change the card.                    | 32.6  |
+| FR-6006 | Cancelling MUST take two presses; on a plan it MUST end at the end of the period paid for and keep the workshop open until then; on a trial it MUST end at once and charge nothing.              | 32.6  |
+| FR-6007 | The provider's subscription and invoice events MUST be verified, applied once, and followed by asking the provider for the whole record rather than trusting a partial event.                    | 32.6  |
+
 ## FR-5900 — Card payment through a provider
 
 | Ref     | Requirement                                                                                                                                                                                                                 | Phase |

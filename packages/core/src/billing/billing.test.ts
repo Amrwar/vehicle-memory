@@ -324,13 +324,14 @@ describe('slugs', () => {
 });
 
 describe('trial', () => {
-  it('ends at the close of the thirtieth day', () => {
-    // Long enough to run a real month-end, which is when a workshop can
-    // actually judge whether the accounting is worth paying for.
+  it('ends at the close of the fourteenth day', () => {
+    // Two weeks: long enough to run a real week of jobs and see the
+    // passport fill, short enough that a card taken up front is not
+    // forgotten by the time it is charged.
     const end = trialEndsOn(new Date('2026-09-01T09:00:00'));
 
-    expect(end.getDate()).toBe(1);
-    expect(end.getMonth()).toBe(9);
+    expect(end.getDate()).toBe(15);
+    expect(end.getMonth()).toBe(8);
     expect(end.getHours()).toBe(23);
   });
 

@@ -199,25 +199,31 @@ A lapsed card cannot be topped up back to life, because the date did not
 move. A cancelled card is cancelled with money on it or without; the
 cancellation wrote the money off, and nothing moves it again.
 
-## 9. Subscription (Phase 31)
+## 9. Subscription (Phase 31, billed in Phase 32.6)
 
-Not stored. Read from four dates on the organisation each time a session is
-made, so it cannot disagree with them:
+Not stored. Read from dates on the organisation and what the provider last
+said, each time a session is made, so it cannot disagree with them:
 
 ```
-  cancelledAt set                                   CANCELLED   read-only, beats everything
-  suspendedAt set                                   SUSPENDED   read-only
-  subscribedAt set                                  ACTIVE
-  trialEndsAt in the future                         TRIAL       days left shown
-  trialEndsAt past, within fourteen days            GRACE       still writing, days left shown
-  trialEndsAt past by more                          SUSPENDED   read-only
-  none of the four                                  ACTIVE      from before trials were recorded
+  cancelledAt in the past                          CANCELLED      read-only, beats everything
+  suspendedAt set                                  SUSPENDED      read-only
+  cancelledAt in the future                        ACTIVE         "stays open for N days", then CANCELLED
+  subscribedAt set, provider says past due         PAST_DUE       still writing; update the card
+  subscribedAt set                                 ACTIVE
+  no trialEndsAt (before trials were recorded)     ACTIVE
+  trialEndsAt set, no card with the provider       AWAITING_CARD  read-only; add a card to start
+  trialEndsAt in the future                        TRIAL          days left; the card is charged at the end
+  trialEndsAt past, within fourteen days           GRACE          still writing; first payment not confirmed
+  trialEndsAt past by more                         SUSPENDED      read-only
 ```
 
-Read-only means every permission that writes is turned away at the guard,
-and everything that reads or exports still works. Choosing a plan sets
-`subscribedAt` and clears the other two, which is how a lapsed or cancelled
-workshop comes back with everything where it was.
+The card comes before the trial, and the trial's end date is the
+provider's, because it is the day the provider charges. A paid invoice sets
+`subscribedAt`; a failed one sets the provider status to past due; cancelling
+sets `cancelledAt` to the end of the paid period on a plan, and to now on a
+trial, so a trial cancelled is never charged. Choosing a plan on a workshop
+with no card sends it to add one rather than marking it paid. Workshops
+from before this phase were backfilled as on a plan.
 
 ## 10. Payment attempt (Phase 32)
 

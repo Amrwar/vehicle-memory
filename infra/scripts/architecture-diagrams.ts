@@ -455,23 +455,18 @@ const FLOWS: Record<string, string> = {
   b --> t`,
 
   subscription: `stateDiagram-v2
-  [*] --> TRIAL : sign-up sets trialEndsAt
-  TRIAL --> GRACE : trial ends, fourteen days of grace
-  GRACE --> SUSPENDED : grace ends, read-only
-  TRIAL --> ACTIVE : a plan is chosen
-  GRACE --> ACTIVE : a plan is chosen
-  SUSPENDED --> ACTIVE : a plan is chosen
-  ACTIVE --> CANCELLED : cancelled, read-only, nothing deleted
+  [*] --> AWAITING_CARD : sign-up, terms accepted
+  AWAITING_CARD --> TRIAL : card on file with the provider
+  TRIAL --> ACTIVE : trial ends, card charged, invoice paid
+  TRIAL --> CANCELLED : cancelled during the trial, never charged
+  TRIAL --> GRACE : trial ends, payment not confirmed
+  GRACE --> ACTIVE : payment confirmed
+  GRACE --> SUSPENDED : fourteen days, read-only
+  ACTIVE --> PAST_DUE : a charge fails, still writing
+  PAST_DUE --> ACTIVE : a retry pays
+  ACTIVE --> CANCELLED : cancelled, open until the period ends
+  SUSPENDED --> ACTIVE : a plan is chosen and paid
   CANCELLED --> ACTIVE : a plan is chosen again`,
-
-  card: `flowchart LR
-  p["Portal: Pay now"] --> a["PaymentAttempt PENDING<br/>startCardPayment()"]
-  a --> c["Provider checkout<br/>stub: /pay/attempt · Stripe: hosted page"]
-  c -- "webhook, or the customer returns<br/>and the page asks" --> s["settleAttempt()<br/>claim the move, once"]
-  s -- succeeded --> r["recordPayment() ONLINE<br/>posted like a card at the counter"]
-  s -- declined --> f["FAILED, with the provider's reason"]
-  s -- went back --> x["CANCELLED"]
-  r --> rc["Reconcile: provider's record<br/>vs the books, differences named"]`,
 
   scheduled: `flowchart LR
   cron["Scheduler calls /api/cron/job<br/>Bearer CRON_SECRET, constant-time compare"] --> d["dispatch<br/>every minute: the outbox"]
