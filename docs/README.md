@@ -89,16 +89,16 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Twenty-five phases have shipped, the last on 13 September 2026: the workshop core,
+Twenty-six phases have shipped, the last on 13 September 2026: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
 configuring itself, the vehicle's paperwork, and the loyalty programme and its
-referrals in front of the counter and the customer. The
+referrals in front of the counter and the customer, and gift cards. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 151 capabilities
-built, 1 partial and 4 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 371
+phase, the [feature map](00-product/09-feature-map.md) counts 153 capabilities
+built, 1 partial and 3 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 377
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 

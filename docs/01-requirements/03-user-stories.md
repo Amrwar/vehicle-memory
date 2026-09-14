@@ -903,6 +903,36 @@ never promise points on a sign-up.
 
 ---
 
+## Epic W — Gift cards (Phase 26)
+
+### W1 — Selling one
+
+**As** Sara **I want** to sell a gift card at the counter **so that** a
+present can be bought here without me inventing a way to record it.
+**Size** 3 · **Satisfies** FR-5301, FR-5302, FR-5303, FR-5306
+
+- **Given** somebody paying by card, **when** I sell a fifty pound card,
+  **then** I get a number to write on it, and the books show fifty pounds
+  owed as work rather than fifty pounds earned.
+- **Given** pence, too little, too much, or points offered as payment,
+  **when** I try, **then** I am told in a sentence and nothing is sold.
+
+### W2 — Spending one
+
+**As** Sara **I want** to take a gift card off a bill **so that** the
+customer pays the rest and the books stay right.
+**Size** 3 · **Satisfies** FR-5302, FR-5304, FR-5305
+
+- **Given** an invoice with something owed, **when** I type the card number
+  and leave the amount blank, **then** the card pays as much as the bill
+  needs and the rest is left on it.
+- **Given** an amount larger than the card or the bill, **when** I try,
+  **then** it is refused, not quietly reduced.
+- **Given** the card's page, **when** I open it, **then** I see every
+  movement on it and what is left.
+
+---
+
 ## Story map
 
 ```

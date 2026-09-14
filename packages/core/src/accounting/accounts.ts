@@ -80,6 +80,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
     purpose: 'Money taken before the work is invoiced. Not revenue.',
   },
   {
+    code: '2300',
+    name: 'Gift cards outstanding',
+    type: 'LIABILITY',
+    purpose: 'Cards sold and not yet spent. Revenue when the work is done, not when the card is.',
+  },
+  {
     code: '3000',
     name: 'Retained earnings',
     type: 'EQUITY',
@@ -138,6 +144,7 @@ export const ACCOUNT = {
   TAX_PAYABLE: '2100',
   TAX_RECEIVABLE: '2110',
   DEPOSITS: '2200',
+  GIFT_CARDS: '2300',
   RETAINED: '3000',
   LABOUR_REVENUE: '4000',
   PARTS_REVENUE: '4010',

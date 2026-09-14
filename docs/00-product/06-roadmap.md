@@ -1285,6 +1285,36 @@ once, at that moment, and that every refusal refused.
 
 ---
 
+## Phase 26 — Gift cards
+
+Money taken in advance for work not yet chosen. Two things go wrong with
+gift cards and both are accounting: the sale is booked as revenue, which
+flatters December and starves the month the work is done, or the redemption
+is booked as money in, and the bank shows the same fifty pounds twice. The
+feature map had the row as missing.
+
+**Exit.** A card is sold at the counter for whole pounds, paid for with
+money and never with points or another card, and booked as a liability. It
+is redeemed on the invoice as a payment of its own kind that releases the
+liability rather than touching the bank. The balance is the sum of the
+entries. Every refusal refuses with a sentence and spends nothing. The page
+leads with what the workshop owes.
+
+**Status.** Built. `GIFT_CARD` is a payment method posting against a new
+liability account, Gift cards outstanding, which the chart of accounts fills
+in for every organisation the first time it is missing. Cards have a
+twelve-character number from the alphabet the referral codes use, read in
+groups of four. `/gift-cards` sells a card and lists every card with what is
+left on it; each card has a page with every movement on it. The invoice page
+has "Redeem a gift card", with the amount optional: left blank, the card pays
+as much of the bill as it can. A bill settled with a card still earns points,
+because the card was paid for with real money. Cards do not expire. The
+verification script sells a card, settles a small bill with part of it and a
+larger bill with the rest, checks both postings, the balances on card and
+bill, the points earned, and every refusal against a real database.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

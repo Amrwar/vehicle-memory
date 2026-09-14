@@ -118,6 +118,8 @@ model Organization {
   apiKeys             ApiKey[]
   assistantExchanges  AssistantExchange[]
   vehicleDocuments    VehicleDocument[]
+  giftCards           GiftCard[]
+  giftCardEntries     GiftCardEntry[]
 
   @@index([isActive])
   @@map("organizations")
@@ -204,58 +206,60 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  memberships         Membership[]
-  sessions            Session[]
-  auditLogs           AuditLog[]
-  jobsCreated         Job[]                @relation("JobCreatedBy")
-  jobTechnicians      JobTechnician[]
-  jobStatusEvents     JobStatusEvent[]
-  jobNotes            JobNote[]
-  jobAttachments      JobAttachment[]
-  jobTasksDone        JobTask[]
-  jobFollowUps        JobFollowUp[]
-  timeEntries         TimeEntry[]
-  qualityChecks       QualityCheck[]
-  inspections         Inspection[]
-  estimatesCreated    Estimate[]
-  paymentsRecorded    Payment[]
-  refundsRecorded     Refund[]             @relation("RefundRecorder")
-  supplierPaymentsRecorded SupplierPayment[] @relation("SupplierPaymentRecorder")
-  payrollRunsCreated  PayrollRun[]         @relation("PayrollRunCreator")
-  apiKeysCreated      ApiKey[]             @relation("ApiKeyCreator")
-  assistantExchanges AssistantExchange[]
-  documentsUploaded  VehicleDocument[] @relation("DocumentUploader")
-  preferredBy        Customer[]        @relation("PreferredTechnician")
-  bookingTechnician   Booking[]
+  memberships              Membership[]
+  sessions                 Session[]
+  auditLogs                AuditLog[]
+  jobsCreated              Job[]                @relation("JobCreatedBy")
+  jobTechnicians           JobTechnician[]
+  jobStatusEvents          JobStatusEvent[]
+  jobNotes                 JobNote[]
+  jobAttachments           JobAttachment[]
+  jobTasksDone             JobTask[]
+  jobFollowUps             JobFollowUp[]
+  timeEntries              TimeEntry[]
+  qualityChecks            QualityCheck[]
+  inspections              Inspection[]
+  estimatesCreated         Estimate[]
+  paymentsRecorded         Payment[]
+  refundsRecorded          Refund[]             @relation("RefundRecorder")
+  supplierPaymentsRecorded SupplierPayment[]    @relation("SupplierPaymentRecorder")
+  payrollRunsCreated       PayrollRun[]         @relation("PayrollRunCreator")
+  apiKeysCreated           ApiKey[]             @relation("ApiKeyCreator")
+  assistantExchanges       AssistantExchange[]
+  documentsUploaded        VehicleDocument[]    @relation("DocumentUploader")
+  preferredBy              Customer[]           @relation("PreferredTechnician")
+  bookingTechnician        Booking[]
   // Passport
-  ownedVehicles       VehicleOwnership[]
-  vehicleAccess       VehicleAccessGrant[]
-  vehicleEvents       VehicleEvent[]
-  passportShares      PassportShare[]
+  ownedVehicles            VehicleOwnership[]
+  vehicleAccess            VehicleAccessGrant[]
+  vehicleEvents            VehicleEvent[]
+  passportShares           PassportShare[]
   // Portal identity: a customer record in a workshop may point at this user
-  customerProfiles    Customer[]
-  purchaseApprovals   PurchaseRequest[]    @relation("PurchaseApprovedBy")
+  customerProfiles         Customer[]
+  purchaseApprovals        PurchaseRequest[]    @relation("PurchaseApprovedBy")
   // Phase 4
-  employeeRecord      Employee?
-  invitationsSent     Invitation[]         @relation("InvitationSender")
-  counterSales        CounterSale[]        @relation("CounterSaleSeller")
-  tillSessions        TillSession[]        @relation("TillOperator")
-  expensesApproved    Expense[]            @relation("ExpenseApprover")
-  timesheetApprovals  Timesheet[]          @relation("TimesheetApprover")
-  transfersDispatched StockTransfer[]      @relation("TransferDispatcher")
-  transfersReceived   StockTransfer[]      @relation("TransferReceiver")
-  warranties          Warranty[]
-  warrantyClaims      WarrantyClaim[]
-  skillAssessments    EmployeeSkill[]
-  partFitments        PartFitment[]
-  syncedActions       SyncedAction[]
-  reviewsResolved     ReviewRequest[]
-  loyaltyEntries      LoyaltyEntry[]
-  inboundHandled      InboundMessage[]
-  authTokens          AuthToken[]
-  suppressionsLifted  SuppressedAddress[]
-  vehicleClaims       VehicleClaim[]
-  claimsDecided       VehicleClaim[]       @relation("ClaimDecider")
+  employeeRecord           Employee?
+  invitationsSent          Invitation[]         @relation("InvitationSender")
+  counterSales             CounterSale[]        @relation("CounterSaleSeller")
+  tillSessions             TillSession[]        @relation("TillOperator")
+  expensesApproved         Expense[]            @relation("ExpenseApprover")
+  timesheetApprovals       Timesheet[]          @relation("TimesheetApprover")
+  transfersDispatched      StockTransfer[]      @relation("TransferDispatcher")
+  transfersReceived        StockTransfer[]      @relation("TransferReceiver")
+  warranties               Warranty[]
+  warrantyClaims           WarrantyClaim[]
+  skillAssessments         EmployeeSkill[]
+  partFitments             PartFitment[]
+  syncedActions            SyncedAction[]
+  reviewsResolved          ReviewRequest[]
+  loyaltyEntries           LoyaltyEntry[]
+  inboundHandled           InboundMessage[]
+  authTokens               AuthToken[]
+  suppressionsLifted       SuppressedAddress[]
+  vehicleClaims            VehicleClaim[]
+  claimsDecided            VehicleClaim[]       @relation("ClaimDecider")
+  giftCardsSold            GiftCard[]
+  giftCardEntries          GiftCardEntry[]
 
   @@index([isActive])
   @@map("users")
@@ -726,57 +730,58 @@ enum RecallStatus {
 // ===========================================================================
 
 model Customer {
-  id                    String       @id @default(cuid())
-  orgId                 String
-  kind                  CustomerKind @default(INDIVIDUAL)
-  displayName           String
-  firstName             String?
-  lastName              String?
-  companyName           String?
-  taxNumber             String?
-  email                 String?
-  mobile                String?
-  phone                 String?
-  addressLine1          String?
-  addressLine2          String?
-  locality              String?
-  region                String?
-  postcode              String?
-  country               String       @default("GB")
-  sourceOfBusiness      String?
-  notes                 String?
-  marketingEmailConsent Boolean      @default(false)
-  marketingSmsConsent   Boolean      @default(false)
+  id                        String       @id @default(cuid())
+  orgId                     String
+  kind                      CustomerKind @default(INDIVIDUAL)
+  displayName               String
+  firstName                 String?
+  lastName                  String?
+  companyName               String?
+  taxNumber                 String?
+  email                     String?
+  mobile                    String?
+  phone                     String?
+  addressLine1              String?
+  addressLine2              String?
+  locality                  String?
+  region                    String?
+  postcode                  String?
+  country                   String       @default("GB")
+  sourceOfBusiness          String?
+  notes                     String?
+  marketingEmailConsent     Boolean      @default(false)
+  marketingSmsConsent       Boolean      @default(false)
   /// When a marketing message last went out. The floor between sends is
   /// measured from here, so a campaign cannot pester somebody a rule already
   /// contacted this week.
-  lastMarketedAt        DateTime?
+  lastMarketedAt            DateTime?
   /// Portal login, when the customer has one.
-  portalUserId          String?
+  portalUserId              String?
   /// The technician this customer asks for. Preselected on a new job. FR-4706.
   preferredTechnicianUserId String?
-  isActive              Boolean      @default(true)
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  isActive                  Boolean      @default(true)
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
 
-  org                Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  portalUser         User?               @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
-  preferredTechnician User?              @relation("PreferredTechnician", fields: [preferredTechnicianUserId], references: [id], onDelete: SetNull)
-  bookings           Booking[]
-  counterSales       CounterSale[]
-  jobs               Job[]               @relation("JobCustomer")
-  billedJobs         Job[]               @relation("JobBillTo")
-  invoices           Invoice[]
-  payments           Payment[]
-  refunds            Refund[]
-  fleetAgreement     FleetAgreement?
-  consentChanges     ConsentChange[]
-  campaignRecipients CampaignRecipient[]
-  reviewRequests     ReviewRequest[]
-  loyaltyEntries     LoyaltyEntry[]
-  referralsMade      Referral[]          @relation("ReferralsMade")
-  referralsUsed      Referral[]          @relation("ReferralsUsed")
-  inboundMessages    InboundMessage[]
+  org                 Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  portalUser          User?               @relation(fields: [portalUserId], references: [id], onDelete: SetNull)
+  preferredTechnician User?               @relation("PreferredTechnician", fields: [preferredTechnicianUserId], references: [id], onDelete: SetNull)
+  bookings            Booking[]
+  counterSales        CounterSale[]
+  jobs                Job[]               @relation("JobCustomer")
+  billedJobs          Job[]               @relation("JobBillTo")
+  invoices            Invoice[]
+  payments            Payment[]
+  refunds             Refund[]
+  fleetAgreement      FleetAgreement?
+  consentChanges      ConsentChange[]
+  campaignRecipients  CampaignRecipient[]
+  reviewRequests      ReviewRequest[]
+  loyaltyEntries      LoyaltyEntry[]
+  referralsMade       Referral[]          @relation("ReferralsMade")
+  referralsUsed       Referral[]          @relation("ReferralsUsed")
+  giftCardsBought     GiftCard[]
+  inboundMessages     InboundMessage[]
 
   @@index([orgId, isActive])
   @@index([orgId, mobile])
@@ -1563,13 +1568,14 @@ model Invoice {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  org         Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  job         Job?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  customer    Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  lines       InvoiceLine[]
-  payments    Payment[]
-  creditNotes CreditNote[]
-  refunds     Refund[]
+  org             Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job             Job?            @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lines           InvoiceLine[]
+  payments        Payment[]
+  giftCardEntries GiftCardEntry[]
+  creditNotes     CreditNote[]
+  refunds         Refund[]
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -1603,7 +1609,7 @@ model InvoiceLine {
   /// The job this line came from, when the invoice covers several. A
   /// consolidated fleet invoice has one job behind each line and none behind
   /// the invoice itself.
-  jobId       String?
+  jobId String?
 
   invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   taxRate TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
@@ -1627,10 +1633,11 @@ model Payment {
   recordedByUserId String?
   createdAt        DateTime      @default(now())
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  invoice    Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  recordedBy User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  org             Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invoice         Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recordedBy      User?           @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  giftCardEntries GiftCardEntry[]
 
   @@index([orgId, receivedAt])
   @@index([invoiceId])
@@ -1647,6 +1654,8 @@ enum PaymentMethod {
   OTHER
   /// Loyalty points redeemed against the bill. Posts to marketing, not to the bank.
   LOYALTY
+  /// A gift card redeemed against the bill. Posts against the cards outstanding, not to the bank.
+  GIFT_CARD
 }
 
 /// An issued invoice is immutable. Corrections are credit notes. FR-907.
@@ -1862,23 +1871,23 @@ enum VehicleDocumentKind {
 /// owner can see what the assistant is doing and what it is spending. The
 /// reply is what the person saw; a model's rejected output is not kept.
 model AssistantExchange {
-  id           String        @id @default(cuid())
-  orgId        String
-  userId       String?
-  kind         AssistantKind
-  prompt       String
-  reply        String
+  id            String        @id @default(cuid())
+  orgId         String
+  userId        String?
+  kind          AssistantKind
+  prompt        String
+  reply         String
   /// Null when no model was involved.
-  model        String?
-  inputTokens  Int           @default(0)
-  outputTokens Int           @default(0)
-  polished     Boolean       @default(false)
-  rejected     String?
-  relatedType  String?
-  relatedId    String?
+  model         String?
+  inputTokens   Int           @default(0)
+  outputTokens  Int           @default(0)
+  polished      Boolean       @default(false)
+  rejected      String?
+  relatedType   String?
+  relatedId     String?
   /// Set when a drafted message was sent, so a draft cannot be sent twice.
   sentMessageId String?
-  createdAt    DateTime      @default(now())
+  createdAt     DateTime      @default(now())
 
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   user User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -2287,8 +2296,8 @@ model SupplierBill {
   dueAt      DateTime?
   createdAt  DateTime   @default(now())
 
-  org      Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  supplier Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  org         Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier    Supplier                    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   order       PurchaseOrder?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   allocations SupplierPaymentAllocation[]
 
@@ -2526,12 +2535,12 @@ model Timesheet {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  employee   Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  approvedBy User?        @relation("TimesheetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  approvedBy   User?        @relation("TimesheetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   /// The run that handed this sheet to payroll. Set once, when it is exported.
   payrollRunId String?
-  payrollRun   PayrollRun? @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  payrollRun   PayrollRun?  @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
 
   @@unique([employeeId, periodStart])
   @@index([orgId, status])
@@ -3775,4 +3784,67 @@ model WarrantyClaim {
   @@index([warrantyId, raisedAt])
   @@index([status])
   @@map("warranty_claims")
+}
+
+/// Money taken in advance for work not yet chosen. A liability until it is
+/// spent, never revenue on the day it is sold. Phase 26.
+model GiftCard {
+  id    String @id @default(cuid())
+  orgId String
+
+  /// Said out loud or read off a card, so no character that gets misheard.
+  code String
+
+  /// What was loaded on it when sold. The balance is the sum of the entries.
+  amount   Decimal       @db.Decimal(12, 2)
+  currency String        @default("GBP")
+  /// How the buyer paid for it. Never points, never another card.
+  method   PaymentMethod @default(CARD)
+
+  buyerCustomerId String?
+  recipientName   String?
+  note            String?
+
+  soldAt       DateTime  @default(now())
+  soldByUserId String?
+  voidedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org     Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  buyer   Customer?       @relation(fields: [buyerCustomerId], references: [id], onDelete: SetNull)
+  soldBy  User?           @relation(fields: [soldByUserId], references: [id], onDelete: SetNull)
+  entries GiftCardEntry[]
+
+  @@unique([orgId, code])
+  @@index([orgId, soldAt])
+  @@map("gift_cards")
+}
+
+/// One movement on a card. Positive when loaded, negative when spent.
+model GiftCardEntry {
+  id         String @id @default(cuid())
+  orgId      String
+  giftCardId String
+
+  amount Decimal @db.Decimal(12, 2)
+  reason String
+
+  /// The payment a redemption became, and the invoice it went against.
+  paymentId String?
+  invoiceId String?
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  giftCard  GiftCard     @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
+  payment   Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  invoice   Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdBy User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([giftCardId, createdAt])
+  @@index([orgId, createdAt])
+  @@map("gift_card_entries")
 }

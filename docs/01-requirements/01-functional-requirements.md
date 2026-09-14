@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5300 — Gift cards
+
+| Ref     | Requirement                                                                                                                                                                    | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-5301 | A gift card MUST be sold for whole pounds between a floor and a ceiling, paid for with money, and MUST NOT be bought with points or with another card.                         | 26    |
+| FR-5302 | A card sold MUST be posted as money in and a liability, never as revenue; a card redeemed MUST release that liability against what the customer owed, never touching the bank. | 26    |
+| FR-5303 | A card MUST carry a number a person can read out, from an alphabet with nothing that is misheard, and MUST be found however it is typed.                                       | 26    |
+| FR-5304 | A card MUST be redeemable on an invoice for a stated amount or, left blank, for as much as the bill needs; more than is on the card or more than is owed MUST be refused.      | 26    |
+| FR-5305 | The balance MUST be the sum of the card's entries, each naming what it was for, and MUST be readable per card with every movement on it.                                       | 26    |
+| FR-5306 | The gift cards page MUST lead with what the workshop owes as work, and MUST show every card with what is left on it.                                                           | 26    |
+
 ## FR-5200 — Referrals, in the product
 
 | Ref     | Requirement                                                                                                                                                                           | Phase |

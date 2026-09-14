@@ -187,16 +187,56 @@ export function postPartsConsumed(input: {
    --------------------------------------------------------------------------- */
 
 export type PaymentMethod =
-  'CASH' | 'CARD' | 'BANK_TRANSFER' | 'ONLINE' | 'CHEQUE' | 'ACCOUNT' | 'OTHER' | 'LOYALTY';
+  | 'CASH'
+  | 'CARD'
+  | 'BANK_TRANSFER'
+  | 'ONLINE'
+  | 'CHEQUE'
+  | 'ACCOUNT'
+  | 'OTHER'
+  | 'LOYALTY'
+  | 'GIFT_CARD';
 
 /**
  * Cash goes to the cash account; everything else lands in the bank. Points
  * redeemed are not money in: they are the cost of the loyalty programme, so
- * the debit goes to marketing and the customer's debt still comes down.
+ * the debit goes to marketing and the customer's debt still comes down. A
+ * gift card redeemed is money that already came in when the card was sold,
+ * so the debit releases the liability rather than touching the bank twice.
  */
 export function accountForMethod(method: PaymentMethod): string {
   if (method === 'LOYALTY') return ACCOUNT.LOYALTY_REWARDS;
+  if (method === 'GIFT_CARD') return ACCOUNT.GIFT_CARDS;
   return method === 'CASH' ? ACCOUNT.CASH : ACCOUNT.BANK;
+}
+
+/* ---------------------------------------------------------------------------
+   Gift card sold
+   --------------------------------------------------------------------------- */
+
+/**
+ * Money in, owed back as work. The card is a liability until it is spent;
+ * booking it as revenue on the day it is sold is the classic error, and it
+ * flatters December and starves January.
+ */
+export function postGiftCardSold(input: {
+  giftCardId: string;
+  reference: string;
+  amount: Money;
+  method: PaymentMethod;
+  soldAt: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: input.reference,
+    description: 'Gift card sold',
+    sourceType: 'GiftCard',
+    sourceId: input.giftCardId,
+    postedAt: input.soldAt,
+    lines: [
+      debitLine(accountForMethod(input.method), input.amount, input.method.toLowerCase()),
+      creditLine(ACCOUNT.GIFT_CARDS, input.amount),
+    ],
+  });
 }
 
 export function postPaymentReceived(input: {

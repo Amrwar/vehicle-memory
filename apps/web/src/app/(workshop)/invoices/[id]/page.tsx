@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { GiftCardError, redeemGiftCard } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
 import {
   loyaltyCardFor,
@@ -79,6 +80,7 @@ const METHODS: { value: PaymentMethod; label: string }[] = [
 const METHOD_LABELS: Record<string, string> = {
   ...Object.fromEntries(METHODS.map((m) => [m.value, m.label])),
   LOYALTY: 'Points',
+  GIFT_CARD: 'Gift card',
 };
 
 /**
@@ -149,6 +151,34 @@ async function redeem(formData: FormData) {
   }
 
   redirect(`/invoices/${invoiceId}?done=redeemed`);
+}
+
+/**
+ * A gift card off the bill. The amount is optional: left blank, the card
+ * pays as much of the bill as it can, which is what somebody at the counter
+ * nearly always means. Anything typed in is used exactly or refused.
+ */
+async function redeemCard(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+  const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
+
+  try {
+    await redeemGiftCard({
+      orgId,
+      userId: user.userId,
+      invoiceId,
+      code: String(formData.get('code') ?? ''),
+      amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+    });
+  } catch (error) {
+    if (!(error instanceof GiftCardError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}?done=card`);
 }
 
 async function credit(formData: FormData) {
@@ -277,9 +307,11 @@ export default async function InvoicePage({
             ? 'Payment recorded and posted to the ledger.'
             : notice.done === 'redeemed'
               ? 'Points taken off the bill and booked as the cost of the programme, not as money in.'
-              : notice.done === 'credited'
-                ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
-                : 'Refund recorded. The customer has been told it is on its way.'}
+              : notice.done === 'card'
+                ? 'Gift card redeemed. The money came in when the card was sold; this releases what was owed.'
+                : notice.done === 'credited'
+                  ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
+                  : 'Refund recorded. The customer has been told it is on its way.'}
         </Alert>
       ) : null}
 
@@ -558,6 +590,43 @@ export default async function InvoicePage({
                   ) : null}
                   <Button type="submit" variant="secondary">
                     Take the points off
+                  </Button>
+                </CardBody>
+              </form>
+            </Card>
+          ) : null}
+
+          {mayPay ? (
+            <Card>
+              <CardHeader
+                title="Redeem a gift card"
+                description="Read the number off the card. Leave the amount blank to use as much as the bill needs."
+              />
+              <form action={redeemCard}>
+                <CardBody className="grid gap-3">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <Field label="Card number" htmlFor="card-code">
+                    <Input
+                      id="card-code"
+                      name="code"
+                      required
+                      maxLength={14}
+                      autoCapitalize="characters"
+                      className="datum uppercase tracking-[0.12em]"
+                      placeholder="XXXX-XXXX-XXXX"
+                    />
+                  </Field>
+                  <Field label="Amount" hint="Optional" htmlFor="card-amount">
+                    <Input
+                      id="card-amount"
+                      name="amount"
+                      inputMode="decimal"
+                      className="tabular-nums"
+                      placeholder={(money.outstanding.minor / 100).toFixed(2)}
+                    />
+                  </Field>
+                  <Button type="submit" variant="secondary">
+                    Take it off the bill
                   </Button>
                 </CardBody>
               </form>

@@ -17,6 +17,7 @@ import {
   PostingError,
   postCreditNote,
   postGoodsReceived,
+  postGiftCardSold,
   postInvoiceIssued,
   postPartsConsumed,
   postPaymentReceived,
@@ -240,6 +241,21 @@ describe('payment received', () => {
     expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.RECEIVABLE);
   });
 
+  // A gift card was paid for when it was sold. Redeeming it must not put the
+  // money in the bank a second time; it releases what the workshop owed.
+  it('books a gift card redeemed against the cards outstanding, not the bank', () => {
+    const posted = postPaymentReceived({
+      paymentId: 'pay_5',
+      reference: 'PAY-5',
+      amount: gbp('25.00'),
+      method: 'GIFT_CARD',
+      receivedAt: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.GIFT_CARDS);
+    expect(accountType(ACCOUNT.GIFT_CARDS)).toBe('LIABILITY');
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.RECEIVABLE);
+  });
+
   // Treating a deposit as revenue on receipt overstates a good month and
   // understates the one where the work is actually done.
   it('treats a deposit as a liability, not revenue', () => {
@@ -253,6 +269,33 @@ describe('payment received', () => {
     });
     expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.DEPOSITS);
     expect(accountType(ACCOUNT.DEPOSITS)).toBe('LIABILITY');
+  });
+});
+
+describe('gift card sold', () => {
+  it('is money in and a liability, not revenue', () => {
+    const posted = postGiftCardSold({
+      giftCardId: 'gc_1',
+      reference: 'GC-1',
+      amount: gbp('50.00'),
+      method: 'CARD',
+      soldAt: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.BANK);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.GIFT_CARDS);
+    expect(posted.sourceType).toBe('GiftCard');
+    expect(() => assertBalanced(posted)).not.toThrow();
+  });
+
+  it('sends cash to the cash account', () => {
+    const posted = postGiftCardSold({
+      giftCardId: 'gc_2',
+      reference: 'GC-2',
+      amount: gbp('20.00'),
+      method: 'CASH',
+      soldAt: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.CASH);
   });
 });
 

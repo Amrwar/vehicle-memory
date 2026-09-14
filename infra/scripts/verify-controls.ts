@@ -74,6 +74,7 @@ const PAGES = [
   '/estimates',
   '/invoices',
   '/payments',
+  '/gift-cards',
   '/reports',
   '/reports/business',
   '/insights',

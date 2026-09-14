@@ -82,6 +82,7 @@ const GROUPS: Group[] = [
       { href: '/estimates', label: 'Estimates', icon: 'estimates', permission: 'estimate:read' },
       { href: '/invoices', label: 'Invoices', icon: 'invoices', permission: 'invoice:read' },
       { href: '/payments', label: 'Payments', icon: 'payments', permission: 'payment:read' },
+      { href: '/gift-cards', label: 'Gift cards', icon: 'giftcards', permission: 'payment:read' },
       { href: '/payables', label: 'Suppliers owed', icon: 'payables', permission: 'ledger:read' },
       { href: '/reports', label: 'Reports', icon: 'reports', permission: 'report:operational' },
       {
