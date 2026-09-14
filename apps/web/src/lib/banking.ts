@@ -15,12 +15,14 @@ import {
   summariseExpenses,
   toNumber,
   trialBalance,
+  PlanLimitError,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { postedLines, postEntry } from './accounting';
 import { audit } from './guard';
 import { regionFor } from './region';
+import { assertPlanAllows } from './billing';
 
 /**
  * Expenses and the bank, against the database.
@@ -80,6 +82,12 @@ export async function recordExpense(input: {
   receiptUrl?: string | null;
   claimedByEmployeeId?: string | null;
 }): Promise<{ ok: boolean; error?: string; expenseId?: string }> {
+  try {
+    await assertPlanAllows(input.orgId, 'ledger');
+  } catch (error) {
+    if (error instanceof PlanLimitError) return { ok: false, error: error.message };
+    throw error;
+  }
   const region = await regionFor(input.orgId);
   const count = await prisma.expense.count({ where: { orgId: input.orgId } });
   const reference = `EXP-${String(count + 1).padStart(4, '0')}`;

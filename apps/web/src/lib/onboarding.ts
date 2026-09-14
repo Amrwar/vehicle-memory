@@ -112,6 +112,7 @@ export async function createWorkshop(
         phone: input.phone?.trim() || null,
         plan,
         country: region.country,
+        trialEndsAt: trialEndsOn(),
         baseCurrency: region.currency,
         locale: region.locale,
         timezone: region.timezone,

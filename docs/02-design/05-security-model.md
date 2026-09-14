@@ -44,12 +44,33 @@ caller.
 ```
   Request
     -> authenticated?          no -> 302 /login
-    -> role has permission?    no -> 403, audited
+    -> workshop read-only, and this writes?
+                               yes -> /settings/subscription, with the reason
+    -> role has permission?    no -> own surface, with the reason; audited
+    -> plan allows it?         no -> refused where the thing is made, naming the plan
     -> row in scope?           no -> 404, never 403
 ```
 
 The last line matters: a cross-tenant request by id returns **404**, so
 existence is not disclosed.
+
+**Layer 3, the plan and the subscription (Phase 31).** Holding the
+permission and the row is still not enough if the workshop's plan does not
+include the feature or has no room for one more of the thing. `assertPlanAllows`
+and `assertWithinLimit` sit inside the function that creates or does it,
+never only on the page, and the refusal carries the number and the plan that
+would allow it. A workshop whose trial has lapsed past its fortnight of
+grace, or that has cancelled, is read-only: every permission that writes is
+turned away at the guard to the subscription page, and everything that reads
+or exports still works. Nothing is deleted in any state.
+
+**Tried, not trusted.** `infra/scripts/verify-authz.ts` reads every workshop
+page from disk with the permission its page function asks for, mints a
+session for every role, and opens every page as every role, expecting the
+answer the table gives. It then reads every server action on every page and
+fails on one that writes behind a reading permission, which is the mistake
+it was written after finding twice. It runs against a built server before
+each phase ships.
 
 ## 4. Tenant isolation
 
@@ -64,6 +85,8 @@ mechanism. Summary:
   to an unscoped one.
 - Cross-tenant isolation tests exist per entity; adding a model without one is
   a review failure.
+- The authorisation probe asks for another organisation's customer, supplier
+  and receipt by id as an owner, over HTTP, and expects not found.
 
 **Known gap, stated rather than hidden:** `update` and `delete` by id are not
 narrowed by the extension, because their `where` must address a unique row. The

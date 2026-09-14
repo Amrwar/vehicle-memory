@@ -44,19 +44,20 @@ Read in this order if you are new to the project.
 
 ### 2. Design — how it is shaped
 
-| Doc                                                       | Contents                                                                                                                                |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [Domain model](02-design/01-domain-model.md)              | Bounded contexts, aggregates, invariants, the ubiquitous language                                                                       |
-| [Data model & ERD](02-design/02-data-model.md)            | Every table, key, index and relationship                                                                                                |
-| [Architecture](02-design/03-architecture.md)              | C4 context/container/component, runtime, deployment                                                                                     |
-| [State machines](02-design/04-state-machines.md)          | Job lifecycle, estimate approval, stock reservation, invoice                                                                            |
-| [Security model](02-design/05-security-model.md)          | Authn, authz, tenancy isolation, threat model, passport integrity                                                                       |
-| [API contract](02-design/06-api-contract.md)              | The three live read endpoints and their keys, then the contract for what follows                                                        |
-| [Accounting model](02-design/07-accounting-model.md)      | Chart of accounts and the exact journal postings each event makes                                                                       |
-| [Design system](02-design/08-design-system.md)            | Colour, type, spacing, elevation, components, dark mode, a11y                                                                           |
-| [Wireframes](02-design/09-wireframes.md)                  | Every screen, annotated                                                                                                                 |
-| [The passport, designed](02-design/10-passport-design.md) | Why the passport looks like a passport: every choice and the fact it carries                                                            |
-| [The design book](Carnet-Design-Book.pdf)                 | Every design photographed from the running app: when, why, meaning, why it works. Word beside it; rebuilt by `npm run docs:design-book` |
+| Doc                                                                | Contents                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Domain model](02-design/01-domain-model.md)                       | Bounded contexts, aggregates, invariants, the ubiquitous language                                                                                                                                                                                                                                              |
+| [Data model & ERD](02-design/02-data-model.md)                     | Every table, key, index and relationship                                                                                                                                                                                                                                                                       |
+| [Architecture](02-design/03-architecture.md)                       | C4 context/container/component, runtime, deployment                                                                                                                                                                                                                                                            |
+| [State machines](02-design/04-state-machines.md)                   | Job lifecycle, estimate approval, stock reservation, invoice                                                                                                                                                                                                                                                   |
+| [Security model](02-design/05-security-model.md)                   | Authn, authz, tenancy isolation, threat model, passport integrity                                                                                                                                                                                                                                              |
+| [API contract](02-design/06-api-contract.md)                       | The three live read endpoints and their keys, then the contract for what follows                                                                                                                                                                                                                               |
+| [Accounting model](02-design/07-accounting-model.md)               | Chart of accounts and the exact journal postings each event makes                                                                                                                                                                                                                                              |
+| [Design system](02-design/08-design-system.md)                     | Colour, type, spacing, elevation, components, dark mode, a11y                                                                                                                                                                                                                                                  |
+| [Wireframes](02-design/09-wireframes.md)                           | Every screen, annotated                                                                                                                                                                                                                                                                                        |
+| [The passport, designed](02-design/10-passport-design.md)          | Why the passport looks like a passport: every choice and the fact it carries                                                                                                                                                                                                                                   |
+| [The design book](Carnet-Design-Book.pdf)                          | Every design photographed from the running app: when, why, meaning, why it works. Word beside it; rebuilt by `npm run docs:design-book`                                                                                                                                                                        |
+| [The system architecture document](Carnet-System-Architecture.pdf) | How the system is put together and processes data: request and write paths, every workflow as a data flow, the database domain by domain with ER diagrams read from the schema, security in the data path, wireframes and photographs of the interface. Word beside it; rebuilt by `npm run docs:architecture` |
 
 ### 3. Decisions
 
@@ -90,14 +91,15 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Thirty phases have shipped, the last on 14 September 2026: the workshop core,
+Thirty-one phases have shipped, the last on 14 September 2026: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
 configuring itself, the vehicle's paperwork, and the loyalty programme and its
 referrals in front of the counter and the customer, gift cards, the
 passports listed side by side, a country and currency per workshop, and money
-held ahead of a bill with a receipt for every payment. The
+held ahead of a bill with a receipt for every payment, and the permissions
+tried as every role with the plan enforced where things are made. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
 phase, the [feature map](00-product/09-feature-map.md) counts 160 capabilities
 built, 4 partial and 22 missing, and the

@@ -1,4 +1,4 @@
-import { humaniseRole, type Role } from '@carnet/core';
+import { humaniseRole, type Role, PlanLimitError } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -56,7 +56,7 @@ async function mint(formData: FormData) {
     });
     redirect(`/settings?token=${encodeURIComponent(key.token)}#api`);
   } catch (error) {
-    if (error instanceof ApiKeyError) {
+    if (error instanceof ApiKeyError || error instanceof PlanLimitError) {
       redirect(`/settings?problem=${encodeURIComponent(error.message)}#api`);
     }
     throw error;
@@ -136,6 +136,20 @@ export default async function SettingsPage({
       />
 
       <div className="grid gap-5 lg:grid-cols-2">
+        <Card>
+          <CardHeader
+            title="Subscription"
+            description="Where the workshop stands, and what its plan allows"
+            action={
+              <Link href="/settings/subscription">
+                <Button variant="secondary" size="sm">
+                  Open
+                </Button>
+              </Link>
+            }
+          />
+        </Card>
+
         <Card>
           <CardHeader
             title="Organisation"

@@ -120,6 +120,7 @@ async function main() {
     { file: 'login', path: '/login', who: 'nobody' },
     { file: 'signup', path: '/signup', who: 'nobody', fullPage: true },
     { file: 'settings-organisation', path: '/settings/organisation', who: 'owner', fullPage: true },
+    { file: 'subscription', path: '/settings/subscription', who: 'owner', fullPage: true },
     { file: 'dashboard', path: '/dashboard', who: 'owner' },
     { file: 'dashboard-dark', path: '/dashboard', who: 'owner', dark: true },
     { file: 'diary', path: '/diary', who: 'owner' },

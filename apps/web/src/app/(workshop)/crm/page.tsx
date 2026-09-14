@@ -76,7 +76,7 @@ const SEGMENTS: { key: string; rules: SegmentRule[] }[] = [
 async function compose(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('customer:read');
+  const { orgId, user } = await requireSession('customer:write');
 
   const chosen = SEGMENTS.find((segment) => segment.key === String(formData.get('segment') ?? ''));
 
@@ -102,7 +102,7 @@ async function compose(formData: FormData) {
 async function send(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('customer:read');
+  const { orgId, user } = await requireSession('customer:write');
 
   try {
     const result = await sendCampaign({

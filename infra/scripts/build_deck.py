@@ -572,12 +572,12 @@ def build() -> Path:
     rule(slide, Inches(2.15))
 
     phases = [
-        ('7', 'Digital vehicle inspection', 'Six tables exist and no interface. An inspection is what turns a booked oil change into approved brake work.'),
-        ('8', 'The floor and the diary', 'Day, month, technician and site views. Drag a job between bays, with the capacity check running on the drop.'),
-        ('9', 'Warranty, fleet, customer thread', 'A fifty-vehicle company is fifty unrelated records today. This opens a market rather than adding a feature.'),
-        ('10', 'Reviews, loyalty and the inbox', 'A strong rating invited to a public review, a poor one into a private conversation. Replies land against the job.'),
-        ('11', 'Filling in the ERP', 'Supplier payments, purchase price history, refunds, card payment, payroll export.'),
-        ('12', 'Answers rather than pages', 'Ask a question in words. AI inside the workflow, never deciding anything.'),
+        ('32', 'Card payment through a provider', 'A provider seam with a stub that behaves like the real one, a "Pay now" in the portal, failed payments as a state, and reconciliation that names the difference.'),
+        ('33', 'Data in, data out', 'CSV import with mapping, validation and a report of what did not go in; export of everything a workshop owns.'),
+        ('34', 'The workflow, as one thing', 'An approved estimate becomes a job in one press; extra work is quoted and approved without leaving the job.'),
+        ('35', 'Arrival and departure', 'Check-in and check-out, signatures on the record, key tags.'),
+        ('36', 'Conversations', 'One thread per customer across email, SMS and WhatsApp, on the job it is about.'),
+        ('37', 'Packages and templates', 'Service packages priced as one thing; job templates that put the right lines on from the start.'),
     ]
 
     for index, (number, title, note) in enumerate(phases):

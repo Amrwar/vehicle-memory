@@ -235,6 +235,16 @@ read by every page. The invariant is that no figure or date reaches a person
 formatted by a default. The country table is the only place a country's
 currency, locale, timezone and first tax rate are written down.
 
+### 3.9 Subscription (Phase 31)
+
+Not an aggregate either: a state read from four dates on the organisation,
+carried on the session. The invariant is that a read-only workshop can lose
+nothing: every write is turned away at the guard, every read and export
+still answers, and choosing a plan restores writing without touching a
+record. The plan's limits and features are asserted inside the function
+that makes or does the thing, so a page that forgets its wall changes what
+somebody sees and never what they can do.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

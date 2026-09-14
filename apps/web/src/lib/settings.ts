@@ -15,6 +15,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { assertWithinLimit } from './billing';
 
 /**
  * Settings, written. Phase 19.
@@ -304,6 +305,12 @@ export async function saveBay(input: {
       });
       return input.bayId;
     }
+
+    // One more bay is what the plan is priced by.
+    const bays = await prisma.bay.count({
+      where: { location: { orgId: input.orgId }, isActive: true },
+    });
+    await assertWithinLimit(input.orgId, 'bays', bays);
 
     const bay = await prisma.bay.create({
       data: { ...data, locationId: location.id, sortOrder: location._count.bays + 1 },

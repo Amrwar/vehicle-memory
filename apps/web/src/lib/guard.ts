@@ -9,6 +9,9 @@ import {
   type PlanId,
   planFor,
   type Region,
+  isWritePermission,
+  type Subscription,
+  subscriptionStateOf,
   type Role,
 } from '@carnet/core';
 import { headers } from 'next/headers';
@@ -34,6 +37,8 @@ export interface Session {
   plan: PlanId;
   /** What money and dates are formatted by. */
   region: Region;
+  /** Where the workshop stands with us. */
+  subscription: Subscription;
 }
 
 /** Requires a signed-in user attached to an organisation. */
@@ -47,6 +52,12 @@ export async function requireSession(permission?: Permission): Promise<Session> 
   if (!user.orgId) {
     // A portal-only customer has no organisation membership.
     redirect(landingPathFor(user.role));
+  }
+
+  // A workshop that has lapsed or cancelled keeps reading and exporting and
+  // loses writing. The refusal lands on the page that explains why.
+  if (permission && user.subscription?.readOnly && isWritePermission(permission)) {
+    redirect('/settings/subscription?blocked=1');
   }
 
   if (permission) {
@@ -71,6 +82,14 @@ export async function requireSession(permission?: Permission): Promise<Session> 
     db: forOrg(user.orgId),
     plan: planFor(user.orgPlan ?? 'CORE').id,
     region: user.region,
+    subscription:
+      user.subscription ??
+      subscriptionStateOf({
+        trialEndsAt: null,
+        subscribedAt: null,
+        suspendedAt: null,
+        cancelledAt: null,
+      }),
   };
 }
 

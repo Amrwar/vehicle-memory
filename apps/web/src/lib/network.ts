@@ -14,6 +14,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { orgCanReadVehicle } from './passport';
+import { assertWithinLimit, usageOf } from './billing';
 
 /**
  * The network, against the database.
@@ -147,6 +148,7 @@ export async function adoptVehicle(input: {
   userId: string;
   vehicleId: string;
 }): Promise<void> {
+  await assertWithinLimit(input.orgId, 'vehicles', (await usageOf(input.orgId)).vehicles);
   const [vehicle, servicedHere] = await Promise.all([
     prisma.vehicle.findUnique({ where: { id: input.vehicleId }, select: { id: true, vin: true } }),
     orgCanReadVehicle(input.orgId, input.vehicleId),
@@ -188,6 +190,7 @@ export async function registerVehicle(input: {
   model?: string | null;
   year?: number | null;
 }): Promise<{ id: string; warning: string | null }> {
+  await assertWithinLimit(input.orgId, 'vehicles', (await usageOf(input.orgId)).vehicles);
   const vin = normaliseVin(input.vin);
   const validation = validateVin(vin);
 

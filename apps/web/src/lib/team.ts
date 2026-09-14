@@ -8,12 +8,14 @@ import {
   invitationExpiry,
   type InvitationError,
   type Role,
+  PlanLimitError,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { siteUrl } from './credentials';
 import { audit } from './guard';
 import { pushNow } from './outbound';
+import { assertWithinLimit } from './billing';
 
 /**
  * The team, against the database.
@@ -63,6 +65,16 @@ export async function inviteColleague(input: {
 
   if (existing && existing.memberships.length > 0) {
     return { ok: false, error: 'That person is already in this workshop.' };
+  }
+
+  // Unlimited on every plan, and checked anyway so the shape is the same
+  // everywhere and a cap later is a data change.
+  try {
+    const seats = await prisma.membership.count({ where: { orgId: input.orgId, isActive: true } });
+    await assertWithinLimit(input.orgId, 'users', seats);
+  } catch (error) {
+    if (error instanceof PlanLimitError) return { ok: false, error: error.message };
+    throw error;
   }
 
   const open = await prisma.invitation.findFirst({

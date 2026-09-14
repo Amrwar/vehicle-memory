@@ -15,6 +15,7 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import { regionFor } from './region';
+import { assertPlanAllows } from './billing';
 
 /**
  * Stock between sites, against the database.
@@ -70,6 +71,7 @@ export async function dispatchTransfer(
   transferId: string,
   userId: string,
 ): Promise<StockTransfer> {
+  await assertPlanAllows(orgId, 'transfers');
   return prisma.$transaction(async (tx) => {
     const row = await tx.stockTransfer.findFirstOrThrow({
       where: { id: transferId, orgId },

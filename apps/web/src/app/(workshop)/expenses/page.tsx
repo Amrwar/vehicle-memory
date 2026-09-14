@@ -61,7 +61,7 @@ const CATEGORIES: ExpenseCategory[] = [
 async function record(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('report:financial');
+  const { orgId, user } = await requireSession('ledger:write');
 
   const result = await recordExpense({
     orgId,
@@ -87,7 +87,7 @@ async function record(formData: FormData) {
 async function approve(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('report:financial');
+  const { orgId, user } = await requireSession('ledger:write');
 
   const result = await approveExpense({
     orgId,

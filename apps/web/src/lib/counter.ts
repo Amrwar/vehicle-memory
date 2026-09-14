@@ -14,6 +14,7 @@ import { postEntry } from './accounting';
 import { redeemAtCounter } from './giftcards';
 import { audit } from './guard';
 import { regionFor } from './region';
+import { assertPlanAllows } from './billing';
 
 /**
  * Counter sales, against the database.
@@ -83,6 +84,8 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
     .filter((id): id is string => id !== null);
 
   try {
+    await assertPlanAllows(input.orgId, 'inventory');
+
     const outcome = await prisma.$transaction(async (tx) => {
       // Locked before reading. Availability checked a moment ago is a guess.
       const levels = productIds.length

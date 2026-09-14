@@ -16,6 +16,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { audit } from './guard';
 import { draftTimesheet } from './people';
+import { assertPlanAllows } from './billing';
 
 /**
  * Timesheets to payroll, against the database.
@@ -220,6 +221,7 @@ export async function runPayroll(input: {
   periodStart: Date;
   periodEnd: Date;
 }): Promise<string> {
+  await assertPlanAllows(input.orgId, 'payroll');
   const rows = await prisma.timesheet.findMany({
     where: {
       orgId: input.orgId,

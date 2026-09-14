@@ -1054,6 +1054,48 @@ that says what I paid and what is still owed.
 - **Given** a payment, **when** it lands, **then** I am sent a receipt, and
   the workshop can print one for me at the counter.
 
+## Epic AB — Permissions at the resource, and the plan enforced (Phase 31)
+
+### AB1 — Tried, not trusted
+
+**As** Ahmed **I want** every door in the workshop knocked on as every role
+by a script **so that** the permission table is something we know, not
+something we believe.
+**Size** 5 · **Satisfies** FR-5801, FR-5802, FR-5803
+
+- **Given** every workshop page and every role, **when** the probe runs,
+  **then** each answer matches the table, and a technician lands on the shop
+  floor.
+- **Given** another workshop's customer, **when** I ask for it by id,
+  **then** it is not found, and I learn nothing.
+- **Given** a server action behind a reading permission that writes, **when**
+  the probe reads the page, **then** it fails and names the action.
+
+### AB2 — Told where I try
+
+**As** Ahmed **I want** the plan's limit to stop me where I add the seventh
+bay, with the number and the plan that raises it **so that** I am not sent
+to a pricing page to work out why.
+**Size** 3 · **Satisfies** FR-5804, FR-5805
+
+- **Given** six bays on Core, **when** I save a seventh, **then** the form
+  says six of six and that Complete raises it, and nothing is saved.
+- **Given** Core, **when** I make an API key, **then** I am told Complete
+  has the API.
+
+### AB3 — Nothing lost when the trial ends
+
+**As** Ahmed **I want** a lapsed workshop to keep reading and exporting
+**so that** a missed renewal never costs a record, and choosing a plan puts
+everything back.
+**Size** 3 · **Satisfies** FR-5806, FR-5807
+
+- **Given** a trial that ended a fortnight ago, **when** I open a new job,
+  **then** I land on the subscription page with the reason, and the jobs
+  list still opens.
+- **Given** a cancelled workshop, **when** I choose a plan, **then** it is
+  open again and the change is in the audit log.
+
 ---
 
 ## Story map

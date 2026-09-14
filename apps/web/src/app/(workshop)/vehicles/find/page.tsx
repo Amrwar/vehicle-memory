@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
 import { adoptVehicle, findOnNetwork, NetworkError, registerVehicle } from '@/lib/network';
+import { PlanLimitError } from '@carnet/core';
 
 export const metadata: Metadata = { title: 'Find a vehicle' };
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,7 @@ async function adopt(formData: FormData) {
   try {
     await adoptVehicle({ orgId, userId: user.userId, vehicleId });
   } catch (error) {
-    if (!(error instanceof NetworkError)) throw error;
+    if (!(error instanceof NetworkError) && !(error instanceof PlanLimitError)) throw error;
     redirect(
       `/vehicles/find?q=${encodeURIComponent(String(formData.get('q') ?? ''))}&problem=${encodeURIComponent(error.message)}`,
     );
@@ -59,7 +60,7 @@ async function register(formData: FormData) {
       year: Number(formData.get('year') ?? '') || null,
     });
   } catch (error) {
-    if (!(error instanceof NetworkError)) throw error;
+    if (!(error instanceof NetworkError) && !(error instanceof PlanLimitError)) throw error;
     redirect(
       `/vehicles/find?q=${encodeURIComponent(String(formData.get('vin') ?? ''))}&problem=${encodeURIComponent(error.message)}`,
     );
@@ -86,7 +87,7 @@ export default async function FindVehiclePage({
     try {
       found = await findOnNetwork(orgId, q);
     } catch (error) {
-      if (!(error instanceof NetworkError)) throw error;
+      if (!(error instanceof NetworkError) && !(error instanceof PlanLimitError)) throw error;
       problem = error.message;
     }
   }

@@ -1,4 +1,11 @@
-import { DEFAULT_REGION, type Region, type Role, safeLocale } from '@carnet/core';
+import {
+  DEFAULT_REGION,
+  type Region,
+  type Role,
+  safeLocale,
+  type Subscription,
+  subscriptionStateOf,
+} from '@carnet/core';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { prisma } from '@carnet/db';
@@ -204,6 +211,8 @@ export interface CurrentUser {
   sessionId: string;
   /** The organisation's region: what money and dates are formatted by. */
   region: Region;
+  /** Where the workshop stands with us. Null for a portal-only person. */
+  subscription: Subscription | null;
 }
 
 /**
@@ -233,6 +242,10 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
                   baseCurrency: true,
                   locale: true,
                   timezone: true,
+                  trialEndsAt: true,
+                  subscribedAt: true,
+                  suspendedAt: true,
+                  cancelledAt: true,
                 },
               },
             },
@@ -267,6 +280,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
           timezone: membership.org.timezone,
         }
       : DEFAULT_REGION,
+    subscription: membership ? subscriptionStateOf(membership.org) : null,
   };
 });
 

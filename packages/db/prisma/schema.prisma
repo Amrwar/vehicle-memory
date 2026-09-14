@@ -28,8 +28,8 @@ datasource db {
 // ===========================================================================
 
 model Organization {
-  id                     String   @id @default(cuid())
-  slug                   String   @unique
+  id                     String    @id @default(cuid())
+  slug                   String    @unique
   name                   String
   legalName              String?
   taxNumber              String?
@@ -37,21 +37,26 @@ model Organization {
   phone                  String?
   website                String?
   /// Chosen at sign-up; currency, locale and timezone follow it unless changed.
-  country                String   @default("GB")
-  baseCurrency           String   @default("GBP")
-  timezone               String   @default("Europe/London")
-  locale                 String   @default("en-GB")
-  plan                   OrgPlan  @default(CORE)
+  country                String    @default("GB")
+  baseCurrency           String    @default("GBP")
+  timezone               String    @default("Europe/London")
+  locale                 String    @default("en-GB")
+  plan                   OrgPlan   @default(CORE)
+  /// Where the workshop stands with us: a state read from these four dates. Phase 31.
+  trialEndsAt            DateTime?
+  subscribedAt           DateTime?
+  suspendedAt            DateTime?
+  cancelledAt            DateTime?
   logoUrl                String?
   // Work exceeding an approved estimate by more than this fraction needs
   // re-approval. FR-812.
-  reapprovalThresholdPct Decimal  @default(10.0) @db.Decimal(5, 2)
+  reapprovalThresholdPct Decimal   @default(10.0) @db.Decimal(5, 2)
   /// Model tokens the assistant may spend in a calendar month. Beyond it the
   /// assistant keeps working on the plain, composed text. FR-4904.
-  assistantTokenBudget   Int      @default(1000000)
-  isActive               Boolean  @default(true)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  assistantTokenBudget   Int       @default(1000000)
+  isActive               Boolean   @default(true)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   locations           Location[]
   memberships         Membership[]

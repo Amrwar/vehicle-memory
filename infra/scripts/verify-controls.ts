@@ -113,6 +113,7 @@ const PAGES = [
   '/settings',
   '/settings/team',
   '/settings/organisation',
+  '/settings/subscription',
   '/settings/site',
   '/settings/catalogue',
   '/automation',

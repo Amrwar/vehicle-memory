@@ -1,4 +1,4 @@
-import { formatClock, parseClock } from '@carnet/core';
+import { formatClock, parseClock, PlanLimitError } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -67,7 +67,7 @@ async function saveSite(formData: FormData) {
       closesAtMinute: closes,
     });
   } catch (error) {
-    if (error instanceof SettingsError) back(error.message);
+    if (error instanceof SettingsError || error instanceof PlanLimitError) back(error.message);
     throw error;
   }
 
@@ -91,7 +91,7 @@ async function saveBayAction(formData: FormData) {
       capability: text('capability'),
     });
   } catch (error) {
-    if (error instanceof SettingsError) back(error.message);
+    if (error instanceof SettingsError || error instanceof PlanLimitError) back(error.message);
     throw error;
   }
 
@@ -111,7 +111,7 @@ async function toggleBay(formData: FormData) {
       active: String(formData.get('active') ?? '') === 'yes',
     });
   } catch (error) {
-    if (error instanceof SettingsError) back(error.message);
+    if (error instanceof SettingsError || error instanceof PlanLimitError) back(error.message);
     throw error;
   }
 

@@ -11,6 +11,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { assertPlanAllows } from './billing';
 
 /**
  * API keys, against the database.
@@ -23,6 +24,7 @@ export { ApiKeyError };
 
 /** Issues a key. The token is returned exactly once. */
 export async function createApiKey(input: { orgId: string; userId: string; name: string }) {
+  await assertPlanAllows(input.orgId, 'api');
   assertKeyNameable(input.name);
 
   const issued = issueApiKey();

@@ -199,6 +199,26 @@ A lapsed card cannot be topped up back to life, because the date did not
 move. A cancelled card is cancelled with money on it or without; the
 cancellation wrote the money off, and nothing moves it again.
 
+## 9. Subscription (Phase 31)
+
+Not stored. Read from four dates on the organisation each time a session is
+made, so it cannot disagree with them:
+
+```
+  cancelledAt set                                   CANCELLED   read-only, beats everything
+  suspendedAt set                                   SUSPENDED   read-only
+  subscribedAt set                                  ACTIVE
+  trialEndsAt in the future                         TRIAL       days left shown
+  trialEndsAt past, within fourteen days            GRACE       still writing, days left shown
+  trialEndsAt past by more                          SUSPENDED   read-only
+  none of the four                                  ACTIVE      from before trials were recorded
+```
+
+Read-only means every permission that writes is turned away at the guard,
+and everything that reads or exports still works. Choosing a plan sets
+`subscribedAt` and clears the other two, which is how a lapsed or cancelled
+workshop comes back with everything where it was.
+
 ## 7. Why these are in the domain layer
 
 Every one of these could have been expressed as conditional rendering. Putting

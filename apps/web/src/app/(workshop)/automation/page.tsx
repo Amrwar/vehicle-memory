@@ -80,7 +80,7 @@ const COMPARISONS: Comparison[] = ['gte', 'gt', 'eq', 'ne', 'lt', 'lte'];
 async function create(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('settings:write');
 
   const field = String(formData.get('field') ?? '');
   const value = Number(formData.get('value') ?? 0);
@@ -125,7 +125,7 @@ async function create(formData: FormData) {
 async function toggle(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('settings:write');
 
   await setRuleActive({
     orgId,
@@ -140,7 +140,7 @@ async function toggle(formData: FormData) {
 async function stop(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('settings:write');
 
   await cancelAction({
     orgId,

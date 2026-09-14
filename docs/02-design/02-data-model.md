@@ -162,7 +162,10 @@ Implemented in `20260909000100_invariants` and verified by
 
 ## 6.5 Region (Phase 29)
 
-The organisation carries `country`, `baseCurrency`, `locale` and `timezone`.
+The organisation carries `country`, `baseCurrency`, `locale` and `timezone`,
+and four dates its subscription state is read from: `trialEndsAt`,
+`subscribedAt`, `suspendedAt` and `cancelledAt` (Phase 31). The state itself
+is never stored.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

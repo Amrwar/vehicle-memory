@@ -1,4 +1,4 @@
-import { describePayrollRun, fromDecimal } from '@carnet/core';
+import { describePayrollRun, fromDecimal, PlanLimitError } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
   Alert,
@@ -64,7 +64,7 @@ async function submit(formData: FormData) {
       periodEnd: dateOnly(String(formData.get('to') ?? ''), true),
     });
   } catch (error) {
-    if (!(error instanceof PayrollError)) throw error;
+    if (!(error instanceof PayrollError) && !(error instanceof PlanLimitError)) throw error;
     redirect(`/payroll?problem=${encodeURIComponent(error.message)}`);
   }
 
@@ -106,7 +106,7 @@ async function run(formData: FormData) {
       periodEnd: new Date(String(formData.get('periodEnd') ?? '')),
     });
   } catch (error) {
-    if (!(error instanceof PayrollError)) throw error;
+    if (!(error instanceof PayrollError) && !(error instanceof PlanLimitError)) throw error;
     redirect(`/payroll?problem=${encodeURIComponent(error.message)}`);
   }
 

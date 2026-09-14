@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 30.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 31.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -489,6 +489,25 @@ def build() -> None:
         works="Money held is a payment of its own kind when it meets a bill, so the books release the liability and never see the bank twice. What is held is never stored: it is what came in less what went out, and every movement says why.",
         shots=[("receipt", "A receipt, as it prints.", 14.0)],
         source="docs/02-design/07-accounting-model.md, section 3.17",
+    )
+
+    design(
+        doc,
+        title="Where the workshop stands",
+        when="Phase 31, 14 September 2026.",
+        why="A trial ends, a plan is chosen or not, a workshop cancels. Each of these used to be a "
+            "column nobody read. Now there is one page that says where the workshop stands, what its "
+            "plan allows and how much of it is used, and it is also where a refused write lands, so the "
+            "reason for the refusal is on the screen that can fix it.",
+        meaning=[
+            "The badge in the header is the state in two words: on trial, trial ended, on a plan, read-only, cancelled.",
+            "The left card is the standing: plan, state, days left, and each counted thing as used-of-allowed, with \"any number\" where there is no ceiling.",
+            "The right column is the two things that change the state: choose a plan, or cancel. Cancel is bordered in the danger colour and says in its own words that nothing is deleted.",
+            "A refused write arrives with a red alert at the top: what could not be saved, and that reading and exporting still work.",
+        ],
+        works="A plan limit is refused where the thing is made, so the page is a courtesy and never the lock. The state is read from four dates each time, so the page cannot disagree with the guard that turned the write away.",
+        shots=[("subscription", "The subscription page, on a plan.", 16.4)],
+        source="docs/02-design/05-security-model.md, section 3, and 04-state-machines.md, section 9",
     )
 
     # 11. Counter

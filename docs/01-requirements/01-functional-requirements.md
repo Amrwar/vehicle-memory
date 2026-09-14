@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5800 — Permissions at the resource, and the plan enforced
+
+| Ref     | Requirement                                                                                                                                                                                            | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-5801 | Every page and server action MUST ask for a permission, an action that writes MUST ask for a writing one, and a script MUST read every action and fail on one that writes behind a reading permission. | 31    |
+| FR-5802 | Every workshop page MUST be tried as every role by a script and the answer MUST match the role table; a technician MUST be turned back to their own surface before any workshop page runs.             | 31    |
+| FR-5803 | Another organisation's record asked for by id MUST be not found, never refused, and a machine route with nothing in hand MUST answer 401.                                                              | 31    |
+| FR-5804 | A plan's limit MUST be enforced where the thing is made, and the refusal MUST carry the number and the plan that raises it.                                                                            | 31    |
+| FR-5805 | A plan's feature MUST be enforced where it is used, and the refusal MUST name the plan that includes it.                                                                                               | 31    |
+| FR-5806 | An organisation MUST have a subscription state read from four dates and never stored: on trial, grace, on a plan, read-only, cancelled; nothing is deleted in any state.                               | 31    |
+| FR-5807 | A read-only workshop MUST keep reading and exporting and lose writing, the refusal MUST land on the page that says why, and choosing a plan MUST reopen it.                                            | 31    |
+
 ## FR-5700 — Money owed ahead
 
 | Ref     | Requirement                                                                                                                                                            | Phase |

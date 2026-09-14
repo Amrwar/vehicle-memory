@@ -1336,10 +1336,10 @@ exist.
 | Country and currency per workshop     | Missing | Pounds and British formatting hard-wired in 239 places; the money type already carries a currency                                                | 29    |
 | Deposits and customer credit          | Partial | A deposits account and a flag in the ledger; no deposit taken from a screen, no unapplied payment, no credit applied to a later bill             | 30    |
 | Receipts                              | Missing | A payment is a row and a ledger line; nothing the customer can hold                                                                              | 30    |
-| Card payment through a provider       | Missing | No provider code at all; refunds and failed payments have nowhere to come from                                                                   | 31    |
-| Payment links                         | Missing | The portal says "pay the workshop directly"                                                                                                      | 31    |
-| Permissions at the resource           | Partial | A granular permission list enforced on pages and actions; no script that tries every action as every role with manipulated requests              | 32    |
-| Plan limits, server side              | Partial | The rules exist in core and are never called from the app; no trial end, grace, suspension or cancellation on the organisation                   | 32    |
+| Card payment through a provider       | Missing | No provider code at all; refunds and failed payments have nowhere to come from                                                                   | 32    |
+| Payment links                         | Missing | The portal says "pay the workshop directly"                                                                                                      | 32    |
+| Permissions at the resource           | Built   | Every page tried as every role, every action read for its permission, another workshop's records not found (Phase 31)                            | 31    |
+| Plan limits, server side              | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled on the organisation (Phase 31)                           | 31    |
 | Data import                           | Missing | A workshop switching systems types everything in                                                                                                 | 33    |
 | Data export and exit                  | Partial | CSV for five reports; nothing that gives a workshop its data back whole                                                                          | 33    |
 | Estimate to job to invoice, as one    | Partial | Each step exists; nothing converts an approved estimate into a job, nothing approves extra work mid-job, parts are not reserved on approval      | 34    |
@@ -1512,20 +1512,7 @@ checks every posting and every refusal against a real database.
 
 ---
 
-## Phase 31 — Card payment through a provider
-
-**Scope.** A provider seam: create a payment, hand the customer a link, hear
-the result, refund. A stub provider that behaves like a real one for the
-tests, and one real adapter behind the same seam. Failed payments as a state
-with a reason. Reconciliation: the provider's record and the ledger's record
-compared, and the difference named rather than assumed away.
-
-**Exit.** An invoice in the portal has a "Pay now" that works against the
-stub end to end, and the real adapter passes the same script with keys.
-
----
-
-## Phase 32 — Permissions at the resource, and the plan enforced
+## Phase 31 — Permissions at the resource, and the plan enforced
 
 **Scope.** A script that calls every server action and API route as every
 role, with the ids of another organisation and with a role it does not hold,
@@ -1536,6 +1523,41 @@ retained.
 
 **Exit.** The script passes. A workshop over its plan is told so where it
 tries, not on the pricing page.
+
+**Status.** Built, and taken ahead of the card provider because it needs no
+keys. The probe, `verify-authz.ts`, reads every workshop page from disk with
+the permission its page function asks for, mints a session for every role
+(the seed has no manager, so it makes one and removes it), and knocks on
+every door as every role: four hundred and fifty-two checks. A refusal
+after the page has started streaming is a 200 with the redirect in the
+stream, so the probe reads what a browser would. A technician is turned
+back to the shop floor before any workshop page runs, and that is the check
+for them. Another workshop's customer, supplier and receipt, asked for by
+id as an owner, are not found rather than refused. The machine routes
+answer 401 with nothing in hand, and a technician cannot pull a report
+file. Then it reads every server action on every page, eighty-five of
+them, and fails any that writes behind a reading permission: that found
+six, on expenses, the team page, campaigns and automation, each now asking
+for the writing permission. The plan is enforced where a thing is made: a
+seventh bay on Core is refused with the number, and an API key on Core with
+the plan that has one. The organisation carries four dates and a state
+read from them: trial, grace, on a plan, read-only, cancelled. A read-only
+workshop keeps reading and exporting and loses writing, with the refusal
+landing on a subscription page that says why; choosing a plan reopens it,
+and nothing is deleted in any state.
+
+---
+
+## Phase 32 — Card payment through a provider
+
+**Scope.** A provider seam: create a payment, hand the customer a link, hear
+the result, refund. A stub provider that behaves like a real one for the
+tests, and one real adapter behind the same seam. Failed payments as a state
+with a reason. Reconciliation: the provider's record and the ledger's record
+compared, and the difference named rather than assumed away.
+
+**Exit.** An invoice in the portal has a "Pay now" that works against the
+stub end to end, and the real adapter passes the same script with keys.
 
 ---
 

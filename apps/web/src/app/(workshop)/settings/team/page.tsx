@@ -49,7 +49,7 @@ export const dynamic = 'force-dynamic';
 async function invite(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('user:manage');
 
   const result = await inviteColleague({
     orgId,
@@ -71,7 +71,7 @@ async function invite(formData: FormData) {
 async function withdraw(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('user:manage');
 
   await revokeInvitation({
     orgId,
@@ -85,7 +85,7 @@ async function withdraw(formData: FormData) {
 async function setRole(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('user:manage');
 
   const result = await changeRole({
     orgId,
@@ -105,7 +105,7 @@ async function setRole(formData: FormData) {
 async function remove(formData: FormData) {
   'use server';
 
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user } = await requireSession('user:manage');
 
   const result = await deactivateMember({
     orgId,
