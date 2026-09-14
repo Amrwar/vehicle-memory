@@ -46,6 +46,7 @@
     "verify:offline": "tsx infra/scripts/verify-offline.ts",
     "verify:retention": "tsx infra/scripts/verify-retention.ts",
     "verify:loyalty": "tsx infra/scripts/verify-loyalty.ts",
+    "verify:referrals": "tsx infra/scripts/verify-referrals.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",
     "verify:claims": "tsx infra/scripts/verify-claims.ts",

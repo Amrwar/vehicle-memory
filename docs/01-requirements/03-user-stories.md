@@ -873,6 +873,36 @@ know what they are worth and use them before they lapse.
 
 ---
 
+## Epic V — Referrals, in the product (Phase 25)
+
+### V1 — A code at the counter
+
+**As** Sara **I want** to take a referral code from somebody new and have
+both sides paid when it is earned **so that** the scheme runs itself and I
+never promise points on a sign-up.
+**Size** 5 · **Satisfies** FR-5202, FR-5203, FR-5204, FR-5205, FR-5206
+
+- **Given** a new customer who arrived with a code, **when** I take them
+  down, **then** the code is checked before the record exists and refused in
+  a sentence if it is wrong.
+- **Given** a newcomer whose bills have not reached the minimum, **when**
+  their bill is paid, **then** nobody is paid; **when** the bill that crosses
+  the line is paid, **then** both sides are, and I pressed nothing.
+- **Given** a customer already introduced, **when** a second code is offered,
+  **then** it is refused.
+
+### V2 — Bring a friend
+
+**As** Maria **I want** my code for each garage, with what it pays and when
+**so that** I can hand it to a friend and know what to expect.
+**Size** 2 · **Satisfies** FR-5201
+
+- **Given** the portal, **when** I look, **then** I see a code per workshop and
+  the rule beside it: both of us get the points once my friend has had the
+  minimum of work done.
+
+---
+
 ## Story map
 
 ```

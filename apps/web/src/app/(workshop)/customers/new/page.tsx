@@ -17,6 +17,7 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { createCustomer, CustomerError, possibleDuplicate } from '@/lib/customers';
 import { requireSession } from '@/lib/guard';
+import { checkCode, LoyaltyError, redeemCode } from '@/lib/referrals';
 
 export const metadata: Metadata = { title: 'New customer' };
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,29 @@ async function save(formData: FormData) {
     marketingSmsConsent: formData.get('marketingSmsConsent') === 'on',
   };
 
+  // A code they arrived with is checked before the record exists, so a
+  // mistyped code does not leave a customer half taken down.
+  const referralCode = String(formData.get('referralCode') ?? '').trim();
+
+  const back = (problem: string, code?: string) => {
+    const params = new URLSearchParams({ problem });
+    if (code) params.set('code', code);
+    for (const [key, value] of Object.entries(details)) {
+      if (typeof value === 'string' && value.trim()) params.set(key, value);
+    }
+    if (referralCode) params.set('referralCode', referralCode);
+    redirect(`/customers/new?${params.toString()}`);
+  };
+
+  if (referralCode) {
+    try {
+      await checkCode(orgId, referralCode);
+    } catch (error) {
+      if (!(error instanceof LoyaltyError)) throw error;
+      back(error.message);
+    }
+  }
+
   let id: string;
 
   try {
@@ -74,14 +98,20 @@ async function save(formData: FormData) {
     });
   } catch (error) {
     if (!(error instanceof CustomerError)) throw error;
+    back(error.message, error.code);
+    throw error;
+  }
 
-    const params = new URLSearchParams({ problem: error.message, code: error.code });
-
-    for (const [key, value] of Object.entries(details)) {
-      if (typeof value === 'string' && value.trim()) params.set(key, value);
+  if (referralCode) {
+    try {
+      await redeemCode({ orgId, userId: user.userId, customerId: id, code: referralCode });
+    } catch (error) {
+      if (!(error instanceof LoyaltyError)) throw error;
+      // The customer exists; the code did not take. Say so on their page
+      // rather than losing the record over it.
+      redirect(`/customers/${id}?problem=${encodeURIComponent(error.message)}`);
     }
-
-    redirect(`/customers/new?${params.toString()}`);
+    redirect(`/customers/${id}?saved=referral`);
   }
 
   redirect(`/customers/${id}`);
@@ -322,6 +352,19 @@ export default async function NewCustomerPage({
                   name="sourceOfBusiness"
                   defaultValue={params.sourceOfBusiness ?? ''}
                   placeholder="Recommended by a neighbour"
+                />
+              </Field>
+              <Field
+                label="Arrived with a code"
+                hint="Optional. Another customer's referral code; both sides are paid once this one has had work done"
+              >
+                <Input
+                  name="referralCode"
+                  defaultValue={params.referralCode ?? ''}
+                  maxLength={8}
+                  autoCapitalize="characters"
+                  className="datum uppercase tracking-[0.15em]"
+                  placeholder="XXXXXX"
                 />
               </Field>
               <Field label="Notes" hint="Anything whoever serves them next should know">

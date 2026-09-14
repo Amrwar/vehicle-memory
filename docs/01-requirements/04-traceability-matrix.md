@@ -343,6 +343,12 @@ where the work happens.
 | FR-5105 | U1    | —                                                              | `loyaltyCardFor()`, the Points card on `/customers/[id]`      | `verify-controls.ts`, `verify-empty.ts`    | Done   |
 | FR-5106 | U2    | —                                                              | `pointsForPortalUser()`, the portal home                      | `verify-controls.ts`, `verify-empty.ts`    | Done   |
 | FR-5107 | U1    | `Account`                                                      | `ensureChartOfAccounts()`                                     | `verify-loyalty.ts`                        | Done   |
+| FR-5201 | V2    | `Referral.code`                                                | `referralFor()`, `referralsForPortalUser()`                   | `verify-referrals.ts`                      | Done   |
+| FR-5202 | V1    | —                                                              | `checkCode()`, `redeemCode()`, `useReferral()`                | `retention.test.ts`, `verify-referrals.ts` | Done   |
+| FR-5203 | V1    | `Referral.referredCustomerId`                                  | `redeemCode()`                                                | `verify-referrals.ts`                      | Done   |
+| FR-5204 | V1    | `Referral.creditedAt`                                          | `creditReferral()`, `assertCreditable()`                      | `retention.test.ts`, `verify-referrals.ts` | Done   |
+| FR-5205 | V1    | —                                                              | `settleReferralsFor()` from `recordPayment()`                 | `verify-referrals.ts`                      | Done   |
+| FR-5206 | V1    | —                                                              | `referralCardFor()`, the Referrals card on `/customers/[id]`  | `verify-controls.ts`, `verify-empty.ts`    | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                         | `verify-credentials.ts`                    | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                    | `verify-credentials.ts`                    | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                         | `smoke.ts`                                 | Done   |
@@ -635,9 +641,10 @@ details without a provider behind it would be worse than not having one.
 | The assistant inside the workflow         | 7                   | 7                      |
 | The passport, designed                    | 6                   | 5                      |
 | Points, and the public face               | 7                   | 7                      |
-| **Total**                                 | **365**             | **361 (99%)**          |
+| Referrals, in the product                 | 6                   | 6                      |
+| **Total**                                 | **371**             | **367 (99%)**          |
 
-The requirements document lists 449 requirements. 84 of
+The requirements document lists 455 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

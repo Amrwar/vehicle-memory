@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5200 — Referrals, in the product
+
+| Ref     | Requirement                                                                                                                                                                           | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5201 | Every customer MUST have a referral code, made once and kept until used, shown on their page and in the portal beside the rule for what it pays and when.                             | 25    |
+| FR-5202 | A code MUST be taken at the counter on a new customer or an existing one, however it is typed, and MUST be refused with a sentence when unknown, already used, or the customer's own. | 25    |
+| FR-5203 | A customer MUST be introduced at most once; a second code for the same person MUST be refused.                                                                                        | 25    |
+| FR-5204 | Both sides MUST be credited once, in one transaction, only once the newcomer's bills reach the minimum, and MUST NOT be credited on a sign-up.                                        | 25    |
+| FR-5205 | Crediting MUST happen at the moment the bill that reaches the minimum is paid, without anybody pressing anything, and a code remembered after that point MUST pay at once.            | 25    |
+| FR-5206 | The customer's page MUST show who introduced them and whom they introduced, each with whether it has been paid or what it waits on.                                                   | 25    |
+
 ## FR-5100 — Points, and the public face
 
 | Ref     | Requirement                                                                                                                                                                                                           | Phase |

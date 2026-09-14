@@ -30,6 +30,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { settleReferralsFor } from './referrals';
 import { awardForInvoice } from './retention';
 import { consumeForJob } from './inventory';
 import { pushNow } from './outbound';
@@ -556,6 +557,13 @@ export async function recordPayment(input: {
   // not money in and earn nothing.
   if (next === 'PAID') {
     await awardForInvoice({ orgId: input.orgId, userId: input.userId, invoiceId: invoice.id });
+    // And if somebody introduced this customer, the bill that crosses the
+    // line pays both sides.
+    await settleReferralsFor({
+      orgId: input.orgId,
+      userId: input.userId,
+      customerId: invoice.customerId,
+    });
   }
 
   await audit({

@@ -290,18 +290,20 @@ endpoint that receives them exists and is authenticated.
 
 ## 17. Marketing and retention
 
-| Item                 | Status  | Where                                                                       |
-| -------------------- | ------- | --------------------------------------------------------------------------- |
-| Automated campaigns  | Built   | `/automation`, trigger and conditions                                       |
-| Customer segments    | Built   | `/crm`, with the reachable count                                            |
-| Campaigns            | Built   | Consent rechecked at the moment of sending                                  |
-| Loyalty programme    | Built   | Points as a sum of entries, never a stored total                            |
-| Earning points       | Built   | A point a pound on a bill paid in full, once (Phase 24)                     |
-| Spending points      | Built   | Off the bill on the invoice page, booked as the programme's cost (Phase 24) |
-| Points in the portal | Built   | Per workshop, with what they are worth and when they lapse (Phase 24)       |
-| Referrals            | Built   | A code both sides are paid for, once, on a visit                            |
-| Coupons              | Missing |                                                                             |
-| Gift cards           | Missing |                                                                             |
+| Item                  | Status  | Where                                                                                  |
+| --------------------- | ------- | -------------------------------------------------------------------------------------- |
+| Automated campaigns   | Built   | `/automation`, trigger and conditions                                                  |
+| Customer segments     | Built   | `/crm`, with the reachable count                                                       |
+| Campaigns             | Built   | Consent rechecked at the moment of sending                                             |
+| Loyalty programme     | Built   | Points as a sum of entries, never a stored total                                       |
+| Earning points        | Built   | A point a pound on a bill paid in full, once (Phase 24)                                |
+| Spending points       | Built   | Off the bill on the invoice page, booked as the programme's cost (Phase 24)            |
+| Points in the portal  | Built   | Per workshop, with what they are worth and when they lapse (Phase 24)                  |
+| Referrals             | Built   | A code on the customer and in the portal; both sides paid, once, on a visit (Phase 25) |
+| A code at the counter | Built   | On a new customer or an existing one, refused with a sentence (Phase 25)               |
+| Referral paid itself  | Built   | Both sides credited the moment the qualifying bill is paid (Phase 25)                  |
+| Coupons               | Missing |                                                                                        |
+| Gift cards            | Missing |                                                                                        |
 
 ## 18. Reviews and reputation
 
@@ -401,7 +403,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 149          |
+| Built    | 151          |
 | Partial  | 1            |
 | Missing  | 4            |
 | Deferred | 1            |

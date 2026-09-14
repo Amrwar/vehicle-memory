@@ -30,6 +30,7 @@ import {
   LoyaltyError,
   methodLabel,
 } from '@/lib/loyalty';
+import { redeemCode, referralCardFor } from '@/lib/referrals';
 import { messagesFor, timelineFor } from '@/lib/timeline';
 
 export const dynamic = 'force-dynamic';
@@ -76,6 +77,35 @@ async function prefer(formData: FormData) {
 }
 
 /**
+ * Somebody arrived with a code. Recorded against them; paid at once if they
+ * have already had enough work done here, otherwise when the bill that
+ * crosses the line is paid.
+ */
+async function refer(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  let credited = false;
+  try {
+    ({ credited } = await redeemCode({
+      orgId,
+      userId: user.userId,
+      customerId,
+      code: String(formData.get('code') ?? ''),
+    }));
+  } catch (error) {
+    if (error instanceof LoyaltyError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/customers/${customerId}?saved=${credited ? 'referral-paid' : 'referral'}`);
+}
+
+/**
  * Points given by hand. A goodwill gesture after a bad week, a referral the
  * scheme could not see. The reason is required because it is what the
  * customer reads in their history, and "points" is not a reason.
@@ -117,10 +147,11 @@ export default async function CustomerPage({
 
   const { id: customerId } = await params;
 
-  const [timeline, messages, points] = await Promise.all([
+  const [timeline, messages, points, referrals] = await Promise.all([
     timelineFor(orgId, customerId),
     messagesFor(orgId, customerId),
     loyaltyCardFor(orgId, customerId),
+    referralCardFor(orgId, customerId, user.userId),
   ]);
 
   const customer = await db.customer.findUnique({
@@ -186,7 +217,13 @@ export default async function CustomerPage({
 
       {saved ? (
         <Alert tone="success" className="mb-5">
-          {saved === 'points' ? 'Points added. They can see them in the portal.' : 'Saved.'}
+          {saved === 'points'
+            ? 'Points added. They can see them in the portal.'
+            : saved === 'referral-paid'
+              ? 'Code used. They had already had enough work done here, so both sides have been paid.'
+              : saved === 'referral'
+                ? 'Code used. Both sides are paid once this customer has had enough work done.'
+                : 'Saved.'}
         </Alert>
       ) : null}
       {problem ? (
@@ -487,6 +524,108 @@ export default async function CustomerPage({
                     className="justify-self-start"
                   >
                     Add points
+                  </Button>
+                </form>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          {/* Referrals. The code is made once and shown plainly, because it
+              is said out loud over a counter. The rule is stated next to it
+              so nobody promises points on a sign-up. */}
+          <Card>
+            <CardHeader
+              title="Referrals"
+              description={`Both sides get ${referrals.pointsEachSide} points once the person brought in has had ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(referrals.minimumMinor / 100)} of work done`}
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              <div>
+                <p className="eyebrow">Their code to hand out</p>
+                <p className="datum mt-1 text-[22px] font-semibold tracking-[0.2em]">
+                  {referrals.code}
+                </p>
+              </div>
+
+              {referrals.introducedBy ? (
+                <p className="text-[12px] text-(--text-soft)">
+                  Introduced by{' '}
+                  <Link
+                    href={`/customers/${referrals.introducedBy.referrer.id}`}
+                    className="font-medium hover:underline"
+                  >
+                    {referrals.introducedBy.referrer.displayName}
+                  </Link>
+                  {referrals.introducedBy.creditedAt
+                    ? ` · both sides paid on ${referrals.introducedBy.creditedAt.toLocaleDateString('en-GB')}`
+                    : ' · waiting on their first bill'}
+                </p>
+              ) : null}
+
+              {referrals.made.length > 0 ? (
+                <ul className="divide-y divide-(--border-soft) border-t border-(--border-soft)">
+                  {referrals.made.map((entry) => (
+                    <li
+                      key={entry.id}
+                      className="flex items-baseline justify-between gap-3 py-1.5 text-[12px]"
+                    >
+                      <span className="min-w-0 flex-1 truncate">
+                        {entry.referred ? (
+                          <Link
+                            href={`/customers/${entry.referred.id}`}
+                            className="hover:underline"
+                          >
+                            {entry.referred.displayName}
+                          </Link>
+                        ) : (
+                          'A customer since removed'
+                        )}
+                        {entry.usedAt ? (
+                          <time className="datum ml-1.5 text-(--text-faint)">
+                            {entry.usedAt.toLocaleDateString('en-GB')}
+                          </time>
+                        ) : null}
+                      </span>
+                      {entry.creditedAt ? (
+                        <Badge tone="success" size="sm">
+                          Paid
+                        </Badge>
+                      ) : (
+                        <Badge tone="neutral" size="sm">
+                          Waiting on a bill
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[12px] text-(--text-faint)">Nobody brought in yet.</p>
+              )}
+
+              {mayEditCustomer && !referrals.introducedBy ? (
+                <form action={refer} className="grid gap-2 border-t border-(--border-soft) pt-3">
+                  <input type="hidden" name="customerId" value={customer.id} />
+                  <Field
+                    label="Arrived with a code"
+                    hint="Somebody else's code, said at the counter"
+                    htmlFor="refer-code"
+                  >
+                    <Input
+                      id="refer-code"
+                      name="code"
+                      required
+                      maxLength={8}
+                      autoCapitalize="characters"
+                      className="datum uppercase tracking-[0.15em]"
+                      placeholder="XXXXXX"
+                    />
+                  </Field>
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    className="justify-self-start"
+                  >
+                    Use the code
                   </Button>
                 </form>
               ) : null}

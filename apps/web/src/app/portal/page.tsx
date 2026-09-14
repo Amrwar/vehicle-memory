@@ -16,6 +16,7 @@ import Link from 'next/link';
 
 import { requireUser } from '@/lib/guard';
 import { pointsForPortalUser } from '@/lib/loyalty';
+import { referralsForPortalUser } from '@/lib/referrals';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export const metadata: Metadata = { title: 'My vehicles' };
@@ -66,7 +67,10 @@ export default async function PortalPage() {
     },
   });
 
-  const points = await pointsForPortalUser(user.userId);
+  const [points, referrals] = await Promise.all([
+    pointsForPortalUser(user.userId),
+    referralsForPortalUser(user.userId),
+  ]);
 
   const activeJobs = customers.flatMap((customer) =>
     customer.jobs
@@ -294,6 +298,33 @@ export default async function PortalPage() {
                     {card.balance.toLocaleString('en-GB')}
                     <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
                   </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* A code per workshop, with the rule in the same breath. It pays
+            once the friend has had work done, and saying so here is what
+            stops a friend expecting points for signing up. */}
+        {referrals.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="font-display text-[17px] font-semibold">Bring a friend</h2>
+            <ul className="mt-3 grid gap-2">
+              {referrals.map((card) => (
+                <li
+                  key={card.customerId}
+                  className="flex flex-wrap items-center gap-3 rounded-(--radius-md) border border-(--border) bg-(--surface) px-3.5 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-medium">{card.workshop}</p>
+                    <p className="text-[12px] text-(--text-faint)">
+                      Give this code to somebody who has not been there. Once they have had{' '}
+                      <Money amount={card.minimumMinor / 100} /> of work done, you both get{' '}
+                      {card.pointsEachSide} points.
+                    </p>
+                  </div>
+                  <p className="datum text-[20px] font-semibold tracking-[0.2em]">{card.code}</p>
                 </li>
               ))}
             </ul>

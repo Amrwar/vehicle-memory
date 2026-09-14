@@ -1254,6 +1254,37 @@ every refusal against a real database.
 
 ---
 
+## Phase 25 — Referrals, in the product
+
+The referral rules have existed since Phase 5: a code a person can say over
+a counter, both sides paid once, and only after the person brought in has
+actually had work done. The feature map called that built. No page showed a
+code, nothing took one, and the credit was a function nobody called, which
+by the map's own rule is not built. This phase finishes it.
+
+**Exit.** Every customer has a code, made once, on their page and in the
+portal with the rule beside it. A code is taken at the counter, on a new
+customer or an existing one, and refused with a sentence when it is unknown,
+already used, the customer's own, or the customer has already been
+introduced. Both sides are paid the moment the bill that takes the newcomer
+over the minimum is paid, without anybody pressing anything, and never on a
+sign-up.
+
+**Status.** Built. The customer's page has a Referrals card: their code in
+large letters, who introduced them and whether that has been paid, whom they
+brought in with the same, and a form for a code somebody arrived with. The
+new-customer form takes a code too, checked before the record exists so a
+mistyped code does not leave a customer half taken down. The portal shows
+"Bring a friend" with the code per workshop and the rule in plain words.
+Settling is wired into the payment that marks a bill paid, next to the points
+it earns, so a referral remembered on the second visit is paid on the spot
+and one recorded on the first is paid when the line is crossed. The
+verification script brings a newcomer in with a code, pays a bill too small
+to count, then one that crosses the line, and checks both sides were paid
+once, at that moment, and that every refusal refused.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the
