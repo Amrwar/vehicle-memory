@@ -118,6 +118,8 @@ export const stripeProvider: PaymentProvider = {
       'POST',
       '/checkout/sessions',
       form({
+        // A one-off payment for one invoice, priced inline: the line is the
+        // invoice, not a catalogue product.
         mode: 'payment',
         'line_items[0][price_data][currency]': request.currency.toLowerCase(),
         'line_items[0][price_data][unit_amount]': request.amountMinor,
@@ -128,6 +130,17 @@ export const stripeProvider: PaymentProvider = {
         customer_email: request.customerEmail ?? undefined,
         success_url: request.returnUrl,
         cancel_url: request.cancelUrl,
+        // Configured in Stripe's Checkout Studio (hosted page, web). No SDK
+        // and no pinned API version here, so `ui_mode` follows the account's
+        // API version; see STRIPE_INTEGRATION_TODO.md.
+        ui_mode: 'hosted_page',
+        billing_address_collection: 'auto',
+        'phone_number_collection[enabled]': 'false',
+        'automatic_tax[enabled]': 'false',
+        allow_promotion_codes: 'false',
+        submit_type: 'auto',
+        origin_context: 'web',
+        'metadata[integration_identifier]': 'hosted_web_0001',
       }),
     );
     if (!session.url)
