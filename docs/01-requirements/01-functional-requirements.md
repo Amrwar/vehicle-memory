@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5900 — Card payment through a provider
+
+| Ref     | Requirement                                                                                                                                                                                                                 | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5901 | A payment provider MUST sit behind one seam of four calls (open a checkout, ask what became of it, refund, read a webhook), with a stub that behaves like a real one and a real adapter behind the same seam.               | 32    |
+| FR-5902 | An outstanding invoice in the portal MUST offer "Pay now", and MUST refuse a paid, draft or void invoice, nothing, more than is owed, and another customer's invoice, each with a sentence.                                 | 32    |
+| FR-5903 | An attempt MUST move once from pending to succeeded, failed with the provider's reason, or cancelled, and never back; a failed payment MUST be a row with its reason, not an absence.                                       | 32    |
+| FR-5904 | A succeeded attempt MUST record the payment and its posting exactly once, however many times and by whichever route the provider says so.                                                                                   | 32    |
+| FR-5905 | A refund by card MUST go back through the provider that took the money, asked before anything is recorded, and MUST be refused where no card payment through the provider has that much left.                               | 32    |
+| FR-5906 | Reconciliation MUST compare the provider's record with ours for every recent attempt and name each difference (paid there not here, here not there, amount, currency, unknown, pending too long) without changing anything. | 32    |
+| FR-5907 | The webhook MUST fail closed: unsigned or wrongly signed is refused, an event for a checkout we do not know is acknowledged and ignored, a replay changes nothing.                                                          | 32    |
+
 ## FR-5800 — Permissions at the resource, and the plan enforced
 
 | Ref     | Requirement                                                                                                                                                                                            | Phase |

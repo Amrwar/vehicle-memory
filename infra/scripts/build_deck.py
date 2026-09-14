@@ -572,12 +572,12 @@ def build() -> Path:
     rule(slide, Inches(2.15))
 
     phases = [
-        ('32', 'Card payment through a provider', 'A provider seam with a stub that behaves like the real one, a "Pay now" in the portal, failed payments as a state, and reconciliation that names the difference.'),
         ('33', 'Data in, data out', 'CSV import with mapping, validation and a report of what did not go in; export of everything a workshop owns.'),
         ('34', 'The workflow, as one thing', 'An approved estimate becomes a job in one press; extra work is quoted and approved without leaving the job.'),
         ('35', 'Arrival and departure', 'Check-in and check-out, signatures on the record, key tags.'),
-        ('36', 'Conversations', 'One thread per customer across email, SMS and WhatsApp, on the job it is about.'),
+        ('36', 'Conversations', 'One thread per customer across email, SMS and WhatsApp, on the job it is about; a payment link in a message.'),
         ('37', 'Packages and templates', 'Service packages priced as one thing; job templates that put the right lines on from the start.'),
+        ('38', 'Parts back, work out', 'Returns and cores to the supplier; sublet work on the job with its own cost.'),
     ]
 
     for index, (number, title, note) in enumerate(phases):

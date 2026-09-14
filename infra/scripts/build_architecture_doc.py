@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 31"
+AFTER_PHASE = "Phase 32"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -288,7 +288,9 @@ DOMAIN_TEXT: dict[str, list[str]] = {
         "A Payment is one tender against one invoice, with a method that decides its ledger account: cash and card to "
         "the bank, points to the loyalty liability, a gift card to the gift card liability, money held to the deposit "
         "liability. A CreditNote reverses an invoice in whole or part; a Refund is money going back out, with a method "
-        "of its own, and may instead be kept as credit.",
+        "of its own, and may instead be kept as credit. A PaymentAttempt is one try at paying through the provider, "
+        "moving once from pending; a succeeded attempt produces exactly one Payment, and a Refund sent back through "
+        "the provider names the attempt it went back to.",
     ],
     "tender": [
         "The counter is a sale without a job: a CounterSale with its lines and one or more CounterSaleTenders, inside a "
@@ -359,6 +361,7 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("receipt", "A receipt for one payment, as it prints.", "Workshop"),
     ("counter", "The counter: one sale on one screen.", "Workshop"),
     ("gift-cards", "Gift cards sold and outstanding.", "Workshop"),
+    ("card-payments", "Every card payment tried through the provider, with the provider's record against the books.", "Workshop"),
     ("customer", "A customer, with their vehicles, bills, money held and points.", "Workshop"),
     ("vehicle", "A vehicle as the workshop sees it.", "Workshop"),
     ("passport", "The vehicle passport: the hash-chained history, verified on the page.", "Workshop"),
@@ -373,6 +376,7 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("settings-organisation", "Organisation settings, where the region is changed.", "Workshop"),
     ("subscription", "The subscription page: where the workshop stands and what its plan allows.", "Workshop"),
     ("portal", "The customer's portal.", "Customer"),
+    ("portal-invoices", "The customer's invoices, with Pay now on what is owed.", "Customer"),
     ("portal-passport", "A passport as its owner sees it.", "Customer"),
     ("portal-passports", "Every car the customer owns, listed.", "Customer"),
     ("not-found", "Not found, in the product's own voice.", "Public"),
@@ -396,6 +400,7 @@ VERIFY_TEXT = {
     "verify-referrals": "a code redeemed at sign-up and the reward settled on the first paid bill",
     "verify-backup": "a backup taken and restored, and the restored database answering",
     "verify-headers": "the security headers and the content security policy on every surface",
+    "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
 }
 
 
@@ -607,12 +612,26 @@ def build() -> None:
               "service done, reservations are consumed into StockMovements, and the customer is told.")
     para(doc, "An Invoice is raised from the job's lines with the tax rate in force and a gapless number, posted to "
               "the ledger as revenue, tax and a receivable. A Payment settles it by one of the methods — cash and card to "
-              "the bank; loyalty points, a gift card or money held against their own liabilities — and each posting "
+              "the bank; a card through the provider posts the same as a card at the counter; loyalty points, a gift "
+              "card or money held go against their own liabilities — and each posting "
               "releases exactly what it should. recordPayment in apps/web/src/lib/money.ts also awards loyalty points, "
               "settles a referral if this was the referred customer's first paid bill, and sends a receipt. A CreditNote "
               "reverses; a Refund sends money back, or keeps it as credit on the customer's account.")
 
-    doc.add_heading("6.2 The counter, gift cards and money held", level=2)
+    doc.add_heading("6.2 Card payment through a provider", level=2)
+    diagram(doc, "flow-card", "Pay now, from the portal: the attempt, the provider's checkout, one settlement, and reconciliation.", max_h=7)
+    para(doc, "A payment provider sits behind a seam of four calls in packages/core (open a checkout, ask what became "
+              "of it, refund, read a webhook), with a stub that takes pretend money at a checkout page of ours and "
+              "Stripe written against its HTTP API behind the same seam; PAYMENT_PROVIDER chooses. \"Pay now\" on an "
+              "outstanding invoice in the portal opens a PaymentAttempt and sends the customer to the checkout. The "
+              "provider's answer arrives by webhook or when the customer returns and the page asks; settleAttempt "
+              "claims the move from pending with a conditional update before recording anything, so two answers "
+              "record one payment, posted exactly like a card at the counter. A declined card is a row with the "
+              "provider's reason. A refund by card goes back through the provider, asked before the refund is recorded. "
+              "Reconciliation asks the provider about every attempt of the last ninety days and names each difference "
+              "between its record and the books without changing anything; the provider is a witness, never the record.")
+
+    doc.add_heading("6.3 The counter, gift cards and money held", level=2)
     para(doc, "A counter sale is the same money path without a job: a CounterSale with lines and tenders in one "
               "transaction, stock moved as it is sold, the ledger posted per tender, inside a TillSession that is "
               "counted at close. A gift card is sold at the counter or on its own page, and the sale posts a liability, "
@@ -622,7 +641,7 @@ def build() -> None:
               "first, refused rather than clamped. packages/core/src/giftcards and deposits hold the rules; "
               "apps/web/src/lib/giftcards.ts, deposits.ts and counter.ts do the work.")
 
-    doc.add_heading("6.3 Purchasing and stock", level=2)
+    doc.add_heading("6.4 Purchasing and stock", level=2)
     diagram(doc, "flow-purchasing", "Request → order → receipt → bill → payment, with stock rising at the receipt.", max_h=6)
     para(doc, "A part a job needs and the workshop does not have becomes a PurchaseRequest, approved by a role that "
               "may approve spending, gathered onto a PurchaseOrder to a supplier. The GoodsReceipt is the moment stock "
@@ -631,7 +650,7 @@ def build() -> None:
               "bills and is allocated across them. Transfers between sites are dispatched at one warehouse and received "
               "at another, and the stock is in transit between.")
 
-    doc.add_heading("6.4 The passport", level=2)
+    doc.add_heading("6.5 The passport", level=2)
     diagram(doc, "flow-passport", "An event on a vehicle: chained, verified, shared, transferred, read by the network.", max_h=12)
     para(doc, "The passport is the product's reason to exist, and the mechanism is small. Every event on a vehicle is "
               "a VehicleEvent whose hash covers its own content and the hash of the event before it "
@@ -644,7 +663,7 @@ def build() -> None:
               "owner's private notes do not. Another workshop reads what it is entitled to through VehicleAccessGrant, "
               "earned by working on the car or granted by the owner, and the same entitlement governs /api/v1.")
 
-    doc.add_heading("6.5 The technician's device, out of signal", level=2)
+    doc.add_heading("6.6 The technician's device, out of signal", level=2)
     diagram(doc, "flow-sync", "The queue empties through /api/sync when the device is back in signal.", max_h=5)
     para(doc, "The shop floor keeps working without a connection. Actions taken while away — a task ticked, time "
               "started, a note — are queued on the device by a service worker and sent to /api/sync when signal "
@@ -652,28 +671,28 @@ def build() -> None:
               "in the body would be a write API with no door on it), applies each action once by its client-side id "
               "(SyncedAction), and answers with everything the device needs to carry on: its jobs, tasks and parts.")
 
-    doc.add_heading("6.6 Scheduled work", level=2)
+    doc.add_heading("6.7 Scheduled work", level=2)
     diagram(doc, "flow-scheduled", "Two endpoints, called on a schedule, run the same functions the worker runs on a loop.", max_h=7)
     para(doc, "There is no queue server. A scheduler calls /api/cron/dispatch every minute to drain the outbox and "
               "/api/cron/hourly to queue service reminders, close abandoned time entries, run due automation actions and "
               "audit passport chains. In development apps/worker calls the same functions on a five-second loop. There "
               "are not two implementations of any job.")
 
-    doc.add_heading("6.7 Communication, in and out", level=2)
+    doc.add_heading("6.8 Communication, in and out", level=2)
     para(doc, "Every outbound message is a MessageLog row with a channel and a reason, written before it is sent, then "
               "sent through the provider, whose webhooks come back as DeliveryEvents. A reply arrives at /api/inbound as "
               "an InboundMessage and is matched to the job it is about, so the conversation is on the job. A bounce or "
               "an opt-out writes SuppressedAddress and the product stops sending to it. Automation rules and campaigns "
               "produce messages the same way; nothing bypasses the log.")
 
-    doc.add_heading("6.8 Region and currency", level=2)
+    doc.add_heading("6.9 Region and currency", level=2)
     para(doc, "The organisation carries one country, currency, locale and timezone, chosen at sign-up and editable by "
               "the owner. The session carries the region and every page formats money and dates from it; invoices and "
               "estimates are raised in the organisation's currency; a message to a customer is formatted the same way. "
               "A driver in the portal sees each amount in the currency of the workshop that raised it. Changing the "
               "currency converts nothing already recorded, and the page says so.")
 
-    doc.add_heading("6.9 The subscription and the plan", level=2)
+    doc.add_heading("6.10 The subscription and the plan", level=2)
     diagram(doc, "flow-subscription", "The subscription's states, read from four dates on the organisation.", max_h=11)
     para(doc, "Sign-up sets trialEndsAt. The state is read from the dates each time a session is made and is never "
               "stored. A lapsed or cancelled workshop keeps reading and exporting and loses writing; nothing is deleted "
@@ -681,7 +700,7 @@ def build() -> None:
               "ledger, payroll, transfers, the API) are enforced inside the functions that make or do the thing, with "
               "the refusal naming the number and the plan.")
 
-    doc.add_heading("6.10 Answers and the assistant", level=2)
+    doc.add_heading("6.11 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

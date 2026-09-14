@@ -166,6 +166,14 @@ The organisation carries `country`, `baseCurrency`, `locale` and `timezone`,
 and four dates its subscription state is read from: `trialEndsAt`,
 `subscribedAt`, `suspendedAt` and `cancelledAt` (Phase 31). The state itself
 is never stored.
+
+A `PaymentAttempt` (Phase 32) is one try at paying some of an invoice through
+the provider: `providerRef` unique, `paymentId` unique so a succeeded attempt
+can produce one payment only, `status` moving once, `failureReason` in the
+provider's words, and `providerPayload` as the stub provider's own memory,
+kept apart from ours so reconciliation has two records to compare. A
+`Refund` sent back through the provider carries `attemptId` and the
+provider's `providerRef` for it.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

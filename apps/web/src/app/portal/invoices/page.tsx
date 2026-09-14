@@ -1,8 +1,22 @@
-import { Badge, Card, CardBody, CardHeader, EmptyState, Money, Registration } from '@carnet/ui';
+import { PaymentAttemptError, PaymentProviderError } from '@carnet/core';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  Money,
+  Registration,
+} from '@carnet/ui';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import { PortalShell } from '@/components/portal-shell';
+import { attemptForCustomer, checkAttempt, startCardPayment } from '@/lib/card-payments';
 import { requireUser } from '@/lib/guard';
+import { cardPaymentsOffered } from '@/lib/payments/provider';
 import { invoicesFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
 
@@ -19,6 +33,10 @@ export const dynamic = 'force-dynamic';
  * What is outstanding leads, because that is the only figure on the page that
  * asks anything of the reader. Everything settled is a record, and a record
  * can wait below the fold.
+ *
+ * Since Phase 32 an outstanding invoice can be paid here by card, through
+ * the provider behind the seam. The customer comes back to this page with
+ * the outcome, whichever way it went.
  */
 function date(value: Date | null, locale: string): string {
   return value
@@ -26,16 +44,56 @@ function date(value: Date | null, locale: string): string {
     : '—';
 }
 
-export default async function PortalInvoicesPage() {
-  const user = await requireUser();
-  const region = await regionForUser(user.userId);
-  const invoices = await invoicesFor(user.userId);
+async function pay(formData: FormData) {
+  'use server';
 
+  const user = await requireUser();
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+  let url: string;
+  try {
+    ({ url } = await startCardPayment({ userId: user.userId, invoiceId }));
+  } catch (error) {
+    if (error instanceof PaymentAttemptError || error instanceof PaymentProviderError) {
+      redirect(`/portal/invoices?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+  redirect(url);
+}
+
+export default async function PortalInvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ paid?: string; cancelled?: string; problem?: string }>;
+}) {
+  const user = await requireUser();
+  const { paid, cancelled, problem } = await searchParams;
+  const region = await regionForUser(user.userId);
+
+  // Back from the checkout: if the provider has not told us yet, ask it now,
+  // so the page the customer lands on already says what happened.
+  let outcome: { status: string; reason: string | null; number: string | null } | null = null;
+  if (paid) {
+    let attempt = await attemptForCustomer(user.userId, paid);
+    if (attempt?.status === 'PENDING') {
+      await checkAttempt({ orgId: attempt.orgId, attemptId: attempt.id });
+      attempt = await attemptForCustomer(user.userId, paid);
+    }
+    if (attempt)
+      outcome = {
+        status: attempt.status,
+        reason: attempt.failureReason,
+        number: attempt.invoice.number,
+      };
+  }
+
+  const invoices = await invoicesFor(user.userId);
   const owing = invoices.filter((invoice) => invoice.outstanding > 0.005);
   const settled = invoices.filter((invoice) => invoice.outstanding <= 0.005);
 
   const owedTotal = owing.reduce((total, invoice) => total + invoice.outstanding, 0);
   const currency = invoices[0]?.currency ?? 'GBP';
+  const offered = cardPaymentsOffered();
 
   return (
     <PortalShell active="invoices">
@@ -47,6 +105,36 @@ export default async function PortalInvoicesPage() {
             ? 'Everything is settled. Nothing is owed.'
             : `${owing.length} still to pay.`}
       </p>
+
+      {outcome?.status === 'SUCCEEDED' ? (
+        <Alert tone="success" className="mt-4">
+          Paid. Thank you.{' '}
+          {outcome.number ? `Invoice ${outcome.number} is settled` : 'The invoice is settled'}, and
+          a receipt is on its way to you.
+        </Alert>
+      ) : null}
+      {outcome?.status === 'FAILED' ? (
+        <Alert tone="danger" title="That payment did not go through" className="mt-4">
+          {outcome.reason ?? 'The provider did not say why.'} Nothing has been taken. You can try
+          again, or pay the workshop directly.
+        </Alert>
+      ) : null}
+      {outcome?.status === 'PENDING' ? (
+        <Alert tone="warning" className="mt-4">
+          The provider has not confirmed the payment yet. This page will show it once it does;
+          nothing needs doing.
+        </Alert>
+      ) : null}
+      {cancelled ? (
+        <Alert tone="info" className="mt-4">
+          Cancelled. Nothing has been taken.
+        </Alert>
+      ) : null}
+      {problem ? (
+        <Alert tone="danger" className="mt-4">
+          {problem}
+        </Alert>
+      ) : null}
 
       {invoices.length === 0 ? (
         <EmptyState
@@ -105,9 +193,20 @@ export default async function PortalInvoicesPage() {
                       <Money amount={invoice.outstanding} currency={invoice.currency} />
                     </div>
 
+                    {offered ? (
+                      <form action={pay} className="mt-2">
+                        <input type="hidden" name="invoiceId" value={invoice.id} />
+                        <Button type="submit" className="w-full">
+                          Pay <Money amount={invoice.outstanding} currency={invoice.currency} /> now
+                        </Button>
+                      </form>
+                    ) : null}
+
                     <p className="mt-1 text-[12px] text-(--text-faint)">
                       {invoice.dueAt ? `Due ${date(invoice.dueAt, region.locale)}. ` : ''}
-                      Pay the workshop directly. Carnet does not take payments.
+                      {offered
+                        ? 'Paid by card through a secure checkout, or pay the workshop directly.'
+                        : 'Pay the workshop directly.'}
                     </p>
                   </CardBody>
                 </Card>
@@ -137,7 +236,9 @@ export default async function PortalInvoicesPage() {
                   {invoice.payments[0]
                     ? invoice.payments[0].method === 'LOYALTY'
                       ? ' · paid with points'
-                      : ` · paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`
+                      : invoice.payments[0].method === 'ONLINE'
+                        ? ' · paid by card online'
+                        : ` · paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`
                     : ''}
                 </p>
               </li>

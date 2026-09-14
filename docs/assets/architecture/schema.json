@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-14",
   "counts": {
-    "models": 127,
-    "enums": 62,
-    "fields": 1932
+    "models": 128,
+    "enums": 63,
+    "fields": 1967
   },
   "enums": [
     "OrgPlan",
@@ -67,7 +67,8 @@
     "CoverKind",
     "ClaimStatus",
     "GiftCardEntryKind",
-    "DepositKind"
+    "DepositKind",
+    "PaymentAttemptStatus"
   ],
   "domains": [
     {
@@ -727,6 +728,19 @@
           "scope": "organisation"
         },
         {
+          "name": "PaymentAttempt",
+          "comment": "One try at paying some of an invoice through a provider. Phase 32. Pending, then succeeded, failed or cancelled, once; a succeeded attempt produces the Payment exactly once. The provider's own record is kept in providerPayload (the stub's memory; a real provider is asked instead).",
+          "fields": 20,
+          "relations": [
+            "Organization",
+            "Invoice",
+            "Customer",
+            "Payment",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
           "name": "CreditNote",
           "comment": "An issued invoice is immutable. Corrections are credit notes. FR-907.",
           "fields": 8,
@@ -739,13 +753,14 @@
         {
           "name": "Refund",
           "comment": "Money going back to a customer. Phase 16. A refund is its own record rather than a negative payment, because the two answer different questions. A payment says what came in; a refund says what went back, why, and against which credit note. Reporting that nets the two together silently loses the second answer, and the second answer is the one an argument at the counter turns on.",
-          "fields": 12,
+          "fields": 15,
           "relations": [
             "Organization",
             "Invoice",
             "CreditNote",
             "Customer",
-            "User"
+            "User",
+            "PaymentAttempt"
           ],
           "scope": "organisation"
         }

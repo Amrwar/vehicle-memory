@@ -64,6 +64,12 @@ const schema = z.object({
   // which is the right failure: the endpoint writes rows into a workshop's
   // inbox, and an inbox anybody can write to is one nobody can trust.
   INBOUND_WEBHOOK_SECRET: z.string().min(16).optional(),
+  // Card payments through a provider (Phase 32). The stub takes pretend
+  // money until keys are put in; its webhook is signed with PAYMENT_WEBHOOK_SECRET.
+  PAYMENT_PROVIDER: z.enum(['stub', 'stripe']).default('stub'),
+  PAYMENT_WEBHOOK_SECRET: z.string().min(16).optional(),
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 
   MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),

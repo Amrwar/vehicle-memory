@@ -135,6 +135,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'Invoice',
       'InvoiceLine',
       'Payment',
+      'PaymentAttempt',
       'CreditNote',
       'Refund',
     ],
@@ -462,6 +463,15 @@ const FLOWS: Record<string, string> = {
   SUSPENDED --> ACTIVE : a plan is chosen
   ACTIVE --> CANCELLED : cancelled, read-only, nothing deleted
   CANCELLED --> ACTIVE : a plan is chosen again`,
+
+  card: `flowchart LR
+  p["Portal: Pay now"] --> a["PaymentAttempt PENDING<br/>startCardPayment()"]
+  a --> c["Provider checkout<br/>stub: /pay/attempt · Stripe: hosted page"]
+  c -- "webhook, or the customer returns<br/>and the page asks" --> s["settleAttempt()<br/>claim the move, once"]
+  s -- succeeded --> r["recordPayment() ONLINE<br/>posted like a card at the counter"]
+  s -- declined --> f["FAILED, with the provider's reason"]
+  s -- went back --> x["CANCELLED"]
+  r --> rc["Reconcile: provider's record<br/>vs the books, differences named"]`,
 
   scheduled: `flowchart LR
   cron["Scheduler calls /api/cron/job<br/>Bearer CRON_SECRET, constant-time compare"] --> d["dispatch<br/>every minute: the outbox"]

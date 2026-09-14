@@ -39,6 +39,7 @@ const PAGES = [
   '/estimates',
   '/invoices',
   '/payments',
+  '/payments/card',
   '/gift-cards',
   '/reports',
   '/reports/business',

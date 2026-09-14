@@ -245,6 +245,16 @@ record. The plan's limits and features are asserted inside the function
 that makes or does the thing, so a page that forgets its wall changes what
 somebody sees and never what they can do.
 
+### 3.10 Payment attempt (Finance context, Phase 32)
+
+An aggregate of one row: a try at paying some of an invoice through the
+provider. Its invariant is that the money is recorded exactly once, at the
+move to succeeded, and that the provider is a witness and never the record.
+The provider sits behind a seam of four calls in core (`PaymentProvider`);
+the rules about what can be tried, how an attempt moves, what can go back
+through the provider and what differs between the two records are pure
+functions in `packages/core/src/payments`, tested without a provider.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

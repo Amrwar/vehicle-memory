@@ -219,6 +219,26 @@ and everything that reads or exports still works. Choosing a plan sets
 `subscribedAt` and clears the other two, which is how a lapsed or cancelled
 workshop comes back with everything where it was.
 
+## 10. Payment attempt (Phase 32)
+
+One try at paying some of an invoice through the provider. Stored, because
+it is the record that a try was made; but it moves once and never back:
+
+```
+  PENDING ---- provider says paid -------> SUCCEEDED   (the Payment is recorded here, once)
+  PENDING ---- provider says declined ---> FAILED      (with the provider's reason)
+  PENDING ---- customer went back -------> CANCELLED
+```
+
+A terminal state ignores everything the provider says afterwards; a
+provider that says "failed" after we recorded the money is a difference for
+reconciliation to name, not a state change. The move to SUCCEEDED is
+claimed with a conditional update before the money is recorded, so two
+answers arriving together (the webhook and the customer's return) record one
+payment. If recording fails after the claim, the attempt goes back to
+PENDING with the reason, and reconciliation keeps naming it until it is
+recorded.
+
 ## 7. Why these are in the domain layer
 
 Every one of these could have been expressed as conditional rendering. Putting

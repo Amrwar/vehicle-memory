@@ -31,6 +31,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { refundThroughProvider } from './card-payments';
 import { keepAsCredit } from './deposit-credits';
 import { refundOntoCard } from './giftcard-refunds';
 import { settleReferralsFor } from './referrals';
@@ -851,6 +852,19 @@ export async function recordRefund(input: {
     amount: input.amount,
   });
 
+  // Back through the provider that took it. The provider is asked first,
+  // so a refusal there leaves nothing recorded here.
+  const viaProvider =
+    input.method === 'ONLINE'
+      ? await refundThroughProvider({
+          orgId: input.orgId,
+          invoiceId: invoice.id,
+          amountMinor: input.amount.minor,
+          currency,
+          reason: note.reason,
+        })
+      : null;
+
   const refundedAt = new Date();
 
   const refund = await prisma.refund.create({
@@ -861,8 +875,11 @@ export async function recordRefund(input: {
       customerId: invoice.customerId,
       amount: toNumber(input.amount),
       method: input.method,
-      reference: input.reference?.trim() || null,
+      reference: viaProvider?.refundRef ?? (input.reference?.trim() || null),
       reason: note.reason,
+      attemptId: viaProvider?.attemptId ?? null,
+      providerRef: viaProvider?.refundRef ?? null,
+      providerStatus: viaProvider?.status ?? null,
       refundedAt,
       recordedByUserId: input.userId,
     },
@@ -962,6 +979,10 @@ export async function invoiceDetail(orgId: string, invoiceId: string) {
     where: { id: invoiceId, orgId },
     include: {
       customer: { select: { id: true, displayName: true, email: true, mobile: true } },
+      paymentAttempts: {
+        where: { status: 'SUCCEEDED' },
+        select: { id: true, providerRef: true, amount: true },
+      },
       job: {
         select: {
           id: true,

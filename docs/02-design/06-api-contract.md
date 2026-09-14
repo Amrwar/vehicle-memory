@@ -189,6 +189,16 @@ prevent replay.
 Delivery is at-least-once with exponential backoff, so consumers must be
 idempotent. `X-Carnet-Delivery-Id` is stable across retries.
 
+### Inbound: the payment provider (Phase 32)
+
+`POST /api/payments/webhook` is where the payment provider reports what became
+of a checkout. It is verified by the provider behind the seam (Stripe's
+`Stripe-Signature`; the stub's `X-Carnet-Signature`, an HMAC-SHA256 of the
+body with `PAYMENT_WEBHOOK_SECRET`) and fails closed: 401 when unsigned or
+unconfigured, 400 when signed and unreadable, 200 with `{ outcome }` otherwise,
+where the outcome is `recorded`, `moved`, `unchanged` or `unknown`. Applying
+an event is idempotent.
+
 ## 5. Versioning
 
 The version is in the path. Additive changes (new fields, new endpoints) do not

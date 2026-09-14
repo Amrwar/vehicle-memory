@@ -93,6 +93,9 @@ export default async function PaymentsPage({
                 </Button>
               </Link>
             ))}
+            <Link href="/payments/card">
+              <Button variant="secondary">Card payments</Button>
+            </Link>
             <Link href="/invoices?status=unpaid">
               <Button>Unpaid invoices</Button>
             </Link>

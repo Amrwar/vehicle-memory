@@ -385,6 +385,13 @@ where the work happens.
 | FR-5805 | AB2   | —                                                               | `assertPlanAllows()` in `createApiKey()`, `runPayroll()`, `dispatchTransfer()`, `completeSale()`, `recordExpense()` | `plans.test.ts`, `verify-authz.ts`                               | Done   |
 | FR-5806 | AB3   | `Organization.trialEndsAt/subscribedAt/suspendedAt/cancelledAt` | `subscriptionStateOf()`, `planOf()`                                                                                 | `subscription.test.ts`, `verify-authz.ts`                        | Done   |
 | FR-5807 | AB3   | —                                                               | `requireSession()` read-only branch, `/settings/subscription`, `choosePlan()`                                       | `verify-authz.ts`, `verify-controls.ts`                          | Done   |
+| FR-5901 | AC1   | `PaymentAttempt`, `Refund.attemptId`                            | `PaymentProvider` in core, `stubProvider`, `stripeProvider`, `paymentProvider()`                                    | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
+| FR-5902 | AC1   | `PaymentAttempt.status`                                         | `startCardPayment()`, `assertAttemptCreatable()`, the portal invoices page                                          | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
+| FR-5903 | AC1   | `PaymentAttemptStatus`, `PaymentAttempt.failureReason`          | `nextAttemptState()`, `settleAttempt()`                                                                             | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
+| FR-5904 | AC1   | `PaymentAttempt.paymentId` unique                               | `settlesMoney()`, the claim in `settleAttempt()`, `recordPayment()`                                                 | `verify-payments.ts`                                             | Done   |
+| FR-5905 | AC2   | `Refund.providerRef`                                            | `refundThroughProvider()` from `recordRefund()`, `assertRefundableThroughProvider()`                                | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
+| FR-5906 | AC3   | —                                                               | `reconcileAttempts()`, `reconcileFor()`, `/payments/card`                                                           | `attempts.test.ts`, `verify-payments.ts`, `verify-controls.ts`   | Done   |
+| FR-5907 | AC3   | —                                                               | `parseWebhook()` per provider, `/api/payments/webhook`                                                              | `verify-payments.ts`                                             | Done   |
 | FR-3907 | A1    | —                                                               | `assertNotFlooding()`                                                                                               | `verify-credentials.ts`                                          | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                         | `digest()`                                                                                                          | `verify-credentials.ts`                                          | Done   |
 | FR-3801 | —     | —                                                               | `/api/inbound/resend`                                                                                               | `smoke.ts`                                                       | Done   |
@@ -684,9 +691,10 @@ details without a provider behind it would be worse than not having one.
 | Country and currency                               | 6                   | 5                      |
 | Money owed ahead                                   | 6                   | 6                      |
 | Permissions at the resource, and the plan enforced | 7                   | 7                      |
-| **Total**                                          | **407**             | **401 (99%)**          |
+| Card payment through a provider                    | 7                   | 7                      |
+| **Total**                                          | **414**             | **408 (99%)**          |
 
-The requirements document lists 491 requirements. 84 of
+The requirements document lists 498 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

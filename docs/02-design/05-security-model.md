@@ -151,6 +151,20 @@ else. Removal is for the workshop that added a document or the owner, needs a
 reason, and keeps the row. Files are stored on a short-lived signed ticket and
 read back through signed URLs that expire in an hour.
 
+### 7.1 The payment provider's webhook (Phase 32)
+
+`/api/payments/webhook` records money, so it fails closed. The provider
+behind the seam verifies its own signature scheme (Stripe's `t=…,v1=…` HMAC
+over the timestamp and the raw body, with a five-minute tolerance against
+replay; the stub's HMAC over the body with `PAYMENT_WEBHOOK_SECRET`), and with
+no secret configured nothing is accepted. Unsigned or wrongly signed is 401.
+An event for a checkout we do not know is acknowledged with 200 and ignored,
+so the provider stops sending it and learns nothing. Applying an event is
+idempotent: the attempt moves once, and a replay changes nothing. The
+provider's key is read from the environment and never stored; the
+customer's card never touches this system, because the checkout is the
+provider's page.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

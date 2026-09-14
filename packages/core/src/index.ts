@@ -24,5 +24,6 @@ export * from './banking/index';
 export * from './pos/index';
 export * from './team/index';
 export * from './billing/index';
+export * from './payments/index';
 export * from './access/index';
 export * from './settings/index';

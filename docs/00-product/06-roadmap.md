@@ -1336,8 +1336,8 @@ exist.
 | Country and currency per workshop     | Missing | Pounds and British formatting hard-wired in 239 places; the money type already carries a currency                                                | 29    |
 | Deposits and customer credit          | Partial | A deposits account and a flag in the ledger; no deposit taken from a screen, no unapplied payment, no credit applied to a later bill             | 30    |
 | Receipts                              | Missing | A payment is a row and a ledger line; nothing the customer can hold                                                                              | 30    |
-| Card payment through a provider       | Missing | No provider code at all; refunds and failed payments have nowhere to come from                                                                   | 32    |
-| Payment links                         | Missing | The portal says "pay the workshop directly"                                                                                                      | 32    |
+| Card payment through a provider       | Built   | A provider seam with a stub and Stripe; \"Pay now\" in the portal; failed payments with a reason; reconciliation names differences (Phase 32)    | 32    |
+| Payment links                         | Partial | \"Pay now\" in the portal is built; a link sent in a message is not (Phase 36, with conversations)                                               | 36    |
 | Permissions at the resource           | Built   | Every page tried as every role, every action read for its permission, another workshop's records not found (Phase 31)                            | 31    |
 | Plan limits, server side              | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled on the organisation (Phase 31)                           | 31    |
 | Data import                           | Missing | A workshop switching systems types everything in                                                                                                 | 33    |
@@ -1558,6 +1558,30 @@ compared, and the difference named rather than assumed away.
 
 **Exit.** An invoice in the portal has a "Pay now" that works against the
 stub end to end, and the real adapter passes the same script with keys.
+
+**Status.** Built. The seam is four calls and a signature check: open a
+checkout, ask what became of it, send some back, read a webhook. Behind it
+sit a stub that takes pretend money at a checkout page of ours, and Stripe,
+written against its HTTP API with no SDK; PAYMENT_PROVIDER chooses, stub by
+default. An attempt is one try at paying some of an invoice: pending, then
+succeeded, failed with the provider's reason, or cancelled, once and never
+back. A succeeded attempt records the Payment (method online, reference the
+provider's) and posts it exactly like a card at the counter, exactly once
+however many times the provider says so, because the move is claimed
+before the money is recorded. The portal's outstanding invoices have "Pay
+now"; the customer comes back to the same page with the outcome, whichever
+way it went, and if the provider has not said yet the page asks it. A
+refund by card goes back through the provider that took it, asked before
+anything is recorded here. The workshop's /payments/card lists every
+attempt with its reason and can ask the provider about any; "Reconcile"
+asks about the last ninety days and names each difference (paid there and
+not here, here and not there, amount, currency, unknown, pending too long)
+rather than fixing anything. The webhook fails closed: unsigned is 401, a
+stranger's checkout is acknowledged and ignored, a replay changes nothing.
+The verification script pays, declines, retries, refunds, breaks the two
+records apart and watches reconciliation name it, and drives the webhook
+over HTTP with the stub's signature; the same script against Stripe is the
+same script with keys. Payment links sent in a message are still to come.
 
 ---
 

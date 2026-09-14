@@ -3,6 +3,8 @@ import {
   fromDecimal,
   type InvoiceState,
   type PaymentMethod,
+  PaymentAttemptError,
+  PaymentProviderError,
 } from '@carnet/core';
 import {
   Alert,
@@ -251,7 +253,14 @@ async function refund(formData: FormData) {
       reference: String(formData.get('reference') ?? ''),
     });
   } catch (error) {
-    if (!(error instanceof MoneyCycleError) && !(error instanceof GiftCardError)) throw error;
+    if (
+      !(error instanceof MoneyCycleError) &&
+      !(error instanceof GiftCardError) &&
+      !(error instanceof PaymentAttemptError) &&
+      !(error instanceof PaymentProviderError)
+    ) {
+      throw error;
+    }
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
 
@@ -291,6 +300,7 @@ export default async function InvoicePage({
     money.credited.minor < money.total.minor;
   const mayRefund = can(user.role, 'payment:write') && money.owedBack.minor > 0;
   const paidWithCard = invoice.payments.some((p) => p.method === 'GIFT_CARD');
+  const paidThroughProvider = invoice.paymentAttempts.length > 0;
   const held = mayPay ? await heldFor(orgId, invoice.customer.id) : null;
 
   // Points are only offered when there is a bill to put them against and
@@ -784,12 +794,17 @@ export default async function InvoicePage({
                       {paidWithCard ? (
                         <option value="GIFT_CARD">Back onto the gift card</option>
                       ) : null}
+                      {paidThroughProvider ? (
+                        <option value="ONLINE">Back to their card, through the provider</option>
+                      ) : null}
                       <option value="DEPOSIT">Keep it as credit on their account</option>
-                      {METHODS.filter((m) => m.value !== 'ACCOUNT').map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
-                        </option>
-                      ))}
+                      {METHODS.filter((m) => m.value !== 'ACCOUNT' && m.value !== 'ONLINE').map(
+                        (m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ),
+                      )}
                     </Select>
                   </Field>
                   <Field label="Reference" hint="Optional">

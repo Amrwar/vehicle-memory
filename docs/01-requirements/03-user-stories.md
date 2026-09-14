@@ -1096,6 +1096,47 @@ everything back.
 - **Given** a cancelled workshop, **when** I choose a plan, **then** it is
   open again and the change is in the audit log.
 
+## Epic AC — Card payment through a provider (Phase 32)
+
+### AC1 — Pay now, from my phone
+
+**As** Maria **I want** to pay an invoice by card from the portal **so
+that** I am not asked to transfer money by hand or ring the workshop with a
+card number.
+**Size** 5 · **Satisfies** FR-5901, FR-5902, FR-5903, FR-5904
+
+- **Given** an outstanding invoice, **when** I press "Pay now", **then** I
+  land on a secure checkout for exactly what is owed.
+- **Given** the card is declined, **when** I come back, **then** the page
+  says why, nothing has been taken, and I can try again.
+- **Given** the card is accepted, **when** I come back, **then** the invoice
+  is settled and a receipt is on its way, and pressing back does not pay
+  twice.
+
+### AC2 — Back to the card it came from
+
+**As** Sara **I want** a refund to go back through the provider to the card
+that paid **so that** I am not typing card numbers or sending bank transfers
+for money that arrived online.
+**Size** 3 · **Satisfies** FR-5905
+
+- **Given** an invoice paid online, **when** I refund by card, **then** the
+  provider is asked first and the refund carries its reference.
+- **Given** an invoice paid in cash, **when** I choose card, **then** it is
+  refused with a sentence.
+
+### AC3 — The provider's word against the books
+
+**As** Fatima **I want** the provider's record compared with the books, with
+each difference named **so that** a payment that landed at the provider and
+never reached us is found by me and not by the customer.
+**Size** 3 · **Satisfies** FR-5906, FR-5907
+
+- **Given** a payment the provider took and we did not record, **when** I
+  reconcile, **then** it is named, and checking that attempt records it.
+- **Given** everything agrees, **when** I reconcile, **then** the page says
+  so and changes nothing.
+
 ---
 
 ## Story map

@@ -98,15 +98,15 @@ way to find that out is to press the button rather than to read the schema.
 
 ## What this leaves
 
-Two rows above are not fully built, and both are waiting on a third party
-rather than on work: taking a card payment online, which needs a payment
-provider, and the payroll file in a provider's own layout, which needs a named
-provider. Everything else in these three tables is built and covered by a
+Two rows above are not fully built: a payment link sent in a message, which
+comes with conversations, and the payroll file in a provider's own layout,
+which needs a named provider. Card payment itself runs against a stub
+provider and Stripe behind the same seam. Everything else in these three tables is built and covered by a
 verification script or a crawl, and the [feature map](09-feature-map.md)
-counts the finer-grained capabilities the same way: 162 built, 3 partial, 21
+counts the finer-grained capabilities the same way: 163 built, 4 partial, 20
 missing, each named and assigned a phase.
 
-The phases these tables were last reconciled against are 1 to 31, the last
+The phases these tables were last reconciled against are 1 to 32, the last
 shipped on 14 September 2026. The [roadmap](06-roadmap.md) carries a status
 paragraph under each.
 

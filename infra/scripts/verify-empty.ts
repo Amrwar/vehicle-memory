@@ -45,6 +45,7 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/estimates', expectsGuidance: ['raised from a job'] },
   { path: '/invoices', expectsGuidance: [] },
   { path: '/payments', expectsGuidance: [] },
+  { path: '/payments/card', expectsGuidance: ['No card payments yet'] },
   { path: '/gift-cards', expectsGuidance: ['No cards sold yet'] },
   { path: '/reports', expectsGuidance: [] },
   { path: '/reports/business', expectsGuidance: [] },

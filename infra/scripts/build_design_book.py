@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 31.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 32.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -508,6 +508,24 @@ def build() -> None:
         works="A plan limit is refused where the thing is made, so the page is a courtesy and never the lock. The state is read from four dates each time, so the page cannot disagree with the guard that turned the write away.",
         shots=[("subscription", "The subscription page, on a plan.", 16.4)],
         source="docs/02-design/05-security-model.md, section 3, and 04-state-machines.md, section 9",
+    )
+
+    design(
+        doc,
+        title="Pay now, and what became of it",
+        when="Phase 32, 14 September 2026.",
+        why="The portal used to say \"pay the workshop directly\". A customer on their phone at nine in the "
+            "evening does not want a sort code; they want a button. The button opens the provider's checkout "
+            "for exactly what is owed, and whichever way it goes the customer comes back to the same page "
+            "with the outcome in a sentence.",
+        meaning=[
+            "One button per outstanding invoice, the amount in it, and a line beneath saying it is a secure checkout and that paying the workshop directly is still fine.",
+            "The outcome comes back as an alert at the top: paid and a receipt on its way; declined, with the provider's reason and the assurance that nothing was taken; cancelled; or not yet confirmed.",
+            "The workshop's card payments page is every attempt, newest first, with a declined card kept beside its reason rather than vanishing, and a reconcile button that names each difference between the provider and the books.",
+        ],
+        works="A failed payment is a row with a reason, so the customer and the workshop see the same fact. The provider is a witness and never the record: the payment is recorded once, at the moment the attempt succeeds, and the reconcile page exists because two records can disagree and somebody has to be told.",
+        shots=[("portal-invoices", "The portal's invoices, with Pay now.", 7.0), ("card-payments", "Every card payment tried, and the provider's word against the books.", 16.4)],
+        source="docs/02-design/04-state-machines.md, section 10; 07-accounting-model.md, section 3.18",
     )
 
     # 11. Counter

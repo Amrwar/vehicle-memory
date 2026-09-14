@@ -301,6 +301,30 @@ Returned to the customer, the way money goes:
 A refund by method `DEPOSIT` is the ordinary refund posting with the credit
 to 2200: the workshop owes the customer credit instead of cash.
 
+### 3.18 Card payment through a provider (Phase 32)
+
+A payment that arrives through the provider posts exactly as a card taken at
+the counter, with method `ONLINE` and the provider's reference on the
+payment:
+
+```
+  Dr 1000 Bank                 amount
+      Cr 1100 Receivable               amount
+```
+
+It is posted once, at the moment the attempt moves to succeeded, and never
+again however many times the provider reports it. A refund back through the
+provider is `postRefund` with method `ONLINE`, credited from the bank; the
+provider is asked before the refund is recorded, so a refusal there leaves
+no posting here.
+
+Deliberately not modelled yet: the provider's fee and the payout. The bank
+is debited for the gross amount the customer paid, which is what the
+invoice was for; the fee arrives on the provider's statement and is
+recorded as an expense when the bank feed is matched, the way a card
+terminal's fee is today. Netting the fee at the moment of payment would
+make the customer's receipt and the bank's figure disagree.
+
 ## 4. Job profitability
 
 Derived from the postings, not computed separately, so the figure on the job

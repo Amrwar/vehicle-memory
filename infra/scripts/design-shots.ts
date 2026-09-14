@@ -157,6 +157,15 @@ async function main() {
     { file: 'business', path: '/reports/business', who: 'owner' },
     { file: 'plan', path: '/plan', who: 'owner' },
     { file: 'portal', path: '/portal', who: 'driver', width: 390, height: 844, fullPage: true },
+    {
+      file: 'portal-invoices',
+      path: '/portal/invoices',
+      who: 'driver',
+      width: 390,
+      height: 844,
+      fullPage: true,
+    },
+    { file: 'card-payments', path: '/payments/card', who: 'owner' },
     { file: 'portal-passports', path: '/portal/passports', who: 'driver', width: 390, height: 844 },
     {
       file: 'portal-passport',
