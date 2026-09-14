@@ -98,7 +98,7 @@ referrals in front of the counter and the customer, gift cards, and the
 passports listed side by side. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
 phase, the [feature map](00-product/09-feature-map.md) counts 155 capabilities
-built, 4 partial and 25 missing, and the
+built, 4 partial and 26 missing, and the
 [traceability matrix](01-requirements/04-traceability-matrix.md) traces 381
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
@@ -107,4 +107,4 @@ What has not happened is the thing the [MVP definition](00-product/05-mvp-defini
 still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
-would trip over first, with the pilot itself placed after Phase 33.
+would trip over first, with the pilot itself placed after Phase 34.
