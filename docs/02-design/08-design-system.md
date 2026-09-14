@@ -140,6 +140,17 @@ phone must see the same thing.
 **Primitives:** Button (6 variants, 6 sizes), Badge, Card, Input, Textarea,
 Select, Field, Alert, EmptyState, PageHeader, Divider.
 
+**Buttons read as buttons before they are read at all.** Every variant has a
+pointer cursor (Tailwind 4 removed the browser default), a weight above body
+text, a visible focus ring, and a one-pixel press. Primary is the filled
+petrol with a lifting shadow, and there is one per screen, for the thing the
+screen is for: "Pay by card", "Complete the job", "Choose a plan". Secondary
+sits raised on the page with a border and a soft shadow, so it is never
+mistaken for the input beside it, which is sunk and flat. Danger is filled red
+and used only where money or a record leaves. A button that takes money says
+the amount inside it, on its own line, full width on a phone, with the
+assurance beneath it rather than inside it (Phase 32).
+
 **Data:** Table with sticky headers, StatTile, StatRow, KeyValue,
 UtilisationBar, TabStrip.
 

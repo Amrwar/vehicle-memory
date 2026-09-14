@@ -7,9 +7,19 @@ import { cn } from './cn';
    Button
    =========================================================================== */
 
+/**
+ * A button must read as a button before it is read at all: something to
+ * press, distinct from a field beside it. So every variant has a pointer,
+ * a weight above body text, a visible focus ring, and a press that moves,
+ * and the secondary variant sits raised on the page rather than sunk into
+ * it like an input. One primary per screen, for the thing the page is for.
+ */
 const button = cva(
-  'inline-flex items-center justify-center gap-2 font-medium whitespace-nowrap ' +
-    'transition-colors select-none ' +
+  'inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap ' +
+    'cursor-pointer select-none transition-[background-color,border-color,box-shadow,transform] ' +
+    'duration-150 active:translate-y-px ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brand) ' +
+    'focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface) ' +
     'disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
@@ -19,14 +29,16 @@ const button = cva(
         // cannot serve both across two themes.
         primary:
           'bg-(--brand-solid) text-(--on-brand-solid) hover:bg-(--brand-solid-hover) ' +
-          'shadow-sm',
+          'shadow-(--shadow-md) hover:shadow-(--shadow-lg)',
         secondary:
-          'bg-(--surface) text-(--text) border border-(--border-strong) ' +
-          'hover:bg-(--surface-sunk) hover:border-(--text-faint)',
+          'bg-(--surface) text-(--text) border border-(--border-strong) shadow-(--shadow-sm) ' +
+          'hover:bg-(--surface-sunk) hover:border-(--text-faint) hover:shadow-(--shadow-md)',
         ghost: 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',
-        danger: 'bg-(--danger-solid) text-(--on-danger-solid) hover:brightness-110 shadow-sm',
+        danger:
+          'bg-(--danger-solid) text-(--on-danger-solid) hover:brightness-110 shadow-(--shadow-md)',
         accent:
-          'bg-(--accent-solid) text-(--on-accent-solid) hover:bg-(--accent-solid-hover) shadow-sm',
+          'bg-(--accent-solid) text-(--on-accent-solid) hover:bg-(--accent-solid-hover) ' +
+          'shadow-(--shadow-md)',
         link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',
       },
       size: {

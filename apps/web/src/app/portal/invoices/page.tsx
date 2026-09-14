@@ -194,18 +194,50 @@ export default async function PortalInvoicesPage({
                     </div>
 
                     {offered ? (
-                      <form action={pay} className="mt-2">
+                      <form action={pay} className="mt-3">
                         <input type="hidden" name="invoiceId" value={invoice.id} />
-                        <Button type="submit" className="w-full">
-                          Pay <Money amount={invoice.outstanding} currency={invoice.currency} /> now
+                        <Button type="submit" variant="primary" size="lg" block>
+                          <svg
+                            aria-hidden
+                            viewBox="0 0 24 24"
+                            className="h-[18px] w-[18px]"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.8}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="2.5" y="5.5" width="19" height="13" rx="2.5" />
+                            <path d="M2.5 10h19M6.5 14.5h4" />
+                          </svg>
+                          <span>
+                            Pay <Money amount={invoice.outstanding} currency={invoice.currency} />{' '}
+                            by card
+                          </span>
                         </Button>
+                        <p className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-(--text-faint)">
+                          <svg
+                            aria-hidden
+                            viewBox="0 0 24 24"
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+                            <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+                          </svg>
+                          Secure checkout. Your card details never reach the workshop.
+                        </p>
                       </form>
                     ) : null}
 
                     <p className="mt-1 text-[12px] text-(--text-faint)">
                       {invoice.dueAt ? `Due ${date(invoice.dueAt, region.locale)}. ` : ''}
                       {offered
-                        ? 'Paid by card through a secure checkout, or pay the workshop directly.'
+                        ? 'You can also pay the workshop directly.'
                         : 'Pay the workshop directly.'}
                     </p>
                   </CardBody>

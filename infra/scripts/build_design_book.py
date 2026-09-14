@@ -519,7 +519,7 @@ def build() -> None:
             "for exactly what is owed, and whichever way it goes the customer comes back to the same page "
             "with the outcome in a sentence.",
         meaning=[
-            "One button per outstanding invoice, the amount in it, and a line beneath saying it is a secure checkout and that paying the workshop directly is still fine.",
+            "One filled petrol button per outstanding invoice, full width, with a card icon and the amount inside it: \"Pay £750.00 by card\". Beneath it, a lock and the assurance that the card details never reach the workshop; paying the workshop directly stays possible.",
             "The outcome comes back as an alert at the top: paid and a receipt on its way; declined, with the provider's reason and the assurance that nothing was taken; cancelled; or not yet confirmed.",
             "The workshop's card payments page is every attempt, newest first, with a declined card kept beside its reason rather than vanishing, and a reconcile button that names each difference between the provider and the books.",
         ],
