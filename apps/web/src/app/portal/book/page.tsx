@@ -19,6 +19,7 @@ import { prisma } from '@carnet/db';
 import { Mark } from '@/components/marketing';
 import { requireUser } from '@/lib/guard';
 import { requestBooking, servicesFor, slotsFor } from '@/lib/booking';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Book a visit' };
 export const dynamic = 'force-dynamic';
@@ -77,6 +78,7 @@ export default async function BookPage({
   searchParams: Promise<{ service?: string; vehicle?: string; error?: string }>;
 }) {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const params = await searchParams;
 
   const customer = await prisma.customer.findFirst({
@@ -236,7 +238,7 @@ export default async function BookPage({
                   />
                 ) : (
                   <CardBody className="grid gap-4">
-                    {groupByDay(slots).map(([day, daySlots]) => (
+                    {groupByDay(slots, region.locale).map(([day, daySlots]) => (
                       <fieldset key={day}>
                         <legend className="eyebrow mb-2">{day}</legend>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -252,7 +254,7 @@ export default async function BookPage({
                                 required
                                 className="sr-only"
                               />
-                              {slot.startAt.toLocaleTimeString('en-GB', {
+                              {slot.startAt.toLocaleTimeString(region.locale, {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}
@@ -283,11 +285,11 @@ export default async function BookPage({
   );
 }
 
-function groupByDay(slots: { startAt: Date }[]): [string, { startAt: Date }[]][] {
+function groupByDay(slots: { startAt: Date }[], locale: string): [string, { startAt: Date }[]][] {
   const days = new Map<string, { startAt: Date }[]>();
 
   for (const slot of slots) {
-    const key = slot.startAt.toLocaleDateString('en-GB', {
+    const key = slot.startAt.toLocaleDateString(locale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

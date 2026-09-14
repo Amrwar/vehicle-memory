@@ -117,7 +117,7 @@ export default async function PartPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
-  const { db, orgId } = await requireSession('inventory:read');
+  const { db, orgId, region } = await requireSession('inventory:read');
 
   const product = await db.product.findUnique({
     where: { id },
@@ -218,12 +218,33 @@ export default async function PartPage({
                   { label: 'Bin', value: level?.binLocation },
                   {
                     label: 'Weighted average cost',
-                    value: <Money amount={Number(position.avgCost)} />,
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(position.avgCost)}
+                      />
+                    ),
                   },
-                  { label: 'Sell price', value: <Money amount={Number(product.sellPrice)} /> },
+                  {
+                    label: 'Sell price',
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(product.sellPrice)}
+                      />
+                    ),
+                  },
                   {
                     label: 'Stock value',
-                    value: <Money amount={position.onHand * Number(position.avgCost)} />,
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={position.onHand * Number(position.avgCost)}
+                      />
+                    ),
                   },
                 ]}
               />
@@ -256,7 +277,7 @@ export default async function PartPage({
                       return (
                         <Tr key={movement.id}>
                           <Td className="datum whitespace-nowrap text-(--text-faint)">
-                            {movement.createdAt.toLocaleDateString('en-GB')}
+                            {movement.createdAt.toLocaleDateString(region.locale)}
                           </Td>
                           <Td>
                             <Badge
@@ -277,7 +298,11 @@ export default async function PartPage({
                             {quantity}
                           </Td>
                           <Td numeric className="text-(--text-soft)">
-                            <Money amount={Number(movement.unitCost)} />
+                            <Money
+                              currency={region.currency}
+                              locale={region.locale}
+                              amount={Number(movement.unitCost)}
+                            />
                           </Td>
                           <Td numeric>{Number(movement.balanceAfter)}</Td>
                           <Td className="text-(--text-faint)">{movement.reason ?? '—'}</Td>

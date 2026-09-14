@@ -119,7 +119,7 @@ export default async function GiftCardPage({
 }) {
   const { id } = await params;
   const { done, problem } = await searchParams;
-  const { orgId, user } = await requireSession('payment:read');
+  const { orgId, user, region } = await requireSession('payment:read');
 
   const card = await giftCardDetail(orgId, id);
   if (!card) notFound();
@@ -175,7 +175,7 @@ export default async function GiftCardPage({
               {card.entries.map((entry) => (
                 <li key={entry.id} className="flex flex-wrap items-baseline gap-3 px-4 py-2.5">
                   <time className="datum w-24 shrink-0 text-[12px] text-(--text-faint)">
-                    {entry.createdAt.toLocaleDateString('en-GB', {
+                    {entry.createdAt.toLocaleDateString(region.locale, {
                       day: 'numeric',
                       month: 'short',
                       year: '2-digit',
@@ -209,7 +209,12 @@ export default async function GiftCardPage({
                         : 'text-[13px] font-medium tabular-nums'
                     }
                   >
-                    <Money amount={entry.amountMinor / 100} signed />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={entry.amountMinor / 100}
+                      signed
+                    />
                   </span>
                 </li>
               ))}
@@ -271,23 +276,36 @@ export default async function GiftCardPage({
               <div className="flex items-baseline justify-between text-[13px]">
                 <span className="text-(--text-faint)">Left on the card</span>
                 <span className="font-display text-[22px] font-semibold tabular-nums">
-                  <Money amount={card.balanceMinor / 100} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={card.balanceMinor / 100}
+                  />
                 </span>
               </div>
               <KeyValue
                 columns={1}
                 items={[
-                  { label: 'Loaded', value: <Money amount={card.loadedMinor / 100} /> },
+                  {
+                    label: 'Loaded',
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={card.loadedMinor / 100}
+                      />
+                    ),
+                  },
                   { label: 'Paid for by', value: TENDER_LABEL[card.method] ?? card.method },
                   {
                     label: 'Sold',
-                    value: `${card.soldAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}${card.soldBy ? ` by ${card.soldBy.name}` : ''}`,
+                    value: `${card.soldAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}${card.soldBy ? ` by ${card.soldBy.name}` : ''}`,
                   },
                   { label: 'Good at', value: card.site ? `${card.site} only` : 'Every site' },
                   {
                     label: 'Lasts',
                     value: card.expiresAt
-                      ? `Until ${card.expiresAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}`
+                      ? `Until ${card.expiresAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}`
                       : 'For good',
                   },
                   { label: 'Note', value: card.note },
@@ -295,7 +313,7 @@ export default async function GiftCardPage({
                     ? [
                         {
                           label: 'Cancelled',
-                          value: `${card.disabledAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}: ${card.disabledReason ?? ''}`,
+                          value: `${card.disabledAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}: ${card.disabledReason ?? ''}`,
                         },
                       ]
                     : []),

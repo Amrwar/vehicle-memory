@@ -1,7 +1,7 @@
+import { DEFAULT_REGION, type Region, type Role, safeLocale } from '@carnet/core';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { prisma } from '@carnet/db';
-import type { Role } from '@carnet/core';
 import bcrypt from 'bcryptjs';
 import { cookies, headers } from 'next/headers';
 import { cache } from 'react';
@@ -202,6 +202,8 @@ export interface CurrentUser {
   orgPlan: string | null;
   locationId: string | null;
   sessionId: string;
+  /** The organisation's region: what money and dates are formatted by. */
+  region: Region;
 }
 
 /**
@@ -220,7 +222,20 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
         include: {
           memberships: {
             where: { isActive: true },
-            include: { org: { select: { id: true, name: true, slug: true, plan: true } } },
+            include: {
+              org: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  plan: true,
+                  country: true,
+                  baseCurrency: true,
+                  locale: true,
+                  timezone: true,
+                },
+              },
+            },
           },
         },
       },
@@ -244,6 +259,14 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
     orgPlan: membership?.org.plan ?? null,
     locationId: membership?.locationId ?? null,
     sessionId: session.id,
+    region: membership
+      ? {
+          country: membership.org.country,
+          currency: membership.org.baseCurrency,
+          locale: safeLocale(membership.org.locale, DEFAULT_REGION.locale),
+          timezone: membership.org.timezone,
+        }
+      : DEFAULT_REGION,
   };
 });
 

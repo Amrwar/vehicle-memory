@@ -97,7 +97,7 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<{ token?: string; problem?: string; saved?: string }>;
 }) {
-  const { db, user, orgId } = await requireSession('settings:read');
+  const { db, user, orgId, region } = await requireSession('settings:read');
   const { token, problem, saved } = await searchParams;
   const mayWrite = can(user.role, 'settings:write');
   const apiKeys = await apiKeysFor(orgId);
@@ -265,10 +265,18 @@ export default async function SettingsPage({
                           : 'Workshop'}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      {membership.costRate ? <Money amount={Number(membership.costRate)} /> : '—'}
+                      {membership.costRate ? (
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(membership.costRate)}
+                        />
+                      ) : (
+                        '—'
+                      )}
                     </Td>
                     <Td className="datum text-(--text-faint)">
-                      {membership.user.lastLoginAt?.toLocaleDateString('en-GB') ?? 'Never'}
+                      {membership.user.lastLoginAt?.toLocaleDateString(region.locale) ?? 'Never'}
                     </Td>
                   </Tr>
                 ))}
@@ -469,7 +477,9 @@ export default async function SettingsPage({
                         <Td className="font-mono text-[12px]">{key.prefix}…</Td>
                         <Td>{key.createdBy?.name ?? 'Somebody since removed'}</Td>
                         <Td>
-                          {key.lastUsedAt ? key.lastUsedAt.toLocaleDateString('en-GB') : 'Never'}
+                          {key.lastUsedAt
+                            ? key.lastUsedAt.toLocaleDateString(region.locale)
+                            : 'Never'}
                         </Td>
                         <Td>
                           {key.revokedAt ? (

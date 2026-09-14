@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { invoicesFor } from '@/lib/portal';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Invoices' };
 export const dynamic = 'force-dynamic';
@@ -19,14 +20,15 @@ export const dynamic = 'force-dynamic';
  * asks anything of the reader. Everything settled is a record, and a record
  * can wait below the fold.
  */
-function date(value: Date | null): string {
+function date(value: Date | null, locale: string): string {
   return value
-    ? value.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? value.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
     : '—';
 }
 
 export default async function PortalInvoicesPage() {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const invoices = await invoicesFor(user.userId);
 
   const owing = invoices.filter((invoice) => invoice.outstanding > 0.005);
@@ -69,7 +71,7 @@ export default async function PortalInvoicesPage() {
                 <Card className="border-(--warning)">
                   <CardHeader
                     title={invoice.number ?? 'Invoice'}
-                    description={`${invoice.org.name} · issued ${date(invoice.issuedAt)}`}
+                    description={`${invoice.org.name} · issued ${date(invoice.issuedAt, region.locale)}`}
                     action={
                       <Badge tone="warning" size="sm">
                         {invoice.paidNumber > 0 ? 'part paid' : 'unpaid'}
@@ -104,7 +106,7 @@ export default async function PortalInvoicesPage() {
                     </div>
 
                     <p className="mt-1 text-[12px] text-(--text-faint)">
-                      {invoice.dueAt ? `Due ${date(invoice.dueAt)}. ` : ''}
+                      {invoice.dueAt ? `Due ${date(invoice.dueAt, region.locale)}. ` : ''}
                       Pay the workshop directly. Carnet does not take payments.
                     </p>
                   </CardBody>
@@ -131,7 +133,7 @@ export default async function PortalInvoicesPage() {
                   </span>
                 </div>
                 <p className="mt-0.5 text-[13px] text-(--text-soft)">
-                  {invoice.org.name} · {date(invoice.issuedAt)}
+                  {invoice.org.name} · {date(invoice.issuedAt, region.locale)}
                   {invoice.payments[0]
                     ? invoice.payments[0].method === 'LOYALTY'
                       ? ' · paid with points'

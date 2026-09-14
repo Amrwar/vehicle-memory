@@ -34,7 +34,7 @@ export const dynamic = 'force-dynamic';
  * shelf. Every other view in the system would show it as missing.
  */
 export default async function TransfersPage() {
-  const { orgId, plan } = await requireSession('inventory:read');
+  const { orgId, plan, region } = await requireSession('inventory:read');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'transfers')) {
@@ -75,7 +75,9 @@ export default async function TransfersPage() {
         />
         <StatTile
           label="Value on the road"
-          value={<Money amount={roadValue / 100} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={roadValue / 100} />
+          }
           note="Owned, but on nobody's shelf"
         />
         <StatTile
@@ -115,7 +117,7 @@ export default async function TransfersPage() {
                         </p>
                         <p className="mt-0.5 text-[12px] text-(--text-faint)">
                           Sent{' '}
-                          {transfer.dispatchedAt?.toLocaleDateString('en-GB', {
+                          {transfer.dispatchedAt?.toLocaleDateString(region.locale, {
                             day: 'numeric',
                             month: 'short',
                           })}
@@ -134,7 +136,12 @@ export default async function TransfersPage() {
                             ? 'today'
                             : `${transfer.daysInTransit}d in transit`}
                         </Badge>
-                        <Money amount={transfer.valueMinor / 100} className="font-medium" />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={transfer.valueMinor / 100}
+                          className="font-medium"
+                        />
                       </div>
                     </div>
 
@@ -215,7 +222,7 @@ export default async function TransfersPage() {
                         </Td>
                         <Td className="text-(--text-faint)">
                           {transfer.receivedAt
-                            ? transfer.receivedAt.toLocaleDateString('en-GB', {
+                            ? transfer.receivedAt.toLocaleDateString(region.locale, {
                                 day: 'numeric',
                                 month: 'short',
                               })

@@ -1460,6 +1460,27 @@ Not multi-currency inside one workshop.
 **Exit.** A workshop signed up in Canada sees dollars everywhere and its
 ledger balances in dollars; one in Britain is unchanged.
 
+**Status.** Built. A country table in core carries, for each country the
+product is sold in, its currency, language and region, timezone, and the
+sensible first tax rate; adding a country is adding a row. The organisation
+gained a country column beside the base currency, locale and timezone it
+already had, and sign-up asks for the country first and writes all four
+from it, with the first tax rate named and rated for the country and the
+site following. The organisation settings page lets the owner change any of
+the four, with the currency carrying a warning that nothing already recorded
+is converted. The session carries the region, so every page in the workshop
+formats money and dates from it rather than from a British default: two
+hundred and thirty-nine hard-wired sites were replaced, the three shared
+components take a locale, the libraries that write to customers look the
+region up, and the portal formats by the workshop the driver uses most
+while showing each amount in its own workshop's currency. The public
+passport formats by the region of whoever last wrote to it. Plan prices on
+the pricing page stay in pounds until a billing provider exists. The
+verification script signs a workshop up in Canada and checks the region,
+the tax rate, the session, a bill and the message that told the customer are
+all in dollars, then moves it to France and checks euros; Britain is checked
+to be exactly as it was.
+
 ---
 
 ## Phase 30 — Money owed ahead

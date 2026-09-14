@@ -34,7 +34,7 @@ export const dynamic = 'force-dynamic';
  * need managing.
  */
 export default async function FleetPage() {
-  const { orgId } = await requireSession('customer:read');
+  const { orgId, region } = await requireSession('customer:read');
 
   const accounts = await fleets(orgId);
 
@@ -62,7 +62,7 @@ export default async function FleetPage() {
         />
         <StatTile
           label="Last thirty days"
-          value={<Money amount={spend} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={spend} />}
           note="Invoiced to fleets"
         />
       </StatRow>
@@ -126,7 +126,11 @@ export default async function FleetPage() {
                       {fleet.awaitingApproval}
                     </Td>
                     <Td numeric>
-                      <Money amount={fleet.spend} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={fleet.spend}
+                      />
                     </Td>
                   </Tr>
                 ))}

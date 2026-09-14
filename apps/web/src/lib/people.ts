@@ -15,6 +15,7 @@ import {
   zero,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
+import { regionFor } from './region';
 
 /**
  * People, against the database.
@@ -203,6 +204,7 @@ export async function draftTimesheet(
   range: PeriodRange,
   overtimeMultiplier = 1.5,
 ) {
+  const region = await regionFor(orgId);
   const [employee, records, absences] = await Promise.all([
     prisma.employee.findFirstOrThrow({
       where: { id: employeeId, orgId },
@@ -247,7 +249,7 @@ export async function draftTimesheet(
       attendedMinutes: attendedMinutes(spans, range.to),
       absenceMinutes: Math.round(absenceMinutes),
       ordinaryMinutesPerPeriod: employee.weeklyMinutes,
-      costPerHour: current?.costPerHour ?? zero('GBP'),
+      costPerHour: current?.costPerHour ?? zero(region.currency),
       overtimeMultiplier,
     }),
     records,

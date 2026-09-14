@@ -15,6 +15,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { readUrlFor } from './storage';
+import { regionFor } from './region';
 
 /**
  * Inspections, against the database.
@@ -315,6 +316,7 @@ export async function completeInspection(input: {
   inspectionId: string;
   notes?: string | null;
 }) {
+  const region = await regionFor(input.orgId);
   const loaded = await inspectionFor(input.orgId, input.inspectionId);
 
   if (!loaded) throw new InspectionError('UNKNOWN_ITEM', 'That inspection does not exist.');
@@ -366,6 +368,7 @@ export async function completeInspection(input: {
         jobId: job.id,
         version: (latest?.version ?? 0) + 1,
         status: 'DRAFT',
+        currency: region.currency,
         createdByUserId: input.userId,
       },
     });

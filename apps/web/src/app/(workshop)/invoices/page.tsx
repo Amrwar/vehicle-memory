@@ -43,7 +43,7 @@ export default async function InvoicesPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
-  const { db } = await requireSession('invoice:read');
+  const { db, region } = await requireSession('invoice:read');
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
 
@@ -120,14 +120,16 @@ export default async function InvoicesPage({
         <Link href="/invoices?status=unpaid" className="group">
           <StatTile
             label="Outstanding"
-            value={<Money amount={totalOutstanding} />}
+            value={
+              <Money currency={region.currency} locale={region.locale} amount={totalOutstanding} />
+            }
             tone={totalOutstanding > 0 ? 'warning' : 'neutral'}
             note="Invoiced but not yet paid"
           />
         </Link>
         <StatTile
           label="Overdue"
-          value={<Money amount={overdueValue} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={overdueValue} />}
           tone={overdueValue > 0 ? 'danger' : 'success'}
           note={overdueValue > 0 ? 'Past the due date' : 'Nothing past due'}
         />
@@ -219,10 +221,10 @@ export default async function InvoicesPage({
                       )}
                     </Td>
                     <Td className="datum text-(--text-faint)">
-                      {invoice.issuedAt?.toLocaleDateString('en-GB') ?? '—'}
+                      {invoice.issuedAt?.toLocaleDateString(region.locale) ?? '—'}
                     </Td>
                     <Td className="datum text-(--text-faint)">
-                      {invoice.dueAt?.toLocaleDateString('en-GB') ?? '—'}
+                      {invoice.dueAt?.toLocaleDateString(region.locale) ?? '—'}
                     </Td>
                     <Td numeric>
                       <Money amount={Number(invoice.total)} currency={invoice.currency} />

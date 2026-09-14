@@ -10,6 +10,7 @@ import { requireUser } from '@/lib/guard';
 import { reportFor } from '@/lib/handover';
 import { mileageFindings } from '@/lib/insights';
 import { verifyVehicleChain } from '@/lib/passport';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Your vehicle’s passport' };
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function PortalPassportPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const { id } = await params;
 
   if (!(await ownsVehicle(user.userId, id))) notFound();
@@ -32,7 +34,7 @@ export default async function PortalPassportPage({ params }: { params: Promise<{
     include: {
       events: {
         orderBy: { sequence: 'desc' },
-        include: { recordedByOrg: { select: { name: true } } },
+        include: { recordedByOrg: { select: { name: true, locale: true } } },
       },
       ownerships: { orderBy: { startedAt: 'desc' }, select: { id: true } },
       recalls: { where: { status: 'OPEN' }, include: { recall: true } },
@@ -64,6 +66,7 @@ export default async function PortalPassportPage({ params }: { params: Promise<{
       </div>
 
       <VehiclePassport
+        locale={region.locale}
         vehicle={vehicle}
         verification={verification}
         report={report}

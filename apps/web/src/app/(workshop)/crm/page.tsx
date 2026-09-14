@@ -126,7 +126,7 @@ export default async function CrmPage({
 }: {
   searchParams: Promise<{ drafted?: string; sent?: string; held?: string; error?: string }>;
 }) {
-  const { orgId } = await requireSession('customer:read');
+  const { orgId, region } = await requireSession('customer:read');
   const { drafted, sent, held, error } = await searchParams;
 
   const [segments, campaigns, cohortRows] = await Promise.all([
@@ -237,7 +237,11 @@ export default async function CrmPage({
                     {segment.segment.unreachable.length}
                   </Td>
                   <Td numeric>
-                    <Money amount={toNumber(segment.segment.totalValue)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(segment.segment.totalValue)}
+                    />
                   </Td>
                   <Td className="text-[12px] text-(--text-soft)">
                     {segment.plan.warnings[0] ??
@@ -281,7 +285,11 @@ export default async function CrmPage({
                     <Td className="font-medium">{row.cohort}</Td>
                     <Td numeric>{row.size}</Td>
                     <Td numeric>
-                      <Money amount={toNumber(lifetimeValue(row))} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(lifetimeValue(row))}
+                      />
                     </Td>
                     {Array.from({ length: widest }, (_, month) => {
                       const share = row.retention[month];
@@ -411,7 +419,7 @@ export default async function CrmPage({
                     </Td>
                     <Td className="text-(--text-soft)">
                       {campaign.sentAt
-                        ? campaign.sentAt.toLocaleDateString('en-GB', {
+                        ? campaign.sentAt.toLocaleDateString(region.locale, {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric',

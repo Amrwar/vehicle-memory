@@ -34,7 +34,7 @@ export default async function VehiclesPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const { orgId } = await requireSession('vehicle:read');
+  const { orgId, region } = await requireSession('vehicle:read');
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
 
@@ -139,7 +139,7 @@ export default async function VehiclesPage({
                       )}
                     </Td>
                     <Td numeric>
-                      <Mileage km={vehicle.lastOdometerKm} />
+                      <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {vehicle._count.events} entries

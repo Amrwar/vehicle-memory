@@ -32,8 +32,8 @@ export const dynamic = 'force-dynamic';
  * asked. That is work the workshop has already done and is not being paid for,
  * and there was nowhere in the product it could be seen.
  */
-function when(date: Date): string {
-  return date.toLocaleDateString('en-GB', {
+function when(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -42,7 +42,7 @@ function when(date: Date): string {
 }
 
 export default async function InspectionsPage() {
-  const { orgId } = await requireSession('job:read');
+  const { orgId, region } = await requireSession('job:read');
 
   const inspections = await recentInspections(orgId);
 
@@ -140,7 +140,7 @@ export default async function InspectionsPage() {
                         {row.job.number}
                       </Link>
                     </Td>
-                    <Td className="text-(--text-soft)">{when(row.startedAt)}</Td>
+                    <Td className="text-(--text-soft)">{when(row.startedAt, region.locale)}</Td>
                     <Td className="text-(--text-soft)">{row.performedBy?.name ?? '—'}</Td>
                     <Td numeric>
                       {row.criticalCount > 0 ? (

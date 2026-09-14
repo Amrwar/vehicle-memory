@@ -40,7 +40,7 @@ export interface PassportEventRow {
   odometerKm: number | null;
   verification: string;
   supersededById: string | null;
-  recordedByOrg: { name: string } | null;
+  recordedByOrg: { name: string; locale?: string } | null;
 }
 
 export interface PassportVehicle {
@@ -80,8 +80,11 @@ export function VehiclePassport({
   mileage,
   reader,
   afterIdentity,
+  locale = 'en-GB',
 }: {
   vehicle: PassportVehicle;
+  /** How dates and figures are written, from the region of whoever is reading. */
+  locale?: string;
   verification: { valid: boolean };
   report: Awaited<ReturnType<typeof reportFor>>;
   mileage: Awaited<ReturnType<typeof mileageFindings>>;
@@ -177,7 +180,7 @@ export function VehiclePassport({
                 {
                   label: 'First registered',
                   value: vehicle.firstRegisteredAt
-                    ? vehicle.firstRegisteredAt.toLocaleDateString('en-GB', {
+                    ? vehicle.firstRegisteredAt.toLocaleDateString(locale, {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric',
@@ -334,14 +337,14 @@ export function VehiclePassport({
                       ink={inkFor(event.verification, { alert, cancelled })}
                       authority={authorityFor(event)}
                       kind={humaniseEventType(event.type as VehicleEventType)}
-                      date={event.occurredAt.toLocaleDateString('en-GB', {
+                      date={event.occurredAt.toLocaleDateString(locale, {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric',
                       })}
                       odometer={
                         event.odometerKm !== null
-                          ? `${event.odometerKm.toLocaleString('en-GB')} km`
+                          ? `${event.odometerKm.toLocaleString(locale)} km`
                           : null
                       }
                       title={event.title}

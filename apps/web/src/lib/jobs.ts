@@ -2,6 +2,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { grantServicingAccess, orgCanReadVehicle } from './passport';
+import { regionFor } from './region';
 
 /**
  * Opening a job.
@@ -39,6 +40,7 @@ export async function createJob(input: {
   jobTypeId?: string | null;
   technicianUserId?: string | null;
 }) {
+  const region = await regionFor(input.orgId);
   const description = input.shortDescription.trim();
 
   if (!input.customerId) throw new JobError('NO_CUSTOMER', 'Say whose car it is.');
@@ -86,7 +88,7 @@ export async function createJob(input: {
   if (reading !== null && vehicle.lastOdometerKm !== null && reading < vehicle.lastOdometerKm) {
     throw new JobError(
       'MILEAGE_BACK',
-      `The last reading on this vehicle was ${vehicle.lastOdometerKm.toLocaleString('en-GB')} km. ${reading.toLocaleString('en-GB')} is lower, so one of the two is wrong.`,
+      `The last reading on this vehicle was ${vehicle.lastOdometerKm.toLocaleString(region.locale)} km. ${reading.toLocaleString(region.locale)} is lower, so one of the two is wrong.`,
     );
   }
 

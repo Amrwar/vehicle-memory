@@ -50,7 +50,7 @@ export async function generateMetadata({
  * single editable number cannot express that.
  */
 export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
-  const { orgId, plan } = await requireSession('people:read');
+  const { orgId, plan, region } = await requireSession('people:read');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'payroll')) {
@@ -143,10 +143,20 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         />
         <StatTile
           label="Cost per hour"
-          value={currentRate ? <Money amount={Number(currentRate.costPerHour)} /> : '—'}
+          value={
+            currentRate ? (
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={Number(currentRate.costPerHour)}
+              />
+            ) : (
+              '—'
+            )
+          }
           note={
             currentRate
-              ? `Since ${currentRate.effectiveFrom.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
+              ? `Since ${currentRate.effectiveFrom.toLocaleDateString(region.locale, { month: 'short', year: 'numeric' })}`
               : 'No rate set'
           }
         />
@@ -185,7 +195,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                       return (
                         <Tr key={rate.id}>
                           <Td className="tabular">
-                            {rate.effectiveFrom.toLocaleDateString('en-GB', {
+                            {rate.effectiveFrom.toLocaleDateString(region.locale, {
                               day: 'numeric',
                               month: 'short',
                               year: 'numeric',
@@ -193,7 +203,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                           </Td>
                           <Td className="tabular text-(--text-soft)">
                             {rate.effectiveTo ? (
-                              rate.effectiveTo.toLocaleDateString('en-GB', {
+                              rate.effectiveTo.toLocaleDateString(region.locale, {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric',
@@ -205,10 +215,22 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                             )}
                           </Td>
                           <Td numeric>
-                            <Money amount={cost} />
+                            <Money
+                              currency={region.currency}
+                              locale={region.locale}
+                              amount={cost}
+                            />
                           </Td>
                           <Td numeric className="text-(--text-soft)">
-                            {charge > 0 ? <Money amount={charge} /> : '—'}
+                            {charge > 0 ? (
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={charge}
+                              />
+                            ) : (
+                              '—'
+                            )}
                           </Td>
                           <Td numeric className="text-(--text-soft)">
                             {margin === null ? '—' : `${margin.toFixed(0)}%`}
@@ -230,7 +252,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           <Card>
             <CardHeader
               title="This week"
-              description={`${periodStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} to today, not yet submitted`}
+              description={`${periodStart.toLocaleDateString(region.locale, { day: 'numeric', month: 'short' })} to today, not yet submitted`}
             />
             <CardBody>
               <KeyValue
@@ -249,16 +271,33 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   },
                   {
                     label: 'Ordinary pay',
-                    value: <Money amount={toNumber(timesheet.totals.ordinaryPay)} />,
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(timesheet.totals.ordinaryPay)}
+                      />
+                    ),
                   },
                   {
                     label: 'Overtime pay',
-                    value: <Money amount={toNumber(timesheet.totals.overtimePay)} />,
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(timesheet.totals.overtimePay)}
+                      />
+                    ),
                   },
                   {
                     label: 'Gross',
                     value: (
-                      <Money amount={toNumber(timesheet.totals.gross)} className="font-medium" />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(timesheet.totals.gross)}
+                        className="font-medium"
+                      />
                     ),
                   },
                 ]}
@@ -280,11 +319,19 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                 </div>
                 <div className="flex justify-between">
                   <span className="text-(--text-faint)">Basis total</span>
-                  <Money amount={toNumber(commission.result.basisTotal)} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={toNumber(commission.result.basisTotal)}
+                  />
                 </div>
                 <div className="flex justify-between border-t border-(--border) pt-2 font-medium">
                   <span>Earned</span>
-                  <Money amount={toNumber(commission.result.earned)} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={toNumber(commission.result.earned)}
+                  />
                 </div>
                 <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
                   {explainCommission(commission.result)}
@@ -304,7 +351,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   { label: 'Type', value: employee.employment.toLowerCase() },
                   {
                     label: 'Started',
-                    value: employee.startedOn.toLocaleDateString('en-GB', {
+                    value: employee.startedOn.toLocaleDateString(region.locale, {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
@@ -371,12 +418,12 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   >
                     <div>
                       <p className="text-[13px]">
-                        {sheet.periodStart.toLocaleDateString('en-GB', {
+                        {sheet.periodStart.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'short',
                         })}
                         {' – '}
-                        {sheet.periodEnd.toLocaleDateString('en-GB', {
+                        {sheet.periodEnd.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'short',
                         })}
@@ -389,7 +436,12 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                       </p>
                     </div>
                     <div className="text-right">
-                      <Money amount={Number(sheet.gross)} className="text-[13px]" />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(sheet.gross)}
+                        className="text-[13px]"
+                      />
                       <Badge
                         tone={sheet.status === 'PAID' ? 'success' : 'neutral'}
                         size="sm"
@@ -418,12 +470,12 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                     <div>
                       <p className="text-[13px] capitalize">{absence.type.toLowerCase()}</p>
                       <p className="text-[11px] text-(--text-faint)">
-                        {absence.startsOn.toLocaleDateString('en-GB', {
+                        {absence.startsOn.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'short',
                         })}
                         {' – '}
-                        {absence.endsOn.toLocaleDateString('en-GB', {
+                        {absence.endsOn.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'short',
                         })}

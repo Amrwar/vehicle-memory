@@ -1,4 +1,4 @@
-import { PLAN_ORDER, PLANS, type PlanId, TRIAL_DAYS } from '@carnet/core';
+import { PLAN_ORDER, PLANS, type PlanId, TRIAL_DAYS, COUNTRIES } from '@carnet/core';
 import { Alert, Button, Field, Input, Select } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -40,6 +40,7 @@ async function submit(formData: FormData) {
     {
       workshopName: String(formData.get('workshopName') ?? ''),
       contactName: String(formData.get('contactName') ?? ''),
+      country: String(formData.get('country') ?? 'GB'),
       email: String(formData.get('email') ?? ''),
       password: String(formData.get('password') ?? ''),
       phone: String(formData.get('phone') ?? ''),
@@ -56,6 +57,7 @@ async function submit(formData: FormData) {
   if (!outcome.ok) {
     const params = new URLSearchParams({
       plan: plan.toLowerCase(),
+      country: String(formData.get('country') ?? 'GB'),
       workshopName: String(formData.get('workshopName') ?? ''),
       contactName: String(formData.get('contactName') ?? ''),
       email: String(formData.get('email') ?? ''),
@@ -190,6 +192,20 @@ export default async function SignupPage({
                 required
                 placeholder="Hillside Motors"
               />
+            </Field>
+
+            <Field
+              label="Country"
+              hint="Sets the currency the books are kept in, the language and the clock. Changeable in settings."
+              error={problemFor('country')}
+            >
+              <Select name="country" defaultValue={params.country ?? 'GB'}>
+                {COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name} · {country.currency}
+                  </option>
+                ))}
+              </Select>
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-[1fr_7.5rem]">

@@ -13,7 +13,7 @@ export interface Period {
   to: Date;
 }
 
-export function periodFor(key: string): Period & { label: string } {
+export function periodFor(key: string, locale = 'en-GB'): Period & { label: string } {
   const now = new Date();
   const to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
@@ -21,7 +21,7 @@ export function periodFor(key: string): Period & { label: string } {
     return {
       from: new Date(now.getFullYear(), now.getMonth(), 1),
       to,
-      label: now.toLocaleString('en-GB', { month: 'long', year: 'numeric' }),
+      label: now.toLocaleString(locale, { month: 'long', year: 'numeric' }),
     };
   }
 

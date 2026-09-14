@@ -40,8 +40,8 @@ export const dynamic = 'force-dynamic';
  * means the worker is not running, and that is the one worth interrupting a
  * morning for, because nothing at all is going out.
  */
-function when(date: Date): string {
-  return date.toLocaleDateString('en-GB', {
+function when(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -84,7 +84,7 @@ export default async function MessagesPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const notice = await searchParams;
-  const { orgId } = await requireSession('settings:read');
+  const { orgId, region } = await requireSession('settings:read');
 
   const [messages, summary, health, blocked] = await Promise.all([
     outbound(orgId),
@@ -169,7 +169,7 @@ export default async function MessagesPage({
                 {messages.map((message) => (
                   <Tr key={message.id}>
                     <Td className="text-(--text-soft)">
-                      {when(message.sentAt ?? message.createdAt)}
+                      {when(message.sentAt ?? message.createdAt, region.locale)}
                     </Td>
                     <Td>
                       <span className="font-medium">{message.to}</span>
@@ -206,7 +206,9 @@ export default async function MessagesPage({
                       {message.error ??
                         (message.provider ? `via ${message.provider}` : 'Not yet attempted.')}
                       {message.attempts > 1 ? ` · ${message.attempts} attempts` : ''}
-                      {message.holdingUntil ? ` · until ${when(message.holdingUntil)}` : ''}
+                      {message.holdingUntil
+                        ? ` · until ${when(message.holdingUntil, region.locale)}`
+                        : ''}
                     </Td>
                   </Tr>
                 ))}
@@ -247,7 +249,7 @@ export default async function MessagesPage({
                     {row.reason === 'COMPLAINT' ? 'marked as spam' : 'permanent bounce'}
                   </Badge>
                   <span className="ml-auto text-[11px] text-(--text-faint)">
-                    {row.createdAt.toLocaleDateString('en-GB')}
+                    {row.createdAt.toLocaleDateString(region.locale)}
                   </span>
                 </div>
 

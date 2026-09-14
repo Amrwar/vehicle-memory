@@ -44,7 +44,7 @@ export default async function RemindersPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
-  const { orgId } = await requireSession('customer:read');
+  const { orgId, region } = await requireSession('customer:read');
   const { days } = await searchParams;
   const window = Math.max(1, Number(days ?? 30) || 30);
 
@@ -155,7 +155,7 @@ export default async function RemindersPage({
                     <Td>
                       {entry.dueAt ? (
                         <span className={entry.overdue ? 'font-medium text-(--warning)' : ''}>
-                          {entry.dueAt.toLocaleDateString('en-GB', {
+                          {entry.dueAt.toLocaleDateString(region.locale, {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric',
@@ -166,7 +166,7 @@ export default async function RemindersPage({
                       )}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      {entry.dueKm ? <Mileage km={entry.dueKm} /> : '—'}
+                      {entry.dueKm ? <Mileage locale={region.locale} km={entry.dueKm} /> : '—'}
                     </Td>
                     <Td>
                       {entry.alreadySent ? (

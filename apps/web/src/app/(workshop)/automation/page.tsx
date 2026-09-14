@@ -151,8 +151,8 @@ async function stop(formData: FormData) {
   redirect('/automation?stopped=1');
 }
 
-function when(date: Date): string {
-  return date.toLocaleDateString('en-GB', {
+function when(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -178,7 +178,7 @@ export default async function AutomationPage({
 }: {
   searchParams: Promise<{ error?: string; saved?: string; stopped?: string }>;
 }) {
-  const { orgId } = await requireSession('settings:read');
+  const { orgId, region } = await requireSession('settings:read');
   const { error, saved, stopped } = await searchParams;
 
   const [rules, queued, runs] = await Promise.all([
@@ -275,7 +275,7 @@ export default async function AutomationPage({
                   <Tr key={action.id}>
                     <Td>
                       <span className={action.overdue ? 'font-medium text-(--warning)' : ''}>
-                        {when(action.dueAt)}
+                        {when(action.dueAt, region.locale)}
                       </span>
                     </Td>
                     <Td className="font-medium">{action.ruleName}</Td>
@@ -336,7 +336,7 @@ export default async function AutomationPage({
                   {rule.runCount === 0
                     ? 'Never triggered.'
                     : `Triggered ${rule.runCount} time${rule.runCount === 1 ? '' : 's'}, last on ${
-                        rule.lastRunAt ? when(rule.lastRunAt) : 'an unknown date'
+                        rule.lastRunAt ? when(rule.lastRunAt, region.locale) : 'an unknown date'
                       }${rule.lastRunBlocked ? ', and held back' : ''}.`}{' '}
                   Will not act on the same subject twice within {rule.cooldownHours} hours.
                 </p>
@@ -482,7 +482,7 @@ export default async function AutomationPage({
               <tbody>
                 {runs.map((run) => (
                   <Tr key={run.id}>
-                    <Td className="text-(--text-soft)">{when(run.firedAt)}</Td>
+                    <Td className="text-(--text-soft)">{when(run.firedAt, region.locale)}</Td>
                     <Td className="font-medium">{run.ruleName}</Td>
                     <Td>
                       {run.fired ? (

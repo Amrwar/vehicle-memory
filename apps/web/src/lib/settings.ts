@@ -53,7 +53,9 @@ export async function organisationSettings(orgId: string) {
       email: true,
       phone: true,
       website: true,
+      country: true,
       baseCurrency: true,
+      locale: true,
       timezone: true,
       reapprovalThresholdPct: true,
       sequences: {
@@ -74,6 +76,10 @@ export async function updateOrganisation(input: {
   phone?: string | null;
   website?: string | null;
   reapprovalThresholdPct: number;
+  country?: string;
+  currency?: string;
+  locale?: string;
+  timezone?: string;
 }): Promise<void> {
   assertOrganisationSaveable(input);
 
@@ -87,6 +93,10 @@ export async function updateOrganisation(input: {
       phone: true,
       website: true,
       reapprovalThresholdPct: true,
+      country: true,
+      baseCurrency: true,
+      locale: true,
+      timezone: true,
     },
   });
 
@@ -98,6 +108,10 @@ export async function updateOrganisation(input: {
     phone: tidy(input.phone),
     website: tidy(input.website),
     reapprovalThresholdPct: input.reapprovalThresholdPct,
+    ...(input.country ? { country: input.country.toUpperCase() } : {}),
+    ...(input.currency ? { baseCurrency: input.currency.toUpperCase() } : {}),
+    ...(input.locale ? { locale: input.locale } : {}),
+    ...(input.timezone ? { timezone: input.timezone } : {}),
   };
 
   await prisma.organization.update({ where: { id: input.orgId }, data: after });

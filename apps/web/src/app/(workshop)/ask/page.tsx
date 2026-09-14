@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
  * the way in, and nothing is stored. An owner's questions are their own.
  */
 export default async function AskPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { orgId, user } = await requireSession('report:operational');
+  const { orgId, user, region } = await requireSession('report:operational');
   const { q } = await searchParams;
 
   // Asked through the assistant so the exchange is recorded; the answer is
@@ -132,7 +132,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
                   )}
                   <span className="text-(--text-faint)">{exchange.user?.name ?? 'Somebody'}</span>
                   <span className="datum text-[12px] text-(--text-faint)">
-                    {exchange.createdAt.toLocaleString('en-GB', {
+                    {exchange.createdAt.toLocaleString(region.locale, {
                       dateStyle: 'medium',
                       timeStyle: 'short',
                     })}
@@ -141,7 +141,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
                 <p className="text-[12px] text-(--text-soft)">
                   {describeExchange(exchange)}
                   {exchange.inputTokens + exchange.outputTokens > 0
-                    ? ` ${(exchange.inputTokens + exchange.outputTokens).toLocaleString('en-GB')} tokens.`
+                    ? ` ${(exchange.inputTokens + exchange.outputTokens).toLocaleString(region.locale)} tokens.`
                     : ''}
                 </p>
               </li>

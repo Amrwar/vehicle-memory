@@ -26,7 +26,7 @@ export default async function WorkshopPassportPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { orgId } = await requireSession('vehicle:read');
+  const { orgId, region } = await requireSession('vehicle:read');
   const { id } = await params;
 
   if (!(await orgCanReadVehicle(orgId, id))) notFound();
@@ -36,7 +36,7 @@ export default async function WorkshopPassportPage({
     include: {
       events: {
         orderBy: { sequence: 'desc' },
-        include: { recordedByOrg: { select: { name: true } } },
+        include: { recordedByOrg: { select: { name: true, locale: true } } },
       },
       ownerships: { orderBy: { startedAt: 'desc' }, select: { id: true } },
       recalls: { where: { status: 'OPEN' }, include: { recall: true } },
@@ -62,6 +62,7 @@ export default async function WorkshopPassportPage({
       />
       <div className="mx-auto max-w-3xl">
         <VehiclePassport
+          locale={region.locale}
           vehicle={vehicle}
           verification={verification}
           report={report}

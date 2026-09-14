@@ -21,6 +21,7 @@ import { postEntry } from './accounting';
 import { audit } from './guard';
 import { priceableLinesOf } from './money';
 import { pushNow } from './outbound';
+import { regionFor } from './region';
 
 export { FleetError };
 
@@ -325,6 +326,7 @@ export async function consolidateMonth(input: {
   year: number;
   month: number;
 }): Promise<string> {
+  const region = await regionFor(input.orgId);
   const customer = await prisma.customer.findFirstOrThrow({
     where: { id: input.customerId, orgId: input.orgId, kind: 'COMPANY' },
     select: { id: true, displayName: true, email: true, fleetAgreement: true },
@@ -411,8 +413,8 @@ export async function consolidateMonth(input: {
     });
   }
 
-  const totals = calculateTotals(agreedLines);
-  const list = calculateTotals(listLines);
+  const totals = calculateTotals(agreedLines, region.currency);
+  const list = calculateTotals(listLines, region.currency);
   const issuedAt = new Date();
   const dueAt = dueDateFor(issuedAt, agreement.paymentTermsDays);
 
@@ -526,7 +528,7 @@ export async function consolidateMonth(input: {
           '',
           summary,
           '',
-          `Due by ${dueAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}. Each line names the vehicle and the job it came from.`,
+          `Due by ${dueAt.toLocaleDateString(region.locale, { day: 'numeric', month: 'long' })}. Each line names the vehicle and the job it came from.`,
           '',
           org.name,
         ].join('\n'),

@@ -36,6 +36,8 @@ model Organization {
   email                  String?
   phone                  String?
   website                String?
+  /// Chosen at sign-up; currency, locale and timezone follow it unless changed.
+  country                String   @default("GB")
   baseCurrency           String   @default("GBP")
   timezone               String   @default("Europe/London")
   locale                 String   @default("en-GB")

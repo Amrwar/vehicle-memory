@@ -41,9 +41,9 @@ export const dynamic = 'force-dynamic';
  * everything healthy. A fleet manager opens this to find out what needs
  * deciding, not to admire the vans that are fine.
  */
-function date(value: Date | null): string {
+function date(value: Date | null, locale: string): string {
   return value
-    ? value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    ? value.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
     : '—';
 }
 
@@ -111,7 +111,7 @@ export default async function FleetDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ problem?: string; done?: string }>;
 }) {
-  const { orgId, user } = await requireSession('customer:read');
+  const { orgId, user, region } = await requireSession('customer:read');
   const { id } = await params;
   const notice = await searchParams;
 
@@ -162,7 +162,9 @@ export default async function FleetDetailPage({
         />
         <StatTile
           label="Spent with you"
-          value={<Money amount={fleet.totals.spend} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={fleet.totals.spend} />
+          }
           note="Across every vehicle"
         />
       </StatRow>
@@ -210,7 +212,8 @@ export default async function FleetDetailPage({
                     ) : null}
                   </div>
                   <p className="mt-1 text-[12px] text-(--text-faint)">
-                    <Mileage km={row.vehicle.lastOdometerKm} /> · last in {date(row.lastVisit)}
+                    <Mileage locale={region.locale} km={row.vehicle.lastOdometerKm} /> · last in{' '}
+                    {date(row.lastVisit, region.locale)}
                   </p>
                 </div>
 
@@ -233,7 +236,7 @@ export default async function FleetDetailPage({
                     </Badge>
                   ) : row.dueSoon ? (
                     <Badge tone="brand" size="sm">
-                      due {date(row.dueAt)}
+                      due {date(row.dueAt, region.locale)}
                     </Badge>
                   ) : (
                     <Badge tone="success" size="sm">
@@ -244,7 +247,7 @@ export default async function FleetDetailPage({
 
                 <div className="text-[13px] sm:text-right">
                   <span className="text-(--text-faint)">Spent </span>
-                  <Money amount={row.spend} />
+                  <Money currency={region.currency} locale={region.locale} amount={row.spend} />
                 </div>
               </CardBody>
             </Card>
@@ -353,7 +356,7 @@ export default async function FleetDetailPage({
                     const value = `${when.getFullYear()}-${String(when.getMonth() + 1).padStart(2, '0')}`;
                     return (
                       <option key={value} value={value}>
-                        {when.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+                        {when.toLocaleDateString(region.locale, { month: 'long', year: 'numeric' })}
                       </option>
                     );
                   })}

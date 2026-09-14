@@ -74,7 +74,7 @@ export default async function PlanPage({
 }: {
   searchParams: Promise<{ on?: string; accepted?: string; problem?: string }>;
 }) {
-  const { orgId, user } = await requireSession('diary:read');
+  const { orgId, user, region } = await requireSession('diary:read');
   const { on, accepted, problem } = await searchParams;
   const mayAccept = can(user.role, 'diary:write');
 
@@ -99,7 +99,7 @@ export default async function PlanPage({
       <PageHeader
         eyebrow="Planning"
         title="Plan the day"
-        description={date.toLocaleDateString('en-GB', {
+        description={date.toLocaleDateString(region.locale, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',

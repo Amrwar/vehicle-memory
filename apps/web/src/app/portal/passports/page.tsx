@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { passportsForOwner } from '@/lib/passports';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Your passports' };
 export const dynamic = 'force-dynamic';
@@ -19,10 +20,11 @@ export const dynamic = 'force-dynamic';
  */
 export default async function PortalPassportsPage() {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const { rows, summary } = await passportsForOwner(user.userId);
 
   const date = (value: Date | null) =>
-    value ? value.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : null;
+    value ? value.toLocaleDateString(region.locale, { month: 'long', year: 'numeric' }) : null;
 
   return (
     <PortalShell active="passports">

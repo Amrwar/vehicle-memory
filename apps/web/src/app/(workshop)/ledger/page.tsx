@@ -42,7 +42,7 @@ export default async function LedgerPage({
 }: {
   searchParams: Promise<{ view?: string; account?: string }>;
 }) {
-  const { orgId, plan } = await requireSession('ledger:read');
+  const { orgId, plan, region } = await requireSession('ledger:read');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'ledger')) {
@@ -87,17 +87,35 @@ export default async function LedgerPage({
       <StatRow className="mb-5">
         <StatTile
           label="Total debits"
-          value={<Money amount={toNumber(balance.totalDebits)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(balance.totalDebits)}
+            />
+          }
           note={`Across ${accountsUsed} account${accountsUsed === 1 ? '' : 's'}`}
         />
         <StatTile
           label="Total credits"
-          value={<Money amount={toNumber(balance.totalCredits)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(balance.totalCredits)}
+            />
+          }
           note="Must equal debits"
         />
         <StatTile
           label="Difference"
-          value={<Money amount={toNumber(balance.difference)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(balance.difference)}
+            />
+          }
           tone={balance.balanced ? 'success' : 'danger'}
           note={balance.balanced ? 'The books balance' : 'Stop and investigate'}
         />
@@ -159,13 +177,33 @@ export default async function LedgerPage({
                         </span>
                       </Td>
                       <Td numeric className="text-(--text-soft)">
-                        {row.debit.minor === 0 ? '—' : <Money amount={toNumber(row.debit)} />}
+                        {row.debit.minor === 0 ? (
+                          '—'
+                        ) : (
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(row.debit)}
+                          />
+                        )}
                       </Td>
                       <Td numeric className="text-(--text-soft)">
-                        {row.credit.minor === 0 ? '—' : <Money amount={toNumber(row.credit)} />}
+                        {row.credit.minor === 0 ? (
+                          '—'
+                        ) : (
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(row.credit)}
+                          />
+                        )}
                       </Td>
                       <Td numeric className="font-medium">
-                        <Money amount={toNumber(row.balance)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(row.balance)}
+                        />
                       </Td>
                     </Tr>
                   ))}
@@ -176,10 +214,18 @@ export default async function LedgerPage({
                     <Td className="font-semibold">Total</Td>
                     <Td />
                     <Td numeric className="font-semibold">
-                      <Money amount={toNumber(balance.totalDebits)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(balance.totalDebits)}
+                      />
                     </Td>
                     <Td numeric className="font-semibold">
-                      <Money amount={toNumber(balance.totalCredits)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(balance.totalCredits)}
+                      />
                     </Td>
                     <Td numeric>
                       <Badge tone={balance.balanced ? 'success' : 'danger'} size="sm">
@@ -231,7 +277,7 @@ export default async function LedgerPage({
                           {entry.description}
                         </p>
                         <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                          {entry.postedAt.toLocaleDateString('en-GB', {
+                          {entry.postedAt.toLocaleDateString(region.locale, {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric',
@@ -246,7 +292,12 @@ export default async function LedgerPage({
                             Closed period
                           </Badge>
                         ) : null}
-                        <Money amount={debits} className="font-medium" />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={debits}
+                          className="font-medium"
+                        />
                       </div>
                     </div>
 
@@ -267,14 +318,22 @@ export default async function LedgerPage({
                             {Number(line.debit) === 0 ? (
                               <span className="text-(--text-faint)">—</span>
                             ) : (
-                              <Money amount={Number(line.debit)} />
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={Number(line.debit)}
+                              />
                             )}
                           </span>
                           <span className="tabular w-24 text-right">
                             {Number(line.credit) === 0 ? (
                               <span className="text-(--text-faint)">—</span>
                             ) : (
-                              <Money amount={Number(line.credit)} />
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={Number(line.credit)}
+                              />
                             )}
                           </span>
                         </li>

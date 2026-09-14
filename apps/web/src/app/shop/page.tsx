@@ -205,7 +205,7 @@ export default async function ShopFloorPage({
               <p className="text-[14px] font-semibold text-(--success)">Clocked on</p>
               <p className="datum text-[13px] text-(--text-soft)">
                 Since{' '}
-                {openEntry.startedAt.toLocaleTimeString('en-GB', {
+                {openEntry.startedAt.toLocaleTimeString(user.region.locale, {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}

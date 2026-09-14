@@ -19,6 +19,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { audit } from './guard';
 import { pushNow } from './outbound';
+import { regionFor } from './region';
 
 /**
  * Supplier bills and paying them, against the database.
@@ -129,7 +130,7 @@ export async function bookBill(input: {
     select: { id: true },
   });
 
-  const currency = 'GBP';
+  const currency = (await regionFor(input.orgId)).currency;
 
   await postEntry(input.orgId, {
     reference: `${reference}/B`,
@@ -242,6 +243,7 @@ export async function disputeBill(input: {
 
 /** What is owed to each supplier, oldest due first. */
 export async function payablesFor(orgId: string) {
+  const currency = (await regionFor(orgId)).currency;
   const bills = await prisma.supplierBill.findMany({
     where: { orgId, status: { in: ['AWAITING', 'APPROVED', 'PART_PAID', 'DISPUTED'] } },
     orderBy: [{ dueAt: 'asc' }, { billedAt: 'asc' }],
@@ -266,21 +268,21 @@ export async function payablesFor(orgId: string) {
 
   for (const bill of bills) {
     const view = asBill(bill);
-    const owed = { minor: view.total.minor - view.amountPaid.minor, currency: 'GBP' };
+    const owed = { minor: view.total.minor - view.amountPaid.minor, currency };
     if (owed.minor <= 0) continue;
 
     const entry = bySupplier.get(bill.supplierId) ?? {
       supplier: bill.supplier,
       bills: [],
-      outstanding: zero('GBP'),
-      payable: zero('GBP'),
+      outstanding: zero(currency),
+      payable: zero(currency),
       overdue: 0,
     };
 
     entry.bills.push(bill);
-    entry.outstanding = { minor: entry.outstanding.minor + owed.minor, currency: 'GBP' };
+    entry.outstanding = { minor: entry.outstanding.minor + owed.minor, currency };
     if (bill.status === 'APPROVED' || bill.status === 'PART_PAID') {
-      entry.payable = { minor: entry.payable.minor + owed.minor, currency: 'GBP' };
+      entry.payable = { minor: entry.payable.minor + owed.minor, currency };
     }
     if (bill.dueAt && bill.dueAt.getTime() < now) entry.overdue += 1;
 
@@ -476,8 +478,8 @@ export async function supplierPaymentsFor(orgId: string, limit = 50) {
   });
 }
 
-function format(value: Money): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: value.currency }).format(
+function format(value: Money, locale = 'en-GB'): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: value.currency }).format(
     value.minor / 100,
   );
 }

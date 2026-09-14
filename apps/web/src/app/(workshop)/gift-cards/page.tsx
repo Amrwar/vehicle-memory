@@ -97,7 +97,7 @@ export default async function GiftCardsPage({
 }: {
   searchParams: Promise<{ problem?: string }>;
 }) {
-  const { orgId, user } = await requireSession('payment:read');
+  const { orgId, user, region } = await requireSession('payment:read');
   const { problem } = await searchParams;
 
   const [cards, sites] = await Promise.all([giftCardsFor(orgId), sitesFor(orgId)]);
@@ -120,7 +120,13 @@ export default async function GiftCardsPage({
       <StatRow className="mb-5">
         <StatTile
           label="Outstanding"
-          value={<Money amount={cards.outstandingMinor / 100} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={cards.outstandingMinor / 100}
+            />
+          }
           tone={cards.outstandingMinor > 0 ? 'warning' : 'neutral'}
           note="What the workshop owes as work"
         />
@@ -136,12 +142,24 @@ export default async function GiftCardsPage({
         />
         <StatTile
           label="Sold"
-          value={<Money amount={cards.soldMinor / 100} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={cards.soldMinor / 100}
+            />
+          }
           note="Taken when the cards were bought"
         />
         <StatTile
           label="Spent"
-          value={<Money amount={cards.spentMinor / 100} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={cards.spentMinor / 100}
+            />
+          }
           note="Put against bills and counter sales"
         />
       </StatRow>
@@ -183,7 +201,7 @@ export default async function GiftCardsPage({
                         </Link>
                       </Td>
                       <Td>
-                        {card.soldAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}
+                        {card.soldAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}
                         {card.soldBy ? (
                           <span className="text-(--text-faint)"> · {card.soldBy}</span>
                         ) : null}
@@ -192,17 +210,25 @@ export default async function GiftCardsPage({
                       <Td className="text-(--text-soft)">
                         {card.site ? `At ${card.site}` : 'Everywhere'}
                         {card.expiresAt
-                          ? ` · until ${card.expiresAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}`
+                          ? ` · until ${card.expiresAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}`
                           : ''}
                       </Td>
                       <Td numeric>
-                        <Money amount={card.loadedMinor / 100} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={card.loadedMinor / 100}
+                        />
                       </Td>
                       <Td numeric>
                         <span
                           className={card.balanceMinor > 0 ? 'font-medium' : 'text-(--text-faint)'}
                         >
-                          <Money amount={card.balanceMinor / 100} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={card.balanceMinor / 100}
+                          />
                         </span>
                       </Td>
                       <Td>
@@ -222,7 +248,7 @@ export default async function GiftCardsPage({
           <Card className="border-(--brand) self-start">
             <CardHeader
               title="Sell a card"
-              description={`Whole pounds, ${GIFT_CARD_MIN_MINOR / 100} to ${(GIFT_CARD_MAX_MINOR / 100).toLocaleString('en-GB')}. Paid for with money, never with points.`}
+              description={`Whole pounds, ${GIFT_CARD_MIN_MINOR / 100} to ${(GIFT_CARD_MAX_MINOR / 100).toLocaleString(region.locale)}. Paid for with money, never with points.`}
             />
             <form action={sell}>
               <CardBody className="grid gap-3">

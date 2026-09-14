@@ -185,7 +185,11 @@ export async function settleReferralsFor(input: {
 export async function referralsForPortalUser(userId: string) {
   const customers = await prisma.customer.findMany({
     where: { portalUserId: userId },
-    select: { id: true, orgId: true, org: { select: { name: true } } },
+    select: {
+      id: true,
+      orgId: true,
+      org: { select: { name: true, baseCurrency: true, locale: true } },
+    },
   });
 
   return Promise.all(
@@ -194,6 +198,8 @@ export async function referralsForPortalUser(userId: string) {
       return {
         customerId: customer.id,
         workshop: customer.org.name,
+        currency: customer.org.baseCurrency,
+        locale: customer.org.locale,
         code: own.code,
         pointsEachSide: REFERRAL_POINTS,
         minimumMinor: REFERRAL_MINIMUM_MINOR,

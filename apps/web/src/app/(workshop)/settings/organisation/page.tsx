@@ -1,4 +1,15 @@
-import { Alert, Button, Card, CardBody, CardHeader, Field, Input, PageHeader } from '@carnet/ui';
+import { COUNTRIES, CURRENCIES } from '@carnet/core';
+import {
+  Alert,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Field,
+  Input,
+  PageHeader,
+  Select,
+} from '@carnet/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -44,6 +55,10 @@ async function save(formData: FormData) {
       phone: text('phone'),
       website: text('website'),
       reapprovalThresholdPct: Number(text('reapprovalThresholdPct')),
+      country: text('country'),
+      currency: text('currency'),
+      locale: text('locale'),
+      timezone: text('timezone'),
     });
   } catch (error) {
     if (error instanceof SettingsError) back(error.message);
@@ -149,13 +164,42 @@ export default async function OrganisationSettingsPage({
                   className="max-w-[10rem]"
                 />
               </Field>
-              <div className="grid gap-4 sm:grid-cols-2 text-[13px] text-(--text-soft)">
-                <p>
-                  Base currency <span className="datum">{org.baseCurrency}</span>
-                </p>
-                <p>
-                  Timezone <span className="datum">{org.timezone}</span>
-                </p>
+              {/* The region. One currency per workshop, because a workshop
+                  keeps one set of books; the rest follows the country unless
+                  somebody has a reason to differ. */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Country" hint="Where the workshop trades">
+                  <Select name="country" defaultValue={org.country}>
+                    {COUNTRIES.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field
+                  label="Currency"
+                  hint="The books are kept in one currency. Changing it does not convert what is already recorded."
+                >
+                  <Select name="currency" defaultValue={org.baseCurrency}>
+                    {CURRENCIES.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="Language and region"
+                  hint="How dates and figures are written, such as en-CA or fr-FR"
+                >
+                  <Input name="locale" defaultValue={org.locale} maxLength={12} required />
+                </Field>
+                <Field label="Timezone" hint="Such as America/Toronto">
+                  <Input name="timezone" defaultValue={org.timezone} maxLength={64} required />
+                </Field>
               </div>
             </CardBody>
             <CardBody className="border-t border-(--border)">

@@ -38,7 +38,7 @@ export const dynamic = 'force-dynamic';
  * record rather than a source.
  */
 export default async function RecallsPage() {
-  const { orgId } = await requireSession('vehicle:read');
+  const { orgId, region } = await requireSession('vehicle:read');
 
   // Vehicles this workshop has actually seen, rather than every vehicle in the
   // network. A recall on a car that has never been here is somebody else's to
@@ -149,7 +149,7 @@ export default async function RecallsPage() {
                       </span>
                     </Td>
                     <Td className="text-(--text-soft)">
-                      {row.recall.issuedAt.toLocaleDateString('en-GB', {
+                      {row.recall.issuedAt.toLocaleDateString(region.locale, {
                         month: 'short',
                         year: 'numeric',
                       })}
@@ -161,7 +161,8 @@ export default async function RecallsPage() {
                         </Badge>
                       ) : (
                         <Badge tone="success" size="sm">
-                          done {row.completedAt ? row.completedAt.toLocaleDateString('en-GB') : ''}
+                          done{' '}
+                          {row.completedAt ? row.completedAt.toLocaleDateString(region.locale) : ''}
                         </Badge>
                       )}
                     </Td>

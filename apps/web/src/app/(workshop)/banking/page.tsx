@@ -80,7 +80,7 @@ export default async function BankingPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const { orgId, plan } = await requireSession('ledger:read');
+  const { orgId, plan, region } = await requireSession('ledger:read');
 
   if (!planIncludes(plan, 'ledger')) {
     return <PlanWall feature="ledger" plan={plan} />;
@@ -122,17 +122,47 @@ export default async function BankingPage({
       <StatRow className="mb-5">
         <StatTile
           label="On the statement"
-          value={view ? <Money amount={toNumber(view.state.statementBalance)} /> : '—'}
+          value={
+            view ? (
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={toNumber(view.state.statementBalance)}
+              />
+            ) : (
+              '—'
+            )
+          }
           note={view?.statement ? 'Closing balance' : 'No statement imported'}
         />
         <StatTile
           label="In the ledger"
-          value={view ? <Money amount={toNumber(view.state.ledgerBalance)} /> : '—'}
+          value={
+            view ? (
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={toNumber(view.state.ledgerBalance)}
+              />
+            ) : (
+              '—'
+            )
+          }
           note="From postings to this account"
         />
         <StatTile
           label="Difference"
-          value={view ? <Money amount={toNumber(view.state.difference)} /> : '—'}
+          value={
+            view ? (
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={toNumber(view.state.difference)}
+              />
+            ) : (
+              '—'
+            )
+          }
           tone={view?.state.reconciled ? 'success' : 'warning'}
           note={view?.state.reconciled ? 'Agreed' : 'Explained below'}
         />
@@ -198,7 +228,12 @@ export default async function BankingPage({
                           >
                             {match.confidence.toLowerCase()}
                           </Badge>
-                          <Money amount={toNumber(line.amount)} className="font-medium" />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(line.amount)}
+                            className="font-medium"
+                          />
                           <form action={accept}>
                             <input type="hidden" name="lineId" value={line.id} />
                             <input type="hidden" name="entryId" value={entry.id} />
@@ -240,10 +275,19 @@ export default async function BankingPage({
                     <div className="min-w-0">
                       <p className="truncate text-[13px]">{line.description}</p>
                       <p className="text-[11px] text-(--text-faint)">
-                        {line.at.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        {line.at.toLocaleDateString(region.locale, {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
                       </p>
                     </div>
-                    <Money amount={toNumber(line.amount)} signed className="shrink-0" />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(line.amount)}
+                      signed
+                      className="shrink-0"
+                    />
                   </li>
                 ))}
               </ul>

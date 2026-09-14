@@ -41,7 +41,7 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
-  const { db, orgId } = await requireSession('report:operational');
+  const { db, orgId, region } = await requireSession('report:operational');
   const { days } = await searchParams;
   const window = Math.max(1, Number(days ?? 30) || 30);
 
@@ -192,7 +192,11 @@ export default async function ReportsPage({
                           </Td>
                           <Td numeric className="text-(--text-soft)">
                             {row.costRate !== null ? (
-                              <Money amount={row.hours * row.costRate} />
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={row.hours * row.costRate}
+                              />
                             ) : (
                               '—'
                             )}

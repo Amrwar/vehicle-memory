@@ -32,21 +32,25 @@ const CONDITION_TONE = {
   UNKNOWN: 'neutral',
 } as const;
 
-function date(value: Date): string {
-  return value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function date(value: Date, locale: string): string {
+  return value.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
-function away(km: number | null, days: number): string {
+function away(km: number | null, days: number, locale: string): string {
   if (km != null) {
     return km < 0
-      ? `${Math.abs(km).toLocaleString('en-GB')} km past`
-      : `in about ${km.toLocaleString('en-GB')} km`;
+      ? `${Math.abs(km).toLocaleString(locale)} km past`
+      : `in about ${km.toLocaleString(locale)} km`;
   }
   return days < 0 ? `${Math.abs(days)} days past` : `in about ${Math.round(days / 30)} months`;
 }
 
 export default async function ConditionPage({ params }: { params: Promise<{ id: string }> }) {
-  const { orgId } = await requireSession('vehicle:read');
+  const { orgId, region } = await requireSession('vehicle:read');
   const { id } = await params;
 
   const permitted = await orgCanReadVehicle(orgId, id);
@@ -173,7 +177,7 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
                       <span
                         className={`datum text-[13px] ${prediction.overdue ? 'font-semibold text-(--danger)' : ''}`}
                       >
-                        {away(prediction.kmAway, prediction.daysAway)}
+                        {away(prediction.kmAway, prediction.daysAway, region.locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[12px] text-(--text-faint)">
@@ -206,7 +210,7 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-[12px] text-(--text-soft)">
-                      {component.summary} Fitted {date(component.fittedOn)}
+                      {component.summary} Fitted {date(component.fittedOn, region.locale)}
                       {component.brand ? `, ${component.brand}` : ''}.
                     </p>
                     <p className="text-[11px] text-(--text-faint)">
@@ -225,8 +229,9 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
                 {condition.missing.length} components have no record here.
               </strong>{' '}
               That is not the same as them being new. This vehicle has{' '}
-              <Mileage km={vehicle.lastOdometerKm} /> on it and {condition.visits} recorded visits,
-              and anything fitted before those visits, or elsewhere, is not in this list.
+              <Mileage locale={region.locale} km={vehicle.lastOdometerKm} /> on it and{' '}
+              {condition.visits} recorded visits, and anything fitted before those visits, or
+              elsewhere, is not in this list.
             </CardBody>
           </Card>
         </div>

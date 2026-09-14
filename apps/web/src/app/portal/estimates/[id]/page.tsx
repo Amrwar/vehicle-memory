@@ -7,6 +7,7 @@ import { EstimateReview } from '@/components/estimate-review';
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { decisionPreview, DecisionError, estimateForCustomer, recordDecision } from '@/lib/portal';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Your quote' };
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,7 @@ export default async function PortalEstimatePage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -69,6 +71,7 @@ export default async function PortalEstimatePage({
   return (
     <PortalShell>
       <EstimateReview
+        locale={region.locale}
         estimate={estimate}
         preview={preview}
         action={answer}

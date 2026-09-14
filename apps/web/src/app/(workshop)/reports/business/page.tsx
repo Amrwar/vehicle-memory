@@ -47,7 +47,7 @@ export default async function BusinessReportsPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const { orgId } = await requireSession('report:operational');
+  const { orgId, region } = await requireSession('report:operational');
   const { range } = await searchParams;
 
   const key = range === 'month' || range === 'quarter' ? range : 'year';
@@ -95,7 +95,7 @@ export default async function BusinessReportsPage({
       <StatRow className="mb-5">
         <StatTile
           label="Revenue"
-          value={<Money amount={revenue / 100} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={revenue / 100} />}
           note="Work completed in this period"
         />
         <StatTile
@@ -171,10 +171,18 @@ export default async function BusinessReportsPage({
                         {row.jobs}
                       </Td>
                       <Td numeric>
-                        <Money amount={row.revenueMinor / 100} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={row.revenueMinor / 100}
+                        />
                       </Td>
                       <Td numeric className="text-(--text-soft)">
-                        <Money amount={row.costMinor / 100} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={row.costMinor / 100}
+                        />
                       </Td>
                       <Td numeric>
                         <span
@@ -188,7 +196,11 @@ export default async function BusinessReportsPage({
                         </span>
                       </Td>
                       <Td numeric className="text-(--text-soft)">
-                        <Money amount={row.averageMinor / 100} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={row.averageMinor / 100}
+                        />
                       </Td>
                     </Tr>
                   ))}
@@ -242,10 +254,18 @@ export default async function BusinessReportsPage({
                           {row.quantity}
                         </Td>
                         <Td numeric>
-                          <Money amount={row.revenueMinor / 100} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={row.revenueMinor / 100}
+                          />
                         </Td>
                         <Td numeric className="text-(--text-soft)">
-                          <Money amount={row.costMinor / 100} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={row.costMinor / 100}
+                          />
                         </Td>
                         <Td numeric>
                           {row.marginPct === null ? (
@@ -313,7 +333,11 @@ export default async function BusinessReportsPage({
                           {row.visits}
                         </Td>
                         <Td numeric>
-                          <Money amount={row.lifetimeMinor / 100} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={row.lifetimeMinor / 100}
+                          />
                         </Td>
                         <Td numeric className="text-(--text-faint)">
                           {row.daysSinceLastVisit === null ? '—' : `${row.daysSinceLastVisit}d`}

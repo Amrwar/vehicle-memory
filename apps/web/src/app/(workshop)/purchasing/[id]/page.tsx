@@ -90,7 +90,7 @@ export default async function PurchaseOrderPage({
 }) {
   const { id } = await params;
   const { error, received } = await searchParams;
-  const { db } = await requireSession('inventory:read');
+  const { db, region } = await requireSession('inventory:read');
 
   const order = await db.purchaseOrder.findUnique({
     where: { id },
@@ -295,7 +295,11 @@ export default async function PurchaseOrderPage({
                             {outstanding || '—'}
                           </Td>
                           <Td numeric className="text-(--text-soft)">
-                            <Money amount={Number(line.unitCost)} />
+                            <Money
+                              currency={region.currency}
+                              locale={region.locale}
+                              amount={Number(line.unitCost)}
+                            />
                           </Td>
 
                           {receivable ? (
@@ -365,7 +369,7 @@ export default async function PurchaseOrderPage({
                     <div>
                       <p className="text-[13px] font-medium">{receipt.reference ?? 'Delivery'}</p>
                       <p className="datum text-[11px] text-(--text-faint)">
-                        {receipt.receivedAt.toLocaleString('en-GB', {
+                        {receipt.receivedAt.toLocaleString(region.locale, {
                           dateStyle: 'medium',
                           timeStyle: 'short',
                         })}
@@ -393,14 +397,27 @@ export default async function PurchaseOrderPage({
                   { label: 'Payment terms', value: `${order.supplier.paymentTermsDays} days` },
                   {
                     label: 'Expected',
-                    value: order.expectedAt?.toLocaleDateString('en-GB'),
+                    value: order.expectedAt?.toLocaleDateString(region.locale),
                   },
-                  { label: 'Value', value: <Money amount={toNumber(totals.subtotal)} /> },
+                  {
+                    label: 'Value',
+                    value: (
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(totals.subtotal)}
+                      />
+                    ),
+                  },
                   {
                     label: 'Outstanding',
                     value:
                       totals.outstandingValue.minor > 0 ? (
-                        <Money amount={toNumber(totals.outstandingValue)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.outstandingValue)}
+                        />
                       ) : null,
                   },
                 ]}
@@ -465,7 +482,11 @@ export default async function PurchaseOrderPage({
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-[13px]">
-                      <Money amount={Number(bill.total)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(bill.total)}
+                      />
                     </p>
                   </li>
                 ))}

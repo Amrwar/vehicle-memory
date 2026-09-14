@@ -31,7 +31,7 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<{ page?: string; entity?: string }>;
 }) {
-  const { orgId } = await requireSession('audit:read');
+  const { orgId, region } = await requireSession('audit:read');
   const params = await searchParams;
   const page = Math.max(1, Number(params.page ?? 1) || 1);
 
@@ -65,7 +65,7 @@ export default async function AuditPage({
       <PageHeader
         eyebrow="Admin"
         title="Audit log"
-        description={`${total.toLocaleString('en-GB')} recorded action${total === 1 ? '' : 's'}`}
+        description={`${total.toLocaleString(region.locale)} recorded action${total === 1 ? '' : 's'}`}
       />
 
       <Card className="mb-5 border-(--brand)">
@@ -121,7 +121,7 @@ export default async function AuditPage({
                 {entries.map((entry) => (
                   <Tr key={entry.id}>
                     <Td className="datum text-(--text-faint)">
-                      {entry.createdAt.toLocaleString('en-GB', {
+                      {entry.createdAt.toLocaleString(region.locale, {
                         dateStyle: 'short',
                         timeStyle: 'medium',
                       })}

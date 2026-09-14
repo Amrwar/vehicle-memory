@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: 'Suppliers' };
 export const dynamic = 'force-dynamic';
 
 export default async function SuppliersPage() {
-  const { db } = await requireSession('inventory:read');
+  const { db, region } = await requireSession('inventory:read');
 
   const suppliers = await db.supplier.findMany({
     where: { isActive: true },
@@ -96,7 +96,7 @@ export default async function SuppliersPage() {
                       </Td>
                       <Td numeric>{open || '—'}</Td>
                       <Td numeric className={owed > 0 ? 'font-medium' : 'text-(--text-faint)'}>
-                        <Money amount={owed} />
+                        <Money currency={region.currency} locale={region.locale} amount={owed} />
                       </Td>
                       <Td>
                         {disputed > 0 ? (

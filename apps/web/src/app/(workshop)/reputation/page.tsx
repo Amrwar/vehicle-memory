@@ -77,7 +77,7 @@ export default async function ReputationPage({
 }: {
   searchParams: Promise<{ asked?: string; error?: string }>;
 }) {
-  const { orgId } = await requireSession('customer:read');
+  const { orgId, region } = await requireSession('customer:read');
   const { asked, error } = await searchParams;
 
   const [picture, candidates] = await Promise.all([reputation(orgId), askable(orgId)]);
@@ -210,7 +210,7 @@ export default async function ReputationPage({
                         </Badge>
                       ) : null}
                       <span className="ml-auto text-[11px] text-(--text-faint)">
-                        {row.respondedAt?.toLocaleDateString('en-GB')}
+                        {row.respondedAt?.toLocaleDateString(region.locale)}
                       </span>
                     </div>
                     {row.comment ? (

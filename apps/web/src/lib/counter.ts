@@ -13,6 +13,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { redeemAtCounter } from './giftcards';
 import { audit } from './guard';
+import { regionFor } from './region';
 
 /**
  * Counter sales, against the database.
@@ -61,6 +62,7 @@ export interface SaleResult {
  * both succeed.
  */
 export async function completeSale(input: CompleteSaleInput): Promise<SaleResult> {
+  const region = await regionFor(input.orgId);
   if (input.lines.length === 0) {
     return { ok: false, error: 'There is nothing on this sale.' };
   }
@@ -101,10 +103,10 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         description: line.description,
         productId: line.productId,
         quantity: line.quantity,
-        unitPrice: { minor: Math.round(line.unitPrice * 100), currency: 'GBP' },
+        unitPrice: { minor: Math.round(line.unitPrice * 100), currency: region.currency },
         unitCost: {
           minor: Math.round((line.productId ? (costOf.get(line.productId) ?? 0) : 0) * 100),
-          currency: 'GBP',
+          currency: region.currency,
         },
         taxRatePct: taxPct,
         discountPct: line.discountPct ?? 0,
@@ -233,9 +235,9 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         at: outcome.sale.soldAt ?? new Date(),
         totals: outcome.totals,
         settlement: outcome.settlement,
-        cashTaken: { minor: outcome.cash, currency: 'GBP' },
-        cardTaken: { minor: outcome.card, currency: 'GBP' },
-        giftCardTaken: { minor: outcome.giftCard, currency: 'GBP' },
+        cashTaken: { minor: outcome.cash, currency: region.currency },
+        cardTaken: { minor: outcome.card, currency: region.currency },
+        giftCardTaken: { minor: outcome.giftCard, currency: region.currency },
         revenue: outcome.revenue,
       }),
     );

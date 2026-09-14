@@ -23,6 +23,7 @@ import { PassportCover } from '@carnet/ui';
 import { documentsFor, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Vehicle history' };
 export const dynamic = 'force-dynamic';
@@ -70,9 +71,9 @@ async function withdraw(formData: FormData) {
   redirect(`/portal/vehicles/${vehicleId}?withdrawn=1`);
 }
 
-function date(value: Date | null): string {
+function date(value: Date | null, locale: string): string {
   return value
-    ? value.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? value.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
     : '—';
 }
 
@@ -84,6 +85,7 @@ export default async function PortalVehiclePage({
   searchParams: Promise<{ link?: string; withdrawn?: string }>;
 }) {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const { id } = await params;
   const { link, withdrawn } = await searchParams;
 
@@ -176,7 +178,7 @@ export default async function PortalVehiclePage({
               >
                 <span className="font-medium">{schedule.name}</span>
                 <span className="text-[13px] text-(--text-soft)">
-                  {schedule.dueAt ? date(schedule.dueAt) : null}
+                  {schedule.dueAt ? date(schedule.dueAt, region.locale) : null}
                   {schedule.dueKm ? (
                     <>
                       {schedule.dueAt ? ' · ' : ''}
@@ -217,7 +219,7 @@ export default async function PortalVehiclePage({
                   <Card>
                     <CardHeader
                       title={job.shortDescription}
-                      description={`${job.org.name} · ${date(job.completedAt ?? job.createdAt)}`}
+                      description={`${job.org.name} · ${date(job.completedAt ?? job.createdAt, region.locale)}`}
                       action={
                         <Badge tone={progress.done ? 'neutral' : 'brand'} size="sm">
                           {progress.label}
@@ -285,7 +287,7 @@ export default async function PortalVehiclePage({
                 className="flex flex-wrap items-center justify-between gap-2 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3.5 py-2.5 text-[13px]"
               >
                 <span className="text-(--text-soft)">
-                  Live until {date(entry.expiresAt)} ·{' '}
+                  Live until {date(entry.expiresAt, region.locale)} ·{' '}
                   {entry.openCount === 0
                     ? 'not opened yet'
                     : `opened ${entry.openCount} time${entry.openCount === 1 ? '' : 's'}`}

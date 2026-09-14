@@ -178,7 +178,11 @@ export function spendableAgainst(balance: number, owedMinor: number): number {
 export async function pointsForPortalUser(userId: string) {
   const customers = await prisma.customer.findMany({
     where: { portalUserId: userId },
-    select: { id: true, orgId: true, org: { select: { name: true } } },
+    select: {
+      id: true,
+      orgId: true,
+      org: { select: { name: true, baseCurrency: true, locale: true } },
+    },
   });
 
   const cards = await Promise.all(
@@ -187,6 +191,8 @@ export async function pointsForPortalUser(userId: string) {
       return {
         customerId: customer.id,
         workshop: customer.org.name,
+        currency: customer.org.baseCurrency,
+        locale: customer.org.locale,
         balance: held.balance,
         valueMinor: valueOf(held.balance),
         expiring: held.expiring,

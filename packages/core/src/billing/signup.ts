@@ -1,3 +1,4 @@
+import { isCountry } from '../region/countries';
 /**
  * Opening an account.
  *
@@ -20,6 +21,8 @@ export interface SignupInput {
   password: string;
   phone?: string;
   sites: number;
+  /** ISO 3166 two letters. Currency, locale and timezone follow it. */
+  country?: string;
 }
 
 export type SignupField = keyof SignupInput;
@@ -146,6 +149,10 @@ export function isReservedSlug(slug: string): boolean {
  */
 export function validateSignup(input: SignupInput): SignupProblem[] {
   const problems: SignupProblem[] = [];
+
+  if (input.country !== undefined && !isCountry(input.country)) {
+    problems.push({ field: 'country', message: 'Choose the country the workshop trades in.' });
+  }
 
   const name = input.workshopName.trim();
   if (name.length < 2) {

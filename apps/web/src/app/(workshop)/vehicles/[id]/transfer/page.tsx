@@ -80,7 +80,7 @@ export default async function TransferPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { orgId } = await requireSession('vehicle:write');
+  const { orgId, region } = await requireSession('vehicle:write');
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -201,7 +201,7 @@ export default async function TransferPage({
                   columns={1}
                   items={[
                     { label: 'Owner', value: current.ownerName ?? 'Unnamed' },
-                    { label: 'Since', value: current.startedAt.toLocaleDateString('en-GB') },
+                    { label: 'Since', value: current.startedAt.toLocaleDateString(region.locale) },
                   ]}
                 />
               ) : (

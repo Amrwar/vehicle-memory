@@ -40,7 +40,7 @@ export default async function EstimatesPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  const { db } = await requireSession('estimate:read');
+  const { db, region } = await requireSession('estimate:read');
   const { status } = await searchParams;
 
   const estimates = await db.estimate.findMany({
@@ -104,7 +104,9 @@ export default async function EstimatesPage({
         />
         <StatTile
           label="Value waiting"
-          value={<Money amount={waitingValue / 100} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={waitingValue / 100} />
+          }
           note="Work that has not been said yes to"
         />
         <StatTile
@@ -198,7 +200,11 @@ export default async function EstimatesPage({
                         )}
                       </Td>
                       <Td numeric className="font-medium">
-                        <Money amount={Number(estimate.total)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(estimate.total)}
+                        />
                       </Td>
                     </Tr>
                   );

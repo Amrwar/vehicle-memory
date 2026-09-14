@@ -143,7 +143,7 @@ export default async function CustomerPage({
 }) {
   const { id } = await params;
   const { saved, problem } = await searchParams;
-  const { db, orgId, user } = await requireSession('customer:read');
+  const { db, orgId, user, region } = await requireSession('customer:read');
 
   const { id: customerId } = await params;
 
@@ -319,8 +319,8 @@ export default async function CustomerPage({
                         ) : null}
                       </div>
                       <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                        <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events} history
-                        entries
+                        <Mileage locale={region.locale} km={vehicle.lastOdometerKm} /> ·{' '}
+                        {vehicle._count.events} history entries
                       </p>
                     </div>
                     <Link href={`/vehicles/${vehicle.id}`}>
@@ -353,7 +353,7 @@ export default async function CustomerPage({
                       {job.vehicle.make} {job.vehicle.model}
                     </span>
                     <time className="datum text-[11px] text-(--text-faint)">
-                      {job.createdAt.toLocaleDateString('en-GB')}
+                      {job.createdAt.toLocaleDateString(region.locale)}
                     </time>
                     <Badge tone={toneFor(job.status as JobStatus)} size="sm">
                       {humanise(job.status as JobStatus)}
@@ -414,7 +414,7 @@ export default async function CustomerPage({
               <div className="flex justify-between">
                 <span className="text-(--text-faint)">Outstanding</span>
                 <span className="font-display text-[16px] font-semibold">
-                  <Money amount={outstanding} />
+                  <Money currency={region.currency} locale={region.locale} amount={outstanding} />
                 </span>
               </div>
               <div className="flex justify-between">
@@ -433,7 +433,7 @@ export default async function CustomerPage({
               title="Points"
               description={
                 points.balance > 0
-                  ? `Worth ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(points.valueMinor / 100)} off a bill`
+                  ? `Worth ${new Intl.NumberFormat(region.locale, { style: 'currency', currency: region.currency }).format(points.valueMinor / 100)} off a bill`
                   : `${points.perPound} point a pound on every bill paid in full`
               }
             />
@@ -441,14 +441,14 @@ export default async function CustomerPage({
               <div className="flex items-baseline justify-between">
                 <span className="text-(--text-faint)">Balance</span>
                 <span className="font-display text-[22px] font-semibold tabular-nums">
-                  {points.balance.toLocaleString('en-GB')}
+                  {points.balance.toLocaleString(region.locale)}
                 </span>
               </div>
               {points.expiring.points > 0 && points.expiring.on ? (
                 <p className="rounded-(--radius-sm) bg-(--warning-soft) px-2.5 py-1.5 text-[12px] text-(--warning)">
-                  {points.expiring.points.toLocaleString('en-GB')} lapse on{' '}
-                  {points.expiring.on.toLocaleDateString('en-GB', { dateStyle: 'medium' })}. Worth
-                  mentioning at the next visit.
+                  {points.expiring.points.toLocaleString(region.locale)} lapse on{' '}
+                  {points.expiring.on.toLocaleDateString(region.locale, { dateStyle: 'medium' })}.
+                  Worth mentioning at the next visit.
                 </p>
               ) : null}
 
@@ -468,7 +468,7 @@ export default async function CustomerPage({
                           entry.reason
                         )}
                         <time className="datum ml-1.5 text-(--text-faint)">
-                          {entry.createdAt.toLocaleDateString('en-GB')}
+                          {entry.createdAt.toLocaleDateString(region.locale)}
                         </time>
                       </span>
                       <span
@@ -479,7 +479,7 @@ export default async function CustomerPage({
                         }
                       >
                         {entry.points > 0 ? '+' : ''}
-                        {entry.points.toLocaleString('en-GB')}
+                        {entry.points.toLocaleString(region.locale)}
                       </span>
                     </li>
                   ))}
@@ -536,7 +536,7 @@ export default async function CustomerPage({
           <Card>
             <CardHeader
               title="Referrals"
-              description={`Both sides get ${referrals.pointsEachSide} points once the person brought in has had ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(referrals.minimumMinor / 100)} of work done`}
+              description={`Both sides get ${referrals.pointsEachSide} points once the person brought in has had ${new Intl.NumberFormat(region.locale, { style: 'currency', currency: region.currency, maximumFractionDigits: 0 }).format(referrals.minimumMinor / 100)} of work done`}
             />
             <CardBody className="grid gap-3 text-[13px]">
               <div>
@@ -556,7 +556,7 @@ export default async function CustomerPage({
                     {referrals.introducedBy.referrer.displayName}
                   </Link>
                   {referrals.introducedBy.creditedAt
-                    ? ` · both sides paid on ${referrals.introducedBy.creditedAt.toLocaleDateString('en-GB')}`
+                    ? ` · both sides paid on ${referrals.introducedBy.creditedAt.toLocaleDateString(region.locale)}`
                     : ' · waiting on their first bill'}
                 </p>
               ) : null}
@@ -581,7 +581,7 @@ export default async function CustomerPage({
                         )}
                         {entry.usedAt ? (
                           <time className="datum ml-1.5 text-(--text-faint)">
-                            {entry.usedAt.toLocaleDateString('en-GB')}
+                            {entry.usedAt.toLocaleDateString(region.locale)}
                           </time>
                         ) : null}
                       </span>
@@ -642,11 +642,15 @@ export default async function CustomerPage({
                   <li key={payment.id} className="flex items-center justify-between px-4 py-2.5">
                     <div>
                       <p className="text-[13px] font-medium">
-                        <Money amount={Number(payment.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(payment.amount)}
+                        />
                       </p>
                       <p className="datum text-[11px] text-(--text-faint)">
                         {methodLabel(payment.method)} ·{' '}
-                        {payment.receivedAt.toLocaleDateString('en-GB')}
+                        {payment.receivedAt.toLocaleDateString(region.locale)}
                       </p>
                     </div>
                   </li>
@@ -680,7 +684,7 @@ export default async function CustomerPage({
                 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5"
               >
                 <span className="w-24 shrink-0 text-[12px] tabular-nums text-(--text-faint)">
-                  {entry.at.toLocaleDateString('en-GB', {
+                  {entry.at.toLocaleDateString(region.locale, {
                     day: 'numeric',
                     month: 'short',
                     year: '2-digit',
@@ -702,7 +706,11 @@ export default async function CustomerPage({
 
                 {entry.amount !== null && entry.amount !== undefined ? (
                   <span className="text-[13px] font-medium tabular-nums">
-                    <Money amount={entry.amount} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={entry.amount}
+                    />
                   </span>
                 ) : null}
               </li>
@@ -729,7 +737,7 @@ export default async function CustomerPage({
                   </span>
                   <span className="text-[11px] text-(--text-faint)">
                     {message.channel.toLowerCase()} ·{' '}
-                    {(message.sentAt ?? message.createdAt).toLocaleDateString('en-GB')}
+                    {(message.sentAt ?? message.createdAt).toLocaleDateString(region.locale)}
                     {message.status === 'FAILED' ? ' · did not arrive' : ''}
                   </span>
                 </div>

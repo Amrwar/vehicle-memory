@@ -42,7 +42,7 @@ const ORDER_TONE = {
  * is a technician waiting.
  */
 export default async function PurchasingPage() {
-  const { db, user, plan } = await requireSession('purchase:request');
+  const { db, user, plan, region } = await requireSession('purchase:request');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'purchasing')) {
@@ -143,7 +143,9 @@ export default async function PurchasingPage() {
         <StatTile label="Open orders" value={openOrders.length} note="Sent or part received" />
         <StatTile
           label="Outstanding value"
-          value={<Money amount={outstandingValue} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={outstandingValue} />
+          }
           note="Ordered but not yet delivered"
         />
         <StatTile
@@ -185,7 +187,9 @@ export default async function PurchasingPage() {
                         {' · '}
                       </>
                     ) : null}
-                    <time className="datum">{request.createdAt.toLocaleDateString('en-GB')}</time>
+                    <time className="datum">
+                      {request.createdAt.toLocaleDateString(region.locale)}
+                    </time>
                     {request.approvedBy ? ` · approved by ${request.approvedBy.name}` : ''}
                   </p>
                 </div>
@@ -264,17 +268,25 @@ export default async function PurchasingPage() {
                         </Link>
                       </Td>
                       <Td className="datum text-(--text-faint)">
-                        {order.expectedAt?.toLocaleDateString('en-GB') ?? '—'}
+                        {order.expectedAt?.toLocaleDateString(region.locale) ?? '—'}
                       </Td>
                       <Td numeric className="text-(--text-soft)">
                         {order.lines.length}
                       </Td>
                       <Td numeric>
-                        <Money amount={toNumber(totals.subtotal)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.subtotal)}
+                        />
                       </Td>
                       <Td numeric className="text-(--text-soft)">
                         {totals.outstandingValue.minor > 0 ? (
-                          <Money amount={toNumber(totals.outstandingValue)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(totals.outstandingValue)}
+                          />
                         ) : (
                           '—'
                         )}
@@ -324,7 +336,11 @@ export default async function PurchasingPage() {
                 </div>
 
                 <span className="font-display text-[15px] font-semibold">
-                  <Money amount={Number(bill.total)} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={Number(bill.total)}
+                  />
                 </span>
 
                 <Badge tone={match ? matchTone(match.status) : 'neutral'} dot>

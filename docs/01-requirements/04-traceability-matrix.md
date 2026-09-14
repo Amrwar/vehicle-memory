@@ -366,6 +366,12 @@ where the work happens.
 | FR-5505 | Y1    | —                                                              | `refundOntoCard()` from `recordRefund()`                                     | `verify-giftcards.ts`                                            | Done   |
 | FR-5506 | Y2    | —                                                              | `assertCardAdjustable()`, `adjustGiftCard()`, `postGiftCardAdjustment()`     | `giftcards.test.ts`, `accounting.test.ts`, `verify-giftcards.ts` | Done   |
 | FR-5507 | Y2    | `gift_cards_cancelled_with_a_reason`                           | `disableGiftCard()`                                                          | `verify-giftcards.ts`                                            | Done   |
+| FR-5601 | Z1    | `Organization.country`                                         | `COUNTRIES`, `regionOf()`, `updateOrganisation()`                            | `region.test.ts`, `verify-region.ts`                             | Done   |
+| FR-5602 | Z1    | —                                                              | `createWorkshop()`, `regionForCountry()`, `countryFor()`                     | `verify-region.ts`                                               | Done   |
+| FR-5603 | Z1    | —                                                              | `Session.region`, every workshop page                                        | `verify-region.ts`, `verify-controls.ts`                         | Done   |
+| FR-5604 | Z2    | —                                                              | `regionForUser()`, `pointsForPortalUser()`                                   | `verify-region.ts`                                               | Done   |
+| FR-5605 | Z1    | —                                                              | `regionFor()` in `lib/money.ts`, `lib/fleet.ts`, `lib/estimates.ts`          | `verify-region.ts`                                               | Done   |
+| FR-5606 | Z1    | —                                                              | the settings page                                                            | reviewed on the page                                             | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                                        | `verify-credentials.ts`                                          | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                                   | `verify-credentials.ts`                                          | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                                        | `smoke.ts`                                                       | Done   |
@@ -662,9 +668,10 @@ details without a provider behind it would be worse than not having one.
 | Gift cards                                | 6                   | 6                      |
 | The passport, listed                      | 4                   | 3                      |
 | Gift cards, deepened                      | 7                   | 7                      |
-| **Total**                                 | **388**             | **383 (99%)**          |
+| Country and currency                      | 6                   | 5                      |
+| **Total**                                 | **394**             | **388 (98%)**          |
 
-The requirements document lists 472 requirements. 84 of
+The requirements document lists 478 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

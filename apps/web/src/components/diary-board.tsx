@@ -44,7 +44,10 @@ export function DiaryBoard({
   lanes,
   laneKind,
   onMove,
+  locale = 'en-GB',
 }: {
+  /** How times are written, from the workshop's region. */
+  locale?: string;
   lanes: BoardLane[];
   /** What a lane represents, which is what a drop changes. */
   laneKind: 'bay' | 'technician' | 'none';
@@ -176,7 +179,7 @@ export function DiaryBoard({
                       >
                         <p className="text-[13px] font-medium">{entry.title}</p>
                         <p className="mt-0.5 text-[11px] text-(--text-soft)">
-                          {new Date(entry.startAt).toLocaleTimeString('en-GB', {
+                          {new Date(entry.startAt).toLocaleTimeString(locale, {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}

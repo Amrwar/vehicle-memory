@@ -1,3 +1,4 @@
+import { isCountry, isCurrency, safeLocale } from '../region/countries';
 /**
  * The workshop configures itself.
  *
@@ -13,6 +14,7 @@ export class SettingsError extends Error {
   constructor(
     readonly code:
       | 'NO_NAME'
+      | 'BAD_REGION'
       | 'BAD_EMAIL'
       | 'BAD_THRESHOLD'
       | 'BAD_CODE'
@@ -41,6 +43,11 @@ export interface OrganisationProfile {
   phone?: string | null;
   website?: string | null;
   reapprovalThresholdPct: number;
+  /** The region the books are kept in. Optional so older callers still pass. */
+  country?: string;
+  currency?: string;
+  locale?: string;
+  timezone?: string;
 }
 
 /** Trimmed, with empty strings become null, so a cleared field clears. */
@@ -60,6 +67,23 @@ export function assertOrganisationSaveable(profile: OrganisationProfile): void {
   const email = tidy(profile.email);
   if (email && !EMAIL.test(email)) {
     throw new SettingsError('BAD_EMAIL', `"${email}" is not an email address.`);
+  }
+
+  if (profile.country !== undefined && !isCountry(profile.country)) {
+    throw new SettingsError('BAD_REGION', 'Choose the country the workshop trades in.');
+  }
+  if (profile.currency !== undefined && !isCurrency(profile.currency)) {
+    throw new SettingsError('BAD_REGION', 'That is not a currency the books can be kept in.');
+  }
+  if (profile.locale !== undefined && safeLocale(profile.locale, '') === '') {
+    throw new SettingsError('BAD_REGION', 'That is not a language and region the product knows.');
+  }
+  if (profile.timezone !== undefined) {
+    try {
+      new Intl.DateTimeFormat('en', { timeZone: profile.timezone });
+    } catch {
+      throw new SettingsError('BAD_REGION', 'That is not a timezone.');
+    }
   }
 
   if (

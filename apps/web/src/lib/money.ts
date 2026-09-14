@@ -36,6 +36,7 @@ import { awardForInvoice } from './retention';
 import { consumeForJob } from './inventory';
 import { pushNow } from './outbound';
 import { writeJobCompletion } from './passport';
+import { regionFor } from './region';
 
 /**
  * The money cycle, against the database.
@@ -278,6 +279,7 @@ export async function issueInvoice(input: {
   jobId: string;
   termsDays?: number;
 }): Promise<string> {
+  const region = await regionFor(input.orgId);
   const job = await prisma.job.findFirstOrThrow({
     where: { id: input.jobId, orgId: input.orgId },
     include: {
@@ -299,7 +301,7 @@ export async function issueInvoice(input: {
 
   assertTransition(job.status as JobStatus, 'INVOICED', { hasChargeableLines: lines.length > 0 });
 
-  const totals = calculateTotals(lines);
+  const totals = calculateTotals(lines, region.currency);
   const issuedAt = new Date();
   const dueAt = dueDateFor(issuedAt, input.termsDays);
 
@@ -422,7 +424,7 @@ export async function issueInvoice(input: {
         body: [
           `Hello ${job.customer.displayName.split(' ')[0]}.`,
           '',
-          `The work on the ${vehicle} (job ${job.number}) is finished. Invoice ${invoice.number} is for ${formatMoney(totals.total)}, due by ${dueAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`,
+          `The work on the ${vehicle} (job ${job.number}) is finished. Invoice ${invoice.number} is for ${formatMoney(totals.total, region.locale)}, due by ${dueAt.toLocaleDateString(region.locale, { day: 'numeric', month: 'long' })}.`,
           '',
           job.customer.portalUserId
             ? `The invoice is on your account: ${siteUrl()}/portal/invoices`
@@ -621,6 +623,7 @@ export async function raiseCreditNote(input: {
   amount: Money;
   reason: string;
 }): Promise<string> {
+  const region = await regionFor(input.orgId);
   const invoice = await prisma.invoice.findFirstOrThrow({
     where: { id: input.invoiceId, orgId: input.orgId },
     include: {
@@ -716,7 +719,7 @@ export async function raiseCreditNote(input: {
         body: [
           `Hello ${invoice.customer.displayName.split(' ')[0]}.`,
           '',
-          `We have credited ${formatMoney(input.amount)} against invoice ${invoice.number}. Reason: ${input.reason.trim()}`,
+          `We have credited ${formatMoney(input.amount, region.locale)} against invoice ${invoice.number}. Reason: ${input.reason.trim()}`,
           '',
           view.amountPaid.minor > 0
             ? 'If you had already paid, the difference is on its way back to you and we will confirm when it has been sent.'
@@ -761,6 +764,7 @@ export async function recordRefund(input: {
   method: PaymentMethod;
   reference?: string | null;
 }): Promise<string> {
+  const region = await regionFor(input.orgId);
   const [invoice, note] = await Promise.all([
     prisma.invoice.findFirstOrThrow({
       where: { id: input.invoiceId, orgId: input.orgId },
@@ -855,11 +859,11 @@ export async function recordRefund(input: {
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: invoice.customer.email,
-        subject: `Refund of ${formatMoney(input.amount)} from ${invoice.org.name}`,
+        subject: `Refund of ${formatMoney(input.amount, region.locale)} from ${invoice.org.name}`,
         body: [
           `Hello ${invoice.customer.displayName.split(' ')[0]}.`,
           '',
-          `${formatMoney(input.amount)} is on its way back to you by ${describeMethod(input.method)}, against credit note ${note.number} on invoice ${invoice.number}.`,
+          `${formatMoney(input.amount, region.locale)} is on its way back to you by ${describeMethod(input.method)}, against credit note ${note.number} on invoice ${invoice.number}.`,
           '',
           input.reference ? `Reference: ${input.reference}` : '',
           invoice.org.name,
@@ -961,8 +965,8 @@ export async function invoiceDetail(orgId: string, invoiceId: string) {
   };
 }
 
-function formatMoney(value: Money): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: value.currency }).format(
+function formatMoney(value: Money, locale = 'en-GB'): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: value.currency }).format(
     value.minor / 100,
   );
 }

@@ -37,14 +37,14 @@ export const dynamic = 'force-dynamic';
  * invoice matches the price on the order. Both are answerable from records the
  * product already holds, and neither is anywhere else in it.
  */
-function date(value: Date | null): string {
+function date(value: Date | null, locale: string): string {
   return value
-    ? value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    ? value.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
     : '—';
 }
 
 export default async function SupplierPage({ params }: { params: Promise<{ id: string }> }) {
-  const { orgId } = await requireSession('inventory:read');
+  const { orgId, region } = await requireSession('inventory:read');
   const { id } = await params;
 
   const supplier = await supplierDetail(orgId, id);
@@ -87,7 +87,13 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
         />
         <StatTile
           label="Owed"
-          value={<Money amount={supplier.outstanding} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={supplier.outstanding}
+            />
+          }
           note={`${supplier.openBills} bill${supplier.openBills === 1 ? '' : 's'} unpaid`}
         />
       </StatRow>
@@ -163,11 +169,15 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         {price.name}
                       </Link>
                       <span className="block text-[11px] text-(--text-faint)">
-                        last on {date(price.lastAt)}
+                        last on {date(price.lastAt, region.locale)}
                       </span>
                     </span>
                     <span className="text-right text-[13px] font-medium tabular-nums">
-                      <Money amount={price.lastPrice} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={price.lastPrice}
+                      />
                       {price.change !== null ? (
                         <span
                           className={
@@ -222,12 +232,12 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         {order.number}
                       </Link>
                     </Td>
-                    <Td className="text-(--text-soft)">{date(order.createdAt)}</Td>
-                    <Td className="text-(--text-soft)">{date(order.expectedAt)}</Td>
+                    <Td className="text-(--text-soft)">{date(order.createdAt, region.locale)}</Td>
+                    <Td className="text-(--text-soft)">{date(order.expectedAt, region.locale)}</Td>
                     <Td>
                       {order.receivedAt ? (
                         <span className={order.late ? 'text-(--warning)' : ''}>
-                          {date(order.receivedAt)}
+                          {date(order.receivedAt, region.locale)}
                         </span>
                       ) : (
                         <span className="text-(--text-faint)">not yet</span>
@@ -248,7 +258,11 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                       </Badge>
                     </Td>
                     <Td numeric>
-                      <Money amount={order.total} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={order.total}
+                      />
                     </Td>
                   </Tr>
                 ))}

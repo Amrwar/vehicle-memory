@@ -10,6 +10,7 @@ import { hashShareToken } from '@/lib/auth';
 import { reportFor } from '@/lib/handover';
 import { mileageFindings } from '@/lib/insights';
 import { verifyVehicleChain } from '@/lib/passport';
+import { safeLocale } from '@carnet/core';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export default async function PublicPassportPage({
         include: {
           events: {
             orderBy: { sequence: 'desc' },
-            include: { recordedByOrg: { select: { name: true } } },
+            include: { recordedByOrg: { select: { name: true, locale: true } } },
           },
           ownerships: { orderBy: { startedAt: 'desc' }, select: { id: true } },
           recalls: { where: { status: 'OPEN' }, include: { recall: true } },
@@ -82,6 +83,9 @@ export default async function PublicPassportPage({
   // own screen, from the same functions. Two implementations of "what this
   // record says" would eventually say different things to the two people in
   // the transaction, and the one who lost by it would be the buyer.
+  const locale = safeLocale(
+    vehicle.events.find((event) => event.recordedByOrg?.locale)?.recordedByOrg?.locale,
+  );
   const [verification, mileage, report] = await Promise.all([
     verifyVehicleChain(vehicle.id),
     mileageFindings(vehicle.id),
@@ -102,6 +106,7 @@ export default async function PublicPassportPage({
 
       <main id="main" className="mx-auto max-w-3xl px-4 py-6">
         <VehiclePassport
+          locale={locale}
           vehicle={vehicle}
           verification={verification}
           report={report}
@@ -113,7 +118,7 @@ export default async function PublicPassportPage({
           <p>
             Shared by the vehicle&rsquo;s owner. This link expires on{' '}
             <time className="datum">
-              {share.expiresAt.toLocaleDateString('en-GB', {
+              {share.expiresAt.toLocaleDateString(locale, {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',

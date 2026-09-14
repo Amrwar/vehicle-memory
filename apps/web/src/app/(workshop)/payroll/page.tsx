@@ -138,7 +138,7 @@ export default async function PayrollPage({
 }: {
   searchParams: Promise<{ problem?: string; done?: string; run?: string }>;
 }) {
-  const { orgId, user } = await requireSession('payroll:read');
+  const { orgId, user, region } = await requireSession('payroll:read');
   const notice = await searchParams;
 
   const [toApprove, toRun, runs, employees] = await Promise.all([
@@ -244,15 +244,19 @@ export default async function PayrollPage({
                     <span className="font-medium">{sheet.employee.displayName}</span>
                     <span className="datum text-(--text-faint)">{sheet.employee.reference}</span>
                     <span className="text-(--text-faint)">
-                      {sheet.periodStart.toLocaleDateString('en-GB')} to{' '}
-                      {sheet.periodEnd.toLocaleDateString('en-GB')}
+                      {sheet.periodStart.toLocaleDateString(region.locale)} to{' '}
+                      {sheet.periodEnd.toLocaleDateString(region.locale)}
                     </span>
                     <span className="tabular-nums">
                       {(sheet.ordinaryMinutes / 60).toFixed(1)}h +{' '}
                       {(sheet.overtimeMinutes / 60).toFixed(1)}h OT
                     </span>
                     <span className="ml-auto font-medium tabular-nums">
-                      <Money amount={Number(sheet.gross)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(sheet.gross)}
+                      />
                     </span>
                     {mayWrite ? (
                       <form action={approve}>
@@ -284,14 +288,18 @@ export default async function PayrollPage({
                   <li key={period.periodStart.toISOString()} className="px-4 py-3">
                     <div className="flex flex-wrap items-center gap-3 text-[13px]">
                       <span className="font-medium">
-                        {period.periodStart.toLocaleDateString('en-GB')} to{' '}
-                        {period.periodEnd.toLocaleDateString('en-GB')}
+                        {period.periodStart.toLocaleDateString(region.locale)} to{' '}
+                        {period.periodEnd.toLocaleDateString(region.locale)}
                       </span>
                       <span className="text-(--text-faint)">
                         {period.sheets.length} {period.sheets.length === 1 ? 'person' : 'people'}
                       </span>
                       <span className="ml-auto font-medium tabular-nums">
-                        <Money amount={period.gross.minor / 100} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={period.gross.minor / 100}
+                        />
                       </span>
                       {mayWrite ? (
                         <form action={run}>
@@ -338,8 +346,8 @@ export default async function PayrollPage({
                     className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-[13px]"
                   >
                     <span className="font-medium">
-                      {entry.periodStart.toLocaleDateString('en-GB')} to{' '}
-                      {entry.periodEnd.toLocaleDateString('en-GB')}
+                      {entry.periodStart.toLocaleDateString(region.locale)} to{' '}
+                      {entry.periodEnd.toLocaleDateString(region.locale)}
                     </span>
                     <Badge
                       tone={

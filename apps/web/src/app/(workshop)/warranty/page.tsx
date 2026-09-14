@@ -37,12 +37,16 @@ export const dynamic = 'force-dynamic';
  * them nobody else will cover, which is the only number that comes out of the
  * workshop's own pocket.
  */
-function date(value: Date): string {
-  return value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function date(value: Date, locale: string): string {
+  return value.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export default async function WarrantyPage() {
-  const { orgId } = await requireSession('job:read');
+  const { orgId, region } = await requireSession('job:read');
 
   const book = await warrantyBook(orgId);
 
@@ -74,7 +78,7 @@ export default async function WarrantyPage() {
         />
         <StatTile
           label="Carrying"
-          value={<Money amount={book.exposure} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={book.exposure} />}
           tone={book.exposure > 0 ? 'danger' : 'neutral'}
           note="What nobody else will cover"
         />
@@ -134,10 +138,18 @@ export default async function WarrantyPage() {
                         ) : null}
                       </Td>
                       <Td numeric className="text-(--success)">
-                        <Money amount={Number(claim.recoverable)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(claim.recoverable)}
+                        />
                       </Td>
                       <Td numeric className="font-medium">
-                        <Money amount={Number(claim.exposure)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(claim.exposure)}
+                        />
                       </Td>
                     </Tr>
                   );
@@ -192,7 +204,9 @@ export default async function WarrantyPage() {
                         </span>
                       ) : null}
                     </Td>
-                    <Td className="text-(--text-soft)">{date(entry.row.startedOn)}</Td>
+                    <Td className="text-(--text-soft)">
+                      {date(entry.row.startedOn, region.locale)}
+                    </Td>
                     <Td>
                       <Badge
                         tone={

@@ -8,6 +8,7 @@ import {
   trialBalance,
   upTo,
   withinPeriod,
+  type Region,
 } from '@carnet/core';
 import {
   Badge,
@@ -53,7 +54,7 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: 'year', label: 'Year to date' },
 ];
 
-function rangeFor(key: RangeKey): { from: Date; to: Date; label: string } {
+function rangeFor(key: RangeKey, locale: string): { from: Date; to: Date; label: string } {
   const now = new Date();
   const to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
@@ -61,7 +62,7 @@ function rangeFor(key: RangeKey): { from: Date; to: Date; label: string } {
     return {
       from: new Date(now.getFullYear(), now.getMonth(), 1),
       to,
-      label: now.toLocaleString('en-GB', { month: 'long', year: 'numeric' }),
+      label: now.toLocaleString(locale, { month: 'long', year: 'numeric' }),
     };
   }
 
@@ -86,7 +87,7 @@ export default async function FinancialsPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const { orgId, plan } = await requireSession('report:financial');
+  const { orgId, plan, region } = await requireSession('report:financial');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'statements')) {
@@ -94,7 +95,7 @@ export default async function FinancialsPage({
   }
   const { range } = await searchParams;
   const key: RangeKey = range === 'month' || range === 'quarter' ? range : 'year';
-  const period = rangeFor(key);
+  const period = rangeFor(key, region.locale);
 
   const [lines, receivables, payables] = await Promise.all([
     postedLines(orgId),
@@ -145,28 +146,52 @@ export default async function FinancialsPage({
       <StatRow className="mb-5">
         <StatTile
           label="Revenue"
-          value={<Money amount={toNumber(pl.totalRevenue)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(pl.totalRevenue)}
+            />
+          }
           note={period.label}
         />
         <StatTile
           label="Gross profit"
-          value={<Money amount={toNumber(pl.grossProfit)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(pl.grossProfit)}
+            />
+          }
           tone="brand"
           note={pl.grossMarginPct === null ? 'No revenue yet' : `${pl.grossMarginPct}% margin`}
         />
         <StatTile
           label="Net profit"
-          value={<Money amount={toNumber(pl.netProfit)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(pl.netProfit)}
+            />
+          }
           tone={profitable ? 'success' : 'danger'}
           note={pl.netMarginPct === null ? 'No revenue yet' : `${pl.netMarginPct}% margin`}
         />
         <StatTile
           label="Owed to you"
-          value={<Money amount={toNumber(debtors.total)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(debtors.total)}
+            />
+          }
           tone={debtors.atRisk.minor > 0 ? 'warning' : 'neutral'}
           note={
             debtors.atRisk.minor > 0
-              ? `${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(toNumber(debtors.atRisk))} past 60 days`
+              ? `${new Intl.NumberFormat(region.locale, { style: 'currency', currency: region.currency }).format(toNumber(debtors.atRisk))} past 60 days`
               : 'Nothing seriously overdue'
           }
         />
@@ -190,22 +215,35 @@ export default async function FinancialsPage({
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow label="Total revenue" amount={toNumber(pl.totalRevenue)} />
+                  <TotalRow
+                    region={region}
+                    label="Total revenue"
+                    amount={toNumber(pl.totalRevenue)}
+                  />
 
                   <SectionRow label="Cost of sales" />
                   {pl.costOfSales.map((line) => (
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
                   <TotalRow
+                    region={region}
                     label="Gross profit"
                     amount={toNumber(pl.grossProfit)}
                     note={pl.grossMarginPct === null ? undefined : `${pl.grossMarginPct}%`}
@@ -217,11 +255,16 @@ export default async function FinancialsPage({
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
                   <TotalRow
+                    region={region}
                     label="Net profit"
                     amount={toNumber(pl.netProfit)}
                     note={pl.netMarginPct === null ? undefined : `${pl.netMarginPct}%`}
@@ -238,7 +281,7 @@ export default async function FinancialsPage({
         <Card className="overflow-hidden">
           <CardHeader
             title="Balance sheet"
-            description={`Position as at ${period.to.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+            description={`Position as at ${period.to.toLocaleDateString(region.locale, { day: 'numeric', month: 'long', year: 'numeric' })}`}
             action={
               <Badge tone={sheet.balanced ? 'success' : 'danger'} size="sm">
                 {sheet.balanced ? 'Balanced' : 'Out by ' + toNumber(sheet.difference).toFixed(2)}
@@ -256,29 +299,50 @@ export default async function FinancialsPage({
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow label="Total assets" amount={toNumber(sheet.totalAssets)} emphasis />
+                  <TotalRow
+                    region={region}
+                    label="Total assets"
+                    amount={toNumber(sheet.totalAssets)}
+                    emphasis
+                  />
 
                   <SectionRow label="Liabilities" />
                   {sheet.liabilities.map((line) => (
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
-                  <TotalRow label="Total liabilities" amount={toNumber(sheet.totalLiabilities)} />
+                  <TotalRow
+                    region={region}
+                    label="Total liabilities"
+                    amount={toNumber(sheet.totalLiabilities)}
+                  />
 
                   <SectionRow label="Equity" />
                   {sheet.equity.map((line) => (
                     <Tr key={line.accountCode}>
                       <Td className="pl-6 text-(--text-soft)">{line.accountName}</Td>
                       <Td numeric>
-                        <Money amount={toNumber(line.amount)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(line.amount)}
+                        />
                       </Td>
                     </Tr>
                   ))}
@@ -288,10 +352,15 @@ export default async function FinancialsPage({
                       <span className="ml-1.5 text-[11px] text-(--text-faint)">not yet closed</span>
                     </Td>
                     <Td numeric>
-                      <Money amount={toNumber(sheet.retainedThisPeriod)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(sheet.retainedThisPeriod)}
+                      />
                     </Td>
                   </Tr>
                   <TotalRow
+                    region={region}
                     label="Liabilities and equity"
                     amount={toNumber(sheet.totalLiabilities) + toNumber(sheet.totalEquity)}
                     emphasis
@@ -308,12 +377,22 @@ export default async function FinancialsPage({
             title="Owed to you"
             description="Aged debtors. The right-hand columns are the ones worth a phone call."
           />
-          <Ageing analysis={debtors} emptyLabel="Every invoice is settled." tone="danger" />
+          <Ageing
+            region={region}
+            analysis={debtors}
+            emptyLabel="Every invoice is settled."
+            tone="danger"
+          />
         </Card>
 
         <Card className="overflow-hidden">
           <CardHeader title="Owed by you" description="Aged creditors, by supplier" />
-          <Ageing analysis={creditors} emptyLabel="No supplier bills outstanding." tone="warning" />
+          <Ageing
+            region={region}
+            analysis={creditors}
+            emptyLabel="No supplier bills outstanding."
+            tone="warning"
+          />
         </Card>
       </div>
 
@@ -324,15 +403,27 @@ export default async function FinancialsPage({
           <CardBody className="grid gap-2 text-[13px]">
             <div className="flex justify-between">
               <span className="text-(--text-faint)">Output tax charged to customers</span>
-              <Money amount={toNumber(vat.outputTax)} />
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={toNumber(vat.outputTax)}
+              />
             </div>
             <div className="flex justify-between">
               <span className="text-(--text-faint)">Input tax paid to suppliers</span>
-              <Money amount={toNumber(vat.inputTax)} />
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={toNumber(vat.inputTax)}
+              />
             </div>
             <div className="flex justify-between border-t border-(--border) pt-2 font-medium">
               <span>{vat.owed ? 'Owed to HMRC' : 'Reclaimable from HMRC'}</span>
-              <Money amount={Math.abs(toNumber(vat.net))} />
+              <Money
+                currency={region.currency}
+                locale={region.locale}
+                amount={Math.abs(toNumber(vat.net))}
+              />
             </div>
             <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
               Computed from the tax accounts, not from invoice totals, so a credit note or a
@@ -387,12 +478,14 @@ function SectionRow({ label }: { label: string }) {
 }
 
 function TotalRow({
+  region,
   label,
   amount,
   note,
   emphasis,
   tone,
 }: {
+  region: Region;
   label: string;
   amount: number;
   note?: string;
@@ -407,6 +500,8 @@ function TotalRow({
       </td>
       <td className="px-4 py-2 text-right">
         <Money
+          currency={region.currency}
+          locale={region.locale}
           amount={amount}
           className={
             emphasis
@@ -420,10 +515,12 @@ function TotalRow({
 }
 
 function Ageing({
+  region,
   analysis,
   emptyLabel,
   tone,
 }: {
+  region: Region;
   analysis: ReturnType<typeof ageAnalysis>;
   emptyLabel: string;
   tone: 'danger' | 'warning';
@@ -450,7 +547,11 @@ function Ageing({
                   hot && amount > 0 ? `text-(--${tone})` : ''
                 }`}
               >
-                {amount === 0 ? '—' : <Money amount={amount} />}
+                {amount === 0 ? (
+                  '—'
+                ) : (
+                  <Money currency={region.currency} locale={region.locale} amount={amount} />
+                )}
               </p>
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-(--surface-sunk)">
                 <div
@@ -488,7 +589,11 @@ function Ageing({
                   )}
                 </Td>
                 <Td numeric className="font-medium">
-                  <Money amount={toNumber(document.outstanding)} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={toNumber(document.outstanding)}
+                  />
                 </Td>
               </Tr>
             ))}

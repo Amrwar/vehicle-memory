@@ -28,7 +28,7 @@ export default async function JobsPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
-  const { db } = await requireSession('job:read');
+  const { db, region } = await requireSession('job:read');
   const params = await searchParams;
 
   const page = Math.max(1, Number(params.page ?? 1) || 1);
@@ -84,7 +84,7 @@ export default async function JobsPage({
       <PageHeader
         eyebrow="Workshop"
         title="Jobs"
-        description={`${total.toLocaleString('en-GB')} job${total === 1 ? '' : 's'}`}
+        description={`${total.toLocaleString(region.locale)} job${total === 1 ? '' : 's'}`}
         actions={
           <Link href="/jobs/new">
             <Button variant="primary">New job</Button>

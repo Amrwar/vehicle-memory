@@ -214,6 +214,14 @@ petrol. The name beside it is "Carnet", alone: a carnet is a booklet of
 papers a vehicle carries, so the name already says passport, and the tagline
 says it in plain words where a tagline belongs.
 
+## 12.5 Money and dates follow the workshop (Phase 29)
+
+Nothing in the interface writes a currency symbol or a date format itself.
+The `Money` and `Mileage` components take a currency and a locale, the pages
+pass the session's region, and the three shared components that render for
+a customer or a buyer take a locale from whoever is reading. A page that
+forgets is not wrong in Britain, which is why the rule is written here.
+
 ## 13. Lists that lead with the fault
 
 The passports list (Phase 27) leads with how many chains are sound rather

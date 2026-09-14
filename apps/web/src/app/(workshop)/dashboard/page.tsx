@@ -40,7 +40,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ verification?: string }>;
 }) {
   const notice = await searchParams;
-  const { db, user, orgId } = await requireSession('job:read');
+  const { db, user, orgId, region } = await requireSession('job:read');
 
   // Arithmetic with a sentence around it: this month against last, from the
   // same figures the reports page shows. No model, and never a percentage on
@@ -135,7 +135,7 @@ export default async function DashboardPage({
       <VerifyBanner sent={notice.verification === 'sent'} />
 
       <PageHeader
-        eyebrow={new Date().toLocaleDateString('en-GB', {
+        eyebrow={new Date().toLocaleDateString(region.locale, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
@@ -172,7 +172,9 @@ export default async function DashboardPage({
         <Link href="/payments" className="group">
           <StatTile
             label="Taken today"
-            value={<Money amount={revenueToday} />}
+            value={
+              <Money currency={region.currency} locale={region.locale} amount={revenueToday} />
+            }
             tone={revenueToday > 0 ? 'success' : 'neutral'}
             note="Payments received"
           />
@@ -251,7 +253,7 @@ export default async function DashboardPage({
                     <span className="text-(--text-faint)">{entry.entityType.toLowerCase()}</span>
                   </span>
                   <span className="text-[11px] tabular-nums text-(--text-faint)">
-                    {entry.createdAt.toLocaleTimeString('en-GB', {
+                    {entry.createdAt.toLocaleTimeString(region.locale, {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
@@ -359,7 +361,7 @@ export default async function DashboardPage({
                 {todaysBookings.map((booking) => (
                   <Tr key={booking.id}>
                     <Td className="datum whitespace-nowrap">
-                      {booking.startAt.toLocaleTimeString('en-GB', {
+                      {booking.startAt.toLocaleTimeString(region.locale, {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}

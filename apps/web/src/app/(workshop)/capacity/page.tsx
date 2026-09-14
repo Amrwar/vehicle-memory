@@ -38,7 +38,7 @@ function hours(minutes: number): string {
 }
 
 export default async function CapacityPage() {
-  const { orgId, user } = await requireSession('diary:read');
+  const { orgId, user, region } = await requireSession('diary:read');
 
   const days = await capacityAhead(orgId, user.locationId, new Date(), 7);
 
@@ -105,7 +105,10 @@ export default async function CapacityPage() {
                       {DAY_NAMES[day.weekday]}
                     </span>
                     <span className="ml-2 text-[12px] text-(--text-faint)">
-                      {day.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      {day.date.toLocaleDateString(region.locale, {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
                     </span>
                   </div>
 

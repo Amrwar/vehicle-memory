@@ -56,7 +56,10 @@ export function EstimateReview({
   action,
   hiddenFields,
   error,
+  locale = 'en-GB',
 }: {
+  /** How dates are written, from the workshop's region. */
+  locale?: string;
   estimate: ReviewEstimate;
   preview: DecisionPreview;
   action: (formData: FormData) => void | Promise<void>;
@@ -173,7 +176,7 @@ export function EstimateReview({
             <p className="mt-1 text-[12px] text-(--text-faint)">
               You will only be charged for what you tick.
               {estimate.validUntil
-                ? ` This price holds until ${estimate.validUntil.toLocaleDateString('en-GB', {
+                ? ` This price holds until ${estimate.validUntil.toLocaleDateString(locale, {
                     day: 'numeric',
                     month: 'long',
                   })}.`

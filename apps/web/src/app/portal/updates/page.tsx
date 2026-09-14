@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { updatesFor } from '@/lib/portal';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'Updates' };
 export const dynamic = 'force-dynamic';
@@ -34,21 +35,22 @@ export const dynamic = 'force-dynamic';
  * Anything needing an answer comes first and says what to do about it. A
  * timeline that reports without asking is a timeline nobody opens twice.
  */
-function when(value: Date): string {
+function when(value: Date, locale: string): string {
   const days = Math.floor((Date.now() - value.getTime()) / 86_400_000);
 
   if (days === 0) {
-    return `today at ${value.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+    return `today at ${value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`;
   }
 
   if (days === 1) return 'yesterday';
   if (days < 7) return `${days} days ago`;
 
-  return value.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+  return value.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
 }
 
 export default async function PortalUpdatesPage() {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
   const jobs = await updatesFor(user.userId);
 
   const waiting = jobs.filter((job) => job.estimates.length > 0);
@@ -139,7 +141,7 @@ export default async function PortalUpdatesPage() {
                   <p className="text-[14px] text-(--text-soft)">
                     {progress.detail}
                     {job.promisedAt
-                      ? ` Promised for ${job.promisedAt.toLocaleDateString('en-GB', {
+                      ? ` Promised for ${job.promisedAt.toLocaleDateString(region.locale, {
                           weekday: 'long',
                           day: 'numeric',
                           month: 'long',
@@ -156,7 +158,9 @@ export default async function PortalUpdatesPage() {
                       {job.statusEvents.map((event) => (
                         <li key={event.id} className="flex flex-wrap justify-between gap-2">
                           <span>{customerProgressFor(event.toStatus).label}</span>
-                          <span className="text-(--text-faint)">{when(event.createdAt)}</span>
+                          <span className="text-(--text-faint)">
+                            {when(event.createdAt, region.locale)}
+                          </span>
                         </li>
                       ))}
                     </ol>
@@ -192,7 +196,7 @@ export default async function PortalUpdatesPage() {
                     <span className="text-[13px] text-(--text-soft)">{progress.label}</span>
                   </div>
                   <p className="mt-0.5 text-[13px] text-(--text-soft)">
-                    {job.org.name} · {when(job.updatedAt)}
+                    {job.org.name} · {when(job.updatedAt, region.locale)}
                     {invoice ? (
                       <>
                         {' · '}

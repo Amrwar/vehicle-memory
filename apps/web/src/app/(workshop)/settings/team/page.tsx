@@ -126,7 +126,7 @@ export default async function TeamPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const { orgId, user } = await requireSession('settings:read');
+  const { orgId, user, region } = await requireSession('settings:read');
   const params = await searchParams;
 
   const { members, invitations, locations } = await teamFor(orgId);
@@ -236,7 +236,7 @@ export default async function TeamPage({
                         </Td>
                         <Td className="text-(--text-faint)">
                           {member.user.lastLoginAt
-                            ? member.user.lastLoginAt.toLocaleDateString('en-GB', {
+                            ? member.user.lastLoginAt.toLocaleDateString(region.locale, {
                                 day: 'numeric',
                                 month: 'short',
                               })

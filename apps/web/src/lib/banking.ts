@@ -20,6 +20,7 @@ import { prisma } from '@carnet/db';
 
 import { postedLines, postEntry } from './accounting';
 import { audit } from './guard';
+import { regionFor } from './region';
 
 /**
  * Expenses and the bank, against the database.
@@ -79,6 +80,7 @@ export async function recordExpense(input: {
   receiptUrl?: string | null;
   claimedByEmployeeId?: string | null;
 }): Promise<{ ok: boolean; error?: string; expenseId?: string }> {
+  const region = await regionFor(input.orgId);
   const count = await prisma.expense.count({ where: { orgId: input.orgId } });
   const reference = `EXP-${String(count + 1).padStart(4, '0')}`;
 
@@ -89,8 +91,8 @@ export async function recordExpense(input: {
     status: 'DRAFT',
     supplier: input.supplier.trim(),
     description: input.description.trim(),
-    net: { minor: Math.round(input.net * 100), currency: 'GBP' },
-    tax: { minor: Math.round(input.tax * 100), currency: 'GBP' },
+    net: { minor: Math.round(input.net * 100), currency: region.currency },
+    tax: { minor: Math.round(input.tax * 100), currency: region.currency },
     incurredAt: input.incurredAt,
     paidFrom: input.paidFrom,
     hasReceipt: Boolean(input.receiptUrl),
@@ -219,6 +221,7 @@ export async function expensesFor(orgId: string, range?: { from: Date; to: Date 
  * one-click acceptance.
  */
 export async function reconciliation(orgId: string, bankAccountId: string) {
+  const region = await regionFor(orgId);
   const account = await prisma.bankAccount.findFirst({
     where: { id: bankAccountId, orgId },
     include: {
@@ -278,7 +281,7 @@ export async function reconciliation(orgId: string, bankAccountId: string) {
       // same sign convention a statement uses.
       amount: {
         minor: Math.round((Number(line.debit) - Number(line.credit)) * 100),
-        currency: 'GBP',
+        currency: region.currency,
       },
       reference: line.entry.reference,
       sourceType: line.entry.sourceType ?? 'Journal',
@@ -297,8 +300,8 @@ export async function reconciliation(orgId: string, bankAccountId: string) {
     state: reconciliationState({
       statementBalance: statement
         ? decimal(statement.closingBalance)
-        : { minor: 0, currency: 'GBP' },
-      ledgerBalance: { minor: ledgerBalance, currency: 'GBP' },
+        : { minor: 0, currency: region.currency },
+      ledgerBalance: { minor: ledgerBalance, currency: region.currency },
       statement: lines,
       candidates,
       matches,

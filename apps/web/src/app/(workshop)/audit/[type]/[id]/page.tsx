@@ -23,8 +23,8 @@ export const dynamic = 'force-dynamic';
  * Oldest first, unlike the customer thread. A thread is caught up with; a
  * life is read from the beginning, because the question is how it got here.
  */
-function when(value: Date): string {
-  return value.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+function when(value: Date, locale: string): string {
+  return value.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 export default async function LifePage({
@@ -32,7 +32,7 @@ export default async function LifePage({
 }: {
   params: Promise<{ type: string; id: string }>;
 }) {
-  const { orgId } = await requireSession('audit:read');
+  const { orgId, region } = await requireSession('audit:read');
   const { type, id } = await params;
 
   const life = await lifeFor(orgId, type, id);
@@ -71,13 +71,13 @@ export default async function LifePage({
             <span className="block text-[11px] tracking-wide text-(--text-faint) uppercase">
               First recorded
             </span>
-            {life.createdAt ? when(life.createdAt) : 'Never'}
+            {life.createdAt ? when(life.createdAt, region.locale) : 'Never'}
           </div>
           <div>
             <span className="block text-[11px] tracking-wide text-(--text-faint) uppercase">
               Last touched
             </span>
-            {life.lastTouchedAt ? when(life.lastTouchedAt) : 'Never'}
+            {life.lastTouchedAt ? when(life.lastTouchedAt, region.locale) : 'Never'}
           </div>
           <div>
             <span className="block text-[11px] tracking-wide text-(--text-faint) uppercase">
@@ -115,7 +115,7 @@ export default async function LifePage({
                       </Badge>
                     ) : null}
                     <span className="ml-auto datum text-[12px] text-(--text-faint)">
-                      {when(event.at)}
+                      {when(event.at, region.locale)}
                     </span>
                   </div>
 
@@ -168,7 +168,7 @@ export default async function LifePage({
                   <p className="text-[12px] text-(--text-soft)">
                     {event.recordedByOrg?.name ?? 'Unknown workshop'}
                     {event.recordedByUser?.name ? ` · ${event.recordedByUser.name}` : ''} ·{' '}
-                    {event.occurredAt.toLocaleDateString('en-GB')}
+                    {event.occurredAt.toLocaleDateString(region.locale)}
                   </p>
                   <p className="datum text-[11px] break-all text-(--text-faint)">
                     {event.fingerprint}…

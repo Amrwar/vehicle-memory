@@ -75,7 +75,7 @@ export default async function VehiclePage({
 }) {
   const { id } = await params;
   const notice = await searchParams;
-  const { db, orgId, user } = await requireSession('vehicle:read');
+  const { db, orgId, user, region } = await requireSession('vehicle:read');
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
@@ -234,7 +234,7 @@ export default async function VehiclePage({
                   { label: 'Colour', value: vehicle.colour },
                   {
                     label: 'Odometer',
-                    value: <Mileage km={vehicle.lastOdometerKm} />,
+                    value: <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />,
                   },
                   {
                     label: 'Average use',
@@ -353,7 +353,7 @@ export default async function VehiclePage({
                   <div className="flex justify-between">
                     <span className="text-(--text-faint)">Projected</span>
                     <span className="datum">
-                      {due.projectedDueAt.toLocaleDateString('en-GB', {
+                      {due.projectedDueAt.toLocaleDateString(region.locale, {
                         month: 'short',
                         year: 'numeric',
                       })}
@@ -455,7 +455,7 @@ export default async function VehiclePage({
                       </Badge>
                     ) : null}
                     <span className="text-[12px] text-(--text-faint)">
-                      {document.addedBy} · {document.createdAt.toLocaleDateString('en-GB')}
+                      {document.addedBy} · {document.createdAt.toLocaleDateString(region.locale)}
                     </span>
                     {document.mayRemove && mayAddDocuments ? (
                       <DocumentRemove vehicleId={vehicle.id} documentId={document.id} />
@@ -496,7 +496,7 @@ export default async function VehiclePage({
                       {job.shortDescription}
                     </p>
                     <p className="datum text-[11px] text-(--text-faint)">
-                      {job.createdAt.toLocaleDateString('en-GB')}
+                      {job.createdAt.toLocaleDateString(region.locale)}
                     </p>
                   </li>
                 ))}
@@ -517,7 +517,7 @@ export default async function VehiclePage({
                   <p className="mt-2 text-[12px] text-(--text-soft)">
                     Next likely: {condition.soon[0]!.label}
                     {condition.soon[0]!.kmAway != null
-                      ? ` in about ${Math.abs(condition.soon[0]!.kmAway).toLocaleString('en-GB')} km`
+                      ? ` in about ${Math.abs(condition.soon[0]!.kmAway).toLocaleString(region.locale)} km`
                       : ''}
                     .
                   </p>
@@ -574,8 +574,10 @@ export default async function VehiclePage({
                 <li key={ownership.id} className="px-4 py-2.5 text-[13px]">
                   <p className="font-medium">{ownership.ownerName ?? 'Unnamed owner'}</p>
                   <p className="datum text-[11px] text-(--text-faint)">
-                    {ownership.startedAt.toLocaleDateString('en-GB')} —{' '}
-                    {ownership.endedAt ? ownership.endedAt.toLocaleDateString('en-GB') : 'present'}
+                    {ownership.startedAt.toLocaleDateString(region.locale)} —{' '}
+                    {ownership.endedAt
+                      ? ownership.endedAt.toLocaleDateString(region.locale)
+                      : 'present'}
                   </p>
                 </li>
               ))}

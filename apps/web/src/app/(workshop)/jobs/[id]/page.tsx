@@ -248,7 +248,7 @@ export default async function JobPage({
 }) {
   const { id } = await params;
   const notice = await searchParams;
-  const { db, user, orgId } = await requireSession('job:read');
+  const { db, user, orgId, region } = await requireSession('job:read');
 
   const job = await db.job.findUnique({
     where: { id },
@@ -332,7 +332,7 @@ export default async function JobPage({
     })),
   ];
 
-  const totals = calculateTotals(lines);
+  const totals = calculateTotals(lines, region.currency);
   // The most recent one that actually has something in it. Taking the newest
   // regardless meant an inspection somebody opened and abandoned hid the
   // completed one underneath it, so the job page showed nothing was found on a
@@ -549,7 +549,7 @@ export default async function JobPage({
                 <Link href={`/jobs/${entry.jobId}`} className="underline">
                   #{entry.jobNumber}
                 </Link>{' '}
-                on {entry.startedOn.toLocaleDateString('en-GB')}.
+                on {entry.startedOn.toLocaleDateString(region.locale)}.
                 {entry.supplierName
                   ? ` ${entry.supplierName} still covers the part, so check before charging for it.`
                   : ' No supplier behind it, so any replacement falls on the workshop.'}
@@ -563,7 +563,7 @@ export default async function JobPage({
         <Alert tone="warning" title="Waiting on the customer" className="mb-5">
           Work cannot proceed until the estimate is approved. Sent
           {estimate?.sentAt
-            ? ` ${estimate.sentAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`
+            ? ` ${estimate.sentAt.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' })}`
             : ' but not yet delivered'}
           .
         </Alert>
@@ -599,7 +599,7 @@ export default async function JobPage({
                   { label: 'VIN', value: <Vin value={job.vehicle.vin} /> },
                   {
                     label: 'Odometer in',
-                    value: <Mileage km={job.odometerInKm} />,
+                    value: <Mileage locale={region.locale} km={job.odometerInKm} />,
                   },
                   {
                     label: 'Technician',
@@ -609,7 +609,7 @@ export default async function JobPage({
                   {
                     label: 'Promised',
                     value: job.promisedAt
-                      ? job.promisedAt.toLocaleString('en-GB', {
+                      ? job.promisedAt.toLocaleString(region.locale, {
                           dateStyle: 'medium',
                           timeStyle: 'short',
                         })
@@ -692,7 +692,11 @@ export default async function JobPage({
                           </Td>
                           <Td numeric>
                             {result.estimatedCost ? (
-                              <Money amount={Number(result.estimatedCost)} />
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={Number(result.estimatedCost)}
+                              />
                             ) : (
                               '—'
                             )}
@@ -736,16 +740,32 @@ export default async function JobPage({
                       </Td>
                       <Td numeric>{Number(line.hours).toFixed(2)} h</Td>
                       <Td numeric>
-                        <Money amount={Number(line.rate)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(line.rate)}
+                        />
                       </Td>
                       <Td numeric>
-                        <Money amount={toNumber(totals.lines[index]!.net)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.lines[index]!.net)}
+                        />
                       </Td>
                       <Td numeric>
-                        <Money amount={toNumber(totals.lines[index]!.tax)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.lines[index]!.tax)}
+                        />
                       </Td>
                       <Td numeric className="font-medium">
-                        <Money amount={toNumber(totals.lines[index]!.total)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.lines[index]!.total)}
+                        />
                       </Td>
                     </Tr>
                   ))}
@@ -764,16 +784,32 @@ export default async function JobPage({
                         </Td>
                         <Td numeric>{Number(line.quantity)}</Td>
                         <Td numeric>
-                          <Money amount={Number(line.unitPrice)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={Number(line.unitPrice)}
+                          />
                         </Td>
                         <Td numeric>
-                          <Money amount={toNumber(computed.net)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.net)}
+                          />
                         </Td>
                         <Td numeric>
-                          <Money amount={toNumber(computed.tax)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.tax)}
+                          />
                         </Td>
                         <Td numeric className="font-medium">
-                          <Money amount={toNumber(computed.total)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.total)}
+                          />
                         </Td>
                       </Tr>
                     );
@@ -789,16 +825,32 @@ export default async function JobPage({
                         </Td>
                         <Td numeric>1</Td>
                         <Td numeric>
-                          <Money amount={Number(line.amount)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={Number(line.amount)}
+                          />
                         </Td>
                         <Td numeric>
-                          <Money amount={toNumber(computed.net)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.net)}
+                          />
                         </Td>
                         <Td numeric>
-                          <Money amount={toNumber(computed.tax)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.tax)}
+                          />
                         </Td>
                         <Td numeric className="font-medium">
-                          <Money amount={toNumber(computed.total)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(computed.total)}
+                          />
                         </Td>
                       </Tr>
                     );
@@ -810,13 +862,25 @@ export default async function JobPage({
                       Total
                     </Td>
                     <Td numeric className="font-medium">
-                      <Money amount={toNumber(totals.subtotal)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(totals.subtotal)}
+                      />
                     </Td>
                     <Td numeric className="font-medium">
-                      <Money amount={toNumber(totals.taxTotal)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(totals.taxTotal)}
+                      />
                     </Td>
                     <Td numeric className="font-display text-[15px] font-semibold">
-                      <Money amount={toNumber(totals.total)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(totals.total)}
+                      />
                     </Td>
                   </tr>
                 </tfoot>
@@ -936,7 +1000,7 @@ export default async function JobPage({
                       </Link>
                       <span>{exchange.user?.name ?? 'Somebody'}</span>
                       <span className="datum">
-                        {exchange.createdAt.toLocaleString('en-GB', {
+                        {exchange.createdAt.toLocaleString(region.locale, {
                           dateStyle: 'medium',
                           timeStyle: 'short',
                         })}
@@ -993,7 +1057,7 @@ export default async function JobPage({
                         {note.author?.name ?? 'System'}
                       </span>
                       <time className="datum text-[11px] text-(--text-faint)">
-                        {note.createdAt.toLocaleString('en-GB', {
+                        {note.createdAt.toLocaleString(region.locale, {
                           dateStyle: 'medium',
                           timeStyle: 'short',
                         })}
@@ -1069,7 +1133,7 @@ export default async function JobPage({
                         : ''}
                     </p>
                     <p className="datum mt-0.5 text-[11px]">
-                      {estimate.approvals[0].createdAt.toLocaleString('en-GB', {
+                      {estimate.approvals[0].createdAt.toLocaleString(region.locale, {
                         dateStyle: 'medium',
                         timeStyle: 'short',
                       })}
@@ -1141,13 +1205,21 @@ export default async function JobPage({
               <CardBody className="grid gap-2 text-[13px]">
                 <div className="flex justify-between">
                   <span className="text-(--text-faint)">Revenue, net of tax</span>
-                  <Money amount={toNumber(profit.revenue)} />
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={toNumber(profit.revenue)}
+                  />
                 </div>
                 <div className="flex justify-between">
                   <span className="text-(--text-faint)">Parts at cost</span>
                   <span className="tabular text-(--text-soft)">
                     &minus;
-                    <Money amount={toNumber(profit.partsCost)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(profit.partsCost)}
+                    />
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -1159,7 +1231,11 @@ export default async function JobPage({
                   </span>
                   <span className="tabular text-(--text-soft)">
                     &minus;
-                    <Money amount={toNumber(profit.labourCost)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(profit.labourCost)}
+                    />
                   </span>
                 </div>
 
@@ -1167,6 +1243,8 @@ export default async function JobPage({
                   <span className="font-medium">Gross profit</span>
                   <span className="text-right">
                     <Money
+                      currency={region.currency}
+                      locale={region.locale}
                       amount={toNumber(profit.grossProfit)}
                       className={`font-display text-[20px] font-semibold ${
                         profit.grossProfit.minor < 0 ? 'text-(--danger)' : 'text-(--brand-text)'
@@ -1209,7 +1287,7 @@ export default async function JobPage({
                     <p className="text-(--text-faint)">
                       {event.actor?.name ?? 'System'} ·{' '}
                       <time className="datum">
-                        {event.createdAt.toLocaleString('en-GB', {
+                        {event.createdAt.toLocaleString(region.locale, {
                           dateStyle: 'short',
                           timeStyle: 'short',
                         })}

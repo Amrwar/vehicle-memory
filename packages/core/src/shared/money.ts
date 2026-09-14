@@ -117,8 +117,14 @@ export function subtract(a: Money, b: Money): Money {
   return money(a.minor - b.minor, a.currency);
 }
 
-export function sum(values: readonly Money[], currency: Currency = 'GBP'): Money {
-  return values.reduce((acc, value) => add(acc, value), zero(currency));
+/**
+ * Adds up money. The currency is the values' own unless the caller says
+ * otherwise; the default only matters for an empty list, and a ledger
+ * entry in dollars must not be summed from a zero in pounds.
+ */
+export function sum(values: readonly Money[], currency?: Currency): Money {
+  const start = currency ?? values[0]?.currency ?? 'GBP';
+  return values.reduce((acc, value) => add(acc, value), zero(start));
 }
 
 export function negate(value: Money): Money {

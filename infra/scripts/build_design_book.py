@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 27.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 29.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -190,7 +190,7 @@ def build() -> None:
         "1. The identity: colour, type, and the rule that colour never carries meaning alone",
         "2. The mark: a passport booklet, on the tab and beside the name",
         "3. The front door and the passport as an object",
-        "4. Signing in",
+        "4. Signing in, signing up, and the region",
         "5. The workshop shell and the dashboard",
         "6. The diary and the floor",
         "7. The job: the central screen",
@@ -314,6 +314,25 @@ def build() -> None:
         works="First-party sessions, a cookie that the browser cannot read, and a token that is stored only as a digest. The design is quiet because the security is not visible and should not need to be.",
         shots=[("login", "Sign in.", 16.4)],
         source="docs/02-design/05-security-model.md, sections 1 to 3",
+    )
+
+    design(
+        doc,
+        title="Signing up, and the region a workshop lives in",
+        when="Phase 4.5, 9 September 2026; the country added in Phase 29, 14 September 2026.",
+        why="Signing up creates a workshop, not an account, so the form asks for the business first "
+            "and the person second. In Phase 29 it asks for the country before either, because a workshop "
+            "keeps one set of books in one currency and everything else follows: the currency, the "
+            "language and region dates are written in, the clock, and the first tax rate.",
+        meaning=[
+            "One picker, and four facts written from it. Nothing else in the product has to know a country exists.",
+            "The organisation settings page shows all four and lets the owner change them, with the currency carrying the one warning that matters: nothing already recorded is converted.",
+            "Every page then formats money and dates from the workshop's region rather than from a default; a driver in the portal sees each amount in the currency it was billed in.",
+        ],
+        works="A Canadian workshop sees dollars, Canadian dates and GST from the first screen, and a British one is exactly as it was. The rule is that no figure or date reaches a person formatted by a default, and it is written into the design system so a page that forgets is a defect rather than a habit.",
+        shots=[("signup", "Sign-up, with the country first.", 16.4),
+               ("settings-organisation", "The organisation settings, where the region can be changed.", 16.4)],
+        source="docs/02-design/08-design-system.md, section 12.5; packages/core/src/region/countries.ts",
     )
 
     # 5. Shell and dashboard

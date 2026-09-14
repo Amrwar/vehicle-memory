@@ -44,7 +44,7 @@ export default async function PeoplePage({
 }: {
   searchParams: Promise<{ days?: string; site?: string }>;
 }) {
-  const { orgId, plan } = await requireSession('people:read');
+  const { orgId, plan, region } = await requireSession('people:read');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'payroll')) {
@@ -163,7 +163,13 @@ export default async function PeoplePage({
         />
         <StatTile
           label="Labour profit"
-          value={<Money amount={toNumber(totals.labourProfit)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(totals.labourProfit)}
+            />
+          }
           tone={totals.labourProfit.minor >= 0 ? 'neutral' : 'danger'}
           note="Sold labour less the whole attended day"
         />
@@ -230,7 +236,11 @@ export default async function PeoplePage({
                           </span>
                         </Td>
                         <Td numeric>
-                          <Money amount={toNumber(person.labourProfit)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={toNumber(person.labourProfit)}
+                          />
                         </Td>
                       </Tr>
                     ))}
@@ -257,7 +267,11 @@ export default async function PeoplePage({
                         {pct(totals.productivityPct)}
                       </Td>
                       <Td numeric className="font-semibold">
-                        <Money amount={toNumber(totals.labourProfit)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(totals.labourProfit)}
+                        />
                       </Td>
                     </tr>
                   </tfoot>
@@ -319,7 +333,11 @@ export default async function PeoplePage({
                       </Td>
                       <Td numeric>
                         {employee.payRates[0] ? (
-                          <Money amount={Number(employee.payRates[0].costPerHour)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={Number(employee.payRates[0].costPerHour)}
+                          />
                         ) : (
                           <span className="text-(--danger)">No rate set</span>
                         )}
@@ -353,7 +371,7 @@ export default async function PeoplePage({
                         </p>
                         <p className="text-[11px] text-(--text-faint)">
                           Since{' '}
-                          {record.startedAt.toLocaleTimeString('en-GB', {
+                          {record.startedAt.toLocaleTimeString(region.locale, {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}

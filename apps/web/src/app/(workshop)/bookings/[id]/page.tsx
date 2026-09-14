@@ -77,7 +77,7 @@ export default async function BookingPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { orgId } = await requireSession('diary:read');
+  const { orgId, region } = await requireSession('diary:read');
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -97,7 +97,7 @@ export default async function BookingPage({
       <PageHeader
         eyebrow="Diary"
         title={booking.description}
-        description={booking.startAt.toLocaleString('en-GB', {
+        description={booking.startAt.toLocaleString(region.locale, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
@@ -140,7 +140,7 @@ export default async function BookingPage({
               {vehicle.registration ? <Registration value={vehicle.registration} /> : null}
             </div>
             <p className="text-[13px] text-(--text-soft)">
-              Last recorded at <Mileage km={vehicle.lastOdometerKm} />
+              Last recorded at <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />
             </p>
           </CardBody>
         </Card>
@@ -202,7 +202,7 @@ export default async function BookingPage({
                 {
                   label: 'Reminder',
                   value: booking.reminderSentAt
-                    ? booking.reminderSentAt.toLocaleDateString('en-GB')
+                    ? booking.reminderSentAt.toLocaleDateString(region.locale)
                     : 'Not sent',
                 },
               ]}

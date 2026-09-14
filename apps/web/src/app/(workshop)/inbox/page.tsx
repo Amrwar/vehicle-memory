@@ -63,7 +63,7 @@ export default async function InboxPage({
 }: {
   searchParams: Promise<{ all?: string }>;
 }) {
-  const { orgId } = await requireSession('customer:read');
+  const { orgId, region } = await requireSession('customer:read');
   const { all } = await searchParams;
 
   const messages = await inbox(orgId, all === '1');
@@ -159,7 +159,7 @@ export default async function InboxPage({
                   </span>
 
                   <span className="ml-auto text-[11px] text-(--text-faint)">
-                    {message.receivedAt.toLocaleString('en-GB', {
+                    {message.receivedAt.toLocaleString(region.locale, {
                       dateStyle: 'short',
                       timeStyle: 'short',
                     })}
@@ -196,7 +196,7 @@ export default async function InboxPage({
 
                 {message.handledAt ? (
                   <p className="mt-1 text-[11px] text-(--success)">
-                    Dealt with {message.handledAt.toLocaleDateString('en-GB')}
+                    Dealt with {message.handledAt.toLocaleDateString(region.locale)}
                   </p>
                 ) : (
                   <form action={file} className="mt-2 flex flex-wrap items-center gap-2">

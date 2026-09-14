@@ -107,7 +107,7 @@ export default async function ExpensesPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const { orgId, plan } = await requireSession('report:financial');
+  const { orgId, plan, region } = await requireSession('report:financial');
 
   if (!planIncludes(plan, 'ledger')) {
     return <PlanWall feature="ledger" plan={plan} />;
@@ -146,17 +146,35 @@ export default async function ExpensesPage({
       <StatRow className="mb-5">
         <StatTile
           label="Spent"
-          value={<Money amount={toNumber(summary.total)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(summary.total)}
+            />
+          }
           note="Excluding rejected claims"
         />
         <StatTile
           label="Tax to reclaim"
-          value={<Money amount={toNumber(summary.reclaimableTax)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(summary.reclaimableTax)}
+            />
+          }
           note="Input tax, separated"
         />
         <StatTile
           label="Owed to staff"
-          value={<Money amount={toNumber(summary.owedToStaff)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(summary.owedToStaff)}
+            />
+          }
           tone={summary.owedToStaff.minor > 0 ? 'warning' : 'neutral'}
           note="Paid personally, not yet repaid"
         />
@@ -208,7 +226,12 @@ export default async function ExpensesPage({
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Money amount={Number(row.net) + Number(row.tax)} className="font-medium" />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(row.net) + Number(row.tax)}
+                        className="font-medium"
+                      />
                       <form action={approve}>
                         <input type="hidden" name="expenseId" value={row.id} />
                         <Button type="submit" size="sm" variant="primary">
@@ -268,7 +291,11 @@ export default async function ExpensesPage({
                           </Badge>
                         </Td>
                         <Td numeric className="font-medium">
-                          <Money amount={Number(row.net) + Number(row.tax)} />
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={Number(row.net) + Number(row.tax)}
+                          />
                         </Td>
                       </Tr>
                     ))}
@@ -355,7 +382,12 @@ export default async function ExpensesPage({
                     <div key={row.category}>
                       <div className="flex items-baseline justify-between text-[12px]">
                         <span>{row.label}</span>
-                        <Money amount={toNumber(row.total)} className="text-(--text-soft)" />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={toNumber(row.total)}
+                          className="text-(--text-soft)"
+                        />
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-(--surface-sunk)">
                         <div

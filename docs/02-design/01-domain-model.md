@@ -217,6 +217,13 @@ requirement in several jurisdictions (NFR-902).
 | G3  | A card is a liability until spent, and a redemption never touches the bank | Postings 3.14 and 3.15                         |
 | G4  | A redemption is refused, never clamped, and spends nothing on a refusal    | `assertCardRedeemable`, checked before writing |
 
+### 3.8 Region (Phase 29)
+
+Not an aggregate: a value on the organisation, carried on the session and
+read by every page. The invariant is that no figure or date reaches a person
+formatted by a default. The country table is the only place a country's
+currency, locale, timezone and first tax rate are written down.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

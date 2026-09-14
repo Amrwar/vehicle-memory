@@ -37,7 +37,7 @@ export default async function PaymentsPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
-  const { db } = await requireSession('payment:read');
+  const { db, region } = await requireSession('payment:read');
   const { days } = await searchParams;
   const window = Math.max(1, Number(days ?? 30) || 30);
 
@@ -100,14 +100,23 @@ export default async function PaymentsPage({
       <StatRow className="mb-5">
         <StatTile
           label="Taken today"
-          value={<Money amount={today} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={today} />}
           tone={today > 0 ? 'success' : 'neutral'}
         />
-        <StatTile label={`Last ${window} days`} value={<Money amount={total} />} />
+        <StatTile
+          label={`Last ${window} days`}
+          value={<Money currency={region.currency} locale={region.locale} amount={total} />}
+        />
         <StatTile label="Payments" value={payments.length} note="Individual receipts" />
         <StatTile
           label="Average"
-          value={<Money amount={payments.length ? total / payments.length : 0} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={payments.length ? total / payments.length : 0}
+            />
+          }
           note="Per payment"
         />
       </StatRow>
@@ -133,7 +142,7 @@ export default async function PaymentsPage({
                     {share.toFixed(0)}%
                   </span>
                   <span className="tabular w-24 shrink-0 text-right text-[13px] font-medium">
-                    <Money amount={stats.value} />
+                    <Money currency={region.currency} locale={region.locale} amount={stats.value} />
                   </span>
                 </li>
               );
@@ -172,7 +181,7 @@ export default async function PaymentsPage({
                 {payments.map((payment) => (
                   <Tr key={payment.id}>
                     <Td className="datum text-(--text-faint)">
-                      {payment.receivedAt.toLocaleString('en-GB', {
+                      {payment.receivedAt.toLocaleString(region.locale, {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}
@@ -203,7 +212,11 @@ export default async function PaymentsPage({
                     <Td className="datum text-(--text-faint)">{payment.reference ?? '—'}</Td>
                     <Td className="text-(--text-soft)">{payment.recordedBy?.name ?? 'System'}</Td>
                     <Td numeric className="font-medium">
-                      <Money amount={Number(payment.amount)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(payment.amount)}
+                      />
                     </Td>
                   </Tr>
                 ))}

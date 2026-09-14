@@ -41,7 +41,7 @@ function until(end: Date, now: Date): string {
 }
 
 export default async function FloorPage() {
-  const { orgId } = await requireSession('diary:read');
+  const { orgId, region } = await requireSession('diary:read');
 
   const now = new Date();
   const floor = await floorNow(orgId, now);
@@ -54,7 +54,7 @@ export default async function FloorPage() {
       <PageHeader
         eyebrow="Workshop"
         title="The floor"
-        description={`As at ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`}
+        description={`As at ${now.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' })}`}
         actions={
           <Link href="/diary">
             <Button size="sm" variant="secondary">
@@ -148,7 +148,7 @@ export default async function FloorPage() {
                     <div className="mt-auto border-t border-(--border) pt-2">
                       <p className="text-[11px] text-(--text-faint)">
                         Next:{' '}
-                        {bay.upcoming[0]!.startAt.toLocaleTimeString('en-GB', {
+                        {bay.upcoming[0]!.startAt.toLocaleTimeString(region.locale, {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}{' '}

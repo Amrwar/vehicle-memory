@@ -19,6 +19,7 @@ import { pointsForPortalUser } from '@/lib/loyalty';
 import { referralsForPortalUser } from '@/lib/referrals';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Mark } from '@/components/marketing';
+import { regionForUser } from '@/lib/region';
 
 export const metadata: Metadata = { title: 'My vehicles' };
 export const dynamic = 'force-dynamic';
@@ -32,6 +33,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function PortalPage() {
   const user = await requireUser();
+  const region = await regionForUser(user.userId);
 
   // A portal user is linked to customer records across any number of
   // workshops. This is the point of the model: her history is hers, not one
@@ -265,13 +267,18 @@ export default async function PortalPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-medium">{card.workshop}</p>
                     <p className="text-[12px] text-(--text-faint)">
-                      Worth <Money amount={card.valueMinor / 100} /> off your next bill there. Ask
-                      at the counter to use them.
+                      Worth{' '}
+                      <Money
+                        amount={card.valueMinor / 100}
+                        currency={card.currency}
+                        locale={card.locale}
+                      />{' '}
+                      off your next bill there. Ask at the counter to use them.
                     </p>
                     {card.expiring.points > 0 && card.expiring.on ? (
                       <p className="mt-1 text-[12px] text-(--warning)">
-                        {card.expiring.points.toLocaleString('en-GB')} expire on{' '}
-                        {card.expiring.on.toLocaleDateString('en-GB', {
+                        {card.expiring.points.toLocaleString(region.locale)} expire on{' '}
+                        {card.expiring.on.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric',
@@ -281,7 +288,7 @@ export default async function PortalPage() {
                     ) : null}
                   </div>
                   <p className="font-display text-[22px] font-semibold tabular-nums">
-                    {card.balance.toLocaleString('en-GB')}
+                    {card.balance.toLocaleString(region.locale)}
                     <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
                   </p>
                 </li>
@@ -306,8 +313,12 @@ export default async function PortalPage() {
                     <p className="text-[14px] font-medium">{card.workshop}</p>
                     <p className="text-[12px] text-(--text-faint)">
                       Give this code to somebody who has not been there. Once they have had{' '}
-                      <Money amount={card.minimumMinor / 100} /> of work done, you both get{' '}
-                      {card.pointsEachSide} points.
+                      <Money
+                        amount={card.minimumMinor / 100}
+                        currency={card.currency}
+                        locale={card.locale}
+                      />{' '}
+                      of work done, you both get {card.pointsEachSide} points.
                     </p>
                   </div>
                   <p className="datum text-[20px] font-semibold tracking-[0.2em]">{card.code}</p>
@@ -335,7 +346,7 @@ export default async function PortalPage() {
                     <p className="text-[12px] text-(--text-faint)">
                       {job.vehicle.make} {job.vehicle.model} · {orgName} ·{' '}
                       <time className="datum">
-                        {job.createdAt.toLocaleDateString('en-GB', {
+                        {job.createdAt.toLocaleDateString(region.locale, {
                           day: 'numeric',
                           month: 'short',
                           year: 'numeric',

@@ -109,7 +109,7 @@ export default async function PayablesPage({
 }: {
   searchParams: Promise<{ problem?: string; done?: string }>;
 }) {
-  const { orgId, user } = await requireSession('ledger:read');
+  const { orgId, user, region } = await requireSession('ledger:read');
   const notice = await searchParams;
 
   const [suppliers, payments] = await Promise.all([
@@ -136,10 +136,14 @@ export default async function PayablesPage({
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Owed" value={<Money amount={owed / 100} />} note="Every open bill" />
+        <StatTile
+          label="Owed"
+          value={<Money currency={region.currency} locale={region.locale} amount={owed / 100} />}
+          note="Every open bill"
+        />
         <StatTile
           label="Ready to pay"
-          value={<Money amount={payable / 100} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={payable / 100} />}
           tone={payable > 0 ? 'warning' : 'neutral'}
           note="Approved and not yet settled"
         />
@@ -188,7 +192,11 @@ export default async function PayablesPage({
                 description={`${entry.bills.length} open bill${entry.bills.length === 1 ? '' : 's'}${entry.overdue > 0 ? ` · ${entry.overdue} overdue` : ''}`}
                 action={
                   <span className="font-display text-[16px] font-semibold">
-                    <Money amount={entry.outstanding.minor / 100} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={entry.outstanding.minor / 100}
+                    />
                   </span>
                 }
               />
@@ -230,11 +238,15 @@ export default async function PayablesPage({
                         className={`text-[12px] ${late ? 'text-(--danger)' : 'text-(--text-faint)'}`}
                       >
                         {bill.dueAt
-                          ? `due ${bill.dueAt.toLocaleDateString('en-GB')}`
+                          ? `due ${bill.dueAt.toLocaleDateString(region.locale)}`
                           : 'no due date'}
                       </span>
                       <span className="ml-auto tabular-nums">
-                        <Money amount={outstanding} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={outstanding}
+                        />
                       </span>
 
                       {mayWrite && (bill.status === 'AWAITING' || bill.status === 'DISPUTED') ? (
@@ -319,14 +331,18 @@ export default async function PayablesPage({
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="font-medium">{payment.supplier.name}</span>
                   <span className="text-(--text-faint)">
-                    {payment.paidAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })} ·{' '}
+                    {payment.paidAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })} ·{' '}
                     {METHODS.find((m) => m.value === payment.method)?.label ?? payment.method}
                     {payment.reference ? (
                       <span className="datum"> · {payment.reference}</span>
                     ) : null}
                   </span>
                   <span className="ml-auto font-medium tabular-nums">
-                    <Money amount={Number(payment.amount)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={Number(payment.amount)}
+                    />
                   </span>
                 </div>
                 <p className="mt-1 text-[12px] text-(--text-faint)">

@@ -6,9 +6,12 @@ import {
   trialEndsOn,
   uniqueSlug,
   validateSignup,
+  countryFor,
+  regionForCountry,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { ensureChartOfAccounts } from './accounting';
 import { hashPassword } from './auth';
 import { breachedPasswordProblem } from './breach';
 
@@ -90,6 +93,8 @@ export async function createWorkshop(
 
   const slug = uniqueSlug(input.workshopName, taken);
   const plan = planFor(options.plan ?? 'CORE').id;
+  const country = countryFor(input.country);
+  const region = regionForCountry(country.code);
 
   // A password that has already leaked is refused the way a short one is:
   // as a problem on the field, so the form says why.
@@ -106,10 +111,16 @@ export async function createWorkshop(
         email,
         phone: input.phone?.trim() || null,
         plan,
+        country: region.country,
+        baseCurrency: region.currency,
+        locale: region.locale,
+        timezone: region.timezone,
         locations: {
           create: {
             name: `${input.workshopName.trim()} — main`,
             code: 'MAIN',
+            country: region.country,
+            timezone: region.timezone,
             isDefault: true,
             dailyCapacityHours: 32,
             bays: {
@@ -123,7 +134,7 @@ export async function createWorkshop(
         },
         taxRates: {
           create: [
-            { name: 'VAT 20%', rate: 20, isDefault: true },
+            { name: country.tax.name, rate: country.tax.rate, isDefault: true },
             { name: 'Zero rated', rate: 0 },
           ],
         },
@@ -201,6 +212,14 @@ export async function createWorkshop(
 
     return user.id;
   });
+
+  // The books. Every workshop starts with the standard chart, so its first
+  // invoice can post; before this the chart came only from the seed.
+  const created = await prisma.organization.findUniqueOrThrow({
+    where: { slug },
+    select: { id: true },
+  });
+  await ensureChartOfAccounts(created.id);
 
   return { ok: true, problems: [], orgSlug: slug, userId };
 }

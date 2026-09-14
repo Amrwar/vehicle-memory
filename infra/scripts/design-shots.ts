@@ -112,6 +112,8 @@ async function main() {
   const shots: Shot[] = [
     { file: 'home', path: '/', who: 'nobody', height: 900 },
     { file: 'login', path: '/login', who: 'nobody' },
+    { file: 'signup', path: '/signup', who: 'nobody', fullPage: true },
+    { file: 'settings-organisation', path: '/settings/organisation', who: 'owner', fullPage: true },
     { file: 'dashboard', path: '/dashboard', who: 'owner' },
     { file: 'dashboard-dark', path: '/dashboard', who: 'owner', dark: true },
     { file: 'diary', path: '/diary', who: 'owner' },

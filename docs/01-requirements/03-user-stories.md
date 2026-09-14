@@ -991,6 +991,33 @@ be dealt with.
 
 ---
 
+## Epic Z — Country and currency (Phase 29)
+
+### Z1 — A workshop in dollars
+
+**As** an owner opening a workshop in Canada **I want** to choose my country
+once and see dollars, Canadian dates and my own tax everywhere **so that**
+the product is mine and not a British one with the labels changed.
+**Size** 8 · **Satisfies** FR-5601, FR-5602, FR-5603, FR-5605, FR-5606
+
+- **Given** sign-up, **when** I choose Canada, **then** the currency, the
+  language and region, the clock and the first tax rate are set for me.
+- **Given** any page, **when** it shows money or a date, **then** it is in my
+  workshop's currency and my region's format.
+- **Given** settings, **when** I change the currency, **then** I am told that
+  nothing already recorded is converted.
+
+### Z2 — The driver sees what the bill says
+
+**As** Maria **I want** each amount in the portal in the currency the
+workshop billed it in **so that** what I read matches the paper.
+**Size** 2 · **Satisfies** FR-5604
+
+- **Given** two workshops in two countries, **when** I look at my invoices,
+  **then** each is in its own currency.
+
+---
+
 ## Story map
 
 ```

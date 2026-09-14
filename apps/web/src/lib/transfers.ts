@@ -14,6 +14,7 @@ import {
   TransferError,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
+import { regionFor } from './region';
 
 /**
  * Stock between sites, against the database.
@@ -330,6 +331,7 @@ export async function groupPerformance(
   orgId: string,
   range: { from: Date; to: Date },
 ): Promise<ReturnType<typeof consolidate>> {
+  const region = await regionFor(orgId);
   const locations = await prisma.location.findMany({
     where: { orgId, isActive: true },
     orderBy: { name: 'asc' },
@@ -404,18 +406,18 @@ export async function groupPerformance(
         locationId: location.id,
         siteName: location.name,
         revenue: decimal(invoices._sum.subtotal ?? 0),
-        costOfSales: { minor: partsCost, currency: 'GBP' },
+        costOfSales: { minor: partsCost, currency: region.currency },
         // Overheads are not yet booked per site; see the note on the page.
-        overheads: { minor: 0, currency: 'GBP' },
+        overheads: { minor: 0, currency: region.currency },
         jobsCompleted: jobs.length,
         attendedMinutes: attendedMinutesTotal,
         soldMinutes: Math.round(soldMinutes),
-        stockValue: { minor: stockValue, currency: 'GBP' },
+        stockValue: { minor: stockValue, currency: region.currency },
         receivables: {
           minor: Math.round(
             (Number(receivables._sum.total ?? 0) - Number(receivables._sum.amountPaid ?? 0)) * 100,
           ),
-          currency: 'GBP',
+          currency: region.currency,
         },
       };
     }),

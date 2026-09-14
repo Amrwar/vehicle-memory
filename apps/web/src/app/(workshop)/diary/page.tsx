@@ -60,7 +60,7 @@ export default async function DiaryPage({
 }: {
   searchParams: Promise<{ view?: string; on?: string }>;
 }) {
-  const { orgId } = await requireSession('diary:read');
+  const { orgId, region } = await requireSession('diary:read');
   const { view: rawView, on } = await searchParams;
 
   const view: DiaryView = VIEWS.some((entry) => entry.id === rawView)
@@ -195,6 +195,7 @@ export default async function DiaryPage({
         </Card>
       ) : (
         <DiaryBoard
+          locale={region.locale}
           laneKind={laneKind(view)}
           onMove={move}
           lanes={lanes.map((lane) => ({

@@ -39,7 +39,7 @@ export default async function GroupPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const { orgId, plan } = await requireSession('report:financial');
+  const { orgId, plan, region } = await requireSession('report:financial');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'multiSite')) {
@@ -88,7 +88,7 @@ export default async function GroupPage({
         title="Sites"
         description={`${group.sites.length} sites · ${
           key === 'month'
-            ? now.toLocaleString('en-GB', { month: 'long', year: 'numeric' })
+            ? now.toLocaleString(region.locale, { month: 'long', year: 'numeric' })
             : key === 'quarter'
               ? `${now.getFullYear()} Q${Math.floor(now.getMonth() / 3) + 1} to date`
               : `${now.getFullYear()} to date`
@@ -109,12 +109,24 @@ export default async function GroupPage({
       <StatRow className="mb-5">
         <StatTile
           label="Group revenue"
-          value={<Money amount={toNumber(total.revenue)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(total.revenue)}
+            />
+          }
           note="Net of tax, across every site"
         />
         <StatTile
           label="Gross profit"
-          value={<Money amount={toNumber(total.grossProfit)} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={toNumber(total.grossProfit)}
+            />
+          }
           tone="brand"
           note={total.marginPct === null ? 'No revenue yet' : `${total.marginPct}% net margin`}
         />
@@ -132,7 +144,9 @@ export default async function GroupPage({
         />
         <StatTile
           label="Stock on the road"
-          value={<Money amount={roadValue / 100} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={roadValue / 100} />
+          }
           note={`${inFlight.length} transfer${inFlight.length === 1 ? '' : 's'} in transit`}
         />
       </StatRow>
@@ -184,19 +198,31 @@ export default async function GroupPage({
                       ) : null}
                     </Td>
                     <Td numeric>
-                      <Money amount={toNumber(site.revenue)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(site.revenue)}
+                      />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {site.shareOfGroupPct}%
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={toNumber(site.grossProfit)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(site.grossProfit)}
+                      />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {site.jobsCompleted}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={toNumber(site.revenuePerJob)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(site.revenuePerJob)}
+                      />
                     </Td>
                     <Td numeric>
                       <span
@@ -210,10 +236,18 @@ export default async function GroupPage({
                       </span>
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={toNumber(site.stockValue)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(site.stockValue)}
+                      />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={toNumber(site.receivables)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={toNumber(site.receivables)}
+                      />
                     </Td>
                   </Tr>
                 ))}
@@ -222,28 +256,48 @@ export default async function GroupPage({
                 <tr className="border-t-2 border-(--border-strong) bg-(--surface-sunk)">
                   <Td className="font-semibold">Group</Td>
                   <Td numeric className="font-semibold">
-                    <Money amount={toNumber(total.revenue)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(total.revenue)}
+                    />
                   </Td>
                   <Td numeric className="text-(--text-faint)">
                     100%
                   </Td>
                   <Td numeric className="font-medium">
-                    <Money amount={toNumber(total.grossProfit)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(total.grossProfit)}
+                    />
                   </Td>
                   <Td numeric className="font-medium">
                     {total.jobsCompleted}
                   </Td>
                   <Td numeric className="font-medium">
-                    <Money amount={toNumber(total.revenuePerJob)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(total.revenuePerJob)}
+                    />
                   </Td>
                   <Td numeric className="font-semibold">
                     {total.productivityPct === null ? '—' : `${total.productivityPct}%`}
                   </Td>
                   <Td numeric className="font-medium">
-                    <Money amount={toNumber(total.stockValue)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(total.stockValue)}
+                    />
                   </Td>
                   <Td numeric className="font-medium">
-                    <Money amount={toNumber(total.receivables)} />
+                    <Money
+                      currency={region.currency}
+                      locale={region.locale}
+                      amount={toNumber(total.receivables)}
+                    />
                   </Td>
                 </tr>
               </tfoot>

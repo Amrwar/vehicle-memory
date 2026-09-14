@@ -35,7 +35,7 @@ export default async function PartsPage({
 }: {
   searchParams: Promise<{ q?: string; view?: string }>;
 }) {
-  const { db } = await requireSession('inventory:read');
+  const { db, region } = await requireSession('inventory:read');
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
   const lowOnly = params.view === 'low';
@@ -135,7 +135,7 @@ export default async function PartsPage({
       <StatRow className="mb-5">
         <StatTile
           label="Stock value"
-          value={<Money amount={totalValue} />}
+          value={<Money currency={region.currency} locale={region.locale} amount={totalValue} />}
           note="At weighted average cost"
         />
         <Link href="/parts?view=low" className="group">
@@ -233,10 +233,14 @@ export default async function PartsPage({
                       {onOrder || '—'}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={Number(position.avgCost)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(position.avgCost)}
+                      />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      <Money amount={value} />
+                      <Money currency={region.currency} locale={region.locale} amount={value} />
                     </Td>
                     <Td>
                       <Badge tone={stockTone(summary.state)} dot>

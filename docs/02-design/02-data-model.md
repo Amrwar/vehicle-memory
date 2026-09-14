@@ -159,6 +159,16 @@ Implemented in `20260909000100_invariants` and verified by
 | A gift card is sold for something; every entry on it moves something and says why | `CHECK` constraints `gift_cards_sold_for_something`, `gift_card_entries_move_something`         |
 | A gift card entry's kind agrees with its sign; a cancelled card names its reason  | `CHECK` constraints `gift_card_entries_kind_matches_sign`, `gift_cards_cancelled_with_a_reason` |
 
+## 6.5 Region (Phase 29)
+
+The organisation carries `country`, `baseCurrency`, `locale` and `timezone`.
+The first is a decision and the other three follow it at sign-up from the
+country table in core, then stand on their own so an owner can differ. Every
+money column on a document carries its own `currency`, written from the
+organisation's at the moment the document is raised, so a workshop that
+changes currency keeps its old bills honest. There is one currency per set
+of books; multi-currency inside a workshop is deliberately not modelled.
+
 ## 7. Deletion
 
 Operational records are hard-deleted; there are no `deletedAt` columns. A

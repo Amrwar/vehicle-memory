@@ -35,14 +35,14 @@ export default async function PassportsPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const { orgId } = await requireSession('vehicle:read');
+  const { orgId, region } = await requireSession('vehicle:read');
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
 
   const { rows, summary } = await passportsForOrg(orgId, query);
 
   const date = (value: Date | null) =>
-    value ? value.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '—';
+    value ? value.toLocaleDateString(region.locale, { month: 'short', year: 'numeric' }) : '—';
 
   return (
     <>
@@ -60,7 +60,7 @@ export default async function PassportsPage({
         />
         <StatTile
           label="Entries"
-          value={summary.entries.toLocaleString('en-GB')}
+          value={summary.entries.toLocaleString(region.locale)}
           note="Across all of them"
         />
         <StatTile

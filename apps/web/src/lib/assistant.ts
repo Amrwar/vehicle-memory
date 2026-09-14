@@ -11,6 +11,7 @@ import {
   explainJob,
   formatClock,
   type JobStory,
+  type Region,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
@@ -18,6 +19,7 @@ import { compose, summaryFactsFor } from './ai';
 import { answer } from './answers';
 import { audit } from './guard';
 import { pushNow } from './outbound';
+import { regionFor } from './region';
 
 /**
  * The assistant, against the database. Phase 22.
@@ -42,8 +44,11 @@ export class AssistantError extends Error {
 }
 
 /** The same formatting the summary facts use, so figures compare token for token. */
-function gbp(value: number): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value);
+function figure(value: number, region: Region): string {
+  return new Intl.NumberFormat(region.locale, {
+    style: 'currency',
+    currency: region.currency,
+  }).format(value);
 }
 
 function monthStart(now = new Date()): Date {
@@ -144,6 +149,7 @@ export async function askAssistant(input: { orgId: string; userId: string; quest
 
 /** The facts a draft may use: the summary facts plus the job's state. */
 export async function draftFactsFor(orgId: string, jobId: string): Promise<DraftFacts | null> {
+  const region = await regionFor(orgId);
   const [facts, job] = await Promise.all([
     summaryFactsFor(orgId, jobId),
     prisma.job.findFirst({
@@ -169,7 +175,8 @@ export async function draftFactsFor(orgId: string, jobId: string): Promise<Draft
     jobNumber: job.number,
     status: job.status,
     promisedAt: job.promisedAt,
-    estimateTotal: estimate && estimate.status !== 'DRAFT' ? gbp(Number(estimate.total)) : null,
+    estimateTotal:
+      estimate && estimate.status !== 'DRAFT' ? figure(Number(estimate.total), region) : null,
     closesAt: formatClock(job.location.closesAtMinute),
   };
 }
@@ -227,6 +234,7 @@ export async function draftFor(input: {
 
 /** The job's state as facts, for the explanation. */
 export async function jobStoryFor(orgId: string, jobId: string): Promise<JobStory | null> {
+  const region = await regionFor(orgId);
   const job = await prisma.job.findFirst({
     where: { id: jobId, orgId },
     select: {
@@ -281,7 +289,7 @@ export async function jobStoryFor(orgId: string, jobId: string): Promise<JobStor
     estimate: estimate
       ? {
           status: estimate.status,
-          total: gbp(Number(estimate.total)),
+          total: figure(Number(estimate.total), region),
           sentAt: estimate.sentAt,
         }
       : null,
@@ -297,7 +305,7 @@ export async function jobStoryFor(orgId: string, jobId: string): Promise<JobStor
           status: invoice.status,
           outstanding:
             Number(invoice.total) - Number(invoice.amountPaid) > 0
-              ? gbp(Number(invoice.total) - Number(invoice.amountPaid))
+              ? figure(Number(invoice.total) - Number(invoice.amountPaid), region)
               : null,
         }
       : null,

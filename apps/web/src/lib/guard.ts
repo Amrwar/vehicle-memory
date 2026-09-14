@@ -8,6 +8,7 @@ import {
   type Permission,
   type PlanId,
   planFor,
+  type Region,
   type Role,
 } from '@carnet/core';
 import { headers } from 'next/headers';
@@ -31,6 +32,8 @@ export interface Session {
   db: ReturnType<typeof forOrg>;
   /** The organisation's plan, for the pages that a plan gates. */
   plan: PlanId;
+  /** What money and dates are formatted by. */
+  region: Region;
 }
 
 /** Requires a signed-in user attached to an organisation. */
@@ -67,6 +70,7 @@ export async function requireSession(permission?: Permission): Promise<Session> 
     orgId: user.orgId,
     db: forOrg(user.orgId),
     plan: planFor(user.orgPlan ?? 'CORE').id,
+    region: user.region,
   };
 }
 

@@ -1,4 +1,4 @@
-import { money } from '@carnet/core';
+import { money, type Region } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -145,7 +145,7 @@ export default async function CounterPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const { orgId, user, plan } = await requireSession('invoice:write');
+  const { orgId, user, plan, region } = await requireSession('invoice:write');
 
   if (!planIncludes(plan, 'inventory')) {
     return <PlanWall feature="inventory" plan={plan} />;
@@ -187,7 +187,7 @@ export default async function CounterPage({
       {params.sold ? (
         <Alert tone="success" className="mb-5">
           {Number(params.change ?? 0) > 0
-            ? `${params.sold} taken. Change ${formatMoney(Number(params.change) / 100)}.`
+            ? `${params.sold} taken. Change ${formatMoney(Number(params.change) / 100, region)}.`
             : `${params.sold} taken.`}
         </Alert>
       ) : null}
@@ -195,17 +195,31 @@ export default async function CounterPage({
       <StatRow className="mb-5">
         <StatTile
           label="Taken today"
-          value={<Money amount={todaysTotal / 100} />}
+          value={
+            <Money currency={region.currency} locale={region.locale} amount={todaysTotal / 100} />
+          }
           note="Counter sales only"
         />
         <StatTile
           label="Cash in the drawer"
-          value={<Money amount={(till?.expectedMinor ?? 0) / 100} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={(till?.expectedMinor ?? 0) / 100}
+            />
+          }
           note={till ? 'Float plus takings' : 'No till open'}
         />
         <StatTile
           label="On card"
-          value={<Money amount={(till?.cardMinor ?? 0) / 100} />}
+          value={
+            <Money
+              currency={region.currency}
+              locale={region.locale}
+              amount={(till?.cardMinor ?? 0) / 100}
+            />
+          }
           note="Settles with the processor"
         />
         <StatTile
@@ -298,26 +312,38 @@ export default async function CounterPage({
             <Card>
               <CardHeader
                 title="Close the till"
-                description={`Open since ${till.session.openedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`}
+                description={`Open since ${till.session.openedAt.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' })}`}
               />
               <CardBody>
                 <dl className="mb-3 grid gap-1.5 text-[13px]">
                   <div className="flex justify-between">
                     <dt className="text-(--text-faint)">Opening float</dt>
                     <dd>
-                      <Money amount={Number(till.session.openingFloat)} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={Number(till.session.openingFloat)}
+                      />
                     </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-(--text-faint)">Cash taken</dt>
                     <dd>
-                      <Money amount={till.cashMinor / 100} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={till.cashMinor / 100}
+                      />
                     </dd>
                   </div>
                   <div className="flex justify-between border-t border-(--border) pt-1.5 font-medium">
                     <dt>Should be in the drawer</dt>
                     <dd>
-                      <Money amount={till.expectedMinor / 100} />
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={till.expectedMinor / 100}
+                      />
                     </dd>
                   </div>
                 </dl>
@@ -387,7 +413,11 @@ export default async function CounterPage({
                       </Td>
                       <Td className="text-(--text-faint)">{sale.soldBy?.name ?? '—'}</Td>
                       <Td numeric className="font-medium">
-                        <Money amount={Number(sale.total)} />
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={Number(sale.total)}
+                        />
                       </Td>
                     </Tr>
                   ))}
@@ -410,6 +440,9 @@ function isToday(date: Date): boolean {
   );
 }
 
-function formatMoney(value: number): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value);
+function formatMoney(value: number, region: Region): string {
+  return new Intl.NumberFormat(region.locale, {
+    style: 'currency',
+    currency: region.currency,
+  }).format(value);
 }

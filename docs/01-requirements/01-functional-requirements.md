@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5600 — Country and currency
+
+| Ref     | Requirement                                                                                                                                                        | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-5601 | A workshop MUST have one country, one currency, one language and region, and one timezone, chosen at sign-up from a country and editable in settings by the owner. | 29    |
+| FR-5602 | Sign-up MUST derive the currency, locale, timezone and the first tax rate from the country, and the site MUST follow.                                              | 29    |
+| FR-5603 | Every figure and date a member of staff sees MUST be formatted from the organisation's region, never from a default.                                               | 29    |
+| FR-5604 | A driver in the portal MUST see each amount in the currency of the workshop that raised it, and dates in the region of the workshop they use most.                 | 29    |
+| FR-5605 | A message the product writes to a customer MUST format money and dates in the workshop's region.                                                                   | 29    |
+| FR-5606 | Changing the currency in settings MUST NOT convert anything already recorded, and the page MUST say so.                                                            | 29    |
+
 ## FR-5500 — Gift cards, deepened
 
 | Ref     | Requirement                                                                                                                                                                        | Phase |

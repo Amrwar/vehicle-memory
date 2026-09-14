@@ -17,6 +17,7 @@ import { prisma } from '@carnet/db';
 
 import { openPayables, openReceivables, postedLines } from './accounting';
 import { revenueByServiceType, retention } from './reports';
+import { regionFor } from './region';
 
 /**
  * Questions in words, answered from the records.
@@ -25,8 +26,6 @@ import { revenueByServiceType, retention } from './reports';
  * its working. Nothing is estimated, nothing is extrapolated, and a question
  * the vocabulary does not recognise is refused with the list of what it does.
  */
-
-const GBP = 'GBP';
 
 export interface Asked {
   question: string;
@@ -86,6 +85,8 @@ async function revenue(
   breakdown: boolean,
   now: Date,
 ): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bounds = periodBounds(period, now);
   const rows = await revenueByServiceType(orgId, bounds);
 
@@ -94,7 +95,7 @@ async function revenue(
   const figure = money(total, GBP);
 
   const reasoning = [
-    `Invoices issued between ${bounds.from.toLocaleDateString('en-GB')} and ${bounds.to.toLocaleDateString('en-GB')}, net of tax.`,
+    `Invoices issued between ${bounds.from.toLocaleDateString(region.locale)} and ${bounds.to.toLocaleDateString(region.locale)}, net of tax.`,
     `${jobs} job${jobs === 1 ? '' : 's'} invoiced.`,
   ];
 
@@ -118,6 +119,8 @@ async function revenue(
 }
 
 async function profit(orgId: string, period: Period, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bounds = periodBounds(period, now);
   const lines = withinPeriod(await postedLines(orgId), bounds.from, bounds.to);
   const pl = profitAndLoss(lines, GBP);
@@ -145,6 +148,8 @@ async function profit(orgId: string, period: Period, now: Date): Promise<Answer>
 }
 
 async function outstanding(orgId: string, now: Date, overdueOnly: boolean): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const open = await openReceivables(orgId);
   const overdue = open.filter((row) => row.dueAt !== null && row.dueAt < now);
   const rows = overdueOnly ? overdue : open;
@@ -174,8 +179,8 @@ async function outstanding(orgId: string, now: Date, overdueOnly: boolean): Prom
           `${row.partyName}: ${formatFigure(row.outstanding)} on ${row.reference}${
             row.dueAt
               ? row.dueAt < now
-                ? `, due ${row.dueAt.toLocaleDateString('en-GB')} and late`
-                : `, due ${row.dueAt.toLocaleDateString('en-GB')}`
+                ? `, due ${row.dueAt.toLocaleDateString(region.locale)} and late`
+                : `, due ${row.dueAt.toLocaleDateString(region.locale)}`
               : ''
           }.`,
       ),
@@ -187,6 +192,8 @@ async function outstanding(orgId: string, now: Date, overdueOnly: boolean): Prom
 }
 
 async function owedToSuppliers(orgId: string, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bills = await openPayables(orgId);
   const total = bills.reduce((sum, row) => sum + row.outstanding.minor, 0);
   const overdue = bills.filter((row) => row.dueAt !== null && row.dueAt < now);
@@ -213,6 +220,8 @@ async function owedToSuppliers(orgId: string, now: Date): Promise<Answer> {
 }
 
 async function cashTaken(orgId: string, period: Period, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bounds = periodBounds(period, now);
   const payments = await prisma.payment.findMany({
     where: { orgId, receivedAt: { gte: bounds.from, lte: bounds.to } },
@@ -283,6 +292,8 @@ async function jobsInShop(orgId: string): Promise<Answer> {
 }
 
 async function awaitingApproval(orgId: string): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const jobs = await prisma.job.findMany({
     where: { orgId, status: 'AWAITING_APPROVAL' },
     select: {
@@ -320,6 +331,8 @@ async function awaitingApproval(orgId: string): Promise<Answer> {
 }
 
 async function stockValue(orgId: string): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const levels = await prisma.stockLevel.findMany({
     where: { product: { orgId, isActive: true } },
     select: { onHand: true, avgCost: true, product: { select: { name: true } } },
@@ -353,6 +366,8 @@ async function stockValue(orgId: string): Promise<Answer> {
    --------------------------------------------------------------------------- */
 
 async function topCustomers(orgId: string, period: Period, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bounds = periodBounds(period, now);
   const invoices = await prisma.invoice.findMany({
     where: { orgId, status: { not: 'VOID' }, issuedAt: { gte: bounds.from, lte: bounds.to } },
@@ -385,6 +400,8 @@ async function topCustomers(orgId: string, period: Period, now: Date): Promise<A
 }
 
 async function lapsed(orgId: string): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const rows = (await retention(orgId, 500)).filter((row) => row.lapsing);
 
   return {
@@ -407,6 +424,7 @@ async function lapsed(orgId: string): Promise<Answer> {
 }
 
 async function dueSoon(orgId: string, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
   const soon = new Date(now.getTime() + 30 * 86_400_000);
   const schedules = await prisma.serviceSchedule.findMany({
     where: { orgId, isActive: true, dueAt: { lte: soon } },
@@ -428,7 +446,7 @@ async function dueSoon(orgId: string, now: Date): Promise<Answer> {
       .slice(0, 8)
       .map(
         (row) =>
-          `${row.vehicle.registration ?? `${row.vehicle.make} ${row.vehicle.model}`}: ${row.name}${row.dueAt ? `, ${row.dueAt.toLocaleDateString('en-GB')}` : ''}.`,
+          `${row.vehicle.registration ?? `${row.vehicle.make} ${row.vehicle.model}`}: ${row.name}${row.dueAt ? `, ${row.dueAt.toLocaleDateString(region.locale)}` : ''}.`,
       ),
     source: { label: 'Reminders', href: '/reminders?days=30' },
     period: 'next 30 days',
@@ -440,6 +458,8 @@ async function dueSoon(orgId: string, now: Date): Promise<Answer> {
    --------------------------------------------------------------------------- */
 
 async function wages(orgId: string, period: Period, now: Date): Promise<Answer> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const bounds = periodBounds(period, now);
   const runs = await prisma.payrollRun.findMany({
     where: { orgId, periodEnd: { gte: bounds.from, lte: bounds.to } },
@@ -455,7 +475,7 @@ async function wages(orgId: string, period: Period, now: Date): Promise<Answer> 
       'Gross pay from payroll runs whose period ended in the window. Tax and pension are worked out by the payroll software, not here.',
       ...runs.map(
         (run) =>
-          `Period to ${run.periodEnd.toLocaleDateString('en-GB')}: ${formatFigure(fromDecimal(run.gross.toString(), GBP))} for ${run.employeeCount} ${run.employeeCount === 1 ? 'person' : 'people'}, ${run.status.toLowerCase()}.`,
+          `Period to ${run.periodEnd.toLocaleDateString(region.locale)}: ${formatFigure(fromDecimal(run.gross.toString(), GBP))} for ${run.employeeCount} ${run.employeeCount === 1 ? 'person' : 'people'}, ${run.status.toLowerCase()}.`,
       ),
     ],
     source: { label: 'Payroll', href: '/payroll' },
@@ -469,6 +489,8 @@ async function wages(orgId: string, period: Period, now: Date): Promise<Answer> 
 
 /** This month against last, in sentences. */
 export async function revenueObservations(orgId: string, now = new Date()): Promise<string[]> {
+  const region = await regionFor(orgId);
+  const GBP = region.currency;
   const current = periodBounds('month', now);
   const previous = periodBounds('last-month', now);
 

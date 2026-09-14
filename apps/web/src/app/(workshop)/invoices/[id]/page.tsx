@@ -237,7 +237,7 @@ export default async function InvoicePage({
 }) {
   const { id } = await params;
   const notice = await searchParams;
-  const { orgId, user } = await requireSession('invoice:read');
+  const { orgId, user, region } = await requireSession('invoice:read');
 
   const detail = await invoiceDetail(orgId, id);
   if (!detail) notFound();
@@ -268,7 +268,7 @@ export default async function InvoicePage({
   const spendable = points ? spendableAgainst(points.balance, money.outstanding.minor) : 0;
 
   const format = (minor: number) =>
-    new Intl.NumberFormat('en-GB', { style: 'currency', currency: invoice.currency }).format(
+    new Intl.NumberFormat(region.locale, { style: 'currency', currency: invoice.currency }).format(
       minor / 100,
     );
 
@@ -413,7 +413,7 @@ export default async function InvoicePage({
                     {invoice.payments.map((payment) => (
                       <Tr key={payment.id}>
                         <Td>
-                          {payment.receivedAt.toLocaleString('en-GB', {
+                          {payment.receivedAt.toLocaleString(region.locale, {
                             dateStyle: 'medium',
                             timeStyle: 'short',
                           })}
@@ -454,7 +454,7 @@ export default async function InvoicePage({
                         </Td>
                         <Td>{note.reason}</Td>
                         <Td>
-                          {note.issuedAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}
+                          {note.issuedAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}
                         </Td>
                         <Td numeric>
                           <Money amount={-Number(note.amount)} currency={invoice.currency} />
@@ -472,7 +472,9 @@ export default async function InvoicePage({
                           {row.reference ? <span className="datum"> · {row.reference}</span> : null}
                         </Td>
                         <Td>
-                          {row.refundedAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}
+                          {row.refundedAt.toLocaleDateString(region.locale, {
+                            dateStyle: 'medium',
+                          })}
                         </Td>
                         <Td numeric>
                           <Money amount={-Number(row.amount)} currency={invoice.currency} />
@@ -508,7 +510,7 @@ export default async function InvoicePage({
                   {
                     label: 'Due',
                     value: invoice.dueAt
-                      ? invoice.dueAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })
+                      ? invoice.dueAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })
                       : '—',
                   },
                 ]}
@@ -561,14 +563,14 @@ export default async function InvoicePage({
             <Card>
               <CardHeader
                 title="Use their points"
-                description={`${points.balance.toLocaleString('en-GB')} held, worth ${format(points.valueMinor)}`}
+                description={`${points.balance.toLocaleString(region.locale)} held, worth ${format(points.valueMinor)}`}
               />
               <form action={redeem}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
                   <Field
                     label="Points to use"
-                    hint={`Up to ${spendable.toLocaleString('en-GB')}, which is ${format(spendable)} off the bill`}
+                    hint={`Up to ${spendable.toLocaleString(region.locale)}, which is ${format(spendable)} off the bill`}
                     htmlFor="redeem-points"
                   >
                     <Input
@@ -586,8 +588,11 @@ export default async function InvoicePage({
                   </Field>
                   {points.expiring.points > 0 && points.expiring.on ? (
                     <p className="text-[12px] text-(--warning)">
-                      {points.expiring.points.toLocaleString('en-GB')} of these lapse on{' '}
-                      {points.expiring.on.toLocaleDateString('en-GB', { dateStyle: 'medium' })}.
+                      {points.expiring.points.toLocaleString(region.locale)} of these lapse on{' '}
+                      {points.expiring.on.toLocaleDateString(region.locale, {
+                        dateStyle: 'medium',
+                      })}
+                      .
                     </p>
                   ) : null}
                   <Button type="submit" variant="secondary">

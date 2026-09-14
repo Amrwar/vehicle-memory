@@ -1,4 +1,4 @@
-import { customerSummary, type SummaryFacts, verifyAgainstFacts } from '@carnet/core';
+import { customerSummary, type SummaryFacts, verifyAgainstFacts, safeLocale } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
@@ -41,7 +41,7 @@ export async function summaryFactsFor(orgId: string, jobId: string): Promise<Sum
       odometerOutKm: true,
       odometerInKm: true,
       customer: { select: { displayName: true } },
-      org: { select: { name: true } },
+      org: { select: { name: true, locale: true } },
       vehicle: { select: { make: true, model: true, year: true, registration: true } },
       labourLines: { orderBy: { sortOrder: 'asc' }, select: { description: true, hours: true } },
       partLines: {
@@ -101,9 +101,10 @@ export async function summaryFactsFor(orgId: string, jobId: string): Promise<Sum
       })) ?? [],
     declined: job.estimates[0]?.lines.map((line) => line.description) ?? [],
     total: invoice
-      ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: invoice.currency }).format(
-          Number(invoice.total),
-        )
+      ? new Intl.NumberFormat(safeLocale(job.org.locale), {
+          style: 'currency',
+          currency: invoice.currency,
+        }).format(Number(invoice.total))
       : null,
     workshopName: job.org.name,
   };

@@ -7,6 +7,7 @@ import {
   QuoteError,
   quoteMessage,
   type QuoteStatus,
+  safeLocale,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
@@ -40,7 +41,7 @@ export async function sendEstimate(input: {
       currency: true,
       jobId: true,
       _count: { select: { lines: true } },
-      org: { select: { name: true } },
+      org: { select: { name: true, locale: true } },
       job: {
         select: {
           number: true,
@@ -69,7 +70,7 @@ export async function sendEstimate(input: {
     estimate.job.vehicle.registration ||
     'vehicle';
 
-  const total = new Intl.NumberFormat('en-GB', {
+  const total = new Intl.NumberFormat(safeLocale(estimate.org.locale), {
     style: 'currency',
     currency: estimate.currency,
   }).format(Number(estimate.total));
