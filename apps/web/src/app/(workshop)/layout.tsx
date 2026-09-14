@@ -44,7 +44,7 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
         userName={user.name}
         approvalsWaiting={approvalsWaiting}
       />
-      <main id="main" className="lg:pl-64">
+      <main id="main" tabIndex={-1} className="outline-none lg:pl-64">
         <div className="mx-auto max-w-[1500px] px-4 pb-16 pt-16 lg:px-8 lg:pt-8">
           {/* Reads searchParams, so it needs its own boundary or it would
               opt the whole layout out of static rendering. */}

@@ -120,10 +120,6 @@ export default async function InspectPage({
 
   return (
     <div className="min-h-dvh bg-(--ground) pb-24">
-      <a href="#main" className="skip-link">
-        Skip to content
-      </a>
-
       <header className="sticky top-0 z-10 border-b border-(--border) bg-(--surface)">
         <div className="mx-auto max-w-3xl px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -159,7 +155,7 @@ export default async function InspectPage({
         </div>
       </header>
 
-      <main id="main" className="mx-auto max-w-3xl px-4 py-5">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-5 outline-none">
         {error ? (
           <Alert tone="danger" className="mb-4" title="Not recorded">
             {error}

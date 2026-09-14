@@ -26,10 +26,6 @@ export function PortalShell({
 }) {
   return (
     <div className="min-h-dvh bg-(--ground)">
-      <a href="#main" className="skip-link">
-        Skip to content
-      </a>
-
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3.5">
           <Link href={signedIn ? '/portal' : '/'} className="flex items-center gap-2">
@@ -78,7 +74,7 @@ export function PortalShell({
         ) : null}
       </header>
 
-      <main id="main" className="mx-auto max-w-2xl px-4 py-6">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-2xl px-4 py-6 outline-none">
         {children}
       </main>
     </div>
