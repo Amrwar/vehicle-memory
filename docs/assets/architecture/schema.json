@@ -1,0 +1,1445 @@
+{
+  "builtOn": "2026-09-14",
+  "counts": {
+    "models": 127,
+    "enums": 62,
+    "fields": 1932
+  },
+  "enums": [
+    "OrgPlan",
+    "Role",
+    "FuelType",
+    "Transmission",
+    "VehicleEventType",
+    "VerificationLevel",
+    "AttachmentKind",
+    "OwnerKind",
+    "OdometerSource",
+    "OdometerAnomaly",
+    "AccessScope",
+    "GrantReason",
+    "RecallSeverity",
+    "RecallStatus",
+    "CustomerKind",
+    "BookingStatus",
+    "BookingSource",
+    "JobStatus",
+    "PartLineStatus",
+    "MeasurementType",
+    "WheelPosition",
+    "InspectionStatus",
+    "Severity",
+    "EstimateStatus",
+    "LineKind",
+    "LineDecision",
+    "SequenceKind",
+    "InvoiceStatus",
+    "PaymentMethod",
+    "PayrollRunStatus",
+    "VehicleDocumentKind",
+    "AssistantKind",
+    "MessageChannel",
+    "MessageStatus",
+    "MovementType",
+    "PurchaseRequestStatus",
+    "PurchaseOrderStatus",
+    "BillStatus",
+    "AccountType",
+    "EmploymentType",
+    "TimesheetStatus",
+    "AbsenceType",
+    "SkillLevel",
+    "FitmentSource",
+    "ReviewRouting",
+    "TokenPurpose",
+    "SuppressionReason",
+    "VehicleClaimStatus",
+    "CommissionBasis",
+    "TransferStatus",
+    "CounterSaleStatus",
+    "TenderKind",
+    "ExpenseCategory",
+    "ExpenseStatus",
+    "PaidFrom",
+    "AutomationActionStatus",
+    "CampaignStatus",
+    "ConsentSource",
+    "CoverKind",
+    "ClaimStatus",
+    "GiftCardEntryKind",
+    "DepositKind"
+  ],
+  "domains": [
+    {
+      "key": "tenancy",
+      "title": "Tenancy, identity and the audit trail",
+      "models": [
+        {
+          "name": "Organization",
+          "comment": "",
+          "fields": 23,
+          "relations": [],
+          "scope": "global"
+        },
+        {
+          "name": "Location",
+          "comment": "",
+          "fields": 19,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Bay",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "Location"
+          ],
+          "scope": "through Location"
+        },
+        {
+          "name": "User",
+          "comment": "",
+          "fields": 12,
+          "relations": [],
+          "scope": "global"
+        },
+        {
+          "name": "Membership",
+          "comment": "A user's membership of one organisation, carrying their role there.",
+          "fields": 9,
+          "relations": [
+            "User",
+            "Organization",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Session",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "LoginAttempt",
+          "comment": "Rate-limiting evidence for authentication. FR-110.",
+          "fields": 5,
+          "relations": [],
+          "scope": "global"
+        },
+        {
+          "name": "AuthToken",
+          "comment": "A one-time link sent to an address. Email verification and password reset are the same mechanism with different windows, so they are one table. Only the digest is stored: a link that leaks cannot be read back out of the database, which is the same rule every other capability in this product follows.",
+          "fields": 8,
+          "relations": [
+            "User"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "Invitation",
+          "comment": "",
+          "fields": 12,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ApiKey",
+          "comment": "",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "AuditLog",
+          "comment": "Immutable record of every state-changing action. FR-109.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "OutboxEvent",
+          "comment": "Transactional outbox. Domain events are written in the same transaction as the state change, then dispatched by the worker. At-least-once, so every handler must be idempotent. ADR-0007.",
+          "fields": 9,
+          "relations": [],
+          "scope": "organisation"
+        },
+        {
+          "name": "SyncedAction",
+          "comment": "One action a device recorded offline and the server has since applied. Exists for one reason: a flush interrupted halfway must not write everything again when the signal comes back. The device generates the id before it sends anything, and this table is the record of which ids have already been honoured. Only applied actions are kept. A conflict stays on the device with the reason it was refused, because the person holding the device is the one who has to decide what to do about it, and a row here would make the retry read as a duplicate and disappear.",
+          "fields": 8,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "key": "vehicle",
+      "title": "The vehicle and its passport",
+      "models": [
+        {
+          "name": "Vehicle",
+          "comment": "A physical vehicle. Exists independently of any owner or workshop. Globally unique by VIN. ADR-0004.",
+          "fields": 25,
+          "relations": [],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleEvent",
+          "comment": "One immutable fact about a vehicle. APPEND ONLY. There is no update path in the application. Corrections append a superseding event. FR-401, FR-406.",
+          "fields": 18,
+          "relations": [
+            "Vehicle",
+            "Organization",
+            "User",
+            "VehicleEvent"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleEventAttachment",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "VehicleEvent"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleOwnership",
+          "comment": "Who held the vehicle, and when. At most one open row per vehicle. V5.",
+          "fields": 9,
+          "relations": [
+            "Vehicle",
+            "User"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "OdometerReading",
+          "comment": "Every odometer reading ever taken, including implausible ones. An impossible reading is evidence, not an error. FR-307, invariant V7.",
+          "fields": 9,
+          "relations": [
+            "Vehicle",
+            "Organization"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleAccessGrant",
+          "comment": "A workshop's or person's right to read or write a vehicle's passport. A workshop earns write access by servicing the vehicle. FR-409.",
+          "fields": 11,
+          "relations": [
+            "Vehicle",
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PassportShare",
+          "comment": "An anonymous, expiring, revocable link to one vehicle's passport. FR-409.",
+          "fields": 10,
+          "relations": [
+            "Vehicle",
+            "User"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "PassportShareAccess",
+          "comment": "Every read of a shared passport, visible to the owner. FR-410.",
+          "fields": 5,
+          "relations": [
+            "PassportShare"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "Recall",
+          "comment": "",
+          "fields": 8,
+          "relations": [],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleRecall",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Vehicle",
+            "Recall"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleDocument",
+          "comment": "A key that lets something the workshop already runs read its records. Phase 18. The token is shown once and only its digest is stored, the same treatment as a session or a share link. A key belongs to one organisation and can read only that organisation's records plus the vehicle histories it is entitled to, exactly as a signed-in owner could. The vehicle's paperwork. Phase 20. Documents belong to the car, not to the workshop that scanned them, so a workshop with read access to the vehicle sees them and so does the owner. Nothing is deleted: a removed document keeps its row and its reason.",
+          "fields": 17,
+          "relations": [
+            "Vehicle",
+            "Organization",
+            "User"
+          ],
+          "scope": "global"
+        },
+        {
+          "name": "VehicleClaim",
+          "comment": "A customer asking for a vehicle to be put on their account. A VIN is visible through a windscreen and a plate from further away, so neither is evidence of anything. Every claim is answered by a person at the workshop that serviced the vehicle, and the product never decides one on its own: it has no way to tell an owner from somebody who walked past the car.",
+          "fields": 10,
+          "relations": [
+            "User",
+            "Vehicle",
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PartFitment",
+          "comment": "Which vehicles a part fits. Deliberately not inferred from anything. Guessing which pads fit a particular car puts the wrong pads on it, and the person who finds out is braking. Until a fitment provider is wired in these rows come from a person, and the absence of a row means nobody has said rather than that the part does not fit.",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Product",
+            "User"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "key": "customer",
+      "title": "Customers, bookings and the diary",
+      "models": [
+        {
+          "name": "Customer",
+          "comment": "",
+          "fields": 27,
+          "relations": [
+            "Organization",
+            "User",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Tag",
+          "comment": "",
+          "fields": 4,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Booking",
+          "comment": "",
+          "fields": 21,
+          "relations": [
+            "Organization",
+            "Location",
+            "Customer",
+            "Vehicle",
+            "Bay",
+            "User",
+            "Job"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JobType",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ServiceItem",
+          "comment": "Catalogue of standard services with book times. FR-615.",
+          "fields": 10,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ServiceSchedule",
+          "comment": "Next service due, by date and by projected mileage. FR-1504.",
+          "fields": 14,
+          "relations": [
+            "Organization",
+            "Vehicle"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "FleetAgreement",
+          "comment": "What a fleet customer has agreed. Phase 16. One row per company customer, and only for those who have negotiated terms. Its absence means list price, which is how every other customer is treated and how a fleet without an agreement should be too.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "Customer"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ConsentChange",
+          "comment": "Every change to a marketing permission, kept forever. Consent is only worth anything if you can show when it was given and by what route. A boolean on a customer row proves nothing: it shows the current state and no history, and the one time it matters is the time somebody asks how you came to have it. Written by a database trigger, so a flag cannot be flipped without the trail.",
+          "fields": 8,
+          "relations": [
+            "Customer"
+          ],
+          "scope": "through Customer"
+        }
+      ]
+    },
+    {
+      "key": "job",
+      "title": "The job",
+      "models": [
+        {
+          "name": "Job",
+          "comment": "The central aggregate. Everything in the workshop hangs off the Job.",
+          "fields": 29,
+          "relations": [
+            "Organization",
+            "Location",
+            "Customer",
+            "Customer",
+            "Vehicle",
+            "Bay",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JobTechnician",
+          "comment": "",
+          "fields": 4,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobJobType",
+          "comment": "",
+          "fields": 2,
+          "relations": [
+            "Job",
+            "JobType"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobTag",
+          "comment": "",
+          "fields": 2,
+          "relations": [
+            "Job",
+            "Tag"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobStatusEvent",
+          "comment": "The progress trail shown on the job screen. FR-604.",
+          "fields": 7,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobTask",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobLabourLine",
+          "comment": "Charged time. Distinct from TimeEntry, which is worked time. See the ubiquitous language in docs/02-design/01-domain-model.md section 2.",
+          "fields": 9,
+          "relations": [
+            "Job",
+            "TaxRate"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobPartLine",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Job",
+            "Product",
+            "TaxRate"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobFeeLine",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "Job",
+            "TaxRate"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobNote",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobAttachment",
+          "comment": "",
+          "fields": 11,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "TimeEntry",
+          "comment": "Worked time, used for labour cost. Distinct from JobLabourLine. A technician has at most one open entry. Invariant J5.",
+          "fields": 10,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "QualityCheck",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "JobFollowUp",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Job",
+            "User"
+          ],
+          "scope": "through Job"
+        }
+      ]
+    },
+    {
+      "key": "inspection",
+      "title": "Inspections and estimates",
+      "models": [
+        {
+          "name": "InspectionTemplate",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "InspectionTemplateSection",
+          "comment": "",
+          "fields": 4,
+          "relations": [
+            "InspectionTemplate"
+          ],
+          "scope": "through InspectionTemplate"
+        },
+        {
+          "name": "InspectionTemplateItem",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "InspectionTemplateSection"
+          ],
+          "scope": "through InspectionTemplateSection"
+        },
+        {
+          "name": "Inspection",
+          "comment": "",
+          "fields": 11,
+          "relations": [
+            "Job",
+            "InspectionTemplate",
+            "User"
+          ],
+          "scope": "through Job"
+        },
+        {
+          "name": "InspectionResult",
+          "comment": "",
+          "fields": 14,
+          "relations": [
+            "Inspection",
+            "InspectionTemplateItem"
+          ],
+          "scope": "through Inspection"
+        },
+        {
+          "name": "InspectionPhoto",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "InspectionResult"
+          ],
+          "scope": "through InspectionResult"
+        },
+        {
+          "name": "Estimate",
+          "comment": "",
+          "fields": 18,
+          "relations": [
+            "Organization",
+            "Job",
+            "User",
+            "Estimate"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "EstimateLine",
+          "comment": "",
+          "fields": 15,
+          "relations": [
+            "Estimate",
+            "TaxRate",
+            "InspectionResult"
+          ],
+          "scope": "through Estimate"
+        },
+        {
+          "name": "EstimateShare",
+          "comment": "The secure link sent to the customer. Unguessable, expiring, revocable.",
+          "fields": 10,
+          "relations": [
+            "Estimate"
+          ],
+          "scope": "through Estimate"
+        },
+        {
+          "name": "EstimateApproval",
+          "comment": "The recorded customer decision. Immutable evidence. FR-807.",
+          "fields": 10,
+          "relations": [
+            "Estimate"
+          ],
+          "scope": "through Estimate"
+        }
+      ]
+    },
+    {
+      "key": "invoice",
+      "title": "Invoices, payments and refunds",
+      "models": [
+        {
+          "name": "TaxRate",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "DocumentSequence",
+          "comment": "Gapless per-organisation document numbering. A database sequence would leave gaps on rollback, which is not acceptable for tax documents. FR-902.",
+          "fields": 5,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Invoice",
+          "comment": "",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "Job",
+            "Customer"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "InvoiceLine",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Invoice",
+            "TaxRate",
+            "Job"
+          ],
+          "scope": "through Invoice"
+        },
+        {
+          "name": "Payment",
+          "comment": "",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "Invoice",
+            "Customer",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CreditNote",
+          "comment": "An issued invoice is immutable. Corrections are credit notes. FR-907.",
+          "fields": 8,
+          "relations": [
+            "Organization",
+            "Invoice"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Refund",
+          "comment": "Money going back to a customer. Phase 16. A refund is its own record rather than a negative payment, because the two answer different questions. A payment says what came in; a refund says what went back, why, and against which credit note. Reporting that nets the two together silently loses the second answer, and the second answer is the one an argument at the counter turns on.",
+          "fields": 12,
+          "relations": [
+            "Organization",
+            "Invoice",
+            "CreditNote",
+            "Customer",
+            "User"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "key": "tender",
+      "title": "The counter, gift cards and money held",
+      "models": [
+        {
+          "name": "Deposit",
+          "comment": "Money held for a customer: a deposit taken before the work, or a credit kept on account after a refund. A liability until it goes against an invoice or back to the customer. Phase 30.",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "Customer",
+            "Job",
+            "User",
+            "Refund"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "DepositMovement",
+          "comment": "One movement of money held: negative when it goes against a bill or back to the customer. The taking itself is the deposit row.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Deposit",
+            "Payment",
+            "Invoice",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "GiftCard",
+          "comment": "Money taken in advance for work not yet chosen. A liability until it is spent, never revenue on the day it is sold. Phase 26.",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "Customer",
+            "User",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "GiftCardEntry",
+          "comment": "One movement on a card. Positive when loaded, negative when spent.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "GiftCard",
+            "Payment",
+            "Invoice",
+            "CounterSale",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CounterSale",
+          "comment": "",
+          "fields": 20,
+          "relations": [
+            "Organization",
+            "Location",
+            "Customer",
+            "User",
+            "TillSession",
+            "CounterSale"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CounterSaleLine",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "CounterSale",
+            "Product",
+            "TaxRate"
+          ],
+          "scope": "through CounterSale"
+        },
+        {
+          "name": "CounterSaleTender",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "CounterSale"
+          ],
+          "scope": "through CounterSale"
+        },
+        {
+          "name": "TillSession",
+          "comment": "A day at the till. Opened with a float, closed with a count, and the variance between the two is reported rather than absorbed.",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Location",
+            "User"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "key": "ledger",
+      "title": "The ledger, expenses and banking",
+      "models": [
+        {
+          "name": "Account",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "Account"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "FiscalPeriod",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JournalEntry",
+          "comment": "Every entry must balance. An unbalanced entry is rejected. FR-1202.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "FiscalPeriod",
+            "JournalEntry"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JournalLine",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "JournalEntry",
+            "Account"
+          ],
+          "scope": "through JournalEntry"
+        },
+        {
+          "name": "Expense",
+          "comment": "Money out that is not a supplier bill. Until this existed these were hand-written journal entries, which works exactly as long as the person writing them knows double-entry.",
+          "fields": 20,
+          "relations": [
+            "Organization",
+            "Location",
+            "Employee",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "BankAccount",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "BankStatement",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "BankAccount"
+          ],
+          "scope": "through BankAccount"
+        },
+        {
+          "name": "BankStatementLine",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "BankStatement"
+          ],
+          "scope": "through BankStatement"
+        }
+      ]
+    },
+    {
+      "key": "stock",
+      "title": "Parts and stock",
+      "models": [
+        {
+          "name": "ProductCategory",
+          "comment": "",
+          "fields": 4,
+          "relations": [
+            "Organization",
+            "ProductCategory"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Product",
+          "comment": "",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "ProductCategory"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Warehouse",
+          "comment": "",
+          "fields": 6,
+          "relations": [
+            "Organization",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "StockLevel",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "Product",
+            "Warehouse"
+          ],
+          "scope": "through Product"
+        },
+        {
+          "name": "StockMovement",
+          "comment": "",
+          "fields": 12,
+          "relations": [
+            "Organization",
+            "Product",
+            "Warehouse"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "StockReservation",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Product",
+            "Warehouse",
+            "JobPartLine"
+          ],
+          "scope": "through Product"
+        },
+        {
+          "name": "StockTransfer",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Warehouse",
+            "Warehouse",
+            "User",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "StockTransferLine",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "StockTransfer",
+            "Product"
+          ],
+          "scope": "through StockTransfer"
+        },
+        {
+          "name": "Warranty",
+          "comment": "What a workshop stands behind, and for how long. Cover runs from the day the work was done, not the day the part was sold, and it runs out two ways: a period and a distance, whichever comes first. A van reaches twenty thousand miles in five months, so a check that reads only the calendar gives away a year of free parts.",
+          "fields": 20,
+          "relations": [
+            "Organization",
+            "Job",
+            "Vehicle",
+            "Product",
+            "Supplier",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "WarrantyClaim",
+          "comment": "Somebody saying the work did not hold. A claim can be raised against expired cover, because a workshop does settle those out of goodwill and that decision is worth recording rather than hiding. What the database insists on is that a goodwill claim says why.",
+          "fields": 14,
+          "relations": [
+            "Warranty",
+            "User",
+            "Job"
+          ],
+          "scope": "through Warranty"
+        }
+      ]
+    },
+    {
+      "key": "purchasing",
+      "title": "Suppliers and purchasing",
+      "models": [
+        {
+          "name": "Supplier",
+          "comment": "",
+          "fields": 12,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PurchaseRequest",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PurchaseOrder",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Supplier",
+            "PurchaseRequest"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PurchaseOrderLine",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "PurchaseOrder",
+            "Product"
+          ],
+          "scope": "through PurchaseOrder"
+        },
+        {
+          "name": "GoodsReceipt",
+          "comment": "",
+          "fields": 5,
+          "relations": [
+            "PurchaseOrder"
+          ],
+          "scope": "through PurchaseOrder"
+        },
+        {
+          "name": "GoodsReceiptLine",
+          "comment": "",
+          "fields": 5,
+          "relations": [
+            "GoodsReceipt",
+            "PurchaseOrderLine"
+          ],
+          "scope": "through GoodsReceipt"
+        },
+        {
+          "name": "SupplierBill",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Supplier",
+            "PurchaseOrder"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "SupplierPayment",
+          "comment": "Money going to a supplier. Phase 16. One payment can settle several bills, and one bill can be settled by several payments, so the link between them is its own table with an amount on it. A remittance advice is a list of those allocations, which is why they are stored rather than derived.",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Supplier",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "SupplierPaymentAllocation",
+          "comment": "",
+          "fields": 4,
+          "relations": [
+            "SupplierPayment",
+            "SupplierBill"
+          ],
+          "scope": "through SupplierPayment"
+        }
+      ]
+    },
+    {
+      "key": "people",
+      "title": "People, skills and payroll",
+      "models": [
+        {
+          "name": "Employee",
+          "comment": "",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "User",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PayRate",
+          "comment": "Effective-dated. A rate is never edited, only closed and superseded, so asking what an hour cost means asking what it cost on that day. ADR-0013.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Employee"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "AttendanceRecord",
+          "comment": "On site and being paid. Distinct from TimeEntry, which is time on a job. The gap between the two is what utilisation measures.",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Employee",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Timesheet",
+          "comment": "A pay period for one person. Approved once, then it stops moving: payroll is the one place where \"somebody edited it afterwards\" is unrecoverable.",
+          "fields": 20,
+          "relations": [
+            "Organization",
+            "Employee",
+            "User",
+            "PayrollRun"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Absence",
+          "comment": "",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Employee"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Certification",
+          "comment": "Qualifications with an expiry. An MOT tester whose licence lapsed is a legal problem, not a reminder, so this is queried rather than filed.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Employee"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Skill",
+          "comment": "A kind of work somebody can be signed off on. Named by the workshop, not by us: a truck garage and a tyre bay do not share a vocabulary.",
+          "fields": 8,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "EmployeeSkill",
+          "comment": "One person signed off on one skill. The absence of a row means they cannot do it. That is deliberate: a NONE level would be a row asserting an absence, and the two would eventually disagree.",
+          "fields": 9,
+          "relations": [
+            "Employee",
+            "Skill",
+            "User"
+          ],
+          "scope": "through Employee"
+        },
+        {
+          "name": "JobTypeSkill",
+          "comment": "What a kind of work needs before somebody may be given it.",
+          "fields": 5,
+          "relations": [
+            "JobType",
+            "Skill"
+          ],
+          "scope": "through JobType"
+        },
+        {
+          "name": "WorkingPattern",
+          "comment": "When somebody is contracted to be here. Replaces the single `dailyCapacityHours` figure on a site, which was a number typed once and knew nothing about holidays, part-time hours or the apprentice at college on Fridays. One row per person per weekday they work; a weekday with no row is a day they are not in.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Employee"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PayrollRun",
+          "comment": "One pay period, exported once. Phase 16. The product does not run payroll. It hands approved timesheets to whatever does, as a file, and records that it did. The run exists so the same timesheets cannot be handed over twice and so the wages posting has a single document behind it.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CommissionScheme",
+          "comment": "",
+          "fields": 9,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CommissionBand",
+          "comment": "Marginal bands. The rate applies to the part of the basis above `from`, never to the whole of it: a cliff edge distorts behaviour at month end.",
+          "fields": 5,
+          "relations": [
+            "CommissionScheme"
+          ],
+          "scope": "through CommissionScheme"
+        },
+        {
+          "name": "CommissionAward",
+          "comment": "",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Employee",
+            "CommissionScheme"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    },
+    {
+      "key": "communication",
+      "title": "Communication, retention and automation",
+      "models": [
+        {
+          "name": "MessageLog",
+          "comment": "",
+          "fields": 16,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "InboundMessage",
+          "comment": "Something a customer sent in. Matched to a customer and a job with a stated confidence rather than a silent assignment: a reply filed against the wrong job is worse than one filed against nothing, because somebody reads it about another car.",
+          "fields": 15,
+          "relations": [
+            "Organization",
+            "Customer",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "SuppressedAddress",
+          "comment": "An address nothing may be sent to. A mailbox that does not exist today will not exist tomorrow, and carrying on sending to it is how a sender's reputation is destroyed: providers read a high bounce rate as evidence the list was bought rather than earned, and start filing everything else as spam. Lifted by a person, never automatically. An address that starts working again is usually an address somebody corrected, and correcting it is the moment to say so.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "DeliveryEvent",
+          "comment": "One thing a provider said about a message after it left. Kept as its own rows rather than folded into the message, because a single message produces several and they arrive out of order. The message carries the conclusion; this carries the account of how it got there.",
+          "fields": 8,
+          "relations": [
+            "Organization",
+            "MessageLog"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ReviewRequest",
+          "comment": "One customer asked how a job went. One per job, enforced by a unique index. Asking twice about the same repair is how a workshop teaches somebody to ignore it.",
+          "fields": 18,
+          "relations": [
+            "Organization",
+            "Job",
+            "Customer",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "LoyaltyEntry",
+          "comment": "One movement of points, positive or negative. The balance is the sum of these rather than a figure somebody edits, so it can never drift from the history that produced it.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Customer",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Referral",
+          "comment": "A code one customer gives another.",
+          "fields": 11,
+          "relations": [
+            "Organization",
+            "Customer",
+            "Customer",
+            "Job"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "AutomationRule",
+          "comment": "A rule is trigger, conditions and actions. Deliberately not a graph: a rule cannot trigger a rule, because chained automation is impossible to reason about after the third link and impossible to debug at all.",
+          "fields": 10,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "AutomationRun",
+          "comment": "One firing, against one subject. Written whether or not anything was sent, because \"why did this not fire\" is the question people actually ask.",
+          "fields": 8,
+          "relations": [
+            "AutomationRule"
+          ],
+          "scope": "through AutomationRule"
+        },
+        {
+          "name": "AutomationAction",
+          "comment": "A scheduled action, waiting for its delay to elapse. Kept as a row rather than a timer so a restart does not lose it and a person can see what is about to happen and stop it.",
+          "fields": 9,
+          "relations": [
+            "AutomationRun"
+          ],
+          "scope": "through AutomationRun"
+        },
+        {
+          "name": "Campaign",
+          "comment": "A segment and a message. The segment is stored as its rules rather than as a list of people, because a list goes stale and consent withdrawn on Tuesday must stop Wednesday's send.",
+          "fields": 13,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CampaignRecipient",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Campaign",
+            "Customer"
+          ],
+          "scope": "through Campaign"
+        },
+        {
+          "name": "AssistantExchange",
+          "comment": "One exchange with the assistant. Phase 22. The prompt, the reply, whether a model touched it and what it cost, so an owner can see what the assistant is doing and what it is spending. The reply is what the person saw; a model's rejected output is not kept.",
+          "fields": 15,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        }
+      ]
+    }
+  ]
+}

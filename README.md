@@ -9,6 +9,8 @@ verified, tamper-evident entry to the vehicle's permanent record.
 
 [Documentation](docs/README.md) ·
 [Business case](docs/Carnet-Business-Case.docx) ·
+[System architecture](docs/Carnet-System-Architecture.pdf) ·
+[Design book](docs/Carnet-Design-Book.pdf) ·
 [Architecture decisions](docs/03-adr/) ·
 [Getting started](docs/04-engineering/01-getting-started.md)
 
