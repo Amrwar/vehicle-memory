@@ -1493,6 +1493,23 @@ later bill. A receipt for every payment, printable and sent.
 **Exit.** A customer pays two hundred pounds before the work, the books show
 it as owed, the invoice takes it, and the customer holds a receipt for each.
 
+**Status.** Built. Money held for a customer is one row type with a kind:
+a deposit taken before the work, tied to a job when there is one, or a
+credit kept on account when a refund is answered with "keep it as credit"
+rather than sent back. Both post as a liability and never as revenue. What
+is held is never stored; it is what came in less what went against bills or
+back, and every movement says what it was for. On the invoice page, "Use
+money held" puts it against the bill as a payment of kind DEPOSIT, oldest
+first, as much as the bill needs unless an amount is typed, refused rather
+than clamped; the posting releases the liability and never touches the
+bank. The customer's page shows what is held with a way to give it back,
+with a reason, the way money goes. Every payment now sends the customer a
+receipt and has a printable one at /payments/[id]/receipt, built for
+paper, with the chrome hidden when it prints. The verification script takes
+a deposit, has the invoice take it, sends and reads the receipt, keeps a
+refund as credit and spends it on the next bill, returns money held, and
+checks every posting and every refusal against a real database.
+
 ---
 
 ## Phase 31 — Card payment through a provider

@@ -103,10 +103,10 @@ rather than on work: taking a card payment online, which needs a payment
 provider, and the payroll file in a provider's own layout, which needs a named
 provider. Everything else in these three tables is built and covered by a
 verification script or a crawl, and the [feature map](09-feature-map.md)
-counts the finer-grained capabilities the same way: 158 built, 4 partial, 24
+counts the finer-grained capabilities the same way: 160 built, 4 partial, 22
 missing, each named and assigned a phase.
 
-The phases these tables were last reconciled against are 1 to 29, the last
+The phases these tables were last reconciled against are 1 to 30, the last
 shipped on 14 September 2026. The [roadmap](06-roadmap.md) carries a status
 paragraph under each.
 

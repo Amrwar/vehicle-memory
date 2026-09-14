@@ -30,6 +30,7 @@ import {
   LoyaltyError,
   methodLabel,
 } from '@/lib/loyalty';
+import { DepositError, heldFor, returnHeld, takeDeposit } from '@/lib/deposits';
 import { redeemCode, referralCardFor } from '@/lib/referrals';
 import { messagesFor, timelineFor } from '@/lib/timeline';
 
@@ -74,6 +75,68 @@ async function prefer(formData: FormData) {
   }
 
   redirect(`/customers/${customerId}?saved=preference`);
+}
+
+/**
+ * A deposit before the work: money handed over now, a liability until the
+ * invoice takes it. Tied to a job when there is one, so the job's page can
+ * say what is already in hand.
+ */
+async function deposit(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const customerId = String(formData.get('customerId') ?? '');
+  const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
+  const pounds = Number(typed);
+
+  try {
+    await takeDeposit({
+      orgId,
+      userId: user.userId,
+      customerId,
+      jobId: String(formData.get('jobId') ?? '') || null,
+      amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
+      method: String(formData.get('method') ?? 'CARD'),
+      reference: String(formData.get('reference') ?? ''),
+      note: String(formData.get('note') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof DepositError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/customers/${customerId}?saved=deposit`);
+}
+
+/** Money held going back, with a reason. */
+async function giveBack(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const customerId = String(formData.get('customerId') ?? '');
+  const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
+  const pounds = Number(typed);
+
+  try {
+    await returnHeld({
+      orgId,
+      userId: user.userId,
+      depositId: String(formData.get('depositId') ?? ''),
+      amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
+      method: String(formData.get('method') ?? 'BANK_TRANSFER'),
+      reason: String(formData.get('reason') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof DepositError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/customers/${customerId}?saved=returned`);
 }
 
 /**
@@ -153,6 +216,7 @@ export default async function CustomerPage({
     loyaltyCardFor(orgId, customerId),
     referralCardFor(orgId, customerId, user.userId),
   ]);
+  const held = await heldFor(orgId, customerId);
 
   const customer = await db.customer.findUnique({
     where: { id },
@@ -219,11 +283,15 @@ export default async function CustomerPage({
         <Alert tone="success" className="mb-5">
           {saved === 'points'
             ? 'Points added. They can see them in the portal.'
-            : saved === 'referral-paid'
-              ? 'Code used. They had already had enough work done here, so both sides have been paid.'
-              : saved === 'referral'
-                ? 'Code used. Both sides are paid once this customer has had enough work done.'
-                : 'Saved.'}
+            : saved === 'deposit'
+              ? 'Deposit taken and booked as money held, not as revenue. It goes against the invoice when there is one.'
+              : saved === 'returned'
+                ? 'Money returned, with the reason kept.'
+                : saved === 'referral-paid'
+                  ? 'Code used. They had already had enough work done here, so both sides have been paid.'
+                  : saved === 'referral'
+                    ? 'Code used. Both sides are paid once this customer has had enough work done.'
+                    : 'Saved.'}
         </Alert>
       ) : null}
       {problem ? (
@@ -421,6 +489,150 @@ export default async function CustomerPage({
                 <span className="text-(--text-faint)">Invoices</span>
                 <span className="tabular">{customer.invoices.length}</span>
               </div>
+            </CardBody>
+          </Card>
+
+          {/* Money held. A deposit before the work or a credit from a refund,
+              a liability until the invoice takes it. Led by the figure, then
+              each row with what is left on it and a way to give it back. */}
+          <Card className={held.heldMinor > 0 ? 'border-(--brand)' : undefined}>
+            <CardHeader
+              title="Money held"
+              description={
+                held.heldMinor > 0
+                  ? 'Deposits and credit, waiting for a bill'
+                  : 'A deposit before the work, or credit kept from a refund'
+              }
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              <div className="flex items-baseline justify-between">
+                <span className="text-(--text-faint)">Held</span>
+                <span className="font-display text-[22px] font-semibold tabular-nums">
+                  <Money
+                    currency={region.currency}
+                    locale={region.locale}
+                    amount={held.heldMinor / 100}
+                  />
+                </span>
+              </div>
+
+              {held.live.length > 0 ? (
+                <ul className="divide-y divide-(--border-soft) border-t border-(--border-soft)">
+                  {held.live.map((row) => (
+                    <li key={row.id} className="grid gap-2 py-2 text-[12px]">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="min-w-0 flex-1 truncate">
+                          {row.kind === 'CREDIT' ? 'Credit' : 'Deposit'}
+                          {row.job ? (
+                            <Link href={`/jobs/${row.job.id}`} className="ml-1 hover:underline">
+                              for job #{row.job.number}
+                            </Link>
+                          ) : null}
+                          <time className="datum ml-1.5 text-(--text-faint)">
+                            {row.receivedAt.toLocaleDateString(region.locale)}
+                          </time>
+                        </span>
+                        <span className="tabular-nums font-medium">
+                          <Money
+                            currency={region.currency}
+                            locale={region.locale}
+                            amount={row.heldMinor / 100}
+                          />
+                        </span>
+                      </div>
+                      {mayEditCustomer ? (
+                        <form
+                          action={giveBack}
+                          className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-1.5"
+                        >
+                          <input type="hidden" name="customerId" value={customer.id} />
+                          <input type="hidden" name="depositId" value={row.id} />
+                          <input type="hidden" name="method" value="BANK_TRANSFER" />
+                          <Input
+                            name="amount"
+                            inputMode="decimal"
+                            aria-label="Amount to return"
+                            className="tabular-nums"
+                            defaultValue={(row.heldMinor / 100).toFixed(2)}
+                            required
+                          />
+                          <div className="flex gap-1.5">
+                            <Input
+                              name="reason"
+                              aria-label="Why it is going back"
+                              placeholder="Why it is going back"
+                              required
+                              maxLength={120}
+                            />
+                            <Button type="submit" variant="secondary" size="sm">
+                              Return
+                            </Button>
+                          </div>
+                        </form>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {mayEditCustomer ? (
+                <form action={deposit} className="grid gap-2 border-t border-(--border-soft) pt-3">
+                  <input type="hidden" name="customerId" value={customer.id} />
+                  <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
+                    <Field label="Deposit" htmlFor="deposit-amount">
+                      <Input
+                        id="deposit-amount"
+                        name="amount"
+                        inputMode="decimal"
+                        className="tabular-nums"
+                        placeholder="200.00"
+                        required
+                      />
+                    </Field>
+                    <Field label="How they paid" htmlFor="deposit-method">
+                      <select
+                        id="deposit-method"
+                        name="method"
+                        defaultValue="CARD"
+                        className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
+                      >
+                        <option value="CARD">Card</option>
+                        <option value="CASH">Cash</option>
+                        <option value="BANK_TRANSFER">Bank transfer</option>
+                        <option value="CHEQUE">Cheque</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="For which job" hint="Optional" htmlFor="deposit-job">
+                    <select
+                      id="deposit-job"
+                      name="jobId"
+                      defaultValue=""
+                      className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
+                    >
+                      <option value="">Not a particular job</option>
+                      {customer.jobs
+                        .filter((job) => !['PAID', 'CANCELLED', 'INVOICED'].includes(job.status))
+                        .map((job) => (
+                          <option key={job.id} value={job.id}>
+                            #{job.number} · {job.shortDescription}
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
+                  <Field label="Reference" hint="Optional" htmlFor="deposit-reference">
+                    <Input id="deposit-reference" name="reference" maxLength={60} />
+                  </Field>
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    className="justify-self-start"
+                  >
+                    Take the deposit
+                  </Button>
+                </form>
+              ) : null}
             </CardBody>
           </Card>
 

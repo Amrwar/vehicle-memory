@@ -87,6 +87,11 @@ async function ids() {
     where: { ownerUserId: driver.portalUserId!, endedAt: null },
     select: { vehicleId: true },
   });
+  const payment = await prisma.payment.findFirst({
+    where: { orgId: org.id, invoiceId: { not: null } },
+    orderBy: { receivedAt: 'desc' },
+    select: { id: true },
+  });
   const estimate = await prisma.estimate.findFirst({
     where: { job: { orgId: org.id }, status: 'SENT' },
     orderBy: { createdAt: 'desc' },
@@ -101,6 +106,7 @@ async function ids() {
     driverEmail: driver.portalUser!.email,
     owned: owned.vehicleId,
     estimate: estimate?.id ?? null,
+    payment: payment?.id ?? null,
   };
 }
 
@@ -129,6 +135,16 @@ async function main() {
     },
     { file: 'invoice', path: `/invoices/${r.invoice}`, who: 'owner', fullPage: true },
     { file: 'counter', path: '/counter', who: 'owner' },
+    ...(r.payment
+      ? [
+          {
+            file: 'receipt',
+            path: `/payments/${r.payment}/receipt`,
+            who: 'owner' as const,
+            fullPage: true,
+          },
+        ]
+      : []),
     { file: 'gift-cards', path: '/gift-cards', who: 'owner' },
     { file: 'customer', path: `/customers/${r.customer}`, who: 'owner', fullPage: true },
     { file: 'passports', path: '/passports', who: 'owner' },

@@ -195,7 +195,8 @@ export type PaymentMethod =
   | 'ACCOUNT'
   | 'OTHER'
   | 'LOYALTY'
-  | 'GIFT_CARD';
+  | 'GIFT_CARD'
+  | 'DEPOSIT';
 
 /**
  * Cash goes to the cash account; everything else lands in the bank. Points
@@ -207,7 +208,59 @@ export type PaymentMethod =
 export function accountForMethod(method: PaymentMethod): string {
   if (method === 'LOYALTY') return ACCOUNT.LOYALTY_REWARDS;
   if (method === 'GIFT_CARD') return ACCOUNT.GIFT_CARDS;
+  if (method === 'DEPOSIT') return ACCOUNT.DEPOSITS;
   return method === 'CASH' ? ACCOUNT.CASH : ACCOUNT.BANK;
+}
+
+/* ---------------------------------------------------------------------------
+   Money held for a customer
+   --------------------------------------------------------------------------- */
+
+/**
+ * A deposit taken before the work. Money in, owed as work or owed back: a
+ * liability until an invoice takes it or it is returned. The same account
+ * the payment posting uses for a deposit flagged on receipt.
+ */
+export function postDepositTaken(input: {
+  depositId: string;
+  reference: string;
+  amount: Money;
+  method: PaymentMethod;
+  at: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: input.reference,
+    description: 'Deposit taken',
+    sourceType: 'Deposit',
+    sourceId: input.depositId,
+    postedAt: input.at,
+    lines: [
+      debitLine(accountForMethod(input.method), input.amount, input.method.toLowerCase()),
+      creditLine(ACCOUNT.DEPOSITS, input.amount),
+    ],
+  });
+}
+
+/** Money held going back to the customer, the way money goes. */
+export function postDepositReturned(input: {
+  movementId: string;
+  reference: string;
+  amount: Money;
+  method: PaymentMethod;
+  reason: string;
+  at: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: input.reference,
+    description: `Deposit returned: ${input.reason}`,
+    sourceType: 'DepositMovement',
+    sourceId: input.movementId,
+    postedAt: input.at,
+    lines: [
+      debitLine(ACCOUNT.DEPOSITS, input.amount),
+      creditLine(accountForMethod(input.method), input.amount, input.method.toLowerCase()),
+    ],
+  });
 }
 
 /* ---------------------------------------------------------------------------

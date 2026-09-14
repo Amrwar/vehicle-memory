@@ -1018,6 +1018,44 @@ workshop billed it in **so that** what I read matches the paper.
 
 ---
 
+## Epic AA — Money owed ahead (Phase 30)
+
+### AA1 — A deposit before the parts are ordered
+
+**As** Sara **I want** to take a deposit before ordering a customer's parts
+and have the invoice take it later **so that** the workshop is not out of
+pocket and nobody retypes anything.
+**Size** 5 · **Satisfies** FR-5701, FR-5702, FR-5703, FR-5705
+
+- **Given** a customer and their job, **when** I take two hundred pounds,
+  **then** the books show it as owed, not earned, and the job's page says it
+  is in hand.
+- **Given** the invoice, **when** I press "Use money held", **then** it comes
+  off the bill and the books release what was owed.
+- **Given** a cancelled order, **when** I return the money with a reason,
+  **then** it goes back the way money goes and the reason stays.
+
+### AA2 — Keep it as credit
+
+**As** Ahmed **I want** a refund to be keepable on the customer's account
+**so that** a regular customer's twenty pounds is spent on their next visit
+rather than posted back and forgotten.
+**Size** 2 · **Satisfies** FR-5704
+
+- **Given** a credit note, **when** I refund it as credit, **then** the
+  customer's page shows it held and the next invoice can take it.
+
+### AA3 — A receipt in my hand
+
+**As** Maria **I want** a receipt for every payment **so that** I have paper
+that says what I paid and what is still owed.
+**Size** 2 · **Satisfies** FR-5706
+
+- **Given** a payment, **when** it lands, **then** I am sent a receipt, and
+  the workshop can print one for me at the counter.
+
+---
+
 ## Story map
 
 ```

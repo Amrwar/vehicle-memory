@@ -49,6 +49,7 @@
     "verify:referrals": "tsx infra/scripts/verify-referrals.ts",
     "verify:giftcards": "tsx infra/scripts/verify-giftcards.ts",
     "verify:region": "tsx infra/scripts/verify-region.ts",
+    "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

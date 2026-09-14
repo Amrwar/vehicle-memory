@@ -17,6 +17,8 @@ import {
   PostingError,
   postCreditNote,
   postGoodsReceived,
+  postDepositReturned,
+  postDepositTaken,
   postGiftCardAdjustment,
   postGiftCardSold,
   postInvoiceIssued,
@@ -297,6 +299,49 @@ describe('gift card sold', () => {
       soldAt: new Date(),
     });
     expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.CASH);
+  });
+});
+
+describe('money held for a customer', () => {
+  it('books a deposit taken as a liability, not revenue', () => {
+    const posted = postDepositTaken({
+      depositId: 'dep_1',
+      reference: 'DEP-1',
+      amount: gbp('200.00'),
+      method: 'CARD',
+      at: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.BANK);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.DEPOSITS);
+    expect(accountType(ACCOUNT.DEPOSITS)).toBe('LIABILITY');
+  });
+
+  // Applying money held is a payment that releases the liability; the bank
+  // saw the money when the deposit was taken.
+  it('applies money held against what the customer owes, not the bank', () => {
+    const posted = postPaymentReceived({
+      paymentId: 'pay_6',
+      reference: 'PAY-6',
+      amount: gbp('200.00'),
+      method: 'DEPOSIT',
+      receivedAt: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.DEPOSITS);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.RECEIVABLE);
+  });
+
+  it('returns money held the way money goes', () => {
+    const posted = postDepositReturned({
+      movementId: 'dm_1',
+      reference: 'DEP-1/R',
+      amount: gbp('50.00'),
+      method: 'BANK_TRANSFER',
+      reason: 'Order cancelled',
+      at: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.DEPOSITS);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.BANK);
+    expect(() => assertBalanced(posted)).not.toThrow();
   });
 });
 

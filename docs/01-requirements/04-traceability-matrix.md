@@ -372,6 +372,12 @@ where the work happens.
 | FR-5604 | Z2    | —                                                              | `regionForUser()`, `pointsForPortalUser()`                                   | `verify-region.ts`                                               | Done   |
 | FR-5605 | Z1    | —                                                              | `regionFor()` in `lib/money.ts`, `lib/fleet.ts`, `lib/estimates.ts`          | `verify-region.ts`                                               | Done   |
 | FR-5606 | Z1    | —                                                              | the settings page                                                            | reviewed on the page                                             | Done   |
+| FR-5701 | AA1   | `Deposit`, `deposits_taken_for_something`                      | `takeDeposit()`, `postDepositTaken()`                                        | `deposits.test.ts`, `accounting.test.ts`, `verify-deposits.ts`   | Done   |
+| FR-5702 | AA1   | `DepositMovement`, `deposits_never_overdrawn`                  | `heldOn()`, `depositStatus()`, `heldFor()`                                   | `deposits.test.ts`, `verify-deposits.ts`                         | Done   |
+| FR-5703 | AA1   | `PaymentMethod.DEPOSIT`                                        | `applyHeld()`, `assertDepositApplicable()`, `accountForMethod()`             | `deposits.test.ts`, `accounting.test.ts`, `verify-deposits.ts`   | Done   |
+| FR-5704 | AA2   | `Deposit.kind`, `Deposit.sourceRefundId`                       | `keepAsCredit()` from `recordRefund()`                                       | `verify-deposits.ts`                                             | Done   |
+| FR-5705 | AA1   | —                                                              | `returnHeld()`, `assertDepositReturnable()`, `postDepositReturned()`         | `deposits.test.ts`, `verify-deposits.ts`                         | Done   |
+| FR-5706 | AA3   | —                                                              | `receiptFor()`, the receipt in `recordPayment()`, `/payments/[id]/receipt`   | `verify-deposits.ts`, `verify-controls.ts`                       | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                                        | `verify-credentials.ts`                                          | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                                   | `verify-credentials.ts`                                          | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                                        | `smoke.ts`                                                       | Done   |
@@ -669,9 +675,10 @@ details without a provider behind it would be worse than not having one.
 | The passport, listed                      | 4                   | 3                      |
 | Gift cards, deepened                      | 7                   | 7                      |
 | Country and currency                      | 6                   | 5                      |
-| **Total**                                 | **394**             | **388 (98%)**          |
+| Money owed ahead                          | 6                   | 6                      |
+| **Total**                                 | **400**             | **394 (99%)**          |
 
-The requirements document lists 478 requirements. 84 of
+The requirements document lists 484 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

@@ -217,6 +217,17 @@ requirement in several jurisdictions (NFR-902).
 | G3  | A card is a liability until spent, and a redemption never touches the bank | Postings 3.14 and 3.15                         |
 | G4  | A redemption is refused, never clamped, and spends nothing on a refusal    | `assertCardRedeemable`, checked before writing |
 
+### 3.7.5 Money held (Finance context, Phase 30)
+
+**Root:** `Deposit` · **Contains:** `DepositMovement`
+
+| #   | Invariant                                                          | Enforced by                          |
+| --- | ------------------------------------------------------------------ | ------------------------------------ |
+| D1  | Held is what came in less what went out; never stored              | Computed; `deposits_never_overdrawn` |
+| D2  | A deposit is a liability until an invoice takes it or it goes back | Postings 3.17                        |
+| D3  | Applying is refused, never clamped, and never exceeds held or owed | `assertDepositApplicable`            |
+| D4  | Money goes back with a reason, the way money goes                  | `assertDepositReturnable`            |
+
 ### 3.8 Region (Phase 29)
 
 Not an aggregate: a value on the organisation, carried on the session and

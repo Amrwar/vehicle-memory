@@ -30,6 +30,9 @@ const METHOD_LABEL: Record<string, string> = {
   CHEQUE: 'Cheque',
   ACCOUNT: 'On account',
   OTHER: 'Other',
+  LOYALTY: 'Points',
+  GIFT_CARD: 'Gift card',
+  DEPOSIT: 'Money held',
 };
 
 export default async function PaymentsPage({
@@ -175,6 +178,7 @@ export default async function PaymentsPage({
                   <Th>Reference</Th>
                   <Th>Recorded by</Th>
                   <Th numeric>Amount</Th>
+                  <Th>Receipt</Th>
                 </tr>
               </thead>
               <tbody>
@@ -217,6 +221,14 @@ export default async function PaymentsPage({
                         locale={region.locale}
                         amount={Number(payment.amount)}
                       />
+                    </Td>
+                    <Td>
+                      <Link
+                        href={`/payments/${payment.id}/receipt`}
+                        className="datum text-[12px] hover:underline"
+                      >
+                        R-{payment.id.slice(-6).toUpperCase()}
+                      </Link>
                     </Td>
                   </Tr>
                 ))}

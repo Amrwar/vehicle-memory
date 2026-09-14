@@ -267,6 +267,40 @@ A gift card taken at the counter posts inside the sale's own entry: Dr 2300
 for the card's share, alongside the cash and card lines, so the drawer is
 never expected to hold money it did not take.
 
+### 3.17 Deposit taken, applied, and returned (Phase 30)
+
+Money before the work, and money kept on account after a refund, are the
+same liability. Taken:
+
+```
+  Dr  1000 Bank                           200.00
+      Cr  2200 Customer deposits                    200.00
+
+  source: Deposit dep_...
+```
+
+Put against the invoice, as a payment of kind DEPOSIT, which releases the
+liability and never touches the bank:
+
+```
+  Dr  2200 Customer deposits              200.00
+      Cr  1100 Accounts receivable                  200.00
+
+  source: Payment pay_..., method DEPOSIT
+```
+
+Returned to the customer, the way money goes:
+
+```
+  Dr  2200 Customer deposits               50.00
+      Cr  1000 Bank                                  50.00
+
+  source: DepositMovement dm_...
+```
+
+A refund by method `DEPOSIT` is the ordinary refund posting with the credit
+to 2200: the workshop owes the customer credit instead of cash.
+
 ## 4. Job profitability
 
 Derived from the postings, not computed separately, so the figure on the job

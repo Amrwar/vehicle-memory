@@ -10,6 +10,7 @@ import {
   type InvoiceState,
   type JobStatus,
   type Money,
+  money,
   MoneyCycleError,
   type PaymentMethod,
   postCreditNote,
@@ -30,6 +31,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { keepAsCredit } from './deposit-credits';
 import { refundOntoCard } from './giftcard-refunds';
 import { settleReferralsFor } from './referrals';
 import { awardForInvoice } from './retention';
@@ -479,6 +481,8 @@ export async function recordPayment(input: {
       currency: true,
       customerId: true,
       jobId: true,
+      customer: { select: { displayName: true, email: true, portalUserId: true } },
+      org: { select: { name: true } },
     },
   });
 
@@ -489,6 +493,7 @@ export async function recordPayment(input: {
   };
 
   assertPaymentRecordable(view, input.amount);
+  const region = await regionFor(input.orgId);
 
   const next = stateAfterPayment(view, input.amount);
   const receivedAt = input.receivedAt ?? new Date();
@@ -555,6 +560,41 @@ export async function recordPayment(input: {
       receivedAt,
     }),
   );
+
+  // A receipt, every time, to anybody with an address. Money held or points
+  // put against a bill are still a payment the customer will want on paper.
+  if (invoice.customer.email) {
+    const receiptNumber = `R-${payment.id.slice(-6).toUpperCase()}`;
+    const stillOwed = view.total.minor - view.amountPaid.minor - input.amount.minor;
+    const queued = await prisma.messageLog.create({
+      data: {
+        orgId: input.orgId,
+        channel: 'EMAIL',
+        toAddress: invoice.customer.email,
+        subject: `Receipt ${receiptNumber} from ${invoice.org.name}`,
+        body: [
+          `Hello ${invoice.customer.displayName.split(' ')[0]}.`,
+          '',
+          `We have received ${formatMoney(input.amount, region.locale)} by ${describeMethod(input.method)} against invoice ${invoice.number}.${
+            stillOwed > 0
+              ? ` ${formatMoney(money(stillOwed, invoice.currency), region.locale)} is still to pay.`
+              : ' The invoice is settled.'
+          }`,
+          '',
+          invoice.customer.portalUserId
+            ? `Your invoices and receipts are on your account: ${siteUrl()}/portal/invoices`
+            : 'Keep this with the invoice. Ring or reply if anything is unclear.',
+          '',
+          invoice.org.name,
+        ].join('\n'),
+        status: 'QUEUED',
+        relatedType: 'Payment',
+        relatedId: payment.id,
+      },
+      select: { id: true },
+    });
+    await pushNow(queued.id);
+  }
 
   // A bill paid in full earns points, once. Points redeemed against it are
   // not money in and earn nothing.
@@ -841,6 +881,21 @@ export async function recordRefund(input: {
     }),
   );
 
+  // Kept on account rather than sent back: the posting above credited the
+  // deposits liability, and this is the credit the customer can spend later.
+  if (input.method === 'DEPOSIT') {
+    await keepAsCredit({
+      orgId: input.orgId,
+      userId: input.userId,
+      customerId: invoice.customerId,
+      refundId: refund.id,
+      invoiceNumber: invoice.number,
+      amountMinor: input.amount.minor,
+      currency,
+      reason: note.reason,
+    });
+  }
+
   // Money back onto the card that paid. The posting above already credited
   // the cards outstanding; this is the card's own record of it.
   if (input.method === 'GIFT_CARD') {
@@ -989,6 +1044,8 @@ function describeMethod(method: PaymentMethod): string {
       return 'points';
     case 'GIFT_CARD':
       return 'gift card';
+    case 'DEPOSIT':
+      return 'money held on your account';
     default:
       return 'the original method';
   }

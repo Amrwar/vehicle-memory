@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { applyHeld, DepositError, heldFor } from '@/lib/deposits';
 import { GiftCardError, redeemGiftCard } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
 import {
@@ -81,6 +82,7 @@ const METHOD_LABELS: Record<string, string> = {
   ...Object.fromEntries(METHODS.map((m) => [m.value, m.label])),
   LOYALTY: 'Points',
   GIFT_CARD: 'Gift card',
+  DEPOSIT: 'Money held',
 };
 
 /**
@@ -102,6 +104,7 @@ function amountFrom(formData: FormData, key: string) {
 function methodFrom(formData: FormData): PaymentMethod {
   const raw = String(formData.get('method') ?? 'CARD');
   if (raw === 'GIFT_CARD') return 'GIFT_CARD';
+  if (raw === 'DEPOSIT') return 'DEPOSIT';
   return (METHODS.some((m) => m.value === raw) ? raw : 'CARD') as PaymentMethod;
 }
 
@@ -152,6 +155,33 @@ async function redeem(formData: FormData) {
   }
 
   redirect(`/invoices/${invoiceId}?done=redeemed`);
+}
+
+/**
+ * Money already held for the customer, put against the bill. Oldest first,
+ * as much as the bill needs unless an amount is typed; refused rather than
+ * clamped when the amount is more than is held or owed.
+ */
+async function useHeld(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+  const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
+
+  try {
+    await applyHeld({
+      orgId,
+      userId: user.userId,
+      invoiceId,
+      amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+    });
+  } catch (error) {
+    if (!(error instanceof DepositError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}?done=held`);
 }
 
 /**
@@ -261,6 +291,7 @@ export default async function InvoicePage({
     money.credited.minor < money.total.minor;
   const mayRefund = can(user.role, 'payment:write') && money.owedBack.minor > 0;
   const paidWithCard = invoice.payments.some((p) => p.method === 'GIFT_CARD');
+  const held = mayPay ? await heldFor(orgId, invoice.customer.id) : null;
 
   // Points are only offered when there is a bill to put them against and
   // something to put. A card with nothing to spend is a card to explain.
@@ -311,9 +342,11 @@ export default async function InvoicePage({
               ? 'Points taken off the bill and booked as the cost of the programme, not as money in.'
               : notice.done === 'card'
                 ? 'Gift card redeemed. The money came in when the card was sold; this releases what was owed.'
-                : notice.done === 'credited'
-                  ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
-                  : 'Refund recorded. The customer has been told it is on its way.'}
+                : notice.done === 'held'
+                  ? 'Money held for the customer put against the bill. The books release what was owed; the bank saw the money when it was taken.'
+                  : notice.done === 'credited'
+                    ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
+                    : 'Refund recorded. The customer has been told it is on its way.'}
         </Alert>
       ) : null}
 
@@ -603,6 +636,38 @@ export default async function InvoicePage({
             </Card>
           ) : null}
 
+          {held && held.heldMinor > 0 ? (
+            <Card className="border-(--brand)">
+              <CardHeader
+                title="Use money held"
+                description={`${format(held.heldMinor)} is held for this customer${
+                  held.live.some((row) => row.kind === 'CREDIT')
+                    ? ', some of it credit from a refund'
+                    : ''
+                }. Leave the amount blank to use as much as the bill needs.`}
+              />
+              <form action={useHeld}>
+                <CardBody className="grid gap-3">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <Field label="Amount" hint="Optional" htmlFor="held-amount">
+                    <Input
+                      id="held-amount"
+                      name="amount"
+                      inputMode="decimal"
+                      className="tabular-nums"
+                      placeholder={(
+                        Math.min(held.heldMinor, money.outstanding.minor) / 100
+                      ).toFixed(2)}
+                    />
+                  </Field>
+                  <Button type="submit" variant="primary">
+                    Put it against the bill
+                  </Button>
+                </CardBody>
+              </form>
+            </Card>
+          ) : null}
+
           {mayPay ? (
             <Card>
               <CardHeader
@@ -719,6 +784,7 @@ export default async function InvoicePage({
                       {paidWithCard ? (
                         <option value="GIFT_CARD">Back onto the gift card</option>
                       ) : null}
+                      <option value="DEPOSIT">Keep it as credit on their account</option>
                       {METHODS.filter((m) => m.value !== 'ACCOUNT').map((m) => (
                         <option key={m.value} value={m.value}>
                           {m.label}

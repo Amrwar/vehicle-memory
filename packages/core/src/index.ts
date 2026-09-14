@@ -10,6 +10,7 @@ export * from './offline/index';
 export * from './retention/index';
 export * from './giftcards/index';
 export * from './region/index';
+export * from './deposits/index';
 export * from './accounting/index';
 export * from './scheduling/index';
 export * from './people/index';

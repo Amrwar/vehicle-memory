@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5700 — Money owed ahead
+
+| Ref     | Requirement                                                                                                                                                            | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5701 | A deposit MUST be takeable before the work, for a customer and optionally a job, paid with money, and MUST post as a liability and never as revenue.                   | 30    |
+| FR-5702 | What is held MUST be what came in less what went against bills or back, never a stored figure, and every movement MUST say what it was for.                            | 30    |
+| FR-5703 | Money held MUST go against an invoice as a payment of its own kind that releases the liability without touching the bank, oldest first, refused rather than clamped.   | 30    |
+| FR-5704 | A refund MUST be keepable as credit on the customer's account, which the next bill can take.                                                                           | 30    |
+| FR-5705 | Money held MUST be returnable with a reason, the way money goes, and never more than is held.                                                                          | 30    |
+| FR-5706 | Every payment MUST produce a receipt: sent to the customer where there is an address, and printable, naming who paid, how much, how, for what, and what is still owed. | 30    |
+
 ## FR-5600 — Country and currency
 
 | Ref     | Requirement                                                                                                                                                        | Phase |

@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 29.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 30.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -470,6 +470,25 @@ def build() -> None:
         works="Refusing rather than clamping is the rule. Quietly using fewer points than somebody asked for produces a bill they did not expect, and they find out at the counter.",
         shots=[("invoice", "An invoice with something owed.", 16.4)],
         source="docs/02-design/07-accounting-model.md, sections 3.3, 3.9, 3.13 and 3.15",
+    )
+
+    design(
+        doc,
+        title="Money held, and a receipt in the hand",
+        when="Phase 30, 14 September 2026.",
+        why="A workshop takes money before parts are ordered, and sometimes owes a regular customer "
+            "twenty pounds they would rather keep on account. Neither is revenue, and both used to be a "
+            "flag in the ledger with no screen. Now a deposit is taken on the customer's page, a refund "
+            "can be kept as credit, and either goes against the next bill in one press. And every "
+            "payment produces a receipt, because a person at a counter is handed paper.",
+        meaning=[
+            "The Money held card leads with the figure and lists each deposit or credit with what is left on it and a way to give it back, with a reason.",
+            "On the invoice, \"Use money held\" takes as much as the bill needs unless an amount is typed, oldest first, refused rather than clamped.",
+            "The receipt is one payment on one sheet: who paid, how much, how, for what, and what is still owed. The chrome hides when it prints.",
+        ],
+        works="Money held is a payment of its own kind when it meets a bill, so the books release the liability and never see the bank twice. What is held is never stored: it is what came in less what went out, and every movement says why.",
+        shots=[("receipt", "A receipt, as it prints.", 14.0)],
+        source="docs/02-design/07-accounting-model.md, section 3.17",
     )
 
     # 11. Counter
