@@ -21,6 +21,7 @@ the trade uses a word loosely, we pick one meaning and hold it.
 | **Estimate**           | A priced proposal requiring customer approval. Immutable once sent.                                                                                                                       |
 | **Event**              | One immutable fact about a vehicle at a point in time.                                                                                                                                    |
 | **Finding**            | One inspection item result requiring action.                                                                                                                                              |
+| **Gift card**          | Money taken in advance for work not yet chosen. A liability until spent; redeemed on an invoice as a payment of its own kind. Its balance is the sum of its entries.                      |
 | **Idempotency key**    | A stable identifier derived from an event's cause, so a retry cannot duplicate history.                                                                                                   |
 | **Inspection**         | A structured assessment producing per-item results. Distinct from a diagnosis.                                                                                                            |
 | **Job**                | One visit's work on one vehicle. The central aggregate.                                                                                                                                   |
@@ -35,14 +36,16 @@ the trade uses a word loosely, we pick one meaning and hold it.
 | **Part line**          | A part to be charged on a job. Distinct from a stock movement.                                                                                                                            |
 | **Passport**           | The complete, append-only event history of one vehicle.                                                                                                                                   |
 | **Plan, accepted**     | A proposed day written into the diary: one booking per placed job with the plan's technician, bay and times. The next proposal treats it as fixed.                                        |
+| **Points**             | The loyalty balance: the sum of a customer's loyalty entries, never a stored figure. Earned a point a pound on a bill paid in full; spent against a bill as a payment of its own kind.    |
+| **Referral code**      | Six characters a customer says over a counter. Both sides are paid once, only after the person brought in has had the minimum of work done.                                               |
 | **Reservation**        | Stock committed to a job but not yet consumed.                                                                                                                                            |
 | **Retire**             | What happens to a bay, tax rate or kind of work instead of deletion: it takes no new work and old work keeps reading the same.                                                            |
 | **Severity**           | Pass, Advisory, Critical or Not checked.                                                                                                                                                  |
 | **Superseding event**  | A correction. Appended, referencing the original, which remains visible.                                                                                                                  |
 | **Time entry**         | Actual clocked time, used for **cost**. Distinct from a labour line.                                                                                                                      |
 | **Verification level** | How well evidenced an event is: self-reported, workshop-recorded, workshop-verified, or authority.                                                                                        |
-| **Withheld detail**    | The parts of another workshop's entry the network does not show: job identifiers, internal job numbers, named staff, inspection ids. Nothing about the car itself is withheld.            |
 | **VIN**                | Vehicle Identification Number. 17 characters. The primary identity of a vehicle, globally.                                                                                                |
+| **Withheld detail**    | The parts of another workshop's entry the network does not show: job identifiers, internal job numbers, named staff, inspection ids. Nothing about the car itself is withheld.            |
 
 ## Two distinctions worth the ink
 

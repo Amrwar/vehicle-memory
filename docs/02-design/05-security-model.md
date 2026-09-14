@@ -76,13 +76,13 @@ Passport tables are deliberately not tenant-scoped
 ([ADR-0004](../03-adr/0004-vehicle-is-global.md)), which means they cannot rely
 on the mechanism above. Access is explicit:
 
-| Reader            | Basis                                      | Scope                                                   |
-| ----------------- | ------------------------------------------ | ------------------------------------------------------- |
-| Workshop          | Has serviced the vehicle, or holds a grant | Full history, subject to owner disclosure settings      |
-| Current owner     | Ownership row                              | Full history, plus the access log                       |
-| Previous owner    | Ownership row with an end date             | Read-only, limited to the period they owned it          |
-| Share-link holder | Unguessable token                          | Read-only, no personal details, time-limited, revocable |
-| Anyone else       | —                                          | Nothing                                                 |
+| Reader            | Basis                                                                   | Scope                                                   |
+| ----------------- | ----------------------------------------------------------------------- | ------------------------------------------------------- |
+| Workshop          | Has serviced the vehicle, has written to its passport, or holds a grant | Full history, subject to owner disclosure settings      |
+| Current owner     | Ownership row                                                           | Full history, plus the access log                       |
+| Previous owner    | Ownership row with an end date                                          | Read-only, limited to the period they owned it          |
+| Share-link holder | Unguessable token                                                       | Read-only, no personal details, time-limited, revocable |
+| Anyone else       | —                                                                       | Nothing                                                 |
 
 Every share-link read is logged and visible to the owner (FR-410).
 

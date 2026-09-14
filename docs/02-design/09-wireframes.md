@@ -285,3 +285,47 @@ most valuable thing this page can tell him.
 ---
 
 _Next: [Architecture decision records](../03-adr/)._
+
+## 9. Passports, listed (Phase 27)
+
+```
+PASSPORTS
+The record that belongs to each car.                 [ Search: reg, VIN ... ]
+
++-----------+  +-----------+  +--------------------+  +--------------------+
+| PASSPORTS |  | ENTRIES   |  | CHAINS SOUND   (v) |  | SHARED WITH OTHERS |
+|     7     |  |    64     |  |        7           |  |         1          |
++-----------+  +-----------+  +--------------------+  +--------------------+
+
+Vehicle              Registration  VIN          Entries  Workshops  Recorded            Chain
+2020 BMW X5          [MK20 XRT]    WBA...0000        7          1  Mar 2020 to Jun 25  (v) Verifies
+2008 Ford Transit    [PR08 NET]    WF0...1234       24          2  Jan 2019 to Sep 26  (v) Verifies
+                                                          . 18 from elsewhere
+2021 Vauxhall Corsa  [BJ21 OYD]    W0V...9876        0          0  -                   Empty
+```
+
+The third tile is the one that matters and it turns red when it is not the
+same number as the first. "From elsewhere" is the network, counted.
+
+## 10. Gift cards (Phase 26)
+
+```
+GIFT CARDS
+Money taken in advance. Owed as work until it is spent.
+
++--------------+  +---------------------+  +----------+  +----------+
+| OUTSTANDING  |  | CARDS WITH MONEY ON |  | SOLD     |  | SPENT    |
+|   £76.00     |  |          2          |  | £150.00  |  | £74.00   |
++--------------+  +---------------------+  +----------+  +----------+
+
++-------------------------------------------------+  +---------------------+
+| EVERY CARD                                      |  | SELL A CARD         |
+| Number          Sold          For   Loaded Left |  | Amount   [ 50 ]     |
+| M2HP-VY89-F7QH  14 Sep . Sara Probe £50.00 Spent|  | How paid [ Card v ] |
+| BCDF-GHJK-LMNP  12 Sep . Ali  Dad   £100   £76  |  | For      [ Dad ]    |
++-------------------------------------------------+  | [ Sell the card ]   |
+                                                     +---------------------+
+```
+
+On the invoice, "Redeem a gift card" takes the number and an optional amount;
+blank means as much as the bill needs.

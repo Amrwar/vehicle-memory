@@ -35,6 +35,7 @@ Seeded per organisation, editable.
 | 2100 | Tax payable (output)      | Liability |
 | 2110 | Tax receivable (input)    | Asset     |
 | 2200 | Customer deposits         | Liability |
+| 2300 | Gift cards outstanding    | Liability |
 | 3000 | Retained earnings         | Equity    |
 | 4000 | Labour revenue            | Revenue   |
 | 4010 | Parts revenue             | Revenue   |
@@ -44,6 +45,7 @@ Seeded per organisation, editable.
 | 6000 | Wages                     | Expense   |
 | 6100 | Premises                  | Expense   |
 | 6200 | Stock adjustments         | Expense   |
+| 6400 | Loyalty rewards           | Expense   |
 
 ## 3. Postings
 
@@ -195,6 +197,51 @@ own journal and are posted from its report, not guessed at here:
 
   source: PayrollRun pr_..., one entry per run
 ```
+
+### 3.13 Points redeemed (Phase 24)
+
+Points are not money in. They are the cost of the loyalty programme, so the
+debit is marketing and the customer's debt still comes down:
+
+```
+  Dr  6400 Loyalty rewards                  3.00
+      Cr  1100 Accounts receivable                     3.00
+
+  source: Payment pay_..., method LOYALTY
+```
+
+A bill settled partly with points earns points only on the money actually
+paid; the programme does not pay itself.
+
+### 3.14 Gift card sold (Phase 26)
+
+Money in, owed back as work. A liability until it is spent, never revenue on
+the day it is sold:
+
+```
+  Dr  1000 Bank                            50.00
+      Cr  2300 Gift cards outstanding                 50.00
+
+  source: GiftCard gc_...
+```
+
+Cash goes to 1010 rather than 1000, as for any other payment.
+
+### 3.15 Gift card redeemed (Phase 26)
+
+The money came in when the card was sold. Redeeming it releases the
+liability against what the customer owed and never touches the bank a
+second time:
+
+```
+  Dr  2300 Gift cards outstanding          24.00
+      Cr  1100 Accounts receivable                    24.00
+
+  source: Payment pay_..., method GIFT_CARD
+```
+
+A refund by method `GIFT_CARD` is the mirror image and puts the money back
+on the card: Dr 1100, Cr 2300.
 
 ## 4. Job profitability
 

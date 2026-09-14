@@ -191,12 +191,37 @@ The words are design material.
   or "recorded with photographic evidence", because those are different
   things and a buyer is entitled to weigh them differently.
 
----
-
-_Next: [Wireframes](09-wireframes.md)._
-
 ## 11. The passport
 
 The passport pages have their own paper, ink, cover and foil, defined once and
 not redefined for dark mode, and their own face, Fraunces, used nowhere else.
 Every choice and the fact it carries is in [The passport, designed](10-passport-design.md).
+
+## 12. The mark
+
+One drawing, everywhere: a passport booklet with the wheel from its cover.
+It is the favicon, the app icon, the home-screen icon and the mark beside
+the name in every header. Before Phase 27 the tab had no icon at all and the
+headers carried a clock, which said "time" about a product whose subject is
+a record.
+
+Drawn to survive sixteen pixels. On the tab it sits on a petrol ground so it
+shows against a light tab bar and a dark one; the booklet is near-black, the
+wheel is a heavy foil stroke, and the laurel from the passport cover is left
+off because at that size it turned to fog. In a header it is one colour,
+`currentColor`, so it takes the brand tint on white and the paper tint on
+petrol. The name beside it is "Carnet", alone: a carnet is a booklet of
+papers a vehicle carries, so the name already says passport, and the tagline
+says it in plain words where a tagline belongs.
+
+## 13. Lists that lead with the fault
+
+The passports list (Phase 27) leads with how many chains are sound rather
+than how many passports there are, and the gift cards page (Phase 26) leads
+with what the workshop owes rather than what it has sold. The rule: when a
+page has one figure that means somebody must act today, it is the first tile
+that changes colour, and it changes colour only when it is non-zero.
+
+---
+
+_Next: [Wireframes](09-wireframes.md)._

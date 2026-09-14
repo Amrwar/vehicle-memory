@@ -2,6 +2,7 @@ import Link from 'next/link';
 import * as React from 'react';
 
 import { ThemeToggle } from './theme-toggle';
+import { Mark } from '@/components/marketing';
 
 /**
  * The frame every customer-facing page sits in.
@@ -32,22 +33,7 @@ export function PortalShell({
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3.5">
           <Link href={signedIn ? '/portal' : '/'} className="flex items-center gap-2">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="none"
-              aria-hidden
-              className="text-(--brand)"
-            >
-              <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M10 4.6v5.4l3.4 2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Mark size={18} className="text-(--brand)" />
             <span className="font-display text-[14px] font-semibold">Carnet</span>
           </Link>
 

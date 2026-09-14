@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { StrandedCar } from '@/components/stranded-car';
+import { Mark } from '@/components/marketing';
 
 export const metadata: Metadata = {
   title: 'Page not found',
@@ -24,22 +25,7 @@ export default function NotFound() {
     <div className="grid min-h-dvh place-items-center bg-(--ground) px-4 py-12">
       <main id="main" className="w-full max-w-xl text-center">
         <div className="mb-1 flex items-center justify-center gap-2">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden
-            className="text-(--brand)"
-          >
-            <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M10 4.6v5.4l3.4 2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Mark size={18} className="text-(--brand)" />
           <span className="font-display text-[14px] font-semibold">Carnet</span>
         </div>
 

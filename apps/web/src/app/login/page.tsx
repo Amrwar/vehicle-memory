@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { currentUser, signIn } from '@/lib/auth';
+import { Mark } from '@/components/marketing';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
@@ -43,15 +44,7 @@ export default async function LoginPage({
           signing in on a shared machine should know which system this is. */}
       <section className="hidden flex-col justify-between bg-(--color-petrol-900) p-10 text-(--color-petrol-50) lg:flex">
         <div className="flex items-center gap-2.5">
-          <svg width="26" height="26" viewBox="0 0 20 20" fill="none" aria-hidden>
-            <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M10 4.6v5.4l3.4 2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Mark size={26} className="text-current" />
           <span className="font-display text-[17px] font-semibold tracking-tight">Carnet</span>
         </div>
 
@@ -90,15 +83,7 @@ export default async function LoginPage({
       <section className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" aria-hidden>
-              <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M10 4.6v5.4l3.4 2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Mark size={24} className="text-current" />
             <span className="font-display text-[17px] font-semibold">Carnet</span>
           </div>
 

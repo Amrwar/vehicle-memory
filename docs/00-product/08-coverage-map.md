@@ -17,18 +17,19 @@ being specific about the gaps rather than generous about the ticks.
 
 ## Customer-facing side
 
-| Capability               | Status | Where it is                                                                                                                                                                       |
-| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Book an appointment      | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it.                                   |
-| Select a service         | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                                                        |
-| Select a vehicle         | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                                                          |
-| Receive confirmation     | Built  | Written to `message_logs` by the flow that caused it, then handed to a provider by the worker. Console, SMTP and Twilio transports; `/messages` shows what went and what did not. |
-| Receive updates          | Built  | Messages queued at the four stages that change something for the customer, and `/portal/updates`, where every visit says in plain words what is happening and what is owed.       |
-| View invoice and history | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).                |
-| Approve or decline work  | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                          |
-| Pay online               | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                             |
-| Sign up and claim a car  | Built  | `/signup/customer`, then a request by plate or VIN that the workshop which last serviced the car approves or refuses with a reason (Phase 15.1).                                  |
-| Keep the paperwork       | Built  | `/portal/vehicles/[id]`: registration certificate, MOT, insurance, receipts and photographs, added by the owner or the workshop and seen by both (Phase 20).                      |
+| Capability                      | Status | Where it is                                                                                                                                                                       |
+| ------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Book an appointment             | Built  | `/portal/book`. Only times the workshop can genuinely do the work are offered, and the slot is re-checked inside the transaction that takes it.                                   |
+| Select a service                | Built  | Chosen on the booking page; the choice sets how long the slot needs to be.                                                                                                        |
+| Select a vehicle                | Built  | Chosen on the booking page, from the vehicles that person actually owns.                                                                                                          |
+| Receive confirmation            | Built  | Written to `message_logs` by the flow that caused it, then handed to a provider by the worker. Console, SMTP and Twilio transports; `/messages` shows what went and what did not. |
+| Receive updates                 | Built  | Messages queued at the four stages that change something for the customer, and `/portal/updates`, where every visit says in plain words what is happening and what is owed.       |
+| View invoice and history        | Built  | `/portal/invoices` across every workshop that uses Carnet, `/portal/vehicles/[id]` for one vehicle, and the passport as a public link (FR-1303, FR-1304, FR-1307).                |
+| Points, referrals and passports | Built  | `/portal` shows points and a referral code per workshop; `/portal/passports` lists the customer's own passports (Phases 24, 25, 27).                                              |
+| Approve or decline work         | Built  | `/e/[token]` with no account at all, or `/portal/estimates/[id]` signed in. Decided line by line, nothing preselected (FR-1302, FR-802).                                          |
+| Pay online                      | Phased | FR-1309. Still the one gap on this side, and still waiting on a payment provider rather than on work.                                                                             |
+| Sign up and claim a car         | Built  | `/signup/customer`, then a request by plate or VIN that the workshop which last serviced the car approves or refuses with a reason (Phase 15.1).                                  |
+| Keep the paperwork              | Built  | `/portal/vehicles/[id]`: registration certificate, MOT, insurance, receipts and photographs, added by the owner or the workshop and seen by both (Phase 20).                      |
 
 **A second correction, found later.** "Receive confirmation" and "Receive
 updates" were both marked built on the strength of rows appearing in
@@ -52,25 +53,28 @@ way to find that out is to press the button rather than to read the schema.
 
 ## Workshop side
 
-| Capability        | Status | Where it is                                                                                                                                                                     |
-| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Calendar          | Built  | `/diary`, bay lanes with per-day capacity.                                                                                                                                      |
-| Customers         | Built  | `/customers`, with vehicles, history and balance.                                                                                                                               |
-| Vehicles          | Built  | `/vehicles`, with the passport, ownership and odometer history.                                                                                                                 |
-| Work orders       | Built  | `/jobs`, fourteen statuses with guarded transitions.                                                                                                                            |
-| Technicians       | Built  | `/people`, attendance, pay history, productivity.                                                                                                                               |
-| Job cards         | Built  | `/shop`, the technician's own tablet surface.                                                                                                                                   |
-| Parts             | Built  | `/parts`, weighted average cost, reservations, reorder.                                                                                                                         |
-| Inventory         | Built  | Stock levels, movements, stocktakes, transfers between sites.                                                                                                                   |
-| Suppliers         | Built  | `/suppliers`, with bills and three-way match.                                                                                                                                   |
-| Quotes            | Built  | `/estimates`, ordered by how long somebody has been waiting rather than by value.                                                                                               |
-| Invoices          | Built  | `/invoices`, gapless numbering, credit notes.                                                                                                                                   |
-| Payments          | Built  | `/payments`, with allocation and aged debt.                                                                                                                                     |
-| Service reminders | Built  | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner.                                                                                 |
-| Find a vehicle    | Built  | `/vehicles/find`: a car serviced at another Carnet workshop is found by plate or VIN, taken on, and its history continued with the other workshop's detail withheld (Phase 18). |
-| Plan the day      | Built  | `/plan` proposes with every reason shown, and one press writes the placements into the diary (Phase 19).                                                                        |
-| Settings          | Built  | `/settings`: the organisation, the site and its bays and hours, tax rates, kinds of work, document prefixes and API keys, every change audited (Phase 19).                      |
-| Ask               | Built  | `/ask`: a closed vocabulary of questions answered from the records with the working shown; anything else refused (Phase 17).                                                    |
+| Capability            | Status | Where it is                                                                                                                                                                     |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Calendar              | Built  | `/diary`, bay lanes with per-day capacity.                                                                                                                                      |
+| Customers             | Built  | `/customers`, with vehicles, history and balance.                                                                                                                               |
+| Vehicles              | Built  | `/vehicles`, with the passport, ownership and odometer history.                                                                                                                 |
+| Passports, listed     | Built  | `/passports`: every passport the workshop wrote to, with its chain verdict (Phase 27).                                                                                          |
+| Loyalty and referrals | Built  | Points earned on a paid bill and spent on the invoice; codes taken at the counter and paid when earned (Phases 24, 25).                                                         |
+| Gift cards            | Built  | `/gift-cards`, sold as a liability and spent on the invoice (Phase 26).                                                                                                         |
+| Work orders           | Built  | `/jobs`, fourteen statuses with guarded transitions.                                                                                                                            |
+| Technicians           | Built  | `/people`, attendance, pay history, productivity.                                                                                                                               |
+| Job cards             | Built  | `/shop`, the technician's own tablet surface.                                                                                                                                   |
+| Parts                 | Built  | `/parts`, weighted average cost, reservations, reorder.                                                                                                                         |
+| Inventory             | Built  | Stock levels, movements, stocktakes, transfers between sites.                                                                                                                   |
+| Suppliers             | Built  | `/suppliers`, with bills and three-way match.                                                                                                                                   |
+| Quotes                | Built  | `/estimates`, ordered by how long somebody has been waiting rather than by value.                                                                                               |
+| Invoices              | Built  | `/invoices`, gapless numbering, credit notes.                                                                                                                                   |
+| Payments              | Built  | `/payments`, with allocation and aged debt.                                                                                                                                     |
+| Service reminders     | Built  | `/reminders` shows what is due, what has been sent, and which vehicles have no reachable owner.                                                                                 |
+| Find a vehicle        | Built  | `/vehicles/find`: a car serviced at another Carnet workshop is found by plate or VIN, taken on, and its history continued with the other workshop's detail withheld (Phase 18). |
+| Plan the day          | Built  | `/plan` proposes with every reason shown, and one press writes the placements into the diary (Phase 19).                                                                        |
+| Settings              | Built  | `/settings`: the organisation, the site and its bays and hours, tax rates, kinds of work, document prefixes and API keys, every change audited (Phase 19).                      |
+| Ask                   | Built  | `/ask`: a closed vocabulary of questions answered from the records with the working shown; anything else refused (Phase 17).                                                    |
 
 ## ERP and business side
 
@@ -99,11 +103,11 @@ rather than on work: taking a card payment online, which needs a payment
 provider, and the payroll file in a provider's own layout, which needs a named
 provider. Everything else in these three tables is built and covered by a
 verification script or a crawl, and the [feature map](09-feature-map.md)
-counts the finer-grained capabilities the same way: 139 built, 1 partial, 6
-missing, with the six named.
+counts the finer-grained capabilities the same way: 155 built, 4 partial, 26
+missing, each named and assigned a phase.
 
-The phases these tables were last reconciled against are 1 to 20, the last
-shipped on 13 September 2026. The [roadmap](06-roadmap.md) carries a status
+The phases these tables were last reconciled against are 1 to 27, the last
+shipped on 14 September 2026. The [roadmap](06-roadmap.md) carries a status
 paragraph under each.
 
 ---

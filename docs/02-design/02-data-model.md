@@ -136,24 +136,27 @@ Never `float8`. See [ADR-0008](../03-adr/0008-money-as-integer-minor-units.md).
 Implemented in `20260909000100_invariants` and verified by
 `infra/scripts/verify-integrity.ts`, which actively tries to break each one:
 
-| Guarantee                                                                         | Mechanism                                                                 |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Vehicle events are append-only                                                    | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once |
-| Audit log is immutable                                                            | `BEFORE UPDATE OR DELETE` trigger                                         |
-| One open ownership per vehicle                                                    | Partial unique index `WHERE endedAt IS NULL`                              |
-| One open time entry per technician                                                | Partial unique index `WHERE endedAt IS NULL`                              |
-| Payments never exceed the invoice                                                 | Deferred constraint trigger                                               |
-| Journal entries balance                                                           | Deferred constraint trigger, checked at commit                            |
-| A journal line is a debit or a credit                                             | `CHECK` constraint                                                        |
-| Odometer readings are non-negative                                                | `CHECK` constraint                                                        |
-| Booking ends after it starts                                                      | `CHECK` constraint                                                        |
-| A paid timesheet is final                                                         | `BEFORE UPDATE OR DELETE` trigger `timesheets_paid_are_final`             |
-| A refund, a credit and a refusal carry a reason                                   | `CHECK` constraints on `refunds`, `credit_notes` and `vehicle_claims`     |
-| One open claim per person per vehicle                                             | Partial unique index `vehicle_claims_one_open_each`                       |
-| A key is named                                                                    | `CHECK api_keys_are_named`                                                |
-| A site opens before it closes                                                     | `CHECK locations_open_before_close`                                       |
-| A document is named, has bytes, expires after issue, and is removed with a reason | Four `CHECK` constraints on `vehicle_documents`                           |
-| Consent history is append-only                                                    | `BEFORE UPDATE OR DELETE` trigger                                         |
+| Guarantee                                                                         | Mechanism                                                                                  |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Vehicle events are append-only                                                    | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once                  |
+| Audit log is immutable                                                            | `BEFORE UPDATE OR DELETE` trigger                                                          |
+| One open ownership per vehicle                                                    | Partial unique index `WHERE endedAt IS NULL`                                               |
+| One open time entry per technician                                                | Partial unique index `WHERE endedAt IS NULL`                                               |
+| Payments never exceed the invoice                                                 | Deferred constraint trigger                                                                |
+| Journal entries balance                                                           | Deferred constraint trigger, checked at commit                                             |
+| A journal line is a debit or a credit                                             | `CHECK` constraint                                                                         |
+| Odometer readings are non-negative                                                | `CHECK` constraint                                                                         |
+| Booking ends after it starts                                                      | `CHECK` constraint                                                                         |
+| A paid timesheet is final                                                         | `BEFORE UPDATE OR DELETE` trigger `timesheets_paid_are_final`                              |
+| A refund, a credit and a refusal carry a reason                                   | `CHECK` constraints on `refunds`, `credit_notes` and `vehicle_claims`                      |
+| One open claim per person per vehicle                                             | Partial unique index `vehicle_claims_one_open_each`                                        |
+| A key is named                                                                    | `CHECK api_keys_are_named`                                                                 |
+| A site opens before it closes                                                     | `CHECK locations_open_before_close`                                                        |
+| A document is named, has bytes, expires after issue, and is removed with a reason | Four `CHECK` constraints on `vehicle_documents`                                            |
+| Consent history is append-only                                                    | `BEFORE UPDATE OR DELETE` trigger                                                          |
+| A loyalty entry moves something and says why; only awards expire                  | `CHECK` constraints `loyalty_entries_move_something`, `loyalty_entries_only_awards_expire` |
+| A referral pays once, to two different people                                     | Partial unique index and `CHECK` on `referrals`                                            |
+| A gift card is sold for something; every entry on it moves something and says why | `CHECK` constraints `gift_cards_sold_for_something`, `gift_card_entries_move_something`    |
 
 ## 7. Deletion
 

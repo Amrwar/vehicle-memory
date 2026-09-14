@@ -73,7 +73,18 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
-export function Mark({ size = 24 }: { size?: number }) {
+/**
+ * The mark: a passport booklet with the wheel from its cover. The same
+ * drawing as the favicon and the home-screen icon, in one colour so it can
+ * sit in a header at eighteen pixels or on petrol at twenty-six.
+ */
+export function Mark({
+  size = 24,
+  className = 'text-(--brand)',
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       width={size}
@@ -81,10 +92,17 @@ export function Mark({ size = 24 }: { size?: number }) {
       viewBox="0 0 20 20"
       fill="none"
       aria-hidden
-      className="text-(--brand)"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 4.6v5.4l3.4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M5.2 2.6h9.6a1.6 1.6 0 0 1 1.6 1.6v11.6a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6V4.2a1.6 1.6 0 0 1 1.6-1.6z" />
+      <path d="M6.4 2.6v14.8" />
+      <circle cx="11.5" cy="8.6" r="2.7" />
+      <path d="M11.5 4.7v1.2M11.5 11.3v1.2M7.6 8.6h1.2M14.2 8.6h1.2" />
+      <path d="M8.8 14.3h5.2" />
     </svg>
   );
 }

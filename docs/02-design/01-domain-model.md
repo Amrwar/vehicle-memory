@@ -194,6 +194,29 @@ requirement in several jurisdictions (NFR-902).
 | S3  | Reservations never exceed available         | Checked under lock   |
 | S4  | Every movement names its cause              | Non-null reference   |
 
+### 3.6 Loyalty and referral (Retention context, Phases 24 and 25)
+
+**Root:** `Customer` · **Contains:** `LoyaltyEntry`, `Referral`
+
+| #   | Invariant                                                          | Enforced by                                        |
+| --- | ------------------------------------------------------------------ | -------------------------------------------------- |
+| L1  | The balance is the sum of the entries, never a stored figure       | Computed; no balance column exists                 |
+| L2  | A bill paid in full earns once, on the money actually paid         | Idempotency on the invoice; points earn no points  |
+| L3  | A redemption is refused, never clamped                             | `assertRedeemable` in core                         |
+| L4  | A referral pays both sides once, only after the newcomer has spent | `assertCreditable`, one transaction for both sides |
+| L5  | A person is introduced at most once, and never by themselves       | Checked on use                                     |
+
+### 3.7 Gift card (Finance context, Phase 26)
+
+**Root:** `GiftCard` · **Contains:** `GiftCardEntry`
+
+| #   | Invariant                                                                  | Enforced by                                    |
+| --- | -------------------------------------------------------------------------- | ---------------------------------------------- |
+| G1  | The balance is the sum of the entries                                      | Computed                                       |
+| G2  | Sold for whole pounds between a floor and a ceiling, paid for with money   | `assertCardSellable`; never points or a card   |
+| G3  | A card is a liability until spent, and a redemption never touches the bank | Postings 3.14 and 3.15                         |
+| G4  | A redemption is refused, never clamped, and spends nothing on a refusal    | `assertCardRedeemable`, checked before writing |
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

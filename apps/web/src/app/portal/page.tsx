@@ -18,6 +18,7 @@ import { requireUser } from '@/lib/guard';
 import { pointsForPortalUser } from '@/lib/loyalty';
 import { referralsForPortalUser } from '@/lib/referrals';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Mark } from '@/components/marketing';
 
 export const metadata: Metadata = { title: 'My vehicles' };
 export const dynamic = 'force-dynamic';
@@ -85,22 +86,7 @@ export default async function PortalPage() {
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="none"
-              aria-hidden
-              className="text-(--brand)"
-            >
-              <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M10 4.6v5.4l3.4 2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Mark size={18} className="text-(--brand)" />
             <span className="font-display text-[14px] font-semibold">Carnet</span>
           </div>
           <div className="flex items-center gap-3">
