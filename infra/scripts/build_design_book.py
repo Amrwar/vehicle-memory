@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 32.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 32.5.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -526,6 +526,26 @@ def build() -> None:
         works="A failed payment is a row with a reason, so the customer and the workshop see the same fact. The provider is a witness and never the record: the payment is recorded once, at the moment the attempt succeeds, and the reconcile page exists because two records can disagree and somebody has to be told.",
         shots=[("portal-invoices", "The portal's invoices, with Pay now.", 7.0), ("card-payments", "Every card payment tried, and the provider's word against the books.", 16.4)],
         source="docs/02-design/04-state-machines.md, section 10; 07-accounting-model.md, section 3.18",
+    )
+
+    design(
+        doc,
+        title="The customer's side, redesigned",
+        when="Phase 32.5, 14 September 2026.",
+        why="The owner opened the portal on their own phone and found the navigation missing from the "
+            "home page, invoices reachable only through a vehicle, a referral code sitting between the "
+            "cars and the service history, and a phone layout stretched across a monitor. Each of those "
+            "is a small thing; together they made the customer's side feel like an afterthought, and the "
+            "customer's side is the passport's audience.",
+        meaning=[
+            "A fixed tab bar at the bottom of the phone, five tabs with icons, on every page: Home, Passports, Invoices, Updates, Book. On a desktop the same tabs run under the header and the home becomes two columns.",
+            "The home leads with Needs you: an estimate to decide, invoices to pay by card, a recall to book, each with its own button. Then the cars as cards with one way in, then recent work.",
+            "Rewards are a page: points per workshop and the referral code, with the rule beside it. The home gives them one line in the side column.",
+            "A directory of every workshop on Carnet, findable by name or place, with Book here on each; booking at a new one makes the customer its customer.",
+        ],
+        works="A person who visits twice a year should never have to learn a layout. Everything is one tap away and the first thing on the screen is the thing that needs them, with the button that finishes it.",
+        shots=[("portal", "The home, on a phone.", 7.0), ("portal-desktop", "The home, on a desktop.", 16.4), ("portal-rewards", "Rewards, on their own page.", 7.0), ("portal-workshops", "The workshop directory.", 7.0)],
+        source="docs/02-design/09-wireframes.md, section 11; 08-design-system.md, section 7",
     )
 
     # 11. Counter

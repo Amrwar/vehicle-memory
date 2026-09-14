@@ -16,10 +16,11 @@ import { redirect } from 'next/navigation';
 
 import { prisma } from '@carnet/db';
 
-import { Mark } from '@/components/marketing';
+import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { requestBooking, servicesFor, slotsFor } from '@/lib/booking';
 import { regionForUser } from '@/lib/region';
+import { bookableWorkshop, customerAt, workshopDirectory, workshopsUsedBy } from '@/lib/workshops';
 
 export const metadata: Metadata = { title: 'Book a visit' };
 export const dynamic = 'force-dynamic';
@@ -41,23 +42,25 @@ async function book(formData: FormData) {
   'use server';
 
   const user = await requireUser();
+  const orgId = String(formData.get('orgId') ?? '');
+  const org = await bookableWorkshop(orgId);
+  const location = org?.locations[0];
+  if (!org || !location) redirect('/portal/workshops');
 
-  const customer = await prisma.customer.findFirst({
-    where: { portalUserId: user.userId, isActive: true },
-    include: { org: { include: { locations: { where: { isActive: true }, take: 1 } } } },
-  });
-
-  if (!customer) redirect('/portal');
+  // Booking at a workshop for the first time is how somebody becomes its
+  // customer. The record is made here, with the name and contact the
+  // account already has, so the workshop sees a person in its diary.
+  const customer = await customerAt({ userId: user.userId, orgId: org.id });
 
   const startAt = new Date(String(formData.get('startAt') ?? ''));
   const hours = Number(formData.get('hours') ?? 1);
 
   const result = await requestBooking({
-    orgId: customer.orgId,
+    orgId: org.id,
     customerId: customer.id,
     ownerUserId: user.userId,
     vehicleId: String(formData.get('vehicleId') ?? ''),
-    locationId: customer.org.locations[0]!.id,
+    locationId: location.id,
     serviceItemId: String(formData.get('serviceItemId') ?? '') || null,
     description: String(formData.get('description') ?? 'Booking requested online'),
     startAt,
@@ -68,68 +71,57 @@ async function book(formData: FormData) {
   redirect(
     result.ok
       ? '/portal?booked=1'
-      : `/portal/book?error=${encodeURIComponent(result.error ?? 'That did not work.')}`,
+      : `/portal/book?${new URLSearchParams({ workshop: org.id, error: result.error ?? 'That did not work.' }).toString()}`,
   );
 }
 
 export default async function BookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string; vehicle?: string; error?: string }>;
+  searchParams: Promise<{ service?: string; vehicle?: string; error?: string; workshop?: string }>;
 }) {
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const params = await searchParams;
 
-  const customer = await prisma.customer.findFirst({
-    where: { portalUserId: user.userId, isActive: true },
-    include: {
-      org: {
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          locations: { where: { isActive: true }, take: 1, select: { id: true, name: true } },
-        },
-      },
-    },
-  });
+  // The workshop: the one asked for, else the one the customer used last,
+  // else the directory to choose from.
+  const used = await workshopsUsedBy(user.userId);
+  const preferred =
+    params.workshop ??
+    (
+      await prisma.customer.findFirst({
+        where: { portalUserId: user.userId, isActive: true },
+        orderBy: { updatedAt: 'desc' },
+        select: { orgId: true },
+      })
+    )?.orgId;
+  const org = preferred ? await bookableWorkshop(preferred) : null;
+  const location = org?.locations[0];
+  if (!org || !location) redirect('/portal/workshops');
 
-  if (!customer) redirect('/portal');
-
-  const location = customer.org.locations[0];
-  if (!location) redirect('/portal');
-
-  const [vehicles, services] = await Promise.all([
+  const [vehicles, services, directory] = await Promise.all([
     prisma.vehicleOwnership.findMany({
       where: { ownerUserId: user.userId, endedAt: null },
       include: {
         vehicle: { select: { id: true, make: true, model: true, year: true, registration: true } },
       },
     }),
-    servicesFor(customer.orgId),
+    servicesFor(org.id),
+    workshopDirectory(),
   ]);
 
   const chosen = services.find((service) => service.id === params.service) ?? services[0] ?? null;
   const slots = chosen
-    ? await slotsFor({ orgId: customer.orgId, locationId: location.id, hours: chosen.hours })
+    ? await slotsFor({ orgId: org.id, locationId: location.id, hours: chosen.hours })
     : [];
+  const withWorkshop = (extra: Record<string, string>) =>
+    `/portal/book?${new URLSearchParams({ workshop: org.id, ...extra }).toString()}`;
+  const customer = { org, orgId: org.id };
 
   return (
-    <div className="min-h-dvh bg-(--ground)">
-      <header className="border-b border-(--border) bg-(--surface)">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/portal" className="flex items-center gap-2.5">
-            <Mark size={20} />
-            <span className="font-display text-[15px] font-semibold">{customer.org.name}</span>
-          </Link>
-          <Link href="/portal" className="text-[13px] text-(--text-faint) underline">
-            Back
-          </Link>
-        </div>
-      </header>
-
-      <main id="main" className="mx-auto max-w-2xl px-4 py-6">
+    <PortalShell active="book">
+      <div>
         <p className="eyebrow mb-2">Book a visit</p>
         <h1 className="font-display text-[24px] font-semibold leading-tight tracking-tight">
           When suits you?
@@ -138,6 +130,35 @@ export default async function BookPage({
           Every time below is one {customer.org.name} can actually do. Pick one and it is in the
           diary.
         </p>
+
+        <Card className="mt-5">
+          <CardHeader
+            title={org.name}
+            description={
+              used.has(org.id)
+                ? 'Your workshop. Any other on Carnet can take the car too.'
+                : 'A workshop you have not used before. Booking makes you their customer.'
+            }
+            action={
+              <form method="get" className="flex items-center gap-2">
+                <label htmlFor="workshop" className="sr-only">
+                  Workshop
+                </label>
+                <Select id="workshop" name="workshop" defaultValue={org.id} className="w-56">
+                  {directory.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                      {used.has(w.id) ? ' (yours)' : ''}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit" size="sm" variant="secondary">
+                  Change
+                </Button>
+              </form>
+            }
+          />
+        </Card>
 
         {params.error ? (
           <Alert tone="danger" className="mt-5">
@@ -149,7 +170,7 @@ export default async function BookPage({
           <Card className="mt-6">
             <EmptyState
               title="No vehicle on your account yet"
-              description={`Ask ${customer.org.name} to link your vehicle, then you can book online.`}
+              description="Add your car first, then you can book online at any workshop on Carnet."
             />
           </Card>
         ) : (
@@ -161,7 +182,7 @@ export default async function BookPage({
                 {services.map((service) => (
                   <Link
                     key={service.id}
-                    href={`/portal/book?service=${service.id}`}
+                    href={withWorkshop({ service: service.id })}
                     className={`flex items-center justify-between gap-3 rounded-(--radius-md) border px-3.5 py-3 transition-colors ${
                       chosen?.id === service.id
                         ? 'border-(--brand) bg-(--brand-soft)'
@@ -189,6 +210,7 @@ export default async function BookPage({
             </Card>
 
             <form action={book} className="mt-5 grid gap-5">
+              <input type="hidden" name="orgId" value={org.id} />
               <input type="hidden" name="serviceItemId" value={chosen?.id ?? ''} />
               <input type="hidden" name="hours" value={chosen?.hours ?? 1} />
               <input type="hidden" name="description" value={chosen?.name ?? 'Visit'} />
@@ -280,8 +302,8 @@ export default async function BookPage({
             </form>
           </>
         )}
-      </main>
-    </div>
+      </div>
+    </PortalShell>
   );
 }
 

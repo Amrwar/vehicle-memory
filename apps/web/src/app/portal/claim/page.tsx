@@ -176,7 +176,7 @@ export default async function ClaimPage({
                 </Field>
 
                 <Button type="submit" variant="primary" size="lg" disabled={!verified}>
-                  Ask the garage
+                  Ask the workshop that last worked on it
                 </Button>
               </CardBody>
             </form>

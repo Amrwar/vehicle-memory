@@ -157,6 +157,24 @@ async function main() {
     { file: 'business', path: '/reports/business', who: 'owner' },
     { file: 'plan', path: '/plan', who: 'owner' },
     { file: 'portal', path: '/portal', who: 'driver', width: 390, height: 844, fullPage: true },
+    { file: 'portal-desktop', path: '/portal', who: 'driver', width: 1280, height: 800 },
+    { file: 'portal-phone', path: '/portal', who: 'driver', width: 390, height: 844 },
+    {
+      file: 'portal-rewards',
+      path: '/portal/rewards',
+      who: 'driver',
+      width: 390,
+      height: 844,
+      fullPage: true,
+    },
+    {
+      file: 'portal-workshops',
+      path: '/portal/workshops',
+      who: 'driver',
+      width: 390,
+      height: 844,
+      fullPage: true,
+    },
     {
       file: 'portal-invoices',
       path: '/portal/invoices',
@@ -212,6 +230,9 @@ async function main() {
     // Load, then a beat for fonts and the first paint. Not network idle: a
     // page that keeps a connection open, as the assistant does, never gets there.
     await page.goto(`${BASE}${shot.path}`, { waitUntil: 'load', timeout: 60_000 });
+    if (shot.fullPage) {
+      await page.addStyleTag({ content: 'nav.fixed{display:none !important}' });
+    }
     await page.waitForTimeout(shot.settle ?? 1_200);
     // The keyboard skip link sits off-canvas until focused; a full-page
     // capture pulls it into frame, so the camera hides it.

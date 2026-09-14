@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardHeader,
   EmptyState,
   Mileage,
   Money,
@@ -14,30 +13,31 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { pointsForPortalUser } from '@/lib/loyalty';
+import { invoicesFor } from '@/lib/portal';
 import { referralsForPortalUser } from '@/lib/referrals';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { Mark } from '@/components/marketing';
 import { regionForUser } from '@/lib/region';
 
-export const metadata: Metadata = { title: 'My vehicles' };
+export const metadata: Metadata = { title: 'Home' };
 export const dynamic = 'force-dynamic';
 
 /**
- * The customer portal.
+ * The customer's home. Redesigned in Phase 32.5.
  *
- * Maria (persona P4) knows nothing about cars and does not want to. Every
- * status is in plain language, every figure is explained, and the whole thing
- * works on a phone in a supermarket car park.
+ * Maria (persona P4) knows nothing about cars and does not want to. The
+ * page answers one question first, "does anything need me?", with each
+ * answer carrying its own button: decide an estimate, pay an invoice, ring
+ * about a recall. Then her cars, each one a card with one way in. Then what
+ * has happened lately. Rewards live on their own page and get one line here,
+ * because a referral code in the middle of somebody's service history read
+ * as an advertisement.
  */
 export default async function PortalPage() {
   const user = await requireUser();
   const region = await regionForUser(user.userId);
 
-  // A portal user is linked to customer records across any number of
-  // workshops. This is the point of the model: her history is hers, not one
-  // garage's.
   const customers = await prisma.customer.findMany({
     where: { portalUserId: user.userId },
     include: {
@@ -70,9 +70,10 @@ export default async function PortalPage() {
     },
   });
 
-  const [points, referrals] = await Promise.all([
+  const [points, referrals, invoices] = await Promise.all([
     pointsForPortalUser(user.userId),
     referralsForPortalUser(user.userId),
+    invoicesFor(user.userId),
   ]);
 
   const activeJobs = customers.flatMap((customer) =>
@@ -80,296 +81,320 @@ export default async function PortalPage() {
       .filter((job) => !['PAID', 'CANCELLED', 'INVOICED'].includes(job.status))
       .map((job) => ({ job, orgName: customer.org.name })),
   );
-
   const awaiting = activeJobs.filter(({ job }) => job.status === 'AWAITING_APPROVAL');
+  const owing = invoices.filter((invoice) => invoice.outstanding > 0.005);
+  const owedTotal = owing.reduce((total, invoice) => total + invoice.outstanding, 0);
+  const recalled = ownerships.filter(({ vehicle }) => vehicle.recalls.length > 0);
+  const attention = awaiting.length + owing.length + recalled.length;
+  const totalPoints = points.reduce((n, card) => n + card.balance, 0);
+
+  const recent = customers
+    .flatMap((customer) => customer.jobs.map((job) => ({ job, orgName: customer.org.name })))
+    .sort((a, b) => b.job.createdAt.getTime() - a.job.createdAt.getTime())
+    .slice(0, 6);
 
   return (
-    <div className="min-h-dvh bg-(--ground)">
-      <header className="border-b border-(--border) bg-(--surface)">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
-          <div className="flex items-center gap-2">
-            <Mark size={18} className="text-(--brand)" />
-            <span className="font-display text-[14px] font-semibold">Carnet</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle className="w-[6.5rem]" />
-            <form action="/api/sign-out" method="post">
-              <button type="submit" className="text-[13px] text-(--text-faint) underline">
-                Sign out
-              </button>
-            </form>
-          </div>
+    <PortalShell active="home" wide>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-[26px] font-semibold leading-tight">
+            Hello, {user.name.split(' ')[0]}
+          </h1>
+          <p className="mt-1 text-[14px] text-(--text-soft)">
+            {attention === 0
+              ? 'Nothing needs your attention right now.'
+              : `${attention} ${attention === 1 ? 'thing needs' : 'things need'} your attention.`}
+          </p>
         </div>
-      </header>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/portal/claim">
+            <Button variant="secondary">Add a car</Button>
+          </Link>
+          <Link href="/portal/book">
+            <Button variant="primary">Book a visit</Button>
+          </Link>
+        </div>
+      </div>
 
-      <main id="main" className="mx-auto max-w-2xl px-4 py-6">
-        <h1 className="font-display text-[24px] font-semibold leading-tight">
-          Hello, {user.name.split(' ')[0]}
-        </h1>
-        <p className="mt-1 text-[14px] text-(--text-soft)">
-          {awaiting.length > 0
-            ? `${awaiting.length} ${awaiting.length === 1 ? 'estimate needs' : 'estimates need'} your decision.`
-            : 'Nothing needs your attention right now.'}
-        </p>
-
-        {awaiting.length > 0 ? (
-          <section className="mt-5 grid gap-3">
-            {awaiting.map(({ job, orgName }) => {
-              const estimate = job.estimates[0];
-
-              return (
-                <Card key={job.id} className="border-(--warning)">
-                  <CardHeader
-                    title={`${job.vehicle.make} ${job.vehicle.model}`}
-                    description={`${orgName} · ${job.shortDescription}`}
-                    action={
-                      <Badge tone="warning" dot>
-                        Needs your approval
-                      </Badge>
-                    }
-                  />
-                  <CardBody className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="eyebrow">Estimated total</p>
-                      <p className="font-display text-[24px] font-semibold">
-                        {estimate ? (
-                          <Money amount={Number(estimate.total)} currency={estimate.currency} />
-                        ) : (
-                          '—'
-                        )}
-                      </p>
-                    </div>
-                    {estimate ? (
-                      // The account route, not the share link. A share id is
-                      // not the capability token and never opened anything;
-                      // somebody signed in is entitled to the quote without
-                      // needing the link that was emailed to them.
-                      <Link href={`/portal/estimates/${estimate.id}`}>
-                        <Button variant="primary" size="lg">
-                          Review and decide
-                        </Button>
-                      </Link>
-                    ) : null}
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </section>
-        ) : null}
-
-        <section className="mt-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-[17px] font-semibold">My vehicles</h2>
-            {ownerships.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Link href="/portal/claim">
-                  <Button size="sm">Add another car</Button>
-                </Link>
-                <Link href="/portal/book">
-                  <Button size="sm" variant="primary">
-                    Book a visit
-                  </Button>
-                </Link>
-              </div>
-            ) : null}
-          </div>
-
-          {ownerships.length === 0 ? (
-            <EmptyState
-              className="mt-3 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-              title="No vehicles yet"
-              description="Add your car by entering its registration. The garage that last worked on it confirms the car is yours."
-              action={
-                <Link href="/portal/claim">
-                  <Button variant="primary">Add your car</Button>
-                </Link>
-              }
-            />
-          ) : (
-            <ul className="mt-3 grid gap-3">
-              {ownerships.map(({ vehicle, id }) => {
-                const active = activeJobs.find(({ job }) => job.vehicleId === vehicle.id);
-
-                return (
-                  <li key={id}>
-                    <Card>
-                      <CardBody>
-                        <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_18rem] lg:gap-10">
+        <div className="min-w-0">
+          {attention > 0 ? (
+            <section aria-labelledby="attention">
+              <h2 id="attention" className="eyebrow mb-3">
+                Needs you
+              </h2>
+              <ul className="grid gap-3">
+                {awaiting.map(({ job, orgName }) => {
+                  const estimate = job.estimates[0];
+                  return (
+                    <li key={job.id}>
+                      <Card className="border-(--warning)">
+                        <CardBody className="flex flex-wrap items-center justify-between gap-4">
                           <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-display text-[17px] font-semibold">
-                                {vehicle.year} {vehicle.make} {vehicle.model}
-                              </h3>
-                              {vehicle.registration ? (
-                                <Registration value={vehicle.registration} />
+                            <Badge tone="warning" size="sm" dot>
+                              Estimate to approve
+                            </Badge>
+                            <p className="mt-2 text-[15px] font-semibold">
+                              {job.vehicle.make} {job.vehicle.model} · {job.shortDescription}
+                            </p>
+                            <p className="text-[13px] text-(--text-soft)">
+                              {orgName}
+                              {estimate ? (
+                                <>
+                                  {' '}
+                                  · estimated{' '}
+                                  <span className="font-medium text-(--text)">
+                                    <Money
+                                      amount={Number(estimate.total)}
+                                      currency={estimate.currency}
+                                    />
+                                  </span>
+                                </>
                               ) : null}
-                            </div>
-                            <p className="mt-1 text-[13px] text-(--text-faint)">
-                              <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events}{' '}
-                              entries on record
                             </p>
                           </div>
+                          {estimate ? (
+                            <Link href={`/portal/estimates/${estimate.id}`}>
+                              <Button variant="primary" size="lg">
+                                Review and decide
+                              </Button>
+                            </Link>
+                          ) : null}
+                        </CardBody>
+                      </Card>
+                    </li>
+                  );
+                })}
 
+                {owing.length > 0 ? (
+                  <li>
+                    <Card className="border-(--warning)">
+                      <CardBody className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <Badge tone="warning" size="sm" dot>
+                            {owing.length === 1
+                              ? 'Invoice to pay'
+                              : `${owing.length} invoices to pay`}
+                          </Badge>
+                          <p className="mt-2 font-display text-[24px] font-semibold leading-none">
+                            <Money amount={owedTotal} currency={owing[0]!.currency} />
+                          </p>
+                          <p className="mt-1 text-[13px] text-(--text-soft)">
+                            {owing.length === 1
+                              ? `${owing[0]!.number ?? 'Invoice'} from ${owing[0]!.org.name}`
+                              : `From ${[...new Set(owing.map((i) => i.org.name))].join(', ')}`}
+                          </p>
+                        </div>
+                        <Link href="/portal/invoices">
+                          <Button variant="primary" size="lg">
+                            Pay by card
+                          </Button>
+                        </Link>
+                      </CardBody>
+                    </Card>
+                  </li>
+                ) : null}
+
+                {recalled.map(({ vehicle, id }) => (
+                  <li key={id}>
+                    <Card className="border-(--danger)">
+                      <CardBody className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <Badge tone="danger" size="sm" dot>
+                            Safety recall
+                          </Badge>
+                          <p className="mt-2 text-[15px] font-semibold">
+                            {vehicle.year} {vehicle.make} {vehicle.model}
+                          </p>
+                          <p className="text-[13px] text-(--text-soft)">
+                            The manufacturer has an open safety recall on this car. The fix is free;
+                            book it in.
+                          </p>
+                        </div>
+                        <Link href={`/portal/book?vehicle=${vehicle.id}`}>
+                          <Button variant="secondary" size="lg">
+                            Book the recall
+                          </Button>
+                        </Link>
+                      </CardBody>
+                    </Card>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          <section aria-labelledby="vehicles" className={attention > 0 ? 'mt-8' : ''}>
+            <h2 id="vehicles" className="eyebrow mb-3">
+              My cars
+            </h2>
+            {ownerships.length === 0 ? (
+              <EmptyState
+                className="rounded-(--radius-lg) border border-(--border) bg-(--surface)"
+                title="No cars yet"
+                description="Add your car by entering its registration. The garage that last worked on it confirms it is yours."
+                action={
+                  <Link href="/portal/claim">
+                    <Button variant="primary">Add your car</Button>
+                  </Link>
+                }
+              />
+            ) : (
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {ownerships.map(({ vehicle, id }) => {
+                  const active = activeJobs.find(({ job }) => job.vehicleId === vehicle.id);
+                  return (
+                    <li key={id}>
+                      <Link
+                        href={`/portal/vehicles/${vehicle.id}`}
+                        className="group block h-full rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 transition-[border-color,box-shadow] hover:border-(--brand) hover:shadow-(--shadow-md)"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-medium tracking-wide text-(--text-faint) uppercase">
+                              {vehicle.year}
+                            </p>
+                            <h3 className="font-display text-[18px] font-semibold leading-tight group-hover:text-(--brand-text)">
+                              {vehicle.make} {vehicle.model}
+                            </h3>
+                          </div>
+                          {vehicle.registration ? (
+                            <Registration value={vehicle.registration} />
+                          ) : null}
+                        </div>
+                        <p className="mt-3 text-[13px] text-(--text-soft)">
+                          <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events}{' '}
+                          {vehicle._count.events === 1 ? 'entry' : 'entries'} on its passport
+                        </p>
+                        <div className="mt-4 flex items-center justify-between gap-2">
                           {active ? (
                             <Badge tone={toneFor(active.job.status as JobStatus)} dot>
                               {humanise(active.job.status as JobStatus)}
+                            </Badge>
+                          ) : vehicle.recalls.length > 0 ? (
+                            <Badge tone="danger" dot>
+                              Recall open
                             </Badge>
                           ) : (
                             <Badge tone="success" dot>
                               Nothing due
                             </Badge>
                           )}
+                          <span className="text-[13px] font-medium text-(--brand-text)">
+                            Open →
+                          </span>
                         </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
 
-                        {vehicle.recalls.length > 0 ? (
-                          <p className="mt-3 rounded-(--radius-sm) bg-(--danger-soft) px-2.5 py-1.5 text-[13px] text-(--danger)">
-                            This vehicle has an outstanding safety recall. Contact your workshop.
-                          </p>
-                        ) : null}
+          {recent.length > 0 ? (
+            <section aria-labelledby="recent" className="mt-8">
+              <h2 id="recent" className="eyebrow mb-3">
+                Recent work
+              </h2>
+              <Card>
+                <ul className="divide-y divide-(--border)">
+                  {recent.map(({ job, orgName }) => (
+                    <li key={job.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[14px] font-medium">{job.shortDescription}</p>
+                        <p className="text-[12px] text-(--text-faint)">
+                          {job.vehicle.make} {job.vehicle.model} · {orgName} ·{' '}
+                          <time className="datum">
+                            {job.createdAt.toLocaleDateString(region.locale, {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </time>
+                        </p>
+                      </div>
+                      {job.invoices[0] ? (
+                        <span className="text-[14px] font-medium tabular-nums">
+                          <Money
+                            amount={Number(job.invoices[0].total)}
+                            currency={job.invoices[0].currency}
+                          />
+                        </span>
+                      ) : null}
+                      <Badge tone={toneFor(job.status as JobStatus)} size="sm">
+                        {humanise(job.status as JobStatus)}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </section>
+          ) : null}
+        </div>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Link href={`/portal/vehicles/${vehicle.id}`}>
-                            <Button size="touch">View history</Button>
-                          </Link>
-                          {/* Both of these were buttons with nothing behind
-                              them. Sharing lives on the vehicle's own page,
-                              because the moment somebody wants to share a
-                              car's history is the moment they are looking at
-                              it. */}
-                          <Link href={`/portal/vehicles/${vehicle.id}#share`}>
-                            <Button size="touch">Share with a buyer</Button>
-                          </Link>
-                          <Link href={`/portal/book?vehicle=${vehicle.id}`}>
-                            <Button size="touch">Book a service</Button>
-                          </Link>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+        <aside className="grid content-start gap-4">
+          {points.length > 0 || referrals.length > 0 ? (
+            <Link
+              href="/portal/rewards"
+              className="block rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 transition-[border-color,box-shadow] hover:border-(--brand) hover:shadow-(--shadow-md)"
+            >
+              <p className="eyebrow">Rewards</p>
+              <p className="mt-1 font-display text-[22px] font-semibold leading-none">
+                {totalPoints.toLocaleString(region.locale)}
+                <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
+              </p>
+              <p className="mt-2 text-[12px] text-(--text-soft)">
+                {referrals.length > 0
+                  ? 'Your points and a code that brings a friend.'
+                  : 'Your points, workshop by workshop.'}
+              </p>
+            </Link>
+          ) : null}
 
-        {/* Points are per workshop, because each workshop runs its own
-            scheme and pays for it. Shown only where there is something to
-            show; a row of zeros is a sales pitch, not information. */}
-        {points.length > 0 ? (
-          <section className="mt-8">
-            <h2 className="font-display text-[17px] font-semibold">Your points</h2>
-            <ul className="mt-3 grid gap-2">
-              {points.map((card) => (
-                <li
-                  key={card.customerId}
-                  className="flex flex-wrap items-center gap-3 rounded-(--radius-md) border border-(--border) bg-(--surface) px-3.5 py-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium">{card.workshop}</p>
-                    <p className="text-[12px] text-(--text-faint)">
-                      Worth{' '}
-                      <Money
-                        amount={card.valueMinor / 100}
-                        currency={card.currency}
-                        locale={card.locale}
-                      />{' '}
-                      off your next bill there. Ask at the counter to use them.
-                    </p>
-                    {card.expiring.points > 0 && card.expiring.on ? (
-                      <p className="mt-1 text-[12px] text-(--warning)">
-                        {card.expiring.points.toLocaleString(region.locale)} expire on{' '}
-                        {card.expiring.on.toLocaleDateString(region.locale, {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                        .
-                      </p>
+          <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
+            <p className="eyebrow">Your passports</p>
+            <p className="mt-2 text-[13px] text-(--text-soft)">
+              Every car's full history, verified, in one place. Share it with a buyer when you sell.
+            </p>
+            <Link href="/portal/passports" className="mt-3 inline-block">
+              <Button variant="secondary" size="sm">
+                See passports
+              </Button>
+            </Link>
+          </div>
+
+          <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
+            <p className="eyebrow">{customers.length > 0 ? 'Your workshops' : 'Workshops'}</p>
+            {customers.length > 0 ? (
+              <ul className="mt-2 grid gap-2 text-[13px]">
+                {customers.map((customer) => (
+                  <li key={customer.id}>
+                    <p className="font-medium">{customer.org.name}</p>
+                    {customer.org.phone ? (
+                      <a
+                        href={`tel:${customer.org.phone}`}
+                        className="text-(--text-soft) underline"
+                      >
+                        {customer.org.phone}
+                      </a>
                     ) : null}
-                  </div>
-                  <p className="font-display text-[22px] font-semibold tabular-nums">
-                    {card.balance.toLocaleString(region.locale)}
-                    <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        {/* A code per workshop, with the rule in the same breath. It pays
-            once the friend has had work done, and saying so here is what
-            stops a friend expecting points for signing up. */}
-        {referrals.length > 0 ? (
-          <section className="mt-8">
-            <h2 className="font-display text-[17px] font-semibold">Bring a friend</h2>
-            <ul className="mt-3 grid gap-2">
-              {referrals.map((card) => (
-                <li
-                  key={card.customerId}
-                  className="flex flex-wrap items-center gap-3 rounded-(--radius-md) border border-(--border) bg-(--surface) px-3.5 py-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium">{card.workshop}</p>
-                    <p className="text-[12px] text-(--text-faint)">
-                      Give this code to somebody who has not been there. Once they have had{' '}
-                      <Money
-                        amount={card.minimumMinor / 100}
-                        currency={card.currency}
-                        locale={card.locale}
-                      />{' '}
-                      of work done, you both get {card.pointsEachSide} points.
-                    </p>
-                  </div>
-                  <p className="datum text-[20px] font-semibold tracking-[0.2em]">{card.code}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        <section className="mt-8">
-          <h2 className="font-display text-[17px] font-semibold">Recent work</h2>
-          <ul className="mt-3 grid gap-2">
-            {customers
-              .flatMap((customer) =>
-                customer.jobs.map((job) => ({ job, orgName: customer.org.name })),
-              )
-              .slice(0, 8)
-              .map(({ job, orgName }) => (
-                <li
-                  key={job.id}
-                  className="flex flex-wrap items-center gap-2 rounded-(--radius-md) border border-(--border) bg-(--surface) px-3.5 py-2.5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium">{job.shortDescription}</p>
-                    <p className="text-[12px] text-(--text-faint)">
-                      {job.vehicle.make} {job.vehicle.model} · {orgName} ·{' '}
-                      <time className="datum">
-                        {job.createdAt.toLocaleDateString(region.locale, {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </time>
-                    </p>
-                  </div>
-                  {job.invoices[0] ? (
-                    <span className="text-[14px] font-medium">
-                      <Money
-                        amount={Number(job.invoices[0].total)}
-                        currency={job.invoices[0].currency}
-                      />
-                    </span>
-                  ) : null}
-                  <Badge tone={toneFor(job.status as JobStatus)} size="sm">
-                    {humanise(job.status as JobStatus)}
-                  </Badge>
-                </li>
-              ))}
-          </ul>
-        </section>
-      </main>
-    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-[13px] text-(--text-soft)">
+                Any workshop on Carnet can take your car, and its history goes with you.
+              </p>
+            )}
+            <Link href="/portal/workshops" className="mt-3 inline-block">
+              <Button variant="secondary" size="sm">
+                Find a workshop
+              </Button>
+            </Link>
+          </div>
+        </aside>
+      </div>
+    </PortalShell>
   );
 }

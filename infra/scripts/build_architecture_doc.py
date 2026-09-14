@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 32"
+AFTER_PHASE = "Phase 32.5"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -375,7 +375,10 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("ask", "Ask: a question in words, answered from the workshop's own data.", "Workshop"),
     ("settings-organisation", "Organisation settings, where the region is changed.", "Workshop"),
     ("subscription", "The subscription page: where the workshop stands and what its plan allows.", "Workshop"),
-    ("portal", "The customer's portal.", "Customer"),
+    ("portal", "The customer's home on a phone: what needs them first, then their cars.", "Customer"),
+    ("portal-desktop", "The same home on a desktop, two columns under a persistent navigation.", "Customer"),
+    ("portal-rewards", "Rewards: points per workshop and the referral code.", "Customer"),
+    ("portal-workshops", "The directory of every workshop on Carnet, with Book here on each.", "Customer"),
     ("portal-invoices", "The customer's invoices, with Pay now on what is owed.", "Customer"),
     ("portal-passport", "A passport as its owner sees it.", "Customer"),
     ("portal-passports", "Every car the customer owns, listed.", "Customer"),
@@ -557,6 +560,8 @@ def build() -> None:
     doc.add_heading("The other surfaces", level=2)
     para(doc, "The customer portal goes through requireUser rather than requireSession: a portal user has no "
               "organisation, and what they may see is decided by ownership (VehicleOwnership) rather than membership. "
+              "A customer may book at any workshop on Carnet: the directory lists every active organisation with a "
+              "site, and a first booking creates their Customer record there, so the workshop sees a person in its diary. "
               "The public passport at /p/<token> has no session at all; the token is the PassportShare row and its scope "
               "and expiry decide what is rendered, and every opening is recorded. /api/v1 authenticates an organisation "
               "key (hashed at rest, shown once) and reuses the same library functions the pages use, so the API and the "

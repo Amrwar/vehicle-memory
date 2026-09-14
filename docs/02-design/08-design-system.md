@@ -166,6 +166,14 @@ recognisable at a glance in a way that plain text is not.
 people can compare a vehicle's history over the phone without reading 64 hex
 characters to each other.
 
+**The customer's side (Phase 32.5).** The portal is an app on a phone
+before it is a website: a fixed five-tab bar at the bottom (Home,
+Passports, Invoices, Updates, Book), each with an icon, on every page, and
+the same tabs under the header on a desktop, where the home widens to two
+columns. The home leads with "Needs you", each item carrying its own
+button. Cars are cards with one way in. Rewards and the workshop directory
+are pages, not sections.
+
 ## 8. Dark mode
 
 Full support, both themes designed rather than one inverted. Tokens are

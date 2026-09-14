@@ -1585,6 +1585,36 @@ same script with keys. Payment links sent in a message are still to come.
 
 ---
 
+## Phase 32.5 — The customer's side, redesigned
+
+**Scope.** The portal as a product rather than a list of pages: navigation
+that is always there, a home that leads with what needs the customer,
+rewards on their own page, a directory of every workshop on Carnet, and
+booking at any of them.
+
+**Exit.** A customer opens the portal on a phone and reaches invoices,
+passports, updates and booking in one tap from anywhere; a customer with no
+workshop finds one and books.
+
+**Status.** Built, on 14 September 2026, from what the owner saw on their
+own phone. The home page used to carry its own header with no navigation
+at all, so invoices and passports were only reachable through a vehicle;
+the tabs now sit at the bottom of the screen on a phone and under the
+header on a desktop, on every page. The home answers "does anything need
+me?" first, with a button on each answer: an estimate to decide, invoices
+to pay by card, a recall to book. Then the cars as cards with one way in,
+then recent work. Points and referral codes moved to a Rewards page,
+because a referral code between somebody's cars and their service history
+read as an advertisement. Every button reads as a button (Phase 32's
+primitive change), and the Pay button is the filled primary with the amount
+in it. A directory at /portal/workshops lists every active workshop with
+somewhere to bring a car, findable by name or place; booking at one the
+customer has never used makes them its customer on the spot, and the claim
+page no longer says "ask the garage" as if there were one. The design book
+carries the new home, the rewards page and the directory.
+
+---
+
 ## Phase 33 — Data in, data out
 
 **Scope.** Import from CSV for customers, vehicles, parts, suppliers and

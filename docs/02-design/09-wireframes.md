@@ -329,3 +329,48 @@ Money taken in advance. Owed as work until it is spent.
 
 On the invoice, "Redeem a gift card" takes the number and an optional amount;
 blank means as much as the bill needs.
+
+## 11. The customer's home (Phase 32.5)
+
+```
+  PHONE                                DESKTOP
+  +-----------------------------+      +--------------------------------------------------+
+  | [mark] Carnet   [theme] out |      | [mark] Carnet · YOUR CARS          [theme] Sign out|
+  |        YOUR CARS            |      | Home  Passports  Invoices  Updates  Rewards       |
+  +-----------------------------+      | Workshops  Book                                   |
+  | Hello, Maria                |      +--------------------------------------------------+
+  | 2 things need your attention|      | Hello, Maria            [Add a car] [Book a visit]|
+  |          [Add a car][Book]  |      | 2 things need your attention                      |
+  |                             |      |                                    |             |
+  | NEEDS YOU                   |      | NEEDS YOU                          | REWARDS     |
+  | +-------------------------+ |      | +------------------------------+   | 576 points  |
+  | | Estimate to approve     | |      | | Estimate to approve          |   |             |
+  | | BMW X5 · Brake repair   | |      | | BMW X5 · Brake repair        |   | YOUR        |
+  | | Hillside · est £1,509   | |      | |     [Review and decide]      |   | PASSPORTS   |
+  | |     [Review and decide] | |      | +------------------------------+   | [See]       |
+  | +-------------------------+ |      | | Invoice to pay  £750.00      |   |             |
+  | | Invoice to pay  £750.00 | |      | |            [Pay by card]     |   | YOUR        |
+  | |            [Pay by card]| |      | +------------------------------+   | WORKSHOPS   |
+  | +-------------------------+ |      |                                    | Hillside    |
+  |                             |      | MY CARS                            | [Find one]  |
+  | MY CARS                     |      | +-------------+ +-------------+    |             |
+  | +-------------------------+ |      | | 2020        | | 2021        |    |             |
+  | | 2020        [MK20 XRT]  | |      | | BMW X5      | | Honda Civic |    |             |
+  | | BMW X5                  | |      | | 82,430 km   | | Not recorded|    |             |
+  | | 82,430 km · 14 entries  | |      | | ● Approval  Open → | ● Nothing due  Open →|    |
+  | | ● Customer approval  Open →|      | +-------------+ +-------------+    |             |
+  | +-------------------------+ |      |                                    |             |
+  |                             |      | RECENT WORK                        |             |
+  | RECENT WORK                 |      | Brake system repair  ·  £750  ● Approval          |
+  | ...                         |      +--------------------------------------------------+
+  +-----------------------------+
+  | [Home][Passports][Invoices] |
+  | [Updates][Book]             |   <- fixed bottom tab bar, always visible
+  +-----------------------------+
+```
+
+The navigation is never behind a vehicle. Five tabs on a phone, at the
+bottom where a thumb is; seven on a desktop, under the header. "Needs you"
+comes first and each item carries its own button, so the page is done with
+in one press for the person who came to pay. Rewards and the workshop
+directory are pages of their own.

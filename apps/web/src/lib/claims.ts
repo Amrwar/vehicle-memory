@@ -155,8 +155,8 @@ export async function claimVehicle(input: {
     throw new ClaimError(
       'NO_VEHICLE',
       kind === 'VIN'
-        ? 'No vehicle with that VIN has been worked on by a workshop using Carnet.'
-        : 'No vehicle on that registration has been worked on by a workshop using Carnet.',
+        ? 'No vehicle with that VIN has been worked on by a workshop using Carnet yet. Book it in at any workshop on Carnet and it joins with the job.'
+        : 'No vehicle on that registration has been worked on by a workshop using Carnet yet. Book it in at any workshop on Carnet and it joins with the job.',
     );
   }
 
