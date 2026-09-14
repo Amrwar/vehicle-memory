@@ -182,6 +182,23 @@ There is no way back. A removed document keeps its row, its reason and its
 audit entry; a corrected scan is a new document. Only the workshop that added
 it or the vehicle's owner may remove it.
 
+## 8. Gift card (Phase 28)
+
+Not stored. Read from the card's facts each time it is looked at, which is
+the reason it cannot drift from the entries beneath it:
+
+```
+  balance > 0, no expiry passed, not cancelled     ACTIVE
+  balance = 0                                      DEPLETED
+  expiresAt <= now                                 EXPIRED     (beats DEPLETED)
+  disabledAt set                                   DISABLED    (beats everything)
+```
+
+A refund onto a spent card makes it active again, because the balance did.
+A lapsed card cannot be topped up back to life, because the date did not
+move. A cancelled card is cancelled with money on it or without; the
+cancellation wrote the money off, and nothing moves it again.
+
 ## 7. Why these are in the domain layer
 
 Every one of these could have been expressed as conditional rendering. Putting

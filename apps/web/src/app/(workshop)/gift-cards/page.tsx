@@ -1,4 +1,10 @@
-import { GIFT_CARD_MAX_MINOR, GIFT_CARD_MIN_MINOR, type GiftCardTender } from '@carnet/core';
+import {
+  GIFT_CARD_MAX_MINOR,
+  GIFT_CARD_MIN_MINOR,
+  GIFT_CARD_TERMS_MONTHS,
+  type GiftCardStatus,
+  type GiftCardTender,
+} from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -24,14 +30,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { GiftCardError, giftCardsFor, sellGiftCard } from '@/lib/giftcards';
+import { GiftCardError, giftCardsFor, sellGiftCard, sitesFor } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Gift cards' };
 export const dynamic = 'force-dynamic';
 
 /**
- * Gift cards: sold here, spent on an invoice.
+ * Gift cards: sold here, spent on an invoice or at the counter.
  *
  * The figure this page leads with is what the workshop owes, because that is
  * what a gift card is. Money taken for work not yet done is a liability, and
@@ -46,6 +52,16 @@ const TENDERS: { value: GiftCardTender; label: string }[] = [
   { value: 'CHEQUE', label: 'Cheque' },
 ];
 
+const STATUS: Record<
+  GiftCardStatus,
+  { label: string; tone: 'success' | 'neutral' | 'warning' | 'danger' }
+> = {
+  ACTIVE: { label: 'Active', tone: 'success' },
+  DEPLETED: { label: 'Spent', tone: 'neutral' },
+  EXPIRED: { label: 'Lapsed', tone: 'warning' },
+  DISABLED: { label: 'Cancelled', tone: 'danger' },
+};
+
 async function sell(formData: FormData) {
   'use server';
 
@@ -53,6 +69,8 @@ async function sell(formData: FormData) {
 
   const pounds = Number(String(formData.get('amount') ?? '').replace(/[£,\s]/g, ''));
   const method = String(formData.get('method') ?? 'CARD');
+  const term = String(formData.get('term') ?? '');
+  const site = String(formData.get('locationId') ?? '');
 
   let sold: { id: string };
   try {
@@ -61,6 +79,8 @@ async function sell(formData: FormData) {
       userId: user.userId,
       amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
       method: TENDERS.some((t) => t.value === method) ? method : 'CARD',
+      termMonths: term ? Number(term) : null,
+      locationId: site || null,
       recipientName: String(formData.get('recipientName') ?? ''),
       note: String(formData.get('note') ?? ''),
     });
@@ -80,7 +100,7 @@ export default async function GiftCardsPage({
   const { orgId, user } = await requireSession('payment:read');
   const { problem } = await searchParams;
 
-  const cards = await giftCardsFor(orgId);
+  const [cards, sites] = await Promise.all([giftCardsFor(orgId), sitesFor(orgId)]);
   const maySell = can(user.role, 'payment:write');
 
   return (
@@ -107,7 +127,12 @@ export default async function GiftCardsPage({
         <StatTile
           label="Cards with money on"
           value={cards.withBalance}
-          note={`${cards.cards.length} sold in all`}
+          note={
+            cards.lapsingSoon > 0
+              ? `${cards.lapsingSoon} lapse within sixty days`
+              : `${cards.cards.length} sold in all`
+          }
+          tone={cards.lapsingSoon > 0 ? 'warning' : 'neutral'}
         />
         <StatTile
           label="Sold"
@@ -117,7 +142,7 @@ export default async function GiftCardsPage({
         <StatTile
           label="Spent"
           value={<Money amount={cards.spentMinor / 100} />}
-          note="Put against bills since"
+          note="Put against bills and counter sales"
         />
       </StatRow>
 
@@ -140,8 +165,10 @@ export default async function GiftCardsPage({
                     <Th>Number</Th>
                     <Th>Sold</Th>
                     <Th>For</Th>
+                    <Th>Good</Th>
                     <Th numeric>Loaded</Th>
                     <Th numeric>Left</Th>
+                    <Th>Status</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,23 +189,26 @@ export default async function GiftCardsPage({
                         ) : null}
                       </Td>
                       <Td>{card.recipientName ?? '—'}</Td>
+                      <Td className="text-(--text-soft)">
+                        {card.site ? `At ${card.site}` : 'Everywhere'}
+                        {card.expiresAt
+                          ? ` · until ${card.expiresAt.toLocaleDateString('en-GB', { dateStyle: 'medium' })}`
+                          : ''}
+                      </Td>
                       <Td numeric>
                         <Money amount={card.loadedMinor / 100} />
                       </Td>
                       <Td numeric>
-                        {card.voided ? (
-                          <Badge tone="neutral" size="sm">
-                            Cancelled
-                          </Badge>
-                        ) : card.balanceMinor === 0 ? (
-                          <Badge tone="neutral" size="sm">
-                            Spent
-                          </Badge>
-                        ) : (
-                          <span className="font-medium">
-                            <Money amount={card.balanceMinor / 100} />
-                          </span>
-                        )}
+                        <span
+                          className={card.balanceMinor > 0 ? 'font-medium' : 'text-(--text-faint)'}
+                        >
+                          <Money amount={card.balanceMinor / 100} />
+                        </span>
+                      </Td>
+                      <Td>
+                        <Badge tone={STATUS[card.status].tone} size="sm">
+                          {STATUS[card.status].label}
+                        </Badge>
                       </Td>
                     </Tr>
                   ))}
@@ -219,6 +249,32 @@ export default async function GiftCardsPage({
                     ))}
                   </Select>
                 </Field>
+                <Field
+                  label="Lasts"
+                  hint="Most cards should not lapse. A card that lapses is money paid for nothing."
+                  htmlFor="sell-term"
+                >
+                  <Select id="sell-term" name="term" defaultValue="">
+                    <option value="">For good</option>
+                    {GIFT_CARD_TERMS_MONTHS.map((months) => (
+                      <option key={months} value={months}>
+                        {months === 12 ? 'A year' : `${months / 12} years`}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                {sites.length > 1 ? (
+                  <Field label="Good at" htmlFor="sell-site">
+                    <Select id="sell-site" name="locationId" defaultValue="">
+                      <option value="">Every site</option>
+                      {sites.map((site) => (
+                        <option key={site.id} value={site.id}>
+                          {site.name} only
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : null}
                 <Field label="For" hint="Optional. Who it is a present for" htmlFor="sell-for">
                   <Input id="sell-for" name="recipientName" maxLength={120} placeholder="Dad" />
                 </Field>

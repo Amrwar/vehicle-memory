@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5500 — Gift cards, deepened
+
+| Ref     | Requirement                                                                                                                                                                        | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-5501 | Every movement on a card MUST be typed as an issue, a redemption, a refund or an adjustment, and the database MUST refuse a kind whose sign disagrees with it.                     | 28    |
+| FR-5502 | A card's status MUST be read from its facts, never stored: active, spent, lapsed or cancelled, with cancelled winning over all.                                                    | 28    |
+| FR-5503 | A card MAY be sold with a term of a year or two years, defaulting to no term, and MAY be tied to one site; a lapsed card or one at the wrong site MUST be refused with a sentence. | 28    |
+| FR-5504 | A gift card MUST be a tender at the counter, spent inside the sale's own transaction, posted as the liability released and never as cash taken.                                    | 28    |
+| FR-5505 | A refund by method gift card MUST put the money back on the card that paid the bill, and MUST be refused when no card paid it or that card was cancelled.                          | 28    |
+| FR-5506 | A person MUST be able to add to or take off a card with a reason, never below nothing, booked as goodwill or sundry income by the same amount.                                     | 28    |
+| FR-5507 | A card MUST be cancellable with a reason, writing off what was on it, after which it MUST refuse every use and every change.                                                       | 28    |
+
 ## FR-5400 — The passport, listed
 
 | Ref     | Requirement                                                                                                                                                                                                                          | Phase |

@@ -959,6 +959,38 @@ or show it to a buyer without hunting.
 
 ---
 
+## Epic Y — Gift cards, deepened (Phase 28)
+
+### Y1 — A card at the counter, and back onto it
+
+**As** Sara **I want** to take a gift card at the counter and to put a
+refund back on the card that paid **so that** a present works everywhere a
+card does and a refund does not become cash the customer never handed over.
+**Size** 5 · **Satisfies** FR-5501, FR-5504, FR-5505
+
+- **Given** a sale at the counter, **when** the customer offers a gift card,
+  **then** it pays what it can and the rest is cash, and the books show the
+  liability released rather than money in the drawer.
+- **Given** a bill paid with a card and then credited, **when** I refund by
+  gift card, **then** the money is back on that card.
+
+### Y2 — A card explained
+
+**As** Ahmed **I want** every card to say what happened on it and what it is
+now **so that** a question about a balance has an answer and a lost card can
+be dealt with.
+**Size** 5 · **Satisfies** FR-5502, FR-5503, FR-5506, FR-5507
+
+- **Given** a card's page, **when** I open it, **then** I see it loaded,
+  spent, returned or changed by hand, each with a reason, and whether it is
+  active, spent, lapsed or cancelled.
+- **Given** a complaint, **when** I add five pounds with a reason, **then**
+  the books move by five pounds as goodwill.
+- **Given** a card reported lost, **when** I cancel it with the reason,
+  **then** what was on it is written off and the number refuses every use.
+
+---
+
 ## Story map
 
 ```

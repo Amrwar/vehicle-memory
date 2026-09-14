@@ -135,6 +135,15 @@ describe('settling', () => {
     ).not.toThrow();
   });
 
+  it('takes a gift card like a card: exact, and never over', () => {
+    const settlement = settle(totals, [
+      { kind: 'GIFT_CARD', amount: gbp(10), code: 'BCDFGHJKLMNP' },
+      { kind: 'CASH', amount: gbp(5) },
+    ]);
+    expect(toDecimalString(settlement.change)).toBe('0.60');
+    expect(() => settle(totals, [{ kind: 'GIFT_CARD', amount: gbp(20) }])).toThrow(SaleError);
+  });
+
   it('says how short a payment is', () => {
     expect(() => settle(totals, [{ kind: 'CASH', amount: gbp(10) }])).toThrow(/Short by £4.40/);
   });

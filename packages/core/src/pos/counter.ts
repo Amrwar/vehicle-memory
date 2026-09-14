@@ -141,11 +141,13 @@ export function revenueSplit(
    Taking the money
    --------------------------------------------------------------------------- */
 
-export type TenderKind = 'CASH' | 'CARD' | 'ACCOUNT';
+export type TenderKind = 'CASH' | 'CARD' | 'ACCOUNT' | 'GIFT_CARD';
 
 export interface Tender {
   kind: TenderKind;
   amount: Money;
+  /** The card's number, for a gift card. */
+  code?: string;
 }
 
 export class SaleError extends Error {
@@ -189,8 +191,12 @@ export function settle(
     currency,
   );
 
+  // A card and a gift card are alike here: nobody hands over more of either
+  // than the total, and neither can give change.
   const card = sum(
-    tenders.filter((tender) => tender.kind === 'CARD').map((tender) => tender.amount),
+    tenders
+      .filter((tender) => tender.kind === 'CARD' || tender.kind === 'GIFT_CARD')
+      .map((tender) => tender.amount),
     currency,
   );
 
@@ -300,6 +306,8 @@ export function postCounterSale(input: {
   settlement: Settlement;
   cardTaken: Money;
   cashTaken: Money;
+  /** Spent from gift cards: a liability released, not money in. */
+  giftCardTaken?: Money;
   /** Split by kind, so labour is not posted as parts. */
   revenue: { labourNet: Money; partsNet: Money; feeNet: Money };
 }): JournalEntryDraft {
@@ -319,6 +327,9 @@ export function postCounterSale(input: {
   // What came in. Cash net of change actually given.
   debit(ACCOUNT.CASH, subtract(input.cashTaken, input.settlement.change), 'Into the drawer');
   debit(ACCOUNT.BANK, input.cardTaken, 'Card, settling to the bank');
+  if (input.giftCardTaken) {
+    debit(ACCOUNT.GIFT_CARDS, input.giftCardTaken, 'Gift card, released');
+  }
   debit(ACCOUNT.RECEIVABLE, input.settlement.onAccount, 'On account');
 
   // What was sold, split by kind. A bulb and half an hour of diagnosis are

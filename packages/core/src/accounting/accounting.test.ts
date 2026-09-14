@@ -17,6 +17,7 @@ import {
   PostingError,
   postCreditNote,
   postGoodsReceived,
+  postGiftCardAdjustment,
   postGiftCardSold,
   postInvoiceIssued,
   postPartsConsumed,
@@ -296,6 +297,35 @@ describe('gift card sold', () => {
       soldAt: new Date(),
     });
     expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.CASH);
+  });
+});
+
+describe('gift card adjusted', () => {
+  it('books money added by hand as the cost of goodwill', () => {
+    const posted = postGiftCardAdjustment({
+      entryId: 'gce_1',
+      reference: 'GC-1/A',
+      amount: gbp('5.00'),
+      direction: 'UP',
+      reason: 'Sorry about the wait',
+      at: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.LOYALTY_REWARDS);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.GIFT_CARDS);
+  });
+
+  it('books money taken off by hand as sundry income, releasing the liability', () => {
+    const posted = postGiftCardAdjustment({
+      entryId: 'gce_2',
+      reference: 'GC-2/A',
+      amount: gbp('12.00'),
+      direction: 'DOWN',
+      reason: 'Cancelled: lost',
+      at: new Date(),
+    });
+    expect(posted.lines.find((l) => l.debit.minor > 0)!.accountCode).toBe(ACCOUNT.GIFT_CARDS);
+    expect(posted.lines.find((l) => l.credit.minor > 0)!.accountCode).toBe(ACCOUNT.FEE_REVENUE);
+    expect(() => assertBalanced(posted)).not.toThrow();
   });
 });
 

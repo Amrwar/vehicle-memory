@@ -101,6 +101,7 @@ function amountFrom(formData: FormData, key: string) {
 
 function methodFrom(formData: FormData): PaymentMethod {
   const raw = String(formData.get('method') ?? 'CARD');
+  if (raw === 'GIFT_CARD') return 'GIFT_CARD';
   return (METHODS.some((m) => m.value === raw) ? raw : 'CARD') as PaymentMethod;
 }
 
@@ -220,7 +221,7 @@ async function refund(formData: FormData) {
       reference: String(formData.get('reference') ?? ''),
     });
   } catch (error) {
-    if (!(error instanceof MoneyCycleError)) throw error;
+    if (!(error instanceof MoneyCycleError) && !(error instanceof GiftCardError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
 
@@ -259,6 +260,7 @@ export default async function InvoicePage({
     status !== 'VOID' &&
     money.credited.minor < money.total.minor;
   const mayRefund = can(user.role, 'payment:write') && money.owedBack.minor > 0;
+  const paidWithCard = invoice.payments.some((p) => p.method === 'GIFT_CARD');
 
   // Points are only offered when there is a bill to put them against and
   // something to put. A card with nothing to spend is a card to explain.
@@ -697,8 +699,21 @@ export default async function InvoicePage({
                       required
                     />
                   </Field>
-                  <Field label="How">
-                    <Select name="method" defaultValue="BANK_TRANSFER">
+                  <Field
+                    label="How"
+                    hint={
+                      paidWithCard
+                        ? 'This bill was paid with a gift card; the money can go back onto it.'
+                        : undefined
+                    }
+                  >
+                    <Select
+                      name="method"
+                      defaultValue={paidWithCard ? 'GIFT_CARD' : 'BANK_TRANSFER'}
+                    >
+                      {paidWithCard ? (
+                        <option value="GIFT_CARD">Back onto the gift card</option>
+                      ) : null}
                       {METHODS.filter((m) => m.value !== 'ACCOUNT').map((m) => (
                         <option key={m.value} value={m.value}>
                           {m.label}

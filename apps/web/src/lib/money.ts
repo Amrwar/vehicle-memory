@@ -30,6 +30,7 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import { refundOntoCard } from './giftcard-refunds';
 import { settleReferralsFor } from './referrals';
 import { awardForInvoice } from './retention';
 import { consumeForJob } from './inventory';
@@ -836,6 +837,18 @@ export async function recordRefund(input: {
     }),
   );
 
+  // Money back onto the card that paid. The posting above already credited
+  // the cards outstanding; this is the card's own record of it.
+  if (input.method === 'GIFT_CARD') {
+    await refundOntoCard({
+      orgId: input.orgId,
+      userId: input.userId,
+      invoiceId: invoice.id,
+      amountMinor: input.amount.minor,
+      reason: note.reason,
+    });
+  }
+
   if (invoice.customer.email) {
     const queued = await prisma.messageLog.create({
       data: {
@@ -968,6 +981,10 @@ function describeMethod(method: PaymentMethod): string {
       return 'online payment';
     case 'ACCOUNT':
       return 'account credit';
+    case 'LOYALTY':
+      return 'points';
+    case 'GIFT_CARD':
+      return 'gift card';
     default:
       return 'the original method';
   }

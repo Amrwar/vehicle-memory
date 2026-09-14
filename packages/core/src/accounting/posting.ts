@@ -211,6 +211,44 @@ export function accountForMethod(method: PaymentMethod): string {
 }
 
 /* ---------------------------------------------------------------------------
+   Gift card adjusted by hand
+   --------------------------------------------------------------------------- */
+
+/**
+ * A person changed what a card holds. Money added is a gift from the
+ * workshop, so it is the same cost as the loyalty programme; money taken
+ * off is a card the workshop no longer owes on, which is sundry income
+ * rather than a sale. Either way the liability moves by exactly the amount.
+ */
+export function postGiftCardAdjustment(input: {
+  entryId: string;
+  reference: string;
+  /** Always positive; the direction says which way the card moved. */
+  amount: Money;
+  direction: 'UP' | 'DOWN';
+  reason: string;
+  at: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: input.reference,
+    description: `Gift card adjusted: ${input.reason}`,
+    sourceType: 'GiftCardEntry',
+    sourceId: input.entryId,
+    postedAt: input.at,
+    lines:
+      input.direction === 'UP'
+        ? [
+            debitLine(ACCOUNT.LOYALTY_REWARDS, input.amount, 'Added to a card by hand'),
+            creditLine(ACCOUNT.GIFT_CARDS, input.amount),
+          ]
+        : [
+            debitLine(ACCOUNT.GIFT_CARDS, input.amount),
+            creditLine(ACCOUNT.FEE_REVENUE, input.amount, 'Taken off a card by hand'),
+          ],
+  });
+}
+
+/* ---------------------------------------------------------------------------
    Gift card sold
    --------------------------------------------------------------------------- */
 

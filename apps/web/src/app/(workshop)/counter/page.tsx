@@ -26,6 +26,7 @@ import { redirect } from 'next/navigation';
 
 import { PlanWall } from '@/components/plan-wall';
 import { closeTill, completeSale, openTill, recentSales, sellableParts } from '@/lib/counter';
+import { findGiftCard, GiftCardError } from '@/lib/giftcards';
 import { planIncludes, requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Counter' };
@@ -52,8 +53,9 @@ async function sell(formData: FormData) {
   const productId = String(formData.get('productId') ?? '');
   const quantity = Number(formData.get('quantity') ?? 1);
   const unitPrice = Number(formData.get('unitPrice') ?? 0);
-  const tender = String(formData.get('tender') ?? 'CASH') as 'CASH' | 'CARD';
+  const tender = String(formData.get('tender') ?? 'CASH') as 'CASH' | 'CARD' | 'GIFT_CARD';
   const given = Number(formData.get('given') ?? 0);
+  const cardNumber = String(formData.get('cardNumber') ?? '');
 
   const [part] = productId
     ? await sellableParts(orgId, user.locationId, undefined).then((parts) =>
@@ -64,6 +66,40 @@ async function sell(formData: FormData) {
   const description = part?.name ?? String(formData.get('description') ?? 'Counter item');
   const price = unitPrice > 0 ? unitPrice : Number(part?.sellPrice ?? 0);
   const total = price * quantity * 1.2;
+  const totalMinor = Math.round(total * 100);
+
+  // A gift card pays what it can; whatever is left is cash. Looked up here
+  // so the person at the counter is told the card's state before the sale,
+  // not after the stock has moved.
+  let tenders: {
+    kind: 'CASH' | 'CARD' | 'GIFT_CARD';
+    amount: ReturnType<typeof money>;
+    code?: string;
+  }[];
+  if (tender === 'GIFT_CARD') {
+    let fromCard = 0;
+    try {
+      const card = await findGiftCard(orgId, cardNumber);
+      fromCard = Math.min(card.balanceMinor, totalMinor);
+      if (fromCard <= 0) throw new GiftCardError('EMPTY', 'There is nothing left on that card.');
+    } catch (error) {
+      if (!(error instanceof GiftCardError)) throw error;
+      redirect(`/counter?error=${encodeURIComponent(error.message)}`);
+    }
+    tenders = [{ kind: 'GIFT_CARD', amount: money(fromCard), code: cardNumber }];
+    if (fromCard < totalMinor) {
+      const rest = totalMinor - fromCard;
+      tenders.push({ kind: 'CASH', amount: money(Math.max(rest, Math.round(given * 100))) });
+    }
+  } else {
+    tenders = [
+      {
+        kind: tender,
+        // Cash can be over-tendered; a card is always the exact amount.
+        amount: money(Math.round((tender === 'CASH' ? given || total : total) * 100)),
+      },
+    ];
+  }
 
   const result = await completeSale({
     orgId,
@@ -78,13 +114,7 @@ async function sell(formData: FormData) {
         unitPrice: price,
       },
     ],
-    tenders: [
-      {
-        kind: tender,
-        // Cash can be over-tendered; a card is always the exact amount.
-        amount: money(Math.round((tender === 'CASH' ? given || total : total) * 100)),
-      },
-    ],
+    tenders,
   });
 
   redirect(
@@ -234,7 +264,18 @@ export default async function CounterPage({
                   <Select name="tender" defaultValue="CASH">
                     <option value="CASH">Cash</option>
                     <option value="CARD">Card</option>
+                    <option value="GIFT_CARD">Gift card, the rest in cash</option>
                   </Select>
+                </Field>
+
+                <Field label="Gift card number" hint="Only for a gift card. Read it off the card.">
+                  <Input
+                    name="cardNumber"
+                    maxLength={14}
+                    autoCapitalize="characters"
+                    className="datum uppercase tracking-[0.12em]"
+                    placeholder="XXXX-XXXX-XXXX"
+                  />
                 </Field>
 
                 <Field label="Cash given" hint="Leave blank for the exact amount">

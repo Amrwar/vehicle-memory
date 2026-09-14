@@ -243,6 +243,30 @@ second time:
 A refund by method `GIFT_CARD` is the mirror image and puts the money back
 on the card: Dr 1100, Cr 2300.
 
+### 3.16 Gift card adjusted by hand (Phase 28)
+
+Money added to a card by hand is a gift from the workshop, the same cost as
+the loyalty programme; money taken off is a card the workshop no longer owes
+on, which is sundry income rather than a sale. A cancellation is an
+adjustment down to nothing with the reason, so the liability leaves the
+books with the card:
+
+```
+  Dr  6400 Loyalty rewards                  5.00
+      Cr  2300 Gift cards outstanding                  5.00
+
+  source: GiftCardEntry gce_..., kind ADJUSTMENT, up
+
+  Dr  2300 Gift cards outstanding          12.00
+      Cr  4020 Fees and sundry revenue                12.00
+
+  source: GiftCardEntry gce_..., kind ADJUSTMENT, down
+```
+
+A gift card taken at the counter posts inside the sale's own entry: Dr 2300
+for the card's share, alongside the cash and card lines, so the drawer is
+never expected to hold money it did not take.
+
 ## 4. Job profitability
 
 Derived from the postings, not computed separately, so the figure on the job

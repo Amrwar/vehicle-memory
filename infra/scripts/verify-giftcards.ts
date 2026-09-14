@@ -1,5 +1,5 @@
 /**
- * Gift cards, against a real database. Phase 26.
+ * Gift cards, against a real database. Phases 26 and 28.
  *
  *   npx tsx infra/scripts/verify-giftcards.ts
  *
@@ -7,20 +7,28 @@
  * a card sold is a liability and not revenue, that a card redeemed releases
  * that liability rather than putting the money in the bank a second time,
  * that the balance on the card and the balance on the bill move together,
- * and that a refusal leaves both exactly where they were.
+ * that a refund puts money back on the card that paid, that a change by
+ * hand moves the books by the same amount, that a cancellation writes off
+ * what was on the card, and that a refusal leaves everything where it was.
  *
  * A card is sold, a small bill is settled with part of it, a larger bill
- * takes the rest, and every refusal is tried in between. It cleans up after
- * itself, except for the passport events a completed job contributes.
+ * takes the rest, part of that is credited and refunded back onto the card,
+ * the card is topped up and then cancelled, and every refusal is tried in
+ * between. Then a second card is sold with a term and a site, spent at the
+ * counter, and refused at the wrong site and after it lapses. It cleans up
+ * after itself, except for the passport events a completed job contributes.
  */
 
 import 'dotenv/config';
 
-import { ACCOUNT, GiftCardError, MoneyCycleError, trialBalance } from '@carnet/core';
+import { ACCOUNT, GiftCardError, money, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { postedLines } from '../../apps/web/src/lib/accounting';
+import { completeSale } from '../../apps/web/src/lib/counter';
 import {
+  adjustGiftCard,
+  disableGiftCard,
   findGiftCard,
   giftCardDetail,
   giftCardsFor,
@@ -29,7 +37,7 @@ import {
 } from '../../apps/web/src/lib/giftcards';
 import { createJob } from '../../apps/web/src/lib/jobs';
 import { loyaltyCardFor } from '../../apps/web/src/lib/loyalty';
-import { issueInvoice, moveJob } from '../../apps/web/src/lib/money';
+import { issueInvoice, moveJob, raiseCreditNote, recordRefund } from '../../apps/web/src/lib/money';
 
 let failures = 0;
 
@@ -115,6 +123,11 @@ async function main() {
     select: { customerId: true, vehicleId: true },
   });
   const vat = await prisma.taxRate.findFirst({ where: { orgId: org.id, isDefault: true } });
+  const sites = await prisma.location.findMany({
+    where: { orgId: org.id, isActive: true },
+    select: { id: true },
+    take: 2,
+  });
 
   await forget(org.id);
 
@@ -163,6 +176,16 @@ async function main() {
       note: TAG,
     }),
   );
+  await refuses('a term that is not offered', GiftCardError, 'TOO_SMALL', () =>
+    sellGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      amountMinor: 5_000,
+      method: 'CARD',
+      termMonths: 7,
+      note: TAG,
+    }),
+  );
 
   const sold = await sellGiftCard({
     orgId: org.id,
@@ -177,6 +200,8 @@ async function main() {
   const fresh = await findGiftCard(org.id, sold.code.toLowerCase());
   check('found however it is typed', fresh.id, sold.id);
   check('holding fifty pounds', fresh.balanceMinor, 5_000);
+  check('active', fresh.status, 'ACTIVE');
+  check('for good', fresh.expiresAt, null);
 
   const salePosting = await prisma.journalEntry.findFirst({
     where: { orgId: org.id, sourceType: 'GiftCard', sourceId: sold.id },
@@ -283,8 +308,6 @@ async function main() {
     false,
   );
 
-  // The card was paid for with real money, so the bill it settles earns
-  // points like any other. Only points themselves earn nothing.
   const pointsAfter = await loyaltyCardFor(org.id, previous.customerId);
   check(
     'a bill paid with a card still earns points',
@@ -334,6 +357,7 @@ async function main() {
   });
   check('the card gives what it has', second.amountMinor, left);
   check('and is empty', second.leftMinor, 0);
+  check('and reads as spent', (await findGiftCard(org.id, sold.code)).status, 'DEPLETED');
 
   const partPaid = await prisma.invoice.findUniqueOrThrow({
     where: { id: large.invoiceId },
@@ -352,70 +376,218 @@ async function main() {
     }),
   );
 
-  const detail = await giftCardDetail(org.id, sold.id);
-  check('the card shows three movements', detail?.entries.length, 3);
-  check(
-    'each naming what it was for',
-    detail?.entries.map(
-      (e) => e.reason.startsWith('Sold') || e.reason.startsWith('Against invoice'),
-    ),
-    [true, true, true],
-  );
-  check('and nothing left', detail?.balanceMinor, 0);
+  console.info('\nMoney back onto the card');
 
-  const afterAll = await giftCardsFor(org.id);
+  const noteId = await raiseCreditNote({
+    orgId: org.id,
+    userId: staff.id,
+    invoiceId: large.invoiceId,
+    amount: money(1_000, 'GBP'),
+    reason: `${TAG}: part not fitted`,
+  });
+  await recordRefund({
+    orgId: org.id,
+    userId: staff.id,
+    invoiceId: large.invoiceId,
+    creditNoteId: noteId,
+    amount: money(1_000, 'GBP'),
+    method: 'GIFT_CARD',
+  });
+  const returned = await findGiftCard(org.id, sold.code);
+  check('ten pounds are back on the card', returned.balanceMinor, 1_000);
+  check('and it is active again', returned.status, 'ACTIVE');
+
+  const refundRow = await prisma.refund.findFirst({
+    where: { invoiceId: large.invoiceId },
+    select: { id: true },
+  });
+  const refundPosting = await prisma.journalEntry.findFirst({
+    where: { orgId: org.id, sourceType: 'Refund', sourceId: refundRow?.id ?? '' },
+    include: { lines: { include: { account: { select: { code: true } } } } },
+  });
   check(
-    'the page owes nothing more than before',
-    afterAll.outstandingMinor,
-    before.outstandingMinor,
+    'the refund raised the cards outstanding, not the bank',
+    refundPosting?.lines.find((l) => Number(l.credit) > 0)?.account.code,
+    ACCOUNT.GIFT_CARDS,
   );
-  check('and counts the fifty pounds spent', afterAll.spentMinor - before.spentMinor, 5_000);
+
+  console.info('\nChanged by hand, then cancelled');
+
+  await refuses('nothing', GiftCardError, 'NOT_ENOUGH', () =>
+    adjustGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      giftCardId: sold.id,
+      amountMinor: 0,
+      reason: 'x',
+    }),
+  );
+  await refuses('no reason', GiftCardError, 'NO_REASON', () =>
+    adjustGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      giftCardId: sold.id,
+      amountMinor: 500,
+      reason: ' ',
+    }),
+  );
+  await refuses('below nothing', GiftCardError, 'BELOW_ZERO', () =>
+    adjustGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      giftCardId: sold.id,
+      amountMinor: -1_001,
+      reason: 'too much',
+    }),
+  );
+
+  const topped = await adjustGiftCard({
+    orgId: org.id,
+    userId: staff.id,
+    giftCardId: sold.id,
+    amountMinor: 500,
+    reason: 'Sorry about the wait',
+  });
+  check('five pounds added by hand', topped.balanceMinor, 1_500);
+
+  const adjustEntry = await prisma.giftCardEntry.findFirst({
+    where: { giftCardId: sold.id, kind: 'ADJUSTMENT' },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true },
+  });
+  const adjustPosting = await prisma.journalEntry.findFirst({
+    where: { orgId: org.id, sourceType: 'GiftCardEntry', sourceId: adjustEntry?.id ?? '' },
+    include: { lines: { include: { account: { select: { code: true } } } } },
+  });
+  check(
+    'booked as goodwill',
+    adjustPosting?.lines.find((l) => Number(l.debit) > 0)?.account.code,
+    ACCOUNT.LOYALTY_REWARDS,
+  );
+  check(
+    'against the cards outstanding',
+    adjustPosting?.lines.find((l) => Number(l.credit) > 0)?.account.code,
+    ACCOUNT.GIFT_CARDS,
+  );
+
+  await refuses('cancelling without a reason', GiftCardError, 'NO_REASON', () =>
+    disableGiftCard({ orgId: org.id, userId: staff.id, giftCardId: sold.id, reason: '' }),
+  );
+  await disableGiftCard({ orgId: org.id, userId: staff.id, giftCardId: sold.id, reason: 'Lost' });
+
+  const gone = await findGiftCard(org.id, sold.code);
+  check('cancelled', gone.status, 'DISABLED');
+  check('with nothing left on it', gone.balanceMinor, 0);
+  await refuses('spending a cancelled card', GiftCardError, 'DISABLED', () =>
+    redeemGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      invoiceId: large.invoiceId,
+      code: sold.code,
+      amountMinor: null,
+    }),
+  );
+  await refuses('changing a cancelled card', GiftCardError, 'DISABLED', () =>
+    adjustGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      giftCardId: sold.id,
+      amountMinor: 100,
+      reason: 'x',
+    }),
+  );
+  await refuses('cancelling it twice', GiftCardError, 'DISABLED', () =>
+    disableGiftCard({ orgId: org.id, userId: staff.id, giftCardId: sold.id, reason: 'again' }),
+  );
+
+  const story = await giftCardDetail(org.id, sold.id);
+  check(
+    'the card tells the whole story, typed',
+    story?.entries.map((e) => e.kind),
+    ['ISSUE', 'REDEEM', 'REDEEM', 'REFUND', 'ADJUSTMENT', 'ADJUSTMENT'],
+  );
+  check('the write-off names the reason', story?.entries.at(-1)?.reason, 'Cancelled: Lost');
+
+  console.info('\nA card with a term and a site, spent at the counter');
+
+  const site = sites[0]?.id ?? null;
+  const termed = await sellGiftCard({
+    orgId: org.id,
+    userId: staff.id,
+    amountMinor: 2_000,
+    method: 'CASH',
+    termMonths: 12,
+    locationId: site,
+    note: TAG,
+  });
+  const termedCard = await findGiftCard(org.id, termed.code);
+  check('lasts a year', termedCard.expiresAt !== null, true);
+  check('good at one site', termedCard.locationId, site);
+
+  if (site && sites[1]) {
+    await refuses('spent at the wrong site', GiftCardError, 'WRONG_SITE', async () => {
+      const result = await completeSale({
+        orgId: org.id,
+        locationId: sites[1]!.id,
+        userId: staff.id,
+        lines: [{ productId: null, kind: 'FEE', description: TAG, quantity: 1, unitPrice: 5 }],
+        tenders: [{ kind: 'GIFT_CARD', amount: money(600, 'GBP'), code: termed.code }],
+      });
+      if (!result.ok) throw new GiftCardError('WRONG_SITE', result.error ?? '');
+    });
+  }
+
+  const sale = await completeSale({
+    orgId: org.id,
+    locationId: site,
+    userId: staff.id,
+    lines: [{ productId: null, kind: 'FEE', description: TAG, quantity: 1, unitPrice: 5 }],
+    tenders: [{ kind: 'GIFT_CARD', amount: money(600, 'GBP'), code: termed.code }],
+  });
+  check('the counter took the card', sale.ok, true);
+  const afterCounter = await findGiftCard(org.id, termed.code);
+  check('six pounds came off it', afterCounter.balanceMinor, 1_400);
+
+  const salePosted = await prisma.journalEntry.findFirst({
+    where: { orgId: org.id, sourceType: 'CounterSale', sourceId: sale.saleId ?? '' },
+    include: { lines: { include: { account: { select: { code: true } } } } },
+  });
+  check(
+    'the counter released the liability rather than taking cash',
+    salePosted?.lines.some((l) => l.account.code === ACCOUNT.GIFT_CARDS && Number(l.debit) > 0),
+    true,
+  );
+  check(
+    'and put nothing in the drawer',
+    salePosted?.lines.some((l) => l.account.code === ACCOUNT.CASH) ?? true,
+    false,
+  );
+
+  const lapsedBill = await bill({
+    orgId: org.id,
+    userId: staff.id,
+    customerId: previous.customerId,
+    vehicleId: previous.vehicleId,
+    hours: 0.5,
+    taxRateId: vat?.id ?? null,
+  });
+  await refuses('spent after it lapsed', GiftCardError, 'EXPIRED', () =>
+    redeemGiftCard({
+      orgId: org.id,
+      userId: staff.id,
+      invoiceId: lapsedBill.invoiceId,
+      code: termed.code,
+      amountMinor: null,
+      now: new Date(Date.now() + 400 * 86_400_000),
+    }),
+  );
 
   const closing = trialBalance(await postedLines(org.id));
   check('the ledger still balances', closing.balanced, true);
 
-  await refuses(
-    'a draft invoice, before anything is spent',
-    MoneyCycleError,
-    'NOT_ISSUED',
-    async () => {
-      const other = await sellGiftCard({
-        orgId: org.id,
-        userId: staff.id,
-        amountMinor: 1_000,
-        method: 'CASH',
-        note: TAG,
-      });
-      const draft = await prisma.invoice.create({
-        data: {
-          orgId: org.id,
-          customerId: previous.customerId,
-          number: `${TAG} draft`,
-          status: 'DRAFT',
-          currency: 'GBP',
-          subtotal: 10,
-          taxTotal: 0,
-          total: 10,
-          amountPaid: 0,
-        },
-        select: { id: true },
-      });
-      try {
-        await redeemGiftCard({
-          orgId: org.id,
-          userId: staff.id,
-          invoiceId: draft.id,
-          code: other.code,
-          amountMinor: null,
-        });
-      } finally {
-        const stillTen = await findGiftCard(org.id, other.code);
-        check('and the card is untouched', stillTen.balanceMinor, 1_000);
-      }
-    },
-  );
-
   await forget(org.id);
+  const after = await giftCardsFor(org.id);
+  check('the probe left the page as it found it', after.outstandingMinor, before.outstandingMinor);
 
   console.info(failures === 0 ? '\nAll good.' : `\n${failures} failed.`);
   if (failures > 0) process.exitCode = 1;
@@ -424,14 +596,32 @@ async function main() {
 async function forget(orgId: string) {
   const cards = await prisma.giftCard.findMany({
     where: { orgId, note: TAG },
-    select: { id: true },
+    select: { id: true, entries: { select: { id: true } } },
   });
   for (const card of cards) {
     await prisma.journalEntry.deleteMany({
       where: { orgId, sourceType: 'GiftCard', sourceId: card.id },
     });
+    await prisma.journalEntry.deleteMany({
+      where: {
+        orgId,
+        sourceType: 'GiftCardEntry',
+        sourceId: { in: card.entries.map((e) => e.id) },
+      },
+    });
   }
   await prisma.giftCard.deleteMany({ where: { id: { in: cards.map((c) => c.id) } } });
+
+  const sales = await prisma.counterSale.findMany({
+    where: { orgId, lines: { some: { description: TAG } } },
+    select: { id: true },
+  });
+  for (const s of sales) {
+    await prisma.journalEntry.deleteMany({
+      where: { orgId, sourceType: 'CounterSale', sourceId: s.id },
+    });
+  }
+  await prisma.counterSale.deleteMany({ where: { id: { in: sales.map((s) => s.id) } } });
 
   const jobs = await prisma.job.findMany({
     where: { orgId, shortDescription: TAG },
@@ -439,7 +629,7 @@ async function forget(orgId: string) {
   });
   const jobIds = jobs.map((j) => j.id);
   const invoices = await prisma.invoice.findMany({
-    where: { OR: [{ jobId: { in: jobIds } }, { orgId, number: `${TAG} draft` }] },
+    where: { jobId: { in: jobIds } },
     select: { id: true, number: true },
   });
   const invoiceIds = invoices.map((i) => i.id);
@@ -447,10 +637,20 @@ async function forget(orgId: string) {
     where: { invoiceId: { in: invoiceIds } },
     select: { id: true },
   });
+  const notes = await prisma.creditNote.findMany({
+    where: { invoiceId: { in: invoiceIds } },
+    select: { id: true },
+  });
+  const refunds = await prisma.refund.findMany({
+    where: { invoiceId: { in: invoiceIds } },
+    select: { id: true },
+  });
   const sources = [
     ...jobIds.map((id) => ({ sourceType: 'Job', sourceId: id })),
     ...invoiceIds.map((id) => ({ sourceType: 'Invoice', sourceId: id })),
     ...payments.map((p) => ({ sourceType: 'Payment', sourceId: p.id })),
+    ...notes.map((n) => ({ sourceType: 'CreditNote', sourceId: n.id })),
+    ...refunds.map((r) => ({ sourceType: 'Refund', sourceId: r.id })),
   ];
   for (const source of sources) {
     await prisma.journalEntry.deleteMany({ where: { orgId, ...source } });
@@ -458,7 +658,14 @@ async function forget(orgId: string) {
   await prisma.loyaltyEntry.deleteMany({
     where: { orgId, reason: { in: invoices.map((i) => `Invoice ${i.number} paid`) } },
   });
-  await prisma.messageLog.deleteMany({ where: { orgId, relatedId: { in: invoiceIds } } });
+  await prisma.messageLog.deleteMany({
+    where: {
+      orgId,
+      relatedId: { in: [...invoiceIds, ...notes.map((n) => n.id), ...refunds.map((r) => r.id)] },
+    },
+  });
+  await prisma.refund.deleteMany({ where: { invoiceId: { in: invoiceIds } } });
+  await prisma.creditNote.deleteMany({ where: { invoiceId: { in: invoiceIds } } });
   await prisma.payment.deleteMany({ where: { invoiceId: { in: invoiceIds } } });
   await prisma.invoice.deleteMany({ where: { id: { in: invoiceIds } } });
   await prisma.outboxEvent.deleteMany({

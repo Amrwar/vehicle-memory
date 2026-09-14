@@ -1425,6 +1425,23 @@ bill it can no longer be spent on.
 adjusted with a reason and disabled, and every one of those is a row that
 says why.
 
+**Status.** Built. Every movement on a card is typed, issue, redeem, refund
+or adjustment, and the database refuses a kind whose sign disagrees with
+it. A card's status is read from its facts, never stored: active, spent,
+lapsed or cancelled, cancelled winning over everything. A card may be sold
+for a year or two years or for good, the default, and may be good at one
+site or everywhere. At the counter a gift card is a tender that pays what it
+can with the rest in cash, spent inside the sale's own transaction so the
+sale and the spend stand or fall together, and posted as the liability
+released rather than cash in the drawer. A refund by method gift card puts
+the money back on the card that paid the bill. A person can add to or take
+off a card with a reason, booked as goodwill or sundry income, and can
+cancel one, which writes off what was on it with the reason and leaves the
+number unusable. The deposits half waits for Phase 30, where deposits are
+built. The verification script sells, spends on a bill and at the counter,
+refunds onto the card, adjusts, cancels, and tries every refusal including
+the wrong site and a lapsed card, against a real database.
+
 ---
 
 ## Phase 29 — Country and currency

@@ -11,6 +11,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { postEntry } from './accounting';
+import { redeemAtCounter } from './giftcards';
 import { audit } from './guard';
 
 /**
@@ -159,6 +160,21 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         },
       });
 
+      // A gift card pays its share from inside the sale, so the sale and the
+      // spend stand or fall together. Refused here, the whole sale rolls back.
+      for (const tender of input.tenders) {
+        if (tender.kind !== 'GIFT_CARD') continue;
+        await redeemAtCounter(tx, {
+          orgId: input.orgId,
+          userId: input.userId,
+          code: tender.code ?? '',
+          amountMinor: tender.amount.minor,
+          counterSaleId: sale.id,
+          reference,
+          locationId: input.locationId,
+        });
+      }
+
       // The stock leaves the shelf now. There is no job to consume it later.
       for (const line of saleLines) {
         if (!line.productId) continue;
@@ -198,6 +214,9 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         card: input.tenders
           .filter((tender) => tender.kind === 'CARD')
           .reduce((total, tender) => total + tender.amount.minor, 0),
+        giftCard: input.tenders
+          .filter((tender) => tender.kind === 'GIFT_CARD')
+          .reduce((total, tender) => total + tender.amount.minor, 0),
         revenue: revenueSplit(saleLines, totals),
       };
     });
@@ -216,6 +235,7 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         settlement: outcome.settlement,
         cashTaken: { minor: outcome.cash, currency: 'GBP' },
         cardTaken: { minor: outcome.card, currency: 'GBP' },
+        giftCardTaken: { minor: outcome.giftCard, currency: 'GBP' },
         revenue: outcome.revenue,
       }),
     );

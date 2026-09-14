@@ -185,6 +185,9 @@ async function main() {
     // page that keeps a connection open, as the assistant does, never gets there.
     await page.goto(`${BASE}${shot.path}`, { waitUntil: 'load', timeout: 60_000 });
     await page.waitForTimeout(shot.settle ?? 1_200);
+    // The keyboard skip link sits off-canvas until focused; a full-page
+    // capture pulls it into frame, so the camera hides it.
+    await page.addStyleTag({ content: '.skip-link{display:none !important}' });
     const file = join(OUT, `${shot.file}.png`);
     await page.screenshot({ path: file, fullPage: shot.fullPage ?? false });
     console.info(`  ${shot.file}.png  ${shot.path}`);
