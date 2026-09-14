@@ -241,8 +241,17 @@ export async function orgCanReadVehicle(orgId: string, vehicleId: string): Promi
     where: { orgId, vehicleId },
     select: { id: true },
   });
+  if (job) return true;
 
-  return job !== null;
+  // So does having written to the passport. A workshop that recorded an
+  // entry had access at the time, and a record it cannot read back is a
+  // record it cannot stand behind.
+  const wrote = await prisma.vehicleEvent.findFirst({
+    where: { vehicleId, recordedByOrgId: orgId },
+    select: { id: true },
+  });
+
+  return wrote !== null;
 }
 
 /** Grants a workshop write access because it is servicing the vehicle. */

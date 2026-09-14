@@ -21,7 +21,7 @@ export function PortalShell({
 }: {
   children: React.ReactNode;
   signedIn?: boolean;
-  active?: 'vehicles' | 'updates' | 'invoices' | 'book';
+  active?: 'vehicles' | 'updates' | 'invoices' | 'book' | 'passports';
 }) {
   return (
     <div className="min-h-dvh bg-(--ground)">
@@ -68,6 +68,7 @@ export function PortalShell({
             <ul className="flex flex-wrap gap-4 text-[13px]">
               {[
                 { href: '/portal', label: 'My vehicles', key: 'vehicles' },
+                { href: '/portal/passports', label: 'Passports', key: 'passports' },
                 { href: '/portal/updates', label: 'Updates', key: 'updates' },
                 { href: '/portal/invoices', label: 'Invoices', key: 'invoices' },
                 { href: '/portal/book', label: 'Book a visit', key: 'book' },

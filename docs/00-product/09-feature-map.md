@@ -64,28 +64,29 @@ says why.
 
 ## 4. Vehicle management
 
-| Item                       | Status | Note                                                                                        |
-| -------------------------- | ------ | ------------------------------------------------------------------------------------------- |
-| Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`                                               |
-| VIN, plate, make, model    | Built  |                                                                                             |
-| Mileage, engine, fuel      | Built  |                                                                                             |
-| Service and repair history | Built  | Every visit, across workshops                                                               |
-| Parts replaced             | Built  | Through job lines                                                                           |
-| Inspections                | Built  | Carried out on a tablet, sent to the customer                                               |
-| Upcoming maintenance       | Built  | Service schedules                                                                           |
-| Warranty information       | Built  | On the vehicle, and in full at `/warranty`                                                  |
-| Ownership transfer         | Built  | History stays, the previous owner does not                                                  |
-| Buyer report               | Built  | What it says, what it misses, whether intact                                                |
-| Public verification        | Built  | A code at `/verify`, no account needed                                                      |
-| Reads as a passport        | Built  | Cover, identity page with a checking zone, stamps; one document for every reader (Phase 23) |
-| Recalls                    | Built  | `/recalls`, honest about being a record                                                     |
-| Insurance information      | Built  | A document with a policy reference and an expiry                                            |
-| Photos                     | Built  | Paperwork of kind photograph, on the vehicle                                                |
-| Documents                  | Built  | Belong to the car; workshop and owner both see them                                         |
-| Maintenance timeline       | Built  | Components with ages, on `/vehicles/[id]/condition`                                         |
-| Health score               | Built  | With every factor and its evidence shown                                                    |
-| Predicted maintenance      | Built  | In distance as well as date, from this vehicle                                              |
-| Component history          | Built  | Battery, brakes, tyres, belt, each with an age                                              |
+| Item                       | Status | Note                                                                                              |
+| -------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`                                                     |
+| VIN, plate, make, model    | Built  |                                                                                                   |
+| Mileage, engine, fuel      | Built  |                                                                                                   |
+| Service and repair history | Built  | Every visit, across workshops                                                                     |
+| Parts replaced             | Built  | Through job lines                                                                                 |
+| Inspections                | Built  | Carried out on a tablet, sent to the customer                                                     |
+| Upcoming maintenance       | Built  | Service schedules                                                                                 |
+| Warranty information       | Built  | On the vehicle, and in full at `/warranty`                                                        |
+| Ownership transfer         | Built  | History stays, the previous owner does not                                                        |
+| Buyer report               | Built  | What it says, what it misses, whether intact                                                      |
+| Public verification        | Built  | A code at `/verify`, no account needed                                                            |
+| Reads as a passport        | Built  | Cover, identity page with a checking zone, stamps; one document for every reader (Phase 23)       |
+| Listed side by side        | Built  | Every passport with its count, its workshops and its chain verdict; a favicon to match (Phase 27) |
+| Recalls                    | Built  | `/recalls`, honest about being a record                                                           |
+| Insurance information      | Built  | A document with a policy reference and an expiry                                                  |
+| Photos                     | Built  | Paperwork of kind photograph, on the vehicle                                                      |
+| Documents                  | Built  | Belong to the car; workshop and owner both see them                                               |
+| Maintenance timeline       | Built  | Components with ages, on `/vehicles/[id]/condition`                                               |
+| Health score               | Built  | With every factor and its evidence shown                                                          |
+| Predicted maintenance      | Built  | In distance as well as date, from this vehicle                                                    |
+| Component history          | Built  | Battery, brakes, tyres, belt, each with an age                                                    |
 
 ## 5. Digital vehicle inspection
 
@@ -393,6 +394,41 @@ rather than a copy of them.
 
 ---
 
+## 23. What the pilot needs
+
+Written against the code on 14 September 2026, after an audit of forty
+items a real workshop would ask for. Each is assigned a phase in the
+[roadmap](06-roadmap.md); the rows here keep the counts honest.
+
+| Item                               | Status  | Where                                                                       |
+| ---------------------------------- | ------- | --------------------------------------------------------------------------- |
+| Passports as a list                | Built   | `/passports` for the workshop, `/portal/passports` for the owner (Phase 27) |
+| Gift card expiry, status, reversal | Missing | Sold and spent only; Phase 28                                               |
+| Deposits and customer credit       | Missing | A ledger account without a screen; Phase 29                                 |
+| Receipts                           | Missing | Phase 29                                                                    |
+| Card payment through a provider    | Missing | Phase 30                                                                    |
+| Payment links                      | Missing | Phase 30                                                                    |
+| Authorisation tried per role       | Missing | Permissions enforced; no script attacking them; Phase 31                    |
+| Plan limits enforced server side   | Partial | Rules in core, never called; Phase 31                                       |
+| Data import                        | Missing | Phase 32                                                                    |
+| Whole-data export                  | Partial | Five CSV reports; Phase 32                                                  |
+| Estimate becomes a job             | Missing | Approval and invoicing exist either side of it; Phase 33                    |
+| Extra work approved mid-job        | Missing | Phase 33                                                                    |
+| Check-in and check-out             | Missing | Phase 34                                                                    |
+| Signatures                         | Missing | Phase 34                                                                    |
+| Key tags                           | Missing | Phase 34                                                                    |
+| Conversation threads and WhatsApp  | Missing | Outbound and inbound exist without a thread; Phase 35                       |
+| Service packages                   | Missing | Job types and a catalogue exist; Phase 36                                   |
+| Parts returns and cores            | Missing | Phase 37                                                                    |
+| Sublet work                        | Missing | Phase 37                                                                    |
+| Global search                      | Missing | Phase 38                                                                    |
+| Staff notifications                | Missing | Phase 38                                                                    |
+| Tax by customer, site, or stacked  | Missing | One rate per line; Phase 40                                                 |
+| Printing, PDF, labels              | Partial | Three pages print; Phase 41                                                 |
+| Onboarding checklist               | Missing | Phase 44                                                                    |
+| Demonstration data                 | Missing | Phase 44                                                                    |
+| Help inside the product            | Missing | Phase 44                                                                    |
+
 ## What this adds up to
 
 Counting individual capabilities rather than sections, both the table rows and
@@ -404,9 +440,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 153          |
-| Partial  | 1            |
-| Missing  | 3            |
+| Built    | 155          |
+| Partial  | 4            |
+| Missing  | 25           |
 | Deferred | 1            |
 
 <!-- counts:end -->

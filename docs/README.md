@@ -89,19 +89,22 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Twenty-six phases have shipped, the last on 13 September 2026: the workshop core,
+Twenty-seven phases have shipped, the last on 14 September 2026: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
 configuring itself, the vehicle's paperwork, and the loyalty programme and its
-referrals in front of the counter and the customer, and gift cards. The
+referrals in front of the counter and the customer, gift cards, and the
+passports listed side by side. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 153 capabilities
-built, 1 partial and 3 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 377
+phase, the [feature map](00-product/09-feature-map.md) counts 155 capabilities
+built, 4 partial and 25 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 381
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
 What has not happened is the thing the [MVP definition](00-product/05-mvp-definition.md)
 still asks for: four weeks in front of a real workshop. Everything above is
-evidence of effort, not of fit.
+evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
+carries an audited plan for Phases 27 onward, ordered by what that pilot
+would trip over first, with the pilot itself placed after Phase 33.

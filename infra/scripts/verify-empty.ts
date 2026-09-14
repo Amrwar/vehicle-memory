@@ -40,6 +40,7 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/jobs', expectsGuidance: [] },
   { path: '/customers', expectsGuidance: [] },
   { path: '/vehicles', expectsGuidance: [] },
+  { path: '/passports', expectsGuidance: ['No passports yet'] },
   { path: '/vehicles/find', expectsGuidance: ['Why look first'] },
   { path: '/estimates', expectsGuidance: ['raised from a job'] },
   { path: '/invoices', expectsGuidance: [] },

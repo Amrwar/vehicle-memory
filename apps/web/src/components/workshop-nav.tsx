@@ -63,6 +63,7 @@ const GROUPS: Group[] = [
       { href: '/skills', label: 'Skills', icon: 'skills', permission: 'people:read' },
       { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
       { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
+      { href: '/passports', label: 'Passports', icon: 'passports', permission: 'vehicle:read' },
       { href: '/reminders', label: 'Reminders', icon: 'reminders', permission: 'customer:read' },
       { href: '/crm', label: 'Relationships', icon: 'crm', permission: 'customer:read' },
       { href: '/fleet', label: 'Fleets', icon: 'fleet', permission: 'customer:read' },

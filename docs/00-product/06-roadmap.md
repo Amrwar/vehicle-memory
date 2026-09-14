@@ -1315,6 +1315,263 @@ bill, the points earned, and every refusal against a real database.
 
 ---
 
+## Phases 27 onward — what the pilot needs
+
+Twenty-six phases in, the risk is no longer too few features. It is a
+ninety-four page application where every feature works and the workshop's
+day is still slower than the old software plus a spreadsheet plus WhatsApp.
+So the phases from here are ordered by what a real workshop would trip over
+in its first month, and the pilot itself is a phase, not a reward for
+finishing the list.
+
+The list below was written against the code on 14 September 2026, not
+against intention. _Built_ means somebody can open a page and do it.
+_Partial_ names what works and what does not. _Missing_ means it does not
+exist.
+
+| Area                                  | Status  | What is there, and what is not                                                                                                                   | Phase |
+| ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| Passports as a list                   | Partial | A passport per vehicle in three places; no page listing them for staff, none for the customer, and no favicon on the tab                         | 27    |
+| Gift cards                            | Partial | Sold, redeemed on invoices, balance from entries; no expiry, no status, no reversal or adjustment, invoices only, not by location                | 28    |
+| Deposits and customer credit          | Partial | A deposits account and a flag in the ledger; no deposit taken from a screen, no unapplied payment, no credit applied to a later bill             | 29    |
+| Receipts                              | Missing | A payment is a row and a ledger line; nothing the customer can hold                                                                              | 29    |
+| Card payment through a provider       | Missing | No provider code at all; refunds and failed payments have nowhere to come from                                                                   | 30    |
+| Payment links                         | Missing | The portal says "pay the workshop directly"                                                                                                      | 30    |
+| Permissions at the resource           | Partial | A granular permission list enforced on pages and actions; no script that tries every action as every role with manipulated requests              | 31    |
+| Plan limits, server side              | Partial | The rules exist in core and are never called from the app; no trial end, grace, suspension or cancellation on the organisation                   | 31    |
+| Data import                           | Missing | A workshop switching systems types everything in                                                                                                 | 32    |
+| Data export and exit                  | Partial | CSV for five reports; nothing that gives a workshop its data back whole                                                                          | 32    |
+| Estimate to job to invoice, as one    | Partial | Each step exists; nothing converts an approved estimate into a job, nothing approves extra work mid-job, parts are not reserved on approval      | 33    |
+| Check-in and check-out                | Missing | Mileage and photos exist on the job; no arrival or departure workflow, no fuel, belongings or keys                                               | 34    |
+| Signatures                            | Missing | An approval records a name, address and browser; nothing is signed                                                                               | 34    |
+| Key tags                              | Missing | Nowhere to say where the keys are                                                                                                                | 34    |
+| Conversations, channel-independent    | Partial | Outbound email and SMS with delivery tracking; inbound with matching; no thread, no attachments, no assignment, no WhatsApp sender               | 35    |
+| Service packages and job templates    | Partial | Job types with default hours and a service catalogue; no bundle of labour, parts, checklist and duration that becomes a job in one press         | 36    |
+| Parts returns, cores, credits         | Missing | Two enum values and no flow                                                                                                                      | 37    |
+| Sublet work                           | Missing | Nothing                                                                                                                                          | 37    |
+| Global search                         | Missing | Scoped lookups only                                                                                                                              | 38    |
+| Notifications for staff               | Missing | Audit and delivery logs, nothing that says "the customer approved" where you are standing                                                        | 38    |
+| The owner's day                       | Built   | Dashboard, business report and insights answer most of the list; no comeback rate, no reputation trend by site or person, no supplier comparison | 39    |
+| Tax, configurable                     | Partial | One rate per line per organisation; no exempt customers, no stacked taxes, no tax by site, no inclusive pricing                                  | 40    |
+| Printing and labels                   | Partial | Three pages print; no print styles, no work order, no labels, no QR, no PDF                                                                      | 41    |
+| VIN decoding and a fitment feed       | Partial | Fitment rows typed by a person, VIN checked and searched; no provider seam                                                                       | 42    |
+| Payroll, the rest                     | Partial | Periods, approval, CSV and a wages posting; no overtime, deductions or bonuses, no named export format                                           | 42    |
+| Reviews to Google                     | Missing | The invitation exists; nowhere to send it                                                                                                        | 42    |
+| Ownership transfer with an invitation | Partial | The transfer is done by the workshop; no buyer invitation or acceptance, no explicit revocation of the seller's access                           | 43    |
+| Warranty, deeper                      | Built   | Policies with months and mileage, parts and labour, supplier cover, eligibility on a new job; no warranty cost or profitability figure           | 43    |
+| Pricing and tax by location           | Partial | Inventory and jobs are per site; prices and tax are per organisation                                                                             | 43    |
+| Onboarding checklist                  | Missing | Sign-up creates the workshop; nothing walks the owner through the rest                                                                           | 44    |
+| Demo with sample data                 | Missing | A development seed only                                                                                                                          | 44    |
+| Help inside the product               | Missing | Page copy explains; nothing searchable                                                                                                           | 44    |
+| Offline, tested hard                  | Built   | Queue, replay order, conflicts kept on the device with a reason, idempotent sync; tested by script, not yet by a technician in a cold workshop   | Pilot |
+| Backup and restore                    | Built   | Dumped, restored into a fresh database, every row and every chain checked, in CI                                                                 | —     |
+| Passport privacy                      | Built   | A shared passport names no owner, no price, no note; every view recorded                                                                         | —     |
+| Passport trust, explained             | Built   | The seal, the chain, who recorded each entry                                                                                                     | —     |
+| Credit notes and voids                | Built   | Invoices immutable; partial credits, refunds, reversals, refusals                                                                                | —     |
+| Multi-location                        | Built   | Sites, warehouses per site, transfers, a group roll-up                                                                                           | —     |
+| Technician performance                | Built   | Utilisation, efficiency, productivity per person and per site                                                                                    | —     |
+
+A note on money. Everything is in pounds and British spelling. The tax list
+above mentions GST, QST and HST, which are Canadian. The tax phase is written
+so the engine is configured per organisation and either market works; which
+one the product is for is a decision, not a phase.
+
+---
+
+## Phase 27 — The passport, listed, and the mark on the tab
+
+**Scope.** A Passports page for the workshop listing every vehicle it has
+written to, with the count of entries, the workshops that contributed, when
+it was last verified and whether the chain is intact, opening onto the
+passport already designed. A page in the portal listing the customer's own
+passports the same way. A favicon and app icon drawn from the passport's own
+emblem, so the tab is recognisable among twenty others.
+
+**Exit.** An owner sees every passport in one place and opens any of them.
+A customer sees theirs. The tab has a mark.
+
+**Status.** Built. `/passports` lists every vehicle the workshop has written
+to or been granted, with entries, the number of workshops that contributed
+and how many entries came from elsewhere, the span of dates, and whether
+the chain verifies, leading with how many are sound rather than how many
+there are. `/portal/passports` lists the customer's own with the same facts
+in plainer words and a button to open each or show it to a buyer. The chain
+is verified per vehicle on request rather than cached, because a stored
+verdict about a chain would be the one stored fact the design forbids. The
+favicon and the home-screen icon are the passport booklet with the foil
+wheel and laurel from the cover, and the shop-floor icons match. The
+verification script checks the list against the ledger: every vehicle the
+workshop wrote to is on it and no other, the counts are the ledger's, the
+verdict is the chain's, and an owner sees the cars they own now and not the
+one they sold. The controls crawl found that a workshop could list a
+passport it had written to and then be refused the page, because reading
+was granted by a job or a grant and not by having written; a workshop that
+recorded an entry can now read it back.
+
+---
+
+## Phase 28 — Gift cards, deepened
+
+**Scope.** Every movement typed: issue, redeem, refund, adjustment, with a
+reason on the ones a person makes. A status read from the entries and the
+dates: active, depleted, disabled, expired. An optional expiry set when the
+card is sold. A card tied to a site or good everywhere. A card taken at the
+counter as a tender, and against a deposit. A redemption reversed when the
+invoice it paid is credited, so a credit note does not strand money on a
+bill it can no longer be spent on.
+
+**Exit.** A card can be sold, spent at the counter or on a bill, reversed,
+adjusted with a reason and disabled, and every one of those is a row that
+says why.
+
+---
+
+## Phase 29 — Money owed ahead
+
+**Scope.** A deposit taken before the work, as a screen rather than a flag:
+a liability until it is applied to the invoice. An unapplied payment, and a
+customer credit that a refund or an overpayment can become, applied to a
+later bill. A receipt for every payment, printable and sent.
+
+**Exit.** A customer pays two hundred pounds before the work, the books show
+it as owed, the invoice takes it, and the customer holds a receipt for each.
+
+---
+
+## Phase 30 — Card payment through a provider
+
+**Scope.** A provider seam: create a payment, hand the customer a link, hear
+the result, refund. A stub provider that behaves like a real one for the
+tests, and one real adapter behind the same seam. Failed payments as a state
+with a reason. Reconciliation: the provider's record and the ledger's record
+compared, and the difference named rather than assumed away.
+
+**Exit.** An invoice in the portal has a "Pay now" that works against the
+stub end to end, and the real adapter passes the same script with keys.
+
+---
+
+## Phase 31 — Permissions at the resource, and the plan enforced
+
+**Scope.** A script that calls every server action and API route as every
+role, with the ids of another organisation and with a role it does not hold,
+and fails on anything that answers. Fix what it finds. Plan limits enforced
+where the feature is used, with the refusal naming the plan. Trial end,
+grace, suspension and cancellation as states on the organisation, with data
+retained.
+
+**Exit.** The script passes. A workshop over its plan is told so where it
+tries, not on the pricing page.
+
+---
+
+## Phase 32 — Data in, data out
+
+**Scope.** Import from CSV for customers, vehicles, parts, suppliers and
+opening balances: upload, map the columns, validate every row, preview,
+import, with a report of what did not go in and why. Export of every dataset
+a workshop owns, whole, in the same shapes. The passport records exported in
+the form the network already exchanges.
+
+**Exit.** A workshop with five thousand customers in another system is
+running on Carnet by the afternoon, and could leave again with everything.
+
+---
+
+## Phase 33 — The workflow, as one thing
+
+**Scope.** An approved estimate becomes a job in one press, with the
+approved lines on it and the parts reserved. Extra work found mid-job is
+quoted and approved without leaving the job. Every hand-off in the five
+workflows is counted in presses and the count is written down, then
+reduced. A script walks a job from booking to pickup the way a front desk
+would, and fails on any step that needs a second screen it should not.
+
+**Exit.** The five workflows run end to end with no retyping, and the press
+counts are in the document.
+
+---
+
+## Pilot — four weeks in a real workshop
+
+Not a phase with code in it. What the front desk clicks and what they still
+write on paper; whether a technician can inspect on the tablet with the
+connection gone; whether the owner understands the reports; whether the
+customer understands the passport; and what everybody does outside Carnet to
+finish a job. The findings reorder everything below.
+
+---
+
+## Phase 34 — Arrival and departure
+
+Check-in with mileage, fuel, visible condition, photos, belongings, keys and
+a signature; check-out with the work done, final mileage, payment, documents,
+keys and a signature. Key tags on the job: which hook, who took them, when.
+Signatures as a record of their own, reused for estimate approval, pickup,
+terms and warranty.
+
+## Phase 35 — Conversations
+
+One Communication model with a channel, a direction, a thread, attachments,
+assignment and read status; the existing email and SMS moved onto it;
+inbound routed onto threads on the job and the customer; a WhatsApp seam
+with a stub and one real adapter; templates that are messages rather than
+placeholders.
+
+## Phase 36 — Packages and templates
+
+A service package with labour, parts, checklist, duration, skills, price
+and interval; a job template from it; a job from a package in one press.
+
+## Phase 37 — Parts back, work out
+
+Returns, defective returns and cores with supplier credits, from receipt to
+credit note. Sublet work: a vendor, a line on the job, a cost, a charge to
+the customer, a payable.
+
+## Phase 38 — Finding anything
+
+One search box for customers, registrations, VINs, telephone numbers, job
+numbers, invoice numbers and part numbers. A notifications list for staff,
+each entry opening the record it is about.
+
+## Phase 39 — The owner's day, sharpened
+
+Comeback rate; reputation trend by site and by person; supplier comparison
+when a part is short, and supplier performance over time; the dashboard's
+today, business and inventory blocks reviewed against what the pilot's owner
+actually asked.
+
+## Phase 40 — Tax, configurable
+
+Several taxes on a line, exempt customers, tax by site, inclusive or
+exclusive pricing, a report per tax. The currency decision made and applied.
+
+## Phase 41 — Paper
+
+Print styles for every document; a printable work order; invoice, estimate
+and inspection report as PDF; labels, key tags and QR codes; receipts.
+
+## Phase 42 — Providers
+
+A VIN decoding seam and a fitment feed seam, each with a stub; payroll with
+overtime, deductions, bonuses and a named export; reviews posted to Google
+behind a seam.
+
+## Phase 43 — Ownership, warranty and sites
+
+Transfer by invitation: the seller starts it, the buyer accepts, the seller's
+access ends and the history stays. Warranty cost and profitability. Prices
+and tax per site.
+
+## Phase 44 — The first day
+
+A setup checklist a new workshop works through; a demonstration workshop
+with a year of sample data; help that can be searched from inside the
+product.
+
+---
+
 ## Running throughout — the four things that are not features
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the

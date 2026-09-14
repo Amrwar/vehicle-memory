@@ -68,6 +68,7 @@ const PAGES = [
   '/jobs',
   '/customers',
   '/vehicles',
+  '/passports',
   '/vehicles/find',
   '/vehicles/find?q=ZZ99+ZZZ',
   '/vehicles/find?q=MK20+XRT',

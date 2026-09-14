@@ -34,6 +34,7 @@ export type NavIconName =
   | 'invoices'
   | 'payments'
   | 'giftcards'
+  | 'passports'
   | 'reports'
   | 'parts'
   | 'suppliers'
@@ -266,6 +267,15 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <rect x="2.4" y="5" width="15.2" height="10" rx="1.6" />
       <path d="M2.4 8.6h15.2M5.6 12h2.8" />
+    </>
+  ),
+  // A booklet with a wheel on the cover: the record that belongs to the car.
+  passports: (
+    <>
+      <path d="M5 2.8h10a1.2 1.2 0 0 1 1.2 1.2v12a1.2 1.2 0 0 1-1.2 1.2H5a1.2 1.2 0 0 1-1.2-1.2V4A1.2 1.2 0 0 1 5 2.8z" />
+      <path d="M6.2 2.8v14.4" />
+      <circle cx="11.2" cy="9" r="2.6" />
+      <path d="M11.2 5.6v.9M11.2 11.5v.9M7.8 9h.9M13.7 9h.9" />
     </>
   ),
   // A card with a ribbon across it: money given to be spent later.

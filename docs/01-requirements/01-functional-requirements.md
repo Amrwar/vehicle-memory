@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-5400 — The passport, listed
+
+| Ref     | Requirement                                                                                                                                                                                                                          | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-5401 | A workshop MUST be able to see every passport it has written to or been granted in one list, with the entry count, the number of contributing workshops, the span of dates and the chain verdict, and no vehicle it has no claim on. | 27    |
+| FR-5402 | The chain verdict on the list MUST be computed from the entries on request, never stored.                                                                                                                                            | 27    |
+| FR-5403 | A customer signed into the portal MUST see the passports of the vehicles they own now, and not of one they have sold, each opening onto the passport and onto sharing it.                                                            | 27    |
+| FR-5404 | The site MUST carry a favicon and a home-screen icon drawn from the passport's own emblem.                                                                                                                                           | 27    |
+
 ## FR-5300 — Gift cards
 
 | Ref     | Requirement                                                                                                                                                                    | Phase |

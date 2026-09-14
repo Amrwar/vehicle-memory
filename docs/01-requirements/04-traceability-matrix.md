@@ -355,6 +355,10 @@ where the work happens.
 | FR-5304 | W2    | —                                                              | `assertCardRedeemable()`, `redeemGiftCard()`                  | `giftcards.test.ts`, `verify-giftcards.ts`  | Done   |
 | FR-5305 | W2    | `GiftCardEntry`, `gift_card_entries_move_something`            | `giftCardBalance()`, `giftCardDetail()`                       | `giftcards.test.ts`, `verify-giftcards.ts`  | Done   |
 | FR-5306 | W1    | —                                                              | `giftCardsFor()`, `/gift-cards`                               | `verify-controls.ts`, `verify-empty.ts`     | Done   |
+| FR-5401 | X1    | —                                                              | `passportsForOrg()`, `/passports`                             | `verify-passports.ts`                       | Done   |
+| FR-5402 | X1    | —                                                              | `verifyVehicleChain()` per row in `lib/passports.ts`          | `verify-passports.ts`                       | Done   |
+| FR-5403 | X2    | `VehicleOwnership.endedAt`                                     | `passportsForOwner()`, `/portal/passports`                    | `verify-passports.ts`                       | Done   |
+| FR-5404 | X1    | —                                                              | `app/icon.svg`, `app/apple-icon.tsx`                          | reviewed in the browser                     | Done   |
 | FR-3907 | A1    | —                                                              | `assertNotFlooding()`                                         | `verify-credentials.ts`                     | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                        | `digest()`                                                    | `verify-credentials.ts`                     | Done   |
 | FR-3801 | —     | —                                                              | `/api/inbound/resend`                                         | `smoke.ts`                                  | Done   |
@@ -649,9 +653,10 @@ details without a provider behind it would be worse than not having one.
 | Points, and the public face               | 7                   | 7                      |
 | Referrals, in the product                 | 6                   | 6                      |
 | Gift cards                                | 6                   | 6                      |
-| **Total**                                 | **377**             | **373 (99%)**          |
+| The passport, listed                      | 4                   | 3                      |
+| **Total**                                 | **381**             | **376 (99%)**          |
 
-The requirements document lists 461 requirements. 84 of
+The requirements document lists 465 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Carnet: a passport booklet with the wheel-in-laurel emblem in foil. -->
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5f1d"/>
+      <stop offset="0.45" stop-color="#d9b36c"/>
+      <stop offset="0.55" stop-color="#f2dfae"/>
+      <stop offset="1" stop-color="#b8892e"/>
+    </linearGradient>
+  </defs>
+  <!-- cover -->
+  <rect x="9" y="4" width="46" height="56" rx="7" fill="#15292d"/>
+  <rect x="9" y="4" width="46" height="56" rx="7" fill="none" stroke="#1f4148" stroke-width="1.5"/>
+  <!-- spine -->
+  <rect x="9" y="4" width="6" height="56" rx="3" fill="#0f1f22"/>
+  <!-- laurel -->
+  <g fill="none" stroke="url(#foil)" stroke-width="2.6" stroke-linecap="round">
+    <path d="M20.5 41.5c-3.5-5.5-3-13.5 1-18.5"/>
+    <path d="M45.5 41.5c3.5-5.5 3-13.5-1-18.5"/>
+  </g>
+  <!-- wheel -->
+  <circle cx="33" cy="30" r="10.5" fill="none" stroke="url(#foil)" stroke-width="3"/>
+  <circle cx="33" cy="30" r="3.2" fill="url(#foil)"/>
+  <g stroke="url(#foil)" stroke-width="2.2" stroke-linecap="round">
+    <path d="M33 22.5v-3M33 40.5v-3M25.5 30h-3M43.5 30h-3"/>
+  </g>
+  <!-- the machine-readable zone -->
+  <g stroke="url(#foil)" stroke-width="2.4" stroke-linecap="round">
+    <path d="M22 49h22"/>
+    <path d="M22 54h14"/>
+  </g>
+</svg>

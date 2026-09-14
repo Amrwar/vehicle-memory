@@ -933,6 +933,32 @@ customer pays the rest and the books stay right.
 
 ---
 
+## Epic X — The passport, listed (Phase 27)
+
+### X1 — All of them at once
+
+**As** Ahmed **I want** every passport my workshop has a hand in on one page
+**so that** I can see how much of the network we have built and whether
+every record is sound.
+**Size** 3 · **Satisfies** FR-5401, FR-5402, FR-5404
+
+- **Given** the Passports page, **when** I open it, **then** I see each
+  vehicle with its entries, its workshops and whether its chain verifies, and
+  I can open any as the next owner will see it.
+- **Given** a chain that does not verify, **when** I open the page, **then**
+  that is the first figure on it.
+
+### X2 — Mine, together
+
+**As** Maria **I want** my cars' passports listed **so that** I can open one
+or show it to a buyer without hunting.
+**Size** 2 · **Satisfies** FR-5403
+
+- **Given** the portal, **when** I open Passports, **then** I see each car I
+  own now, whether its record is sound, and how to show it to somebody.
+
+---
+
 ## Story map
 
 ```

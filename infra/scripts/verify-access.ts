@@ -34,6 +34,7 @@ const PAGES = [
   '/jobs',
   '/customers',
   '/vehicles',
+  '/passports',
   '/vehicles/find',
   '/estimates',
   '/invoices',
