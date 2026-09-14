@@ -103,7 +103,8 @@ tried as every role with the plan enforced where things are made, and card
 payment through a provider from the customer's portal, redesigned around a
 navigation that is always there and a directory of every workshop, and the
 subscription billed: a card before a fourteen-day trial, charged when it ends
-unless cancelled, with every sentence of that on the form. The
+unless cancelled, with every sentence of that on the form, priced in the
+workshop's own currency, and the customer's account page. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
 phase, the [feature map](00-product/09-feature-map.md) counts 160 capabilities
 built, 4 partial and 22 missing, and the

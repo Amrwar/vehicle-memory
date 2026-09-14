@@ -1,11 +1,22 @@
-import { PLAN_ORDER, PLANS, type PlanId, TERMS_VERSION, TRIAL_DAYS, COUNTRIES } from '@carnet/core';
-import { Alert, Button, Field, Input, Select } from '@carnet/ui';
+import {
+  COUNTRIES,
+  FALLBACK_CURRENCY,
+  PLAN_ORDER,
+  PLANS,
+  type PlanId,
+  planPrice,
+  PRICED_CURRENCIES,
+  TERMS_VERSION,
+  TRIAL_DAYS,
+} from '@carnet/core';
+import { Alert, Button, Field, Input } from '@carnet/ui';
 import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { Mark } from '@/components/marketing';
+import { SignupPricing } from '@/components/signup-pricing';
 import { currentUser, startSession } from '@/lib/auth';
 import { requestVerification } from '@/lib/credentials';
 import { createWorkshop } from '@/lib/onboarding';
@@ -187,7 +198,18 @@ export default async function SignupPage({
             <span className="font-display text-[16px] font-semibold">Carnet</span>
           </Link>
 
-          <p className="eyebrow mb-2">Start free</p>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="eyebrow">Start free</p>
+            <p className="text-[13px] text-(--text-soft)">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="font-medium text-(--brand-text) underline underline-offset-2"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
           <h1 className="font-display text-[26px] font-semibold leading-tight tracking-tight">
             Open your workshop
           </h1>
@@ -218,20 +240,6 @@ export default async function SignupPage({
                 required
                 placeholder="Hillside Motors"
               />
-            </Field>
-
-            <Field
-              label="Country"
-              hint="Sets the currency the books are kept in, the language and the clock. Changeable in settings."
-              error={problemFor('country')}
-            >
-              <Select name="country" defaultValue={params.country ?? 'GB'}>
-                {COUNTRIES.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name} · {country.currency}
-                  </option>
-                ))}
-              </Select>
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-[1fr_7.5rem]">
@@ -308,35 +316,29 @@ export default async function SignupPage({
               />
             </Field>
 
-            <Field label="Plan" hint="Changeable at any point during the trial">
-              <Select name="plan" defaultValue={plan}>
-                {PLAN_ORDER.map((id) => (
-                  <option key={id} value={id}>
-                    {PLANS[id].name} — £{PLANS[id].priceMonthly.minor / 100} per bay, per month,
-                    paid monthly
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <label className="flex items-start gap-2.5 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) px-3 py-2.5 text-[13px] leading-relaxed">
-              <input
-                type="checkbox"
-                name="agree"
-                required
-                className="mt-1 h-4 w-4 accent-(--brand)"
-              />
-              <span>
-                I have read the{' '}
-                <Link href="/terms" className="text-(--brand-text) underline" target="_blank">
-                  terms
-                </Link>
-                . The trial is free for {TRIAL_DAYS} days. On the day it ends, the card I add next
-                is charged £{PLANS[plan].priceMonthly.minor / 100} per bay per month for the{' '}
-                {PLANS[plan].name} plan, and monthly after that, unless I cancel before then. I can
-                cancel at any time from Settings.
-              </span>
-            </label>
+            <SignupPricing
+              countries={COUNTRIES.map((c) => ({
+                code: c.code,
+                name: c.name,
+                currency: c.currency,
+                locale: c.locale,
+              }))}
+              plans={PLAN_ORDER.map((id) => ({ id, name: PLANS[id].name }))}
+              book={Object.fromEntries(
+                PRICED_CURRENCIES.map((currency) => [
+                  currency,
+                  Object.fromEntries(
+                    PLAN_ORDER.map((id) => [id, planPrice(id, currency, 'monthly').minor]),
+                  ),
+                ]),
+              )}
+              fallbackCurrency={FALLBACK_CURRENCY}
+              defaultCountry={params.country ?? 'GB'}
+              defaultPlan={plan}
+              trialDays={TRIAL_DAYS}
+              countryError={problemFor('country')}
+              termsHref="/terms"
+            />
 
             <Button type="submit" variant="primary" size="lg" block className="mt-1">
               Create the workshop and add a card

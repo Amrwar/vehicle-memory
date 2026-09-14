@@ -21,7 +21,15 @@ import { ThemeToggle } from './theme-toggle';
  */
 
 export type PortalTab =
-  'home' | 'vehicles' | 'passports' | 'invoices' | 'updates' | 'rewards' | 'workshops' | 'book';
+  | 'home'
+  | 'vehicles'
+  | 'passports'
+  | 'invoices'
+  | 'updates'
+  | 'rewards'
+  | 'workshops'
+  | 'book'
+  | 'settings';
 
 const TABS: {
   key: PortalTab;
@@ -111,6 +119,18 @@ const TABS: {
       </>
     ),
   },
+  {
+    key: 'settings',
+    href: '/portal/settings',
+    label: 'Account',
+    phone: false,
+    icon: (
+      <>
+        <circle cx="12" cy="8.5" r="3.5" />
+        <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+      </>
+    ),
+  },
 ];
 
 function TabIcon({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -162,14 +182,17 @@ export function PortalShell({
           <div className="flex items-center gap-3">
             <ThemeToggle className="w-[6.5rem]" />
             {signedIn ? (
-              <form action="/api/sign-out" method="post">
-                <button
-                  type="submit"
-                  className="cursor-pointer text-[13px] font-medium text-(--text-soft) hover:text-(--text)"
-                >
-                  Sign out
-                </button>
-              </form>
+              <Link
+                href="/portal/settings"
+                aria-label="Account"
+                className="flex items-center gap-1.5 text-[13px] font-medium text-(--text-soft) hover:text-(--text)"
+              >
+                <TabIcon className="h-[18px] w-[18px]">
+                  <circle cx="12" cy="8.5" r="3.5" />
+                  <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+                </TabIcon>
+                <span className="hidden sm:inline">Account</span>
+              </Link>
             ) : null}
           </div>
         </div>

@@ -18,7 +18,7 @@
 
 import 'dotenv/config';
 
-import { TRIAL_DAYS, TRIAL_REMINDER_DAYS } from '@carnet/core';
+import { planPrice, TRIAL_DAYS, TRIAL_REMINDER_DAYS } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import { remindTrialsEnding } from '@carnet/jobs';
 
@@ -67,7 +67,7 @@ async function main() {
       password: 'a-long-enough-probe-password',
       phone: '',
       sites: 1,
-      country: 'GB',
+      country: 'CA',
     },
     { plan: 'CORE', termsVersion: '2026-09-14' },
   );
@@ -141,10 +141,15 @@ async function main() {
         overview.nextCharge?.on?.toISOString(),
       ],
       [
-        4700 * overview.nextCharge!.bays,
+        planPrice('CORE', 'CAD', 'monthly').minor * overview.nextCharge!.bays,
         overview.nextCharge!.bays,
         record.trialEndsAt!.toISOString(),
       ],
+    );
+    check(
+      "and in the workshop's own currency, dollars, not pounds",
+      overview.nextCharge?.currency,
+      'CAD',
     );
     check('no invoice yet', overview.invoices.length, 0);
     const after = await prisma.organization.findUniqueOrThrow({
@@ -179,7 +184,7 @@ async function main() {
       'it names the card, the plan and the cancel path',
       [
         /Visa card ending 4242/.test(reminders[0]!.body),
-        /Core plan/.test(reminders[0]!.body),
+        /\$/.test(reminders[0]!.body) && /Core plan/.test(reminders[0]!.body),
         /cancel before then/.test(reminders[0]!.body),
       ],
       [true, true, true],

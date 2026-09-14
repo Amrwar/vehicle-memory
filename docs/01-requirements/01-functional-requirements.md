@@ -267,6 +267,14 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6100 — One currency, and the customer's account
+
+| Ref     | Requirement                                                                                                                                                                                            | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-6101 | Every plan MUST have a price, paid monthly and paid annually, in every currency the country table can put a workshop in, set by hand in one price book and never by an exchange rate.                  | 32.7  |
+| FR-6102 | A workshop MUST see and pay the plan in its own currency everywhere: the pricing page, the sign-up sentence, the terms, the reminder, the billing page and the provider's charge.                      | 32.7  |
+| FR-6103 | The customer's portal MUST have an account page with their details, a password change that asks for the current password, and what each workshop may send them, with every change recorded as consent. | 32.7  |
+
 ## FR-6000 — The subscription, billed
 
 | Ref     | Requirement                                                                                                                                                                                      | Phase |

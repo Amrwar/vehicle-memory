@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 32.6.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 32.7.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -563,6 +563,23 @@ def build() -> None:
         works="A sentence repeated in the same words in five places is a sentence nobody can claim not to have seen. The reminder three days before, once, is the same sentence with a date and an amount in it.",
         shots=[("signup", "Sign-up, with the terms beside the button.", 16.4), ("terms", "The terms, in plain words.", 12.0), ("subscription", "The billing page: card, next charge, invoices.", 16.4)],
         source="docs/02-design/04-state-machines.md, section 9; 05-security-model.md, section 7.2",
+    )
+
+    design(
+        doc,
+        title="Priced in the workshop's money, and the customer's account",
+        when="Phase 32.7, 14 September 2026.",
+        why="The owner put it in one sentence: everything in one currency based on the country, not "
+            "shown in pounds and billed in another. And a customer looking for settings in the portal "
+            "found none.",
+        meaning=[
+            "The pricing page takes a country and shows every plan in that currency, with the tax named the way that country names it. No second currency appears anywhere on the page.",
+            "On the sign-up form, changing the country changes the plan's prices and the sentence beside the terms box in the same breath; they are one component.",
+            "The customer's Account page: details the workshops know them by, a password change that asks for the current one, a row per workshop with email and text switches, and sign out. A tab on the desktop, a person icon in the header on a phone.",
+        ],
+        works="One currency per page removes a whole class of doubt. A price book set by hand, rather than a rate on the day, means the number a workshop saw on Tuesday is the number it is charged on Friday.",
+        shots=[("pricing", "The pricing page, in Canadian dollars.", 16.4), ("portal-settings", "The customer's account page.", 7.0)],
+        source="docs/00-product/07-business-model.md; 08-design-system.md, section 12.6",
     )
 
     # 11. Counter

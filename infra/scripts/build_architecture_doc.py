@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 32.6"
+AFTER_PHASE = "Phase 32.7"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -375,11 +375,13 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("ask", "Ask: a question in words, answered from the workshop's own data.", "Workshop"),
     ("settings-organisation", "Organisation settings, where the region is changed.", "Workshop"),
     ("terms", "The terms: the trial, the charge that follows it, cancelling, the data.", "Public"),
+    ("pricing", "The pricing page in the currency of the country picked.", "Public"),
     ("subscription", "The billing page: the card, the next charge as a date and an amount, the invoices.", "Workshop"),
     ("portal", "The customer's home on a phone: what needs them first, then their cars.", "Customer"),
     ("portal-desktop", "The same home on a desktop, two columns under a persistent navigation.", "Customer"),
     ("portal-rewards", "Rewards: points per workshop and the referral code.", "Customer"),
     ("portal-workshops", "The directory of every workshop on Carnet, with Book here on each.", "Customer"),
+    ("portal-settings", "The customer's account: details, password, consent per workshop, sign out.", "Customer"),
     ("portal-invoices", "The customer's invoices, with Pay now on what is owed.", "Customer"),
     ("portal-passport", "A passport as its owner sees it.", "Customer"),
     ("portal-passports", "Every car the customer owns, listed.", "Customer"),
@@ -697,7 +699,9 @@ def build() -> None:
               "the owner. The session carries the region and every page formats money and dates from it; invoices and "
               "estimates are raised in the organisation's currency; a message to a customer is formatted the same way. "
               "A driver in the portal sees each amount in the currency of the workshop that raised it. Changing the "
-              "currency converts nothing already recorded, and the page says so.")
+              "currency converts nothing already recorded, and the page says so. The plan itself is priced in the "
+              "workshop's currency from a price book in core that carries every plan in each currency a country can "
+              "set, and the provider is asked to charge that currency and no other.")
 
     doc.add_heading("6.10 The subscription and the plan", level=2)
     diagram(doc, "flow-subscription", "The subscription's states, read from four dates on the organisation.", max_h=11)

@@ -1,7 +1,10 @@
 import {
+  formatMinor,
   GRACE_DAYS,
   PLAN_ORDER,
+  planPrice,
   PLANS,
+  PRICED_CURRENCIES,
   TERMS_VERSION,
   TRIAL_DAYS,
   TRIAL_REMINDER_DAYS,
@@ -25,7 +28,6 @@ export const metadata: Metadata = {
  * page and the same sentence that sits beside the sign-up button.
  */
 export default function TermsPage() {
-  const cheapest = PLANS[PLAN_ORDER[0]!];
   return (
     <main id="main" className="mx-auto max-w-2xl px-5 py-12">
       <Link href="/" className="mb-8 flex items-center gap-2.5">
@@ -62,9 +64,42 @@ export default function TermsPage() {
             <Link href="/pricing" className="text-(--brand-text) underline">
               pricing page
             </Link>
-            , per bay, per month, and exclude tax. The cheapest is {cheapest.name} at{' '}
-            {cheapest.priceMonthly.minor / 100} pounds per bay per month paid monthly. The amount
-            you will be charged is shown on your billing page before the trial ends.
+            , per bay, per month, and exclude tax. You are billed in the currency of your country,
+            the one your books are kept in, and in no other. Paid monthly, per bay per month, the
+            plans cost:
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+                <tr>
+                  <th className="py-1 pr-3">Currency</th>
+                  {PLAN_ORDER.map((id) => (
+                    <th key={id} className="py-1 pr-3 text-right">
+                      {PLANS[id].name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PRICED_CURRENCIES.map((currency) => (
+                  <tr key={currency} className="border-t border-(--border)">
+                    <td className="py-1 pr-3">{currency}</td>
+                    {PLAN_ORDER.map((id) => (
+                      <td key={id} className="py-1 pr-3 text-right tabular-nums">
+                        {formatMinor(planPrice(id, currency, 'monthly').minor, {
+                          currency,
+                          locale: 'en',
+                        })}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2">
+            The amount you will be charged, the price times your bays, is shown on your billing page
+            before the trial ends.
           </p>
         </section>
 

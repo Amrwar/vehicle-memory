@@ -420,8 +420,9 @@ export const stripeProvider: PaymentProvider = {
   },
 
   async createSubscriptionCheckout(request: SubscriptionCheckoutRequest): Promise<CheckoutResult> {
+    // A catalogue price may carry several currencies; the session says which.
     const line = request.priceRef
-      ? { 'line_items[0][price]': request.priceRef }
+      ? { 'line_items[0][price]': request.priceRef, currency: request.currency.toLowerCase() }
       : {
           'line_items[0][price_data][currency]': request.currency.toLowerCase(),
           'line_items[0][price_data][unit_amount]': request.amountMinor,

@@ -4,8 +4,12 @@ import {
   NO_LIMIT,
   PLAN_ORDER,
   PLANS,
-  savingPercent,
   TRIAL_DAYS,
+  annualSavingPercent,
+  COUNTRIES,
+  formatMinor,
+  planPrice,
+  pricingCurrency,
 } from '@carnet/core';
 import { cn } from '@carnet/ui';
 import type { Metadata } from 'next';
@@ -58,11 +62,15 @@ const LIMIT_ROWS = [
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ billing?: string }>;
+  searchParams: Promise<{ billing?: string; country?: string }>;
 }) {
   const user = await currentUser();
-  const { billing } = await searchParams;
+  const { billing, country: countryParam } = await searchParams;
   const annual = billing !== 'monthly';
+  const country = COUNTRIES.find((c) => c.code === (countryParam ?? 'GB')) ?? COUNTRIES[0]!;
+  const currency = pricingCurrency(country.currency);
+  const show = (minor: number) => formatMinor(minor, { currency, locale: country.locale });
+  const term = annual ? 'annual' : 'monthly';
 
   return (
     <>
@@ -85,7 +93,7 @@ export default async function PricingPage({
               className="inline-flex gap-0.5 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-0.5"
             >
               <Link
-                href="/pricing"
+                href={`/pricing?country=${country.code}`}
                 className={cn(
                   'rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors',
                   annual
@@ -96,7 +104,7 @@ export default async function PricingPage({
                 Annual
               </Link>
               <Link
-                href="/pricing?billing=monthly"
+                href={`/pricing?billing=monthly&country=${country.code}`}
                 className={cn(
                   'rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors',
                   !annual
@@ -109,10 +117,35 @@ export default async function PricingPage({
             </div>
           </div>
 
+          <form method="get" className="mt-4 flex items-center justify-center gap-2 text-[13px]">
+            <input type="hidden" name="billing" value={annual ? 'annual' : 'monthly'} />
+            <label htmlFor="pricing-country" className="text-(--text-faint)">
+              Prices in the currency of
+            </label>
+            <select
+              id="pricing-country"
+              name="country"
+              defaultValue={country.code}
+              className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1"
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name} · {c.currency}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="cursor-pointer rounded-(--radius-sm) border border-(--border-strong) px-2.5 py-1 font-medium"
+            >
+              Show
+            </button>
+          </form>
+
           <div className="mt-8 grid gap-5 lg:grid-cols-3">
             {PLAN_ORDER.map((id) => {
               const plan = PLANS[id];
-              const price = annual ? plan.price : plan.priceMonthly;
+              const price = planPrice(id, currency, term);
 
               return (
                 <div
@@ -139,7 +172,7 @@ export default async function PricingPage({
 
                   <p className="mt-4 flex items-baseline gap-1.5">
                     <span className="tabular font-display text-[38px] font-bold leading-none">
-                      £{price.minor / 100}
+                      {show(price.minor)}
                     </span>
                     <span className="text-[13px] text-(--text-faint)">per bay, per month</span>
                   </p>
@@ -147,8 +180,8 @@ export default async function PricingPage({
                   <p className="mt-1.5 text-[12px] text-(--text-faint)">
                     {annual ? (
                       <>
-                        Billed annually. Saves {savingPercent(id)}% against £
-                        {plan.priceMonthly.minor / 100} monthly.
+                        Billed annually. Saves {annualSavingPercent(id, currency)}% against{' '}
+                        {show(planPrice(id, currency, 'monthly').minor)} monthly.
                       </>
                     ) : (
                       <>Billed monthly. Cancel any time.</>
@@ -156,7 +189,7 @@ export default async function PricingPage({
                   </p>
 
                   <Link
-                    href={`/signup?plan=${id.toLowerCase()}`}
+                    href={`/signup?plan=${id.toLowerCase()}&country=${country.code}`}
                     className={cn(
                       'mt-5 rounded-(--radius-md) px-4 py-2.5 text-center text-[14px] font-medium transition-colors',
                       plan.popular
@@ -181,8 +214,10 @@ export default async function PricingPage({
           </div>
 
           <p className="mt-6 text-center text-[13px] text-(--text-faint)">
-            Prices exclude VAT. The trial creates a real workshop with your data in it. A card is
-            added at sign-up and charged only when the trial ends, unless you cancel first.
+            Prices are in {currency}, per bay per month, and exclude {country.tax.name}. You are
+            billed in the currency of your country and no other. The trial creates a real workshop
+            with your data in it. A card is added at sign-up and charged only when the trial ends,
+            unless you cancel first.
           </p>
         </Section>
 

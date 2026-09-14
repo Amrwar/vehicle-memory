@@ -399,6 +399,9 @@ where the work happens.
 | FR-6005 | AD2   | `Organization.billingCardBrand/Last4`, `currentPeriodEnd`       | `billingOverview()`, `monthlyChargeFor()`, `billingPortalLink()`, `/settings/subscription`                          | `verify-billing.ts`, `verify-controls.ts`                        | Done   |
 | FR-6006 | AD3   | `Organization.cancelledAt` in the future                        | `cancelSubscription()`, `subscriptionStateOf()` cancel-at-period-end                                                | `subscription.test.ts`, `verify-billing.ts`                      | Done   |
 | FR-6007 | AD3   | —                                                               | `parseWebhook()` subscription and invoice events, `syncBillingFromProvider()`                                       | `verify-billing.ts`                                              | Done   |
+| FR-6101 | AE1   | —                                                               | `PRICE_BOOK`, `planPrice()`, `annualSavingPercent()`                                                                | `prices.test.ts`                                                 | Done   |
+| FR-6102 | AE1   | `Organization.baseCurrency`                                     | `monthlyChargeFor()`, `SignupPricing`, the pricing and terms pages, `remindTrialsEnding()`                          | `prices.test.ts`, `verify-billing.ts`                            | Done   |
+| FR-6103 | AE2   | `ConsentChange.source = PORTAL`                                 | `updateProfile()`, `changePassword()`, `setConsent()`, `/portal/settings`                                           | `verify-portal-account.ts`                                       | Done   |
 | FR-3907 | A1    | —                                                               | `assertNotFlooding()`                                                                                               | `verify-credentials.ts`                                          | Done   |
 | FR-3908 | A1    | `auth_tokens.tokenHash`                                         | `digest()`                                                                                                          | `verify-credentials.ts`                                          | Done   |
 | FR-3801 | —     | —                                                               | `/api/inbound/resend`                                                                                               | `smoke.ts`                                                       | Done   |
@@ -701,9 +704,9 @@ details without a provider behind it would be worse than not having one.
 | Permissions at the resource, and the plan enforced | 7                   | 7                      |
 | Card payment through a provider                    | 7                   | 7                      |
 | The subscription, billed                           | 7                   | 7                      |
-| **Total**                                          | **421**             | **415 (99%)**          |
+| **Total**                                          | **424**             | **418 (99%)**          |
 
-The requirements document lists 505 requirements. 84 of
+The requirements document lists 508 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

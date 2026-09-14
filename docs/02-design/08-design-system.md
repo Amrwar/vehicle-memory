@@ -241,6 +241,13 @@ pass the session's region, and the three shared components that render for
 a customer or a buyer take a locale from whoever is reading. A page that
 forgets is not wrong in Britain, which is why the rule is written here.
 
+### 12.6 The plan in the workshop's currency (Phase 32.7)
+
+A price is shown in exactly one currency on any page: the workshop's, or on
+the public pricing page the currency of the country picked. Never a pound
+figure beside a dollar one, never a conversion. The sign-up form's country,
+plan and terms sentence are one component so they cannot disagree.
+
 ## 13. Lists that lead with the fault
 
 The passports list (Phase 27) leads with how many chains are sound rather

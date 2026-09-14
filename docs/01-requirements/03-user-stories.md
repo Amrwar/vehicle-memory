@@ -1179,6 +1179,35 @@ paid for **so that** leaving costs nothing more than the month I used.
   stays open until the paid period ends, and no next charge is scheduled.
 - **Given** a trial, **when** I cancel, **then** the card is never charged.
 
+## Epic AE — One currency, and the customer's account (Phase 32.7)
+
+### AE1 — Priced in my money
+
+**As** a workshop owner in Canada **I want** every price I see and pay to
+be in dollars **so that** I am never quoted in one currency and billed in
+another.
+**Size** 3 · **Satisfies** FR-6101, FR-6102
+
+- **Given** the pricing page, **when** I pick Canada, **then** every plan is
+  in dollars and the tax is called GST.
+- **Given** the sign-up form, **when** I choose Canada, **then** the plan
+  prices and the sentence by the terms box change to dollars at once.
+- **Given** my billing page, **when** the trial is about to end, **then** the
+  next charge and the reminder are in dollars, and the provider charges
+  dollars.
+
+### AE2 — My account, in one place
+
+**As** Maria **I want** a settings page in the portal **so that** I can
+change my phone number, my password and what a workshop may send me without
+asking anybody.
+**Size** 3 · **Satisfies** FR-6103
+
+- **Given** the portal, **when** I press Account, **then** I see my details,
+  a password form, and a row per workshop with email and text switches.
+- **Given** I turn off a workshop's offers, **when** I save, **then** the
+  workshop sees a consent change with the date and that I made it.
+
 ---
 
 ## Story map

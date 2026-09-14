@@ -177,6 +177,15 @@ async function main() {
       fullPage: true,
     },
     {
+      file: 'portal-settings',
+      path: '/portal/settings',
+      who: 'driver',
+      width: 390,
+      height: 844,
+      fullPage: true,
+    },
+    { file: 'pricing', path: '/pricing?country=CA', who: 'nobody', fullPage: true },
+    {
       file: 'portal-invoices',
       path: '/portal/invoices',
       who: 'driver',

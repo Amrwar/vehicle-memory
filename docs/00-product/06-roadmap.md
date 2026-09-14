@@ -1656,6 +1656,41 @@ Payment for the plan is still in pounds until prices are localised.
 
 ---
 
+## Phase 32.7 — One currency, and the customer's account
+
+**Scope.** A workshop sees and pays the plan in its own currency, the one
+its books are kept in, and in no other: the pricing page, the sign-up box,
+the terms, the reminder, the billing page and the provider's charge all
+read one price book. And the customer's portal gets the account page it
+lacked: details, password, what each workshop may send them, sign out.
+
+**Exit.** A workshop in Canada never reads a price in pounds; a customer
+finds their settings without asking.
+
+**Status.** Built. The price book in core prices every plan, paid monthly
+and paid annually, in each of the eleven currencies the country table can
+put a workshop in, as round figures set by hand rather than an exchange
+rate on the day; a currency it has never heard of falls back to pounds and
+says so nowhere, because the country table cannot produce one. The pricing
+page takes a country and shows that currency, with the tax named as that
+country names it. On the sign-up form the country, the plan's price and
+the sentence beside the terms box are one component, so changing the
+country changes the price and the sentence in the same breath. The terms
+carry the whole table. The charge itself, the reminder email, the billing
+page and the provider's checkout all use the workshop's currency, and a
+catalogue price on the provider is asked for in that currency. Two things
+raised from the owner's own browsing were fixed on the way: the sign-up
+page now says "Already have an account? Sign in" at the top of the form,
+and the billing page's card button says what it does, "Payment methods and
+invoices", with a line saying cards are added, changed or removed on the
+provider's secure page. The customer's portal has an Account page with
+their details (the name and phone the workshops know them by), a password
+change that asks for the current one, what each workshop may send them by
+email and text with every change recorded as consent with its source, and
+sign out; it is a tab on the desktop and an icon in the header on a phone.
+
+---
+
 ## Phase 33 — Data in, data out
 
 **Scope.** Import from CSV for customers, vehicles, parts, suppliers and

@@ -1,4 +1,12 @@
-import { formatMinor, PLAN_ORDER, PLANS, type PlanId, TRIAL_DAYS } from '@carnet/core';
+import {
+  formatMinor,
+  PLAN_ORDER,
+  PLANS,
+  type PlanId,
+  planPrice,
+  pricingCurrency,
+  TRIAL_DAYS,
+} from '@carnet/core';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, KeyValue, PageHeader } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -119,7 +127,9 @@ export default async function SubscriptionPage({
   const money = (minor: number, currency: string) =>
     formatMinor(minor, { currency, locale: region.locale });
   const monthly =
-    billing.nextCharge?.amountMinor ?? current.priceMonthly.minor * Math.max(1, usage.bays);
+    billing.nextCharge?.amountMinor ??
+    planPrice(subscription.plan, region.currency, 'monthly').minor * Math.max(1, usage.bays);
+  const pricedIn = pricingCurrency(region.currency);
   const endingSoon = subscription.message.startsWith('Cancelled');
 
   return (
@@ -211,8 +221,8 @@ export default async function SubscriptionPage({
                     Add a card and start the {TRIAL_DAYS}-day trial
                   </Button>
                   <p className="mt-2 text-[12px] text-(--text-faint)">
-                    You will be charged {money(monthly, current.priceMonthly.currency)} a month from
-                    the day the trial ends, unless you cancel before then. The{' '}
+                    You will be charged {money(monthly, pricedIn)} a month from the day the trial
+                    ends, unless you cancel before then. The{' '}
                     <Link href="/terms" className="underline">
                       terms
                     </Link>{' '}
@@ -223,8 +233,12 @@ export default async function SubscriptionPage({
               {billing.card && mayChange ? (
                 <form action={manage} className="mt-4">
                   <Button type="submit" variant="secondary">
-                    Change the card or see invoices
+                    Payment methods and invoices
                   </Button>
+                  <p className="mt-2 text-[12px] text-(--text-faint)">
+                    Add, change or remove cards, and download invoices, on the payment
+                    provider&apos;s secure page. Card details never pass through Carnet.
+                  </p>
                 </form>
               ) : null}
               <p className="mt-4 text-[12px] leading-relaxed text-(--text-faint)">
@@ -353,7 +367,7 @@ export default async function SubscriptionPage({
                     <p className="text-[13px] font-medium">
                       {PLANS[id].name}
                       <span className="ml-2 text-[12px] text-(--text-faint)">
-                        {money(PLANS[id].priceMonthly.minor, PLANS[id].priceMonthly.currency)}
+                        {money(planPrice(id, region.currency, 'monthly').minor, pricedIn)}
                       </span>
                       {id === subscription.plan && subscription.state !== 'AWAITING_CARD' ? (
                         <span className="ml-2 text-[11px] text-(--text-faint)">current</span>

@@ -1,4 +1,4 @@
-import { TRIAL_DAYS, trialReminderDue } from '@carnet/core';
+import { formatMinor, planPrice, TRIAL_DAYS, trialReminderDue } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { log } from './log';
@@ -34,6 +34,11 @@ export async function remindTrialsEnding(now = new Date()): Promise<number> {
       billingCardBrand: true,
       billingCardLast4: true,
       locale: true,
+      baseCurrency: true,
+      locations: {
+        where: { isActive: true },
+        select: { _count: { select: { bays: { where: { isActive: true } } } } },
+      },
       memberships: {
         where: { role: 'OWNER', isActive: true },
         take: 1,
@@ -60,6 +65,15 @@ export async function remindTrialsEnding(now = new Date()): Promise<number> {
       month: 'long',
       year: 'numeric',
     });
+    const bays = Math.max(
+      1,
+      org.locations.reduce((n, l) => n + l._count.bays, 0),
+    );
+    const price = planPrice(org.plan, org.baseCurrency, 'monthly');
+    const amount = formatMinor(price.minor * bays, {
+      currency: price.currency,
+      locale: org.locale,
+    });
     const card =
       org.billingCardBrand && org.billingCardLast4
         ? `the ${org.billingCardBrand} card ending ${org.billingCardLast4}`
@@ -74,7 +88,7 @@ export async function remindTrialsEnding(now = new Date()): Promise<number> {
         body: [
           `Hello ${owner.name.split(' ')[0]}.`,
           '',
-          `The ${TRIAL_DAYS}-day free trial for ${org.name} ends on ${ends}. On that day ${card} is charged for the first month of the ${org.plan.charAt(0) + org.plan.slice(1).toLowerCase()} plan, and then each month until you cancel.`,
+          `The ${TRIAL_DAYS}-day free trial for ${org.name} ends on ${ends}. On that day ${card} is charged ${amount} for the first month of the ${org.plan.charAt(0) + org.plan.slice(1).toLowerCase()} plan (${bays} ${bays === 1 ? 'bay' : 'bays'}), and then each month until you cancel.`,
           '',
           'If you would rather not continue, cancel before then from Settings, Subscription, and nothing is charged. Everything you have put in stays readable and exportable either way.',
           '',

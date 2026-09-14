@@ -25,6 +25,14 @@ giving staff access, which is exactly the opposite of what we want.
 | **Complete** | £69                 | Core plus inventory, purchasing, suppliers, general ledger, financial statements, job profitability                          |
 | **Group**    | £99                 | Complete plus multi-location, consolidated reporting, stock transfer, commissions, priority support                          |
 
+Those are the pound prices. A workshop is priced and billed in its own
+currency, the one its books are kept in, from a price book in
+`packages/core/src/billing/prices.ts` that carries every plan in each of the
+eleven currencies the country table can set (GBP, EUR, USD, CAD, AUD, NZD,
+AED, SAR, ZAR, INR, EGP), as round figures set by hand rather than an
+exchange rate on the day (Phase 32.7). Core paid monthly is £47, €55, $59,
+C$79, A$89, NZ$95; the rest are in the book.
+
 Rationale for the shape:
 
 - **Nothing important is behind a paywall in Core.** The customer portal and

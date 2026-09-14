@@ -7,8 +7,8 @@ import {
   PLAN_ORDER,
   type PlanId,
   type PlanLimits,
-  PLANS,
   planFor,
+  planPrice,
   type Subscription,
   type SubscriptionEvent,
   type SubscriptionRecord,
@@ -108,9 +108,15 @@ export async function monthlyChargeFor(orgId: string): Promise<{
   amountMinor: number;
   currency: string;
 }> {
-  const [{ plan }, usage] = await Promise.all([planOf(orgId), usageOf(orgId)]);
+  const [{ plan }, usage, org] = await Promise.all([
+    planOf(orgId),
+    usageOf(orgId),
+    prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { baseCurrency: true } }),
+  ]);
   const bays = Math.max(1, usage.bays);
-  const price = PLANS[plan].priceMonthly;
+  // The workshop's own currency, the one its books are in. The book has a
+  // price for every currency a country can set; the fallback is for none.
+  const price = planPrice(plan, org.baseCurrency, 'monthly');
   return { plan, bays, amountMinor: price.minor * bays, currency: price.currency };
 }
 
@@ -147,7 +153,7 @@ export async function startTrialCheckout(input: {
   const checkout = await provider.createSubscriptionCheckout({
     orgId: org.id,
     plan: charge.plan,
-    amountMinor: PLANS[charge.plan].priceMonthly.minor,
+    amountMinor: charge.amountMinor / charge.bays,
     currency: charge.currency,
     priceRef: priceRefFor(charge.plan),
     quantity: charge.bays,
