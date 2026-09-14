@@ -44,18 +44,19 @@ Read in this order if you are new to the project.
 
 ### 2. Design — how it is shaped
 
-| Doc                                                       | Contents                                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [Domain model](02-design/01-domain-model.md)              | Bounded contexts, aggregates, invariants, the ubiquitous language                |
-| [Data model & ERD](02-design/02-data-model.md)            | Every table, key, index and relationship                                         |
-| [Architecture](02-design/03-architecture.md)              | C4 context/container/component, runtime, deployment                              |
-| [State machines](02-design/04-state-machines.md)          | Job lifecycle, estimate approval, stock reservation, invoice                     |
-| [Security model](02-design/05-security-model.md)          | Authn, authz, tenancy isolation, threat model, passport integrity                |
-| [API contract](02-design/06-api-contract.md)              | The three live read endpoints and their keys, then the contract for what follows |
-| [Accounting model](02-design/07-accounting-model.md)      | Chart of accounts and the exact journal postings each event makes                |
-| [Design system](02-design/08-design-system.md)            | Colour, type, spacing, elevation, components, dark mode, a11y                    |
-| [Wireframes](02-design/09-wireframes.md)                  | Every screen, annotated                                                          |
-| [The passport, designed](02-design/10-passport-design.md) | Why the passport looks like a passport: every choice and the fact it carries     |
+| Doc                                                       | Contents                                                                                                                                |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [Domain model](02-design/01-domain-model.md)              | Bounded contexts, aggregates, invariants, the ubiquitous language                                                                       |
+| [Data model & ERD](02-design/02-data-model.md)            | Every table, key, index and relationship                                                                                                |
+| [Architecture](02-design/03-architecture.md)              | C4 context/container/component, runtime, deployment                                                                                     |
+| [State machines](02-design/04-state-machines.md)          | Job lifecycle, estimate approval, stock reservation, invoice                                                                            |
+| [Security model](02-design/05-security-model.md)          | Authn, authz, tenancy isolation, threat model, passport integrity                                                                       |
+| [API contract](02-design/06-api-contract.md)              | The three live read endpoints and their keys, then the contract for what follows                                                        |
+| [Accounting model](02-design/07-accounting-model.md)      | Chart of accounts and the exact journal postings each event makes                                                                       |
+| [Design system](02-design/08-design-system.md)            | Colour, type, spacing, elevation, components, dark mode, a11y                                                                           |
+| [Wireframes](02-design/09-wireframes.md)                  | Every screen, annotated                                                                                                                 |
+| [The passport, designed](02-design/10-passport-design.md) | Why the passport looks like a passport: every choice and the fact it carries                                                            |
+| [The design book](Carnet-Design-Book.pdf)                 | Every design photographed from the running app: when, why, meaning, why it works. Word beside it; rebuilt by `npm run docs:design-book` |
 
 ### 3. Decisions
 
