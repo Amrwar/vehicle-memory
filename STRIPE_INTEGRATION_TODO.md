@@ -41,6 +41,13 @@ call.
 | submit_type                      | `auto`            |
 | origin_context                   | `web`             |
 | metadata[integration_identifier] | `hosted_web_0001` |
+| managed_payments[enabled]        | `false`           |
+
+`managed_payments[enabled]=false` is not from Checkout Studio: new Stripe
+accounts have Managed Payments (Stripe as merchant of record, taxing the sale
+itself) on by default, and it refuses `automatic_tax: false`. The invoice
+already carries the workshop's tax, so each checkout opts out. You can also turn
+the default off under Settings → Managed Payments in the dashboard.
 
 Not set, on purpose: `payment_method_collection` only applies when `mode` is
 `subscription`. `integration_identifier` is not a Checkout Session API

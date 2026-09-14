@@ -137,6 +137,10 @@ export const stripeProvider: PaymentProvider = {
         billing_address_collection: 'auto',
         'phone_number_collection[enabled]': 'false',
         'automatic_tax[enabled]': 'false',
+        // Stripe's Managed Payments (Stripe as merchant of record, taxing the
+        // sale itself) is on by default for new accounts. The invoice already
+        // carries the workshop's tax, so this checkout is explicitly not managed.
+        'managed_payments[enabled]': 'false',
         allow_promotion_codes: 'false',
         submit_type: 'auto',
         origin_context: 'web',
