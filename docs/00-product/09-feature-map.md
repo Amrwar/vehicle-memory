@@ -31,6 +31,8 @@ says why.
 | Technician workload        | Built  | `/people`, utilisation and productivity        |
 | Upcoming service reminders | Built  | `/reminders`                                   |
 | Customer satisfaction      | Built  | From reviews, refused below five answers       |
+| Comeback rate              | Built  | Ninety days, by site and person (Phase 40)     |
+| Owed and overdue           | Built  | The business block (Phase 40)                  |
 | Profit margin              | Built  | `/reports/business`, by service type           |
 | Activity feed              | Built  | Read from the audit log, which already held it |
 
@@ -185,6 +187,8 @@ mean two different things with no way to tell which.
 | Supplier invoices       | Built  | Three-way match                                   |
 | Supplier payments       | Built  | `/payables`, allocated oldest-due first, remitted |
 | Price history           | Built  | On each supplier, with the change since last time |
+| Supplier comparison     | Built  | Side by side on each part, order in one press     |
+| Supplier performance    | Built  | Quarter by quarter, slower said in a sentence     |
 
 ## 11. Financial ERP
 
@@ -316,6 +320,7 @@ endpoint that receives them exists and is authenticated.
 | Routing by the answer  | Built   | Five invited publicly, three or less opens a talk |
 | Who was not asked, why | Built   | The list that explains a low review count         |
 | Satisfaction           | Built   | Refused below five answers rather than swinging   |
+| Trend by site, person  | Built   | Ninety days against the ninety before (Phase 40)  |
 | Closing a complaint    | Built   | With a stated outcome, enforced by the database   |
 | Posting to Google      | Missing | Needs a place to send them. The invitation exists |
 
@@ -460,7 +465,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 195          |
+| Built    | 200          |
 | Partial  | 2            |
 | Missing  | 7            |
 | Deferred | 1            |

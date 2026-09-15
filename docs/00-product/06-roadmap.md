@@ -2003,10 +2003,55 @@ exact search going straight to the car and the notifications page.
 
 ## Phase 40 — The owner's day, sharpened
 
-Comeback rate; reputation trend by site and by person; supplier comparison
-when a part is short, and supplier performance over time; the dashboard's
-today, business and inventory blocks reviewed against what the pilot's owner
-actually asked.
+**Scope.** Comeback rate; reputation trend by site and by person; supplier
+comparison when a part is short, and supplier performance over time; the
+dashboard's today, business and inventory blocks reviewed against what the
+pilot's owner actually asked.
+
+**Exit.** The owner can say how much work comes back and whose it was,
+whether customers are happier than last quarter and where, who to ring for a
+part that has run out, and which supplier has quietly got slower, without
+opening a spreadsheet.
+
+**Status.** Built. A job can be recorded as earlier work on the same car
+coming back: the job page offers finished work on that car from the thirty
+days before, allows anything up to ninety, and refuses a comeback without a
+sentence saying what came back, on another car, from work finished after
+this job was opened, or pointing both ways; the database refuses one with no
+reason too, and taking it off is kept in the audit log. The comeback rate is
+measured on work finished in the period and counted against the site and
+every technician who did the work that came back, never against whoever put
+it right; below ten finished jobs it gives the count and not a percentage.
+It sits on the business report beside the comebacks themselves. The
+reputation page now shows the last six months and the last ninety days
+against the ninety before, for the workshop, each site and each technician
+on the rated job, with a direction only when both windows have five answers.
+Every part's page lays every active supplier side by side: what they last
+charged for it, how often, their typical wait, how often they arrived by the
+day promised and how much was sent back as faulty or wrong, with cheapest,
+quickest and most reliable marked only where two can be compared, and one
+press opens an order to that supplier with the part, the quantity and their
+last cost filled in; the reorder suggestion now uses the quickest measured
+wait. Each supplier's page shows the year quarter by quarter and says in a
+sentence whether they are getting slower or less reliable. The pilot has not
+started, so there was no owner's list to review the dashboard against; it
+was reviewed instead against the order the product's own brief gives for
+running the business (today, the jobs, the people, the stock, the money).
+Two tiles that showed a word rather than a figure were replaced; today now
+counts bookings and who is clocked on; a business block shows what is owed
+and overdue, the comeback rate and the satisfaction trend, gated to people
+who can read reports; an inventory block shows what is short with nothing on
+order, orders past the day promised, jobs waiting for parts and the value on
+the shelf, and lists the short parts, each opening its supplier comparison.
+The dashboard is now translated into French and Arabic. The authorisation
+script now names the one action that writes only the person's own rows,
+marking their notifications read, rather than failing on it. The
+verification script records and refuses comebacks, reads the rate move for
+the workshop and the technician and move back when the link is taken off,
+moves the reputation trend with one answer, compares two probe suppliers of
+one part, reads one of them getting slower over the year, and reads the job,
+part, supplier, report, reputation and dashboard pages, the dashboard in
+French, and an order opened from a part arriving filled in.
 
 ## Phase 41 — Tax, configurable
 

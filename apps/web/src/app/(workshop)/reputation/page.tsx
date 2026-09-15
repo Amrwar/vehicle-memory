@@ -1,3 +1,4 @@
+import { describeTrend, type Direction, type GroupTrend } from '@carnet/core';
 import {
   Badge,
   Button,
@@ -16,6 +17,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { reputationTrend } from '@/lib/owner';
 import { askable, askAbout, reputation, resolveReview } from '@/lib/retention';
 
 export const metadata: Metadata = { title: 'Reputation' };
@@ -68,6 +70,40 @@ async function resolve(formData: FormData) {
   redirect('/reputation');
 }
 
+function TrendRows({ rows, empty }: { rows: GroupTrend[]; empty: string }) {
+  if (rows.length === 0) {
+    return <CardBody className="text-[13px] text-(--text-soft)">{empty}</CardBody>;
+  }
+  return (
+    <ul className="divide-y divide-(--border)">
+      {rows.map((row) => (
+        <li
+          key={row.id}
+          className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5"
+        >
+          <span className="min-w-0">
+            <span className="block text-[13px] font-medium">{row.name}</span>
+            <span className="block text-[12px] text-(--text-soft)">{describeTrend(row.trend)}</span>
+          </span>
+          <DirectionBadge direction={row.trend.direction} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DirectionBadge({ direction }: { direction: Direction | null }) {
+  if (direction === null) return null;
+  return (
+    <Badge
+      tone={direction === 'up' ? 'success' : direction === 'down' ? 'danger' : 'neutral'}
+      size="sm"
+    >
+      {direction === 'up' ? 'improving' : direction === 'down' ? 'falling' : 'steady'}
+    </Badge>
+  );
+}
+
 function stars(rating: number): string {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating);
 }
@@ -80,7 +116,11 @@ export default async function ReputationPage({
   const { orgId, region } = await requireSession('customer:read');
   const { asked, error } = await searchParams;
 
-  const [picture, candidates] = await Promise.all([reputation(orgId), askable(orgId)]);
+  const [picture, candidates, trend] = await Promise.all([
+    reputation(orgId),
+    askable(orgId),
+    reputationTrend(orgId),
+  ]);
 
   const toAsk = candidates.filter((entry) => entry.decision.ask);
   const skipped = candidates.filter((entry) => !entry.decision.ask);
@@ -132,6 +172,57 @@ export default async function ReputationPage({
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
           {picture.summary}
         </CardBody>
+      </Card>
+
+      <Card id="trend" className="mb-5 overflow-hidden">
+        <CardHeader
+          title="How it is moving"
+          description="The last ninety days against the ninety before. An average shows only on five answers or more."
+          action={<DirectionBadge direction={trend.overall.direction} />}
+        />
+        <CardBody className="grid gap-4">
+          <p className="text-[13px]">{describeTrend(trend.overall)}</p>
+          <ol className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {trend.months.map((month) => (
+              <li
+                key={month.month}
+                className="rounded-md border border-(--border) px-2 py-1.5 text-center"
+              >
+                <span className="block text-[11px] text-(--text-faint)">
+                  {month.start.toLocaleDateString(region.locale, {
+                    month: 'short',
+                    year: '2-digit',
+                  })}
+                </span>
+                <span className="block font-display text-[16px] font-semibold tabular-nums">
+                  {month.average === null ? '—' : month.average}
+                </span>
+                <span className="block text-[11px] text-(--text-faint)">
+                  {month.count} {month.count === 1 ? 'answer' : 'answers'}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </CardBody>
+        <div className="grid border-t border-(--border) lg:grid-cols-2 lg:divide-x lg:divide-(--border)">
+          <div>
+            <CardHeader title="By site" />
+            <TrendRows
+              rows={trend.bySite}
+              empty="Nobody has answered about any site in six months."
+            />
+          </div>
+          <div>
+            <CardHeader
+              title="By person"
+              description="Each technician on the job that was rated."
+            />
+            <TrendRows
+              rows={trend.byPerson}
+              empty="No rated job had a technician on it in six months."
+            />
+          </div>
+        </div>
       </Card>
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">

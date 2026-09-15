@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 39"
+AFTER_PHASE = "Phase 40"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-owner": "a comeback offered, refused without a reason or on another car, recorded, counted against the technician and taken off; the reputation trend moved by an answer; two suppliers of a part compared and one read as slower; the pages, the dashboard in French",
     "verify-search": "a car by its plate typed two ways and its VIN, a customer by their number, a job, an invoice and a part exactly, a name as a list; a decision and a part request notifying the right people, and the screens",
     "verify-returns": "an order delivered and billed, faulty parts sent back and credited off the bill, a refusal written off, a core credited with the leftover held for the next bill, sublet work billed and invoiced, and the trial balance",
     "verify-languages": "every sentence passed to the translator checked for both translations, eight pages read in each language for the root element's direction and a known sentence, and the switcher's cookie, account and redirect",
@@ -857,7 +858,24 @@ def build() -> None:
               "requestPart, and never throws. The workshop layout counts the person's unread rows for the bell; "
               "/notifications/[id] marks one read and redirects to its path.")
 
-    doc.add_heading("6.19 Answers and the assistant", level=2)
+    doc.add_heading("6.19 The owner's day", level=2)
+    para(doc, "A comeback is a column on the job pointing at the earlier job, written by markComeback after "
+              "assertComebackLink in core has checked the vehicle, the order of the dates, the ninety-day limit and the "
+              "reason; a check constraint holds the reason in the database. comebackPicture reads the jobs finished in the "
+              "period with their site, technicians and a count of later jobs pointing at them, and comebackRates in core "
+              "turns them into a rate per workshop, site and person, null below ten jobs. reputationTrend reads a year of "
+              "answered review requests with the rated job's site and technicians and hands them to monthlyRatings, "
+              "ratingTrend and reputationBy. ordersBySupplier reads a supplier's placed orders with their first receipt, "
+              "line quantities and costs, and the value of returns for faulty or wrong parts; measureSupplier, "
+              "performanceOverTime and describePerformance turn those into waits, promises kept, fill and returns per "
+              "quarter, each null below three orders. supplierOptionsFor adds each supplier's last price for one part and "
+              "compareSuppliers marks cheapest, quickest and most reliable only among two or more. ownerDay gathers what the "
+              "dashboard's business and inventory blocks show: invoice balances and those past due, the ninety-day comeback "
+              "rate and satisfaction trend, parts below their reorder point with nothing on order, orders past their "
+              "expected date and the shelf at average cost. The dashboard is translated through the same translator as the "
+              "public site.")
+
+    doc.add_heading("6.20 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

@@ -30,3 +30,4 @@ export * from './access/index';
 export * from './settings/index';
 export * from './i18n/index';
 export * from './search/index';
+export * from './owner/index';

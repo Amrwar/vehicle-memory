@@ -3,7 +3,7 @@
   "counts": {
     "models": 143,
     "enums": 71,
-    "fields": 2256
+    "fields": 2264
   },
   "enums": [
     "OrgPlan",
@@ -441,7 +441,7 @@
         {
           "name": "Job",
           "comment": "The central aggregate. Everything in the workshop hangs off the Job.",
-          "fields": 31,
+          "fields": 35,
           "relations": [
             "Organization",
             "Location",
@@ -450,7 +450,9 @@
             "Vehicle",
             "Bay",
             "User",
-            "ServicePackage"
+            "ServicePackage",
+            "Job",
+            "User"
           ],
           "scope": "organisation"
         },

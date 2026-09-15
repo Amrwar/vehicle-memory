@@ -18,7 +18,10 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { describeRate, type GroupRate } from '@carnet/core';
+
 import { requireSession } from '@/lib/guard';
+import { comebackPicture } from '@/lib/owner';
 import {
   bySource,
   partsProfitability,
@@ -53,11 +56,12 @@ export default async function BusinessReportsPage({
   const key = range === 'month' || range === 'quarter' ? range : 'year';
   const period = periodFor(key);
 
-  const [serviceTypes, parts, customers, sources] = await Promise.all([
+  const [serviceTypes, parts, customers, sources, comebacks] = await Promise.all([
     revenueByServiceType(orgId, period),
     partsProfitability(orgId, period),
     retention(orgId, 25),
     bySource(orgId, period),
+    comebackPicture(orgId, { days: key === 'month' ? 30 : key === 'quarter' ? 90 : 365 }),
   ]);
 
   const losing = parts.filter((row) => row.marginPct !== null && row.marginPct < 0);
@@ -208,6 +212,70 @@ export default async function BusinessReportsPage({
               </Table>
             </TableWrap>
           )}
+        </Card>
+
+        {/* --- comebacks -------------------------------------------------- */}
+        <Card id="comebacks" className="overflow-hidden">
+          <CardHeader
+            title="Comebacks"
+            description="Work finished in this period that came back, counted against the site and the technicians who did it"
+            action={
+              <Badge tone={comebacks.overall.part > 0 ? 'warning' : 'neutral'} size="sm">
+                {comebacks.overall.value === null
+                  ? `${comebacks.overall.part} back`
+                  : `${comebacks.overall.value}%`}
+              </Badge>
+            }
+          />
+          <CardBody className="border-b border-(--border) text-[13px]">
+            {describeRate(comebacks.overall)}
+          </CardBody>
+          <div className="grid lg:grid-cols-3 lg:divide-x lg:divide-(--border)">
+            <RateList title="By site" rows={comebacks.bySite} />
+            <RateList title="By person" rows={comebacks.byPerson} />
+            <div>
+              <CardHeader title="What came back" />
+              {comebacks.recent.length === 0 ? (
+                <CardBody className="text-[13px] text-(--text-soft)">
+                  Nothing was recorded as coming back.
+                </CardBody>
+              ) : (
+                <ul className="divide-y divide-(--border)">
+                  {comebacks.recent.map((entry) => (
+                    <li key={entry.id} className="px-4 py-2.5 text-[13px]">
+                      <Link href={`/jobs/${entry.id}`} className="font-medium hover:underline">
+                        #{entry.number}
+                      </Link>{' '}
+                      back from{' '}
+                      {entry.comebackOf ? (
+                        <Link
+                          href={`/jobs/${entry.comebackOf.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          #{entry.comebackOf.number}
+                        </Link>
+                      ) : (
+                        'an earlier job'
+                      )}
+                      <span className="block text-[12px] text-(--text-soft)">
+                        {entry.comebackReason}
+                      </span>
+                      {entry.comebackOf && entry.comebackOf.technicians.length > 0 ? (
+                        <span className="block text-[11px] text-(--text-faint)">
+                          {entry.comebackOf.technicians.map((t) => t.user.name).join(', ')}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+          <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
+            A rate shows only on ten finished jobs or more. One car back out of four jobs is one
+            car, not a quarter of the work, and saying otherwise is how a good technician gets a bad
+            name.
+          </CardBody>
         </Card>
 
         {/* --- parts ------------------------------------------------------ */}
@@ -417,5 +485,31 @@ export default async function BusinessReportsPage({
         </div>
       </div>
     </>
+  );
+}
+
+function RateList({ title, rows }: { title: string; rows: GroupRate[] }) {
+  return (
+    <div>
+      <CardHeader title={title} />
+      {rows.length === 0 ? (
+        <CardBody className="text-[13px] text-(--text-soft)">No finished work.</CardBody>
+      ) : (
+        <ul className="divide-y divide-(--border)">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="flex items-baseline justify-between gap-2 px-4 py-2.5 text-[13px]"
+            >
+              <span className="font-medium">{row.name}</span>
+              <span className="text-right tabular-nums text-(--text-soft)">
+                {row.rate.value === null ? '' : `${row.rate.value}% · `}
+                {row.rate.part} of {row.rate.base}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

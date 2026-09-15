@@ -234,6 +234,12 @@ Phase 39 adds `StaffNotification` (one row per person: kind, title, body,
 the path it opens, what it is about, when it was read) and two expression
 indexes Prisma does not model: vehicles by their registration with spacing
 and punctuation removed, and customers by the digits of their mobile.
+
+Phase 40 adds four columns to `Job`: `comebackOfJobId` (the earlier job this
+one is that work coming back), `comebackReason`, `comebackMarkedAt` and
+`comebackMarkedByUserId`. A check constraint requires a reason of at least
+three characters whenever the link is set, and refuses a job pointing at
+itself. Everything else in the phase is read from records already held.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

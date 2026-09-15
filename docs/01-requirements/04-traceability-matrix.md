@@ -485,12 +485,23 @@ where the work happens.
 | FR-6903 | AM1   | `VehicleAccessGrant`       | the scoped queries in `searchEverything()`                                                                                          | `verify-search.ts`                   | Done   |
 | FR-6904 | AM2   | `StaffNotification`        | `recipients()`, `notifyStaff()` from `recordDecision()`, `receiveInbound()`, `requestBooking()`, `settleAttempt()`, `requestPart()` | `search.test.ts`, `verify-search.ts` | Done   |
 | FR-6905 | AM2   | `StaffNotification.readAt` | `notificationsFor()`, `openNotification()`, `markAllRead()`, `/notifications`                                                       | `verify-search.ts`                   | Done   |
-| FR-3907 | A1    | —                          | `assertNotFlooding()`                                                                                                               | `verify-credentials.ts`              | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`    | `digest()`                                                                                                                          | `verify-credentials.ts`              | Done   |
-| FR-3801 | —     | —                          | `/api/inbound/resend`                                                                                                               | `smoke.ts`                           | Done   |
-| FR-3802 | —     | —                          | `verify()` tolerance                                                                                                                | `smoke.ts`                           | Done   |
-| FR-3803 | —     | `Organization.slug`        | `organisationFor()`                                                                                                                 | `smoke.ts`                           | Done   |
-| FR-3804 | —     | —                          | `INBOUND_WEBHOOK_SECRET`                                                                                                            | `smoke.ts`                           | Done   |
+
+## The owner's day, sharpened
+
+| Req     | Story | Schema                           | Implementation                                                                                   | Test                                 | Status |
+| ------- | ----- | -------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------ | ------ |
+| FR-7001 | AN1   | `Job.comebackOfJobId`            | `assertComebackLink()`, `comebackCandidates()`, `markComeback()`, `clearComeback()`              | `owner.test.ts`, `verify-owner.ts`   | Done   |
+| FR-7002 | AN1   | —                                | `comebackRates()`, `rateOf()`, `comebackPicture()`, the business report                          | `owner.test.ts`, `verify-owner.ts`   | Done   |
+| FR-7003 | AN2   | `ReviewRequest`                  | `ratingTrend()`, `monthlyRatings()`, `reputationBy()`, `reputationTrend()`                       | `owner.test.ts`, `verify-owner.ts`   | Done   |
+| FR-7004 | AN3   | `PurchaseOrderLine`              | `measureSupplier()`, `compareSuppliers()`, `supplierOptionsFor()`, the part page, the order form | `owner.test.ts`, `verify-owner.ts`   | Done   |
+| FR-7005 | AN3   | `GoodsReceipt`, `SupplierReturn` | `performanceOverTime()`, `describePerformance()`, `supplierOverTime()`                           | `owner.test.ts`, `verify-owner.ts`   | Done   |
+| FR-7006 | AN4   | —                                | `ownerDay()`, the dashboard                                                                      | `verify-owner.ts`, `verify-authz.ts` | Done   |
+| FR-3907 | A1    | —                                | `assertNotFlooding()`                                                                            | `verify-credentials.ts`              | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`          | `digest()`                                                                                       | `verify-credentials.ts`              | Done   |
+| FR-3801 | —     | —                                | `/api/inbound/resend`                                                                            | `smoke.ts`                           | Done   |
+| FR-3802 | —     | —                                | `verify()` tolerance                                                                             | `smoke.ts`                           | Done   |
+| FR-3803 | —     | `Organization.slug`              | `organisationFor()`                                                                              | `smoke.ts`                           | Done   |
+| FR-3804 | —     | —                                | `INBOUND_WEBHOOK_SECRET`                                                                         | `smoke.ts`                           | Done   |
 
 ## What people say afterwards
 
@@ -794,9 +805,10 @@ details without a provider behind it would be worse than not having one.
 | Languages                                          | 5                   | 5                      |
 | Parts back, work out                               | 7                   | 7                      |
 | Finding anything                                   | 5                   | 5                      |
-| **Total**                                          | **472**             | **466 (99%)**          |
+| The owner's day, sharpened                         | 6                   | 6                      |
+| **Total**                                          | **478**             | **472 (99%)**          |
 
-The requirements document lists 556 requirements. 84 of
+The requirements document lists 562 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

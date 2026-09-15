@@ -62,6 +62,7 @@
     "verify:languages": "tsx infra/scripts/verify-languages.ts",
     "verify:returns": "tsx infra/scripts/verify-returns.ts",
     "verify:search": "tsx infra/scripts/verify-search.ts",
+    "verify:owner": "tsx infra/scripts/verify-owner.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

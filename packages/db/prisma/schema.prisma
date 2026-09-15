@@ -276,6 +276,7 @@ model User {
   messagesSent             MessageLog[]         @relation("MessageSentBy")
   messageTemplates         MessageTemplate[]
   notifications            StaffNotification[]
+  comebacksMarked          Job[]                @relation("ComebackMarkedBy")
   preferredBy              Customer[]           @relation("PreferredTechnician")
   bookingTechnician        Booking[]
   // Passport
@@ -859,9 +860,9 @@ model JobType {
   sortOrder            Int      @default(0)
   isActive             Boolean  @default(true)
 
-  org    Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  jobs   JobJobType[]
-  skills JobTypeSkill[]
+  org      Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  jobs     JobJobType[]
+  skills   JobTypeSkill[]
   packages ServicePackage[]
 
   @@unique([orgId, name])
@@ -992,13 +993,13 @@ model Booking {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  location   Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  bay        Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
-  technician User?        @relation(fields: [technicianId], references: [id], onDelete: SetNull)
-  job        Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  org        Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location   Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  customer   Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bay        Bay?            @relation(fields: [bayId], references: [id], onDelete: SetNull)
+  technician User?           @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+  job        Job?            @relation(fields: [jobId], references: [id], onDelete: SetNull)
   package    ServicePackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
 
   @@index([orgId, startAt])
@@ -1052,18 +1053,23 @@ model Job {
   odometerOutKm  Int?
   estimatedHours Decimal? @db.Decimal(6, 2)
 
-  receivedAt   DateTime?
-  promisedAt   DateTime?
-  pickUpAt     DateTime?
-  startedAt    DateTime?
-  completedAt  DateTime?
+  receivedAt             DateTime?
+  promisedAt             DateTime?
+  pickUpAt               DateTime?
+  startedAt              DateTime?
+  completedAt            DateTime?
   /// When the customer took the car back. Phase 35.
-  collectedAt  DateTime?
+  collectedAt            DateTime?
   /// The package this job was made from, if any. Phase 37.
-  packageId    String?
-  invoicedAt   DateTime?
-  cancelledAt  DateTime?
-  cancelReason String?
+  packageId              String?
+  /// The earlier job this one is that work coming back, why, and who said so. Phase 40.
+  comebackOfJobId        String?
+  comebackReason         String?
+  comebackMarkedAt       DateTime?
+  comebackMarkedByUserId String?
+  invoicedAt             DateTime?
+  cancelledAt            DateTime?
+  cancelReason           String?
 
   courtesyVehicleNote String?
   createdByUserId     String?
@@ -1110,6 +1116,9 @@ model Job {
   conversation     Conversation?
   package          ServicePackage?   @relation(fields: [packageId], references: [id], onDelete: SetNull)
   sublets          JobSublet[]
+  comebackOf       Job?              @relation("Comeback", fields: [comebackOfJobId], references: [id], onDelete: SetNull)
+  comebacks        Job[]             @relation("Comeback")
+  comebackMarkedBy User?             @relation("ComebackMarkedBy", fields: [comebackMarkedByUserId], references: [id], onDelete: SetNull)
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -1117,6 +1126,7 @@ model Job {
   @@index([vehicleId])
   @@index([customerId])
   @@index([locationId, status])
+  @@index([comebackOfJobId])
   @@map("jobs")
 }
 
@@ -2204,25 +2214,25 @@ model MessageLog {
   /// reset for a customer who has not yet been attached to any workshop. A
   /// workshop's own message list filters on this, so a platform message
   /// correctly appears in none of them.
-  orgId       String?
-  channel     MessageChannel
-  toAddress   String
-  subject     String?
-  body        String
-  status      MessageStatus  @default(QUEUED)
-  provider    String?
-  providerRef String?
-  error       String?
+  orgId          String?
+  channel        MessageChannel
+  toAddress      String
+  subject        String?
+  body           String
+  status         MessageStatus  @default(QUEUED)
+  provider       String?
+  providerRef    String?
+  error          String?
   /// How many times sending has been attempted. A message is given up on
   /// rather than retried forever: past the limit somebody has to look.
-  attempts    Int            @default(0)
+  attempts       Int            @default(0)
   /// Not before this. Carries both the retry backoff and the quiet-hours
   /// hold, because from the sender's side they are the same instruction.
-  availableAt DateTime       @default(now())
-  relatedType String?
-  relatedId   String?
-  sentAt      DateTime?
-  createdAt   DateTime       @default(now())
+  availableAt    DateTime       @default(now())
+  relatedType    String?
+  relatedId      String?
+  sentAt         DateTime?
+  createdAt      DateTime       @default(now())
   /// The thread this belongs to, once filed. Phase 36.
   conversationId String?
   /// A person who wrote it, when a person did; null for the product's own messages.
@@ -2320,8 +2330,8 @@ model Product {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  org           Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  category      ProductCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  org           Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  category      ProductCategory?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   stockLevels   StockLevel[]
   movements     StockMovement[]
   reservations  StockReservation[]
@@ -2348,14 +2358,14 @@ model Warehouse {
   code       String
   isDefault  Boolean @default(false)
 
-  org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  location     Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  org          Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location     Location?            @relation(fields: [locationId], references: [id], onDelete: SetNull)
   stockLevels  StockLevel[]
   movements    StockMovement[]
   reservations StockReservation[]
   returnLines  SupplierReturnLine[]
-  transfersOut StockTransfer[]    @relation("TransferOrigin")
-  transfersIn  StockTransfer[]    @relation("TransferDestination")
+  transfersOut StockTransfer[]      @relation("TransferOrigin")
+  transfersIn  StockTransfer[]      @relation("TransferDestination")
 
   @@unique([orgId, code])
   @@map("warehouses")
@@ -2529,8 +2539,8 @@ model PurchaseOrderLine {
   unitCost    Decimal @default(0) @db.Decimal(12, 4)
   sortOrder   Int     @default(0)
 
-  order        PurchaseOrder      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product      Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order        PurchaseOrder        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
   receiptLines GoodsReceiptLine[]
   returnLines  SupplierReturnLine[]
 
@@ -2581,10 +2591,10 @@ model SupplierBill {
   dueAt      DateTime?
   createdAt  DateTime   @default(now())
 
-  org         Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  supplier    Supplier                    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  order       PurchaseOrder?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  allocations SupplierPaymentAllocation[]
+  org                Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier           Supplier                    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  order              PurchaseOrder?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  allocations        SupplierPaymentAllocation[]
   creditApplications SupplierCreditApplication[]
   sublet             JobSublet?
 

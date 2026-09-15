@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 39.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 40.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -711,6 +711,23 @@ def build() -> None:
         works="Going straight to the one record saves the press that a list of one would cost, which is most searches at a counter. Telling only the people whose role acts on something keeps the bell worth looking at.",
         shots=[("search", "Search results for a name.", 16.4), ("notifications", "Notifications.", 16.4)],
         source="docs/02-design/05-security-model.md, section 7.5",
+    )
+
+    design(
+        doc,
+        title="The owner's day, sharpened",
+        when="Phase 40, 15 September 2026.",
+        why="An owner asks four things the product could answer and did not: how much of the work comes back and whose, "
+            "whether customers are happier and where, who to ring for a part that has run out, and which supplier has got slower.",
+        meaning=[
+            "The dashboard reads in three blocks under small headings: today, the business, inventory. Every tile is a figure that opens its list; none is a word.",
+            "Comebacks sit on the business report in three columns, by site, by person, and what came back, with the count shown instead of a percentage until ten jobs stand behind it.",
+            "Reputation gains a strip of six months, each with its average or a dash and the number of answers, and a list by site and by person with a small badge for improving, falling or steady.",
+            "On a part, every supplier sits in one table with small badges for cheapest, quickest and most reliable, and an Order button that is primary when the part is short.",
+        ],
+        works="Refusing to state a rate or an average on too little keeps the figures fair to the people they name. Laying suppliers side by side, and leaving the choice to the person, fits how parts are really bought: the cheapest is not always the one that arrives by four o'clock.",
+        shots=[("dashboard", "The dashboard in three blocks.", 16.4), ("comebacks", "Comebacks on the business report.", 16.4), ("reputation-trend", "How reputation is moving.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 40",
     )
 
     # 11. Counter

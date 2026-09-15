@@ -21,6 +21,7 @@ import { notFound } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { supplierOverTime } from '@/lib/owner';
 import { supplierDetail } from '@/lib/suppliers';
 
 export const metadata: Metadata = { title: 'Supplier' };
@@ -49,6 +50,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
 
   const supplier = await supplierDetail(orgId, id);
   if (!supplier) notFound();
+  const history = await supplierOverTime(orgId, supplier.id);
 
   return (
     <>
@@ -197,6 +199,56 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
           </CardBody>
         </Card>
       </div>
+
+      <Card id="over-time" className="mb-5 overflow-hidden">
+        <CardHeader
+          title="Over the year"
+          description="Quarter by quarter, measured from their orders. A figure shows only when three orders or more stand behind it."
+        />
+        <CardBody className="border-b border-(--border) text-[13px] leading-relaxed">
+          <ul className="grid gap-1">
+            {history.sentences.map((sentence) => (
+              <li key={sentence}>{sentence}</li>
+            ))}
+          </ul>
+        </CardBody>
+        <TableWrap className="rounded-none border-0">
+          <Table>
+            <thead>
+              <tr>
+                <Th>Quarter</Th>
+                <Th numeric>Orders</Th>
+                <Th numeric>Typical wait</Th>
+                <Th numeric>By the day promised</Th>
+                <Th numeric>Delivered in full</Th>
+                <Th numeric>Sent back as faulty or wrong</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.periods.map((period) => (
+                <Tr key={period.label}>
+                  <Td className="font-medium">{period.label}</Td>
+                  <Td numeric className="text-(--text-soft)">
+                    {period.measures.orders}
+                  </Td>
+                  <Td numeric>
+                    {period.measures.leadDays === null ? '—' : `${period.measures.leadDays}d`}
+                  </Td>
+                  <Td numeric>
+                    {period.measures.onTimePct === null ? '—' : `${period.measures.onTimePct}%`}
+                  </Td>
+                  <Td numeric>
+                    {period.measures.fillPct === null ? '—' : `${period.measures.fillPct}%`}
+                  </Td>
+                  <Td numeric>
+                    {period.measures.returnPct === null ? '—' : `${period.measures.returnPct}%`}
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
+      </Card>
 
       <Card className="overflow-hidden">
         <CardHeader

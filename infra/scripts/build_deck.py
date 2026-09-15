@@ -572,13 +572,13 @@ def build() -> Path:
     rule(slide, Inches(2.15))
 
     phases = [
-        ('34', 'The workflow, as one thing', 'Built: a booking becomes a job in one press; an approval puts the work on the job and reserves the parts; extra work quoted mid-job; 37 presses down to 20.'),
-        ('35', 'Arrival and departure', 'Built: the car checked in and handed back against a signed record of what it was like; keys as events; a car cannot leave owing money without a reason.'),
-        ('36', 'Conversations', 'Built: one thread per customer and per job over email, text and WhatsApp, answered from the job; templates as sentences; a payment link in one press.'),
-        ('37', 'Packages and templates', 'Built: a package with labour, parts, checklist, time, price and interval; a job from it in one press, at the counter, online or on a job already open.'),
-        ('37.5', 'Languages', 'Built: English, French and Arabic, the person\'s choice kept on the account; Arabic right to left; the public site, the portal and the workshop shells.'),
-        ('38', 'Parts back, work out', 'Built: returns and cores credited against what the supplier is owed, oldest bill first; sublet work on the job at its real cost.'),
         ('39', 'Finding anything', 'Built: one box for a plate however typed, a VIN, a phone number, a job, an invoice or a part, straight to the record; notifications for staff.'),
+        ('40', 'The owner\'s day, sharpened', 'Built: the comeback rate by site and person; the reputation trend; suppliers side by side on every part and over the year; the dashboard in three blocks.'),
+        ('41', 'Tax, configurable', 'Several taxes on a line, exempt customers, tax by site, inclusive or exclusive prices, a report per tax.'),
+        ('42', 'Paper', 'Print styles for every document; work order, invoice, estimate and inspection as PDF; labels, key tags and QR codes.'),
+        ('43', 'Providers', 'VIN decoding and a fitment feed behind seams; payroll exported; reviews posted to Google.'),
+        ('44', 'Ownership, warranty and sites', 'A car transferred by invitation with its history; warranty cost and profit; prices and tax per site.'),
+        ('45', 'The first day', 'An onboarding checklist, demonstration data, and help inside the product.'),
     ]
 
     for index, (number, title, note) in enumerate(phases):

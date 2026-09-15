@@ -1515,6 +1515,57 @@ books online or pays **so that** nobody has to walk over and ask.
 
 ---
 
+## Epic AN — The owner's day, sharpened (Phase 40)
+
+### AN1 — What came back
+
+**As** Ahmed **I want** to record that a car is back with the same fault
+**so that** I know how much of our work comes back, and whose it was.
+**Size** 3 · **Satisfies** FR-7001, FR-7002
+
+- **Given** a car back nine days after its brakes were done, **when** I open
+  the new job, **then** the brake job is offered as what came back.
+- **Given** I record it with no reason, **when** I press record, **then** it
+  is refused and says why.
+- **Given** John did the brake job, **when** I read the comebacks, **then**
+  it counts against John and not against whoever fixed it.
+
+### AN2 — Whether they are happier
+
+**As** Ahmed **I want** to see whether ratings are rising or falling, by site
+and by technician **so that** I talk to the right person about the right
+thing.
+**Size** 2 · **Satisfies** FR-7003
+
+- **Given** five answers this quarter and five last, **when** I open
+  reputation, **then** I read whether it went up, down or held.
+- **Given** three answers for a technician, **when** I read the list,
+  **then** no average is given.
+
+### AN3 — Who to ring for a part
+
+**As** Paul in parts **I want** every supplier of a short part side by side
+**so that** I order from the right one in one press.
+**Size** 3 · **Satisfies** FR-7004, FR-7005
+
+- **Given** two suppliers of a filter, **when** I open the part, **then** I
+  see which was cheapest last time and which delivers quickest.
+- **Given** a supplier whose deliveries went from one day to six, **when** I
+  open them, **then** it says they are slower.
+
+### AN4 — The morning read
+
+**As** Ahmed **I want** the dashboard to give me today, the money and the
+shelf as figures **so that** I know what needs me before the doors open.
+**Size** 2 · **Satisfies** FR-7006
+
+- **Given** invoices past their due date, **when** I open the dashboard,
+  **then** I see how much is overdue and it opens the aged debt.
+- **Given** a technician, **when** they open the dashboard, **then** the
+  business block is not shown.
+
+---
+
 ## Story map
 
 ```

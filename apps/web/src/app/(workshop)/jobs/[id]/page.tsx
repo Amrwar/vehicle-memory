@@ -62,6 +62,7 @@ import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { applyPackage, PackageError, packagesFor } from '@/lib/packages';
 import { addSublet, billSublet, markSubletDone, ReturnError, subletsForJob } from '@/lib/returns';
+import { clearComeback, ComebackError, comebackFor, markComeback } from '@/lib/owner';
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
@@ -208,6 +209,31 @@ async function sublet(formData: FormData) {
     redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#sublet`);
   }
   redirect(`/jobs/${jobId}#sublet`);
+}
+
+/** This job is earlier work on the same car coming back, or it was recorded so by mistake. Phase 40. */
+async function comeback(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  try {
+    if (formData.get('intent') === 'clear') {
+      await clearComeback({ orgId, userId: user.userId, jobId });
+    } else {
+      await markComeback({
+        orgId,
+        userId: user.userId,
+        jobId,
+        originalJobId: String(formData.get('originalJobId') ?? ''),
+        reason: String(formData.get('reason') ?? ''),
+      });
+    }
+  } catch (error) {
+    if (!(error instanceof ComebackError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#comeback`);
+  }
+  redirect(`/jobs/${jobId}#comeback`);
 }
 
 /** A package onto this job: its lines, checklist, kind and time, one press. Phase 37. */
@@ -515,9 +541,10 @@ export default async function JobPage({
   const packages = ['INVOICED', 'PAID', 'CANCELLED'].includes(job.status)
     ? []
     : await packagesFor(orgId, { activeOnly: true });
-  const [sublets, vendors] = await Promise.all([
+  const [sublets, vendors, returned] = await Promise.all([
     subletsForJob(orgId, job.id),
     db.supplier.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    comebackFor(orgId, job.id),
   ]);
   const subletLineIds = new Set(sublets.map((entry) => entry.partLineId));
 
@@ -604,6 +631,7 @@ export default async function JobPage({
   // A service advisor discussing price with a customer should not have the
   // margin on screen. It is the owner's number, not the counter's.
   const showsProfit = can(user.role, 'report:financial');
+  const mayWrite = can(user.role, 'job:write');
 
   const findings = inspection
     ? summarise(
@@ -1671,6 +1699,98 @@ export default async function JobPage({
               <ProgressTrail stages={stages} />
             </CardBody>
           </Card>
+
+          {returned &&
+          (returned.marked || returned.cameBack.length > 0 || returned.eligible.length > 0) ? (
+            <Card id="comeback" className={returned.marked ? 'border-(--warning)' : undefined}>
+              <CardHeader
+                title="Comeback"
+                description={
+                  returned.marked
+                    ? 'This is earlier work on this car coming back.'
+                    : 'Is this earlier work on this car coming back?'
+                }
+              />
+              <CardBody className="grid gap-3 text-[13px]">
+                {returned.marked ? (
+                  <div className="grid gap-2">
+                    <p>
+                      Back from{' '}
+                      <Link
+                        href={`/jobs/${returned.marked.original.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        job #{returned.marked.original.number}
+                      </Link>{' '}
+                      <span className="text-(--text-soft)">
+                        {returned.marked.original.shortDescription}
+                      </span>
+                    </p>
+                    <p className="text-(--text-soft)">&ldquo;{returned.marked.reason}&rdquo;</p>
+                    <p className="text-[11px] text-(--text-faint)">
+                      Recorded by {returned.marked.by ?? 'somebody'}
+                      {returned.marked.at
+                        ? ` on ${returned.marked.at.toLocaleDateString(region.locale)}`
+                        : ''}
+                    </p>
+                    {mayWrite ? (
+                      <form action={comeback}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <input type="hidden" name="intent" value="clear" />
+                        <Button type="submit" size="sm" variant="ghost">
+                          Not a comeback
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                ) : mayWrite && returned.eligible.length > 0 ? (
+                  <form action={comeback} className="grid gap-2">
+                    <input type="hidden" name="jobId" value={job.id} />
+                    <Field label="Earlier work on this car">
+                      <Select name="originalJobId" required defaultValue="">
+                        <option value="">Choose the job that came back</option>
+                        {returned.eligible.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            #{entry.number} · {entry.shortDescription}
+                            {entry.suggested ? ' · within 30 days' : ''}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label="What came back">
+                      <Input
+                        name="reason"
+                        required
+                        minLength={3}
+                        placeholder="Same squeal from the front brakes"
+                      />
+                    </Field>
+                    <Button type="submit" size="sm" variant="secondary">
+                      Record comeback
+                    </Button>
+                  </form>
+                ) : null}
+
+                {returned.cameBack.length > 0 ? (
+                  <ul className="grid gap-1 border-t border-(--border) pt-2">
+                    {returned.cameBack.map((entry) => (
+                      <li key={entry.id}>
+                        <span className="text-(--warning)">Came back</span> as{' '}
+                        <Link href={`/jobs/${entry.id}`} className="font-medium hover:underline">
+                          job #{entry.number}
+                        </Link>
+                        {entry.comebackReason ? (
+                          <span className="block text-[12px] text-(--text-soft)">
+                            &ldquo;{entry.comebackReason}&rdquo;
+                          </span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </CardBody>
+            </Card>
+          ) : null}
 
           <Card id="keys">
             <CardHeader

@@ -119,11 +119,13 @@ site, the portal and the workshop's shells, and parts back and work out:
 returns and cores credited against what a supplier is owed, and sublet
 work on the job at its real cost, and finding anything: one box for a plate,
 a VIN, a phone number, a job, an invoice or a part, and notifications for
-staff. The
+staff, and the owner's day: the comeback rate, the reputation trend by site and
+person, suppliers side by side on every part and over the year, and a
+dashboard in three blocks. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 195 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 200 capabilities
 built, 2 partial and 7 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 472
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 478
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -132,4 +134,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 39 are now built.
+to 40 are now built.

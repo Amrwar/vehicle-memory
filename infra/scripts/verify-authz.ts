@@ -340,6 +340,11 @@ async function main() {
   //    reading permission.
   const WRITE_CALL =
     /\.(create|createMany|update|updateMany|upsert|delete|deleteMany)\(|await (record|create|save|set|invite|revoke|deactivate|approve|send|issue|post|take|apply|return|mark|move|complete|cancel|adjust|sell|redeem|disable|award|run|dispatch|register|adopt|transfer|grant|assign|book|raise|void|refund|write|update|delete|remove|add|start|finish|reject|accept|confirm|decline|close|open|reopen|archive|restore|submit|schedule|reschedule|toggle|change|choose|keep|give|use|retire|enrol|dismiss|resolve|reverse|reconcile|pay|claim|note|log|file|order|receive|dispose|draft|preview|compose)[A-Z]\w*\(/;
+  // Actions that write only the signed-in person's own rows, scoped by their
+  // user id in the library, which no workshop permission describes. Each is
+  // named here so a new one is a decision, not a gap. Opening somebody
+  // else's notification is refused in verify-search.ts.
+  const OWN_RECORD_ACTIONS = new Set(['/notifications readAll']);
   let actions = 0;
   for (const page of pages) {
     const parts = page.source.split(/(?=async function \w+\()/);
@@ -351,7 +356,10 @@ async function main() {
       const body = part.split(/\n(?=export default|const |type |function )/)[0] ?? part;
       const writes = WRITE_CALL.test(body);
       if (!permission) {
-        check(!writes, `${page.route} ${name}() writes with no permission asked`);
+        check(
+          !writes || OWN_RECORD_ACTIONS.has(`${page.route} ${name}`),
+          `${page.route} ${name}() writes with no permission asked`,
+        );
         continue;
       }
       check(

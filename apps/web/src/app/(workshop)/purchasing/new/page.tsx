@@ -85,12 +85,24 @@ async function raise(formData: FormData) {
 export default async function NewOrderPage({
   searchParams,
 }: {
-  searchParams: Promise<{ problem?: string; supplierId?: string }>;
+  searchParams: Promise<{
+    problem?: string;
+    supplierId?: string;
+    product?: string;
+    qty?: string;
+    cost?: string;
+  }>;
 }) {
   const { orgId } = await requireSession('inventory:write');
   const params = await searchParams;
 
   const { suppliers, products } = await orderFormOptions(orgId);
+
+  // Opened from a part: its first line is that part, the quantity suggested,
+  // and the cost that supplier last charged. Phase 40.
+  const prefill = products.some((product) => product.id === params.product)
+    ? { productId: params.product!, qty: params.qty ?? '', cost: params.cost ?? '' }
+    : null;
 
   return (
     <>
@@ -158,7 +170,10 @@ export default async function NewOrderPage({
                 {Array.from({ length: LINES }, (_, index) => (
                   <tr key={index}>
                     <td className="px-4 py-1.5">
-                      <Select name={`line.${index}.productId`} defaultValue="">
+                      <Select
+                        name={`line.${index}.productId`}
+                        defaultValue={index === 0 && prefill ? prefill.productId : ''}
+                      >
                         <option value="">—</option>
                         {products.map((product) => (
                           <option key={product.id} value={product.id}>
@@ -176,6 +191,7 @@ export default async function NewOrderPage({
                     <td className="px-2 py-1.5">
                       <Input
                         name={`line.${index}.quantity`}
+                        defaultValue={index === 0 && prefill ? prefill.qty : undefined}
                         inputMode="decimal"
                         className="tabular-nums"
                         placeholder="1"
@@ -184,6 +200,7 @@ export default async function NewOrderPage({
                     <td className="px-2 py-1.5 pr-4">
                       <Input
                         name={`line.${index}.unitCost`}
+                        defaultValue={index === 0 && prefill ? prefill.cost : undefined}
                         inputMode="decimal"
                         className="tabular-nums"
                         placeholder="0.00"

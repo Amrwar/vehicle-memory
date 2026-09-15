@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7000 — The owner's day, sharpened
+
+| Ref     | Requirement                                                                                                                                                                                                     | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7001 | A job MUST be recordable as earlier finished work on the same vehicle coming back, within ninety days, with a stated reason, and the link MUST be removable with the removal kept in the audit log.             | 40    |
+| FR-7002 | The comeback rate MUST be measured on work finished in the period, counted against the site and each technician who did the work that came back, and MUST NOT be stated as a percentage below ten jobs.         | 40    |
+| FR-7003 | The reputation trend MUST compare the last ninety days with the ninety before for the workshop, each site and each technician on the rated job, naming a direction only when both have five answers.            | 40    |
+| FR-7004 | Each part MUST show every active supplier side by side with last cost, times supplied, typical wait, delivery by the promised day and faulty returns, and MUST open a filled order to any of them in one press. | 40    |
+| FR-7005 | Each supplier MUST show its performance quarter by quarter over a year, each measure stated only on three orders, with a sentence when it has become slower or less reliable.                                   | 40    |
+| FR-7006 | The dashboard MUST give today, the business and the inventory as figures that open their records, with the business block limited to those who can read reports.                                                | 40    |
+
 ## FR-6900 — Finding anything
 
 | Ref     | Requirement                                                                                                                                                                                           | Phase |

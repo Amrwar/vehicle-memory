@@ -31,6 +31,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
+import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
 
 export const dynamic = 'force-dynamic';
@@ -150,10 +151,18 @@ export default async function PartPage({
     avgCost: String(level?.avgCost ?? 0),
   };
 
-  const [usage, onOrder] = await Promise.all([
+  const [usage, onOrder, suppliers] = await Promise.all([
     usageHistory(product.id),
     quantityOnOrder(orgId, product.id),
+    supplierOptionsFor(orgId, product.id),
   ]);
+
+  // The wait that matters is the quickest supplier who can be measured, not a
+  // number somebody typed once. Three days when nobody can be measured yet.
+  const measuredWaits = suppliers
+    .map((option) => option.measures.leadDays)
+    .filter((days): days is number => days !== null);
+  const leadTimeDays = measuredWaits.length > 0 ? Math.min(...measuredWaits) : 3;
 
   const summary = summariseStock(position, Number(product.reorderPoint), onOrder);
 
@@ -161,7 +170,7 @@ export default async function PartPage({
     available: summary.available,
     onOrder,
     usage,
-    leadTimeDays: 3,
+    leadTimeDays,
     minimumOrderQuantity: Number(product.reorderQty) || undefined,
   });
 
@@ -400,6 +409,120 @@ export default async function PartPage({
           ) : null}
         </aside>
       </div>
+
+      <Card
+        id="suppliers"
+        className={`mt-5 overflow-hidden ${summary.needsOrdering ? 'border-(--warning)' : ''}`}
+      >
+        <CardHeader
+          title="Who to buy it from"
+          description={
+            summary.needsOrdering
+              ? 'Short, and nothing on order. Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.'
+              : 'Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.'
+          }
+        />
+        {suppliers.length === 0 ? (
+          <CardBody className="text-[13px] text-(--text-soft)">
+            There are no suppliers yet.{' '}
+            <Link href="/suppliers/new" className="font-medium hover:underline">
+              Add one
+            </Link>{' '}
+            to order from.
+          </CardBody>
+        ) : (
+          <TableWrap className="rounded-none border-0">
+            <Table>
+              <thead>
+                <tr>
+                  <Th>Supplier</Th>
+                  <Th numeric>Last cost</Th>
+                  <Th numeric>Supplied</Th>
+                  <Th numeric>Typical wait</Th>
+                  <Th numeric>By the day promised</Th>
+                  <Th numeric>Sent back</Th>
+                  <Th>
+                    <span className="sr-only">Order</span>
+                  </Th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((option) => (
+                  <Tr key={option.id}>
+                    <Td>
+                      <Link
+                        href={`/suppliers/${option.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {option.name}
+                      </Link>
+                      <span className="mt-0.5 flex flex-wrap gap-1">
+                        {option.cheapest ? (
+                          <Badge tone="success" size="sm">
+                            cheapest last time
+                          </Badge>
+                        ) : null}
+                        {option.quickest ? (
+                          <Badge tone="info" size="sm">
+                            quickest
+                          </Badge>
+                        ) : null}
+                        {option.mostReliable ? (
+                          <Badge tone="brand" size="sm">
+                            most reliable
+                          </Badge>
+                        ) : null}
+                      </span>
+                    </Td>
+                    <Td numeric>
+                      {option.lastCost === null ? (
+                        <span className="text-(--text-faint)">never bought</span>
+                      ) : (
+                        <Money
+                          currency={region.currency}
+                          locale={region.locale}
+                          amount={option.lastCost}
+                        />
+                      )}
+                    </Td>
+                    <Td numeric className="text-(--text-soft)">
+                      {option.timesSupplied}
+                    </Td>
+                    <Td numeric className="text-(--text-soft)">
+                      {option.measures.leadDays === null ? '—' : `${option.measures.leadDays}d`}
+                    </Td>
+                    <Td numeric className="text-(--text-soft)">
+                      {option.measures.onTimePct === null ? '—' : `${option.measures.onTimePct}%`}
+                    </Td>
+                    <Td numeric className="text-(--text-soft)">
+                      {option.measures.returnPct === null ? '—' : `${option.measures.returnPct}%`}
+                    </Td>
+                    <Td numeric>
+                      <Link
+                        href={`/purchasing/new?${new URLSearchParams({
+                          supplierId: option.id,
+                          product: product.id,
+                          qty: String(suggestion.quantity > 0 ? suggestion.quantity : 1),
+                          ...(option.lastCost !== null ? { cost: String(option.lastCost) } : {}),
+                        }).toString()}`}
+                      >
+                        <Button size="sm" variant={summary.needsOrdering ? 'primary' : 'secondary'}>
+                          Order
+                        </Button>
+                      </Link>
+                    </Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrap>
+        )}
+        <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
+          A figure shows only when three orders or more stand behind it. Cheapest, quickest and most
+          reliable are marked only where two suppliers can be compared. The choice is yours: a part
+          needed by four o&rsquo;clock is worth the extra pound.
+        </CardBody>
+      </Card>
 
       <Card className="mt-5 overflow-hidden">
         <CardHeader
