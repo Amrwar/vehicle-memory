@@ -1779,11 +1779,41 @@ finish a job. The findings reorder everything below.
 
 ## Phase 35 — Arrival and departure
 
-Check-in with mileage, fuel, visible condition, photos, belongings, keys and
-a signature; check-out with the work done, final mileage, payment, documents,
-keys and a signature. Key tags on the job: which hook, who took them, when.
-Signatures as a record of their own, reused for estimate approval, pickup,
-terms and warranty.
+**Scope.** Check-in with mileage, fuel, visible condition, photos,
+belongings, keys and a signature; check-out with the work done, final
+mileage, payment, documents, keys and a signature. Key tags on the job:
+which hook, who took them, when. Signatures as a record of their own,
+reused for estimate approval, pickup, terms and warranty.
+
+**Exit.** A car is handed over and handed back with a signed record of what
+it was like each time, and the keys can be found.
+
+**Status.** Built. "Car is here, start the job" on a booking now lands on
+the check-in: mileage off the dash (refused if it goes backwards), fuel in
+eighths off the gauge, a walk round the car ticking twelve places with a
+note against each, what was left inside, which hook the keys go on, and a
+signature pad; one press saves it in one transaction with the signature,
+the key event, the mileage reading on the vehicle and the job's received
+time, and the photographs are taken on the record it made, straight to the
+store on a ticket like inspection photographs. A car is checked in once.
+Check-out lists what was done, what is owed and whether it was paid, the
+final mileage (refused below the arrival reading), the fuel, what goes back
+with the car, a new mark since arrival, and a signature; a car cannot leave
+before the work is marked completed, and cannot leave owing money unless
+somebody writes down why, which is kept on the record. Both records, and
+what they were like, show on the job and on the customer's own vehicle
+page. Keys are events: hung on a hook, taken by somebody, put back, handed
+to the customer; where they are now is the latest event, on the job page
+and on each technician's job card with a one-press take and return. A
+signature is a record of its own, kept as the strokes that made it rather
+than a picture, with who signed, who captured it, the address and the
+device; the check-in, the check-out and an approval given across the
+counter all point at one, and the purposes for terms and warranty exist
+for the phases that need them. The verification script checks a car in
+with every refusal tried, moves the keys, approves a quote with a
+signature, refuses to let the car leave unfinished or unpaid, hands it back
+signed for, lets a fleet car leave owing with the reason written down, and
+reads the two screens for the one button each needs.
 
 ## Phase 36 — Conversations
 

@@ -275,6 +275,17 @@ test can hold the product to it (`checkWalk`) and a document can be generated
 from it (`docs/02-design/11-workflows.md`), and so that the next phase that
 adds a screen to a hand-off has to change a number in core to do it.
 
+### 3.13 Arrival and departure (Phase 35)
+
+Two records on the job (`VehicleCheck` IN and OUT, at most one of each),
+a `Signature` as an aggregate of its own that a check, an approval, the
+terms or a warranty can point at, and `KeyEvent`, where the keys' present
+whereabouts is a fold over the events (`keyState`). The rules are pure in
+`packages/core/src/job/arrival.ts`: what may be checked in or out, what a
+signature has to be, where the keys are. The check-out is the one place
+the money and the car meet: it reads what is outstanding and refuses to
+let the car go without a reason written down.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

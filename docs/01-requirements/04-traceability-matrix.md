@@ -419,12 +419,24 @@ where the work happens.
 | FR-6304 | AG2   | `EstimateLine.productId`, `JobPartLine`    | `recordDecision()` then `reserveForJobLine()` per part, `defaultWarehouseFor()`    | `verify-workflow.ts`                     | Done   |
 | FR-6305 | AG3   | `Estimate.supplementary`                   | `quoteExtraWork()`, `sendEstimate()` and `recordDecision()` leaving the job status | `verify-workflow.ts`                     | Done   |
 | FR-6306 | AG4   | —                                          | `WORKFLOWS`, `checkWalk()`, `build-workflows-doc.ts`                               | `workflow.test.ts`, `verify-workflow.ts` | Done   |
-| FR-3907 | A1    | —                                          | `assertNotFlooding()`                                                              | `verify-credentials.ts`                  | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                    | `digest()`                                                                         | `verify-credentials.ts`                  | Done   |
-| FR-3801 | —     | —                                          | `/api/inbound/resend`                                                              | `smoke.ts`                               | Done   |
-| FR-3802 | —     | —                                          | `verify()` tolerance                                                               | `smoke.ts`                               | Done   |
-| FR-3803 | —     | `Organization.slug`                        | `organisationFor()`                                                                | `smoke.ts`                               | Done   |
-| FR-3804 | —     | —                                          | `INBOUND_WEBHOOK_SECRET`                                                           | `smoke.ts`                               | Done   |
+
+## Arrival and departure
+
+| Req     | Story | Schema                                                    | Implementation                                                        | Test                                   | Status |
+| ------- | ----- | --------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------- | ------ |
+| FR-6401 | AH1   | `VehicleCheck` IN, `KeyEvent`, `OdometerReading`          | `checkIn()`, `/jobs/[id]/check-in`                                    | `arrival.test.ts`, `verify-arrival.ts` | Done   |
+| FR-6402 | AH1   | —                                                         | `assertCheckInAllowed()`, `assertCheckOutAllowed()`                   | `arrival.test.ts`, `verify-arrival.ts` | Done   |
+| FR-6403 | AH1   | `JobAttachment.checkId`                                   | `/api/check-photos`, `attachCheckPhoto()`, `CheckPhotos`              | `verify-arrival.ts`                    | Done   |
+| FR-6404 | AH2   | `VehicleCheck` OUT, `letGoOwingReason`, `Job.collectedAt` | `checkOut()`, `outstandingOn()`, `/jobs/[id]/check-out`               | `arrival.test.ts`, `verify-arrival.ts` | Done   |
+| FR-6405 | AH1   | `Signature`, `EstimateApproval.signatureId`               | `signatureIsUsable()`, `recordSignature()`, `SignaturePad`, `approve` | `arrival.test.ts`, `verify-arrival.ts` | Done   |
+| FR-6406 | AH3   | `KeyEvent`                                                | `keyState()`, `moveKeys()`, the job page and `/shop` cards            | `arrival.test.ts`, `verify-arrival.ts` | Done   |
+| FR-6407 | AH2   | —                                                         | `vehicleHistory()` checks, `/portal/vehicles/[id]`                    | `verify-arrival.ts`                    | Done   |
+| FR-3907 | A1    | —                                                         | `assertNotFlooding()`                                                 | `verify-credentials.ts`                | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                                   | `digest()`                                                            | `verify-credentials.ts`                | Done   |
+| FR-3801 | —     | —                                                         | `/api/inbound/resend`                                                 | `smoke.ts`                             | Done   |
+| FR-3802 | —     | —                                                         | `verify()` tolerance                                                  | `smoke.ts`                             | Done   |
+| FR-3803 | —     | `Organization.slug`                                       | `organisationFor()`                                                   | `smoke.ts`                             | Done   |
+| FR-3804 | —     | —                                                         | `INBOUND_WEBHOOK_SECRET`                                              | `smoke.ts`                             | Done   |
 
 ## What people say afterwards
 
@@ -722,9 +734,10 @@ details without a provider behind it would be worse than not having one.
 | Card payment through a provider                    | 7                   | 7                      |
 | The subscription, billed                           | 7                   | 7                      |
 | The workflow, as one thing                         | 6                   | 6                      |
-| **Total**                                          | **436**             | **430 (99%)**          |
+| Arrival and departure                              | 7                   | 7                      |
+| **Total**                                          | **443**             | **437 (99%)**          |
 
-The requirements document lists 520 requirements. 84 of
+The requirements document lists 527 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

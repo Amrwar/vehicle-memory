@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 34"
+AFTER_PHASE = "Phase 35"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-arrival": "a car checked in with every refusal tried, the keys moved, a quote approved with a signature, the car refused unfinished and unpaid, handed back signed for, and a fleet car let go owing with the reason written down",
     "verify-workflow": "a job walked from a booking to a paid bill the way a front desk would, every hand-off counted in presses against the table in core, the three screens read for the one button each needs, and stock put back as it was",
 }
 
@@ -773,7 +774,20 @@ def build() -> None:
               "table below is generated from it.")
     workflows_table(doc)
 
-    doc.add_heading("6.13 Answers and the assistant", level=2)
+    doc.add_heading("6.13 Arrival and departure", level=2)
+    para(doc, "checkIn writes, in one transaction, the VehicleCheck (IN) with the mileage, fuel, marks, belongings "
+              "and hook, the Signature it points at, a KeyEvent (HUNG) if a hook was given, the OdometerReading "
+              "on the vehicle and the job's receivedAt; the rules (assertCheckInAllowed, assertSigned) run in core "
+              "first, so a mileage that goes backwards or an empty pad is refused before anything is written. "
+              "Photographs go to the store on a ticket scoped to the check and are recorded as JobAttachments with "
+              "checkId once the store confirms them. checkOut reads what is outstanding across the job's live "
+              "invoices, refuses a car that is not completed or that owes money with no reason given, then writes "
+              "the VehicleCheck (OUT), its Signature, a KeyEvent (HANDED_TO_CUSTOMER), the final reading and "
+              "Job.collectedAt. moveKeys appends a KeyEvent and the present whereabouts is keyState over the "
+              "events, read by the job page, the technician's card and the portal. recordSignature writes a "
+              "Signature for an approval given across the counter, which EstimateApproval.signatureId points at.")
+
+    doc.add_heading("6.14 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

@@ -20,7 +20,16 @@
  */
 
 export type Screen =
-  'diary' | 'booking' | 'job' | 'tablet' | 'customer phone' | 'invoice' | 'today' | 'passport';
+  | 'diary'
+  | 'booking'
+  | 'job'
+  | 'check-in'
+  | 'check-out'
+  | 'tablet'
+  | 'customer phone'
+  | 'invoice'
+  | 'today'
+  | 'passport';
 
 export interface Handoff {
   /** What passes from whom to whom. */
@@ -52,6 +61,13 @@ export const WORKFLOWS: readonly Workflow[] = [
         before: 6,
         presses: 1,
         note: 'One button on the booking opens the job with the customer, the vehicle, the description and the technician already on it. Before, the desk opened a new-job form and chose the customer, the vehicle and the technician again, then typed the description a second time.',
+      },
+      {
+        name: 'Car checked in',
+        screen: 'check-in',
+        before: 1,
+        presses: 1,
+        note: 'New in Phase 35, counted from its first day. The booking button lands on the check-in: mileage, fuel, a walk round the car, what was left inside, the hook, a signature, one press. Photographs go on the record it makes.',
       },
       {
         name: 'Job to the technician',
@@ -155,6 +171,13 @@ export const WORKFLOWS: readonly Workflow[] = [
         before: 0,
         presses: 0,
         note: 'The paid invoice closes the job and writes the passport entry. Nothing to press.',
+      },
+      {
+        name: 'Car handed back',
+        screen: 'check-out',
+        before: 1,
+        presses: 1,
+        note: 'New in Phase 35, counted from its first day. What was done, the final mileage, what is owed and whether it was paid, what goes back with the car, the keys, a signature, one press. A car cannot leave owing money without a reason written down.',
       },
     ],
   },

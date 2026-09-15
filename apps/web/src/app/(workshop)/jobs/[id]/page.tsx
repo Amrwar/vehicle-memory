@@ -40,15 +40,25 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import {
+  ArrivalError,
+  arrivalFor,
+  moveKeys,
+  recordSignature,
+  signatureFromForm,
+} from '@/lib/arrival';
 import { coverWorthChecking } from '@/lib/condition';
 import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
+import { SignaturePad } from '@/components/signature-pad';
+import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
 
 export const dynamic = 'force-dynamic';
@@ -89,15 +99,32 @@ async function approve(formData: FormData) {
 
   const { orgId, user } = await requireSession('estimate:write');
   const jobId = String(formData.get('jobId') ?? '');
+  const headerList = await headers();
 
   try {
+    // Signed on the pad if the customer was in front of somebody; the
+    // approval row points at the signature. Phase 35.
+    const signature = signatureFromForm(formData);
+    const signatureId = signature
+      ? await recordSignature({
+          orgId,
+          purpose: 'ESTIMATE_APPROVAL',
+          jobId,
+          capturedByUserId: user.userId,
+          ip: headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+          userAgent: headerList.get('user-agent'),
+          signature,
+        })
+      : null;
     await approveInPerson({
       orgId,
       userId: user.userId,
       estimateId: String(formData.get('estimateId') ?? ''),
+      approvedByName: signature?.name || null,
+      signatureId,
     });
   } catch (error) {
-    if (!(error instanceof QuoteError)) throw error;
+    if (!(error instanceof QuoteError) && !(error instanceof ArrivalError)) throw error;
     redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
   }
 
@@ -134,6 +161,27 @@ async function extra(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
+}
+
+/** The keys moved: hung on a hook, taken by somebody, put back. Phase 35. */
+async function keys(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  try {
+    await moveKeys({
+      orgId,
+      userId: user.userId,
+      jobId,
+      action: String(formData.get('action') ?? 'TAKEN') as 'HUNG' | 'TAKEN' | 'RETURNED',
+      hook: String(formData.get('hook') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof ArrivalError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#keys`);
+  }
+  redirect(`/jobs/${jobId}#keys`);
 }
 
 /**
@@ -366,11 +414,12 @@ export default async function JobPage({
   // against it. The moment somebody needs to know is the moment the job is
   // open, not a month later when the invoice is written and the part has been
   // paid for twice.
-  const [cover, misfits] = await Promise.all([
+  const [cover, misfits, arrival] = await Promise.all([
     coverWorthChecking(orgId, job.vehicle.id),
     // Only the lines worth interrupting somebody for. A screen that confirmed
     // every correct part would train them to dismiss the one that matters.
     fitmentWarningsForJob(orgId, job.id),
+    arrivalFor(orgId, job.id),
   ]);
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
@@ -508,13 +557,42 @@ export default async function JobPage({
             {estimate &&
             (estimate.status === 'DRAFT' || estimate.status === 'SENT') &&
             can(user.role, 'estimate:write') ? (
-              <form action={approve}>
-                <input type="hidden" name="jobId" value={job.id} />
-                <input type="hidden" name="estimateId" value={estimate.id} />
-                <Button type="submit" variant="secondary">
+              <details className="relative">
+                <summary className="inline-flex h-9 cursor-pointer list-none items-center rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3.5 text-[13px] font-semibold shadow-xs hover:bg-(--surface-sunk)">
                   Customer approved in person
+                </summary>
+                <form
+                  action={approve}
+                  className="absolute right-0 z-20 mt-2 grid w-[22rem] max-w-[calc(100vw-2rem)] gap-3 rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 shadow-lg"
+                >
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <input type="hidden" name="estimateId" value={estimate.id} />
+                  <p className="text-[13px] text-(--text-soft)">
+                    Every line on quote v{estimate.version} is approved under the customer&apos;s
+                    name and yours. Sign if they are in front of you; leave it blank if it was on
+                    the telephone.
+                  </p>
+                  <SignaturePad height={120} />
+                  <Input
+                    name="signedByName"
+                    defaultValue={job.customer.displayName}
+                    aria-label="Signed by"
+                  />
+                  <Button type="submit" variant="primary">
+                    Record the approval
+                  </Button>
+                </form>
+              </details>
+            ) : null}
+
+            {can(user.role, 'job:write') &&
+            !arrival?.in &&
+            !['COMPLETED', 'INVOICED', 'PAID', 'CANCELLED'].includes(job.status) ? (
+              <Link href={`/jobs/${job.id}/check-in`}>
+                <Button variant={job.status === 'RECEIVED' ? 'primary' : 'secondary'}>
+                  Check the car in
                 </Button>
-              </form>
+              </Link>
             ) : null}
 
             {/* The next step, and only the next step. A row of every possible
@@ -574,6 +652,16 @@ export default async function JobPage({
               <Link href={`/invoices/${invoice.id}`}>
                 <Button variant={invoice.status === 'PAID' ? 'secondary' : 'primary'}>
                   {invoice.status === 'PAID' ? `Invoice ${invoice.number}` : 'Take payment'}
+                </Button>
+              </Link>
+            ) : null}
+
+            {can(user.role, 'job:write') &&
+            !arrival?.out &&
+            ['COMPLETED', 'INVOICED', 'PAID'].includes(job.status) ? (
+              <Link href={`/jobs/${job.id}/check-out`}>
+                <Button variant={job.status === 'PAID' ? 'primary' : 'secondary'}>
+                  Hand the car back
                 </Button>
               </Link>
             ) : null}
@@ -1288,6 +1376,117 @@ export default async function JobPage({
             <CardHeader title="Progress" />
             <CardBody>
               <ProgressTrail stages={stages} />
+            </CardBody>
+          </Card>
+
+          <Card id="keys">
+            <CardHeader
+              title="Arrival and keys"
+              action={
+                <Badge
+                  tone={
+                    arrival?.keys.where === 'hook'
+                      ? 'success'
+                      : arrival?.keys.where === 'with'
+                        ? 'info'
+                        : arrival?.keys.where === 'customer'
+                          ? 'neutral'
+                          : 'warning'
+                  }
+                  dot
+                >
+                  {arrival?.keys.where === 'hook'
+                    ? `hook ${arrival.keys.hook ?? '?'}`
+                    : arrival?.keys.where === 'with'
+                      ? `with ${arrival.keys.holder ?? 'somebody'}`
+                      : arrival?.keys.where === 'customer'
+                        ? 'keys returned'
+                        : 'keys not noted'}
+                </Badge>
+              }
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              {arrival?.in ? (
+                <p className="text-(--text-soft)">
+                  Checked in{' '}
+                  {arrival.in.at.toLocaleString(region.locale, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                  {arrival.in.odometerKm !== null
+                    ? ` at ${arrival.in.odometerKm.toLocaleString(region.locale)} km`
+                    : ''}
+                  , fuel {fuelLabel(arrival.in.fuelEighths)}, {arrival.in.damage.length} mark
+                  {arrival.in.damage.length === 1 ? '' : 's'} noted
+                  {arrival.in.photos.length
+                    ? `, ${arrival.in.photos.length} photo${arrival.in.photos.length === 1 ? '' : 's'}`
+                    : ''}
+                  {arrival.in.signedBy ? `, signed by ${arrival.in.signedBy}` : ', not signed'}.{' '}
+                  <Link href={`/jobs/${job.id}/check-in`} className="underline">
+                    The record
+                  </Link>
+                </p>
+              ) : (
+                <p className="text-(--text-faint)">Not checked in.</p>
+              )}
+              {arrival?.out ? (
+                <p className="text-(--text-soft)">
+                  Handed back{' '}
+                  {arrival.out.at.toLocaleString(region.locale, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                  {arrival.out.odometerKm !== null
+                    ? ` at ${arrival.out.odometerKm.toLocaleString(region.locale)} km`
+                    : ''}
+                  {arrival.out.signedBy ? `, signed by ${arrival.out.signedBy}` : ''}
+                  {arrival.out.letGoOwingReason
+                    ? `, left owing: ${arrival.out.letGoOwingReason}`
+                    : ''}
+                  .{' '}
+                  <Link href={`/jobs/${job.id}/check-out`} className="underline">
+                    The record
+                  </Link>
+                </p>
+              ) : null}
+              {can(user.role, 'job:write') && !arrival?.out ? (
+                <div className="flex flex-wrap items-end gap-2 border-t border-(--border) pt-3">
+                  {arrival?.keys.where === 'hook' || arrival?.keys.where === 'unknown' ? (
+                    <form action={keys}>
+                      <input type="hidden" name="jobId" value={job.id} />
+                      <input type="hidden" name="action" value="TAKEN" />
+                      <Button type="submit" size="sm" variant="secondary">
+                        I have the keys
+                      </Button>
+                    </form>
+                  ) : null}
+                  {arrival?.keys.where === 'with' ? (
+                    <form action={keys}>
+                      <input type="hidden" name="jobId" value={job.id} />
+                      <input type="hidden" name="action" value="RETURNED" />
+                      <Button type="submit" size="sm" variant="secondary">
+                        Keys back on hook {arrival.keys.hook ?? ''}
+                      </Button>
+                    </form>
+                  ) : null}
+                  {arrival?.keys.where !== 'with' ? (
+                    <form action={keys} className="flex items-end gap-1.5">
+                      <input type="hidden" name="jobId" value={job.id} />
+                      <input type="hidden" name="action" value="HUNG" />
+                      <Input
+                        name="hook"
+                        placeholder="hook"
+                        aria-label="Hook"
+                        className="h-8 w-16 text-[13px]"
+                        defaultValue={arrival?.keys.hook ?? ''}
+                      />
+                      <Button type="submit" size="sm" variant="secondary">
+                        Hang
+                      </Button>
+                    </form>
+                  ) : null}
+                </div>
+              ) : null}
             </CardBody>
           </Card>
 

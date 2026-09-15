@@ -146,6 +146,9 @@ model Organization {
   depositMovements    DepositMovement[]
   paymentAttempts     PaymentAttempt[]
   imports             ImportBatch[]
+  signatures          Signature[]
+  vehicleChecks       VehicleCheck[]
+  keyEvents           KeyEvent[]
 
   @@index([isActive])
   @@index([billingCustomerRef])
@@ -257,6 +260,9 @@ model User {
   apiKeysCreated           ApiKey[]             @relation("ApiKeyCreator")
   assistantExchanges       AssistantExchange[]
   documentsUploaded        VehicleDocument[]    @relation("DocumentUploader")
+  signaturesCaptured       Signature[]          @relation("SignatureCapturedBy")
+  vehicleChecks            VehicleCheck[]       @relation("CheckPerformedBy")
+  keyEvents                KeyEvent[]           @relation("KeyEventBy")
   preferredBy              Customer[]           @relation("PreferredTechnician")
   bookingTechnician        Booking[]
   // Passport
@@ -966,6 +972,8 @@ model Job {
   pickUpAt     DateTime?
   startedAt    DateTime?
   completedAt  DateTime?
+  /// When the customer took the car back. Phase 35.
+  collectedAt  DateTime?
   invoicedAt   DateTime?
   cancelledAt  DateTime?
   cancelReason String?
@@ -1009,6 +1017,9 @@ model Job {
   loyaltyEntries   LoyaltyEntry[]
   referrals        Referral[]
   inboundMessages  InboundMessage[]
+  checks           VehicleCheck[]
+  keyEvents        KeyEvent[]
+  signatures       Signature[]
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -1201,12 +1212,16 @@ model JobAttachment {
   caption           String?
   isCustomerVisible Boolean        @default(true)
   uploadedByUserId  String?
+  /// Taken at check-in or check-out, so it belongs to that record. Phase 35.
+  checkId           String?
   createdAt         DateTime       @default(now())
 
-  job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  uploadedBy User? @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  job        Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  uploadedBy User?         @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  check      VehicleCheck? @relation(fields: [checkId], references: [id], onDelete: SetNull)
 
   @@index([jobId])
+  @@index([checkId])
   @@map("job_attachments")
 }
 
@@ -1261,6 +1276,111 @@ model JobFollowUp {
 
   @@index([dueAt, completedAt])
   @@map("job_follow_ups")
+}
+
+/// What a signature was given for. The record it belongs to says the rest. Phase 35.
+enum SignaturePurpose {
+  CHECK_IN
+  CHECK_OUT
+  ESTIMATE_APPROVAL
+  TERMS
+  WARRANTY
+}
+
+/// Somebody's mark on a pad, kept as the strokes that made it. A record of
+/// its own, so the check-in, the check-out, an approval given across the
+/// counter, the terms and a warranty all point at the same kind of thing.
+/// Phase 35.
+model Signature {
+  id               String           @id @default(cuid())
+  orgId            String
+  purpose          SignaturePurpose
+  signedByName     String
+  /// Strokes as lists of [x, y] points in the pad's own pixels.
+  strokes          Json
+  width            Int
+  height           Int
+  jobId            String?
+  customerId       String?
+  capturedByUserId String?
+  ip               String?
+  userAgent        String?
+  signedAt         DateTime         @default(now())
+
+  org        Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job        Job?              @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  capturedBy User?             @relation("SignatureCapturedBy", fields: [capturedByUserId], references: [id], onDelete: SetNull)
+  check      VehicleCheck?
+  approval   EstimateApproval?
+
+  @@index([orgId, signedAt])
+  @@index([jobId])
+  @@map("signatures")
+}
+
+enum CheckKind {
+  IN
+  OUT
+}
+
+/// The car as it was when it changed hands: arriving (IN) or leaving (OUT).
+/// One of each per job at most. Phase 35.
+model VehicleCheck {
+  id                String    @id @default(cuid())
+  orgId             String
+  jobId             String
+  kind              CheckKind
+  odometerKm        Int?
+  /// In eighths, from 0 (empty) to 8 (full).
+  fuelEighths       Int?
+  /// [{ area, note }] marks already on the car (IN) or noted at hand-back (OUT).
+  damage            Json?
+  belongings        String?
+  /// What went back with the car at check-out: keys, papers, the old parts.
+  documents         Json?
+  notes             String?
+  keysHook          String?
+  /// Why the car left with money still owed, when it did.
+  letGoOwingReason  String?
+  signatureId       String?   @unique
+  performedByUserId String?
+  createdAt         DateTime  @default(now())
+
+  org         Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job         Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  signature   Signature?      @relation(fields: [signatureId], references: [id], onDelete: SetNull)
+  performedBy User?           @relation("CheckPerformedBy", fields: [performedByUserId], references: [id], onDelete: SetNull)
+  photos      JobAttachment[]
+
+  @@unique([jobId, kind])
+  @@index([orgId, createdAt])
+  @@map("vehicle_checks")
+}
+
+enum KeyAction {
+  HUNG
+  TAKEN
+  RETURNED
+  HANDED_TO_CUSTOMER
+}
+
+/// Where the keys went, each time they moved. Where they are now is the
+/// latest of these. Phase 35.
+model KeyEvent {
+  id       String    @id @default(cuid())
+  orgId    String
+  jobId    String
+  action   KeyAction
+  hook     String?
+  byUserId String?
+  at       DateTime  @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  by  User?        @relation("KeyEventBy", fields: [byUserId], references: [id], onDelete: SetNull)
+
+  @@index([jobId, at])
+  @@map("key_events")
 }
 
 // ===========================================================================
@@ -1534,9 +1654,12 @@ model EstimateApproval {
   ip             String?
   userAgent      String?
   note           String?
+  /// Signed on the pad, when the customer was in front of somebody. Phase 35.
+  signatureId    String?      @unique
   createdAt      DateTime     @default(now())
 
-  estimate Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  estimate  Estimate   @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  signature Signature? @relation(fields: [signatureId], references: [id], onDelete: SetNull)
 
   @@index([estimateId])
   @@map("estimate_approvals")

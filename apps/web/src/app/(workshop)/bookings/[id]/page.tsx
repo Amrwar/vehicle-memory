@@ -79,7 +79,8 @@ async function start(formData: FormData) {
     throw error;
   }
 
-  redirect(`/jobs/${jobId}?started=1`);
+  // Straight to the check-in: the customer is standing there with the keys.
+  redirect(`/jobs/${jobId}/check-in`);
 }
 
 const STATES: Record<

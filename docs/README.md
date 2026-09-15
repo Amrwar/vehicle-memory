@@ -109,11 +109,13 @@ CSV from any system mapped, previewed and imported, and everything exported,
 and the workflow as one thing: a booking that becomes a job in one press, an
 approval that puts the work on the job and reserves the parts, extra work
 quoted without stopping the job, and the five workflows counted in presses
-([02-design/11-workflows.md](02-design/11-workflows.md)). The
+([02-design/11-workflows.md](02-design/11-workflows.md)), and arrival and
+departure: the car checked in and handed back against a signed record of
+what it was like, and the keys found. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 175 capabilities
-built, 3 partial and 18 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 436
+phase, the [feature map](00-product/09-feature-map.md) counts 179 capabilities
+built, 3 partial and 13 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 443
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -121,5 +123,5 @@ What has not happened is the thing the [MVP definition](00-product/05-mvp-defini
 still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
-would trip over first, with the pilot itself placed after Phase 34, which is
-now built.
+would trip over first, with the pilot itself placed after Phase 34; Phases 34
+and 35 are now built.

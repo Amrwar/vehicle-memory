@@ -189,6 +189,18 @@ organisation's own row, never on disk, and a batch cannot run twice.
 Exports need only `settings:read`, which a read-only or cancelled workshop
 keeps, because leaving with everything is a promise the terms make.
 
+### 7.4 Signatures as evidence (Phase 35)
+
+A signature is kept as the strokes that made it, not as a picture: a list
+of points cannot be a pasted image of somebody else's signature, and it is
+drawn back at any size. With it go the name given, the purpose, the member
+of staff who captured it, the address and the device, the same evidence an
+approval by link keeps. A dot, a stray touch or an empty pad is refused in
+core before anything is written. Photographs at a check go to the store on
+a short-lived ticket whose key names the organisation and the check, and
+the row is written only once the store confirms the bytes, so a record
+never points at a picture that is not there.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

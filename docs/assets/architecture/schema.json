@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 129,
-    "enums": 64,
-    "fields": 2001
+    "models": 132,
+    "enums": 67,
+    "fields": 2063
   },
   "enums": [
     "OrgPlan",
@@ -25,6 +25,9 @@
     "BookingSource",
     "JobStatus",
     "PartLineStatus",
+    "SignaturePurpose",
+    "CheckKind",
+    "KeyAction",
     "MeasurementType",
     "WheelPosition",
     "InspectionStatus",
@@ -433,7 +436,7 @@
         {
           "name": "Job",
           "comment": "The central aggregate. Everything in the workshop hangs off the Job.",
-          "fields": 29,
+          "fields": 30,
           "relations": [
             "Organization",
             "Location",
@@ -539,10 +542,11 @@
         {
           "name": "JobAttachment",
           "comment": "",
-          "fields": 11,
+          "fields": 12,
           "relations": [
             "Job",
-            "User"
+            "User",
+            "VehicleCheck"
           ],
           "scope": "through Job"
         },
@@ -575,6 +579,40 @@
             "User"
           ],
           "scope": "through Job"
+        },
+        {
+          "name": "VehicleCheck",
+          "comment": "The car as it was when it changed hands: arriving (IN) or leaving (OUT). One of each per job at most. Phase 35.",
+          "fields": 15,
+          "relations": [
+            "Organization",
+            "Job",
+            "Signature",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Signature",
+          "comment": "Somebody's mark on a pad, kept as the strokes that made it. A record of its own, so the check-in, the check-out, an approval given across the counter, the terms and a warranty all point at the same kind of thing. Phase 35.",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "KeyEvent",
+          "comment": "Where the keys went, each time they moved. Where they are now is the latest of these. Phase 35.",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
         }
       ]
     },
@@ -675,9 +713,10 @@
         {
           "name": "EstimateApproval",
           "comment": "The recorded customer decision. Immutable evidence. FR-807.",
-          "fields": 10,
+          "fields": 11,
           "relations": [
-            "Estimate"
+            "Estimate",
+            "Signature"
           ],
           "scope": "through Estimate"
         }

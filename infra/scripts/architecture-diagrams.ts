@@ -109,6 +109,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'TimeEntry',
       'QualityCheck',
       'JobFollowUp',
+      'VehicleCheck',
+      'Signature',
+      'KeyEvent',
     ],
   },
   {

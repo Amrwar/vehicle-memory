@@ -425,6 +425,8 @@ export async function approveInPerson(input: {
   userId: string;
   estimateId: string;
   approvedByName?: string | null;
+  /** A signature already recorded, when the customer signed the pad. Phase 35. */
+  signatureId?: string | null;
 }) {
   const estimate = await prisma.estimate.findFirstOrThrow({
     where: { id: input.estimateId, orgId: input.orgId },
@@ -473,6 +475,7 @@ export async function approveInPerson(input: {
     approvedByName: input.approvedByName?.trim() || estimate.job.customer.displayName,
     note: `Approved in person, recorded by ${staff.name}.`,
     userId: input.userId,
+    signatureId: input.signatureId ?? null,
   });
 
   await audit({

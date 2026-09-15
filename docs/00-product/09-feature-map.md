@@ -401,45 +401,44 @@ Written against the code on 14 September 2026, after an audit of forty
 items a real workshop would ask for. Each is assigned a phase in the
 [roadmap](06-roadmap.md); the rows here keep the counts honest.
 
-| Item                                    | Status  | Where                                                                                                                           |
-| --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Passports as a list                     | Built   | `/passports` for the workshop, `/portal/passports` for the owner (Phase 27)                                                     |
-| Gift card expiry, status, reversal      | Built   | Phase 28                                                                                                                        |
-| Country and currency per workshop       | Built   | Chosen at sign-up, changed in settings; every page formats from it (Phase 29)                                                   |
-| Deposits and customer credit            | Built   | Taken on the customer, spent on the invoice, returned with a reason; a refund kept as credit (Phase 30)                         |
-| Receipts                                | Built   | Sent on every payment; printable at `/payments/[id]/receipt` (Phase 30)                                                         |
-| Card payment through a provider         | Built   | A seam with a stub and Stripe; "Pay now" in the portal; failed with a reason; reconciliation names differences (Phase 32)       |
-| Payment links                           | Partial | "Pay now" in the portal; a link sent in a message comes with conversations (Phase 36)                                           |
-| Workshop directory and booking anywhere | Built   | Every workshop on Carnet, findable; booking at a new one makes the customer its customer (Phase 32.5)                           |
-| Subscription lifecycle, billed          | Built   | Card before a 14-day trial, charged when it ends unless cancelled, reminded, past due, cancel at period end (Phase 32.6)        |
-| Plan priced in the workshop's currency  | Built   | One price book, eleven currencies, read by the pricing page, sign-up, terms, reminder, billing page and the charge (Phase 32.7) |
-| Customer account page                   | Built   | Details, password, consent per workshop, sign out at /portal/settings (Phase 32.7)                                              |
-| Authorisation tried per role            | Built   | Every page as every role, every action read, another workshop's records not found: `verify-authz.ts` (Phase 31)                 |
-| Plan limits enforced server side        | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled states (Phase 31)                       |
-| Data import                             | Built   | CSV in, mapped from the headers, every problem by row and field, imported through the pages' own rules (Phase 33)               |
-| Whole-data export                       | Built   | Every dataset whole as CSV, the passports as JSON, or everything in one file (Phase 33)                                         |
-| Booking to job in one press             | Built   | "Car is here, start the job" opens the job with everything the booking knew; the booking converted in the same write (Phase 34) |
-| Estimate priced as it is raised         | Built   | Lines and totals written when the inspection raises the quote, so it can be sent (Phase 34)                                     |
-| Approval recorded at the counter        | Built   | One press, under the customer's name and the staff member's, through the same decision the portal records (Phase 34)            |
-| Approval reserves the parts             | Built   | Approved part lines that name a stock item are reserved or put on the purchase list as the approval lands (Phase 34)            |
-| Extra work quoted mid-job               | Built   | A form on the job raises a supplementary quote and sends it; the work already approved carries on (Phase 34)                    |
-| Press counts per hand-off               | Built   | The five workflows as a table in core, tested never to grow, generated into `02-design/11-workflows.md` (Phase 34)              |
-| Estimate becomes a job                  | Missing | Approval and invoicing exist either side of it; Phase 34                                                                        |
-| Extra work approved mid-job             | Missing | Phase 34                                                                                                                        |
-| Check-in and check-out                  | Missing | Phase 35                                                                                                                        |
-| Signatures                              | Missing | Phase 35                                                                                                                        |
-| Key tags                                | Missing | Phase 35                                                                                                                        |
-| Conversation threads and WhatsApp       | Missing | Outbound and inbound exist without a thread; Phase 36                                                                           |
-| Service packages                        | Missing | Job types and a catalogue exist; Phase 37                                                                                       |
-| Parts returns and cores                 | Missing | Phase 38                                                                                                                        |
-| Sublet work                             | Missing | Phase 38                                                                                                                        |
-| Global search                           | Missing | Phase 39                                                                                                                        |
-| Staff notifications                     | Missing | Phase 39                                                                                                                        |
-| Tax by customer, site, or stacked       | Missing | One rate per line; Phase 41                                                                                                     |
-| Printing, PDF, labels                   | Partial | Three pages print; Phase 42                                                                                                     |
-| Onboarding checklist                    | Missing | Phase 45                                                                                                                        |
-| Demonstration data                      | Missing | Phase 45                                                                                                                        |
-| Help inside the product                 | Missing | Phase 45                                                                                                                        |
+| Item                                    | Status  | Where                                                                                                                             |
+| --------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Passports as a list                     | Built   | `/passports` for the workshop, `/portal/passports` for the owner (Phase 27)                                                       |
+| Gift card expiry, status, reversal      | Built   | Phase 28                                                                                                                          |
+| Country and currency per workshop       | Built   | Chosen at sign-up, changed in settings; every page formats from it (Phase 29)                                                     |
+| Deposits and customer credit            | Built   | Taken on the customer, spent on the invoice, returned with a reason; a refund kept as credit (Phase 30)                           |
+| Receipts                                | Built   | Sent on every payment; printable at `/payments/[id]/receipt` (Phase 30)                                                           |
+| Card payment through a provider         | Built   | A seam with a stub and Stripe; "Pay now" in the portal; failed with a reason; reconciliation names differences (Phase 32)         |
+| Payment links                           | Partial | "Pay now" in the portal; a link sent in a message comes with conversations (Phase 36)                                             |
+| Workshop directory and booking anywhere | Built   | Every workshop on Carnet, findable; booking at a new one makes the customer its customer (Phase 32.5)                             |
+| Subscription lifecycle, billed          | Built   | Card before a 14-day trial, charged when it ends unless cancelled, reminded, past due, cancel at period end (Phase 32.6)          |
+| Plan priced in the workshop's currency  | Built   | One price book, eleven currencies, read by the pricing page, sign-up, terms, reminder, billing page and the charge (Phase 32.7)   |
+| Customer account page                   | Built   | Details, password, consent per workshop, sign out at /portal/settings (Phase 32.7)                                                |
+| Authorisation tried per role            | Built   | Every page as every role, every action read, another workshop's records not found: `verify-authz.ts` (Phase 31)                   |
+| Plan limits enforced server side        | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled states (Phase 31)                         |
+| Data import                             | Built   | CSV in, mapped from the headers, every problem by row and field, imported through the pages' own rules (Phase 33)                 |
+| Whole-data export                       | Built   | Every dataset whole as CSV, the passports as JSON, or everything in one file (Phase 33)                                           |
+| Booking to job in one press             | Built   | "Car is here, start the job" opens the job with everything the booking knew; the booking converted in the same write (Phase 34)   |
+| Estimate priced as it is raised         | Built   | Lines and totals written when the inspection raises the quote, so it can be sent (Phase 34)                                       |
+| Approval recorded at the counter        | Built   | One press, under the customer's name and the staff member's, through the same decision the portal records (Phase 34)              |
+| Approval reserves the parts             | Built   | Approved part lines that name a stock item are reserved or put on the purchase list as the approval lands (Phase 34)              |
+| Extra work quoted mid-job               | Built   | A form on the job raises a supplementary quote and sends it; the work already approved carries on (Phase 34)                      |
+| Press counts per hand-off               | Built   | The five workflows as a table in core, tested never to grow, generated into `02-design/11-workflows.md` (Phase 34)                |
+| Check-in                                | Built   | Mileage, fuel, a walk round the car, belongings, the hook, a signature and photographs, one press, once (Phase 35)                |
+| Check-out                               | Built   | What was done, what is owed, final mileage, what goes back, a signature; refused unfinished or unpaid without a reason (Phase 35) |
+| Signatures                              | Built   | A record of its own, strokes not pictures, with who, when, where; on check-in, check-out and counter approvals (Phase 35)         |
+| Key tags                                | Built   | Hung, taken, returned, handed back as events; where they are now on the job and the technician's card (Phase 35)                  |
+| Conversation threads and WhatsApp       | Missing | Outbound and inbound exist without a thread; Phase 36                                                                             |
+| Service packages                        | Missing | Job types and a catalogue exist; Phase 37                                                                                         |
+| Parts returns and cores                 | Missing | Phase 38                                                                                                                          |
+| Sublet work                             | Missing | Phase 38                                                                                                                          |
+| Global search                           | Missing | Phase 39                                                                                                                          |
+| Staff notifications                     | Missing | Phase 39                                                                                                                          |
+| Tax by customer, site, or stacked       | Missing | One rate per line; Phase 41                                                                                                       |
+| Printing, PDF, labels                   | Partial | Three pages print; Phase 42                                                                                                       |
+| Onboarding checklist                    | Missing | Phase 45                                                                                                                          |
+| Demonstration data                      | Missing | Phase 45                                                                                                                          |
+| Help inside the product                 | Missing | Phase 45                                                                                                                          |
 
 ## What this adds up to
 
@@ -452,9 +451,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 175          |
+| Built    | 179          |
 | Partial  | 3            |
-| Missing  | 18           |
+| Missing  | 13           |
 | Deferred | 1            |
 
 <!-- counts:end -->

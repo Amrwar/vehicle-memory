@@ -7,6 +7,8 @@ import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/guard';
 import { startInspection } from '@/lib/inspections';
 import { requestPart, ShopFloorError, toggleClock } from '@/lib/shopfloor';
+import { ArrivalError, moveKeys } from '@/lib/arrival';
+import { keyState } from '@carnet/core';
 import { OutboxStatus } from '@/components/outbox';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -91,6 +93,26 @@ async function askForPart(formData: FormData) {
   redirect('/shop?requested=1');
 }
 
+/** Took the keys off the hook, or put them back. One press. Phase 35. */
+async function keys(formData: FormData) {
+  'use server';
+
+  const user = await requireUser();
+  if (!user.orgId) redirect('/login');
+  try {
+    await moveKeys({
+      orgId: user.orgId,
+      userId: user.userId,
+      jobId: String(formData.get('jobId') ?? ''),
+      action: String(formData.get('action') ?? 'TAKEN') as 'TAKEN' | 'RETURNED',
+    });
+  } catch (error) {
+    if (!(error instanceof ArrivalError)) throw error;
+    redirect('/shop?error=' + encodeURIComponent(error.message));
+  }
+  redirect('/shop');
+}
+
 export default async function ShopFloorPage({
   searchParams,
 }: {
@@ -138,6 +160,10 @@ export default async function ShopFloorPage({
       timeEntries: {
         where: { userId: user.userId, endedAt: null },
         select: { id: true, startedAt: true },
+      },
+      keyEvents: {
+        orderBy: { at: 'asc' },
+        select: { action: true, hook: true, at: true, by: { select: { name: true } } },
       },
     },
   });
@@ -235,6 +261,14 @@ export default async function ShopFloorPage({
               // The query already limits time entries to this person's open
               // ones, so any row here means their clock is running on this job.
               const running = job.timeEntries.length > 0;
+              const keysNow = keyState(
+                job.keyEvents.map((e) => ({
+                  action: e.action,
+                  hook: e.hook,
+                  byName: e.by?.name ?? null,
+                  at: e.at,
+                })),
+              );
 
               return (
                 <li key={job.id}>
@@ -288,6 +322,33 @@ export default async function ShopFloorPage({
                           </dd>
                         </div>
                       ) : null}
+                      <div className="flex items-center gap-1.5">
+                        <dt>Keys</dt>
+                        <dd className="text-(--text-soft)">{keysNow.sentence}</dd>
+                        {keysNow.where === 'hook' || keysNow.where === 'unknown' ? (
+                          <form action={keys}>
+                            <input type="hidden" name="jobId" value={job.id} />
+                            <input type="hidden" name="action" value="TAKEN" />
+                            <button
+                              type="submit"
+                              className="rounded-(--radius-sm) border border-(--border-strong) px-2 py-0.5 text-[12px] font-medium hover:bg-(--surface-sunk)"
+                            >
+                              I have them
+                            </button>
+                          </form>
+                        ) : keysNow.where === 'with' ? (
+                          <form action={keys}>
+                            <input type="hidden" name="jobId" value={job.id} />
+                            <input type="hidden" name="action" value="RETURNED" />
+                            <button
+                              type="submit"
+                              className="rounded-(--radius-sm) border border-(--border-strong) px-2 py-0.5 text-[12px] font-medium hover:bg-(--surface-sunk)"
+                            >
+                              Back on the hook
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
                     </dl>
 
                     {blocked ? (

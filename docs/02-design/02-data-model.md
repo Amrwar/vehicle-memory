@@ -194,6 +194,14 @@ raised as the job's next version, which never moves the job's status. An
 reserve the stock item behind a part line, and `Booking.jobId` with
 `status = CONVERTED` is written in the same transaction as the job the
 booking became.
+
+Phase 35 adds `Signature` (purpose, the name, the strokes as JSON with the
+pad's width and height, who captured it, the address and device), a
+`VehicleCheck` per direction on a job (mileage, fuel in eighths, marks as
+JSON, belongings, what went back, the hook, why it left owing, and its
+signature), `KeyEvent` (hung, taken, returned, handed back, with the hook
+and who), `Job.collectedAt`, `JobAttachment.checkId` for photographs taken
+at a check, and `EstimateApproval.signatureId`.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

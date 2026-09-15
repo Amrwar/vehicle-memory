@@ -1304,6 +1304,50 @@ next screen anybody adds has to justify itself.
 
 ---
 
+## Epic AH — Arrival and departure (Phase 35)
+
+### AH1 — Handed over
+
+**As** Ahmed at the desk **I want** to note what the car is like as it is
+handed over, with the customer's signature **so that** "that scratch was
+already there" is settled by the record, not by memory.
+**Size** 5 · **Satisfies** FR-6401, FR-6402, FR-6403, FR-6405
+
+- **Given** the customer at the counter, **when** I press "Car is here",
+  **then** I am on the check-in, and one press saves the mileage, the fuel,
+  the marks, the belongings, the hook and the signature.
+- **Given** a mileage lower than the last reading, **when** I save, **then**
+  it is refused with both numbers.
+- **Given** an empty pad, **when** I save with a name, **then** it is
+  refused; a check-in without a signature at all is saved and says so.
+- **Given** the record, **when** I take photographs, **then** they are on it
+  the moment the store confirms them.
+
+### AH2 — Handed back
+
+**As** Ahmed **I want** the car handed back against what was done and what
+was paid **so that** no car leaves unfinished or unpaid by accident.
+**Size** 3 · **Satisfies** FR-6404, FR-6407
+
+- **Given** a job still in progress, **when** I try to hand the car back,
+  **then** I am told to complete it first.
+- **Given** money owing, **when** I try, **then** I am sent to take the
+  payment, or asked to say why it is leaving unpaid.
+- **Given** a fleet car, **when** I write "invoiced monthly", **then** it
+  leaves, and the reason is on the record the customer can see.
+
+### AH3 — Where are the keys
+
+**As** Tom under the car **I want** to see where the keys are and say when
+I have them **so that** nobody walks round the workshop asking.
+**Size** 2 · **Satisfies** FR-6406
+
+- **Given** keys on hook 12, **when** I press "I have them", **then** the
+  job says the keys are with me; **when** I press "Back on the hook",
+  **then** it says hook 12 again.
+
+---
+
 ## Story map
 
 ```

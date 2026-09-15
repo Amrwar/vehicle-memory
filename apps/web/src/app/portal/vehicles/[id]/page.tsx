@@ -1,4 +1,4 @@
-import { customerProgressFor, describeExpiry, documentKindLabel } from '@carnet/core';
+import { customerProgressFor, describeExpiry, documentKindLabel, fuelLabel } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -226,20 +226,47 @@ export default async function PortalVehiclePage({
                         </Badge>
                       }
                     />
-                    <CardBody className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-(--text-soft)">
-                      <span>
-                        {job.odometerInKm ? (
-                          <>
-                            At <Mileage km={job.odometerInKm} />
-                          </>
-                        ) : (
-                          'Mileage not recorded'
-                        )}
-                      </span>
-                      {invoice ? (
-                        <span className="font-medium text-(--text)">
-                          <Money amount={Number(invoice.total)} currency={invoice.currency} />
+                    <CardBody className="grid gap-2 text-[13px] text-(--text-soft)">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <span>
+                          {job.odometerInKm ? (
+                            <>
+                              At <Mileage km={job.odometerInKm} />
+                            </>
+                          ) : (
+                            'Mileage not recorded'
+                          )}
                         </span>
+                        {invoice ? (
+                          <span className="font-medium text-(--text)">
+                            <Money amount={Number(invoice.total)} currency={invoice.currency} />
+                          </span>
+                        ) : null}
+                      </div>
+                      {job.checks.length > 0 ? (
+                        <ul className="grid gap-0.5 text-[12px]">
+                          {job.checks.map((check) => {
+                            const marks = Array.isArray(check.damage) ? check.damage.length : 0;
+                            return (
+                              <li key={check.kind}>
+                                {check.kind === 'IN' ? 'Handed over' : 'Handed back'}{' '}
+                                {date(check.createdAt, region.locale)}
+                                {check.odometerKm !== null
+                                  ? ` at ${check.odometerKm.toLocaleString(region.locale)} km`
+                                  : ''}
+                                , fuel {fuelLabel(check.fuelEighths)}, {marks} mark
+                                {marks === 1 ? '' : 's'} noted
+                                {check._count.photos
+                                  ? `, ${check._count.photos} photo${check._count.photos === 1 ? '' : 's'}`
+                                  : ''}
+                                {check.signature
+                                  ? `, signed by ${check.signature.signedByName}`
+                                  : ''}
+                                .
+                              </li>
+                            );
+                          })}
+                        </ul>
                       ) : null}
                     </CardBody>
                   </Card>

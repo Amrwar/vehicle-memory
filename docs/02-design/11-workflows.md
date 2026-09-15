@@ -15,7 +15,7 @@ list. Typing into a field is not a press; the button that submits it is. A
 next. Each hand-off names the one screen it happens on.
 
 **Before** is the count at the end of Phase 33. **Now** is the count after
-Phase 34. Across the five workflows: 37 presses before, 20 now.
+Phase 34. Across the five workflows: 39 presses before, 22 now.
 
 The walkthrough script `infra/scripts/verify-workflow.ts` takes a job from a
 booking to a paid bill through the same library functions the pages call,
@@ -26,12 +26,13 @@ hand-off ever costs more than it did before.
 
 ### The customer arrives
 
-| Hand-off                        | Screen  | Before |   Now | What changed                                                                                                                                                                                                                                                             |
-| ------------------------------- | ------- | -----: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Booking to job, at the desk     | booking |      6 |     1 | One button on the booking opens the job with the customer, the vehicle, the description and the technician already on it. Before, the desk opened a new-job form and chose the customer, the vehicle and the technician again, then typed the description a second time. |
-| Job to the technician           | job     |      1 |     1 | Start the work.                                                                                                                                                                                                                                                          |
-| Technician opens the inspection | tablet  |      1 |     1 | Inspect, from the job on the tablet.                                                                                                                                                                                                                                     |
-| **Whole workflow**              |         |  **8** | **3** |                                                                                                                                                                                                                                                                          |
+| Hand-off                        | Screen   | Before |   Now | What changed                                                                                                                                                                                                                                                             |
+| ------------------------------- | -------- | -----: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Booking to job, at the desk     | booking  |      6 |     1 | One button on the booking opens the job with the customer, the vehicle, the description and the technician already on it. Before, the desk opened a new-job form and chose the customer, the vehicle and the technician again, then typed the description a second time. |
+| Car checked in                  | check-in |      1 |     1 | New in Phase 35, counted from its first day. The booking button lands on the check-in: mileage, fuel, a walk round the car, what was left inside, the hook, a signature, one press. Photographs go on the record it makes.                                               |
+| Job to the technician           | job      |      1 |     1 | Start the work.                                                                                                                                                                                                                                                          |
+| Technician opens the inspection | tablet   |      1 |     1 | Inspect, from the job on the tablet.                                                                                                                                                                                                                                     |
+| **Whole workflow**              |          |  **9** | **4** |                                                                                                                                                                                                                                                                          |
 
 ### The vehicle needs work
 
@@ -48,13 +49,14 @@ hand-off ever costs more than it did before.
 
 ### The work is completed
 
-| Hand-off                                 | Screen  | Before |   Now | What changed                                                                       |
-| ---------------------------------------- | ------- | -----: | ----: | ---------------------------------------------------------------------------------- |
-| Technician to quality check or completed | job     |      1 |     1 | One button that already knows whether this job type needs a check.                 |
-| Completed to invoice                     | job     |      1 |     1 | Issue the invoice, from the job.                                                   |
-| Invoice to payment                       | invoice |      2 |     2 | Take payment: method, then confirm. Or the customer pays by card from their phone. |
-| Payment to pickup                        | invoice |      0 |     0 | The paid invoice closes the job and writes the passport entry. Nothing to press.   |
-| **Whole workflow**                       |         |  **4** | **4** |                                                                                    |
+| Hand-off                                 | Screen    | Before |   Now | What changed                                                                                                                                                                                                                                      |
+| ---------------------------------------- | --------- | -----: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Technician to quality check or completed | job       |      1 |     1 | One button that already knows whether this job type needs a check.                                                                                                                                                                                |
+| Completed to invoice                     | job       |      1 |     1 | Issue the invoice, from the job.                                                                                                                                                                                                                  |
+| Invoice to payment                       | invoice   |      2 |     2 | Take payment: method, then confirm. Or the customer pays by card from their phone.                                                                                                                                                                |
+| Payment to pickup                        | invoice   |      0 |     0 | The paid invoice closes the job and writes the passport entry. Nothing to press.                                                                                                                                                                  |
+| Car handed back                          | check-out |      1 |     1 | New in Phase 35, counted from its first day. What was done, the final mileage, what is owed and whether it was paid, what goes back with the car, the keys, a signature, one press. A car cannot leave owing money without a reason written down. |
+| **Whole workflow**                       |           |  **5** | **5** |                                                                                                                                                                                                                                                   |
 
 ### The customer returns
 

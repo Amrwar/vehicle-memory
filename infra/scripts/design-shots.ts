@@ -128,6 +128,7 @@ async function main() {
     { file: 'diary', path: '/diary', who: 'owner' },
     { file: 'floor', path: '/floor', who: 'owner' },
     { file: 'job', path: `/jobs/${r.job}`, who: 'owner', fullPage: true },
+    { file: 'check-in', path: `/jobs/${r.job}/check-in`, who: 'owner', fullPage: true },
     { file: 'shop', path: '/shop', who: 'owner', width: 1024, height: 768 },
     {
       file: 'inspection',

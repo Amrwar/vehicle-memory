@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6400 — Arrival and departure
+
+| Ref     | Requirement                                                                                                                                                                                              | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6401 | A car MUST be checkable in once per job with mileage, fuel, marks already on it, belongings, the keys' hook and a signature, saved in one transaction with the reading on the vehicle and the key event. | 35    |
+| FR-6402 | A mileage below the last reading MUST be refused at check-in, and below the arrival reading at check-out; fuel MUST be in eighths.                                                                       | 35    |
+| FR-6403 | Photographs at either check MUST go straight to the store on a ticket and be recorded only once the store confirms them, on the check they belong to.                                                    | 35    |
+| FR-6404 | A car MUST NOT be handed back before the work is marked completed, and MUST NOT leave owing money unless a reason is written down and kept on the record.                                                | 35    |
+| FR-6405 | A signature MUST be a record of its own, kept as strokes with the name, the purpose, who captured it, the address and the device; a dot or an empty pad MUST be refused.                                 | 35    |
+| FR-6406 | Where the keys are MUST follow from the events that moved them (hung, taken, returned, handed back), shown on the job and the technician's card, with a one-press take and return.                       | 35    |
+| FR-6407 | Both checks MUST be visible to the customer on their vehicle page: when, the mileage, the fuel, how many marks, how many photographs, and who signed.                                                    | 35    |
+
 ## FR-6300 — The workflow, as one thing
 
 | Ref     | Requirement                                                                                                                                                                                                | Phase |

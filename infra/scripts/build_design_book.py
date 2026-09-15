@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 34.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 35.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -613,6 +613,23 @@ def build() -> None:
         works="A hand-off that costs nothing is one the system did on the person's behalf: the approval that puts the lines on the job and reserves the parts. Counting presses in code, with a test that fails if any grow, is what stops a 94-page product from becoming slower than a spreadsheet and a phone.",
         shots=[("job", "The job, with the extra-work card and the counter approval.", 16.4)],
         source="docs/02-design/11-workflows.md; 04-state-machines.md, section 2",
+    )
+
+    design(
+        doc,
+        title="Arrival and departure",
+        when="Phase 35, 15 September 2026.",
+        why="Most of what a workshop is ever argued with about is settled by what the car was like when it "
+            "was handed over and when it was handed back. Those two moments are a record of their own, signed.",
+        meaning=[
+            "The check-in is one screen filled in with the customer standing there: the mileage off the dash, the fuel as nine buttons in eighths, a walk round the car as twelve places to tick with a note against each, what was left inside, the hook, and a signature pad in the sidebar with one button under it.",
+            "Saving makes the record and shows it, with the camera button on it, because a walk round a car is six pictures and they belong to the record, not to a form.",
+            "The check-out puts the money before the mileage: what is outstanding, a primary button to take the payment, and a field to say why the car is leaving unpaid if it is. The hand-back button is disabled until the work is marked completed and the page says so in a sentence.",
+            "Keys are a sentence on the job and on the technician's card, with the one press each needs: I have them; back on the hook.",
+        ],
+        works="A signature kept as strokes is a few hundred bytes, redraws at any size and cannot be a pasted picture. Refusing a car that is leaving owing money unless somebody writes down why turns a habit into a record.",
+        shots=[("check-in", "Checking a car in.", 16.4)],
+        source="docs/02-design/01-domain-model.md, section 3.13; 05-security-model.md, section 7.4",
     )
 
     # 11. Counter

@@ -93,6 +93,20 @@ export async function vehicleHistory(userId: string, vehicleId: string) {
           invoices: {
             select: { id: true, number: true, total: true, currency: true, status: true },
           },
+          // The car as it was handed over and handed back, because "that
+          // scratch was already there" is the customer's record too. Phase 35.
+          checks: {
+            orderBy: { createdAt: 'asc' },
+            select: {
+              kind: true,
+              createdAt: true,
+              odometerKm: true,
+              fuelEighths: true,
+              damage: true,
+              signature: { select: { signedByName: true } },
+              _count: { select: { photos: true } },
+            },
+          },
         },
       },
     },
@@ -325,6 +339,8 @@ export async function recordDecision(input: {
   userAgent?: string | null;
   /** Set when a signed-in customer decided; absent for a share link. */
   userId?: string | null;
+  /** Signed on a pad in front of somebody. Phase 35. */
+  signatureId?: string | null;
 }) {
   const estimate = await prisma.estimate.findUniqueOrThrow({
     where: { id: input.estimateId },
@@ -406,6 +422,7 @@ export async function recordDecision(input: {
         ip: input.ip ?? null,
         userAgent: input.userAgent ?? null,
         note: input.note || null,
+        signatureId: input.signatureId ?? null,
       },
     });
 
