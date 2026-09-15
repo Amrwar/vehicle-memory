@@ -1,6 +1,7 @@
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { createJob, JobError } from './jobs';
 
 /**
  * Bookings from the workshop's side of the counter.
@@ -15,7 +16,7 @@ import { audit } from './guard';
  */
 
 export class BookingError extends Error {
-  readonly code: 'NOT_FOUND' | 'ALREADY_CONVERTED' | 'CLOSED';
+  readonly code: 'NOT_FOUND' | 'ALREADY_CONVERTED' | 'CLOSED' | 'NO_JOB';
 
   constructor(code: BookingError['code'], message: string) {
     super(message);
@@ -175,4 +176,99 @@ export async function setBookingStatus(input: {
     entityType: 'Booking',
     entityId: booking.id,
   });
+}
+
+/**
+ * The car is here: one press, and the booking is a job. Phase 34.
+ *
+ * Everything the booking already knows goes onto the job: the customer, the
+ * vehicle, what it is in for, the notes, the technician, the bay and the
+ * time it was promised for. Before this the desk opened a blank job form and
+ * chose the customer, the vehicle and the technician a second time, then
+ * typed the description again, six presses and a retype while somebody
+ * stood at the counter with their keys out.
+ *
+ * The booking is marked arrived and converted in the same transaction as
+ * the link to the job, so there is never a booking that says "arrived" with
+ * no job behind it, or a job with a booking that still reads "scheduled".
+ */
+export async function startJobFromBooking(input: {
+  orgId: string;
+  userId: string;
+  bookingId: string;
+  odometerInKm?: number | null;
+}): Promise<{ jobId: string; jobNumber: number }> {
+  const booking = await prisma.booking.findFirst({
+    where: { id: input.bookingId, orgId: input.orgId },
+    select: {
+      id: true,
+      status: true,
+      jobId: true,
+      locationId: true,
+      customerId: true,
+      vehicleId: true,
+      bayId: true,
+      technicianId: true,
+      description: true,
+      notes: true,
+      endAt: true,
+    },
+  });
+
+  if (!booking) throw new BookingError('NOT_FOUND', 'That booking no longer exists.');
+
+  if (booking.status === 'CONVERTED' || booking.jobId) {
+    throw new BookingError(
+      'ALREADY_CONVERTED',
+      'This booking is already a job. Change the job instead.',
+    );
+  }
+
+  if (booking.status === 'CANCELLED' || booking.status === 'NO_SHOW') {
+    throw new BookingError(
+      'CLOSED',
+      'This booking was closed. Book the car in again, or open a job from the vehicle.',
+    );
+  }
+
+  let job: { id: string; number: number };
+  try {
+    job = await createJob({
+      orgId: input.orgId,
+      userId: input.userId,
+      locationId: booking.locationId,
+      customerId: booking.customerId,
+      vehicleId: booking.vehicleId,
+      shortDescription: booking.description,
+      details: booking.notes,
+      odometerInKm: input.odometerInKm ?? null,
+      promisedAt: booking.endAt,
+      technicianUserId: booking.technicianId,
+    });
+  } catch (error) {
+    if (error instanceof JobError) throw new BookingError('NO_JOB', error.message);
+    throw error;
+  }
+
+  await prisma.$transaction([
+    prisma.job.update({
+      where: { id: job.id },
+      data: { bayId: booking.bayId ?? undefined },
+    }),
+    prisma.booking.update({
+      where: { id: booking.id },
+      data: { status: 'CONVERTED', jobId: job.id, confirmedAt: undefined },
+    }),
+  ]);
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'booking.converted',
+    entityType: 'Booking',
+    entityId: booking.id,
+    after: { jobId: job.id, jobNumber: job.number },
+  });
+
+  return { jobId: job.id, jobNumber: job.number };
 }

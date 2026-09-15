@@ -263,6 +263,20 @@ export async function consumeForJob(jobId: string): Promise<{ lines: number; cos
   });
 }
 
+/**
+ * The store a reservation goes against when nobody chose one: the default,
+ * else the first by code. Phase 34 reserves from an approval, where there is
+ * no page to ask on.
+ */
+export async function defaultWarehouseFor(orgId: string): Promise<string | null> {
+  const warehouse = await prisma.warehouse.findFirst({
+    where: { orgId },
+    orderBy: [{ isDefault: 'desc' }, { code: 'asc' }],
+    select: { id: true },
+  });
+  return warehouse?.id ?? null;
+}
+
 async function defaultWarehouseId(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   jobId: string,

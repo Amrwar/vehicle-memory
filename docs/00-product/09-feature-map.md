@@ -418,6 +418,12 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Plan limits enforced server side        | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled states (Phase 31)                       |
 | Data import                             | Built   | CSV in, mapped from the headers, every problem by row and field, imported through the pages' own rules (Phase 33)               |
 | Whole-data export                       | Built   | Every dataset whole as CSV, the passports as JSON, or everything in one file (Phase 33)                                         |
+| Booking to job in one press             | Built   | "Car is here, start the job" opens the job with everything the booking knew; the booking converted in the same write (Phase 34) |
+| Estimate priced as it is raised         | Built   | Lines and totals written when the inspection raises the quote, so it can be sent (Phase 34)                                     |
+| Approval recorded at the counter        | Built   | One press, under the customer's name and the staff member's, through the same decision the portal records (Phase 34)            |
+| Approval reserves the parts             | Built   | Approved part lines that name a stock item are reserved or put on the purchase list as the approval lands (Phase 34)            |
+| Extra work quoted mid-job               | Built   | A form on the job raises a supplementary quote and sends it; the work already approved carries on (Phase 34)                    |
+| Press counts per hand-off               | Built   | The five workflows as a table in core, tested never to grow, generated into `02-design/11-workflows.md` (Phase 34)              |
 | Estimate becomes a job                  | Missing | Approval and invoicing exist either side of it; Phase 34                                                                        |
 | Extra work approved mid-job             | Missing | Phase 34                                                                                                                        |
 | Check-in and check-out                  | Missing | Phase 35                                                                                                                        |
@@ -446,7 +452,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 169          |
+| Built    | 175          |
 | Partial  | 3            |
 | Missing  | 18           |
 | Deferred | 1            |

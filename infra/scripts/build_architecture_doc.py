@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 33"
+AFTER_PHASE = "Phase 34"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -220,6 +220,29 @@ def rule(doc):
 
 def page_break(doc):
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
+
+
+def workflows_table(doc) -> None:
+    """The press-count tables from docs/02-design/11-workflows.md, which is generated from core."""
+    path = ROOT / "docs" / "02-design" / "11-workflows.md"
+    if not path.exists():
+        return
+    title = None
+    rows: list[list[str]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("### "):
+            if title and rows:
+                label(doc, title)
+                table(doc, ["Hand-off", "Screen", "Before", "Now"], rows, widths=[6.0, 2.4, 1.4, 1.4], size=8.0)
+            title = line[4:].strip()
+            rows = []
+        elif line.startswith("| ") and not line.startswith("| ---") and not line.startswith("| Hand-off"):
+            cells = [c.strip().replace("**", "") for c in line.strip().strip("|").split("|")]
+            if len(cells) >= 4:
+                rows.append(cells[:4])
+    if title and rows:
+        label(doc, title)
+        table(doc, ["Hand-off", "Screen", "Before", "Now"], rows, widths=[6.0, 2.4, 1.4, 1.4], size=8.0)
 
 
 def wireframe(section_title: str) -> str | None:
@@ -411,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-workflow": "a job walked from a booking to a paid bill the way a front desk would, every hand-off counted in presses against the table in core, the three screens read for the one button each needs, and stock put back as it was",
 }
 
 
@@ -732,7 +756,24 @@ def build() -> None:
               "write CSV in the same shapes, the passports as JSON in the network's form, or everything as one file; "
               "they need only the read permission a read-only or cancelled workshop keeps.")
 
-    doc.add_heading("6.12 Answers and the assistant", level=2)
+    doc.add_heading("6.12 The workflow, as one thing", level=2)
+    para(doc, "Phase 34 joined the seams between the objects above so that the five workflows run without "
+              "retyping. startJobFromBooking creates the job through createJob with everything the booking knew "
+              "and marks the booking CONVERTED with the job's id in one transaction. completeInspection raises the "
+              "estimate and calls retotalEstimate, which prices every line and the totals from the same "
+              "calculateTotals the invoice uses. approveInPerson marks a draft sent and records the decision through "
+              "the same recordDecision the customer's page and the share link call, with the staff member named on "
+              "the approval row. recordDecision copies the approved lines onto the job and, for each part line that "
+              "names a product, calls reserveForJobLine against the default warehouse after the transaction commits, "
+              "so the reservation or the purchase request for the shortfall exists the moment the approval does. "
+              "quoteExtraWork opens or extends a supplementary estimate as the job's next version; sendEstimate and "
+              "recordDecision leave the job's status alone for a supplementary estimate, so the work already approved "
+              "carries on and the approved extra lines are appended after the lines already there. The press count "
+              "per hand-off is data in core (WORKFLOWS), held by a unit test and by the walkthrough script, and the "
+              "table below is generated from it.")
+    workflows_table(doc)
+
+    doc.add_heading("6.13 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

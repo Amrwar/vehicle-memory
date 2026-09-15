@@ -11,6 +11,7 @@ import { prisma } from '@carnet/db';
 import { createHash, randomBytes } from 'node:crypto';
 
 import { audit } from './guard';
+import { defaultWarehouseFor, reserveForJobLine } from './inventory';
 
 /**
  * The customer's own side, against the database.
@@ -334,6 +335,7 @@ export async function recordDecision(input: {
       currency: true,
       jobId: true,
       orgId: true,
+      supplementary: true,
       lines: {
         select: {
           id: true,
@@ -349,11 +351,14 @@ export async function recordDecision(input: {
           isOptional: true,
           decision: true,
           sortOrder: true,
+          productId: true,
+          product: { select: { partNumber: true } },
           inspectionResult: { select: { severity: true } },
         },
       },
       job: {
         select: {
+          status: true,
           _count: { select: { labourLines: true, partLines: true, feeLines: true } },
         },
       },
@@ -366,6 +371,10 @@ export async function recordDecision(input: {
   });
 
   const outcome = decide(estimate.lines.map(toDecidable), input.approvedLineIds, estimate.currency);
+
+  // Part lines written onto the job that name a stock item, reserved once
+  // the transaction has committed. Phase 34.
+  const toReserve: { jobPartLineId: string; productId: string; quantity: number }[] = [];
 
   await prisma.$transaction(async (tx) => {
     if (outcome.approvedIds.length > 0) {
@@ -402,10 +411,17 @@ export async function recordDecision(input: {
 
     // A declined quote leaves the job waiting rather than moving it on. The
     // conversation that follows is a person's, not the system's.
-    await tx.job.update({
-      where: { id: estimate.jobId },
-      data: { status: outcome.status === 'DECLINED' ? 'ESTIMATED' : 'APPROVED' },
-    });
+    //
+    // A supplementary quote, for extra work found mid-job, moves the job
+    // nowhere at all: the work already approved carried on while the
+    // customer decided, and an answer either way adds to the job or does
+    // not. Phase 34.
+    if (!estimate.supplementary) {
+      await tx.job.update({
+        where: { id: estimate.jobId },
+        data: { status: outcome.status === 'DECLINED' ? 'ESTIMATED' : 'APPROVED' },
+      });
+    }
 
     // What the customer approved becomes the work on the job.
     //
@@ -414,18 +430,23 @@ export async function recordDecision(input: {
     // profitability card read zero and there was nothing to invoice. The lines
     // are copied once, only when the job has none, so a job priced by hand at
     // the counter is never overwritten by a later approval.
-    const alreadyLined =
+    //
+    // A supplementary quote is the exception: its approved lines are extra
+    // work by definition, so they join whatever is on the job already, after
+    // it. Phase 34.
+    const existing =
       estimate.job._count.labourLines +
-        estimate.job._count.partLines +
-        estimate.job._count.feeLines >
-      0;
+      estimate.job._count.partLines +
+      estimate.job._count.feeLines;
+    const alreadyLined = existing > 0;
 
-    if (!alreadyLined && outcome.approvedIds.length > 0) {
+    if ((!alreadyLined || estimate.supplementary) && outcome.approvedIds.length > 0) {
       const approved = estimate.lines
         .filter((line) => outcome.approvedIds.includes(line.id))
         .sort((a, b) => a.sortOrder - b.sortOrder);
 
-      for (const [index, line] of approved.entries()) {
+      for (const [offset, line] of approved.entries()) {
+        const index = existing + offset;
         const description = line.detail ? `${line.description} (${line.detail})` : line.description;
 
         if (line.kind === 'LABOUR') {
@@ -441,9 +462,11 @@ export async function recordDecision(input: {
             },
           });
         } else if (line.kind === 'PART') {
-          await tx.jobPartLine.create({
+          const partLine = await tx.jobPartLine.create({
             data: {
               jobId: estimate.jobId,
+              productId: line.productId,
+              partNumber: line.product?.partNumber ?? null,
               description,
               quantity: line.quantity,
               unitPrice: line.unitPrice,
@@ -453,7 +476,15 @@ export async function recordDecision(input: {
               status: 'REQUESTED',
               sortOrder: index,
             },
+            select: { id: true },
           });
+          if (line.productId) {
+            toReserve.push({
+              jobPartLineId: partLine.id,
+              productId: line.productId,
+              quantity: Number(line.quantity),
+            });
+          }
         } else if (line.kind === 'FEE') {
           await tx.jobFeeLine.create({
             data: {
@@ -469,6 +500,35 @@ export async function recordDecision(input: {
     }
   });
 
+  // The parts, reserved. Each reservation is its own transaction against
+  // the stock level, the same one the parts page uses; a shortfall raises
+  // the purchase request there and then, so the approval that needs a part
+  // ordered is the thing that orders it. Nothing here can undo the
+  // approval: a stock problem is a stock problem, not a reason the customer
+  // did not say yes.
+  const parts = { reserved: 0, ordered: 0 };
+  if (toReserve.length > 0) {
+    const warehouseId = await defaultWarehouseFor(estimate.orgId);
+    if (warehouseId) {
+      for (const entry of toReserve) {
+        const result = await reserveForJobLine({
+          orgId: estimate.orgId,
+          jobPartLineId: entry.jobPartLineId,
+          productId: entry.productId,
+          warehouseId,
+          quantity: entry.quantity,
+          requestedByUserId: input.userId ?? null,
+        });
+        if (result.reserved > 0) parts.reserved += 1;
+        if (result.purchaseRequestId) parts.ordered += 1;
+        await prisma.jobPartLine.update({
+          where: { id: entry.jobPartLineId },
+          data: { status: result.shortfall > 0 ? 'ON_ORDER' : 'RESERVED' },
+        });
+      }
+    }
+  }
+
   await audit({
     orgId: estimate.orgId,
     actorUserId: input.userId ?? null,
@@ -480,10 +540,13 @@ export async function recordDecision(input: {
       approvedMinor: outcome.approved.minor,
       declinedMinor: outcome.declined.minor,
       declinedSafetyCritical: outcome.declinedSafetyCritical.map((line) => line.description),
+      supplementary: estimate.supplementary,
+      jobStatus: estimate.supplementary ? estimate.job.status : undefined,
+      parts,
     },
   });
 
-  return { outcome, confirmation: confirmationFor(outcome) };
+  return { outcome, confirmation: confirmationFor(outcome), parts };
 }
 
 /* ---------------------------------------------------------------------------

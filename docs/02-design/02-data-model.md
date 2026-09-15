@@ -187,6 +187,13 @@ as JSON, the `delimiter` it used, the `mapping` a person settled on, a
 `status` that moves once from uploaded to mapped to imported, and a `report`
 of what went in and what did not, row by row. The rows are kept so the
 mapping can be changed and the preview re-run; a batch never imports twice.
+
+An `Estimate` carries `supplementary` (Phase 34): extra work found mid-job,
+raised as the job's next version, which never moves the job's status. An
+`EstimateLine` carries `productId` so that the customer's approval can
+reserve the stock item behind a part line, and `Booking.jobId` with
+`status = CONVERTED` is written in the same transaction as the job the
+booking became.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

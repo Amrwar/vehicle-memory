@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 33.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 34.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -596,6 +596,23 @@ def build() -> None:
         works="Problems named by row and field are problems a person can fix in the spreadsheet they already have open. Writing every row through the page's own function means the import cannot do anything the page could not.",
         shots=[("data", "Data in and out.", 16.4)],
         source="docs/02-design/01-domain-model.md, section 3.11; 05-security-model.md, section 7.3",
+    )
+
+    design(
+        doc,
+        title="The workflow, as one thing",
+        when="Phase 34, 15 September 2026.",
+        why="A workshop does not buy features; it buys the number of presses between a car arriving and the "
+            "money being in the bank. This phase counted them, wrote the count down, and then took it from 37 to 20.",
+        meaning=[
+            "On the booking, one primary button: \"Car is here, start the job\". It opens the job with the customer, the car, the description, the notes and the technician already on it; the two secondary buttons either side are the telephone's other answers.",
+            "On the job, \"Customer approved in person\" sits beside \"Send the quote\" for as long as the quote is open, because a yes across the counter is as real as a yes on a phone and must cost one press to record.",
+            "Below the labour and parts, a card called Extra work found: what kind, what was found, how many, at what price, which part. Two buttons: \"Quote it now\" sends in the same press; \"Add to the quote, send later\" collects lines. What is on the unsent quote is listed above the form with its own send and approve, so nothing about the extra work leaves this screen.",
+            "The five workflows are a table in core with a press count per hand-off, before and now, and the screen it happens on; the design document 02-design/11-workflows.md is generated from it.",
+        ],
+        works="A hand-off that costs nothing is one the system did on the person's behalf: the approval that puts the lines on the job and reserves the parts. Counting presses in code, with a test that fails if any grow, is what stops a 94-page product from becoming slower than a spreadsheet and a phone.",
+        shots=[("job", "The job, with the extra-work card and the counter approval.", 16.4)],
+        source="docs/02-design/11-workflows.md; 04-state-machines.md, section 2",
     )
 
     # 11. Counter

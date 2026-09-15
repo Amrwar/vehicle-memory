@@ -3,7 +3,7 @@
   "counts": {
     "models": 129,
     "enums": 64,
-    "fields": 1997
+    "fields": 2001
   },
   "enums": [
     "OrgPlan",
@@ -642,7 +642,7 @@
         {
           "name": "Estimate",
           "comment": "",
-          "fields": 18,
+          "fields": 19,
           "relations": [
             "Organization",
             "Job",
@@ -654,11 +654,12 @@
         {
           "name": "EstimateLine",
           "comment": "",
-          "fields": 15,
+          "fields": 16,
           "relations": [
             "Estimate",
             "TaxRate",
-            "InspectionResult"
+            "InspectionResult",
+            "Product"
           ],
           "scope": "through Estimate"
         },

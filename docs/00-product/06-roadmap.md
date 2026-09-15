@@ -1738,6 +1738,33 @@ would, and fails on any step that needs a second screen it should not.
 **Exit.** The five workflows run end to end with no retyping, and the press
 counts are in the document.
 
+**Status.** Built. The five workflows are written down as a table in core,
+hand-off by hand-off, with the presses each cost at the end of Phase 33 and
+the presses it costs now, and the one screen it happens on; a unit test
+fails if any hand-off ever costs more than it did, and the document
+`docs/02-design/11-workflows.md` is generated from the table so the two
+cannot drift. Across the five workflows the count fell from 37 presses to 20. What changed: a booking becomes a job in one press, with the customer,
+the vehicle, the description, the notes, the technician, the bay and the
+promised time already on it, and the booking marked converted in the same
+transaction. An estimate raised from an inspection is priced as it is
+raised (before, it carried a zero total and "Send the quote" refused it).
+A customer who says yes at the counter is recorded in one press, under
+their name and the name of the member of staff who took it, through the
+same decision the customer's own page records. The approval itself puts the
+approved lines on the job and, for every part line that names a stock item,
+reserves the part or raises the purchase request for the shortfall; nothing
+is pressed. Extra work found with the car on the ramp is quoted from a form
+on the job: what, how many, at what price, which part; "Quote it now"
+raises a supplementary estimate as the job's next version and sends it in
+the same press, and the work already approved carries on, because a
+supplementary quote never moves the job to awaiting approval and its
+approval never moves the job backwards; the approved extra lines join the
+job after the lines already there. The walkthrough script takes a job from
+a booking to a paid bill through the same functions the pages call, records
+every hand-off with its presses and its screen, reads the three screens the
+desk uses and fails if the one button each needs is not on it, and fails on
+any step over budget or on a second screen.
+
 ---
 
 ## Pilot — four weeks in a real workshop

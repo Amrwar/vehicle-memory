@@ -20,12 +20,15 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Field,
+  Input,
   KeyValue,
   Mileage,
   Money,
   PageHeader,
   ProgressTrail,
   Registration,
+  Select,
   SeverityBadge,
   SeveritySummary,
   Table,
@@ -41,7 +44,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { coverWorthChecking } from '@/lib/condition';
-import { QuoteError, sendEstimate } from '@/lib/estimates';
+import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
@@ -74,6 +77,63 @@ async function send(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?sent=1`);
+}
+
+/**
+ * The customer said yes at the counter. One press records the decision under
+ * their name, puts the approved lines on the job and reserves the parts.
+ * Phase 34.
+ */
+async function approve(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('estimate:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await approveInPerson({
+      orgId,
+      userId: user.userId,
+      estimateId: String(formData.get('estimateId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof QuoteError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/jobs/${jobId}?approved=1`);
+}
+
+/**
+ * Extra work found with the car on the ramp, quoted from the job. One line
+ * per press; "Quote it now" sends it in the same press. Phase 34.
+ */
+async function extra(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('estimate:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  const send = formData.get('send') === '1';
+  const price = String(formData.get('unitPrice') ?? '').trim();
+
+  try {
+    await quoteExtraWork({
+      orgId,
+      userId: user.userId,
+      jobId,
+      kind: String(formData.get('kind') ?? 'LABOUR') as 'LABOUR' | 'PART' | 'FEE',
+      description: String(formData.get('description') ?? ''),
+      quantity: Number(formData.get('quantity') ?? 1),
+      unitPrice: price === '' ? null : Number(price),
+      partNumber: String(formData.get('partNumber') ?? ''),
+      send,
+    });
+  } catch (error) {
+    if (!(error instanceof QuoteError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#extra`);
+  }
+
+  redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
 }
 
 /**
@@ -244,7 +304,15 @@ export default async function JobPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ sent?: string; problem?: string; summary?: string; exchange?: string }>;
+  searchParams: Promise<{
+    sent?: string;
+    problem?: string;
+    summary?: string;
+    exchange?: string;
+    approved?: string;
+    quoted?: string;
+    started?: string;
+  }>;
 }) {
   const { id } = await params;
   const notice = await searchParams;
@@ -433,7 +501,18 @@ export default async function JobPage({
                 <input type="hidden" name="jobId" value={job.id} />
                 <input type="hidden" name="estimateId" value={estimate.id} />
                 <Button type="submit" variant="primary">
-                  Send the quote
+                  {estimate.supplementary ? 'Send the extra-work quote' : 'Send the quote'}
+                </Button>
+              </form>
+            ) : null}
+            {estimate &&
+            (estimate.status === 'DRAFT' || estimate.status === 'SENT') &&
+            can(user.role, 'estimate:write') ? (
+              <form action={approve}>
+                <input type="hidden" name="jobId" value={job.id} />
+                <input type="hidden" name="estimateId" value={estimate.id} />
+                <Button type="submit" variant="secondary">
+                  Customer approved in person
                 </Button>
               </form>
             ) : null}
@@ -512,6 +591,30 @@ export default async function JobPage({
       {notice.problem ? (
         <Alert tone="danger" className="mb-5">
           {notice.problem}
+        </Alert>
+      ) : null}
+
+      {notice.started ? (
+        <Alert tone="success" className="mb-5">
+          The job is open, with everything from the booking on it. The technician can start.
+        </Alert>
+      ) : null}
+
+      {notice.approved ? (
+        <Alert tone="success" className="mb-5">
+          Approval recorded under {job.customer.displayName}&apos;s name. The approved work is on
+          the job and any part on your books is reserved, or on the purchase list if you are short.
+        </Alert>
+      ) : null}
+
+      {notice.quoted === 'sent' ? (
+        <Alert tone="success" className="mb-5">
+          The extra work is quoted and on its way to {job.customer.displayName}. The work already
+          approved carries on; their answer will add to it.
+        </Alert>
+      ) : notice.quoted ? (
+        <Alert tone="success" className="mb-5">
+          Added to the extra-work quote. Add more, or send it.
         </Alert>
       ) : null}
 
@@ -888,6 +991,109 @@ export default async function JobPage({
             </TableWrap>
           </Card>
 
+          {can(user.role, 'estimate:write') &&
+          !['COMPLETED', 'INVOICED', 'PAID', 'CANCELLED', 'DRAFT', 'BOOKED'].includes(
+            job.status,
+          ) ? (
+            <Card id="extra">
+              <CardHeader
+                title="Extra work found"
+                description="Something seen with the car up on the ramp. Quote it from here; the work already approved carries on while the customer decides."
+              />
+              <CardBody className="grid gap-4">
+                {estimate?.supplementary && estimate.status === 'DRAFT' ? (
+                  <div className="rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) px-3.5 py-3 text-[13px]">
+                    <p className="mb-1.5 font-medium">
+                      On the extra-work quote (v{estimate.version}), not yet sent
+                    </p>
+                    <ul className="grid gap-1">
+                      {estimate.lines.map((line) => (
+                        <li key={line.id} className="flex justify-between gap-3">
+                          <span>
+                            <span className="eyebrow mr-2">{line.kind.toLowerCase()}</span>
+                            {line.description}
+                            {line.detail ? (
+                              <span className="ml-1 text-(--text-faint)">({line.detail})</span>
+                            ) : null}
+                          </span>
+                          <Money
+                            amount={Number(line.lineTotal)}
+                            currency={estimate.currency}
+                            locale={region.locale}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <form action={send}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <input type="hidden" name="estimateId" value={estimate.id} />
+                        <Button type="submit" variant="primary" size="sm">
+                          Send it to {job.customer.displayName}
+                        </Button>
+                      </form>
+                      <form action={approve}>
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <input type="hidden" name="estimateId" value={estimate.id} />
+                        <Button type="submit" variant="secondary" size="sm">
+                          Approved in person
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                ) : null}
+
+                <form action={extra} className="grid gap-3">
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <div className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                    <Field label="What kind">
+                      <Select name="kind" defaultValue="LABOUR">
+                        <option value="LABOUR">Labour</option>
+                        <option value="PART">Part</option>
+                        <option value="FEE">Fee</option>
+                      </Select>
+                    </Field>
+                    <Field label="What was found" hint="As the customer will read it.">
+                      <Input
+                        name="description"
+                        placeholder="Rear brake pads worn to 2 mm, replace"
+                        maxLength={200}
+                      />
+                    </Field>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Field label="How many, or hours">
+                      <Input
+                        name="quantity"
+                        type="number"
+                        step="0.25"
+                        min="0.25"
+                        defaultValue="1"
+                      />
+                    </Field>
+                    <Field
+                      label={`Unit price (${region.currency})`}
+                      hint="Blank takes the part's price."
+                    >
+                      <Input name="unitPrice" type="number" step="0.01" min="0" />
+                    </Field>
+                    <Field label="Part number" hint="From your parts; reserved on approval.">
+                      <Input name="partNumber" placeholder="optional" maxLength={64} />
+                    </Field>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button type="submit" name="send" value="1" variant="primary">
+                      Quote it now
+                    </Button>
+                    <Button type="submit" name="send" value="0" variant="secondary">
+                      Add to the quote, send later
+                    </Button>
+                  </div>
+                </form>
+              </CardBody>
+            </Card>
+          ) : null}
+
           {job.tasks.length > 0 ? (
             <Card>
               <CardHeader
@@ -1088,7 +1294,11 @@ export default async function JobPage({
           {estimate ? (
             <Card>
               <CardHeader
-                title={`Estimate v${estimate.version}`}
+                title={
+                  estimate.supplementary
+                    ? `Extra work, quote v${estimate.version}`
+                    : `Estimate v${estimate.version}`
+                }
                 action={
                   <Badge
                     tone={

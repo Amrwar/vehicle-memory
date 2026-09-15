@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
-import { bookingDetail, BookingError, setBookingStatus } from '@/lib/bookings';
+import { bookingDetail, BookingError, setBookingStatus, startJobFromBooking } from '@/lib/bookings';
 import { requireSession } from '@/lib/guard';
 
 export const metadata: Metadata = { title: 'Booking' };
@@ -56,6 +56,30 @@ async function move(formData: FormData) {
   }
 
   redirect(`/bookings/${bookingId}`);
+}
+
+/**
+ * The car is here. One press: the booking becomes the job, with everything
+ * the booking knew already on it, and the desk is looking at the job.
+ * Phase 34.
+ */
+async function start(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const bookingId = String(formData.get('bookingId') ?? '');
+
+  let jobId: string;
+  try {
+    ({ jobId } = await startJobFromBooking({ orgId, userId: user.userId, bookingId }));
+  } catch (error) {
+    if (error instanceof BookingError) {
+      redirect(`/bookings/${bookingId}?error=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/jobs/${jobId}?started=1`);
 }
 
 const STATES: Record<
@@ -233,25 +257,35 @@ export default async function BookingPage({
             ) : (
               <>
                 <div className="grid gap-2 sm:grid-cols-3">
-                  {(['CONFIRMED', 'ARRIVED', 'NO_SHOW'] as const).map((status) => (
-                    <form action={move} key={status}>
-                      <input type="hidden" name="bookingId" value={booking.id} />
-                      <input type="hidden" name="status" value={status} />
-                      <Button
-                        type="submit"
-                        size="touch"
-                        block
-                        variant={status === 'ARRIVED' ? 'primary' : 'secondary'}
-                        disabled={booking.status === status}
-                      >
-                        {status === 'CONFIRMED'
-                          ? 'They confirmed'
-                          : status === 'ARRIVED'
-                            ? 'Car is here'
-                            : 'Did not turn up'}
-                      </Button>
-                    </form>
-                  ))}
+                  <form action={move}>
+                    <input type="hidden" name="bookingId" value={booking.id} />
+                    <input type="hidden" name="status" value="CONFIRMED" />
+                    <Button
+                      type="submit"
+                      size="touch"
+                      block
+                      variant="secondary"
+                      disabled={booking.status === 'CONFIRMED'}
+                    >
+                      They confirmed
+                    </Button>
+                  </form>
+                  {/* One press. The booking already knows the customer, the
+                      car, the work and who is doing it; the job is opened
+                      with all of it and this screen is left behind. */}
+                  <form action={start}>
+                    <input type="hidden" name="bookingId" value={booking.id} />
+                    <Button type="submit" size="touch" block variant="primary">
+                      Car is here, start the job
+                    </Button>
+                  </form>
+                  <form action={move}>
+                    <input type="hidden" name="bookingId" value={booking.id} />
+                    <input type="hidden" name="status" value="NO_SHOW" />
+                    <Button type="submit" size="touch" block variant="secondary">
+                      Did not turn up
+                    </Button>
+                  </form>
                 </div>
 
                 <form

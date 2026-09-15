@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6300 — The workflow, as one thing
+
+| Ref     | Requirement                                                                                                                                                                                                | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6301 | A booking MUST become a job in one press, with the customer, vehicle, description, notes, technician, bay and promised time already on it, and the booking marked converted in the same transaction.       | 34    |
+| FR-6302 | An estimate raised from an inspection MUST carry its line totals and totals the moment it is raised, so it can be sent without a second step.                                                              | 34    |
+| FR-6303 | A decision given in person MUST be recordable from the job in one press, under the customer's name and the recording staff member's, through the same decision the customer's own page records.            | 34    |
+| FR-6304 | An approval MUST put the approved lines on the job and, for each part line naming a stock item, reserve the part or raise a purchase request for the shortfall, with nothing further pressed.              | 34    |
+| FR-6305 | Extra work found mid-job MUST be quotable from the job as a supplementary estimate, sent in the same press if wanted; sending it MUST NOT stop the job, and its approval MUST NOT move the job backwards.  | 34    |
+| FR-6306 | The five workflows MUST be written down hand-off by hand-off with the presses each costs and the screen it happens on; a test MUST fail if a hand-off ever costs more, and the document MUST be generated. | 34    |
+
 ## FR-6200 — Data in, data out
 
 | Ref     | Requirement                                                                                                                                                                                         | Phase |

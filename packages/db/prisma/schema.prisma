@@ -1431,6 +1431,8 @@ model Estimate {
   sentAt          DateTime?
   decidedAt       DateTime?
   supersedesId    String?        @unique
+  /// Extra work found mid-job, quoted without stopping the work already approved. Phase 34.
+  supplementary   Boolean        @default(false)
   createdByUserId String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -1475,12 +1477,16 @@ model EstimateLine {
   isOptional         Boolean      @default(false)
   sortOrder          Int          @default(0)
   inspectionResultId String?
+  /// The stock item behind a part line, so approval can reserve it. Phase 34.
+  productId          String?
 
   estimate         Estimate          @relation(fields: [estimateId], references: [id], onDelete: Cascade)
   taxRate          TaxRate?          @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
   inspectionResult InspectionResult? @relation(fields: [inspectionResultId], references: [id], onDelete: SetNull)
+  product          Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([estimateId, sortOrder])
+  @@index([productId])
   @@map("estimate_lines")
 }
 
@@ -2097,6 +2103,7 @@ model Product {
   movements     StockMovement[]
   reservations  StockReservation[]
   jobPartLines  JobPartLine[]
+  estimateLines EstimateLine[]
   poLines       PurchaseOrderLine[]
   transferLines StockTransferLine[]
   saleLines     CounterSaleLine[]

@@ -16,6 +16,7 @@ import { prisma } from '@carnet/db';
 import { audit } from './guard';
 import { readUrlFor } from './storage';
 import { regionFor } from './region';
+import { retotalEstimate } from './estimates';
 
 /**
  * Inspections, against the database.
@@ -391,6 +392,10 @@ export async function completeInspection(input: {
         inspectionResultId: line.sourceFindingId,
       })),
     });
+
+    // Priced as it is raised. A quote with a zero total cannot be sent, and
+    // this is where the total comes from. Phase 34.
+    await retotalEstimate(tx, estimate.id);
 
     // The job is waiting on the customer from this moment, not from whenever
     // somebody remembers to change it.

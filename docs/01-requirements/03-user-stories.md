@@ -1247,6 +1247,63 @@ is mine whether I stay or go.
 
 ---
 
+## Epic AG — The workflow, as one thing (Phase 34)
+
+### AG1 — Car is here
+
+**As** Ahmed at the desk **I want** the booking to become the job in one
+press **so that** the customer standing with their keys out is not watching
+me retype what I took on the phone.
+**Size** 2 · **Satisfies** FR-6301
+
+- **Given** a booking with a technician and notes, **when** I press "Car is
+  here, start the job", **then** I am on the job, and it has the customer,
+  the car, the description, the notes and the technician on it.
+- **Given** a booking already converted, **when** I press it again, **then**
+  I am told it is already a job.
+
+### AG2 — Yes, at the counter
+
+**As** Ahmed **I want** to record that the customer approved the quote in
+front of me **so that** the work is on the job and the parts are reserved
+before they have left the building.
+**Size** 3 · **Satisfies** FR-6302, FR-6303, FR-6304
+
+- **Given** an inspection that found worn pads, **when** it is completed,
+  **then** the quote it raises has a total I can send.
+- **Given** the customer says yes, **when** I press "Customer approved in
+  person", **then** the approval is recorded under their name and mine, the
+  lines are on the job and any part on our books is reserved.
+- **Given** a part we are short of, **when** the approval lands, **then**
+  the shortfall is on the purchase list without my going there.
+
+### AG3 — Something else found
+
+**As** Tom under the car **I want** to quote what I just found without
+stopping the job I am on **so that** the customer can say yes while I am
+still there.
+**Size** 3 · **Satisfies** FR-6305
+
+- **Given** a job in progress, **when** I add a part by number and press
+  "Quote it now", **then** the customer has the quote and the job is still in
+  progress.
+- **Given** the customer approves it from their phone, **when** the answer
+  arrives, **then** the extra lines are on the job after the ones already
+  there, the part is reserved and the job has not moved backwards.
+
+### AG4 — The count, written down
+
+**As** the owner **I want** every hand-off counted in presses **so that** the
+next screen anybody adds has to justify itself.
+**Size** 2 · **Satisfies** FR-6306
+
+- **Given** the table in core, **when** a hand-off would cost more than it
+  did, **then** the unit test fails.
+- **Given** the walkthrough, **when** a step needs a second screen, **then**
+  the script fails and names the step.
+
+---
+
 ## Story map
 
 ```

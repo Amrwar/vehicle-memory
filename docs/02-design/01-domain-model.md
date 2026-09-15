@@ -266,6 +266,15 @@ the invariants of each context hold for imported rows as for typed ones.
 Opening balances are the exception that proves it: they post as one
 balanced journal entry through `postEntry`, which refuses an unbalanced one.
 
+### 3.12 The workflow, counted (Phase 34)
+
+Not a context: a measure laid over all of them. `packages/core/src/job/workflow.ts`
+writes down the five workflows hand-off by hand-off with the presses each
+costs, before and now, and the one screen it happens on. It is data so that a
+test can hold the product to it (`checkWalk`) and a document can be generated
+from it (`docs/02-design/11-workflows.md`), and so that the next phase that
+adds a screen to a hand-off has to change a number in core to do it.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

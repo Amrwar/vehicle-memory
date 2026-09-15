@@ -408,12 +408,23 @@ where the work happens.
 | FR-6204 | AF1   | `ImportBatch.status`, `report`                                  | `runImport()` through `createCustomer()`, `registerVehicle()`, `adoptVehicle()`, `createProduct()`, `createSupplier()` | `verify-import.ts`                                               | Done   |
 | FR-6205 | AF2   | `JournalEntry.sourceType = ImportBatch`                         | `openingImbalance()`, `importBalances()`, `postEntry()`                                                                | `importing.test.ts`, `verify-import.ts`                          | Done   |
 | FR-6206 | AF3   | —                                                               | `exportDataset()`, `/api/exports/[dataset]`                                                                            | `verify-import.ts`, `verify-controls.ts`                         | Done   |
-| FR-3907 | A1    | —                                                               | `assertNotFlooding()`                                                                                                  | `verify-credentials.ts`                                          | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                                         | `digest()`                                                                                                             | `verify-credentials.ts`                                          | Done   |
-| FR-3801 | —     | —                                                               | `/api/inbound/resend`                                                                                                  | `smoke.ts`                                                       | Done   |
-| FR-3802 | —     | —                                                               | `verify()` tolerance                                                                                                   | `smoke.ts`                                                       | Done   |
-| FR-3803 | —     | `Organization.slug`                                             | `organisationFor()`                                                                                                    | `smoke.ts`                                                       | Done   |
-| FR-3804 | —     | —                                                               | `INBOUND_WEBHOOK_SECRET`                                                                                               | `smoke.ts`                                                       | Done   |
+
+## The workflow, as one thing
+
+| Req     | Story | Schema                                     | Implementation                                                                     | Test                                     | Status |
+| ------- | ----- | ------------------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| FR-6301 | AG1   | `Booking.jobId`, `status = CONVERTED`      | `startJobFromBooking()`, the booking page's `start` action                         | `verify-workflow.ts`                     | Done   |
+| FR-6302 | AG2   | `Estimate.total`, `EstimateLine.lineTotal` | `retotalEstimate()` from `completeInspection()` and `quoteExtraWork()`             | `verify-workflow.ts`                     | Done   |
+| FR-6303 | AG2   | `EstimateApproval.note`                    | `approveInPerson()` through `recordDecision()`, the job page's `approve` action    | `verify-workflow.ts`                     | Done   |
+| FR-6304 | AG2   | `EstimateLine.productId`, `JobPartLine`    | `recordDecision()` then `reserveForJobLine()` per part, `defaultWarehouseFor()`    | `verify-workflow.ts`                     | Done   |
+| FR-6305 | AG3   | `Estimate.supplementary`                   | `quoteExtraWork()`, `sendEstimate()` and `recordDecision()` leaving the job status | `verify-workflow.ts`                     | Done   |
+| FR-6306 | AG4   | —                                          | `WORKFLOWS`, `checkWalk()`, `build-workflows-doc.ts`                               | `workflow.test.ts`, `verify-workflow.ts` | Done   |
+| FR-3907 | A1    | —                                          | `assertNotFlooding()`                                                              | `verify-credentials.ts`                  | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                    | `digest()`                                                                         | `verify-credentials.ts`                  | Done   |
+| FR-3801 | —     | —                                          | `/api/inbound/resend`                                                              | `smoke.ts`                               | Done   |
+| FR-3802 | —     | —                                          | `verify()` tolerance                                                               | `smoke.ts`                               | Done   |
+| FR-3803 | —     | `Organization.slug`                        | `organisationFor()`                                                                | `smoke.ts`                               | Done   |
+| FR-3804 | —     | —                                          | `INBOUND_WEBHOOK_SECRET`                                                           | `smoke.ts`                               | Done   |
 
 ## What people say afterwards
 
@@ -710,9 +721,10 @@ details without a provider behind it would be worse than not having one.
 | Permissions at the resource, and the plan enforced | 7                   | 7                      |
 | Card payment through a provider                    | 7                   | 7                      |
 | The subscription, billed                           | 7                   | 7                      |
-| **Total**                                          | **430**             | **424 (99%)**          |
+| The workflow, as one thing                         | 6                   | 6                      |
+| **Total**                                          | **436**             | **430 (99%)**          |
 
-The requirements document lists 514 requirements. 84 of
+The requirements document lists 520 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

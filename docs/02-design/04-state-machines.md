@@ -103,6 +103,16 @@ Approval records a snapshot: the exact total agreed, the timestamp, the source
 address, and the name given. That snapshot does not move if a price list is
 edited afterwards.
 
+A **supplementary** estimate (Phase 34) is extra work found mid-job, raised
+as the job's next version with `supplementary = true`. It follows the same
+states, but it does not move the job: sending it leaves the job where it is
+rather than putting it to AWAITING_APPROVAL, and approving it appends the
+approved lines to the job after the lines already there rather than setting
+the job to APPROVED. An approval given in person is the same transition,
+taken by a member of staff on the customer's behalf, and the approval row
+says so. Any approval reserves the stock behind each approved part line that
+names a product, or raises the purchase request for the shortfall.
+
 ## 3. Invoice
 
 ```
