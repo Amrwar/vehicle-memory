@@ -9,6 +9,7 @@ import {
   retention,
   revenueByServiceType,
 } from '@/lib/reports';
+import { taxReportFor } from '@/lib/tax';
 
 /**
  * Report downloads. FR-1406.
@@ -31,8 +32,12 @@ export async function GET(request: Request, context: { params: Promise<{ report:
   // Wages are not an operational report. The people who see the ledger are
   // not necessarily the people who see what everybody is paid, and the
   // bookkeeper who runs payroll does not necessarily see the shop's reports.
-  const { orgId } = await requireSession(
-    report === 'payroll' ? 'payroll:read' : 'report:operational',
+  const { orgId, region } = await requireSession(
+    report === 'payroll'
+      ? 'payroll:read'
+      : report === 'tax'
+        ? 'report:financial'
+        : 'report:operational',
   );
 
   const range = new URL(request.url).searchParams.get('range') ?? 'year';
@@ -106,6 +111,22 @@ export async function GET(request: Request, context: { params: Promise<{ report:
         { header: 'Bookings', value: (row) => row.bookings },
         { header: 'Became jobs', value: (row) => row.converted },
         { header: 'Conversion %', value: (row) => row.conversionPct },
+      ]);
+    }
+
+    case 'tax': {
+      // One row per tax and rate, as declared on the documents. Phase 41.
+      const result = await taxReportFor(orgId, period, region.currency);
+
+      return csv(`Tax ${period.label}`, result.rows, [
+        { header: 'Tax', value: (row) => row.name },
+        { header: 'Rate %', value: (row) => row.ratePct },
+        { header: 'Taxable', value: (row) => money(row.salesNet.minor) },
+        { header: 'Tax charged', value: (row) => money(row.salesTax.minor) },
+        { header: 'Taxable given back', value: (row) => money(row.creditedNet.minor) },
+        { header: 'Tax given back', value: (row) => money(row.creditedTax.minor) },
+        { header: 'Tax owed', value: (row) => money(row.tax.minor) },
+        { header: 'Documents', value: (row) => row.documents },
       ]);
     }
 

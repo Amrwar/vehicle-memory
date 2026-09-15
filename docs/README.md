@@ -123,11 +123,13 @@ staff, and the owner's day: the comeback rate, the reputation trend by site and
 person, suppliers side by side on every part and over the year, and a
 dashboard in three blocks, and every word translated: every page, component,
 page title and refusal in French and Arabic, with a scan that fails on any
-text left outside the translator. The
+text left outside the translator, and tax made configurable: several taxes on
+a rate, prices with tax in, exempt customers, a rate per site, and a report
+per tax read from what each document declared. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 202 capabilities
-built, 2 partial and 7 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 483
+phase, the [feature map](00-product/09-feature-map.md) counts 204 capabilities
+built, 2 partial and 6 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 490
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -136,4 +138,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 40.5 are now built.
+to 41 are now built.

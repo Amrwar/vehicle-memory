@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 143,
+    "models": 145,
     "enums": 71,
-    "fields": 2264
+    "fields": 2297
   },
   "enums": [
     "OrgPlan",
@@ -86,16 +86,17 @@
         {
           "name": "Organization",
           "comment": "",
-          "fields": 35,
+          "fields": 36,
           "relations": [],
           "scope": "global"
         },
         {
           "name": "Location",
           "comment": "",
-          "fields": 19,
+          "fields": 20,
           "relations": [
-            "Organization"
+            "Organization",
+            "TaxRate"
           ],
           "scope": "organisation"
         },
@@ -352,7 +353,7 @@
         {
           "name": "Customer",
           "comment": "",
-          "fields": 27,
+          "fields": 29,
           "relations": [
             "Organization",
             "User",
@@ -786,6 +787,25 @@
           "scope": "organisation"
         },
         {
+          "name": "TaxComponent",
+          "comment": "One tax inside a rate: a rate can carry a federal and a provincial tax, and a compound one is charged on the price with the taxes before it. Phase 41.",
+          "fields": 6,
+          "relations": [
+            "TaxRate"
+          ],
+          "scope": "through TaxRate"
+        },
+        {
+          "name": "TaxEntry",
+          "comment": "What each tax came to on a document, as it was issued: an invoice, a credit note (negative), a counter sale. Written once, never changed; the report per tax reads only these, so a rate retired later cannot change what was declared. Phase 41.",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
           "name": "DocumentSequence",
           "comment": "Gapless per-organisation document numbering. A database sequence would leave gaps on rollback, which is not acceptable for tax documents. FR-902.",
           "fields": 5,
@@ -797,7 +817,7 @@
         {
           "name": "Invoice",
           "comment": "",
-          "fields": 17,
+          "fields": 19,
           "relations": [
             "Organization",
             "Job",

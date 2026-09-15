@@ -775,6 +775,33 @@ export const fr: Readonly<Record<string, string>> = {
   'by {name}': 'par {name}',
   'At {site}': 'À {site}',
   '{days}d': '{days} j',
+  // Phase 41: tax, configurable.
+  '{name} at {rate}% on {net}': '{name} à {rate} % sur {net}',
+  'Exempt from tax: {reference}': 'Exonéré de taxe : {reference}',
+  'Prices on this invoice include tax.': 'Les prix de cette facture sont TTC.',
+  'Last quarter': 'Trimestre précédent',
+  'Last month': 'Mois précédent',
+  'This year': 'Cette année',
+  'Tax owed': 'Taxe due',
+  'Charged, less given back': 'Facturée, moins les remboursements',
+  'Tax charged': 'Taxe facturée',
+  'On invoices and counter sales': 'Sur les factures et les ventes au comptoir',
+  'Given back': 'Rendue',
+  'On credit notes': 'Sur les avoirs',
+  'Issued in the period': 'Émis sur la période',
+  'Each tax': 'Chaque taxe',
+  'As each document declared it when it was issued':
+    'Telle que chaque document l’a déclarée à son émission',
+  'Nothing issued in this period': 'Rien d’émis sur cette période',
+  'Invoices, credit notes and counter sales appear here once issued.':
+    'Les factures, avoirs et ventes au comptoir apparaissent ici une fois émis.',
+  Taxable: 'Base imposable',
+  'Two taxes on the same line both count its net, because each authority is told the amount its own tax was charged on. Exempt sales are listed with no tax, so the certificate behind each can be found.':
+    'Deux taxes sur une même ligne comptent chacune son montant hors taxe, car chaque administration reçoit le montant sur lequel sa propre taxe a été calculée. Les ventes exonérées sont listées sans taxe, afin de retrouver le certificat de chacune.',
+  'No site': 'Sans site',
+  '{amount} owed': '{amount} dus',
+  'No tax': 'Sans taxe',
+  Exempt: 'Exonéré',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1530,4 +1557,30 @@ export const ar: Readonly<Record<string, string>> = {
   'by {name}': 'بواسطة {name}',
   'At {site}': 'في {site}',
   '{days}d': '{days} يوم',
+  // Phase 41: tax, configurable.
+  '{name} at {rate}% on {net}': '{name} بنسبة {rate}% على {net}',
+  'Exempt from tax: {reference}': 'معفى من الضريبة: {reference}',
+  'Prices on this invoice include tax.': 'الأسعار في هذه الفاتورة تشمل الضريبة.',
+  'Last quarter': 'الربع السابق',
+  'Last month': 'الشهر السابق',
+  'This year': 'هذا العام',
+  'Tax owed': 'الضريبة المستحقة',
+  'Charged, less given back': 'المحتسبة، مطروحاً منها المردود',
+  'Tax charged': 'الضريبة المحتسبة',
+  'On invoices and counter sales': 'على الفواتير ومبيعات الكاونتر',
+  'Given back': 'المردود',
+  'On credit notes': 'على الإشعارات الدائنة',
+  'Issued in the period': 'الصادرة خلال الفترة',
+  'Each tax': 'كل ضريبة',
+  'As each document declared it when it was issued': 'كما صرّح بها كل مستند عند إصداره',
+  'Nothing issued in this period': 'لم يصدر شيء في هذه الفترة',
+  'Invoices, credit notes and counter sales appear here once issued.':
+    'تظهر الفواتير والإشعارات الدائنة ومبيعات الكاونتر هنا بعد إصدارها.',
+  Taxable: 'المبلغ الخاضع للضريبة',
+  'Two taxes on the same line both count its net, because each authority is told the amount its own tax was charged on. Exempt sales are listed with no tax, so the certificate behind each can be found.':
+    'تحتسب كل ضريبتين على السطر نفسه صافي المبلغ مرتين، لأن كل جهة تُبلَّغ بالمبلغ الذي احتُسبت عليه ضريبتها. تُدرج المبيعات المعفاة دون ضريبة، ليُعثر على الشهادة التي تستند إليها كل منها.',
+  'No site': 'بدون موقع',
+  '{amount} owed': '{amount} مستحقة',
+  'No tax': 'بدون ضريبة',
+  Exempt: 'معفى',
 };

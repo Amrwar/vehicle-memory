@@ -8,6 +8,7 @@ import {
   CardHeader,
   EmptyState,
   Field,
+  Select,
   Input,
   PageHeader,
   Table,
@@ -16,6 +17,7 @@ import {
   Th,
   Tr,
 } from '@carnet/ui';
+import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -23,6 +25,7 @@ import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { saveBay, setBayActive, SettingsError, siteSettings, updateSite } from '@/lib/settings';
+import { setSiteTaxRate, TaxError } from '@/lib/tax';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -122,6 +125,27 @@ async function toggleBay(formData: FormData) {
   redirect('/settings/site?saved=bay');
 }
 
+/** This site's own tax rate, or the workshop's default. Phase 41. */
+async function saveSiteTax(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+  try {
+    await setSiteTaxRate({
+      orgId,
+      userId: user.userId,
+      locationId: String(formData.get('locationId') ?? ''),
+      taxRateId: String(formData.get('taxRateId') ?? '') || null,
+    });
+  } catch (error) {
+    if (error instanceof TaxError) {
+      redirect(`/settings/site?problem=${encodeURIComponent(error.message)}#tax`);
+    }
+    throw error;
+  }
+  redirect('/settings/site?saved=1#tax');
+}
+
 export default async function SiteSettingsPage({
   searchParams,
 }: {
@@ -129,7 +153,17 @@ export default async function SiteSettingsPage({
 }) {
   const { orgId, user } = await requireSession('settings:write');
   const { saved, problem, edit } = await searchParams;
-  const site = await siteSettings(orgId, user.locationId);
+  const [site, rates] = await Promise.all([
+    siteSettings(orgId, user.locationId),
+    prisma.taxRate.findMany({
+      where: { orgId, isActive: true },
+      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+      select: { id: true, name: true, isDefault: true },
+    }),
+  ]);
+  const siteTax = site
+    ? await prisma.location.findUnique({ where: { id: site.id }, select: { taxRateId: true } })
+    : null;
   const t = await tFor();
 
   const editing = site?.bays.find((bay) => bay.id === edit) ?? null;
@@ -271,6 +305,33 @@ export default async function SiteSettingsPage({
           </Card>
 
           <div className="grid gap-5 content-start">
+            <Card id="tax">
+              <CardHeader
+                title={t('Tax at this site')}
+                description={t(
+                  'New lines here take this rate. Leave it on the default where the site charges what the workshop does.',
+                )}
+              />
+              <form action={saveSiteTax}>
+                <input type="hidden" name="locationId" value={site.id} />
+                <CardBody className="flex flex-wrap items-end gap-3">
+                  <Field label={t('Rate')} className="min-w-[14rem] flex-1">
+                    <Select name="taxRateId" defaultValue={siteTax?.taxRateId ?? ''}>
+                      <option value="">{t('The workshop’s default')}</option>
+                      {rates.map((rate) => (
+                        <option key={rate.id} value={rate.id}>
+                          {rate.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Button type="submit" variant="secondary" size="sm">
+                    {t('Save')}
+                  </Button>
+                </CardBody>
+              </form>
+            </Card>
+
             <Card className="overflow-hidden">
               <CardHeader
                 title={t('Bays')}

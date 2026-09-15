@@ -267,6 +267,10 @@ export const fr: Readonly<Record<string, string>> = {
     '{v1} n’est ni un PDF ni une photo du document papier.',
   '{v1} is not a photograph. Use a picture from the camera.':
     '{v1} n’est pas une photographie. Utilisez une photo prise avec l’appareil.',
+  // Phase 41: tax, configurable.
+  'That customer is not this workshop’s.': 'Ce client n’appartient pas à cet atelier.',
+  'That rate is on {v1} invoice lines. Add a new rate with these taxes and retire this one, so what was invoiced keeps reading the way it was.':
+    'Ce taux figure sur {v1} lignes de facture. Ajoutez un nouveau taux avec ces taxes et retirez celui-ci, afin que ce qui a été facturé se lise toujours de la même façon.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -512,4 +516,8 @@ export const ar: Readonly<Record<string, string>> = {
   '{v1} is not a PDF or a picture of the paper.': '{v1} ليس ملف PDF ولا صورة للمستند الورقي.',
   '{v1} is not a photograph. Use a picture from the camera.':
     '{v1} ليس صورة فوتوغرافية. استخدم صورة من الكاميرا.',
+  // Phase 41: tax, configurable.
+  'That customer is not this workshop’s.': 'هذا العميل لا يتبع هذه الورشة.',
+  'That rate is on {v1} invoice lines. Add a new rate with these taxes and retire this one, so what was invoiced keeps reading the way it was.':
+    'هذا المعدل موجود في {v1} من أسطر الفواتير. أضف معدلاً جديداً بهذه الضرائب وأوقف هذا، ليبقى ما صدر مقروءاً كما كان.',
 };

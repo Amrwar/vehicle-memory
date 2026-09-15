@@ -575,6 +575,20 @@ export const fr: Readonly<Record<string, string>> = {
   sites: 'sites',
   bays: 'postes',
   vehicles: 'véhicules',
+  // Phase 41: tax, configurable.
+  'Name the rate the way it appears on an invoice: "VAT 20%", "GST and PST".':
+    'Nommez le taux tel qu’il apparaît sur une facture : « TVA 20 % », « TPS et TVP ».',
+  'A rate needs at least one tax, even if it is at 0%.':
+    'Un taux doit comporter au moins une taxe, même à 0 %.',
+  'A rate carries at most {v1} taxes.': 'Un taux comporte au maximum {v1} taxes.',
+  'Name tax {v1} as the authority names it: "GST", "PST".':
+    'Nommez la taxe {v1} comme l’administration la nomme : « TPS », « TVP ».',
+  '{v1} must be a percentage from 0 to 100.': '{v1} doit être un pourcentage entre 0 et 100.',
+  '{v1} is on this rate twice.': '{v1} figure deux fois sur ce taux.',
+  '{v1} is the first tax, so there is nothing before it to be charged on.':
+    '{v1} est la première taxe : rien ne la précède sur quoi la calculer en cascade.',
+  'An exempt customer needs the certificate or registration number that makes them exempt. It is printed on every invoice to them.':
+    'Un client exonéré doit avoir le numéro de certificat ou d’immatriculation qui justifie l’exonération. Il figure sur chacune de ses factures.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1108,4 +1122,18 @@ export const ar: Readonly<Record<string, string>> = {
   sites: 'الفروع',
   bays: 'المنصات',
   vehicles: 'المركبات',
+  // Phase 41: tax, configurable.
+  'Name the rate the way it appears on an invoice: "VAT 20%", "GST and PST".':
+    'سمِّ المعدل كما يظهر في الفاتورة: «ضريبة القيمة المضافة 20%»، «ضريبتان اتحادية وإقليمية».',
+  'A rate needs at least one tax, even if it is at 0%.':
+    'يحتاج المعدل إلى ضريبة واحدة على الأقل، ولو بنسبة 0%.',
+  'A rate carries at most {v1} taxes.': 'يحمل المعدل {v1} ضرائب كحد أقصى.',
+  'Name tax {v1} as the authority names it: "GST", "PST".':
+    'سمِّ الضريبة {v1} كما تسميها الجهة المختصة.',
+  '{v1} must be a percentage from 0 to 100.': 'يجب أن تكون {v1} نسبة مئوية بين 0 و100.',
+  '{v1} is on this rate twice.': '{v1} مذكورة مرتين في هذا المعدل.',
+  '{v1} is the first tax, so there is nothing before it to be charged on.':
+    '{v1} هي الضريبة الأولى، فلا شيء قبلها لتُحتسب فوقه.',
+  'An exempt customer needs the certificate or registration number that makes them exempt. It is printed on every invoice to them.':
+    'يحتاج العميل المعفى إلى رقم الشهادة أو التسجيل الذي يثبت إعفاءه. يُطبع على كل فاتورة تصدر له.',
 };

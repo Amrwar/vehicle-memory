@@ -1,4 +1,5 @@
 import { ACCOUNT, type JournalEntryDraft } from '../accounting/index';
+import { type TaxAmount, taxOnLine, type TaxPart } from '../pricing/tax';
 import { add, type Money, money, multiply, subtract, sum, zero } from '../shared/money';
 
 /**
@@ -33,6 +34,11 @@ export interface SaleLine {
   unitCost: Money;
   taxRatePct: number;
   discountPct: number;
+  /** The taxes on the line, each on its own. Phase 41. */
+  taxes?: readonly TaxPart[];
+  /** Shelf prices with tax in. Phase 41. */
+  pricesIncludeTax?: boolean;
+  taxExempt?: boolean;
 }
 
 export interface SaleLineTotals {
@@ -40,6 +46,7 @@ export interface SaleLineTotals {
   discount: Money;
   net: Money;
   tax: Money;
+  taxes: TaxAmount[];
   total: Money;
   cost: Money;
   margin: Money;
@@ -70,8 +77,12 @@ export function saleTotals(lines: readonly SaleLine[], currency = 'GBP'): SaleTo
   const lineTotals = lines.map((line): SaleLineTotals => {
     const gross = multiply(line.unitPrice, line.quantity);
     const discount = multiply(gross, line.discountPct / 100);
-    const net = subtract(gross, discount);
-    const tax = multiply(net, line.taxRatePct / 100);
+    const { net, tax, taxes, total } = taxOnLine({
+      amount: subtract(gross, discount),
+      parts: line.taxes ?? [{ name: `${line.taxRatePct}%`, ratePct: line.taxRatePct }],
+      pricesIncludeTax: line.pricesIncludeTax,
+      exempt: line.taxExempt,
+    });
     const cost = multiply(line.unitCost, line.quantity);
 
     return {
@@ -79,7 +90,8 @@ export function saleTotals(lines: readonly SaleLine[], currency = 'GBP'): SaleTo
       discount,
       net,
       tax,
-      total: add(net, tax),
+      taxes,
+      total,
       cost,
       margin: subtract(net, cost),
       marginPct: net.minor === 0 ? null : round2(((net.minor - cost.minor) / net.minor) * 100),

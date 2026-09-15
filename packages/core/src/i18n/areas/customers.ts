@@ -898,6 +898,14 @@ export const fr: Readonly<Record<string, string>> = {
     '1 personne n’a pas accepté le marketing et ne recevra rien.',
   '{count} people have not agreed to marketing and will not be sent to.':
     '{count} personnes n’ont pas accepté le marketing et ne recevront rien.',
+  // Phase 41: tax, configurable.
+  'Exempt. No tax is charged on their invoices.':
+    'Exonéré. Aucune taxe n’est facturée sur ses factures.',
+  'Charged tax as usual.': 'Taxé normalement.',
+  'Exempt from tax': 'Exonéré de taxe',
+  'Certificate or registration number': 'Numéro de certificat ou d’immatriculation',
+  'Required when exempt. It is printed on every invoice to them.':
+    'Obligatoire en cas d’exonération. Il figure sur chacune de ses factures.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1772,4 +1780,11 @@ export const ar: Readonly<Record<string, string>> = {
     'شخص واحد لم يوافق على التسويق ولن يُرسل إليه.',
   '{count} people have not agreed to marketing and will not be sent to.':
     '{count} أشخاص لم يوافقوا على التسويق ولن يُرسل إليهم.',
+  // Phase 41: tax, configurable.
+  'Exempt. No tax is charged on their invoices.': 'معفى. لا تُحتسب أي ضريبة على فواتيره.',
+  'Charged tax as usual.': 'تُحتسب عليه الضريبة كالمعتاد.',
+  'Exempt from tax': 'معفى من الضريبة',
+  'Certificate or registration number': 'رقم الشهادة أو التسجيل',
+  'Required when exempt. It is printed on every invoice to them.':
+    'مطلوب عند الإعفاء. يُطبع على كل فاتورة تصدر له.',
 };

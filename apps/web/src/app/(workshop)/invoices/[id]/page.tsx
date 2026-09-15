@@ -49,6 +49,7 @@ import {
   recordRefund,
 } from '@/lib/money';
 import { tFor } from '@/lib/i18n';
+import { bandsFor } from '@/lib/tax';
 
 export const dynamic = 'force-dynamic';
 
@@ -286,6 +287,8 @@ export default async function InvoicePage({
   if (!detail) notFound();
 
   const { invoice, money } = detail;
+  // Each tax as it was declared when the invoice was issued. Phase 41.
+  const bands = await bandsFor('INVOICE', invoice.id);
   const status = invoice.status as InvoiceState;
 
   const settlement = describeSettlement({
@@ -432,14 +435,42 @@ export default async function InvoicePage({
                 <span className="text-(--text-faint)">{t('Net')}</span>
                 <Money amount={Number(invoice.subtotal)} currency={invoice.currency} />
               </div>
-              <div className="flex justify-between">
-                <span className="text-(--text-faint)">{t('Tax')}</span>
-                <Money amount={Number(invoice.taxTotal)} currency={invoice.currency} />
-              </div>
+              {bands.length > 1 || (bands[0] && bands[0].tax.minor > 0) ? (
+                bands.map((band) => (
+                  <div key={`${band.name} ${band.ratePct}`} className="flex justify-between">
+                    <span className="text-(--text-faint)">
+                      {t('{name} at {rate}% on {net}', {
+                        name: t(band.name),
+                        rate: band.ratePct,
+                        net: new Intl.NumberFormat(region.locale, {
+                          style: 'currency',
+                          currency: invoice.currency,
+                        }).format(band.net.minor / 100),
+                      })}
+                    </span>
+                    <Money amount={band.tax.minor / 100} currency={invoice.currency} />
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-(--text-faint)">{t('Tax')}</span>
+                  <Money amount={Number(invoice.taxTotal)} currency={invoice.currency} />
+                </div>
+              )}
               <div className="flex justify-between border-t border-(--border) pt-2 font-display text-[16px] font-semibold">
                 <span>{t('Total')}</span>
                 <Money amount={Number(invoice.total)} currency={invoice.currency} />
               </div>
+              {invoice.taxExemptReference ? (
+                <p className="text-[12px] text-(--text-faint)">
+                  {t('Exempt from tax: {reference}', { reference: invoice.taxExemptReference })}
+                </p>
+              ) : null}
+              {invoice.pricesIncludeTax ? (
+                <p className="text-[12px] text-(--text-faint)">
+                  {t('Prices on this invoice include tax.')}
+                </p>
+              ) : null}
             </CardBody>
           </Card>
 

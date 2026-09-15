@@ -370,7 +370,17 @@ export async function catalogueSettings(orgId: string) {
     prisma.taxRate.findMany({
       where: { orgId },
       orderBy: [{ isActive: 'desc' }, { isDefault: 'desc' }, { rate: 'desc' }],
-      select: { id: true, name: true, rate: true, isDefault: true, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        rate: true,
+        isDefault: true,
+        isActive: true,
+        components: {
+          orderBy: { sortOrder: 'asc' },
+          select: { name: true, rate: true, compound: true },
+        },
+      },
     }),
     prisma.jobType.findMany({
       where: { orgId },

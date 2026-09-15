@@ -41,6 +41,8 @@ model Organization {
   baseCurrency           String    @default("GBP")
   timezone               String    @default("Europe/London")
   locale                 String    @default("en-GB")
+  /// Prices entered with tax in, as a counter reads, rather than before tax. Phase 41.
+  pricesIncludeTax       Boolean   @default(false)
   plan                   OrgPlan   @default(CORE)
   /// Where the workshop stands with us: a state read from these four dates. Phase 31.
   trialEndsAt            DateTime?
@@ -91,6 +93,7 @@ model Organization {
   payrollRuns         PayrollRun[]
   fleetAgreements     FleetAgreement[]
   taxRates            TaxRate[]
+  taxEntries          TaxEntry[]
   sequences           DocumentSequence[]
   messages            MessageLog[]
   conversations       Conversation[]
@@ -189,10 +192,14 @@ model Location {
   closesAtMinute     Int      @default(1080)
   isDefault          Boolean  @default(false)
   isActive           Boolean  @default(true)
+  /// The rate new lines take at this site, where it differs from the workshop default. Phase 41.
+  taxRateId          String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  taxRate      TaxRate?           @relation("SiteTaxRate", fields: [taxRateId], references: [id], onDelete: SetNull)
+  taxEntries   TaxEntry[]
   bays         Bay[]
   bookings     Booking[]
   jobs         Job[]
@@ -811,6 +818,9 @@ model Customer {
   portalUserId              String?
   /// The technician this customer asks for. Preselected on a new job. FR-4706.
   preferredTechnicianUserId String?
+  /// Charged no tax, on the strength of a certificate kept here and printed on every invoice. Phase 41.
+  taxExempt                 Boolean      @default(false)
+  taxExemptReference        String?
   isActive                  Boolean      @default(true)
   createdAt                 DateTime     @default(now())
   updatedAt                 DateTime     @updatedAt
@@ -1785,9 +1795,56 @@ model TaxRate {
   estimateLines EstimateLine[]
   invoiceLines  InvoiceLine[]
   saleLines     CounterSaleLine[]
+  components    TaxComponent[]
+  sites         Location[]        @relation("SiteTaxRate")
 
   @@unique([orgId, name])
   @@map("tax_rates")
+}
+
+/// One tax inside a rate: a rate can carry a federal and a provincial tax,
+/// and a compound one is charged on the price with the taxes before it. Phase 41.
+model TaxComponent {
+  id        String  @id @default(cuid())
+  taxRateId String
+  name      String
+  rate      Decimal @db.Decimal(6, 3)
+  compound  Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  taxRate TaxRate @relation(fields: [taxRateId], references: [id], onDelete: Cascade)
+
+  @@unique([taxRateId, name])
+  @@index([taxRateId, sortOrder])
+  @@map("tax_components")
+}
+
+/// What each tax came to on a document, as it was issued: an invoice, a
+/// credit note (negative), a counter sale. Written once, never changed; the
+/// report per tax reads only these, so a rate retired later cannot change
+/// what was declared. Phase 41.
+model TaxEntry {
+  id         String   @id @default(cuid())
+  orgId      String
+  locationId String?
+  /// INVOICE, CREDIT_NOTE or COUNTER_SALE.
+  sourceType String
+  sourceId   String
+  reference  String
+  name       String
+  ratePct    Decimal  @db.Decimal(6, 3)
+  net        Decimal  @db.Decimal(12, 2)
+  tax        Decimal  @db.Decimal(12, 2)
+  currency   String   @default("GBP")
+  occurredAt DateTime
+  createdAt  DateTime @default(now())
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@unique([sourceType, sourceId, name, ratePct])
+  @@index([orgId, occurredAt])
+  @@map("tax_entries")
 }
 
 /// Gapless per-organisation document numbering. A database sequence would
@@ -1815,23 +1872,26 @@ enum SequenceKind {
 }
 
 model Invoice {
-  id            String        @id @default(cuid())
-  orgId         String
-  number        String
-  jobId         String?
-  customerId    String
-  status        InvoiceStatus @default(DRAFT)
-  currency      String        @default("GBP")
-  subtotal      Decimal       @default(0) @db.Decimal(12, 2)
-  discountTotal Decimal       @default(0) @db.Decimal(12, 2)
-  taxTotal      Decimal       @default(0) @db.Decimal(12, 2)
-  total         Decimal       @default(0) @db.Decimal(12, 2)
-  amountPaid    Decimal       @default(0) @db.Decimal(12, 2)
-  issuedAt      DateTime?
-  dueAt         DateTime?
-  notes         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  orgId              String
+  number             String
+  jobId              String?
+  customerId         String
+  status             InvoiceStatus @default(DRAFT)
+  currency           String        @default("GBP")
+  subtotal           Decimal       @default(0) @db.Decimal(12, 2)
+  discountTotal      Decimal       @default(0) @db.Decimal(12, 2)
+  taxTotal           Decimal       @default(0) @db.Decimal(12, 2)
+  total              Decimal       @default(0) @db.Decimal(12, 2)
+  amountPaid         Decimal       @default(0) @db.Decimal(12, 2)
+  issuedAt           DateTime?
+  dueAt              DateTime?
+  notes              String?
+  /// How the invoice was priced when it was issued. Phase 41.
+  pricesIncludeTax   Boolean       @default(false)
+  taxExemptReference String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   org              Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   job              Job?              @relation(fields: [jobId], references: [id], onDelete: SetNull)

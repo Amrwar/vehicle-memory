@@ -14,6 +14,14 @@ import { postEntry } from './accounting';
 import { redeemAtCounter } from './giftcards';
 import { audit } from './guard';
 import { regionFor } from './region';
+import {
+  bandsOfLines,
+  defaultTaxRateId,
+  linePricing,
+  recordTaxEntries,
+  TAX_RATE,
+  taxContextFor,
+} from './tax';
 import { assertPlanAllows } from './billing';
 
 /**
@@ -68,17 +76,22 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
     return { ok: false, error: 'There is nothing on this sale.' };
   }
 
-  const [warehouse, taxRate] = await Promise.all([
+  const [warehouse, taxRateId, taxContext] = await Promise.all([
     prisma.warehouse.findFirst({
       where: { orgId: input.orgId, ...(input.locationId ? { locationId: input.locationId } : {}) },
       orderBy: { isDefault: 'desc' },
     }),
-    prisma.taxRate.findFirst({ where: { orgId: input.orgId, isDefault: true } }),
+    // The site's own rate where it has one. Phase 41.
+    defaultTaxRateId(input.orgId, input.locationId),
+    taxContextFor(input.orgId, input.customerId ?? null),
   ]);
 
   if (!warehouse) return { ok: false, error: 'This site has no parts store.' };
 
-  const taxPct = taxRate ? Number(taxRate.rate) : 0;
+  const taxRate = taxRateId
+    ? await prisma.taxRate.findUnique({ where: { id: taxRateId }, ...TAX_RATE })
+    : null;
+  const pricing = linePricing(taxRate, taxContext);
   const productIds = input.lines
     .map((line) => line.productId)
     .filter((id): id is string => id !== null);
@@ -111,11 +124,14 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
           minor: Math.round((line.productId ? (costOf.get(line.productId) ?? 0) : 0) * 100),
           currency: region.currency,
         },
-        taxRatePct: taxPct,
+        taxRatePct: pricing.taxRatePct ?? 0,
+        taxes: pricing.taxes,
+        pricesIncludeTax: pricing.pricesIncludeTax,
+        taxExempt: pricing.taxExempt,
         discountPct: line.discountPct ?? 0,
       }));
 
-      const totals = saleTotals(saleLines);
+      const totals = saleTotals(saleLines, region.currency);
 
       const settlement = settle(totals, input.tenders, {
         accountAllowed: Boolean(input.customerId),
@@ -179,6 +195,18 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
           locationId: input.locationId,
         });
       }
+
+      // What each tax came to on the sale, for the report per tax. Phase 41.
+      await recordTaxEntries(tx, {
+        orgId: input.orgId,
+        locationId: input.locationId,
+        sourceType: 'COUNTER_SALE',
+        sourceId: sale.id,
+        reference,
+        occurredAt: sale.soldAt ?? new Date(),
+        currency: region.currency,
+        bands: bandsOfLines(totals.lines, taxContext.exempt, region.currency),
+      });
 
       // The stock leaves the shelf now. There is no job to consume it later.
       for (const line of saleLines) {

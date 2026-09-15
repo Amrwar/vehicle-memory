@@ -22,6 +22,7 @@ import { ensureChartOfAccounts, postEntry } from './accounting';
 import { audit } from './guard';
 import { defaultWarehouseFor, lockLevel } from './inventory';
 import { regionFor } from './region';
+import { defaultTaxRateId } from './tax';
 
 /**
  * Parts back, and work sent out, against the database. Phase 38.
@@ -482,22 +483,19 @@ export async function addSublet(input: {
   price: number;
 }): Promise<{ subletId: string }> {
   assertSubletSound(input);
-  const [job, supplier, tax] = await Promise.all([
+  const [job, supplier] = await Promise.all([
     prisma.job.findFirst({
       where: { id: input.jobId, orgId: input.orgId },
       select: {
         id: true,
         status: true,
+        locationId: true,
         _count: { select: { labourLines: true, partLines: true, feeLines: true } },
       },
     }),
     prisma.supplier.findFirst({
       where: { id: input.supplierId, orgId: input.orgId },
       select: { id: true, name: true },
-    }),
-    prisma.taxRate.findFirst({
-      where: { orgId: input.orgId, isDefault: true },
-      select: { id: true },
     }),
   ]);
   if (!job) throw new ReturnError('JOB_CLOSED', 'That job is not here.');
@@ -517,7 +515,7 @@ export async function addSublet(input: {
         quantity: 1,
         unitPrice: input.price,
         unitCost: input.cost,
-        taxRateId: tax?.id ?? null,
+        taxRateId: await defaultTaxRateId(input.orgId, job.locationId, tx),
         status: 'FITTED',
         sortOrder: job._count.labourLines + job._count.partLines + job._count.feeLines,
       },

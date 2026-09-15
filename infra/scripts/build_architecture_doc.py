@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 40.5"
+AFTER_PHASE = "Phase 41"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-tax": "a rate of two taxes saved and refused three ways, a site's rate taken by a new line, an invoice declaring each tax and refusing a rewrite, a credit note giving each back, an exempt customer refused without a certificate and invoiced without tax, prices with tax in, a counter sale, the report moving by exactly what was declared, and the pages",
     "verify-owner": "a comeback offered, refused without a reason or on another car, recorded, counted against the technician and taken off; the reputation trend moved by an answer; two suppliers of a part compared and one read as slower; the pages, the dashboard in French",
     "verify-search": "a car by its plate typed two ways and its VIN, a customer by their number, a job, an invoice and a part exactly, a name as a list; a decision and a part request notifying the right people, and the screens",
     "verify-returns": "an order delivered and billed, faulty parts sent back and credited off the bill, a refusal written off, a core credited with the leftover held for the next bill, sublet work billed and invoiced, and the trial balance",
@@ -889,7 +890,18 @@ def build() -> None:
               "translator and, with --messages, every thrown or returned refusal sentence and whether it has both "
               "translations; verify-languages fails on either.")
 
-    doc.add_heading("6.21 Answers and the assistant", level=2)
+    doc.add_heading("6.21 Tax", level=2)
+    para(doc, "A line's rate carries its components; linePricing in lib/tax.ts turns the rate and the context (whether the "
+              "workshop prices with tax in, whether the customer paying is exempt) into the taxes, the inclusive flag and the "
+              "exemption on the PriceableLine, and calculateTotals and saleTotals in core call taxOnLine for each line, which "
+              "works each tax out and rounds it on its own, compounding where a tax says so, and with tax in takes the net out "
+              "of the price and gives the rounding penny to the largest tax. defaultTaxRateId chooses the site's rate over the "
+              "workshop's default wherever a line is written. issueInvoice, the fleet's monthly invoice, raiseCreditNote and "
+              "completeSale call recordTaxEntries inside their transactions with the document's bands (a credit note's through "
+              "creditShares, negative); a trigger refuses any update to tax_entries. taxReportFor reads the entries for a "
+              "period and hands them to taxReport in core, overall and per site, for /reports/tax and its CSV.")
+
+    doc.add_heading("6.22 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

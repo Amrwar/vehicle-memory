@@ -394,3 +394,17 @@ and 2110 and credits 2000. The operational side matches: a credit is set
 against the supplier's open bills oldest first, and credit held on their
 account is set against the next bill booked, so what the payables page says
 is owed is what 2000 says, less credit held.
+
+## Tax, configurable (Phase 41)
+
+A rate can carry up to three taxes. The ledger still posts all output tax to
+one tax payable account, because the chart of accounts is the workshop's and
+most workshops file one return; what each tax came to is kept beside the
+ledger as append-only tax entries, one per document, tax and rate, written
+in the transaction that issues the document. A credit note writes negative
+entries, spreading the tax it takes back across the invoice's taxes by what
+each came to, to the penny. The report per tax reads only these entries, and
+their total equals the movement on the tax payable account for the same
+documents. With prices entered with tax in, the net posted to revenue is the
+price with the taxes taken out; an exempt customer's documents post no tax
+and are recorded as exempt sales.

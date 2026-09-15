@@ -5,6 +5,7 @@ import {
   assertPaymentRecordable,
   assertTransition,
   calculateTotals,
+  creditShares,
   dueDateFor,
   fromDecimal,
   type InvoiceState,
@@ -31,6 +32,16 @@ import { prisma } from '@carnet/db';
 import { postEntry } from './accounting';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
+import {
+  bandsFor,
+  linePricing,
+  NO_CONTEXT,
+  type RateRow,
+  recordTaxEntries,
+  TAX_RATE,
+  type TaxContext,
+  taxContextFor,
+} from './tax';
 import { refundThroughProvider } from './card-payments';
 import { keepAsCredit } from './deposit-credits';
 import { refundOntoCard } from './giftcard-refunds';
@@ -59,10 +70,10 @@ export { MoneyCycleError };
    The job moves
    --------------------------------------------------------------------------- */
 
-const JOB_LINES = {
-  labourLines: { include: { taxRate: { select: { rate: true } } } },
-  partLines: { include: { taxRate: { select: { rate: true } } } },
-  feeLines: { include: { taxRate: { select: { rate: true } } } },
+export const JOB_LINES = {
+  labourLines: { orderBy: { sortOrder: 'asc' as const }, include: { taxRate: TAX_RATE } },
+  partLines: { orderBy: { sortOrder: 'asc' as const }, include: { taxRate: TAX_RATE } },
+  feeLines: { orderBy: { sortOrder: 'asc' as const }, include: { taxRate: TAX_RATE } },
 } as const;
 
 type LinedJob = {
@@ -70,27 +81,30 @@ type LinedJob = {
     hours: unknown;
     rate: unknown;
     discountPct: unknown;
-    taxRate: { rate: unknown } | null;
+    taxRate: RateRow | null;
   }[];
   partLines: {
     quantity: unknown;
     unitPrice: unknown;
     unitCost: unknown;
     discountPct: unknown;
-    taxRate: { rate: unknown } | null;
+    taxRate: RateRow | null;
   }[];
-  feeLines: { amount: unknown; taxRate: { rate: unknown } | null }[];
+  feeLines: { amount: unknown; taxRate: RateRow | null }[];
 };
 
-/** The job's lines as the pricing engine wants them. */
-export function priceableLinesOf(job: LinedJob): PriceableLine[] {
+/**
+ * The job's lines as the pricing engine wants them: each with its taxes, and
+ * priced with tax in or before tax, for this customer, exempt or not. Phase 41.
+ */
+export function priceableLinesOf(job: LinedJob, context: TaxContext = NO_CONTEXT): PriceableLine[] {
   return [
     ...job.labourLines.map((line) => ({
       kind: 'LABOUR' as const,
       quantity: Number(line.hours),
       unitPrice: String(line.rate),
       discountPct: Number(line.discountPct),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
+      ...linePricing(line.taxRate, context),
     })),
     ...job.partLines.map((line) => ({
       kind: 'PART' as const,
@@ -98,13 +112,13 @@ export function priceableLinesOf(job: LinedJob): PriceableLine[] {
       unitPrice: String(line.unitPrice),
       unitCost: String(line.unitCost),
       discountPct: Number(line.discountPct),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
+      ...linePricing(line.taxRate, context),
     })),
     ...job.feeLines.map((line) => ({
       kind: 'FEE' as const,
       quantity: 1,
       unitPrice: String(line.amount),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
+      ...linePricing(line.taxRate, context),
     })),
   ];
 }
@@ -298,7 +312,9 @@ export async function issueInvoice(input: {
     },
   });
 
-  const lines = priceableLinesOf(job);
+  const billTo = job.billToCustomerId ?? job.customerId;
+  const taxContext = await taxContextFor(input.orgId, billTo);
+  const lines = priceableLinesOf(job, taxContext);
 
   assertInvoiceable({
     status: job.status as JobStatus,
@@ -351,6 +367,8 @@ export async function issueInvoice(input: {
         amountPaid: 0,
         issuedAt,
         dueAt,
+        pricesIncludeTax: taxContext.pricesIncludeTax,
+        taxExemptReference: taxContext.exemptReference,
         lines: {
           create: lines.map((line, index) => ({
             kind: line.kind,
@@ -372,6 +390,18 @@ export async function issueInvoice(input: {
     await tx.job.update({
       where: { id: job.id },
       data: { status: 'INVOICED', invoicedAt: issuedAt },
+    });
+
+    // What each tax came to, as issued. The report per tax reads these.
+    await recordTaxEntries(tx, {
+      orgId: input.orgId,
+      locationId: job.locationId,
+      sourceType: 'INVOICE',
+      sourceId: created.id,
+      reference: number,
+      occurredAt: issuedAt,
+      currency: totals.currency,
+      bands: totals.taxBreakdown,
     });
 
     await tx.jobStatusEvent.create({
@@ -673,6 +703,7 @@ export async function raiseCreditNote(input: {
     where: { id: input.invoiceId, orgId: input.orgId },
     include: {
       lines: { select: { kind: true, lineTotal: true, taxAmount: true } },
+      job: { select: { locationId: true } },
       customer: { select: { displayName: true, email: true } },
       org: { select: { name: true } },
     },
@@ -714,6 +745,11 @@ export async function raiseCreditNote(input: {
 
   const next = stateAfterCredit(view, input.amount);
   const issuedAt = new Date();
+  // Each tax on the invoice gives back its share, as it was declared. Phase 41.
+  const taxShares = creditShares(await bandsFor('INVOICE', invoice.id), {
+    tax: taxTotal,
+    ratio,
+  });
 
   const note = await prisma.$transaction(async (tx) => {
     const sequence = await tx.documentSequence.upsert({
@@ -735,6 +771,18 @@ export async function raiseCreditNote(input: {
     });
 
     await tx.invoice.update({ where: { id: invoice.id }, data: { status: next } });
+
+    await recordTaxEntries(tx, {
+      orgId: input.orgId,
+      locationId: invoice.job?.locationId ?? null,
+      sourceType: 'CREDIT_NOTE',
+      sourceId: created.id,
+      reference: created.number,
+      occurredAt: issuedAt,
+      currency,
+      bands: taxShares,
+      sign: -1,
+    });
 
     return created;
   });

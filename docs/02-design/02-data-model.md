@@ -240,6 +240,16 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 `comebackMarkedByUserId`. A check constraint requires a reason of at least
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
+
+Phase 41 adds `TaxComponent` (a rate's taxes: name, percentage, whether
+compound, order), `TaxEntry` (what each tax came to on an issued document:
+source, reference, site, name, rate, net, tax, currency, when; unique per
+source, tax and rate, and refused an update by a trigger), `pricesIncludeTax`
+on `Organization` and on `Invoice` as it was issued, `taxExempt` and
+`taxExemptReference` on `Customer` (a check constraint requires the reference
+when exempt) and on `Invoice`, and `taxRateId` on `Location`. The migration
+gives every existing rate one component and writes entries for every invoice
+already issued.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

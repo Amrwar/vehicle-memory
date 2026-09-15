@@ -1593,6 +1593,55 @@ know what to do next.
 
 ---
 
+## Epic AP — Tax, configurable (Phase 41)
+
+### AP1 — Two taxes on a line
+
+**As** a workshop owner in Quebec **I want** GST and QST on the same line,
+QST charged with GST in **so that** my invoices are right and my returns add
+up.
+**Size** 5 · **Satisfies** FR-7201, FR-7205, FR-7207
+
+- **Given** a rate of GST 5% and QST 9.975% on top, **when** a 100.00 job
+  is invoiced, **then** the invoice shows GST 5.00 and QST 10.47 and comes
+  to 115.47.
+- **Given** that rate is on an invoice, **when** I change QST, **then** it
+  is refused and I am told to add a new rate.
+
+### AP2 — Prices with tax in
+
+**As** a workshop in Dubai **I want** to enter prices as the customer pays
+them **so that** the price on the board is the price on the invoice.
+**Size** 3 · **Satisfies** FR-7202
+
+- **Given** prices with tax in and VAT at 5%, **when** a 105.00 service is
+  invoiced, **then** it comes to 105.00, of which 5.00 is VAT.
+
+### AP3 — An exempt fleet
+
+**As** Sara **I want** to mark a charity's fleet exempt with its certificate
+**so that** their invoices charge no tax and say why.
+**Size** 2 · **Satisfies** FR-7203
+
+- **Given** no certificate, **when** I mark them exempt, **then** it is
+  refused.
+- **Given** a certificate, **when** their job is invoiced, **then** there is
+  no tax and the certificate is on the invoice.
+
+### AP4 — Filing the return
+
+**As** the bookkeeper **I want** each tax for last quarter, less credit
+notes, per site **so that** I can file without adding up invoices.
+**Size** 3 · **Satisfies** FR-7204, FR-7206
+
+- **Given** a site with its own rate, **when** a line is added there,
+  **then** it takes that rate.
+- **Given** last quarter's invoices, credit notes and counter sales, **when**
+  I open the tax report, **then** each tax shows what was charged, given back
+  and owed, and the CSV says the same.
+
+---
+
 ## Story map
 
 ```

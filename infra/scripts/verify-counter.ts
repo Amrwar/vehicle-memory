@@ -52,6 +52,10 @@ async function main() {
 
   /* --- the sale ----------------------------------------------------------- */
 
+  // What the drawer already expected, so a till left open by an earlier run
+  // does not make this one fail.
+  const drawerBefore = (await openTill(org.id, warehouse.locationId))?.cashMinor ?? 0;
+
   const sale = await completeSale({
     orgId: org.id,
     locationId: warehouse.locationId,
@@ -139,8 +143,8 @@ async function main() {
   check('the sale is in it', (till?.saleCount ?? 0) > 0, `${till?.saleCount}`);
   check(
     'the drawer expects the cash less the change',
-    (till?.cashMinor ?? 0) === 10_000 - (sale.changeMinor ?? 0),
-    `${till?.cashMinor}`,
+    (till?.cashMinor ?? 0) - drawerBefore === 10_000 - (sale.changeMinor ?? 0),
+    `${(till?.cashMinor ?? 0) - drawerBefore}`,
   );
 
   /* --- refusals ------------------------------------------------------------ */

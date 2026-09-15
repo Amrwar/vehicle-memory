@@ -499,19 +499,31 @@ where the work happens.
 
 ## Every word translated
 
-| Req     | Story | Schema                  | Implementation                                                         | Test                                      | Status |
-| ------- | ----- | ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------- | ------ |
-| FR-7101 | AO1   | —                       | `tFor()`, `useT()`, `msg()`, `generateMetadata`, the area dictionaries | `i18n-scan.ts`, `verify-languages.ts`     | Done   |
-| FR-7102 | AO2   | —                       | `translate()` reading finished sentences through keys with slots       | `i18n.test.ts`, `i18n-scan.ts --messages` | Done   |
-| FR-7103 | AO1   | —                       | calendar words in the translator, `readerLocale()`                     | `verify-languages.ts`                     | Done   |
-| FR-7104 | AO1   | —                       | `i18n-ignore` on examples; no keys for names                           | `i18n.test.ts`                            | Done   |
-| FR-7105 | AO2   | —                       | `infra/scripts/i18n-scan.ts`, `i18n-missing.ts`                        | `verify-languages.ts`                     | Done   |
-| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                  | `verify-credentials.ts`                   | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                             | `verify-credentials.ts`                   | Done   |
-| FR-3801 | —     | —                       | `/api/inbound/resend`                                                  | `smoke.ts`                                | Done   |
-| FR-3802 | —     | —                       | `verify()` tolerance                                                   | `smoke.ts`                                | Done   |
-| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                    | `smoke.ts`                                | Done   |
-| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                               | `smoke.ts`                                | Done   |
+| Req     | Story | Schema | Implementation                                                         | Test                                      | Status |
+| ------- | ----- | ------ | ---------------------------------------------------------------------- | ----------------------------------------- | ------ |
+| FR-7101 | AO1   | —      | `tFor()`, `useT()`, `msg()`, `generateMetadata`, the area dictionaries | `i18n-scan.ts`, `verify-languages.ts`     | Done   |
+| FR-7102 | AO2   | —      | `translate()` reading finished sentences through keys with slots       | `i18n.test.ts`, `i18n-scan.ts --messages` | Done   |
+| FR-7103 | AO1   | —      | calendar words in the translator, `readerLocale()`                     | `verify-languages.ts`                     | Done   |
+| FR-7104 | AO1   | —      | `i18n-ignore` on examples; no keys for names                           | `i18n.test.ts`                            | Done   |
+| FR-7105 | AO2   | —      | `infra/scripts/i18n-scan.ts`, `i18n-missing.ts`                        | `verify-languages.ts`                     | Done   |
+
+## Tax, configurable
+
+| Req     | Story | Schema                                 | Implementation                                                                                     | Test                           | Status |
+| ------- | ----- | -------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------ | ------ |
+| FR-7201 | AP1   | `TaxComponent`                         | `assertTaxRateSound()`, `effectiveRatePct()`, `taxOnLine()`, `saveTaxRateWithParts()`              | `tax.test.ts`, `verify-tax.ts` | Done   |
+| FR-7202 | AP2   | `Organization.pricesIncludeTax`        | `taxOnLine()` with tax in, `setPricesIncludeTax()`, `linePricing()`                                | `tax.test.ts`, `verify-tax.ts` | Done   |
+| FR-7203 | AP3   | `Customer.taxExempt`, check constraint | `assertExemption()`, `setCustomerExemption()`, `taxContextFor()`                                   | `tax.test.ts`, `verify-tax.ts` | Done   |
+| FR-7204 | AP4   | `Location.taxRateId`                   | `chooseTaxRate()`, `defaultTaxRateId()` in quotes, inspections, packages, sublets and the counter  | `tax.test.ts`, `verify-tax.ts` | Done   |
+| FR-7205 | AP1   | `TaxEntry`, update trigger             | `recordTaxEntries()` from invoices, credit notes (`creditShares()`), counter sales, fleet invoices | `verify-tax.ts`                | Done   |
+| FR-7206 | AP4   | `TaxEntry`                             | `taxReport()`, `taxReportFor()`, `/reports/tax`, `/api/reports/tax`                                | `tax.test.ts`, `verify-tax.ts` | Done   |
+| FR-7207 | AP1   | —                                      | `saveTaxRateWithParts()`                                                                           | `verify-tax.ts`                | Done   |
+| FR-3907 | A1    | —                                      | `assertNotFlooding()`                                                                              | `verify-credentials.ts`        | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                | `digest()`                                                                                         | `verify-credentials.ts`        | Done   |
+| FR-3801 | —     | —                                      | `/api/inbound/resend`                                                                              | `smoke.ts`                     | Done   |
+| FR-3802 | —     | —                                      | `verify()` tolerance                                                                               | `smoke.ts`                     | Done   |
+| FR-3803 | —     | `Organization.slug`                    | `organisationFor()`                                                                                | `smoke.ts`                     | Done   |
+| FR-3804 | —     | —                                      | `INBOUND_WEBHOOK_SECRET`                                                                           | `smoke.ts`                     | Done   |
 
 ## What people say afterwards
 
@@ -817,9 +829,10 @@ details without a provider behind it would be worse than not having one.
 | Finding anything                                   | 5                   | 5                      |
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
-| **Total**                                          | **483**             | **477 (99%)**          |
+| Tax, configurable                                  | 7                   | 7                      |
+| **Total**                                          | **490**             | **484 (99%)**          |
 
-The requirements document lists 567 requirements. 84 of
+The requirements document lists 574 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

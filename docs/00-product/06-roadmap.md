@@ -2101,8 +2101,53 @@ page.
 
 ## Phase 41 — Tax, configurable
 
-Several taxes on a line, exempt customers, tax by site, inclusive or
-exclusive pricing, a report per tax. The currency decision made and applied.
+**Scope.** Several taxes on a line, exempt customers, tax by site, inclusive
+or exclusive pricing, a report per tax. The currency decision made and
+applied.
+
+**Exit.** A workshop in Quebec charges GST and QST on the price with GST in,
+a workshop in Dubai prices with VAT in, a fleet with an exemption
+certificate pays none, and each files its return from one page.
+
+**Status.** Built. A tax rate is now one or more taxes, up to three, each
+with its name, its percentage and whether it is charged on the price with
+the taxes before it in; every existing rate became a rate of one tax, and
+sign-up creates rates that way. Each tax on a line is worked out and rounded
+on its own, and the document's breakdown has one band per tax, each counting
+the net it was charged on. A workshop chooses whether prices are entered
+before tax or with tax in; with tax in, the taxes are taken out of the price
+and the rounding penny goes to the largest tax, so the line still comes to
+the price. A customer can be exempt only with the certificate or registration
+number that makes them so, refused without it by the product and by the
+database; their invoices charge no tax, carry the certificate, and are
+declared as exempt sales. A site can have its own rate, which every new line
+there takes: quotes raised from an inspection (which before this phase
+carried no rate at all), extra work, packages, sublet work and the counter.
+Every document writes what each tax came to when it is issued, as an
+append-only tax entry: an invoice, a credit note (each tax given back in
+proportion, to the penny), a counter sale and the fleet's monthly invoice;
+the database refuses to change one. Invoices already issued were written as
+entries by the migration. The report per tax, at `/reports/tax` and as CSV,
+gives each tax and rate for the last or current quarter or month or the year:
+what it was charged on, what it came to, what credit notes gave back, what is
+owed, and the same per site; it reads only the entries, so a rate retired
+later cannot change a return already filed. A rate already on an invoice
+cannot have its taxes changed; a new rate is added and the old retired. The
+ledger keeps one tax payable account, which the report reconciles to. The
+currency decision, made in Phase 29, stands and is now applied to tax: one
+currency per workshop, every document and every tax entry carries the
+currency it was issued in, and the report reads in the workshop's own. The
+verification script saves a rate of two taxes and refuses three bad ones,
+sets it as a site's rate, issues an invoice that declares each tax,
+refuses to rewrite the declaration, credits half and reads half of each
+given back, refuses an exemption without a certificate by both the product
+and the database, invoices an exempt customer with no tax and the
+certificate, invoices at a price with tax in and reads it come to the price,
+takes a counter sale that declares its taxes, reads the report move by
+exactly what was declared, refuses to change the taxes of a rate on an
+invoice, and reads the report (in French too), the invoice, the settings and
+the customer's page. Also this phase: `verify-counter` measures the drawer by
+what its own sale added, so an earlier run's till no longer fails it.
 
 ## Phase 42 — Paper
 

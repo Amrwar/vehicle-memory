@@ -10,11 +10,13 @@ import {
   PageHeader,
   Select,
 } from '@carnet/ui';
+import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { setPricesIncludeTax } from '@/lib/tax';
 import { tFor } from '@/lib/i18n';
 import {
   organisationSettings,
@@ -92,6 +94,19 @@ async function savePrefix(formData: FormData) {
   redirect('/settings/organisation?saved=numbering');
 }
 
+/** With tax in, or before tax. Phase 41. */
+async function savePricing(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+  await setPricesIncludeTax({
+    orgId,
+    userId: user.userId,
+    value: formData.get('pricesIncludeTax') === 'yes',
+  });
+  redirect('/settings/organisation?saved=1#pricing');
+}
+
 export default async function OrganisationSettingsPage({
   searchParams,
 }: {
@@ -99,7 +114,13 @@ export default async function OrganisationSettingsPage({
 }) {
   const { orgId } = await requireSession('settings:write');
   const { saved, problem } = await searchParams;
-  const org = await organisationSettings(orgId);
+  const [org, pricing] = await Promise.all([
+    organisationSettings(orgId),
+    prisma.organization.findUniqueOrThrow({
+      where: { id: orgId },
+      select: { pricesIncludeTax: true },
+    }),
+  ]);
   const t = await tFor();
 
   return (
@@ -223,6 +244,57 @@ export default async function OrganisationSettingsPage({
               <Button type="submit" variant="primary">
                 {t('Save details')}
               </Button>
+            </CardBody>
+          </form>
+        </Card>
+
+        <Card id="pricing">
+          <CardHeader
+            title={t('How prices are entered')}
+            description={t('Applies to labour rates, part prices, packages and the counter')}
+          />
+          <form action={savePricing}>
+            <CardBody className="grid gap-3 text-[13px]">
+              <label className="flex items-start gap-2">
+                <input
+                  type="radio"
+                  name="pricesIncludeTax"
+                  value="no"
+                  defaultChecked={!pricing.pricesIncludeTax}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block font-medium">{t('Before tax')}</span>
+                  <span className="block text-(--text-faint)">
+                    {t('Tax is added on top, as a trade price list reads.')}
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2">
+                <input
+                  type="radio"
+                  name="pricesIncludeTax"
+                  value="yes"
+                  defaultChecked={pricing.pricesIncludeTax}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block font-medium">{t('With tax in')}</span>
+                  <span className="block text-(--text-faint)">
+                    {t('The price is what the customer pays; the tax is taken out of it.')}
+                  </span>
+                </span>
+              </label>
+              <p className="text-[12px] leading-relaxed text-(--text-faint)">
+                {t(
+                  'Open jobs and quotes are priced the new way from now on. Invoices already issued keep the way they were priced.',
+                )}
+              </p>
+              <div>
+                <Button type="submit" variant="secondary" size="sm">
+                  {t('Save')}
+                </Button>
+              </div>
             </CardBody>
           </form>
         </Card>

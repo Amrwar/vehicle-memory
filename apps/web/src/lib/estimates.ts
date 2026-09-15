@@ -19,6 +19,7 @@ import { audit } from './guard';
 import { pushNow } from './outbound';
 import { recordDecision } from './portal';
 import { regionFor } from './region';
+import { defaultTaxRateId, linePricing, TAX_RATE, taxContextFor } from './tax';
 
 /**
  * Sending a quote, against the database.
@@ -200,6 +201,8 @@ export async function retotalEstimate(tx: Tx, estimateId: string): Promise<void>
     where: { id: estimateId },
     select: {
       currency: true,
+      orgId: true,
+      job: { select: { customerId: true, billToCustomerId: true } },
       lines: {
         orderBy: { sortOrder: 'asc' },
         select: {
@@ -209,19 +212,24 @@ export async function retotalEstimate(tx: Tx, estimateId: string): Promise<void>
           unitPrice: true,
           unitCost: true,
           discountPct: true,
-          taxRate: { select: { rate: true } },
+          taxRate: TAX_RATE,
         },
       },
     },
   });
 
+  const context = await taxContextFor(
+    estimate.orgId,
+    estimate.job ? (estimate.job.billToCustomerId ?? estimate.job.customerId) : null,
+    tx,
+  );
   const priceable: PriceableLine[] = estimate.lines.map((line) => ({
     kind: line.kind,
     quantity: Number(line.quantity),
     unitPrice: String(line.unitPrice),
     unitCost: String(line.unitCost),
     discountPct: Number(line.discountPct),
-    taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
+    ...linePricing(line.taxRate, context),
   }));
 
   const totals = calculateTotals(priceable, estimate.currency as Currency);
@@ -295,6 +303,7 @@ export async function quoteExtraWork(input: {
     select: {
       id: true,
       status: true,
+      locationId: true,
       estimates: {
         orderBy: { version: 'desc' },
         take: 1,
@@ -319,10 +328,7 @@ export async function quoteExtraWork(input: {
           select: { id: true, name: true, partNumber: true, sellPrice: true, costPrice: true },
         })
       : null,
-    prisma.taxRate.findFirst({
-      where: { orgId: input.orgId, isDefault: true },
-      select: { id: true },
-    }),
+    defaultTaxRateId(input.orgId, job.locationId),
   ]);
 
   if (partNumber && !product) {
@@ -370,7 +376,7 @@ export async function quoteExtraWork(input: {
         quantity: input.quantity,
         unitPrice,
         unitCost: product ? product.costPrice : 0,
-        taxRateId: defaultTax?.id ?? null,
+        taxRateId: defaultTax,
         productId: product?.id ?? null,
         isOptional: false,
         sortOrder: count,

@@ -139,6 +139,8 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     title: 'Invoices, payments and refunds',
     models: [
       'TaxRate',
+      'TaxComponent',
+      'TaxEntry',
       'DocumentSequence',
       'Invoice',
       'InvoiceLine',

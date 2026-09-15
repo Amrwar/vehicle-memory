@@ -143,6 +143,7 @@ async function main() {
       fullPage: true,
     },
     { file: 'reputation-trend', path: '/reputation', who: 'owner', fullPage: true },
+    { file: 'tax-report', path: '/reports/tax?range=year', who: 'owner', fullPage: true },
     { file: 'portal-ar', path: '/portal', who: 'driver', lang: 'ar' },
     { file: 'home-fr', path: '/', who: 'nobody', lang: 'fr', height: 900 },
     { file: 'dashboard-ar', path: '/dashboard', who: 'owner', lang: 'ar' },

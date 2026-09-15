@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 40.5.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 41.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -744,6 +744,22 @@ def build() -> None:
         works="English stays the source, so the dictionaries read as sentences a person can check, and the scan that names any text left outside the translator keeps the next page from shipping half translated.",
         shots=[("dashboard-ar", "The dashboard in Arabic.", 16.4), ("job-fr", "The jobs list in French.", 16.4)],
         source="docs/00-product/06-roadmap.md, Phase 40.5",
+    )
+
+    design(
+        doc,
+        title="Tax, configurable",
+        when="Phase 41, 15 September 2026.",
+        why="One rate per line fitted Britain and nowhere with two taxes, prices with tax in, or customers who pay none. "
+            "And a return was added up by hand from invoices.",
+        meaning=[
+            "A rate's form has three rows of a tax's name and percentage, with a tick for a tax charged on top of the ones before it. Most workshops fill one.",
+            "The invoice lists each tax on its own line, with what it was charged on, and prints the exemption certificate or that prices include tax where either applies.",
+            "The tax report reads as a return: each tax and rate, what it was charged on, charged, given back and owed, with the period chosen by buttons and a CSV beside them.",
+        ],
+        works="Keeping what each document declared, rather than recalculating from rates, means a return filed last quarter reads the same next year, whatever the rates have become.",
+        shots=[("tax-report", "The report per tax.", 16.4)],
+        source="docs/02-design/07-accounting-model.md, Tax, configurable",
     )
 
     # 11. Counter

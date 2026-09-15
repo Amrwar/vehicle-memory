@@ -137,8 +137,17 @@ export async function createWorkshop(
         },
         taxRates: {
           create: [
-            { name: country.tax.name, rate: country.tax.rate, isDefault: true },
-            { name: 'Zero rated', rate: 0 },
+            {
+              name: country.tax.name,
+              rate: country.tax.rate,
+              isDefault: true,
+              components: { create: [{ name: country.tax.name, rate: country.tax.rate }] },
+            },
+            {
+              name: 'Zero rated',
+              rate: 0,
+              components: { create: [{ name: 'Zero rated', rate: 0 }] },
+            },
           ],
         },
         jobTypes: { create: DEFAULT_JOB_TYPES },

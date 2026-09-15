@@ -10,6 +10,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { defaultTaxRateId } from './tax';
 
 /**
  * Service packages, against the database. Phase 37.
@@ -250,6 +251,7 @@ export async function applyPackage(
     select: {
       id: true,
       status: true,
+      locationId: true,
       packageId: true,
       estimatedHours: true,
       _count: {
@@ -262,10 +264,7 @@ export async function applyPackage(
     throw new PackageError('BAD_LINE', 'This job is closed; a package goes on a new job.');
   }
 
-  const tax = await tx.taxRate.findFirst({
-    where: { orgId: input.orgId, isDefault: true },
-    select: { id: true },
-  });
+  const taxRateId = await defaultTaxRateId(input.orgId, job.locationId, tx);
   const mapped = jobLinesFromPackage(
     pkg.lines.map((l) => ({
       kind: l.kind as PackageLine['kind'],
@@ -294,7 +293,7 @@ export async function applyPackage(
         description: line.description,
         hours: line.hours,
         rate: line.rate,
-        taxRateId: tax?.id ?? null,
+        taxRateId,
         sortOrder: index++,
       },
     });
@@ -310,7 +309,7 @@ export async function applyPackage(
         quantity: line.quantity,
         unitPrice: line.unitPrice,
         unitCost: product?.costPrice ?? 0,
-        taxRateId: tax?.id ?? null,
+        taxRateId,
         status: 'REQUESTED',
         sortOrder: index++,
       },
@@ -322,7 +321,7 @@ export async function applyPackage(
         jobId: job.id,
         description: line.description,
         amount: line.amount,
-        taxRateId: tax?.id ?? null,
+        taxRateId,
         sortOrder: index++,
       },
     });

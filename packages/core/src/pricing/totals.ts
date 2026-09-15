@@ -11,6 +11,7 @@ import {
   sum,
   zero,
 } from '../shared/money';
+import { EXEMPT, NO_TAX, type TaxAmount, taxOnLine, type TaxPart } from './tax';
 
 /**
  * Document totals for estimates, jobs and invoices.
@@ -43,8 +44,14 @@ export interface PriceableLine {
   unitCost?: number | string;
   /** Line discount as a percentage, 0 to 100. */
   discountPct?: number;
-  /** Tax rate as a percentage, e.g. 20 for 20% VAT. */
+  /** Tax rate as a percentage, e.g. 20 for 20% VAT. Used when `taxes` is not given. */
   taxRatePct?: number;
+  /** The taxes on the line, each worked out on its own. Phase 41. */
+  taxes?: readonly TaxPart[];
+  /** The unit price already includes the taxes. Phase 41. */
+  pricesIncludeTax?: boolean;
+  /** The customer is exempt: no tax is charged. Phase 41. */
+  taxExempt?: boolean;
   /** Excluded from totals until the customer opts in. */
   isOptional?: boolean;
   /** Set when the customer has declined this line. FR-806. */
@@ -56,6 +63,8 @@ export interface LineTotal {
   discount: Money;
   net: Money;
   tax: Money;
+  /** Each tax on the line. Empty for an exempt customer. */
+  taxes: TaxAmount[];
   total: Money;
   cost: Money;
   margin: Money;
@@ -77,6 +86,8 @@ export interface DocumentTotals {
 }
 
 export interface TaxBand {
+  /** The tax's name, "No tax" for lines without one, "Exempt" for an exempt customer. */
+  name: string;
   ratePct: number;
   net: Money;
   tax: Money;
@@ -88,9 +99,12 @@ export function calculateLine(line: PriceableLine, currency: Currency = 'GBP'): 
 
   const gross = multiply(unitPrice, line.quantity);
   const discount = percentOf(gross, clampPercent(line.discountPct ?? 0));
-  const net = subtract(gross, discount);
-  const tax = percentOf(net, line.taxRatePct ?? 0);
-  const total = add(net, tax);
+  const { net, tax, taxes, total } = taxOnLine({
+    amount: subtract(gross, discount),
+    parts: partsOf(line),
+    pricesIncludeTax: line.pricesIncludeTax,
+    exempt: line.taxExempt,
+  });
   const cost = multiply(unitCost, line.quantity);
   const margin = subtract(net, cost);
 
@@ -99,6 +113,7 @@ export function calculateLine(line: PriceableLine, currency: Currency = 'GBP'): 
     discount,
     net,
     tax,
+    taxes,
     total,
     cost,
     margin,
@@ -157,29 +172,51 @@ export function calculateTotals(
   };
 }
 
+/** The taxes a line carries: its own list, or its single rate. */
+export function partsOf(line: PriceableLine): readonly TaxPart[] {
+  if (line.taxes) return line.taxes;
+  const ratePct = line.taxRatePct ?? 0;
+  return [{ name: ratePct === 0 ? NO_TAX : `${ratePct}%`, ratePct }];
+}
+
+/**
+ * One band per tax and rate. Each band's net is the amount that tax was
+ * charged on, so two taxes on the same line both count its net: that is what
+ * each authority is told.
+ */
 function buildTaxBreakdown(
   lines: readonly PriceableLine[],
   totals: readonly LineTotal[],
   currency: Currency,
 ): TaxBand[] {
-  const bands = new Map<number, { net: Money; tax: Money }>();
+  const bands = new Map<string, TaxBand>();
+  const addTo = (name: string, ratePct: number, net: Money, tax: Money) => {
+    const key = `${name} ${ratePct}`;
+    const existing = bands.get(key) ?? {
+      name,
+      ratePct,
+      net: zero(currency),
+      tax: zero(currency),
+    };
+    bands.set(key, { ...existing, net: add(existing.net, net), tax: add(existing.tax, tax) });
+  };
 
   lines.forEach((line, index) => {
     const computed = totals[index];
     if (!computed) return;
 
-    const ratePct = line.taxRatePct ?? 0;
-    const existing = bands.get(ratePct) ?? { net: zero(currency), tax: zero(currency) };
-
-    bands.set(ratePct, {
-      net: add(existing.net, computed.net),
-      tax: add(existing.tax, computed.tax),
-    });
+    if (line.taxExempt) {
+      addTo(EXEMPT, 0, computed.net, zero(currency));
+      return;
+    }
+    if (computed.taxes.length === 0) {
+      addTo(NO_TAX, 0, computed.net, zero(currency));
+      return;
+    }
+    for (const entry of computed.taxes) addTo(entry.name, entry.ratePct, computed.net, entry.tax);
   });
 
-  return [...bands.entries()]
-    .sort(([a], [b]) => a - b)
-    .map(([ratePct, { net, tax }]) => ({ ratePct, net, tax }));
+  return [...bands.values()].sort((a, b) => a.ratePct - b.ratePct || a.name.localeCompare(b.name));
 }
 
 /**

@@ -19,11 +19,11 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { saveTaxRateWithParts, TaxError } from '@/lib/tax';
 import { tFor } from '@/lib/i18n';
 import {
   catalogueSettings,
   saveJobType,
-  saveTaxRate,
   setDefaultTaxRate,
   setJobTypeActive,
   SettingsError,
@@ -56,16 +56,27 @@ async function saveRate(formData: FormData) {
 
   const { orgId, user } = await requireSession('settings:write');
 
+  // Up to three taxes on one rate, each with its name and percentage, and
+  // whether it is charged on top of the ones before it. Phase 41.
+  const parts = [0, 1, 2]
+    .map((index) => ({
+      name: String(formData.get(`part.${index}.name`) ?? '').trim(),
+      rate: String(formData.get(`part.${index}.rate`) ?? '').trim(),
+      compound: formData.get(`part.${index}.compound`) === 'yes',
+    }))
+    .filter((part) => part.name || part.rate)
+    .map((part) => ({ name: part.name, ratePct: Number(part.rate), compound: part.compound }));
+
   try {
-    await saveTaxRate({
+    await saveTaxRateWithParts({
       orgId,
       userId: user.userId,
       taxRateId: String(formData.get('taxRateId') ?? '') || null,
       name: String(formData.get('name') ?? ''),
-      rate: Number(formData.get('rate') ?? ''),
+      parts,
     });
   } catch (error) {
-    if (error instanceof SettingsError) back(error.message);
+    if (error instanceof SettingsError || error instanceof TaxError) back(error.message);
     throw error;
   }
 
@@ -212,6 +223,21 @@ export default async function CatalogueSettingsPage({
                     <Tr key={row.id}>
                       <Td>
                         {row.name}
+                        {row.components.length > 1 ||
+                        (row.components[0] && row.components[0].name !== row.name) ? (
+                          <span className="block text-[12px] text-(--text-faint)">
+                            {row.components
+                              .map((part) =>
+                                part.compound
+                                  ? t('{name} {rate}% on top', {
+                                      name: part.name,
+                                      rate: Number(part.rate),
+                                    })
+                                  : `${part.name} ${Number(part.rate)}%`,
+                              )
+                              .join(' + ')}
+                          </span>
+                        ) : null}
                         {row.isDefault ? (
                           <Badge tone="brand" size="sm" className="ms-2">
                             {t('default')}
@@ -270,7 +296,7 @@ export default async function CatalogueSettingsPage({
             />
             <form action={saveRate}>
               {editingRate ? <input type="hidden" name="taxRateId" value={editingRate.id} /> : null}
-              <CardBody className="grid gap-4 sm:grid-cols-[1fr_8rem]">
+              <CardBody className="grid gap-4">
                 <Field label={t('Name')} hint={t('As it reads on the invoice')}>
                   <Input
                     name="name"
@@ -280,17 +306,65 @@ export default async function CatalogueSettingsPage({
                     placeholder={t('VAT 20%')}
                   />
                 </Field>
-                <Field label={t('Percent')}>
-                  <Input
-                    name="rate"
-                    type="number"
-                    min={0}
-                    max={100}
-                    step="0.001"
-                    defaultValue={editingRate ? Number(editingRate.rate) : ''}
-                    required
-                  />
-                </Field>
+                <div className="grid gap-2">
+                  <p className="text-[13px] font-medium">{t('The taxes on this rate')}</p>
+                  <p className="text-[12px] text-(--text-faint)">
+                    {t(
+                      'Most rates are one tax. Where two are charged on the same line, add the second; tick “on top” where it is charged on the price with the first tax in.',
+                    )}
+                  </p>
+                  {[0, 1, 2].map((index) => {
+                    const part = editingRate?.components[index];
+                    return (
+                      <div
+                        key={index}
+                        className="grid items-end gap-2 sm:grid-cols-[1fr_7rem_auto]"
+                      >
+                        <Field label={t('Tax {number}', { number: index + 1 })}>
+                          <Input
+                            name={`part.${index}.name`}
+                            defaultValue={
+                              part?.name ?? (index === 0 && editingRate ? editingRate.name : '')
+                            }
+                            required={index === 0}
+                            maxLength={40}
+                            placeholder={index === 0 ? t('VAT') : ''}
+                          />
+                        </Field>
+                        <Field label={t('Percent')}>
+                          <Input
+                            name={`part.${index}.rate`}
+                            type="number"
+                            min={0}
+                            max={100}
+                            step="0.001"
+                            defaultValue={
+                              part
+                                ? Number(part.rate)
+                                : index === 0 && editingRate
+                                  ? Number(editingRate.rate)
+                                  : ''
+                            }
+                            required={index === 0}
+                          />
+                        </Field>
+                        {index > 0 ? (
+                          <label className="flex items-center gap-2 pb-2 text-[13px]">
+                            <input
+                              type="checkbox"
+                              name={`part.${index}.compound`}
+                              value="yes"
+                              defaultChecked={part?.compound ?? false}
+                            />
+                            {t('on top')}
+                          </label>
+                        ) : (
+                          <span />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </CardBody>
               <CardBody className="flex gap-2 border-t border-(--border)">
                 <Button type="submit" variant="primary">
@@ -308,7 +382,7 @@ export default async function CatalogueSettingsPage({
             </form>
             <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
               {t(
-                'A rate that has been invoiced keeps its percentage. Add the new one and retire the old, so what was invoiced still reads the way it was sent.',
+                'A rate that has been invoiced keeps its taxes. Add the new one and retire the old, so what was invoiced still reads the way it was sent.',
               )}
             </CardBody>
           </Card>

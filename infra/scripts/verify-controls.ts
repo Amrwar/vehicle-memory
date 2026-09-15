@@ -79,6 +79,7 @@ const PAGES = [
   '/gift-cards',
   '/reports',
   '/reports/business',
+  '/reports/tax',
   '/insights',
   '/inspections',
   '/floor',

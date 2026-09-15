@@ -96,6 +96,11 @@ export default async function BusinessReportsPage({
                 </Button>
               </Link>
             ))}
+            <Link href="/reports/tax">
+              <Button size="sm" variant="ghost">
+                {t('Tax')}
+              </Button>
+            </Link>
             <Link href="/reports">
               <Button size="sm" variant="ghost">
                 {t('Operational')}

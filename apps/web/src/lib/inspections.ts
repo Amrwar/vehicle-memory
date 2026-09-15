@@ -17,6 +17,7 @@ import { audit } from './guard';
 import { readUrlFor } from './storage';
 import { regionFor } from './region';
 import { retotalEstimate } from './estimates';
+import { defaultTaxRateId } from './tax';
 
 /**
  * Inspections, against the database.
@@ -155,6 +156,7 @@ export async function inspectionFor(orgId: string, inspectionId: string) {
           id: true,
           number: true,
           shortDescription: true,
+          locationId: true,
           customer: { select: { displayName: true } },
           vehicle: {
             select: { id: true, make: true, model: true, year: true, registration: true },
@@ -374,9 +376,14 @@ export async function completeInspection(input: {
       },
     });
 
+    // The quote's lines take the site's rate. Before Phase 41 they carried no
+    // rate at all, so a quote raised from an inspection was priced without tax.
+    const taxRateId = await defaultTaxRateId(input.orgId, job.locationId, tx);
+
     await tx.estimateLine.createMany({
       data: lines.map((line, index) => ({
         estimateId: estimate.id,
+        taxRateId,
         kind: line.kind,
         description: line.description,
         detail: line.detail ?? null,

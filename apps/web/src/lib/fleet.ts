@@ -19,7 +19,8 @@ import { prisma } from '@carnet/db';
 
 import { postEntry } from './accounting';
 import { audit } from './guard';
-import { priceableLinesOf } from './money';
+import { JOB_LINES, priceableLinesOf } from './money';
+import { recordTaxEntries, taxContextFor } from './tax';
 import { pushNow } from './outbound';
 import { regionFor } from './region';
 
@@ -351,9 +352,7 @@ export async function consolidateMonth(input: {
       completedAt: { gte: window.from, lte: window.to },
     },
     include: {
-      labourLines: { include: { taxRate: { select: { rate: true } } } },
-      partLines: { include: { taxRate: { select: { rate: true } } } },
-      feeLines: { include: { taxRate: { select: { rate: true } } } },
+      ...JOB_LINES,
       invoices: { where: { status: { not: 'VOID' } }, select: { id: true } },
       invoiceLines: { select: { id: true } },
       vehicle: { select: { registration: true, make: true, model: true } },
@@ -375,6 +374,8 @@ export async function consolidateMonth(input: {
   });
 
   const included = jobs.filter((job) => include.some((entry) => entry.id === job.id));
+  // The fleet is who pays, so its exemption and the workshop's pricing apply. Phase 41.
+  const taxContext = await taxContextFor(input.orgId, customer.id);
 
   // Every line, tagged with its job, at list and at the agreed price.
   const listLines: PriceableLine[] = [];
@@ -382,7 +383,7 @@ export async function consolidateMonth(input: {
   const lineJobs: { jobId: string; description: string; taxRateId: string | null }[] = [];
 
   for (const job of included) {
-    const lines = priceableLinesOf(job);
+    const lines = priceableLinesOf(job, taxContext);
     const agreed = applyFleetAgreement(lines, {
       labourDiscountPct: Number(agreement.labourDiscountPct),
       partsDiscountPct: Number(agreement.partsDiscountPct),
@@ -440,6 +441,8 @@ export async function consolidateMonth(input: {
         amountPaid: 0,
         issuedAt,
         dueAt,
+        pricesIncludeTax: taxContext.pricesIncludeTax,
+        taxExemptReference: taxContext.exemptReference,
         notes: `${window.label}: ${included.length} job${included.length === 1 ? '' : 's'} under the fleet agreement.`,
         lines: {
           create: agreedLines.map((line, index) => ({
@@ -458,6 +461,17 @@ export async function consolidateMonth(input: {
         },
       },
       select: { id: true, number: true },
+    });
+
+    await recordTaxEntries(tx, {
+      orgId: input.orgId,
+      locationId: included[0]?.locationId ?? null,
+      sourceType: 'INVOICE',
+      sourceId: created.id,
+      reference: created.number,
+      occurredAt: issuedAt,
+      currency: totals.currency,
+      bands: totals.taxBreakdown,
     });
 
     for (const job of included) {

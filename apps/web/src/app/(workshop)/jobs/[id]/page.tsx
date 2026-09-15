@@ -60,7 +60,8 @@ import { type Channel, channelLabel } from '@carnet/core';
 import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
-import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
+import { issueInvoice, MoneyCycleError, moveJob, priceableLinesOf } from '@/lib/money';
+import { TAX_RATE, taxContextFor } from '@/lib/tax';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { applyPackage, PackageError, packagesFor } from '@/lib/packages';
 import { addSublet, billSublet, markSubletDone, ReturnError, subletsForJob } from '@/lib/returns';
@@ -503,9 +504,9 @@ export default async function JobPage({
         include: { actor: { select: { name: true } } },
       },
       tasks: { orderBy: { sortOrder: 'asc' } },
-      labourLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: true } },
-      partLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: true } },
-      feeLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: true } },
+      labourLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
+      partLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
+      feeLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
       notes: { orderBy: { createdAt: 'desc' }, include: { author: { select: { name: true } } } },
       attachments: { orderBy: { createdAt: 'desc' } },
       timeEntries: { include: { user: { select: { name: true } } } },
@@ -556,29 +557,10 @@ export default async function JobPage({
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
   const stages = progressFor(job.status as JobStatus, reached);
 
-  const lines: PriceableLine[] = [
-    ...job.labourLines.map((line) => ({
-      kind: 'LABOUR' as const,
-      quantity: Number(line.hours),
-      unitPrice: line.rate.toString(),
-      discountPct: Number(line.discountPct),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
-    })),
-    ...job.partLines.map((line) => ({
-      kind: 'PART' as const,
-      quantity: Number(line.quantity),
-      unitPrice: line.unitPrice.toString(),
-      unitCost: line.unitCost.toString(),
-      discountPct: Number(line.discountPct),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
-    })),
-    ...job.feeLines.map((line) => ({
-      kind: 'FEE' as const,
-      quantity: 1,
-      unitPrice: line.amount.toString(),
-      taxRatePct: line.taxRate ? Number(line.taxRate.rate) : 0,
-    })),
-  ];
+  // Priced as the invoice will be: each rate's taxes, with tax in or before
+  // tax, and nothing for an exempt customer. Phase 41.
+  const taxContext = await taxContextFor(orgId, job.billToCustomerId ?? job.customerId);
+  const lines: PriceableLine[] = priceableLinesOf(job, taxContext);
 
   const totals = calculateTotals(lines, region.currency);
   // The most recent one that actually has something in it. Taking the newest

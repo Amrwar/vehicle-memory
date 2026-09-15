@@ -450,7 +450,8 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Sublet work                             | Built   | A vendor, a line on the job with its margin, the vendor's bill at the real cost, invoiced to the customer (Phase 38)                    |
 | Global search                           | Built   | Plates however typed, VINs, phone digits, job, invoice and part numbers; an exact match goes straight to the record (Phase 39)          |
 | Staff notifications                     | Built   | Approvals, messages, online bookings, card payments, part requests, to whoever would act; each opens its record (Phase 39)              |
-| Tax by customer, site, or stacked       | Missing | One rate per line; Phase 41                                                                                                             |
+| Tax by customer, site, or stacked       | Built   | Up to three taxes on a rate, compound or not; exempt customers with a certificate; a rate per site; prices with tax in (Phase 41)       |
+| Report per tax                          | Built   | Each tax and rate for a period, as declared on each document, less credit notes, per site; CSV (Phase 41)                               |
 | Printing, PDF, labels                   | Partial | Three pages print; Phase 42                                                                                                             |
 | Onboarding checklist                    | Missing | Phase 45                                                                                                                                |
 | Demonstration data                      | Missing | Phase 45                                                                                                                                |
@@ -467,9 +468,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 202          |
+| Built    | 204          |
 | Partial  | 2            |
-| Missing  | 7            |
+| Missing  | 6            |
 | Deferred | 1            |
 
 <!-- counts:end -->

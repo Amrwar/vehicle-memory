@@ -979,6 +979,30 @@ export const fr: Readonly<Record<string, string>> = {
   'Active subscription': 'Abonnement actif',
   'Past due subscription': 'Abonnement en retard de paiement',
   'Incomplete subscription': 'Abonnement incomplet',
+  // Phase 41: tax, configurable.
+  '{name} {rate}% on top': '{name} {rate} % en cascade',
+  'The taxes on this rate': 'Les taxes de ce taux',
+  'Most rates are one tax. Where two are charged on the same line, add the second; tick “on top” where it is charged on the price with the first tax in.':
+    'La plupart des taux comportent une seule taxe. Lorsque deux sont facturées sur la même ligne, ajoutez la seconde ; cochez « en cascade » si elle se calcule sur le prix incluant la première.',
+  'Tax {number}': 'Taxe {number}',
+  'on top': 'en cascade',
+  'A rate that has been invoiced keeps its taxes. Add the new one and retire the old, so what was invoiced still reads the way it was sent.':
+    'Un taux déjà facturé garde ses taxes. Ajoutez le nouveau et retirez l’ancien, afin que ce qui a été facturé se lise toujours comme il a été envoyé.',
+  'How prices are entered': 'Saisie des prix',
+  'Applies to labour rates, part prices, packages and the counter':
+    'S’applique aux taux horaires, aux prix des pièces, aux forfaits et au comptoir',
+  'Before tax': 'Hors taxe',
+  'Tax is added on top, as a trade price list reads.':
+    'La taxe s’ajoute au prix, comme sur un tarif professionnel.',
+  'With tax in': 'Taxes comprises',
+  'The price is what the customer pays; the tax is taken out of it.':
+    'Le prix est ce que paie le client ; la taxe en est déduite.',
+  'Open jobs and quotes are priced the new way from now on. Invoices already issued keep the way they were priced.':
+    'Les travaux et devis en cours sont désormais chiffrés de la nouvelle façon. Les factures déjà émises gardent leur chiffrage.',
+  'Tax at this site': 'Taxe sur ce site',
+  'New lines here take this rate. Leave it on the default where the site charges what the workshop does.':
+    'Les nouvelles lignes prennent ici ce taux. Laissez le taux par défaut si le site applique le même que l’atelier.',
+  'The workshop’s default': 'Le taux par défaut de l’atelier',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1943,4 +1967,28 @@ export const ar: Readonly<Record<string, string>> = {
   'Active subscription': 'الاشتراك فعّال',
   'Past due subscription': 'الاشتراك متأخر السداد',
   'Incomplete subscription': 'الاشتراك غير مكتمل',
+  // Phase 41: tax, configurable.
+  '{name} {rate}% on top': '{name} {rate}% فوق ما قبلها',
+  'The taxes on this rate': 'الضرائب في هذا المعدل',
+  'Most rates are one tax. Where two are charged on the same line, add the second; tick “on top” where it is charged on the price with the first tax in.':
+    'معظم المعدلات ضريبة واحدة. عندما تُحتسب ضريبتان على السطر نفسه، أضف الثانية؛ وحدّد «فوق ما قبلها» إذا كانت تُحتسب على السعر شاملاً الضريبة الأولى.',
+  'Tax {number}': 'الضريبة {number}',
+  'on top': 'فوق ما قبلها',
+  'A rate that has been invoiced keeps its taxes. Add the new one and retire the old, so what was invoiced still reads the way it was sent.':
+    'المعدل الذي صدرت به فواتير يحتفظ بضرائبه. أضف المعدل الجديد وأوقف القديم، ليبقى ما صدر مقروءاً كما أُرسل.',
+  'How prices are entered': 'طريقة إدخال الأسعار',
+  'Applies to labour rates, part prices, packages and the counter':
+    'تنطبق على أجور العمل وأسعار القطع والباقات والكاونتر',
+  'Before tax': 'قبل الضريبة',
+  'Tax is added on top, as a trade price list reads.':
+    'تُضاف الضريبة فوق السعر، كما في قوائم أسعار التجار.',
+  'With tax in': 'شامل الضريبة',
+  'The price is what the customer pays; the tax is taken out of it.':
+    'السعر هو ما يدفعه العميل؛ وتُستخرج الضريبة منه.',
+  'Open jobs and quotes are priced the new way from now on. Invoices already issued keep the way they were priced.':
+    'تُسعَّر الأعمال وعروض الأسعار المفتوحة بالطريقة الجديدة من الآن. وتحتفظ الفواتير الصادرة بطريقة تسعيرها.',
+  'Tax at this site': 'الضريبة في هذا الموقع',
+  'New lines here take this rate. Leave it on the default where the site charges what the workshop does.':
+    'تأخذ الأسطر الجديدة هنا هذا المعدل. اتركه على الافتراضي إذا كان الموقع يحتسب ما تحتسبه الورشة.',
+  'The workshop’s default': 'المعدل الافتراضي للورشة',
 };

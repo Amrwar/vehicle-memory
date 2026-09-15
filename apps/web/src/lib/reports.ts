@@ -25,6 +25,26 @@ export function periodFor(key: string, locale = 'en-GB'): Period & { label: stri
     };
   }
 
+  // A tax return is for a period that has ended. Phase 41.
+  if (key === 'last-month') {
+    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return {
+      from,
+      to: new Date(now.getFullYear(), now.getMonth(), 1),
+      label: from.toLocaleString(locale, { month: 'long', year: 'numeric' }),
+    };
+  }
+
+  if (key === 'last-quarter') {
+    const quarter = Math.floor(now.getMonth() / 3);
+    const from = new Date(now.getFullYear(), (quarter - 1) * 3, 1);
+    return {
+      from,
+      to: new Date(now.getFullYear(), quarter * 3, 1),
+      label: `${from.getFullYear()} Q${Math.floor(from.getMonth() / 3) + 1}`,
+    };
+  }
+
   if (key === 'quarter') {
     const quarter = Math.floor(now.getMonth() / 3);
     return {

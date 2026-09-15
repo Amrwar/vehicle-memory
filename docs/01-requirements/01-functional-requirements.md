@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7200 — Tax, configurable
+
+| Ref     | Requirement                                                                                                                                                                       | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7201 | A tax rate MUST carry one to three taxes, each with a name and a percentage and optionally charged on the price with the taxes before it, each worked out and rounded on its own. | 41    |
+| FR-7202 | A workshop MUST choose whether prices are entered before tax or with tax in; with tax in, a line MUST come to its price exactly.                                                  | 41    |
+| FR-7203 | A customer MUST be exemptible only with a certificate reference, their documents charging no tax and carrying the reference.                                                      | 41    |
+| FR-7204 | A site MAY have its own tax rate, which every new line at that site MUST take.                                                                                                    | 41    |
+| FR-7205 | Every invoice, credit note and counter sale MUST record what each tax came to when issued, and the record MUST NOT be changed.                                                    | 41    |
+| FR-7206 | A report per tax MUST give, for a period and per site, what each tax was charged on, what it came to, what was given back and what is owed, from those records alone.             | 41    |
+| FR-7207 | A tax rate on an issued invoice MUST NOT have its taxes changed.                                                                                                                  | 41    |
+
 ## FR-7100 — Every word translated
 
 | Ref     | Requirement                                                                                                                                                                     | Phase |

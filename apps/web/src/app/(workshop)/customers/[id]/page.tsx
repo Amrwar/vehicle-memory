@@ -24,6 +24,7 @@ import { BackLink } from '@/components/back-link';
 import { CustomerError, setPreferredTechnician } from '@/lib/customers';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
+import { setCustomerExemption, TaxError } from '@/lib/tax';
 import {
   awardByHand,
   HAND_AWARD_CEILING,
@@ -77,6 +78,29 @@ async function prefer(formData: FormData) {
   }
 
   redirect(`/customers/${customerId}?saved=preference`);
+}
+
+/** Exempt from tax on the strength of a certificate, or charged as usual. Phase 41. */
+async function exemption(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+  try {
+    await setCustomerExemption({
+      orgId,
+      userId: user.userId,
+      customerId,
+      exempt: formData.get('exempt') === 'yes',
+      reference: String(formData.get('reference') ?? ''),
+    });
+  } catch (error) {
+    if (error instanceof TaxError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}#tax`);
+    }
+    throw error;
+  }
+  redirect(`/customers/${customerId}?saved=tax#tax`);
 }
 
 /**
@@ -510,6 +534,50 @@ export default async function CustomerPage({
                 <span className="tabular">{customer.invoices.length}</span>
               </div>
             </CardBody>
+          </Card>
+
+          <Card id="tax" className={customer.taxExempt ? 'border-(--brand)' : undefined}>
+            <CardHeader
+              title={t('Tax')}
+              description={
+                customer.taxExempt
+                  ? t('Exempt. No tax is charged on their invoices.')
+                  : t('Charged tax as usual.')
+              }
+            />
+            {mayEditCustomer ? (
+              <form action={exemption}>
+                <input type="hidden" name="customerId" value={customer.id} />
+                <CardBody className="grid gap-3 text-[13px]">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="exempt"
+                      value="yes"
+                      defaultChecked={customer.taxExempt}
+                    />
+                    {t('Exempt from tax')}
+                  </label>
+                  <Field
+                    label={t('Certificate or registration number')}
+                    hint={t('Required when exempt. It is printed on every invoice to them.')}
+                  >
+                    <Input
+                      name="reference"
+                      defaultValue={customer.taxExemptReference ?? ''}
+                      maxLength={60}
+                    />
+                  </Field>
+                  <div>
+                    <Button type="submit" size="sm" variant="secondary">
+                      {t('Save')}
+                    </Button>
+                  </div>
+                </CardBody>
+              </form>
+            ) : customer.taxExemptReference ? (
+              <CardBody className="text-[13px]">{customer.taxExemptReference}</CardBody>
+            ) : null}
           </Card>
 
           {/* Money held. A deposit before the work or a credit from a refund,
