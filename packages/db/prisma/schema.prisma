@@ -145,6 +145,7 @@ model Organization {
   deposits            Deposit[]
   depositMovements    DepositMovement[]
   paymentAttempts     PaymentAttempt[]
+  imports             ImportBatch[]
 
   @@index([isActive])
   @@index([billingCustomerRef])
@@ -290,6 +291,7 @@ model User {
   giftCardsSold            GiftCard[]
   giftCardEntries          GiftCardEntry[]
   paymentAttemptsStarted   PaymentAttempt[]     @relation("PaymentAttemptStarter")
+  importBatches            ImportBatch[]
 
   @@index([isActive])
   @@map("users")
@@ -4031,4 +4033,36 @@ enum PaymentAttemptStatus {
   SUCCEEDED
   FAILED
   CANCELLED
+}
+
+/// A file somebody brought from another system, and what became of it. Phase 33.
+/// The rows are kept as they arrived so the mapping can be changed and the
+/// preview re-run; the report says, row by row, what did not go in and why.
+model ImportBatch {
+  id              String       @id @default(cuid())
+  orgId           String
+  dataset         String
+  fileName        String
+  delimiter       String       @default(",")
+  headers         Json
+  rows            Json
+  rowCount        Int
+  mapping         Json?
+  status          ImportStatus @default(UPLOADED)
+  report          Json?
+  createdByUserId String?
+  createdAt       DateTime     @default(now())
+  importedAt      DateTime?
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@map("import_batches")
+}
+
+enum ImportStatus {
+  UPLOADED
+  MAPPED
+  IMPORTED
 }

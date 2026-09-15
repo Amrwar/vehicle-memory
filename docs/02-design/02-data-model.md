@@ -181,6 +181,12 @@ is on file"), `billingCheckoutRef`, `billingStatus` as the provider last said
 it, `billingCardBrand` and `billingCardLast4`, `currentPeriodEnd`,
 `billingPayload` as the stub provider's own memory, `termsAcceptedAt` and
 `termsVersion`, and `trialReminderSentAt` so the reminder goes once.
+
+An `ImportBatch` (Phase 33) is a file as it arrived: `headers` and `rows`
+as JSON, the `delimiter` it used, the `mapping` a person settled on, a
+`status` that moves once from uploaded to mapped to imported, and a `report`
+of what went in and what did not, row by row. The rows are kept so the
+mapping can be changed and the preview re-run; a batch never imports twice.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

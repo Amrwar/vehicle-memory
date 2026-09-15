@@ -152,6 +152,20 @@ export default async function SettingsPage({
 
         <Card>
           <CardHeader
+            title="Data in and out"
+            description="Import customers, vehicles, parts, suppliers and opening balances from a CSV; export everything"
+            action={
+              <Link href="/settings/data">
+                <Button variant="secondary" size="sm">
+                  Open
+                </Button>
+              </Link>
+            }
+          />
+        </Card>
+
+        <Card>
+          <CardHeader
             title="Organisation"
             action={
               mayWrite ? (

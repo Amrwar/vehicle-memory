@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 32.7"
+AFTER_PHASE = "Phase 33"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -242,7 +242,8 @@ DOMAIN_TEXT: dict[str, list[str]] = {
         "The organisation also carries its region (country, currency, locale, timezone) and the four dates its subscription "
         "state is read from. AuditLog is written by every consequential action and never rolls the action back if it fails; "
         "OutboxEvent is the transactional outbox that carries side effects out of the commit that caused them; SyncedAction "
-        "is the idempotency record for what a technician's device did while it was out of signal.",
+        "is the idempotency record for what a technician's device did while it was out of signal. ImportBatch is a file "
+        "brought from another system, kept as it arrived with its mapping and its report.",
     ],
     "vehicle": [
         "The vehicle is global, not owned by a workshop (ADR-0004): one Vehicle row per VIN, whoever touches it. Its "
@@ -377,6 +378,7 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("terms", "The terms: the trial, the charge that follows it, cancelling, the data.", "Public"),
     ("pricing", "The pricing page in the currency of the country picked.", "Public"),
     ("subscription", "The billing page: the card, the next charge as a date and an amount, the invoices.", "Workshop"),
+    ("data", "Data in and out: import a CSV, export every dataset.", "Workshop"),
     ("portal", "The customer's home on a phone: what needs them first, then their cars.", "Customer"),
     ("portal-desktop", "The same home on a desktop, two columns under a persistent navigation.", "Customer"),
     ("portal-rewards", "Rewards: points per workshop and the referral code.", "Customer"),
@@ -406,6 +408,7 @@ VERIFY_TEXT = {
     "verify-referrals": "a code redeemed at sign-up and the reward settled on the first paid bill",
     "verify-backup": "a backup taken and restored, and the restored database answering",
     "verify-headers": "the security headers and the content security policy on every surface",
+    "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
 }
@@ -717,7 +720,19 @@ def build() -> None:
               "ledger, payroll, transfers, the API) are enforced inside the functions that make or do the thing, with "
               "the refusal naming the number and the plan.")
 
-    doc.add_heading("6.11 Answers and the assistant", level=2)
+    doc.add_heading("6.11 Data in, data out", level=2)
+    para(doc, "A CSV from another system is parsed in core (any delimiter, quoted fields, a byte-order mark) and "
+              "kept as it came on an ImportBatch: headers, rows, the delimiter, and a mapping suggested from the headers "
+              "and edited by a person. Validation runs every row through the dataset's rules before anything is written "
+              "and names each problem by spreadsheet row and field. The import writes what passed one row at a time "
+              "through the same library functions the pages use (createCustomer, registerVehicle or adoptVehicle, "
+              "createProduct with an opening stock adjustment, createSupplier, postEntry for a balanced opening entry), "
+              "so tenant scoping, duplicate refusal and plan limits apply as they would to typed rows, and a report of "
+              "what did not go in is kept on the batch. Exports read each dataset whole through the scoped client and "
+              "write CSV in the same shapes, the passports as JSON in the network's form, or everything as one file; "
+              "they need only the read permission a read-only or cancelled workshop keeps.")
+
+    doc.add_heading("6.12 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

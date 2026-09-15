@@ -91,7 +91,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Thirty-two phases have shipped, the last on 14 September 2026: the workshop core,
+Thirty-three phases have shipped, the last on 14 September 2026: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
@@ -104,7 +104,8 @@ payment through a provider from the customer's portal, redesigned around a
 navigation that is always there and a directory of every workshop, and the
 subscription billed: a card before a fourteen-day trial, charged when it ends
 unless cancelled, with every sentence of that on the form, priced in the
-workshop's own currency, and the customer's account page. The
+workshop's own currency, the customer's account page, and data in and out: a
+CSV from any system mapped, previewed and imported, and everything exported. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
 phase, the [feature map](00-product/09-feature-map.md) counts 160 capabilities
 built, 4 partial and 22 missing, and the

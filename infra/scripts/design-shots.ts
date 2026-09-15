@@ -121,6 +121,7 @@ async function main() {
     { file: 'signup', path: '/signup', who: 'nobody', fullPage: true },
     { file: 'settings-organisation', path: '/settings/organisation', who: 'owner', fullPage: true },
     { file: 'subscription', path: '/settings/subscription', who: 'owner', fullPage: true },
+    { file: 'data', path: '/settings/data', who: 'owner', fullPage: true },
     { file: 'terms', path: '/terms', who: 'nobody', fullPage: true },
     { file: 'dashboard', path: '/dashboard', who: 'owner' },
     { file: 'dashboard-dark', path: '/dashboard', who: 'owner', dark: true },

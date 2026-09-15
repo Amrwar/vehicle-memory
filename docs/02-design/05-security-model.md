@@ -178,6 +178,17 @@ billing page, and the reminder is sent once and recorded. A provider's
 subscription event is followed by asking the provider for the whole
 record; a partial event never sets a card or a date on its own.
 
+### 7.3 Data in, data out (Phase 33)
+
+An import is the largest write a workshop ever makes and it goes through
+the smallest door: every row is validated in core before anything is
+written, and every row that passes is written through the same function
+the page uses, so tenant scoping, duplicate refusal and the plan's limits
+apply to an imported row exactly as to a typed one. The file is kept on the
+organisation's own row, never on disk, and a batch cannot run twice.
+Exports need only `settings:read`, which a read-only or cancelled workshop
+keeps, because leaving with everything is a promise the terms make.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

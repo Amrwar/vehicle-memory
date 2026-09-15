@@ -255,6 +255,17 @@ the rules about what can be tried, how an attempt moves, what can go back
 through the provider and what differs between the two records are pure
 functions in `packages/core/src/payments`, tested without a provider.
 
+### 3.11 Import (Phase 33)
+
+Not a context of its own: a door into the others. An import batch holds a
+file as it came and a mapping; the rules for reading a cell, suggesting a
+mapping and validating a row are pure functions in
+`packages/core/src/importing`, and the import itself calls the same
+functions the pages call, so an imported customer is exactly a customer and
+the invariants of each context hold for imported rows as for typed ones.
+Opening balances are the exception that proves it: they post as one
+balanced journal entry through `postEntry`, which refuses an unbalanced one.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

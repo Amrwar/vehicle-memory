@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 32.7.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 33.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -580,6 +580,22 @@ def build() -> None:
         works="One currency per page removes a whole class of doubt. A price book set by hand, rather than a rate on the day, means the number a workshop saw on Tuesday is the number it is charged on Friday.",
         shots=[("pricing", "The pricing page, in Canadian dollars.", 16.4), ("portal-settings", "The customer's account page.", 7.0)],
         source="docs/00-product/07-business-model.md; 08-design-system.md, section 12.6",
+    )
+
+    design(
+        doc,
+        title="Data in, data out",
+        when="Phase 33, 14 September 2026.",
+        why="A workshop arriving with five thousand customers in another system, and a workshop leaving "
+            "with everything: both are one page, because both are the same promise, that the data is theirs.",
+        meaning=[
+            "The import card leads: what is in the file, the file, one button. Beneath it, one line per dataset saying what a row becomes.",
+            "On the batch page the three steps sit side by side: which column is which, with the first rows shown beside each header; what would go in, with every problem by spreadsheet row and field; then one button naming the count.",
+            "The export card is the datasets as a list with a download on each and Everything as the primary, and a sentence saying exports work in every state of the subscription.",
+        ],
+        works="Problems named by row and field are problems a person can fix in the spreadsheet they already have open. Writing every row through the page's own function means the import cannot do anything the page could not.",
+        shots=[("data", "Data in and out.", 16.4)],
+        source="docs/02-design/01-domain-model.md, section 3.11; 05-security-model.md, section 7.3",
     )
 
     # 11. Counter

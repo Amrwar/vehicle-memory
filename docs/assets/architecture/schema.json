@@ -1,9 +1,9 @@
 {
-  "builtOn": "2026-09-14",
+  "builtOn": "2026-09-15",
   "counts": {
-    "models": 128,
-    "enums": 63,
-    "fields": 1979
+    "models": 129,
+    "enums": 64,
+    "fields": 1997
   },
   "enums": [
     "OrgPlan",
@@ -68,7 +68,8 @@
     "ClaimStatus",
     "GiftCardEntryKind",
     "DepositKind",
-    "PaymentAttemptStatus"
+    "PaymentAttemptStatus",
+    "ImportStatus"
   ],
   "domains": [
     {
@@ -184,6 +185,16 @@
           "name": "SyncedAction",
           "comment": "One action a device recorded offline and the server has since applied. Exists for one reason: a flush interrupted halfway must not write everything again when the signal comes back. The device generates the id before it sends anything, and this table is the record of which ids have already been honoured. Only applied actions are kept. A conflict stays on the device with the reason it was refused, because the person holding the device is the one who has to decide what to do about it, and a row here would make the retry read as a duplicate and disappear.",
           "fields": 8,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ImportBatch",
+          "comment": "A file somebody brought from another system, and what became of it. Phase 33. The rows are kept as they arrived so the mapping can be changed and the preview re-run; the report says, row by row, what did not go in and why.",
+          "fields": 14,
           "relations": [
             "Organization",
             "User"

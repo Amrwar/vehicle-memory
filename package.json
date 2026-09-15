@@ -54,6 +54,7 @@
     "verify:payments": "tsx infra/scripts/verify-payments.ts",
     "verify:billing": "tsx infra/scripts/verify-billing.ts",
     "verify:portal-account": "tsx infra/scripts/verify-portal-account.ts",
+    "verify:import": "tsx infra/scripts/verify-import.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

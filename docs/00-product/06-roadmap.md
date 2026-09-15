@@ -1340,7 +1340,7 @@ exist.
 | Payment links                         | Partial | \"Pay now\" in the portal is built; a link sent in a message is not (Phase 36, with conversations)                                               | 36    |
 | Permissions at the resource           | Built   | Every page tried as every role, every action read for its permission, another workshop's records not found (Phase 31)                            | 31    |
 | Plan limits, server side              | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled on the organisation (Phase 31)                           | 31    |
-| Data import                           | Missing | A workshop switching systems types everything in                                                                                                 | 33    |
+| Data import                           | Built   | CSV in, mapped from its own headers, every problem named by row, imported through the pages' rules (Phase 33)                                    | 33    |
 | Data export and exit                  | Partial | CSV for five reports; nothing that gives a workshop its data back whole                                                                          | 33    |
 | Estimate to job to invoice, as one    | Partial | Each step exists; nothing converts an approved estimate into a job, nothing approves extra work mid-job, parts are not reserved on approval      | 34    |
 | Check-in and check-out                | Missing | Mileage and photos exist on the job; no arrival or departure workflow, no fuel, belongings or keys                                               | 35    |
@@ -1701,6 +1701,28 @@ the form the network already exchanges.
 
 **Exit.** A workshop with five thousand customers in another system is
 running on Carnet by the afternoon, and could leave again with everything.
+
+**Status.** Built. A CSV from any system is read as it comes (a byte-order
+mark, either line ending, commas, semicolons or tabs, quoted fields with
+newlines) and kept as it came, headers and rows, on an import batch. The
+five datasets, customers, vehicles, parts, suppliers and opening balances,
+each name their fields, the headers other systems use for them and how a
+cell is read; a mapping is suggested from the headers and edited on the
+page; a preview runs every row through the rules and names each problem by
+spreadsheet row and field, so the report says "row 412, Email: not an
+email address" and never "12 failed". The import writes what passed one
+row at a time through the same functions the pages use, so a duplicate
+customer is refused rather than doubled, a part gets its opening stock at
+the main store, a VIN already on the network is adopted rather than
+registered twice, and an opening balance goes in as one balanced entry or
+not at all, with the difference to retained earnings and the report
+saying so. A batch never runs twice. Every dataset a workshop owns exports
+whole, as a CSV in the shape the import reads, and the passports as JSON
+in the form the network exchanges; "Everything" is one file with all of
+it, and exports work in every state of the subscription, read-only and
+cancelled included. The verification script uploads five files in three
+delimiters, watches the preview name the problems, imports, and reads
+every export back.
 
 ---
 

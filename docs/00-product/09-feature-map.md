@@ -416,8 +416,8 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Customer account page                   | Built   | Details, password, consent per workshop, sign out at /portal/settings (Phase 32.7)                                              |
 | Authorisation tried per role            | Built   | Every page as every role, every action read, another workshop's records not found: `verify-authz.ts` (Phase 31)                 |
 | Plan limits enforced server side        | Built   | Refused where the thing is made, naming the plan; trial, grace, read-only and cancelled states (Phase 31)                       |
-| Data import                             | Missing | Phase 33                                                                                                                        |
-| Whole-data export                       | Partial | Five CSV reports; Phase 33                                                                                                      |
+| Data import                             | Built   | CSV in, mapped from the headers, every problem by row and field, imported through the pages' own rules (Phase 33)               |
+| Whole-data export                       | Built   | Every dataset whole as CSV, the passports as JSON, or everything in one file (Phase 33)                                         |
 | Estimate becomes a job                  | Missing | Approval and invoicing exist either side of it; Phase 34                                                                        |
 | Extra work approved mid-job             | Missing | Phase 34                                                                                                                        |
 | Check-in and check-out                  | Missing | Phase 35                                                                                                                        |
@@ -446,9 +446,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 167          |
-| Partial  | 4            |
-| Missing  | 19           |
+| Built    | 169          |
+| Partial  | 3            |
+| Missing  | 18           |
 | Deferred | 1            |
 
 <!-- counts:end -->

@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6200 — Data in, data out
+
+| Ref     | Requirement                                                                                                                                                                                         | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6201 | A CSV from any system MUST be read as it comes (byte-order mark, either line ending, comma, semicolon or tab, quoted fields) and kept as it came, so the mapping can change and the preview re-run. | 33    |
+| FR-6202 | Customers, vehicles, parts, suppliers and opening balances MUST each be importable with a mapping suggested from the headers and edited by a person, and required fields refused when unmapped.     | 33    |
+| FR-6203 | Every row MUST be validated before anything is written, and every problem MUST name the spreadsheet row and the field.                                                                              | 33    |
+| FR-6204 | Imported rows MUST go in through the same functions the pages use, so a duplicate is refused and not doubled, and a batch MUST never run twice; the report MUST list what did not go in and why.    | 33    |
+| FR-6205 | Opening balances MUST post as one balanced entry or not at all, with the difference to retained earnings and the report saying so.                                                                  | 33    |
+| FR-6206 | Every dataset a workshop owns MUST export whole, as a CSV in the shape the import reads, and the passports as JSON in the network's form, in every state of the subscription.                       | 33    |
+
 ## FR-6100 — One currency, and the customer's account
 
 | Ref     | Requirement                                                                                                                                                                                            | Phase |

@@ -1208,6 +1208,43 @@ asking anybody.
 - **Given** I turn off a workshop's offers, **when** I save, **then** the
   workshop sees a consent change with the date and that I made it.
 
+## Epic AF — Data in, data out (Phase 33)
+
+### AF1 — Five thousand customers by the afternoon
+
+**As** Ahmed **I want** to upload the customer list from the old system and
+be told, row by row, what would not go in **so that** the move takes an
+afternoon and not a fortnight of retyping.
+**Size** 5 · **Satisfies** FR-6201, FR-6202, FR-6203, FR-6204
+
+- **Given** a file with "Forename", "Surname" and "E-Mail" columns, **when**
+  I upload it, **then** the columns are already mapped and I only check.
+- **Given** two rows with the same email, **when** I preview, **then** the
+  second says "same as row 2" and is left out.
+- **Given** a customer already on my books, **when** I import, **then** the
+  row is refused with the reason and nothing is doubled.
+
+### AF2 — The books open where they left off
+
+**As** Fatima **I want** to import the opening balances **so that** the
+ledger starts from the old system's closing figures.
+**Size** 3 · **Satisfies** FR-6205
+
+- **Given** debits and credits that do not balance, **when** I preview,
+  **then** the difference is stated and goes to retained earnings.
+- **Given** a code not in the chart, **when** I import, **then** nothing is
+  posted and the row is named.
+
+### AF3 — Leaving with everything
+
+**As** Ahmed **I want** every dataset exported whole **so that** the data
+is mine whether I stay or go.
+**Size** 2 · **Satisfies** FR-6206
+
+- **Given** the data page, **when** I download Everything, **then** one file
+  holds customers, vehicles, jobs, invoices, payments, parts, suppliers, the
+  ledger and the passports.
+
 ---
 
 ## Story map

@@ -55,6 +55,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'AuditLog',
       'OutboxEvent',
       'SyncedAction',
+      'ImportBatch',
     ],
   },
   {
