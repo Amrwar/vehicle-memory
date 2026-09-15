@@ -1857,8 +1857,40 @@ screens.
 
 ## Phase 37 — Packages and templates
 
-A service package with labour, parts, checklist, duration, skills, price
-and interval; a job template from it; a job from a package in one press.
+**Scope.** A service package with labour, parts, checklist, duration,
+skills, price and interval; a job template from it; a job from a package
+in one press.
+
+**Exit.** "Full service" is one press at the counter, online, and on a job
+already open, and the job it makes is one a technician can pick up without
+asking.
+
+**Status.** Built. A service package is a piece of work priced and
+described as one thing: lines of labour (hours and a rate), parts (units, a
+price and optionally a part number that reserves stock on approval) and
+fees, a checklist that becomes the job's tasks, a duration that becomes
+the time to allow, a kind of work that brings the skills the planner
+needs, a fixed price or the lines' sum, and an interval in months or
+kilometres. Packages are saved whole on a settings page, so a job is never
+made from a half-edited one; a package is retired rather than deleted. A
+job from a package is one press: the new-job form takes a package and the
+job is created with everything on it in the same transaction; a package
+can be added to a job already open, after what is there, from the job's
+own labour and parts card; a booking taken for a package sets its time
+and, when the car arrives, becomes a job from that package; a customer
+booking online is offered every bookable package with its price and its
+description. Completing a job made from a recurring package sets the
+vehicle's next one: one schedule per package per vehicle, refreshed rather
+than duplicated, with the due date and the due mileage the reminders run
+on. The job template the scope asked for is the package itself, applied to
+an existing job. The verification script saves a package with every
+refusal tried, makes a job from it in one press, adds it to a job under
+way, books it and arrives it, completes it and reads the next one, checks
+the online offer, and reads the three screens.
+
+**Also this phase.** The user asked (15 September 2026) for the website in
+Arabic and French as well as English, with a user-chosen language. That is
+planned as Phase 37.5, before Phase 38.
 
 ## Phase 38 — Parts back, work out
 

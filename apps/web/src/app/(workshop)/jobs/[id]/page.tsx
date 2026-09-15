@@ -60,6 +60,7 @@ import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
+import { applyPackage, PackageError, packagesFor } from '@/lib/packages';
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
@@ -164,6 +165,26 @@ async function extra(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
+}
+
+/** A package onto this job: its lines, checklist, kind and time, one press. Phase 37. */
+async function addPackage(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  try {
+    await applyPackage({
+      orgId,
+      userId: user.userId,
+      jobId,
+      packageId: String(formData.get('packageId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof PackageError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}`);
+  }
+  redirect(`/jobs/${jobId}?packaged=1`);
 }
 
 /** A word to the customer, from the job, on the channel they can be reached on. Phase 36. */
@@ -385,6 +406,7 @@ export default async function JobPage({
     quoted?: string;
     started?: string;
     wrote?: string;
+    packaged?: string;
   }>;
 }) {
   const { id } = await params;
@@ -447,6 +469,9 @@ export default async function JobPage({
     arrivalFor(orgId, job.id),
     conversationForJob(orgId, job.id),
   ]);
+  const packages = ['INVOICED', 'PAID', 'CANCELLED'].includes(job.status)
+    ? []
+    : await packagesFor(orgId, { activeOnly: true });
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
   const stages = progressFor(job.status as JobStatus, reached);
@@ -708,6 +733,12 @@ export default async function JobPage({
         </Alert>
       ) : null}
 
+      {notice.packaged ? (
+        <Alert tone="success" className="mb-5">
+          The package is on the job: its lines, its checklist, its kind of work and its time.
+        </Alert>
+      ) : null}
+
       {notice.wrote ? (
         <Alert tone="success" className="mb-5">
           Sent to {job.customer.displayName}. It is on the conversation below with what became of
@@ -942,6 +973,23 @@ export default async function JobPage({
             <CardHeader
               title="Labour and parts"
               description="Charged at book time; costed at clocked time."
+              action={
+                packages.length > 0 && can(user.role, 'job:write') ? (
+                  <form action={addPackage} className="flex items-center gap-1.5">
+                    <input type="hidden" name="jobId" value={job.id} />
+                    <Select name="packageId" className="h-8 w-44 text-[12px]" aria-label="Package">
+                      {packages.map((pkg) => (
+                        <option key={pkg.id} value={pkg.id}>
+                          {pkg.name}
+                        </option>
+                      ))}
+                    </Select>
+                    <Button type="submit" size="sm" variant="secondary">
+                      Add the package
+                    </Button>
+                  </form>
+                ) : undefined
+              }
             />
             <TableWrap className="rounded-none border-0">
               <Table>

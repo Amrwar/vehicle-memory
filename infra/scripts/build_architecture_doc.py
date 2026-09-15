@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 36"
+AFTER_PHASE = "Phase 37"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-packages": "a package saved with every refusal tried, a job made from it in one press, added to a job under way, booked and arrived, completed with the vehicle's next one set, offered online with its price",
     "verify-conversations": "a quote filed onto the job's thread, a WhatsApp reply landing on it unread, an answer with a file through the seam, templates filled and refused, a payment link, assignment, closing and reopening, and a stranger's message left for a person",
     "verify-arrival": "a car checked in with every refusal tried, the keys moved, a quote approved with a signature, the car refused unfinished and unpaid, handed back signed for, and a fleet car let go owing with the reason written down",
     "verify-workflow": "a job walked from a booking to a paid bill the way a front desk would, every hand-off counted in presses against the table in core, the three screens read for the one button each needs, and stock put back as it was",
@@ -802,7 +803,21 @@ def build() -> None:
               "transport seam like SMS, to the console or to Twilio's WhatsApp sender. Templates are rendered in core "
               "from templateValues, which reads the customer, the job, the vehicle, the open invoice and the workshop.")
 
-    doc.add_heading("6.15 Answers and the assistant", level=2)
+    doc.add_heading("6.15 Packages and templates", level=2)
+    para(doc, "savePackage validates the package in core (assertPackageSound), checks that any product named is the "
+              "workshop's own, and writes the package, its lines and its checks in one transaction, replacing the "
+              "lines and checks on an edit. createJob with a packageId calls applyPackage inside the job's own "
+              "transaction: the package's lines become labour, part and fee lines after any already there (a part "
+              "with a product carries its part number and cost), its checks become tasks, its kind of work is set if "
+              "the job has none, its duration is added to the time to allow, and Job.packageId records where the job "
+              "came from. The job page calls the same applyPackage on an open job. createBooking with a packageId "
+              "takes the package's time and name, and startJobFromBooking passes the package on to createJob; the "
+              "portal's servicesFor lists bookable packages with their price and requestBooking records the package "
+              "on the booking. When moveJob reaches COMPLETED it calls refreshScheduleFor, which computes the next "
+              "due date and mileage in core (nextServiceFrom) and upserts the vehicle's ServiceSchedule named after "
+              "the package, which the reminder job already reads.")
+
+    doc.add_heading("6.16 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

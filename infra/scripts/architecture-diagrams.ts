@@ -112,6 +112,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'VehicleCheck',
       'Signature',
       'KeyEvent',
+      'ServicePackage',
+      'ServicePackageLine',
+      'ServicePackageCheck',
     ],
   },
   {

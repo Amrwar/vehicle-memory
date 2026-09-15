@@ -1387,6 +1387,45 @@ send them as they are.
 
 ---
 
+## Epic AJ — Packages and templates (Phase 37)
+
+### AJ1 — Full service, one press
+
+**As** Ahmed **I want** "Full service" to put everything on the job
+**so that** the technician picks it up without asking what a full service
+is here.
+**Size** 3 · **Satisfies** FR-6601, FR-6602, FR-6603
+
+- **Given** a package with labour, an oil filter by part number, a fee
+  and a checklist, **when** I open a job from it, **then** the job has the
+  lines, the tasks, the kind of work and the hours.
+- **Given** a job already open, **when** I add the package, **then** its
+  lines follow what was there.
+- **Given** a package with no lines, **when** I save, **then** I am told.
+
+### AJ2 — Booked and offered
+
+**As** Maria **I want** to book a full service online at a price **so
+that** I know what I am paying before I arrive.
+**Size** 2 · **Satisfies** FR-6604
+
+- **Given** a bookable package, **when** I book online, **then** its name,
+  description, time and price are shown and the booking is for it.
+- **Given** the car arrives, **when** the desk presses "Car is here",
+  **then** the job is made from the package.
+
+### AJ3 — The next one
+
+**As** the owner **I want** a service that comes round every year or every
+20,000 km to set the next reminder **so that** the customer comes back.
+**Size** 2 · **Satisfies** FR-6605
+
+- **Given** the job completes at 50,000 km, **when** it is marked
+  completed, **then** the vehicle's schedule says 70,000 km and a year
+  from now.
+
+---
+
 ## Story map
 
 ```

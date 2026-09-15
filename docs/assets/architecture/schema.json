@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 135,
+    "models": 138,
     "enums": 68,
-    "fields": 2124
+    "fields": 2168
   },
   "enums": [
     "OrgPlan",
@@ -369,7 +369,7 @@
         {
           "name": "Booking",
           "comment": "",
-          "fields": 21,
+          "fields": 22,
           "relations": [
             "Organization",
             "Location",
@@ -377,7 +377,8 @@
             "Vehicle",
             "Bay",
             "User",
-            "Job"
+            "Job",
+            "ServicePackage"
           ],
           "scope": "organisation"
         },
@@ -437,7 +438,7 @@
         {
           "name": "Job",
           "comment": "The central aggregate. Everything in the workshop hangs off the Job.",
-          "fields": 30,
+          "fields": 31,
           "relations": [
             "Organization",
             "Location",
@@ -445,7 +446,8 @@
             "Customer",
             "Vehicle",
             "Bay",
-            "User"
+            "User",
+            "ServicePackage"
           ],
           "scope": "organisation"
         },
@@ -614,6 +616,35 @@
             "User"
           ],
           "scope": "organisation"
+        },
+        {
+          "name": "ServicePackage",
+          "comment": "A piece of work priced and described as one thing: labour, parts, a checklist, a duration, a price and an interval. A job or a booking made from one starts with all of it on it. Phase 37.",
+          "fields": 15,
+          "relations": [
+            "Organization",
+            "JobType"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ServicePackageLine",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "ServicePackage",
+            "Product"
+          ],
+          "scope": "through ServicePackage"
+        },
+        {
+          "name": "ServicePackageCheck",
+          "comment": "One thing to do and tick on a job made from the package.",
+          "fields": 5,
+          "relations": [
+            "ServicePackage"
+          ],
+          "scope": "through ServicePackage"
         }
       ]
     },

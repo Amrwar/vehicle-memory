@@ -443,12 +443,22 @@ where the work happens.
 | FR-6505 | AI2   | `MessageChannel.WHATSAPP`                                                    | `configureTransports()` WHATSAPP, `TwilioTransport` whatsapp, `/api/inbound`              | `verify-conversations.ts`, `verify-messaging.ts`   | Done   |
 | FR-6506 | AI3   | `MessageTemplate`                                                            | `DEFAULT_TEMPLATES`, `fillTemplate()`, `templateValues()`, `paymentLinkFor()`             | `conversations.test.ts`, `verify-conversations.ts` | Done   |
 | FR-6507 | AI2   | `MessageAttachment`, `Conversation.assignedToUserId`                         | `sendReply()` files, `assignConversation()`, `setConversationStatus()`                    | `verify-conversations.ts`                          | Done   |
-| FR-3907 | A1    | —                                                                            | `assertNotFlooding()`                                                                     | `verify-credentials.ts`                            | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                                                      | `digest()`                                                                                | `verify-credentials.ts`                            | Done   |
-| FR-3801 | —     | —                                                                            | `/api/inbound/resend`                                                                     | `smoke.ts`                                         | Done   |
-| FR-3802 | —     | —                                                                            | `verify()` tolerance                                                                      | `smoke.ts`                                         | Done   |
-| FR-3803 | —     | `Organization.slug`                                                          | `organisationFor()`                                                                       | `smoke.ts`                                         | Done   |
-| FR-3804 | —     | —                                                                            | `INBOUND_WEBHOOK_SECRET`                                                                  | `smoke.ts`                                         | Done   |
+
+## Packages and templates
+
+| Req     | Story | Schema                                                        | Implementation                                                                  | Test                                     | Status |
+| ------- | ----- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| FR-6601 | AJ1   | `ServicePackage`, `ServicePackageLine`, `ServicePackageCheck` | `savePackage()`, `/settings/packages`                                           | `packages.test.ts`, `verify-packages.ts` | Done   |
+| FR-6602 | AJ1   | —                                                             | `assertPackageSound()`, the duplicate-code refusal                              | `packages.test.ts`, `verify-packages.ts` | Done   |
+| FR-6603 | AJ1   | `Job.packageId`                                               | `applyPackage()` from `createJob()` and the job page                            | `verify-packages.ts`                     | Done   |
+| FR-6604 | AJ2   | `Booking.packageId`                                           | `createBooking()`, `startJobFromBooking()`, `servicesFor()`, `requestBooking()` | `verify-packages.ts`                     | Done   |
+| FR-6605 | AJ3   | `ServiceSchedule`                                             | `nextServiceFrom()`, `refreshScheduleFor()` from `moveJob()`                    | `packages.test.ts`, `verify-packages.ts` | Done   |
+| FR-3907 | A1    | —                                                             | `assertNotFlooding()`                                                           | `verify-credentials.ts`                  | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                                       | `digest()`                                                                      | `verify-credentials.ts`                  | Done   |
+| FR-3801 | —     | —                                                             | `/api/inbound/resend`                                                           | `smoke.ts`                               | Done   |
+| FR-3802 | —     | —                                                             | `verify()` tolerance                                                            | `smoke.ts`                               | Done   |
+| FR-3803 | —     | `Organization.slug`                                           | `organisationFor()`                                                             | `smoke.ts`                               | Done   |
+| FR-3804 | —     | —                                                             | `INBOUND_WEBHOOK_SECRET`                                                        | `smoke.ts`                               | Done   |
 
 ## What people say afterwards
 
@@ -748,9 +758,10 @@ details without a provider behind it would be worse than not having one.
 | The workflow, as one thing                         | 6                   | 6                      |
 | Arrival and departure                              | 7                   | 7                      |
 | Conversations                                      | 7                   | 7                      |
-| **Total**                                          | **450**             | **444 (99%)**          |
+| Packages and templates                             | 5                   | 5                      |
+| **Total**                                          | **455**             | **449 (99%)**          |
 
-The requirements document lists 534 requirements. 84 of
+The requirements document lists 539 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

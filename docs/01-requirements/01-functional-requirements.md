@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6600 — Packages and templates
+
+| Ref     | Requirement                                                                                                                                                                                         | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6601 | A service package MUST carry lines of labour, parts and fees, a checklist, a duration, an optional kind of work, a fixed price or the lines' sum, and an optional interval; it MUST be saved whole. | 37    |
+| FR-6602 | An unsound package MUST be refused with a sentence: no name, no code, no lines, a line with no quantity, a negative price, no duration, an interval that is not a whole number, a duplicate code.   | 37    |
+| FR-6603 | A job from a package MUST be one press, created with the package's lines, tasks, kind of work and time in one transaction; a package MUST be addable to an open job after what is there.            | 37    |
+| FR-6604 | A booking MUST be takeable for a package, taking its time, and MUST become a job from that package when the car arrives; a bookable package MUST be offered online with its price and description.  | 37    |
+| FR-6605 | Completing a job made from a recurring package MUST set the vehicle's schedule for that package to the next due date and mileage, one schedule per package per vehicle.                             | 37    |
+
 ## FR-6500 — Conversations
 
 | Ref     | Requirement                                                                                                                                                                                              | Phase |

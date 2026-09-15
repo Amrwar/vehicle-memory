@@ -89,6 +89,7 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/settings/data', expectsGuidance: ['Nothing imported yet'] },
   { path: '/settings/site', expectsGuidance: [] },
   { path: '/settings/catalogue', expectsGuidance: [] },
+  { path: '/settings/packages', expectsGuidance: ['No packages yet'] },
   { path: '/audit', expectsGuidance: [] },
   { path: '/group', expectsGuidance: ['at least two'] },
 ];

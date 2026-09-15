@@ -3,6 +3,7 @@ import { prisma } from '@carnet/db';
 import { audit } from './guard';
 import { grantServicingAccess, orgCanReadVehicle } from './passport';
 import { regionFor } from './region';
+import { applyPackage } from './packages';
 
 /**
  * Opening a job.
@@ -39,6 +40,8 @@ export async function createJob(input: {
   promisedAt?: Date | null;
   jobTypeId?: string | null;
   technicianUserId?: string | null;
+  /** A package to start the job from: its lines, checks, kind and time. Phase 37. */
+  packageId?: string | null;
 }) {
   const region = await regionFor(input.orgId);
   const description = input.shortDescription.trim();
@@ -103,7 +106,7 @@ export async function createJob(input: {
     // is one below it on the update path and the seeded 1 on the create path.
     const number = sequence.next - 1;
 
-    return tx.job.create({
+    const created = await tx.job.create({
       data: {
         orgId: input.orgId,
         locationId: location.id,
@@ -127,6 +130,17 @@ export async function createJob(input: {
       },
       select: { id: true, number: true },
     });
+
+    // From a package: the lines, the checklist, the kind of work and the
+    // time to allow, in the same transaction as the job. Phase 37.
+    if (input.packageId) {
+      await applyPackage(
+        { orgId: input.orgId, userId: input.userId, jobId: created.id, packageId: input.packageId },
+        tx,
+      );
+    }
+
+    return created;
   });
 
   // The reading travels with the vehicle as well as the job, so the mileage

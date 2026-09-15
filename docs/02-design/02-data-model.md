@@ -210,6 +210,13 @@ assignee, the last channel, `lastMessageAt`, `lastInboundAt`, `readAt`),
 in either direction), `MessageTemplate` (a workshop's own sentences), and
 `WHATSAPP` in `MessageChannel`. Unread is derived: an inbound after the
 last read, never a flag that can drift.
+
+Phase 37 adds `ServicePackage` (code, name, description, kind of work,
+duration in minutes, a fixed price or null, interval in months and in
+kilometres, bookable, active), `ServicePackageLine` (labour, part or fee
+with quantity, unit price and an optional product) and
+`ServicePackageCheck`, with `Job.packageId` and `Booking.packageId` saying
+which package a job or a booking came from.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

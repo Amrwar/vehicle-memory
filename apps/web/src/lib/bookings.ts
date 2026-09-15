@@ -104,8 +104,20 @@ export async function createBooking(input: {
   bayId?: string | null;
   technicianId?: string | null;
   notes?: string | null;
+  /** The package the booking is for; its time and name fill in what was left blank. Phase 37. */
+  packageId?: string | null;
 }) {
-  const endAt = new Date(input.startAt.getTime() + input.estimatedHours * 3_600_000);
+  const pkg = input.packageId
+    ? await prisma.servicePackage.findFirst({
+        where: { id: input.packageId, orgId: input.orgId, isActive: true },
+        select: { id: true, name: true, durationMinutes: true },
+      })
+    : null;
+  const hours =
+    pkg && !(input.estimatedHours > 0)
+      ? Math.max(0.25, pkg.durationMinutes / 60)
+      : input.estimatedHours;
+  const endAt = new Date(input.startAt.getTime() + hours * 3_600_000);
 
   const booking = await prisma.booking.create({
     data: {
@@ -117,8 +129,9 @@ export async function createBooking(input: {
       technicianId: input.technicianId || null,
       startAt: input.startAt,
       endAt,
-      estimatedHours: input.estimatedHours,
-      description: input.description.trim(),
+      estimatedHours: hours,
+      description: input.description.trim() || pkg?.name || '',
+      packageId: pkg?.id ?? null,
       notes: input.notes?.trim() || null,
       // Taken by a person, so it says so. The source is what makes the
       // conversion report on the business page mean anything.
@@ -212,6 +225,7 @@ export async function startJobFromBooking(input: {
       description: true,
       notes: true,
       endAt: true,
+      packageId: true,
     },
   });
 
@@ -244,6 +258,7 @@ export async function startJobFromBooking(input: {
       odometerInKm: input.odometerInKm ?? null,
       promisedAt: booking.endAt,
       technicianUserId: booking.technicianId,
+      packageId: booking.packageId,
     });
   } catch (error) {
     if (error instanceof JobError) throw new BookingError('NO_JOB', error.message);

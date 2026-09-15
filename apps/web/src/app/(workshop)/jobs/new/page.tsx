@@ -16,6 +16,7 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { packagesFor } from '@/lib/packages';
 import { createJob, JobError, jobFormOptions, vehicleOption } from '@/lib/jobs';
 
 export const metadata: Metadata = { title: 'Open a job' };
@@ -58,6 +59,7 @@ async function open(formData: FormData) {
       promisedAt: promised ? new Date(`${promised}T17:00:00`) : null,
       jobTypeId: String(formData.get('jobTypeId') ?? '') || null,
       technicianUserId: String(formData.get('technicianUserId') ?? '') || null,
+      packageId: String(formData.get('packageId') ?? '') || null,
     });
 
     redirect(`/jobs/${job.id}`);
@@ -70,12 +72,16 @@ async function open(formData: FormData) {
 export default async function NewJobPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; customer?: string; vehicle?: string }>;
+  searchParams: Promise<{ error?: string; customer?: string; vehicle?: string; package?: string }>;
 }) {
   const { orgId } = await requireSession('job:write');
-  const { error, customer, vehicle } = await searchParams;
+  const { error, customer, vehicle, package: packageParam } = await searchParams;
 
-  const options = await jobFormOptions(orgId);
+  const [options, packages] = await Promise.all([
+    jobFormOptions(orgId),
+    packagesFor(orgId, { activeOnly: true }),
+  ]);
+  const preset = packages.find((p) => p.id === packageParam) ?? null;
 
   // Arriving from a customer or a vehicle page preselects that side, which is
   // most of how this page is actually reached.
@@ -162,11 +168,28 @@ export default async function NewJobPage({
                   </Select>
                 </Field>
 
+                {packages.length > 0 ? (
+                  <Field
+                    label="From a package"
+                    hint="Its labour, parts, checklist, kind of work and time go on the job in this one press."
+                  >
+                    <Select name="packageId" defaultValue={preset?.id ?? ''}>
+                      <option value="">No package, just the description</option>
+                      {packages.map((pkg) => (
+                        <option key={pkg.id} value={pkg.id}>
+                          {pkg.name} · {pkg.hours}h
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : null}
+
                 <Field label="What it is in for">
                   <Input
                     name="shortDescription"
                     required
                     maxLength={120}
+                    defaultValue={preset?.name ?? ''}
                     placeholder="Grinding under braking"
                   />
                 </Field>

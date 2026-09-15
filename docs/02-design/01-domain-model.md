@@ -298,6 +298,16 @@ template turns into and what a payment link says are pure in
 `packages/core/src/messaging/conversations.ts`. WhatsApp is a channel in
 the same `Channel` union and goes through the same transport seam.
 
+### 3.15 Service packages (Phase 37)
+
+A `ServicePackage` is a template for work: lines, a checklist, a duration,
+a kind of work, a price and an interval, saved whole. It is not a job and
+holds no state; applying it (`applyPackage`) copies its lines and checks
+onto a job and records which package the job came from, and completing
+that job refreshes the vehicle's `ServiceSchedule` for the package. The
+rules (what a package must have, what it comes to, what its lines become,
+when the next one is due) are pure in `packages/core/src/job/packages.ts`.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

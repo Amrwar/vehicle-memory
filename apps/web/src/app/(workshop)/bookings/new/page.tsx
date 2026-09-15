@@ -16,6 +16,7 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { bookableCustomers, createBooking } from '@/lib/bookings';
 import { requireSession } from '@/lib/guard';
+import { packagesFor } from '@/lib/packages';
 
 export const metadata: Metadata = { title: 'Take a booking' };
 export const dynamic = 'force-dynamic';
@@ -40,9 +41,10 @@ async function take(formData: FormData) {
 
   const date = String(formData.get('date') ?? '');
   const time = String(formData.get('time') ?? '09:00');
+  const packageId = String(formData.get('packageId') ?? '') || null;
   const description = String(formData.get('description') ?? '').trim();
 
-  if (!date || !description) {
+  if (!date || (!description && !packageId)) {
     redirect('/bookings/new?error=' + encodeURIComponent('A booking needs a date and a reason.'));
   }
 
@@ -59,8 +61,12 @@ async function take(formData: FormData) {
     customerId: String(formData.get('customerId') ?? ''),
     vehicleId: String(formData.get('vehicleId') ?? ''),
     startAt,
-    estimatedHours: Math.max(0.25, Number(formData.get('estimatedHours') ?? 1) || 1),
+    // Blank hours with a package: the package's own time.
+    estimatedHours: packageId
+      ? Number(formData.get('estimatedHours') ?? 0) || 0
+      : Math.max(0.25, Number(formData.get('estimatedHours') ?? 1) || 1),
     description,
+    packageId,
     bayId: String(formData.get('bayId') ?? '') || null,
     technicianId: String(formData.get('technicianId') ?? '') || null,
     notes: String(formData.get('notes') ?? ''),
@@ -77,6 +83,7 @@ export default async function NewBookingPage({
   const { orgId } = await requireSession('diary:write');
   const { error } = await searchParams;
 
+  const packages = await packagesFor(orgId, { activeOnly: true });
   const [customers, locations, bays, technicians] = await Promise.all([
     bookableCustomers(orgId),
     prisma.location.findMany({
@@ -156,13 +163,29 @@ export default async function NewBookingPage({
                 </Field>
               </div>
 
-              <Field label="What needs doing" htmlFor="description" required>
-                <Input
-                  id="description"
-                  name="description"
-                  required
-                  placeholder="Full service and MOT"
-                />
+              {packages.length > 0 ? (
+                <Field
+                  label="A package"
+                  htmlFor="packageId"
+                  hint="Sets the time, and the job starts from it when the car arrives."
+                >
+                  <Select id="packageId" name="packageId" defaultValue="">
+                    <option value="">Not a package</option>
+                    {packages.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} · {pkg.hours}h
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              ) : null}
+
+              <Field
+                label="What needs doing"
+                htmlFor="description"
+                hint="Blank with a package takes the package's name."
+              >
+                <Input id="description" name="description" placeholder="Full service and MOT" />
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-3">
@@ -174,15 +197,20 @@ export default async function NewBookingPage({
                   <Input id="time" name="time" type="time" required defaultValue="09:00" />
                 </Field>
 
-                <Field label="Hours to allow" htmlFor="estimatedHours">
+                <Field
+                  label="Hours to allow"
+                  htmlFor="estimatedHours"
+                  hint="Blank with a package: its own time."
+                >
                   <Input
                     id="estimatedHours"
                     name="estimatedHours"
                     type="number"
                     step="0.25"
-                    min={0.25}
+                    min={0}
                     inputMode="decimal"
-                    defaultValue={1}
+                    defaultValue=""
+                    placeholder="1"
                   />
                 </Field>
               </div>

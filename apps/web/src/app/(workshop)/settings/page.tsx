@@ -24,6 +24,7 @@ import { redirect } from 'next/navigation';
 import { ApiKeyError, apiKeysFor, createApiKey, revokeApiKey } from '@/lib/api-keys';
 import { AssistantError, assistantUsage, setAssistantBudget } from '@/lib/assistant';
 import { can, requireSession } from '@/lib/guard';
+import { packagesFor } from '@/lib/packages';
 
 export const metadata: Metadata = { title: 'Settings' };
 export const dynamic = 'force-dynamic';
@@ -102,6 +103,7 @@ export default async function SettingsPage({
   const mayWrite = can(user.role, 'settings:write');
   const apiKeys = await apiKeysFor(orgId);
   const assistant = await assistantUsage(orgId);
+  const packages = await packagesFor(orgId, { activeOnly: true });
 
   const org = await db.organization.findFirstOrThrow({
     where: { id: orgId },
@@ -385,6 +387,43 @@ export default async function SettingsPage({
               </li>
             ))}
           </ul>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="Service packages"
+            action={
+              mayWrite ? (
+                <Link
+                  href="/settings/packages"
+                  className="text-[13px] text-(--brand-text) hover:underline"
+                >
+                  Edit
+                </Link>
+              ) : undefined
+            }
+          />
+          {packages.length === 0 ? (
+            <CardBody className="text-[13px] text-(--text-soft)">
+              None yet. A package puts the labour, the parts and the checklist on a job in one
+              press.{' '}
+              <Link href="/settings/packages" className="underline">
+                Add one
+              </Link>
+              .
+            </CardBody>
+          ) : (
+            <ul className="divide-y divide-(--border)">
+              {packages.map((pkg) => (
+                <li key={pkg.id} className="flex items-center justify-between px-4 py-2.5">
+                  <span className="text-[13px] font-medium">{pkg.name}</span>
+                  <span className="text-[12px] text-(--text-faint)">
+                    {pkg.hours}h · {pkg.lines.length} lines
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
 
         <Card className="lg:col-span-2">

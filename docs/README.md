@@ -112,11 +112,12 @@ quoted without stopping the job, and the five workflows counted in presses
 ([02-design/11-workflows.md](02-design/11-workflows.md)), and arrival and
 departure: the car checked in and handed back against a signed record of
 what it was like, and the keys found, and conversations: one thread per
-customer and per job over email, text and WhatsApp, answered from the job. The
+customer and per job over email, text and WhatsApp, answered from the job, and
+service packages: work priced as one thing, a job from it in one press. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 188 capabilities
-built, 2 partial and 12 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 450
+phase, the [feature map](00-product/09-feature-map.md) counts 184 capabilities
+built, 2 partial and 11 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 455
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -125,4 +126,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 36 are now built.
+to 37 are now built.

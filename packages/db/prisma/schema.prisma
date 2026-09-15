@@ -96,6 +96,7 @@ model Organization {
   conversations       Conversation[]
   messageAttachments  MessageAttachment[]
   messageTemplates    MessageTemplate[]
+  servicePackages     ServicePackage[]
   auditLogs           AuditLog[]
   vehicleAccess       VehicleAccessGrant[]
   recordedEvents      VehicleEvent[]
@@ -855,6 +856,7 @@ model JobType {
   org    Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   jobs   JobJobType[]
   skills JobTypeSkill[]
+  packages ServicePackage[]
 
   @@unique([orgId, name])
   @@map("job_types")
@@ -892,6 +894,73 @@ model ServiceItem {
   @@map("service_items")
 }
 
+/// A piece of work priced and described as one thing: labour, parts, a
+/// checklist, a duration, a price and an interval. A job or a booking made
+/// from one starts with all of it on it. Phase 37.
+model ServicePackage {
+  id              String   @id @default(cuid())
+  orgId           String
+  code            String
+  name            String
+  description     String?
+  jobTypeId       String?
+  durationMinutes Int      @default(60)
+  /// A fixed price for the whole package; null means the lines add up.
+  price           Decimal? @db.Decimal(12, 2)
+  intervalMonths  Int?
+  intervalKm      Int?
+  /// Offered to customers booking online.
+  bookable        Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  org      Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  jobType  JobType?              @relation(fields: [jobTypeId], references: [id], onDelete: SetNull)
+  lines    ServicePackageLine[]
+  checks   ServicePackageCheck[]
+  jobs     Job[]
+  bookings Booking[]
+
+  @@unique([orgId, code])
+  @@index([orgId, sortOrder])
+  @@map("service_packages")
+}
+
+model ServicePackageLine {
+  id          String   @id @default(cuid())
+  packageId   String
+  kind        LineKind @default(LABOUR)
+  description String
+  /// Hours for labour, units for a part, 1 for a fee.
+  quantity    Decimal  @default(1) @db.Decimal(10, 3)
+  /// The rate for labour, the unit price for a part, the amount for a fee.
+  unitPrice   Decimal  @default(0) @db.Decimal(12, 2)
+  productId   String?
+  sortOrder   Int      @default(0)
+
+  package ServicePackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  product Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([packageId, sortOrder])
+  @@map("service_package_lines")
+}
+
+/// One thing to do and tick on a job made from the package.
+model ServicePackageCheck {
+  id        String  @id @default(cuid())
+  packageId String
+  title     String
+  detail    String?
+  sortOrder Int     @default(0)
+
+  package ServicePackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId, sortOrder])
+  @@map("service_package_checks")
+}
+
 model Booking {
   id             String        @id @default(cuid())
   orgId          String
@@ -908,6 +977,8 @@ model Booking {
   notes          String?
   source         BookingSource @default(PHONE)
   jobId          String?       @unique
+  /// The package this booking is for, if any. Phase 37.
+  packageId      String?
   reminderSentAt DateTime?
   confirmedAt    DateTime?
   cancelledAt    DateTime?
@@ -922,6 +993,7 @@ model Booking {
   bay        Bay?         @relation(fields: [bayId], references: [id], onDelete: SetNull)
   technician User?        @relation(fields: [technicianId], references: [id], onDelete: SetNull)
   job        Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  package    ServicePackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
 
   @@index([orgId, startAt])
   @@index([locationId, startAt])
@@ -981,6 +1053,8 @@ model Job {
   completedAt  DateTime?
   /// When the customer took the car back. Phase 35.
   collectedAt  DateTime?
+  /// The package this job was made from, if any. Phase 37.
+  packageId    String?
   invoicedAt   DateTime?
   cancelledAt  DateTime?
   cancelReason String?
@@ -1028,6 +1102,7 @@ model Job {
   keyEvents        KeyEvent[]
   signatures       Signature[]
   conversation     Conversation?
+  package          ServicePackage?   @relation(fields: [packageId], references: [id], onDelete: SetNull)
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -2244,6 +2319,7 @@ model Product {
   reservations  StockReservation[]
   jobPartLines  JobPartLine[]
   estimateLines EstimateLine[]
+  packageLines  ServicePackageLine[]
   poLines       PurchaseOrderLine[]
   transferLines StockTransferLine[]
   saleLines     CounterSaleLine[]

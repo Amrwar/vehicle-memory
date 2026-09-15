@@ -118,6 +118,7 @@ const PAGES = [
   '/settings/data',
   '/settings/site',
   '/settings/catalogue',
+  '/settings/packages',
   '/automation',
   '/messages',
   '/audit',

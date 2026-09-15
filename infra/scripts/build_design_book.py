@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 36.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 37.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -647,6 +647,22 @@ def build() -> None:
         works="A thread that is a view over the two message tables rather than a third one keeps the queue and the inbox honest; unread derived from dates rather than a flag cannot drift; refusing a template with a blank is the difference between a workshop's name under a good message and under an embarrassing one.",
         shots=[("conversations", "Conversations, with a thread open.", 16.4)],
         source="docs/02-design/01-domain-model.md, section 3.14; 06-api-contract.md, inbound",
+    )
+
+    design(
+        doc,
+        title="Packages and templates",
+        when="Phase 37, 15 September 2026.",
+        why="\"Full service\" typed at the counter is a job nobody can pick up without asking. A package is the "
+            "same words with the labour, the parts, the checklist, the time and the price already decided.",
+        meaning=[
+            "The settings page is the list on the left and the editor on the right. Each package is one line: code, name, price with the saving if the fixed price undercuts the lines, hours, how many lines and checks, the kind of work, the interval, whether it is bookable.",
+            "The editor is six line rows (kind, description, quantity, each, part number) and six checklist rows, because a package with more than that is two packages. A fixed price is one field; blank means the lines add up.",
+            "On the new-job form the package is the first question; choosing one fills the description. On the job, the labour and parts card offers a package and one button. The booking form and the customer's online booking offer the same list.",
+        ],
+        works="Saved whole, a package is never half of one. Recording which package a job came from is what lets completion say when the next one is due, which is the reminder that brings the customer back.",
+        shots=[("packages", "Service packages.", 16.4)],
+        source="docs/02-design/01-domain-model.md, section 3.15",
     )
 
     # 11. Counter

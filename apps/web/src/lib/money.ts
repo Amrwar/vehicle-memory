@@ -37,6 +37,7 @@ import { refundOntoCard } from './giftcard-refunds';
 import { settleReferralsFor } from './referrals';
 import { awardForInvoice } from './retention';
 import { consumeForJob } from './inventory';
+import { refreshScheduleFor } from './packages';
 import { pushNow } from './outbound';
 import { writeJobCompletion } from './passport';
 import { regionFor } from './region';
@@ -251,6 +252,9 @@ export async function moveJob(input: {
       hasPhotoEvidence: inspection?.results.some((r) => r._count.photos > 0) ?? false,
     });
   }
+
+  // A job made from a recurring package sets the vehicle's next one. Phase 37.
+  if (input.to === 'COMPLETED') await refreshScheduleFor(job.id);
 
   await audit({
     orgId: input.orgId,

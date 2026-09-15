@@ -23,20 +23,47 @@ export interface BookableService {
   name: string;
   hours: number;
   price: number | null;
+  /** A package carries its lines and checklist onto the job. Phase 37. */
+  kind: 'package' | 'item';
+  description?: string | null;
 }
 
 export async function servicesFor(orgId: string): Promise<BookableService[]> {
-  const items = await prisma.serviceItem.findMany({
-    where: { orgId, isActive: true },
-    orderBy: { name: 'asc' },
-  });
+  const [packages, items] = await Promise.all([
+    prisma.servicePackage.findMany({
+      where: { orgId, isActive: true, bookable: true },
+      orderBy: { sortOrder: 'asc' },
+      include: { lines: { select: { quantity: true, unitPrice: true } } },
+    }),
+    prisma.serviceItem.findMany({
+      where: { orgId, isActive: true },
+      orderBy: { name: 'asc' },
+    }),
+  ]);
 
-  return items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    hours: Number(item.defaultHours ?? 1),
-    price: item.defaultPrice === null ? null : Number(item.defaultPrice),
-  }));
+  return [
+    ...packages.map((pkg) => ({
+      id: pkg.id,
+      name: pkg.name,
+      hours: Math.max(0.25, Math.round((pkg.durationMinutes / 60) * 4) / 4),
+      price:
+        pkg.price === null
+          ? Math.round(
+              pkg.lines.reduce((t, l) => t + Number(l.quantity) * Number(l.unitPrice), 0) * 100,
+            ) / 100
+          : Number(pkg.price),
+      kind: 'package' as const,
+      description: pkg.description,
+    })),
+    ...items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      hours: Number(item.defaultHours ?? 1),
+      price: item.defaultPrice === null ? null : Number(item.defaultPrice),
+      kind: 'item' as const,
+      description: item.description,
+    })),
+  ];
 }
 
 /** The slots a customer may be offered for a given piece of work. */
@@ -194,6 +221,15 @@ export async function requestBooking(input: BookingRequest): Promise<BookingOutc
           description: input.description,
           notes: input.notes?.trim() || null,
           source: 'ONLINE',
+          // A package chosen online is the package the job starts from. Phase 37.
+          packageId: input.serviceItemId
+            ? ((
+                await tx.servicePackage.findFirst({
+                  where: { id: input.serviceItemId, orgId: input.orgId, isActive: true },
+                  select: { id: true },
+                })
+              )?.id ?? null)
+            : null,
         },
       });
 

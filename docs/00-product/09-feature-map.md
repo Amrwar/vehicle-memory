@@ -432,11 +432,6 @@ items a real workshop would ask for. Each is assigned a phase in the
 | WhatsApp                                | Built   | A channel through the transport seam: console by default, Twilio's WhatsApp sender as the adapter; inbound accepted (Phase 36)    |
 | Message templates                       | Built   | Sentences filled from the job, refused with a blank; five built in, any number a workshop's own (Phase 36)                        |
 | Attachments, assignment, read state     | Built   | Files kept on the message; a thread assigned, read, closed, reopened by the next reply (Phase 36)                                 |
-| Conversations                           | Built   | One thread per customer and per job over email, text, WhatsApp; unread first; reply from the job (Phase 36)                       |
-| WhatsApp                                | Built   | A channel through the transport seam: console by default, Twilio's WhatsApp sender as the adapter; inbound accepted (Phase 36)    |
-| Message templates                       | Built   | Sentences filled from the job, refused with a blank; five built in, any number a workshop's own (Phase 36)                        |
-| Attachments, assignment, read state     | Built   | Files kept on the message; a thread assigned, read, closed, reopened by the next reply (Phase 36)                                 |
-| Service packages                        | Missing | Job types and a catalogue exist; Phase 37                                                                                         |
 | Parts returns and cores                 | Missing | Phase 38                                                                                                                          |
 | Sublet work                             | Missing | Phase 38                                                                                                                          |
 | Global search                           | Missing | Phase 39                                                                                                                          |
@@ -458,9 +453,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 188          |
+| Built    | 184          |
 | Partial  | 2            |
-| Missing  | 12           |
+| Missing  | 11           |
 | Deferred | 1            |
 
 <!-- counts:end -->

@@ -1,3 +1,4 @@
+import { formatMinor } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -191,9 +192,16 @@ export default async function BookPage({
                   >
                     <span className="min-w-0">
                       <span className="block text-[14px] font-medium">{service.name}</span>
+                      {service.kind === 'package' && service.description ? (
+                        <span className="block text-[12px] text-(--text-soft)">
+                          {service.description}
+                        </span>
+                      ) : null}
                       <span className="block text-[12px] text-(--text-faint)">
                         {`About ${service.hours} hour${service.hours === 1 ? '' : 's'}`}
-                        {service.price === null ? '' : ` · from £${service.price}`}
+                        {service.price === null
+                          ? ''
+                          : ` · ${service.kind === 'package' ? '' : 'from '}${formatMinor(Math.round(service.price * 100), region)}`}
                       </span>
                     </span>
                     {chosen?.id === service.id ? (
