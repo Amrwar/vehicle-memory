@@ -60,6 +60,7 @@
     "verify:conversations": "tsx infra/scripts/verify-conversations.ts",
     "verify:packages": "tsx infra/scripts/verify-packages.ts",
     "verify:languages": "tsx infra/scripts/verify-languages.ts",
+    "verify:returns": "tsx infra/scripts/verify-returns.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

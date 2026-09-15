@@ -221,6 +221,14 @@ which package a job or a booking came from.
 Phase 37.5 adds `User.language`: the language a person chose, `en`, `fr`
 or `ar`, null until they choose; the cookie carries the same choice for
 a browser.
+
+Phase 38 adds `SupplierReturn` (supplier, order, number, reason, status,
+the cost held, the credit note's reference, net and tax, the credit held on
+account, the refusal), `SupplierReturnLine` (the order line, product and
+store it came from, quantity and unit cost), `SupplierCreditApplication` (a
+credit set against a bill) and `JobSublet` (job, vendor, description, cost,
+charge, status, the job line the customer is charged on, and the vendor's
+bill).
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

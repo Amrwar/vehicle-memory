@@ -115,6 +115,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'ServicePackage',
       'ServicePackageLine',
       'ServicePackageCheck',
+      'JobSublet',
     ],
   },
   {
@@ -202,6 +203,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'GoodsReceipt',
       'GoodsReceiptLine',
       'SupplierBill',
+      'SupplierReturn',
+      'SupplierReturnLine',
+      'SupplierCreditApplication',
       'SupplierPayment',
       'SupplierPaymentAllocation',
     ],

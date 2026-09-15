@@ -44,6 +44,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
     purpose: 'Invoiced to customers and not yet paid',
   },
   {
+    code: '1150',
+    name: 'Supplier credits due',
+    type: 'ASSET',
+    purpose: 'Parts sent back to a supplier, at cost, until their credit note arrives',
+  },
+  {
     code: '1200',
     name: 'Stock on hand',
     type: 'ASSET',
@@ -106,6 +112,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
     purpose: 'Cost of parts consumed on jobs',
   },
   {
+    code: '5020',
+    name: 'Cost of sublet work',
+    type: 'EXPENSE',
+    purpose: 'Work bought from another business and sold on a job',
+  },
+  {
     code: '5010',
     name: 'Cost of labour',
     type: 'EXPENSE',
@@ -138,6 +150,7 @@ export const ACCOUNT = {
   BANK: '1000',
   CASH: '1010',
   RECEIVABLE: '1100',
+  SUPPLIER_CREDITS: '1150',
   STOCK: '1200',
   WIP: '1500',
   PAYABLE: '2000',
@@ -151,6 +164,7 @@ export const ACCOUNT = {
   FEE_REVENUE: '4020',
   COGS_PARTS: '5000',
   COGS_LABOUR: '5010',
+  COGS_SUBLET: '5020',
   WAGES: '6000',
   PREMISES: '6100',
   LOYALTY_REWARDS: '6400',

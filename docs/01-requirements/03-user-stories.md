@@ -1451,6 +1451,43 @@ English and be named **so that** nobody ever sees a key or a blank.
 
 ---
 
+## Epic AL — Parts back, work out (Phase 38)
+
+### AL1 — Sending it back
+
+**As** Ahmed **I want** to send faulty pads back from the order they came on
+**so that** the credit comes off what I owe and I do not pay for them twice.
+**Size** 5 · **Satisfies** FR-6801, FR-6802, FR-6803, FR-6804, FR-6805
+
+- **Given** four pads received, **when** I send back five, **then** I am
+  told only four came.
+- **Given** two sent back, **when** their credit note arrives, **then** it
+  comes off the supplier's oldest bill, and the stock and the books agree.
+- **Given** a supplier who will not credit, **when** I record it refused,
+  **then** the value is written off and the return is closed.
+
+### AL2 — The core
+
+**As** Fatima **I want** a core charge coming back to reduce the cost of
+parts **so that** the margin on the job that used the part is right.
+**Size** 2 · **Satisfies** FR-6801, FR-6803, FR-6804
+
+- **Given** a core credited for more than the supplier is owed, **when** the
+  next bill is booked, **then** the rest comes off it.
+
+### AL3 — Work sent out
+
+**As** Ahmed **I want** the alignment the tyre place does for us on the job
+**so that** the customer pays for it and I can see what we made.
+**Size** 3 · **Satisfies** FR-6806, FR-6807
+
+- **Given** an alignment costing 45 charged at 75, **when** I add it,
+  **then** it is a line on the job with a margin of 30.
+- **Given** their bill for 50, **when** I book it, **then** the line's cost
+  is 50, the margin says so, and the bill is owed like any other.
+
+---
+
 ## Story map
 
 ```

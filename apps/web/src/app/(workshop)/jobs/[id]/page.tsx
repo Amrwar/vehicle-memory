@@ -61,6 +61,7 @@ import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@
 import { issueInvoice, MoneyCycleError, moveJob } from '@/lib/money';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { applyPackage, PackageError, packagesFor } from '@/lib/packages';
+import { addSublet, billSublet, markSubletDone, ReturnError, subletsForJob } from '@/lib/returns';
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
@@ -165,6 +166,48 @@ async function extra(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
+}
+
+/** Work bought from another business, sold on this job. Phase 38. */
+async function sublet(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  const intent = String(formData.get('intent') ?? 'add');
+  try {
+    if (intent === 'add') {
+      await addSublet({
+        orgId,
+        userId: user.userId,
+        jobId,
+        supplierId: String(formData.get('supplierId') ?? ''),
+        description: String(formData.get('description') ?? ''),
+        cost: Number(formData.get('cost') ?? 0),
+        price: Number(formData.get('price') ?? 0),
+      });
+    } else if (intent === 'done') {
+      await markSubletDone({
+        orgId,
+        userId: user.userId,
+        subletId: String(formData.get('subletId') ?? ''),
+      });
+    } else {
+      await requireSession('ledger:write');
+      await billSublet({
+        orgId,
+        userId: user.userId,
+        subletId: String(formData.get('subletId') ?? ''),
+        reference: String(formData.get('reference') ?? ''),
+        net: Number(formData.get('net') ?? 0),
+        tax: Number(formData.get('tax') ?? 0),
+      });
+    }
+  } catch (error) {
+    if (!(error instanceof ReturnError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#sublet`);
+  }
+  redirect(`/jobs/${jobId}#sublet`);
 }
 
 /** A package onto this job: its lines, checklist, kind and time, one press. Phase 37. */
@@ -472,6 +515,11 @@ export default async function JobPage({
   const packages = ['INVOICED', 'PAID', 'CANCELLED'].includes(job.status)
     ? []
     : await packagesFor(orgId, { activeOnly: true });
+  const [sublets, vendors] = await Promise.all([
+    subletsForJob(orgId, job.id),
+    db.supplier.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+  ]);
+  const subletLineIds = new Set(sublets.map((entry) => entry.partLineId));
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
   const stages = progressFor(job.status as JobStatus, reached);
@@ -1046,7 +1094,9 @@ export default async function JobPage({
                     return (
                       <Tr key={line.id}>
                         <Td>
-                          <span className="eyebrow mr-2">Part</span>
+                          <span className="eyebrow mr-2">
+                            {subletLineIds.has(line.id) ? 'Sublet' : 'Part'}
+                          </span>
                           {line.description}
                           {line.partNumber ? (
                             <span className="datum ml-2 text-[11px] text-(--text-faint)">
@@ -1159,6 +1209,168 @@ export default async function JobPage({
               </Table>
             </TableWrap>
           </Card>
+
+          {sublets.length > 0 ||
+          (can(user.role, 'job:write') &&
+            !['INVOICED', 'PAID', 'CANCELLED'].includes(job.status)) ? (
+            <Card id="sublet">
+              <CardHeader
+                title="Sublet work"
+                description="Work bought from another business and sold on this job: an alignment, a regas, a machining job."
+              />
+              <CardBody className="grid gap-4 text-[13px]">
+                {sublets.length > 0 ? (
+                  <ul className="grid gap-2">
+                    {sublets.map((entry) => (
+                      <li
+                        key={entry.id}
+                        className="grid gap-2 rounded-(--radius-md) border border-(--border) px-3.5 py-3"
+                      >
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="font-medium">
+                            {entry.description}
+                            <span className="ml-2 text-(--text-faint)">{entry.supplier.name}</span>
+                          </span>
+                          <Badge
+                            tone={
+                              entry.status === 'BILLED'
+                                ? 'success'
+                                : entry.status === 'DONE'
+                                  ? 'info'
+                                  : 'warning'
+                            }
+                            size="sm"
+                          >
+                            {entry.status === 'ORDERED'
+                              ? 'ordered'
+                              : entry.status === 'DONE'
+                                ? 'done, not billed'
+                                : 'billed'}
+                          </Badge>
+                        </div>
+                        <p className="text-(--text-soft)">
+                          Cost{' '}
+                          <Money
+                            amount={entry.cost}
+                            currency={region.currency}
+                            locale={region.locale}
+                          />{' '}
+                          · charged{' '}
+                          <Money
+                            amount={entry.price}
+                            currency={region.currency}
+                            locale={region.locale}
+                          />{' '}
+                          ·{' '}
+                          <span className={entry.margin.belowCost ? 'text-(--danger)' : ''}>
+                            margin{' '}
+                            <Money
+                              amount={entry.margin.margin}
+                              currency={region.currency}
+                              locale={region.locale}
+                            />
+                            {entry.margin.percent !== null ? ` (${entry.margin.percent}%)` : ''}
+                          </span>
+                          {entry.bill ? ` · bill ${entry.bill.reference}` : ''}
+                        </p>
+                        {entry.status !== 'BILLED' && can(user.role, 'job:write') ? (
+                          <div className="flex flex-wrap items-end gap-2">
+                            {entry.status === 'ORDERED' ? (
+                              <form action={sublet}>
+                                <input type="hidden" name="jobId" value={job.id} />
+                                <input type="hidden" name="intent" value="done" />
+                                <input type="hidden" name="subletId" value={entry.id} />
+                                <Button type="submit" size="sm" variant="secondary">
+                                  The work is back
+                                </Button>
+                              </form>
+                            ) : null}
+                            {can(user.role, 'ledger:write') ? (
+                              <form action={sublet} className="flex flex-wrap items-end gap-1.5">
+                                <input type="hidden" name="jobId" value={job.id} />
+                                <input type="hidden" name="intent" value="bill" />
+                                <input type="hidden" name="subletId" value={entry.id} />
+                                <Input
+                                  name="reference"
+                                  placeholder="Their invoice no."
+                                  required
+                                  className="h-8 w-36 text-[12px]"
+                                  aria-label="Vendor invoice number"
+                                />
+                                <Input
+                                  name="net"
+                                  type="number"
+                                  step="0.01"
+                                  min="0.01"
+                                  required
+                                  defaultValue={entry.cost}
+                                  className="h-8 w-24 text-[12px]"
+                                  aria-label="Net"
+                                />
+                                <Input
+                                  name="tax"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  defaultValue={0}
+                                  className="h-8 w-20 text-[12px]"
+                                  aria-label="Tax"
+                                />
+                                <Button type="submit" size="sm" variant="secondary">
+                                  Book their bill
+                                </Button>
+                              </form>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {can(user.role, 'job:write') &&
+                !['INVOICED', 'PAID', 'CANCELLED'].includes(job.status) ? (
+                  vendors.length === 0 ? (
+                    <p className="text-(--text-faint)">
+                      Add the business doing the work as a{' '}
+                      <Link href="/suppliers/new" className="underline">
+                        supplier
+                      </Link>{' '}
+                      first.
+                    </p>
+                  ) : (
+                    <form
+                      action={sublet}
+                      className="grid gap-2 sm:grid-cols-[10rem_minmax(0,1fr)_6rem_6rem_auto] sm:items-end"
+                    >
+                      <input type="hidden" name="jobId" value={job.id} />
+                      <input type="hidden" name="intent" value="add" />
+                      <Field label="Who">
+                        <Select name="supplierId" required>
+                          {vendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.id}>
+                              {vendor.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </Field>
+                      <Field label="The work, as the customer reads it">
+                        <Input name="description" required placeholder="Four-wheel alignment" />
+                      </Field>
+                      <Field label="Cost">
+                        <Input name="cost" type="number" step="0.01" min="0" required />
+                      </Field>
+                      <Field label="Charge">
+                        <Input name="price" type="number" step="0.01" min="0" required />
+                      </Field>
+                      <Button type="submit" variant="secondary">
+                        Add sublet
+                      </Button>
+                    </form>
+                  )
+                ) : null}
+              </CardBody>
+            </Card>
+          ) : null}
 
           {can(user.role, 'estimate:write') &&
           !['COMPLETED', 'INVOICED', 'PAID', 'CANCELLED', 'DRAFT', 'BOOKED'].includes(

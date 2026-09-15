@@ -164,6 +164,10 @@ export async function bookBill(input: {
     ],
   });
 
+  // Credit held on the supplier's account from a return comes off this bill. Phase 38.
+  const { applyHeldCredits } = await import('./returns');
+  await applyHeldCredits(input.orgId, order.supplierId);
+
   await audit({
     orgId: input.orgId,
     actorUserId: input.userId,

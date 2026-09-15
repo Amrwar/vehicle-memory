@@ -126,6 +126,9 @@ export default async function PurchasingPage() {
             <Link href="/suppliers">
               <Button>Suppliers</Button>
             </Link>
+            <Link href="/purchasing/returns">
+              <Button>Returns</Button>
+            </Link>
             <Link href="/purchasing/new">
               <Button variant="primary">New order</Button>
             </Link>

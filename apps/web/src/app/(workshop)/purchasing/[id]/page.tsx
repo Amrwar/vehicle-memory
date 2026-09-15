@@ -10,6 +10,8 @@ import {
   KeyValue,
   Money,
   PageHeader,
+  Select,
+  Field,
   Table,
   TableWrap,
   Td,
@@ -25,8 +27,41 @@ import { BackLink } from '@/components/back-link';
 import { audit, requireSession } from '@/lib/guard';
 import { receiveGoods } from '@/lib/inventory';
 import { bookBill, PayablesError } from '@/lib/payables';
+import { ReturnError, returnsFor, sendReturn } from '@/lib/returns';
+import { reasonLabel, RETURN_REASONS, type ReturnReason } from '@carnet/core';
 
 export const dynamic = 'force-dynamic';
+
+/** Parts from this order go back to the supplier. Phase 38. */
+async function sendBack(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const orderId = String(formData.get('orderId') ?? '');
+  const core = String(formData.get('coreCharge') ?? '').trim();
+  try {
+    const result = await sendReturn({
+      orgId,
+      userId: user.userId,
+      orderId,
+      reason: String(formData.get('reason') ?? 'DEFECTIVE') as ReturnReason,
+      notes: String(formData.get('notes') ?? ''),
+      lines: [
+        {
+          orderLineId: String(formData.get('orderLineId') ?? ''),
+          quantity: Number(formData.get('quantity') ?? 0),
+          unitCost: core === '' ? null : Number(core),
+        },
+      ],
+    });
+    redirect(`/purchasing/${orderId}?returned=${encodeURIComponent(result.number)}`);
+  } catch (error) {
+    if (error instanceof ReturnError) {
+      redirect(`/purchasing/${orderId}?error=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+}
 
 /**
  * Books the supplier's invoice against this order.
@@ -86,11 +121,12 @@ export default async function PurchaseOrderPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; received?: string }>;
+  searchParams: Promise<{ error?: string; received?: string; returned?: string }>;
 }) {
   const { id } = await params;
-  const { error, received } = await searchParams;
-  const { db, region } = await requireSession('inventory:read');
+  const { error, received, returned } = await searchParams;
+  const { db, region, orgId } = await requireSession('inventory:read');
+  const returns = await returnsFor(orgId, { orderId: id });
 
   const order = await db.purchaseOrder.findUnique({
     where: { id },
@@ -359,6 +395,103 @@ export default async function PurchaseOrderPage({
               ) : null}
             </form>
           </Card>
+
+          {returned ? (
+            <Alert tone="success" title={`Sent back, ${returned}`}>
+              The parts are off the shelf and their cost is held as a credit the supplier owes.
+              Record the credit note on the{' '}
+              <Link href="/purchasing/returns" className="underline">
+                returns page
+              </Link>{' '}
+              when it arrives.
+            </Alert>
+          ) : null}
+
+          {order.receipts.length > 0 ? (
+            <Card id="send-back">
+              <CardHeader
+                title="Send parts back"
+                description="Faulty, wrong, not needed, or the old unit a core charge was paid on."
+              />
+              <CardBody>
+                <form action={sendBack} className="grid gap-3">
+                  <input type="hidden" name="orderId" value={order.id} />
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_6rem_10rem]">
+                    <Field label="Which part">
+                      <Select name="orderLineId" required>
+                        {order.lines
+                          .filter((line) => Number(line.received) > 0)
+                          .map((line) => (
+                            <option key={line.id} value={line.id}>
+                              {line.description} · {Number(line.received)} received
+                            </option>
+                          ))}
+                      </Select>
+                    </Field>
+                    <Field label="How many">
+                      <Input
+                        name="quantity"
+                        type="number"
+                        min="1"
+                        step="1"
+                        defaultValue={1}
+                        required
+                      />
+                    </Field>
+                    <Field label="Why">
+                      <Select name="reason" defaultValue="DEFECTIVE">
+                        {RETURN_REASONS.map((reason) => (
+                          <option key={reason} value={reason}>
+                            {reasonLabel(reason)}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
+                    <Field label="Core charge, each" hint="Only for a core.">
+                      <Input name="coreCharge" type="number" step="0.01" min="0" />
+                    </Field>
+                    <Field label="Note for the supplier">
+                      <Input name="notes" placeholder="Pads squeal from new; batch 2291" />
+                    </Field>
+                  </div>
+                  <div>
+                    <Button type="submit" variant="secondary">
+                      Send back
+                    </Button>
+                  </div>
+                </form>
+                {returns.length > 0 ? (
+                  <ul className="mt-4 grid gap-1 border-t border-(--border) pt-3 text-[13px]">
+                    {returns.map((r) => (
+                      <li key={r.id} className="flex flex-wrap justify-between gap-2">
+                        <span>
+                          <span className="datum mr-2">{r.number}</span>
+                          {r.lines
+                            .map((l) => `${Number(l.quantity)} × ${l.description}`)
+                            .join(', ')}{' '}
+                          · {reasonLabel(r.reason)}
+                        </span>
+                        <Badge
+                          tone={
+                            r.status === 'CREDITED'
+                              ? 'success'
+                              : r.status === 'REFUSED'
+                                ? 'danger'
+                                : 'warning'
+                          }
+                          size="sm"
+                        >
+                          {r.status === 'SENT' ? 'awaiting credit' : r.status.toLowerCase()}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </CardBody>
+            </Card>
+          ) : null}
 
           {order.receipts.length > 0 ? (
             <Card>

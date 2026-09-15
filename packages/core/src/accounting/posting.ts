@@ -592,3 +592,109 @@ function round2(value: number): number {
 }
 
 export { fromDecimal as moneyFromDecimal };
+
+/* ---------------------------------------------------------------------------
+   Parts back to a supplier, and sublet work. Phase 38.
+   --------------------------------------------------------------------------- */
+
+/** A part leaves the shelf for the supplier: its cost becomes a credit they owe. */
+export function postReturnSent(input: {
+  returnId: string;
+  number: string;
+  held: Money;
+  at: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: `${input.number}/S`,
+    description: `Parts returned to the supplier, ${input.number}`,
+    sourceType: 'SupplierReturn',
+    sourceId: input.returnId,
+    postedAt: input.at,
+    lines: [
+      debitLine(ACCOUNT.SUPPLIER_CREDITS, input.held, 'Owed back by the supplier'),
+      creditLine(ACCOUNT.STOCK, input.held, 'Off the shelf, at cost'),
+    ],
+  });
+}
+
+/**
+ * The supplier's credit note: what is owed to them comes down by the gross,
+ * the input tax is given back, the credit due is cleared, and any difference
+ * between the credit and the cost held goes to cost: a credit short of it is
+ * a loss on stock, a credit above it (a core charge coming back) reduces the
+ * cost of parts.
+ */
+export function postReturnCredited(input: {
+  returnId: string;
+  number: string;
+  reference: string;
+  net: Money;
+  tax: Money;
+  held: Money;
+  at: Date;
+}): JournalEntryDraft {
+  const currency = input.net.currency;
+  const gross = money(input.net.minor + input.tax.minor, currency);
+  const difference = input.net.minor - input.held.minor;
+  return finalise({
+    reference: `${input.number}/C`,
+    description: `Credit note ${input.reference} for ${input.number}`,
+    sourceType: 'SupplierReturn',
+    sourceId: input.returnId,
+    postedAt: input.at,
+    lines: [
+      debitLine(ACCOUNT.PAYABLE, gross, 'Less owed to the supplier'),
+      ...(difference < 0
+        ? [debitLine(ACCOUNT.STOCK_ADJUSTMENT, money(-difference, currency), 'Credited below cost')]
+        : []),
+      creditLine(ACCOUNT.SUPPLIER_CREDITS, input.held, 'Credit due, cleared'),
+      creditLine(ACCOUNT.TAX_RECEIVABLE, input.tax, 'Input tax given back'),
+      ...(difference > 0
+        ? [creditLine(ACCOUNT.COGS_PARTS, money(difference, currency), 'Core charge refunded')]
+        : []),
+    ],
+  });
+}
+
+/** The supplier will not credit the parts: the value held is written off. */
+export function postReturnRefused(input: {
+  returnId: string;
+  number: string;
+  held: Money;
+  at: Date;
+}): JournalEntryDraft {
+  return finalise({
+    reference: `${input.number}/R`,
+    description: `Return ${input.number} refused by the supplier`,
+    sourceType: 'SupplierReturn',
+    sourceId: input.returnId,
+    postedAt: input.at,
+    lines: [
+      debitLine(ACCOUNT.STOCK_ADJUSTMENT, input.held, 'Written off'),
+      creditLine(ACCOUNT.SUPPLIER_CREDITS, input.held, 'No credit coming'),
+    ],
+  });
+}
+
+/** A vendor's bill for sublet work: its own cost, input tax, owed to the vendor. */
+export function postSubletBilled(input: {
+  subletId: string;
+  reference: string;
+  net: Money;
+  tax: Money;
+  at: Date;
+}): JournalEntryDraft {
+  const gross = money(input.net.minor + input.tax.minor, input.net.currency);
+  return finalise({
+    reference: `${input.reference}/SUB`,
+    description: `Sublet bill ${input.reference}`,
+    sourceType: 'JobSublet',
+    sourceId: input.subletId,
+    postedAt: input.at,
+    lines: [
+      debitLine(ACCOUNT.COGS_SUBLET, input.net, 'Work bought in'),
+      debitLine(ACCOUNT.TAX_RECEIVABLE, input.tax, 'Input tax'),
+      creditLine(ACCOUNT.PAYABLE, gross, 'Owed to the vendor'),
+    ],
+  });
+}

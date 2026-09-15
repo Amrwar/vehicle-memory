@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 138,
-    "enums": 68,
-    "fields": 2169
+    "models": 142,
+    "enums": 71,
+    "fields": 2241
   },
   "enums": [
     "OrgPlan",
@@ -46,6 +46,9 @@
     "MovementType",
     "PurchaseRequestStatus",
     "PurchaseOrderStatus",
+    "SupplierReturnReason",
+    "SupplierReturnStatus",
+    "SubletStatus",
     "BillStatus",
     "AccountType",
     "EmploymentType",
@@ -645,6 +648,19 @@
             "ServicePackage"
           ],
           "scope": "through ServicePackage"
+        },
+        {
+          "name": "JobSublet",
+          "comment": "Work bought from another business and sold on a job. Phase 38.",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Job",
+            "Supplier",
+            "JobPartLine",
+            "SupplierBill"
+          ],
+          "scope": "organisation"
         }
       ]
     },
@@ -1227,6 +1243,39 @@
             "PurchaseOrder"
           ],
           "scope": "organisation"
+        },
+        {
+          "name": "SupplierReturn",
+          "comment": "Parts sent back to a supplier, from the delivery they came on to the credit note that settles them. Phase 38.",
+          "fields": 19,
+          "relations": [
+            "Organization",
+            "Supplier",
+            "PurchaseOrder"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "SupplierReturnLine",
+          "comment": "",
+          "fields": 8,
+          "relations": [
+            "SupplierReturn",
+            "PurchaseOrderLine",
+            "Product",
+            "Warehouse"
+          ],
+          "scope": "through SupplierReturn"
+        },
+        {
+          "name": "SupplierCreditApplication",
+          "comment": "A credit note set against a bill the supplier is owed.",
+          "fields": 4,
+          "relations": [
+            "SupplierReturn",
+            "SupplierBill"
+          ],
+          "scope": "through SupplierReturn"
         },
         {
           "name": "SupplierPayment",

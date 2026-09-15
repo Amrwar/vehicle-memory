@@ -1348,8 +1348,8 @@ exist.
 | Key tags                              | Missing | Nowhere to say where the keys are                                                                                                                | 35    |
 | Conversations, channel-independent    | Partial | Outbound email and SMS with delivery tracking; inbound with matching; no thread, no attachments, no assignment, no WhatsApp sender               | 36    |
 | Service packages and job templates    | Partial | Job types with default hours and a service catalogue; no bundle of labour, parts, checklist and duration that becomes a job in one press         | 37    |
-| Parts returns, cores, credits         | Missing | Two enum values and no flow                                                                                                                      | 38    |
-| Sublet work                           | Missing | Nothing                                                                                                                                          | 38    |
+| Parts returns, cores, credits         | Built   | From the order to the credit note, oldest bill first, held credit, cores to the cost of parts (Phase 38)                                         | 38    |
+| Sublet work                           | Built   | A line on the job with a vendor, a cost and a margin, the vendor's bill at the real cost (Phase 38)                                              | 38    |
 | Global search                         | Missing | Scoped lookups only                                                                                                                              | 39    |
 | Notifications for staff               | Missing | Audit and delivery logs, nothing that says "the customer approved" where you are standing                                                        | 39    |
 | The owner's day                       | Built   | Dashboard, business report and insights answer most of the list; no comeback rate, no reputation trend by site or person, no supplier comparison | 40    |
@@ -1931,9 +1931,40 @@ what is true; the call to action reads "Start your trial".
 
 ## Phase 38 — Parts back, work out
 
-Returns, defective returns and cores with supplier credits, from receipt to
-credit note. Sublet work: a vendor, a line on the job, a cost, a charge to
-the customer, a payable.
+**Scope.** Returns, defective returns and cores with supplier credits, from
+receipt to credit note. Sublet work: a vendor, a line on the job, a cost, a
+charge to the customer, a payable.
+
+**Exit.** A faulty part goes back and the credit comes off what the supplier
+is owed; an alignment bought from the tyre place down the road is on the
+customer's invoice and its cost is on the books.
+
+**Status.** Built. A part goes back to the supplier from the order it came
+on, for one of four reasons: faulty, wrong, not needed, or a core. Nothing
+goes back that was not received, less what already went back, and a part
+that is no longer on the shelf cannot go back as stock. The first three take
+the parts off the shelf in the same transaction as the return, as a return
+movement at the shelf's average cost, and post that cost from stock to a new
+account, supplier credits due. A core never touches the shelf: it is the old
+unit off the car, and its charge is entered with it. Open returns wait on a
+returns page; the credit note goes in with its number, net and tax, is
+claimed once, and comes off the supplier's open bills oldest first; what
+cannot be set against a bill is held on their account, shown on the payables
+page, and set against the next bill booked for them. The posting clears the
+credit due against the payable and gives the input tax back; a credit short
+of the cost held goes to stock adjustments, and a core's credit reduces the
+cost of parts. A supplier who refuses is recorded with the reason and the
+value held is written off. Sublet work is added to a job with a vendor, a
+description, a cost and a charge: it becomes a line the customer is invoiced
+on, shown as sublet, with its margin beside it; "The work is back" marks it
+done; the vendor's bill is booked from the job once, as a supplier bill
+owed like any other, at the real cost, which replaces the estimate on the
+line so the job's margin is what it made, and posts to a new account, the
+cost of sublet work. The verification script delivers and bills an order,
+sends faulty parts back and credits them, has a return refused, sends a
+core back and holds the leftover credit until the next bill, refuses a
+return beyond what was received, adds sublet work to a job, bills it,
+invoices it, checks the trial balance balances, and reads the three screens.
 
 ## Phase 39 — Finding anything
 

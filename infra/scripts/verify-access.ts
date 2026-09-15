@@ -47,6 +47,7 @@ const PAGES = [
   '/parts',
   '/suppliers',
   '/purchasing',
+  '/purchasing/returns',
   '/transfers',
   '/people',
   '/reminders',

@@ -437,8 +437,10 @@ items a real workshop would ask for. Each is assigned a phase in the
 | The next service from a package         | Built   | Completing a job made from a recurring package sets the vehicle's schedule: due date and due mileage (Phase 37)                         |
 | Languages                               | Built   | English, French and Arabic, the person's choice, kept on the account; Arabic right to left; public site, portal and shells (Phase 37.5) |
 | Translation coverage                    | Built   | Every sentence passed to the translator has both translations or the script fails and names it (Phase 37.5)                             |
-| Parts returns and cores                 | Missing | Phase 38                                                                                                                                |
-| Sublet work                             | Missing | Phase 38                                                                                                                                |
+| Supplier returns                        | Built   | Faulty, wrong or not needed: off the shelf at cost, a credit due, the credit note off the bills oldest first (Phase 38)                 |
+| Cores                                   | Built   | The old unit back without touching the shelf; its credit reduces the cost of parts (Phase 38)                                           |
+| Credit held on a supplier account       | Built   | Credit that cannot be set against a bill is held, shown, and taken by the next bill booked (Phase 38)                                   |
+| Sublet work                             | Built   | A vendor, a line on the job with its margin, the vendor's bill at the real cost, invoiced to the customer (Phase 38)                    |
 | Global search                           | Missing | Phase 39                                                                                                                                |
 | Staff notifications                     | Missing | Phase 39                                                                                                                                |
 | Tax by customer, site, or stacked       | Missing | One rate per line; Phase 41                                                                                                             |
@@ -458,9 +460,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 189          |
+| Built    | 193          |
 | Partial  | 2            |
-| Missing  | 11           |
+| Missing  | 9            |
 | Deferred | 1            |
 
 <!-- counts:end -->

@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 37.5"
+AFTER_PHASE = "Phase 38"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-returns": "an order delivered and billed, faulty parts sent back and credited off the bill, a refusal written off, a core credited with the leftover held for the next bill, sublet work billed and invoiced, and the trial balance",
     "verify-languages": "every sentence passed to the translator checked for both translations, eight pages read in each language for the root element's direction and a known sentence, and the switcher's cookie, account and redirect",
     "verify-packages": "a package saved with every refusal tried, a job made from it in one press, added to a job under way, booked and arrived, completed with the vehicle's next one set, offered online with its price",
     "verify-conversations": "a quote filed onto the job's thread, a WhatsApp reply landing on it unread, an answer with a file through the seam, templates filled and refused, a payment link, assignment, closing and reopening, and a stranger's message left for a person",
@@ -829,7 +830,20 @@ def build() -> None:
               "workshop navigation is a client component and receives the language as a prop, translating its labels "
               "with the same pure translate function.")
 
-    doc.add_heading("6.17 Answers and the assistant", level=2)
+    doc.add_heading("6.17 Parts back, work out", level=2)
+    para(doc, "sendReturn reads the order lines with what was received and already returned, locks each stock level "
+              "with lockLevel, checks the return in core (assertReturnable), issues the quantity at the average cost, "
+              "and writes the SupplierReturn, its lines and a RETURN StockMovement per line in one transaction; a core "
+              "writes no movement. postReturnSent moves the cost held from Stock to Supplier credits due. creditReturn "
+              "claims the return (SENT to CREDITED) so it is credited once, sets the gross against the supplier's open "
+              "bills oldest first with applyCredit (raising amountPaid and writing SupplierCreditApplication rows), keeps "
+              "the remainder as creditUnapplied, and posts postReturnCredited. bookBill and billSublet call "
+              "applyHeldCredits so held credit comes off the next bill. addSublet writes a JobPartLine with no product "
+              "(so completion consumes no stock and the invoice charges it like any line) and the JobSublet beside it; "
+              "billSublet claims the sublet, writes a SupplierBill with no order, replaces the line's cost with the real "
+              "cost, and posts postSubletBilled to Cost of sublet work.")
+
+    doc.add_heading("6.18 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

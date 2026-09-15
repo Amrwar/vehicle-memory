@@ -379,3 +379,18 @@ irrecoverably (risk R2):
 ---
 
 _Next: [Design system](08-design-system.md)._
+
+## Returns, cores and sublet (Phase 38)
+
+Two accounts join the chart: **1150 Supplier credits due** (asset) and
+**5020 Cost of sublet work** (expense). A part sent back moves its average
+cost from 1200 Stock to 1150. The supplier's credit note debits 2000
+Accounts payable by the gross, credits 2110 Tax receivable by the tax and
+1150 by the cost held; a credit below the cost is a debit to 6200 Stock
+adjustments, and a credit above it (a core charge refunded, where nothing
+was held) is a credit to 5000 Cost of goods sold, parts. A refused return
+debits 6200 and credits 1150. A vendor's bill for sublet work debits 5020
+and 2110 and credits 2000. The operational side matches: a credit is set
+against the supplier's open bills oldest first, and credit held on their
+account is set against the next bill booked, so what the payables page says
+is owed is what 2000 says, less credit held.

@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6800 — Parts back, work out
+
+| Ref     | Requirement                                                                                                                                                                             | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6801 | A part MUST be returnable from its order as faulty, wrong, not needed or a core, never beyond what was received less what already went back, and never beyond the shelf for a non-core. | 38    |
+| FR-6802 | A non-core return MUST take the parts off the shelf with a return movement in the same transaction, and post their average cost from stock to supplier credits due.                     | 38    |
+| FR-6803 | A credit note MUST be recorded once with its number, net and tax, set against the supplier's open bills oldest first, with any remainder held and set against the next bill booked.     | 38    |
+| FR-6804 | The credit posting MUST clear the credit due against the payable and return the input tax, with a shortfall to stock adjustments and a core's credit to the cost of parts.              | 38    |
+| FR-6805 | A refused return MUST be closed with the reason and its held value written off.                                                                                                         | 38    |
+| FR-6806 | Sublet work MUST be addable to an open job with a vendor, a description, a cost and a charge, as a line the customer is invoiced on, with its margin shown.                             | 38    |
+| FR-6807 | A vendor's bill for sublet work MUST be booked once, as a supplier bill, at the real cost on the line, posted to the cost of sublet work.                                               | 38    |
+
 ## FR-6700 — Languages
 
 | Ref     | Requirement                                                                                                                                                                              | Phase |

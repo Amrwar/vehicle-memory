@@ -3,3 +3,4 @@ export * from './reorder';
 export * from './procurement';
 export * from './fitment';
 export * from './catalogue';
+export * from './returns';

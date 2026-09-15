@@ -43,7 +43,7 @@ function toPosition(row: LevelRow): StockPosition {
  * Locks a stock level for update, creating it if this is the first movement
  * for that product and warehouse.
  */
-async function lockLevel(
+export async function lockLevel(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   productId: string,
   warehouseId: string,

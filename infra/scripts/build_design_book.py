@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 37.5.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 38.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -679,6 +679,22 @@ def build() -> None:
         works="Keeping the English sentence as the key means a page is translated by wrapping what is already there, and the dictionary reads as a list of sentences a person can check.",
         shots=[("portal-ar", "The customer's portal in Arabic, right to left.", 16.4), ("home-fr", "The home page in French.", 16.4)],
         source="docs/02-design/08-design-system.md, section 12.7",
+    )
+
+    design(
+        doc,
+        title="Parts back, work out",
+        when="Phase 38, 15 September 2026.",
+        why="A faulty part that goes back without a record is a part paid for twice; an alignment bought in and "
+            "not written down is work given away. Both belong where the money already is.",
+        meaning=[
+            "On the order, a card called Send parts back: which part, how many, why, a core charge for a core, a note. One secondary button, because sending parts back is not the order's main business.",
+            "The returns page leads with what is waiting on a credit note, each with two forms side by side: the credit note (number, net, tax, and a primary button) and the refusal (the reason, and a secondary one).",
+            "On the job, Sublet work lists each piece with its vendor, cost, charge and margin, red when it is sold below cost, and the two presses it needs: the work is back, and book their bill.",
+        ],
+        works="Taking the cost off the shelf the moment the part leaves, and holding it as a credit due, means stock, the ledger and the supplier's account agree on every day between the part going and the credit arriving.",
+        shots=[("returns", "Returns to suppliers.", 16.4)],
+        source="docs/02-design/07-accounting-model.md, Returns, cores and sublet",
     )
 
     # 11. Counter

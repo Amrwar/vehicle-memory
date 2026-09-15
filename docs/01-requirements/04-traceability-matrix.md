@@ -456,19 +456,31 @@ where the work happens.
 
 ## Languages
 
-| Req     | Story | Schema                  | Implementation                                                                 | Test                                  | Status |
-| ------- | ----- | ----------------------- | ------------------------------------------------------------------------------ | ------------------------------------- | ------ |
-| FR-6701 | AK1   | `User.language`         | `pickLanguage()`, `currentLanguage()`, `setLanguage()`, `applySavedLanguage()` | `i18n.test.ts`, `verify-languages.ts` | Done   |
-| FR-6702 | AK1   | —                       | `htmlAttributes()` on the root layout, `dirFor()`                              | `i18n.test.ts`, `verify-languages.ts` | Done   |
-| FR-6703 | AK2   | —                       | `translate()` fallback, `hasTranslation()`, the coverage check                 | `i18n.test.ts`, `verify-languages.ts` | Done   |
-| FR-6704 | AK2   | —                       | `LanguageSwitch`, `/api/language`                                              | `verify-languages.ts`                 | Done   |
-| FR-6705 | AK1   | —                       | `FR`, `AR` dictionaries; `t()` on the public, portal and shell pages           | `verify-languages.ts`                 | Done   |
-| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                          | `verify-credentials.ts`               | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                                     | `verify-credentials.ts`               | Done   |
-| FR-3801 | —     | —                       | `/api/inbound/resend`                                                          | `smoke.ts`                            | Done   |
-| FR-3802 | —     | —                       | `verify()` tolerance                                                           | `smoke.ts`                            | Done   |
-| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                            | `smoke.ts`                            | Done   |
-| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                                       | `smoke.ts`                            | Done   |
+| Req     | Story | Schema          | Implementation                                                                 | Test                                  | Status |
+| ------- | ----- | --------------- | ------------------------------------------------------------------------------ | ------------------------------------- | ------ |
+| FR-6701 | AK1   | `User.language` | `pickLanguage()`, `currentLanguage()`, `setLanguage()`, `applySavedLanguage()` | `i18n.test.ts`, `verify-languages.ts` | Done   |
+| FR-6702 | AK1   | —               | `htmlAttributes()` on the root layout, `dirFor()`                              | `i18n.test.ts`, `verify-languages.ts` | Done   |
+| FR-6703 | AK2   | —               | `translate()` fallback, `hasTranslation()`, the coverage check                 | `i18n.test.ts`, `verify-languages.ts` | Done   |
+| FR-6704 | AK2   | —               | `LanguageSwitch`, `/api/language`                                              | `verify-languages.ts`                 | Done   |
+| FR-6705 | AK1   | —               | `FR`, `AR` dictionaries; `t()` on the public, portal and shell pages           | `verify-languages.ts`                 | Done   |
+
+## Parts back, work out
+
+| Req     | Story | Schema                                         | Implementation                                                            | Test                                   | Status |
+| ------- | ----- | ---------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------- | ------ |
+| FR-6801 | AL1   | `SupplierReturn`, `SupplierReturnLine`         | `assertReturnable()`, `sendReturn()`, the order page                      | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6802 | AL1   | `StockMovement` RETURN, account 1150           | `lockLevel()`, `applyIssue()`, `postReturnSent()`                         | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6803 | AL1   | `SupplierCreditApplication`, `creditUnapplied` | `applyCredit()`, `creditReturn()`, `applyHeldCredits()` from `bookBill()` | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6804 | AL2   | —                                              | `postReturnCredited()`                                                    | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6805 | AL1   | `SupplierReturn.refusedReason`                 | `refuseReturn()`, `postReturnRefused()`, `/purchasing/returns`            | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6806 | AL3   | `JobSublet`, `JobPartLine`                     | `assertSubletSound()`, `addSublet()`, `subletMargin()`, the job page      | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-6807 | AL3   | `JobSublet.billId`, account 5020               | `assertSubletBillable()`, `billSublet()`, `postSubletBilled()`            | `returns.test.ts`, `verify-returns.ts` | Done   |
+| FR-3907 | A1    | —                                              | `assertNotFlooding()`                                                     | `verify-credentials.ts`                | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                        | `digest()`                                                                | `verify-credentials.ts`                | Done   |
+| FR-3801 | —     | —                                              | `/api/inbound/resend`                                                     | `smoke.ts`                             | Done   |
+| FR-3802 | —     | —                                              | `verify()` tolerance                                                      | `smoke.ts`                             | Done   |
+| FR-3803 | —     | `Organization.slug`                            | `organisationFor()`                                                       | `smoke.ts`                             | Done   |
+| FR-3804 | —     | —                                              | `INBOUND_WEBHOOK_SECRET`                                                  | `smoke.ts`                             | Done   |
 
 ## What people say afterwards
 
@@ -770,9 +782,10 @@ details without a provider behind it would be worse than not having one.
 | Conversations                                      | 7                   | 7                      |
 | Packages and templates                             | 5                   | 5                      |
 | Languages                                          | 5                   | 5                      |
-| **Total**                                          | **460**             | **454 (99%)**          |
+| Parts back, work out                               | 7                   | 7                      |
+| **Total**                                          | **467**             | **461 (99%)**          |
 
-The requirements document lists 544 requirements. 84 of
+The requirements document lists 551 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

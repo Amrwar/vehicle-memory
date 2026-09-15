@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
+import { heldCreditBySupplier } from '@/lib/returns';
 import {
   approveBill,
   disputeBill,
@@ -112,9 +113,10 @@ export default async function PayablesPage({
   const { orgId, user, region } = await requireSession('ledger:read');
   const notice = await searchParams;
 
-  const [suppliers, payments] = await Promise.all([
+  const [suppliers, payments, held] = await Promise.all([
     payablesFor(orgId),
     supplierPaymentsFor(orgId, 20),
+    heldCreditBySupplier(orgId),
   ]);
 
   const owed = suppliers.reduce((total, entry) => total + entry.outstanding.minor, 0);
@@ -189,7 +191,7 @@ export default async function PayablesPage({
             <Card key={entry.supplier.id} className="overflow-hidden">
               <CardHeader
                 title={entry.supplier.name}
-                description={`${entry.bills.length} open bill${entry.bills.length === 1 ? '' : 's'}${entry.overdue > 0 ? ` · ${entry.overdue} overdue` : ''}`}
+                description={`${entry.bills.length} open bill${entry.bills.length === 1 ? '' : 's'}${entry.overdue > 0 ? ` · ${entry.overdue} overdue` : ''}${held.get(entry.supplier.id) ? ` · ${held.get(entry.supplier.id)!.toFixed(2)} credit held from a return` : ''}`}
                 action={
                   <span className="font-display text-[16px] font-semibold">
                     <Money
