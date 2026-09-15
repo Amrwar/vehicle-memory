@@ -12,8 +12,6 @@
  * left without a document, only without the file.
  */
 
-import { chromium } from 'playwright-core';
-
 export interface PdfRequest {
   /** The print page, on this same site. */
   url: string;
@@ -22,6 +20,9 @@ export interface PdfRequest {
 }
 
 async function launch() {
+  // Imported here rather than at the top, so a platform without the browser
+  // falls back to the print page instead of failing the route as it loads.
+  const { chromium } = await import('playwright-core');
   const serverless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
   if (!serverless) return chromium.launch({ headless: true });
   const { default: packaged } = await import('@sparticuz/chromium');

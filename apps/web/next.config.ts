@@ -23,8 +23,10 @@ const config: NextConfig = {
   // it at the repository root. Phase 42.
   outputFileTracingIncludes: {
     '/api/print/[kind]/[id]': [
-      '../../node_modules/@sparticuz/chromium/bin/**',
-      './node_modules/@sparticuz/chromium/bin/**',
+      '../../node_modules/@sparticuz/chromium/**',
+      './node_modules/@sparticuz/chromium/**',
+      '../../node_modules/playwright-core/**',
+      './node_modules/playwright-core/**',
     ],
   },
 
