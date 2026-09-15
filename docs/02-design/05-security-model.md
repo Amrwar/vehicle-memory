@@ -211,6 +211,19 @@ raw queries bind every value as a parameter. A notification is one person's
 row; opening another person's returns nothing, and its path is refused
 unless it is a path on this site.
 
+### 7.6 Printed documents and PDFs (Phase 42)
+
+A printed document is read through `readerFor`, which finds the document's
+workshop first and then asks whether this person may read it: a member of
+that workshop whose role holds the permission for the kind, a technician on
+the job for its work order or key tag, or a customer whose portal login is on
+the document for an invoice, quote or inspection report. Anybody else gets
+not found. The PDF route asks the same question before a browser is started,
+then renders the print page with only the reader's own session and language
+cookies, on the site's own origin; a document the reader could not see as a
+page cannot be made into a file. QR codes carry links to pages that require
+their own sign-in; nothing is readable from the code alone.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

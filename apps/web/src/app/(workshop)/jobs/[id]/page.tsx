@@ -1743,6 +1743,47 @@ export default async function JobPage({
             </CardBody>
           </Card>
 
+          {/* Paper for the job: what the technician works from, the tag for the
+              keys, and the quote and inspection report as the customer is
+              given them. Phase 42. */}
+          <Card id="paper">
+            <CardHeader title={t('Print')} />
+            <CardBody className="grid gap-2 text-[13px]">
+              <a href={`/print/work-order/${job.id}`} className="hover:underline">
+                {t('Work order')}
+              </a>
+              <a href={`/print/key-tag/${job.id}`} className="hover:underline">
+                {t('Key tag')}
+              </a>
+              {estimate ? (
+                <span className="flex flex-wrap gap-3">
+                  <a href={`/print/estimate/${estimate.id}`} className="hover:underline">
+                    {t('Quote')}
+                  </a>
+                  <a
+                    href={`/api/print/estimate/${estimate.id}`}
+                    className="text-(--text-soft) hover:underline"
+                  >
+                    {t('PDF')}
+                  </a>
+                </span>
+              ) : null}
+              {inspection ? (
+                <span className="flex flex-wrap gap-3">
+                  <a href={`/print/inspection/${inspection.id}`} className="hover:underline">
+                    {t('Inspection report')}
+                  </a>
+                  <a
+                    href={`/api/print/inspection/${inspection.id}`}
+                    className="text-(--text-soft) hover:underline"
+                  >
+                    {t('PDF')}
+                  </a>
+                </span>
+              ) : null}
+            </CardBody>
+          </Card>
+
           {returned &&
           (returned.marked || returned.cameBack.length > 0 || returned.eligible.length > 0) ? (
             <Card id="comeback" className={returned.marked ? 'border-(--warning)' : undefined}>

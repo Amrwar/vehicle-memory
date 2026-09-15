@@ -310,6 +310,13 @@ export default async function ShopFloorPage({
                         <dt>{t('Job')}</dt>
                         <dd className="datum text-(--text-soft)">#{job.number}</dd>
                       </div>
+                      <div className="flex gap-1.5">
+                        <dd>
+                          <a href={`/print/work-order/${job.id}`} className="underline">
+                            {t('Work order')}
+                          </a>
+                        </dd>
+                      </div>
                       {job.estimatedHours ? (
                         <div className="flex gap-1.5">
                           <dt>{t('Allowed')}</dt>

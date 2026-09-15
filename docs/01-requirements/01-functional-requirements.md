@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7300 — Paper
+
+| Ref     | Requirement                                                                                                                                                                      | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7301 | The invoice, quote, inspection report, work order, key tag, part labels and counter receipt MUST each print on their own page with the workshop's letterhead.                    | 42    |
+| FR-7302 | Each document MUST be available as a PDF identical to its printed page, and MUST fall back to the print page when no PDF can be made.                                            | 42    |
+| FR-7303 | A document that is not final MUST be stamped as such.                                                                                                                            | 42    |
+| FR-7304 | Printed documents MUST be translated and laid out in the reader's language and direction, with people's data kept in its own direction.                                          | 42    |
+| FR-7305 | A document MUST be readable only by a workshop member with the permission for its kind, a technician on the job for a work order or key tag, or the customer it is addressed to. | 42    |
+| FR-7306 | Labels MUST fill standard sheets with a QR code, part number, name, bin and price, and a run MUST be capped.                                                                     | 42    |
+| FR-7307 | Every workshop page MUST print without navigation or controls, in light colours.                                                                                                 | 42    |
+
 ## FR-7200 — Tax, configurable
 
 | Ref     | Requirement                                                                                                                                                                       | Phase |

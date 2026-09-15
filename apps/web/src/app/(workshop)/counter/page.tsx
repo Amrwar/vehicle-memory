@@ -418,7 +418,11 @@ export default async function CounterPage({
                 <tbody>
                   {sales.map((sale) => (
                     <Tr key={sale.id}>
-                      <Td className="datum font-medium">{sale.reference}</Td>
+                      <Td className="datum font-medium">
+                        <a href={`/print/counter-sale/${sale.id}`} className="hover:underline">
+                          {sale.reference}
+                        </a>
+                      </Td>
                       <Td className="text-(--text-soft)">
                         {sale.lines[0]?.description ?? '—'}
                         {sale.lines.length > 1 ? (

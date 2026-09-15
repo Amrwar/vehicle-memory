@@ -64,6 +64,7 @@
     "verify:search": "tsx infra/scripts/verify-search.ts",
     "verify:owner": "tsx infra/scripts/verify-owner.ts",
     "verify:tax": "tsx infra/scripts/verify-tax.ts",
+    "verify:paper": "tsx infra/scripts/verify-paper.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

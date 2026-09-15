@@ -209,6 +209,13 @@ export default async function PortalInvoicesPage({
                       <Money amount={invoice.outstanding} currency={invoice.currency} />
                     </div>
 
+                    <a
+                      href={`/api/print/invoice/${invoice.id}`}
+                      className="text-[13px] text-(--brand-text) hover:underline"
+                    >
+                      {t('Download the invoice as a PDF')}
+                    </a>
+
                     {offered ? (
                       <form action={pay} className="mt-3">
                         <input type="hidden" name="invoiceId" value={invoice.id} />
@@ -288,7 +295,12 @@ export default async function PortalInvoicesPage({
                 className="rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3.5 py-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium">{invoice.number ?? t('Invoice')}</span>
+                  <a
+                    href={`/api/print/invoice/${invoice.id}`}
+                    className="font-medium hover:underline"
+                  >
+                    {invoice.number ?? t('Invoice')}
+                  </a>
                   <span className="font-medium tabular-nums">
                     <Money amount={invoice.totalNumber} currency={invoice.currency} />
                   </span>

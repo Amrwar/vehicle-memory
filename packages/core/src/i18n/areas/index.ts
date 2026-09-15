@@ -6,6 +6,7 @@
 
 import * as publicSite from './public';
 import * as portal from './portal';
+import * as print from './print';
 import * as components from './components';
 import * as jobs from './jobs';
 import * as settings from './settings';
@@ -28,4 +29,5 @@ export const AREAS = [
   business,
   messages,
   coreMessages,
+  print,
 ] as const;

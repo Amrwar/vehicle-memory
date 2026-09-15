@@ -518,12 +518,24 @@ where the work happens.
 | FR-7205 | AP1   | `TaxEntry`, update trigger             | `recordTaxEntries()` from invoices, credit notes (`creditShares()`), counter sales, fleet invoices | `verify-tax.ts`                | Done   |
 | FR-7206 | AP4   | `TaxEntry`                             | `taxReport()`, `taxReportFor()`, `/reports/tax`, `/api/reports/tax`                                | `tax.test.ts`, `verify-tax.ts` | Done   |
 | FR-7207 | AP1   | —                                      | `saveTaxRateWithParts()`                                                                           | `verify-tax.ts`                | Done   |
-| FR-3907 | A1    | —                                      | `assertNotFlooding()`                                                                              | `verify-credentials.ts`        | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                | `digest()`                                                                                         | `verify-credentials.ts`        | Done   |
-| FR-3801 | —     | —                                      | `/api/inbound/resend`                                                                              | `smoke.ts`                     | Done   |
-| FR-3802 | —     | —                                      | `verify()` tolerance                                                                               | `smoke.ts`                     | Done   |
-| FR-3803 | —     | `Organization.slug`                    | `organisationFor()`                                                                                | `smoke.ts`                     | Done   |
-| FR-3804 | —     | —                                      | `INBOUND_WEBHOOK_SECRET`                                                                           | `smoke.ts`                     | Done   |
+
+## Paper
+
+| Req     | Story | Schema                  | Implementation                                                       | Test                               | Status |
+| ------- | ----- | ----------------------- | -------------------------------------------------------------------- | ---------------------------------- | ------ |
+| FR-7301 | AQ1   | —                       | `/print/[kind]/[id]`, `PrintSheet`, `components/print/documents.tsx` | `verify-paper.ts`                  | Done   |
+| FR-7302 | AQ2   | —                       | `/api/print/[kind]/[id]`, `renderPdf()`, `pdfFilename()`             | `print.test.ts`, `verify-paper.ts` | Done   |
+| FR-7303 | AQ2   | —                       | `watermarkFor()`                                                     | `print.test.ts`, `verify-paper.ts` | Done   |
+| FR-7304 | AQ2   | —                       | `tFor()`, `readingLocaleFor()`, `<bdi>` around data                  | `verify-paper.ts`                  | Done   |
+| FR-7305 | AQ1   | —                       | `readerFor()`, `PRINT_PERMISSION`, `CUSTOMER_PRINT_KINDS`            | `verify-paper.ts`                  | Done   |
+| FR-7306 | AQ3   | —                       | `labelSheets()`, `keyTagFor()`, `qrSvg()`                            | `print.test.ts`, `verify-paper.ts` | Done   |
+| FR-7307 | AQ3   | —                       | the print stylesheet in `packages/ui/src/styles.css`                 | `verify-paper.ts`                  | Done   |
+| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                | `verify-credentials.ts`            | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                           | `verify-credentials.ts`            | Done   |
+| FR-3801 | —     | —                       | `/api/inbound/resend`                                                | `smoke.ts`                         | Done   |
+| FR-3802 | —     | —                       | `verify()` tolerance                                                 | `smoke.ts`                         | Done   |
+| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                  | `smoke.ts`                         | Done   |
+| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                             | `smoke.ts`                         | Done   |
 
 ## What people say afterwards
 
@@ -830,9 +842,10 @@ details without a provider behind it would be worse than not having one.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| **Total**                                          | **490**             | **484 (99%)**          |
+| Paper                                              | 7                   | 7                      |
+| **Total**                                          | **497**             | **491 (99%)**          |
 
-The requirements document lists 574 requirements. 84 of
+The requirements document lists 581 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

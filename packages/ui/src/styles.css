@@ -561,6 +561,185 @@ h6 {
   }
 }
 
+/* Paper. Phase 42.
+   A document is one sheet on the desk on screen and the page itself on
+   paper: the same markup, so the PDF made from it matches. Every workshop
+   page prints too: the navigation, buttons and forms fall away, and the
+   page is drawn light whatever the theme. */
+.print-desk {
+  min-height: 100vh;
+  background: var(--ground);
+  padding-block: 20px 40px;
+  padding-inline: 16px;
+}
+
+.print-sheet {
+  position: relative;
+  max-width: 210mm;
+  margin-inline: auto;
+  padding: 14mm 14mm 16mm;
+  background: #fff;
+  color: #111;
+  font-size: 12.5px;
+  line-height: 1.45;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  overflow: hidden;
+}
+
+.print-sheet[data-size='receipt'] {
+  max-width: 80mm;
+  padding: 6mm 5mm;
+  font-size: 11.5px;
+  page: receipt;
+}
+
+.print-sheet[data-size='tag'] {
+  max-width: 90mm;
+  padding: 5mm;
+  page: tag;
+}
+
+.print-sheet[data-size='labels'] {
+  padding: 8mm;
+}
+
+.print-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.print-sheet th {
+  padding: 4px 6px;
+  border-bottom: 1.5px solid #222;
+  color: #444;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: start;
+}
+
+.print-sheet td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #e2e2e2;
+  vertical-align: top;
+}
+
+.print-sheet .num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.print-watermark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgb(170 30 30 / 0.13);
+  font-size: 84px;
+  font-weight: 700;
+  pointer-events: none;
+  transform: rotate(-24deg);
+}
+
+.print-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.label-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 38mm;
+}
+
+.label-cell {
+  display: flex;
+  gap: 2.5mm;
+  align-items: center;
+  padding: 3mm;
+  border: 1px dashed #cfcfcf;
+  overflow: hidden;
+}
+
+.print-page-break {
+  break-after: page;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  @page receipt {
+    size: 80mm 297mm;
+    margin: 4mm;
+  }
+
+  @page tag {
+    size: 90mm 60mm;
+    margin: 3mm;
+  }
+
+  :root {
+    color-scheme: light;
+    --ground: #fff !important;
+    --surface: #fff !important;
+    --surface-sunk: #f3f3f3 !important;
+    --text: #111 !important;
+    --text-soft: #333 !important;
+    --text-faint: #555 !important;
+    --border: #cfcfcf !important;
+    --border-soft: #e2e2e2 !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  #workshop-nav,
+  [aria-controls='workshop-nav'],
+  .print\:hidden,
+  main button,
+  main form,
+  main [role='search'] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .print-desk {
+    min-height: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  .print-sheet {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .label-cell {
+    border-color: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  tr,
+  .print-avoid {
+    break-inside: avoid;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;

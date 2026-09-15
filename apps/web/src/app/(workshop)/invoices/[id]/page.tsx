@@ -347,6 +347,12 @@ export default async function InvoicePage({
             <Link href={`/customers/${invoice.customer.id}`}>
               <Button variant="secondary">{t('Customer')}</Button>
             </Link>
+            <Link href={`/print/invoice/${invoice.id}`}>
+              <Button variant="secondary">{t('Print')}</Button>
+            </Link>
+            <a href={`/api/print/invoice/${invoice.id}`}>
+              <Button variant="secondary">{t('PDF')}</Button>
+            </a>
           </>
         }
       />

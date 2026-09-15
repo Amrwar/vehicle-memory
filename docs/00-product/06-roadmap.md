@@ -2151,8 +2151,50 @@ what its own sale added, so an earlier run's till no longer fails it.
 
 ## Phase 42 — Paper
 
-Print styles for every document; a printable work order; invoice, estimate
-and inspection report as PDF; labels, key tags and QR codes; receipts.
+**Scope.** Print styles for every document; a printable work order; invoice,
+estimate and inspection report as PDF; labels, key tags and QR codes;
+receipts.
+
+**Exit.** The technician works from a printed work order, the keys hang on a
+tag that says whose they are, the shelf is labelled, and a customer can be
+handed or emailed any invoice, quote or inspection report as paper or a PDF,
+in their language.
+
+**Status.** Built. Seven documents print from their own pages at `/print`,
+outside the workshop's layout: the invoice, the quote, the inspection report,
+the work order, the key tag, a sheet of part labels and the counter receipt.
+Each has the workshop's letterhead (name, legal name, address, telephone,
+email and tax number), stamps what is not final (a draft, a void invoice, a
+quote declined or superseded, a cancelled job), and is translated and laid
+out right to left in Arabic, with names, plates, addresses and figures kept
+in their own direction. The invoice lists each tax as declared, the
+exemption certificate and whether prices include tax. The work order carries
+the checklist, labour, parts and their state, what the inspection found, the
+condition at arrival, the keys' hook and lines for the technician and the
+quality check. The key tag gives the plate, the job, the surname only and the
+hook. Labels fill A4 sheets of 21 with a QR code, part number, name, bin and
+price, capped at a hundred of a part and five hundred in a run. The receipt
+is 80 mm wide. QR codes are drawn on the server as SVG: the invoice opens the
+customer's invoices, the quote its approval page, the report the car's
+record, the work order, key tag and labels their records in the workshop.
+Every document is also a PDF, rendered from the same page by a headless
+browser (Playwright's own locally, `@sparticuz/chromium` on the server), so
+the file and the paper cannot disagree and Arabic is shaped as the browser
+shapes it; when no browser can start, the PDF link falls back to the print
+page and opens the print dialog. Who may read a document is decided once:
+a member of the workshop with the permission for that kind, a technician the
+work order and key tag of a job they are on, a customer their own invoices,
+quotes and inspection reports; anything else is not found. Every workshop
+page now prints cleanly too: the navigation, buttons and forms fall away and
+the page is drawn light whatever the theme. The documents are reached from
+the invoice, job, part, counter and shop-floor pages and the customer's
+invoices in the portal. The verification script reads all seven as the owner
+with their own words, no navigation and QR codes, in French and Arabic;
+fetches the invoice as a real PDF named for the workshop and the number, as
+the owner and as the customer; checks a technician prints their job's work
+order and not another's nor an invoice, a customer their own invoice and not
+another's nor a work order, another workshop nothing, and nobody signed out
+anything; refuses six hundred labels; and finds the links on the pages.
 
 ## Phase 43 — Providers
 

@@ -1642,6 +1642,43 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AQ — Paper (Phase 42)
+
+### AQ1 — The work order on the bench
+
+**As** John **I want** the job on a sheet beside the car **so that** I work
+through it without going back to a screen with greasy hands.
+**Size** 3 · **Satisfies** FR-7301, FR-7305
+
+- **Given** a job I am on, **when** I print its work order, **then** it has
+  the checklist, labour, parts, what the inspection found and the keys' hook.
+- **Given** a job I am not on, **when** I open its work order, **then** it is
+  not found.
+
+### AQ2 — The invoice, as a file
+
+**As** Maria **I want** my invoice as a PDF **so that** I can send it to my
+company for expenses.
+**Size** 3 · **Satisfies** FR-7302, FR-7303, FR-7304
+
+- **Given** my invoice, **when** I download it from the portal, **then** a PDF
+  named for the workshop and the number arrives, and it matches the paper.
+- **Given** Arabic is my language, **when** I print it, **then** it reads
+  right to left with the plate and amounts intact.
+
+### AQ3 — Labels and tags
+
+**As** Paul in parts **I want** labels for a delivery and tags for the keys
+**so that** nothing on the shelf or the hook board is anonymous.
+**Size** 2 · **Satisfies** FR-7306, FR-7307
+
+- **Given** twelve of a filter arrived, **when** I print twelve labels,
+  **then** a sheet of them prints with a QR code to the part.
+- **Given** any workshop page, **when** I print it, **then** only the page's
+  content is on the paper.
+
+---
+
 ## Story map
 
 ```

@@ -196,6 +196,22 @@ export default async function PartPage({
         description={`${product.partNumber}${product.brand ? ` · ${product.brand}` : ''}`}
         actions={
           <>
+            {/* Labels for the shelf, as many as there are to stick. Phase 42. */}
+            <form action="/print/labels/sheet" method="get" className="flex items-center gap-1.5">
+              <input type="hidden" name="part" value={product.id} />
+              <Input
+                name="copies"
+                type="number"
+                min={1}
+                max={100}
+                defaultValue={1}
+                className="h-9 w-16"
+                aria-label={t('How many labels')}
+              />
+              <Button type="submit" variant="secondary">
+                {t('Print labels')}
+              </Button>
+            </form>
             <Button>{t('Adjust stock')}</Button>
             {suggestion.quantity > 0 ? (
               <Link href={`/purchasing/new?product=${product.id}&qty=${suggestion.quantity}`}>

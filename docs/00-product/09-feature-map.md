@@ -452,7 +452,8 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Staff notifications                     | Built   | Approvals, messages, online bookings, card payments, part requests, to whoever would act; each opens its record (Phase 39)              |
 | Tax by customer, site, or stacked       | Built   | Up to three taxes on a rate, compound or not; exempt customers with a certificate; a rate per site; prices with tax in (Phase 41)       |
 | Report per tax                          | Built   | Each tax and rate for a period, as declared on each document, less credit notes, per site; CSV (Phase 41)                               |
-| Printing, PDF, labels                   | Partial | Three pages print; Phase 42                                                                                                             |
+| Printing, PDF, labels                   | Built   | Invoice, quote, inspection report, work order, key tag, part labels and counter receipt; each as a PDF; QR codes (Phase 42)             |
+| Every page prints                       | Built   | Navigation, buttons and forms fall away; drawn light whatever the theme (Phase 42)                                                      |
 | Onboarding checklist                    | Missing | Phase 45                                                                                                                                |
 | Demonstration data                      | Missing | Phase 45                                                                                                                                |
 | Help inside the product                 | Missing | Phase 45                                                                                                                                |
@@ -468,8 +469,8 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 204          |
-| Partial  | 2            |
+| Built    | 206          |
+| Partial  | 1            |
 | Missing  | 6            |
 | Deferred | 1            |
 

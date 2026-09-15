@@ -125,11 +125,13 @@ dashboard in three blocks, and every word translated: every page, component,
 page title and refusal in French and Arabic, with a scan that fails on any
 text left outside the translator, and tax made configurable: several taxes on
 a rate, prices with tax in, exempt customers, a rate per site, and a report
-per tax read from what each document declared. The
+per tax read from what each document declared, and paper: seven documents
+that print and download as a PDF in the reader's language, with QR codes,
+key tags and part labels. The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 204 capabilities
-built, 2 partial and 6 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 490
+phase, the [feature map](00-product/09-feature-map.md) counts 206 capabilities
+built, 1 partial and 6 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 497
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -138,4 +140,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 41 are now built.
+to 42 are now built.

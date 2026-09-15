@@ -31,3 +31,4 @@ export * from './settings/index';
 export * from './i18n/index';
 export * from './search/index';
 export * from './owner/index';
+export * from './print/index';

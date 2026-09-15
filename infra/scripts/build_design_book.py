@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 41.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 42.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -760,6 +760,23 @@ def build() -> None:
         works="Keeping what each document declared, rather than recalculating from rates, means a return filed last quarter reads the same next year, whatever the rates have become.",
         shots=[("tax-report", "The report per tax.", 16.4)],
         source="docs/02-design/07-accounting-model.md, Tax, configurable",
+    )
+
+    design(
+        doc,
+        title="Paper",
+        when="Phase 42, 15 September 2026.",
+        why="A workshop runs on paper as much as screens: the sheet on the bench, the tag on the keys, the label on the shelf, "
+            "and the invoice a customer's company wants as a file.",
+        meaning=[
+            "Each document is one white sheet on a grey desk, with Back, Download PDF and Print above it on screen and nothing but the sheet on paper.",
+            "The letterhead runs across the top with the title and number opposite; what the document is about sits in two columns of label and value; tables are ruled lightly, figures aligned to the end.",
+            "A document that is not final carries its state across it in large faint red letters. A QR code sits beside what it opens, with the words under it for anyone without a phone.",
+            "In Arabic the sheet mirrors; names, plates, addresses and amounts stay in their own direction inside the Arabic text.",
+        ],
+        works="Rendering the PDF from the printed page means one layout to keep right, in every language, and a file that is always the paper.",
+        shots=[("print-work-order", "A work order.", 16.4), ("print-inspection-ar", "An inspection report in Arabic.", 16.4)],
+        source="docs/02-design/05-security-model.md, section 7.6",
     )
 
     # 11. Counter

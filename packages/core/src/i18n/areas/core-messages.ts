@@ -589,6 +589,10 @@ export const fr: Readonly<Record<string, string>> = {
     '{v1} est la première taxe : rien ne la précède sur quoi la calculer en cascade.',
   'An exempt customer needs the certificate or registration number that makes them exempt. It is printed on every invoice to them.':
     'Un client exonéré doit avoir le numéro de certificat ou d’immatriculation qui justifie l’exonération. Il figure sur chacune de ses factures.',
+  'Choose at least one part to print a label for.':
+    'Choisissez au moins une pièce pour laquelle imprimer une étiquette.',
+  'That is {v1} labels. Print at most {v2} at a time.':
+    'Cela fait {v1} étiquettes. Imprimez-en au plus {v2} à la fois.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1136,4 +1140,7 @@ export const ar: Readonly<Record<string, string>> = {
     '{v1} هي الضريبة الأولى، فلا شيء قبلها لتُحتسب فوقه.',
   'An exempt customer needs the certificate or registration number that makes them exempt. It is printed on every invoice to them.':
     'يحتاج العميل المعفى إلى رقم الشهادة أو التسجيل الذي يثبت إعفاءه. يُطبع على كل فاتورة تصدر له.',
+  'Choose at least one part to print a label for.': 'اختر قطعة واحدة على الأقل لطباعة ملصق لها.',
+  'That is {v1} labels. Print at most {v2} at a time.':
+    'هذه {v1} ملصقات. اطبع {v2} كحد أقصى في كل مرة.',
 };

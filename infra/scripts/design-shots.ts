@@ -236,6 +236,17 @@ async function main() {
           },
         ]
       : []),
+    // Paper. Phase 42.
+    { file: 'print-invoice', path: `/print/invoice/${r.invoice}`, who: 'owner', fullPage: true },
+    { file: 'print-work-order', path: `/print/work-order/${r.job}`, who: 'owner', fullPage: true },
+    {
+      file: 'print-inspection-ar',
+      path: `/print/inspection/${r.inspection}`,
+      who: 'owner',
+      lang: 'ar',
+      fullPage: true,
+    },
+    { file: 'print-key-tag', path: `/print/key-tag/${r.job}`, who: 'owner', height: 500 },
     { file: 'not-found', path: '/nothing-here', who: 'owner' },
   ];
 

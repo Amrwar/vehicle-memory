@@ -8,7 +8,25 @@ const config: NextConfig = {
 
   // Prisma and the pg driver must not be bundled; they load native and
   // wasm assets at runtime.
-  serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg', 'bcryptjs'],
+  // The headless browser that renders PDFs ships its own binary. Phase 42.
+  serverExternalPackages: [
+    '@prisma/client',
+    '@prisma/adapter-pg',
+    'pg',
+    'bcryptjs',
+    'playwright-core',
+    '@sparticuz/chromium',
+  ],
+
+  // The packaged browser is read from disk at run time, which file tracing
+  // cannot see, so the PDF route is told to carry it. The workspace installs
+  // it at the repository root. Phase 42.
+  outputFileTracingIncludes: {
+    '/api/print/[kind]/[id]': [
+      '../../node_modules/@sparticuz/chromium/bin/**',
+      './node_modules/@sparticuz/chromium/bin/**',
+    ],
+  },
 
   typedRoutes: false,
 
