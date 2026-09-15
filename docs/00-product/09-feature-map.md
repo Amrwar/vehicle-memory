@@ -442,6 +442,8 @@ items a real workshop would ask for. Each is assigned a phase in the
 | The next service from a package         | Built   | Completing a job made from a recurring package sets the vehicle's schedule: due date and due mileage (Phase 37)                         |
 | Languages                               | Built   | English, French and Arabic, the person's choice, kept on the account; Arabic right to left; public site, portal and shells (Phase 37.5) |
 | Translation coverage                    | Built   | Every sentence passed to the translator has both translations or the script fails and names it (Phase 37.5)                             |
+| Every word translated                   | Built   | Every page, component, page title and refusal through the translator; 5,511 sentences in each language (Phase 40.5)                     |
+| Untranslated text refused               | Built   | A parser-based scan names any text outside the translator and fails the languages check (Phase 40.5)                                    |
 | Supplier returns                        | Built   | Faulty, wrong or not needed: off the shelf at cost, a credit due, the credit note off the bills oldest first (Phase 38)                 |
 | Cores                                   | Built   | The old unit back without touching the shelf; its credit reduces the cost of parts (Phase 38)                                           |
 | Credit held on a supplier account       | Built   | Credit that cannot be set against a bill is held, shown, and taken by the next bill booked (Phase 38)                                   |
@@ -465,7 +467,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 200          |
+| Built    | 202          |
 | Partial  | 2            |
 | Missing  | 7            |
 | Deferred | 1            |

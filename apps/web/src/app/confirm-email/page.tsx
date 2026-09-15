@@ -6,11 +6,15 @@ import { redirect } from 'next/navigation';
 
 import { canSendMail, requestVerification } from '@/lib/credentials';
 import { requireUser } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Confirm your email',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Confirm your email'),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +49,7 @@ export default async function ConfirmEmailPage({
 }: {
   searchParams: Promise<{ sent?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const { sent } = await searchParams;
 
@@ -61,19 +66,32 @@ export default async function ConfirmEmailPage({
       <p className="text-[12px] font-medium tracking-wide text-(--brand-text) uppercase">Carnet</p>
 
       <h1 className="font-display text-[24px] leading-tight font-semibold">
-        One more step: confirm your email
+        {t('One more step: confirm your email')}
       </h1>
 
       <p className="text-[15px] leading-relaxed text-(--text-soft)">
-        We have sent a link to <span className="datum">{row?.email}</span>. Open it and the workshop
-        is yours. Until then, everything the workshop would send goes out in your name from an
-        address nobody has checked, so we wait.
+        {t(
+          'We have sent a link to {email}. Open it and the workshop is yours. Until then, everything the workshop would send goes out in your name from an address nobody has checked, so we wait.',
+        )
+          .split('{email}')
+          .flatMap((part, index) =>
+            index === 0
+              ? [part]
+              : [
+                  <span key={index} className="datum">
+                    {row?.email}
+                  </span>,
+                  part,
+                ],
+          )}
       </p>
 
       {sent ? (
         <Card className="border-(--success)">
           <CardBody className="text-[14px] leading-relaxed text-(--success)">
-            Sent again. The newest link is the one that works; earlier ones have been retired.
+            {t(
+              'Sent again. The newest link is the one that works; earlier ones have been retired.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -81,12 +99,13 @@ export default async function ConfirmEmailPage({
       <Card>
         <CardBody className="grid gap-3">
           <p className="text-[13px] leading-relaxed text-(--text-soft)">
-            Nothing in your inbox? Check the spam folder first. Some providers hold a first message
-            from a new sender for a few minutes.
+            {t(
+              'Nothing in your inbox? Check the spam folder first. Some providers hold a first message from a new sender for a few minutes.',
+            )}
           </p>
           <form action={resend}>
             <Button type="submit" variant="primary">
-              Send the link again
+              {t('Send the link again')}
             </Button>
           </form>
         </CardBody>
@@ -94,22 +113,27 @@ export default async function ConfirmEmailPage({
 
       {canSendMail() ? null : (
         <p className="text-[13px] leading-relaxed text-(--warning)">
-          This deployment has no mail transport configured, so the link is written to the server log
-          rather than sent. Whoever runs it can read it there.
+          {t(
+            'This deployment has no mail transport configured, so the link is written to the server log rather than sent. Whoever runs it can read it there.',
+          )}
         </p>
       )}
 
       <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] leading-relaxed text-(--text-faint)">
-        <span>Typed the wrong address?</span>
-        <form action="/api/sign-out" method="post" className="inline">
-          <button type="submit" className="underline underline-offset-2">
-            Sign out
-          </button>
-        </form>
-        <span>
-          and sign up again with the right one. This account will simply never be confirmed, and
-          nothing has been sent from it.
-        </span>
+        {t(
+          'Typed the wrong address? {signOut} and sign up again with the right one. This account will simply never be confirmed, and nothing has been sent from it.',
+        )
+          .split('{signOut}')
+          .flatMap((part, index) => [
+            index === 0 ? null : (
+              <form key={`form-${index}`} action="/api/sign-out" method="post" className="inline">
+                <button type="submit" className="underline underline-offset-2">
+                  {t('Sign out')}
+                </button>
+              </form>
+            ),
+            part.trim() ? <span key={`text-${index}`}>{part.trim()}</span> : null,
+          ])}
       </div>
     </main>
   );

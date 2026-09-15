@@ -17,9 +17,13 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { createCustomer, CustomerError, possibleDuplicate } from '@/lib/customers';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { checkCode, LoyaltyError, redeemCode } from '@/lib/referrals';
 
-export const metadata: Metadata = { title: 'New customer' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('New customer') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -124,6 +128,7 @@ export default async function NewCustomerPage({
 }) {
   const { orgId } = await requireSession('customer:write');
   const params = await searchParams;
+  const t = await tFor();
 
   const kind = params.kind === 'COMPANY' ? 'COMPANY' : 'INDIVIDUAL';
   const duplicate = params.code === 'DUPLICATE';
@@ -136,17 +141,17 @@ export default async function NewCustomerPage({
 
   return (
     <>
-      <BackLink href="/customers">All customers</BackLink>
+      <BackLink href="/customers">{t('All customers')}</BackLink>
 
       <PageHeader
-        eyebrow="Customers"
-        title="New customer"
-        description="A name and one way to reach them is enough. The rest can wait."
+        eyebrow={t('Customers')}
+        title={t('New customer')}
+        description={t('A name and one way to reach them is enough. The rest can wait.')}
       />
 
       {params.problem ? (
         <Alert tone={duplicate ? 'warning' : 'danger'} className="mb-5">
-          {params.problem}
+          {t(params.problem)}
         </Alert>
       ) : null}
 
@@ -160,7 +165,7 @@ export default async function NewCustomerPage({
               </p>
             </div>
             <Link href={`/customers/${match.id}`}>
-              <Button variant="primary">Open them instead</Button>
+              <Button variant="primary">{t('Open them instead')}</Button>
             </Link>
           </CardBody>
         </Card>
@@ -169,12 +174,12 @@ export default async function NewCustomerPage({
       <form action={save} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="grid gap-5">
           <Card>
-            <CardHeader title="Who they are" description="What goes on the invoice" />
+            <CardHeader title={t('Who they are')} description={t('What goes on the invoice')} />
             <CardBody className="grid gap-4">
-              <Field label="Kind" hint="Changes which name is asked for">
+              <Field label={t('Kind')} hint={t('Changes which name is asked for')}>
                 <Select name="kind" defaultValue={kind}>
-                  <option value="INDIVIDUAL">A person</option>
-                  <option value="COMPANY">A company</option>
+                  <option value="INDIVIDUAL">{t('A person')}</option>
+                  <option value="COMPANY">{t('A company')}</option>
                 </Select>
               </Field>
 
@@ -183,37 +188,41 @@ export default async function NewCustomerPage({
                   be a form that does nothing on the counter tablet when the
                   connection drops, which is when it is most needed. */}
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="First name" hint="For a person">
+                <Field label={t('First name')} hint={t('For a person')}>
                   <Input
                     name="firstName"
                     defaultValue={params.firstName ?? ''}
                     autoComplete="given-name"
+                    // i18n-ignore
                     placeholder="Maria"
                   />
                 </Field>
-                <Field label="Last name" hint="For a person">
+                <Field label={t('Last name')} hint={t('For a person')}>
                   <Input
                     name="lastName"
                     defaultValue={params.lastName ?? ''}
                     autoComplete="family-name"
+                    // i18n-ignore
                     placeholder="Okafor"
                   />
                 </Field>
               </div>
 
-              <Field label="Company name" hint="For a company or a fleet">
+              <Field label={t('Company name')} hint={t('For a company or a fleet')}>
                 <Input
                   name="companyName"
                   defaultValue={params.companyName ?? ''}
                   autoComplete="organization"
+                  // i18n-ignore
                   placeholder="Northgate Logistics Ltd"
                 />
               </Field>
 
-              <Field label="VAT number" hint="Optional. Goes on their invoices.">
+              <Field label={t('VAT number')} hint={t('Optional. Goes on their invoices.')}>
                 <Input
                   name="taxNumber"
                   defaultValue={params.taxNumber ?? ''}
+                  // i18n-ignore
                   placeholder="GB123456789"
                 />
               </Field>
@@ -222,19 +231,20 @@ export default async function NewCustomerPage({
 
           <Card>
             <CardHeader
-              title="Where they are"
-              description="Optional, and worth having before the first invoice"
+              title={t('Where they are')}
+              description={t('Optional, and worth having before the first invoice')}
             />
             <CardBody className="grid gap-4">
-              <Field label="Address">
+              <Field label={t('Address')}>
                 <Input
                   name="addressLine1"
                   defaultValue={params.addressLine1 ?? ''}
                   autoComplete="address-line1"
+                  // i18n-ignore
                   placeholder="14 Hillside Road"
                 />
               </Field>
-              <Field label="Address, continued">
+              <Field label={t('Address, continued')}>
                 <Input
                   name="addressLine2"
                   defaultValue={params.addressLine2 ?? ''}
@@ -242,27 +252,29 @@ export default async function NewCustomerPage({
                 />
               </Field>
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Town">
+                <Field label={t('Town')}>
                   <Input
                     name="locality"
                     defaultValue={params.locality ?? ''}
                     autoComplete="address-level2"
+                    // i18n-ignore
                     placeholder="Stockport"
                   />
                 </Field>
-                <Field label="County">
+                <Field label={t('County')}>
                   <Input
                     name="region"
                     defaultValue={params.region ?? ''}
                     autoComplete="address-level1"
                   />
                 </Field>
-                <Field label="Postcode">
+                <Field label={t('Postcode')}>
                   <Input
                     name="postcode"
                     defaultValue={params.postcode ?? ''}
                     autoComplete="postal-code"
                     className="uppercase"
+                    // i18n-ignore
                     placeholder="SK4 2HL"
                   />
                 </Field>
@@ -274,22 +286,23 @@ export default async function NewCustomerPage({
         <div className="grid content-start gap-5">
           <Card>
             <CardHeader
-              title="How to reach them"
-              description="At least one. Everything the workshop sends goes here."
+              title={t('How to reach them')}
+              description={t('At least one. Everything the workshop sends goes here.')}
             />
             <CardBody className="grid gap-4">
-              <Field label="Email" hint="Quotes, invoices and the portal link">
+              <Field label={t('Email')} hint={t('Quotes, invoices and the portal link')}>
                 <Input
                   name="email"
                   type="email"
                   inputMode="email"
                   defaultValue={params.email ?? ''}
                   autoComplete="email"
+                  // i18n-ignore
                   placeholder="maria@example.com"
                 />
               </Field>
 
-              <Field label="Mobile" hint="Texts about the car">
+              <Field label={t('Mobile')} hint={t('Texts about the car')}>
                 <Input
                   name="mobile"
                   type="tel"
@@ -300,7 +313,7 @@ export default async function NewCustomerPage({
                 />
               </Field>
 
-              <Field label="Other telephone" hint="Landline or work number">
+              <Field label={t('Other telephone')} hint={t('Landline or work number')}>
                 <Input
                   name="phone"
                   type="tel"
@@ -314,8 +327,8 @@ export default async function NewCustomerPage({
 
           <Card>
             <CardHeader
-              title="Marketing"
-              description="Separate from anything about their own car"
+              title={t('Marketing')}
+              description={t('Separate from anything about their own car')}
             />
             <CardBody className="grid gap-3 text-[13px] leading-relaxed">
               {/* Off unless somebody ticks it, and never inferred from the fact
@@ -327,7 +340,7 @@ export default async function NewCustomerPage({
                   name="marketingEmailConsent"
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
                 />
-                <span>They agreed to marketing emails</span>
+                <span>{t('They agreed to marketing emails')}</span>
               </label>
               <label className="flex items-start gap-2.5">
                 <input
@@ -335,28 +348,31 @@ export default async function NewCustomerPage({
                   name="marketingSmsConsent"
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
                 />
-                <span>They agreed to marketing texts</span>
+                <span>{t('They agreed to marketing texts')}</span>
               </label>
               <p className="text-(--text-faint)">
-                Service reminders and messages about a job in progress are not marketing and go out
-                either way.
+                {t(
+                  'Service reminders and messages about a job in progress are not marketing and go out either way.',
+                )}
               </p>
             </CardBody>
           </Card>
 
           <Card>
-            <CardHeader title="Anything else" />
+            <CardHeader title={t('Anything else')} />
             <CardBody className="grid gap-4">
-              <Field label="How they found you" hint="Optional">
+              <Field label={t('How they found you')} hint={t('Optional')}>
                 <Input
                   name="sourceOfBusiness"
                   defaultValue={params.sourceOfBusiness ?? ''}
-                  placeholder="Recommended by a neighbour"
+                  placeholder={t('Recommended by a neighbour')}
                 />
               </Field>
               <Field
-                label="Arrived with a code"
-                hint="Optional. Another customer's referral code; both sides are paid once this one has had work done"
+                label={t('Arrived with a code')}
+                hint={t(
+                  'Optional. Another customer’s referral code; both sides are paid once this one has had work done',
+                )}
               >
                 <Input
                   name="referralCode"
@@ -364,10 +380,11 @@ export default async function NewCustomerPage({
                   maxLength={8}
                   autoCapitalize="characters"
                   className="datum uppercase tracking-[0.15em]"
+                  // i18n-ignore
                   placeholder="XXXXXX"
                 />
               </Field>
-              <Field label="Notes" hint="Anything whoever serves them next should know">
+              <Field label={t('Notes')} hint={t('Anything whoever serves them next should know')}>
                 <Textarea name="notes" rows={3} defaultValue={params.notes ?? ''} />
               </Field>
             </CardBody>
@@ -383,7 +400,7 @@ export default async function NewCustomerPage({
                     className="mt-0.5 h-4 w-4 shrink-0 accent-(--warning)"
                   />
                   <span>
-                    Add them anyway. I have checked, and this really is a different person.
+                    {t('Add them anyway. I have checked, and this really is a different person.')}
                   </span>
                 </label>
               </CardBody>
@@ -391,7 +408,7 @@ export default async function NewCustomerPage({
           ) : null}
 
           <Button type="submit" variant="primary" size="lg" block>
-            Add the customer
+            {t('Add the customer')}
           </Button>
         </div>
       </form>

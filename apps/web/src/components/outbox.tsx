@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * What a device holds when there is no signal.
  *
@@ -172,6 +174,7 @@ export async function flushOutbox(): Promise<string | null> {
  * gloves on, and anything more would be read as decoration.
  */
 export function OutboxStatus() {
+  const t = useT();
   const [online, setOnline] = useState(true);
   const [waiting, setWaiting] = useState(0);
   const [problems, setProblems] = useState<OutboxAction[]>([]);
@@ -247,13 +250,17 @@ export function OutboxStatus() {
           aria-hidden
         />
         <span className="font-medium">
-          {online ? 'Connected' : 'No signal. Carry on; nothing is lost.'}
+          {online ? t('Connected') : t('No signal. Carry on; nothing is lost.')}
         </span>
 
         {waiting > 0 ? (
           <span className="text-(--text-soft)">
-            {waiting} waiting to send
-            {problems.length > 0 ? `, ${problems.length} needing a decision` : ''}
+            {problems.length > 0
+              ? t('{waiting} waiting to send, {problems} needing a decision', {
+                  waiting,
+                  problems: problems.length,
+                })
+              : t('{waiting} waiting to send', { waiting })}
           </span>
         ) : null}
 
@@ -264,17 +271,17 @@ export function OutboxStatus() {
             disabled={busy}
             className="ml-auto min-h-[44px] rounded-(--radius) border border-(--border) px-4 text-[15px] font-medium disabled:opacity-60"
           >
-            {busy ? 'Sending…' : 'Send now'}
+            {busy ? t('Sending…') : t('Send now')}
           </button>
         ) : null}
       </div>
 
-      {message ? <p className="mt-2 text-[14px] text-(--text-soft)">{message}</p> : null}
+      {message ? <p className="mt-2 text-[14px] text-(--text-soft)">{t(message)}</p> : null}
 
       {problems.length > 0 ? (
         <ul className="mt-2 grid gap-1.5 text-[14px] text-(--warning)">
           {problems.map((action) => (
-            <li key={action.clientId}>{action.problem}</li>
+            <li key={action.clientId}>{t(action.problem ?? '')}</li>
           ))}
         </ul>
       ) : null}

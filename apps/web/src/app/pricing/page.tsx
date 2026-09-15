@@ -1,6 +1,7 @@
 import {
   type FeatureKey,
   describeFeature,
+  msg,
   NO_LIMIT,
   PLAN_ORDER,
   PLANS,
@@ -19,12 +20,16 @@ import { MarketingFooter, MarketingHeader, Section, SectionHead } from '@/compon
 import { currentUser } from '@/lib/auth';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Pricing',
-  description:
-    'Three plans, priced per bay. Unlimited staff accounts on every one. The vehicle passport is included in all of them.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Pricing'),
+    description: t(
+      'Three plans, priced per bay. Unlimited staff accounts on every one. The vehicle passport is included in all of them.',
+    ),
+    robots: { index: true, follow: true },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -54,10 +59,10 @@ const COMPARED: FeatureKey[] = [
 ];
 
 const LIMIT_ROWS = [
-  { key: 'bays', label: 'Bays' },
-  { key: 'locations', label: 'Sites' },
-  { key: 'users', label: 'Staff accounts' },
-  { key: 'vehicles', label: 'Vehicles on the books' },
+  { key: 'bays', label: msg('Bays') },
+  { key: 'locations', label: msg('Sites') },
+  { key: 'users', label: msg('Staff accounts') },
+  { key: 'vehicles', label: msg('Vehicles on the books') },
 ] as const;
 
 export default async function PricingPage({
@@ -84,7 +89,9 @@ export default async function PricingPage({
             eyebrow={t('Pricing')}
             primary
             title={t('Per bay, per month, published in full')}
-            lede="Priced per bay, because bays are what a workshop earns from. Staff accounts are unlimited on every plan: charging per user would bill you for giving your own people access."
+            lede={t(
+              'Priced per bay, because bays are what a workshop earns from. Staff accounts are unlimited on every plan: charging per user would bill you for giving your own people access.',
+            )}
             align="centre"
           />
 
@@ -132,7 +139,7 @@ export default async function PricingPage({
             >
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
-                  {c.name} · {c.currency}
+                  {t(c.name)} · {c.currency}
                 </option>
               ))}
             </select>
@@ -160,7 +167,7 @@ export default async function PricingPage({
                   )}
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="font-display text-[19px] font-semibold">{plan.name}</h2>
+                    <h2 className="font-display text-[19px] font-semibold">{t(plan.name)}</h2>
                     {plan.popular ? (
                       <span className="rounded-(--radius-xs) bg-(--brand-soft) px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
                         {t('Most chosen')}
@@ -169,7 +176,7 @@ export default async function PricingPage({
                   </div>
 
                   <p className="mt-1.5 min-h-[2.6rem] text-[13px] leading-relaxed text-(--text-soft)">
-                    {plan.audience}
+                    {t(plan.audience)}
                   </p>
 
                   <p className="mt-4 flex items-baseline gap-1.5">
@@ -184,8 +191,10 @@ export default async function PricingPage({
                   <p className="mt-1.5 text-[12px] text-(--text-faint)">
                     {annual ? (
                       <>
-                        Billed annually. Saves {annualSavingPercent(id, currency)}% against{' '}
-                        {show(planPrice(id, currency, 'monthly').minor)} monthly.
+                        {t('Billed annually. Saves {percent}% against {monthly} monthly.', {
+                          percent: annualSavingPercent(id, currency),
+                          monthly: show(planPrice(id, currency, 'monthly').minor),
+                        })}
                       </>
                     ) : (
                       <>{t('Billed monthly. Cancel any time.')}</>
@@ -201,14 +210,14 @@ export default async function PricingPage({
                         : 'border border-(--border-strong) hover:bg-(--surface-sunk)',
                     )}
                   >
-                    Start {TRIAL_DAYS}-day trial
+                    {t('Start {days}-day trial', { days: TRIAL_DAYS })}
                   </Link>
 
                   <ul className="mt-5 grid gap-2 border-t border-(--border) pt-5">
                     {plan.headline.map((line) => (
                       <li key={line} className="flex items-start gap-2 text-[13px] leading-relaxed">
                         <Tick />
-                        <span className="text-(--text-soft)">{line}</span>
+                        <span className="text-(--text-soft)">{t(line)}</span>
                       </li>
                     ))}
                   </ul>
@@ -218,10 +227,10 @@ export default async function PricingPage({
           </div>
 
           <p className="mt-6 text-center text-[13px] text-(--text-faint)">
-            Prices are in {currency}, per bay per month, and exclude {country.tax.name}. You are
-            billed in the currency of your country and no other. The trial creates a real workshop
-            with your data in it. A card is added at sign-up and charged only when the trial ends,
-            unless you cancel first.
+            {t(
+              'Prices are in {currency}, per bay per month, and exclude {tax}. You are billed in the currency of your country and no other. The trial creates a real workshop with your data in it. A card is added at sign-up and charged only when the trial ends, unless you cancel first.',
+              { currency, tax: t(country.tax.name) },
+            )}
           </p>
         </Section>
 
@@ -230,7 +239,9 @@ export default async function PricingPage({
           <SectionHead
             eyebrow={t('Compare')}
             title={t('What each plan actually includes')}
-            lede="Limits are counted and enforced. When a workshop reaches one, the system says so before it stops rather than after."
+            lede={t(
+              'Limits are counted and enforced. When a workshop reaches one, the system says so before it stops rather than after.',
+            )}
           />
 
           <div className="scroll-x mt-8 rounded-(--radius-lg) border border-(--border) bg-(--surface)">
@@ -242,7 +253,7 @@ export default async function PricingPage({
                   </th>
                   {PLAN_ORDER.map((id) => (
                     <th key={id} scope="col" className="p-3.5 text-right font-semibold">
-                      {PLANS[id].name}
+                      {t(PLANS[id].name)}
                     </th>
                   ))}
                 </tr>
@@ -252,7 +263,7 @@ export default async function PricingPage({
                 {LIMIT_ROWS.map((row) => (
                   <tr key={row.key} className="border-b border-(--border)">
                     <th scope="row" className="p-3.5 text-left font-normal text-(--text-soft)">
-                      {row.label}
+                      {t(row.label)}
                     </th>
                     {PLAN_ORDER.map((id) => {
                       const value = PLANS[id].limits[row.key];
@@ -278,7 +289,7 @@ export default async function PricingPage({
                 {COMPARED.map((feature) => (
                   <tr key={feature} className="border-b border-(--border) last:border-0">
                     <th scope="row" className="p-3.5 text-left font-normal text-(--text-soft)">
-                      {capitalise(describeFeature(feature))}
+                      {t(capitalise(describeFeature(feature)))}
                     </th>
                     {PLAN_ORDER.map((id) => (
                       <td key={id} className="p-3.5 text-right">
@@ -311,37 +322,53 @@ export default async function PricingPage({
           <div className="mt-8 grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border) md:grid-cols-2">
             {[
               {
-                q: 'Why is the passport in the cheapest plan?',
-                a: 'Because a network nobody can join is not a network. The record is worth more to every workshop the more vehicles carry one, so putting it behind the top tier would strangle the part of the product that compounds.',
+                q: msg('Why is the passport in the cheapest plan?'),
+                a: msg(
+                  'Because a network nobody can join is not a network. The record is worth more to every workshop the more vehicles carry one, so putting it behind the top tier would strangle the part of the product that compounds.',
+                ),
               },
               {
-                q: 'What happens at the end of the trial?',
-                a: `You add a card when you open the workshop; nothing is charged for ${TRIAL_DAYS} days. On the day the trial ends the card is charged for the first month of the plan you chose, and monthly after that, unless you cancelled before then, which takes two presses from Settings. We remind you by email three days before. Nothing is ever deleted: a cancelled workshop still reads and exports everything.`,
+                q: msg('What happens at the end of the trial?'),
+                a: msg(
+                  'You add a card when you open the workshop; nothing is charged for {days} days. On the day the trial ends the card is charged for the first month of the plan you chose, and monthly after that, unless you cancelled before then, which takes two presses from Settings. We remind you by email three days before. Nothing is ever deleted: a cancelled workshop still reads and exports everything.',
+                ),
               },
               {
-                q: 'Why per bay rather than per user?',
-                a: 'Because bays are what a workshop earns from, and users are not. Charging per seat bills you for giving your own staff access, which pushes workshops into sharing a login and makes every record say the wrong person did the work.',
+                q: msg('Why per bay rather than per user?'),
+                a: msg(
+                  'Because bays are what a workshop earns from, and users are not. Charging per seat bills you for giving your own staff access, which pushes workshops into sharing a login and makes every record say the wrong person did the work.',
+                ),
               },
               {
-                q: 'What counts as a site?',
-                a: 'A physical premises with its own bays and its own stock. Two units on the same industrial estate sharing a store is one site. Two towns is two.',
+                q: msg('What counts as a site?'),
+                a: msg(
+                  'A physical premises with its own bays and its own stock. Two units on the same industrial estate sharing a store is one site. Two towns is two.',
+                ),
               },
               {
-                q: 'Do customers using the portal count?',
-                a: 'No. Your customers are unlimited on every plan, and so is the number of people who read a passport link.',
+                q: msg('Do customers using the portal count?'),
+                a: msg(
+                  'No. Your customers are unlimited on every plan, and so is the number of people who read a passport link.',
+                ),
               },
               {
-                q: 'Can we move our existing history in?',
-                a: 'Yes, and it is worth doing. Imported history is marked as migrated rather than as verified work you recorded, because a record that cannot distinguish the two is not worth trusting.',
+                q: msg('Can we move our existing history in?'),
+                a: msg(
+                  'Yes, and it is worth doing. Imported history is marked as migrated rather than as verified work you recorded, because a record that cannot distinguish the two is not worth trusting.',
+                ),
               },
               {
-                q: 'What happens if we leave?',
-                a: 'Your data exports in full. The passports stay with the vehicles, which is the point of them: they were never yours to take away.',
+                q: msg('What happens if we leave?'),
+                a: msg(
+                  'Your data exports in full. The passports stay with the vehicles, which is the point of them: they were never yours to take away.',
+                ),
               },
             ].map((item) => (
               <div key={item.q} className="bg-(--surface) p-5">
-                <h3 className="font-display text-[15px] font-semibold">{item.q}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">{item.a}</p>
+                <h3 className="font-display text-[15px] font-semibold">{t(item.q)}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">
+                  {t(item.a, { days: TRIAL_DAYS })}
+                </p>
               </div>
             ))}
           </div>

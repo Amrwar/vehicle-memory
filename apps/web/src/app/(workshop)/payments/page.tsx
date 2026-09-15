@@ -1,3 +1,4 @@
+import { msg } from '@carnet/core';
 import {
   Badge,
   Button,
@@ -18,21 +19,25 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Payments' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Payments') };
+}
 export const dynamic = 'force-dynamic';
 
 const METHOD_LABEL: Record<string, string> = {
-  CASH: 'Cash',
-  CARD: 'Card',
-  BANK_TRANSFER: 'Bank transfer',
-  ONLINE: 'Online',
-  CHEQUE: 'Cheque',
-  ACCOUNT: 'On account',
-  OTHER: 'Other',
-  LOYALTY: 'Points',
-  GIFT_CARD: 'Gift card',
-  DEPOSIT: 'Money held',
+  CASH: msg('Cash'),
+  CARD: msg('Card'),
+  BANK_TRANSFER: msg('Bank transfer'),
+  ONLINE: msg('Online'),
+  CHEQUE: msg('Cheque'),
+  ACCOUNT: msg('On account'),
+  OTHER: msg('Other'),
+  LOYALTY: msg('Points'),
+  GIFT_CARD: msg('Gift card'),
+  DEPOSIT: msg('Money held'),
 };
 
 export default async function PaymentsPage({
@@ -41,6 +46,7 @@ export default async function PaymentsPage({
   searchParams: Promise<{ days?: string }>;
 }) {
   const { db, region } = await requireSession('payment:read');
+  const t = await tFor();
   const { days } = await searchParams;
   const window = Math.max(1, Number(days ?? 30) || 30);
 
@@ -81,23 +87,23 @@ export default async function PaymentsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Money"
-        title="Payments"
-        description={`Received in the last ${window} days`}
+        eyebrow={t('Money')}
+        title={t('Payments')}
+        description={t('Received in the last {days} days', { days: window })}
         actions={
           <>
             {[7, 30, 90].map((option) => (
               <Link key={option} href={`/payments?days=${option}`}>
                 <Button size="sm" variant={option === window ? 'primary' : 'secondary'}>
-                  {option}d
+                  {t('{days}d', { days: option })}
                 </Button>
               </Link>
             ))}
             <Link href="/payments/card">
-              <Button variant="secondary">Card payments</Button>
+              <Button variant="secondary">{t('Card payments')}</Button>
             </Link>
             <Link href="/invoices?status=unpaid">
-              <Button>Unpaid invoices</Button>
+              <Button>{t('Unpaid invoices')}</Button>
             </Link>
           </>
         }
@@ -105,17 +111,17 @@ export default async function PaymentsPage({
 
       <StatRow className="mb-5">
         <StatTile
-          label="Taken today"
+          label={t('Taken today')}
           value={<Money currency={region.currency} locale={region.locale} amount={today} />}
           tone={today > 0 ? 'success' : 'neutral'}
         />
         <StatTile
-          label={`Last ${window} days`}
+          label={t('Last {days} days', { days: window })}
           value={<Money currency={region.currency} locale={region.locale} amount={total} />}
         />
-        <StatTile label="Payments" value={payments.length} note="Individual receipts" />
+        <StatTile label={t('Payments')} value={payments.length} note={t('Individual receipts')} />
         <StatTile
-          label="Average"
+          label={t('Average')}
           value={
             <Money
               currency={region.currency}
@@ -123,20 +129,23 @@ export default async function PaymentsPage({
               amount={payments.length ? total / payments.length : 0}
             />
           }
-          note="Per payment"
+          note={t('Per payment')}
         />
       </StatRow>
 
       {methods.length > 0 ? (
         <Card className="mb-5">
-          <CardHeader title="How you were paid" description="By method, over the period" />
+          <CardHeader
+            title={t('How you were paid')}
+            description={t('By method, over the period')}
+          />
           <ul className="divide-y divide-(--border)">
             {methods.map(([method, stats]) => {
               const share = total > 0 ? (stats.value / total) * 100 : 0;
               return (
                 <li key={method} className="flex items-center gap-4 px-4 py-2.5">
                   <span className="w-32 shrink-0 text-[13px] font-medium">
-                    {METHOD_LABEL[method] ?? method}
+                    {t(METHOD_LABEL[method] ?? method)}
                   </span>
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-(--surface-sunk)">
                     <div
@@ -158,14 +167,14 @@ export default async function PaymentsPage({
       ) : null}
 
       <Card className="overflow-hidden">
-        <CardHeader title="Receipts" />
+        <CardHeader title={t('Receipts')} />
         {payments.length === 0 ? (
           <EmptyState
-            title="Nothing received in this period"
-            description="Try a longer window, or check outstanding invoices."
+            title={t('Nothing received in this period')}
+            description={t('Try a longer window, or check outstanding invoices.')}
             action={
               <Link href="/invoices?status=unpaid">
-                <Button variant="primary">Unpaid invoices</Button>
+                <Button variant="primary">{t('Unpaid invoices')}</Button>
               </Link>
             }
           />
@@ -174,14 +183,14 @@ export default async function PaymentsPage({
             <Table>
               <thead>
                 <tr>
-                  <Th>Received</Th>
-                  <Th>Customer</Th>
-                  <Th>Invoice</Th>
-                  <Th>Method</Th>
-                  <Th>Reference</Th>
-                  <Th>Recorded by</Th>
-                  <Th numeric>Amount</Th>
-                  <Th>Receipt</Th>
+                  <Th>{t('Received')}</Th>
+                  <Th>{t('Customer')}</Th>
+                  <Th>{t('Invoice')}</Th>
+                  <Th>{t('Method')}</Th>
+                  <Th>{t('Reference')}</Th>
+                  <Th>{t('Recorded by')}</Th>
+                  <Th numeric>{t('Amount')}</Th>
+                  <Th>{t('Receipt')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -208,16 +217,18 @@ export default async function PaymentsPage({
                           payment.invoice.number
                         )
                       ) : (
-                        <span className="text-(--text-faint)">On account</span>
+                        <span className="text-(--text-faint)">{t('On account')}</span>
                       )}
                     </Td>
                     <Td>
                       <Badge tone="neutral" size="sm">
-                        {METHOD_LABEL[payment.method] ?? payment.method}
+                        {t(METHOD_LABEL[payment.method] ?? payment.method)}
                       </Badge>
                     </Td>
                     <Td className="datum text-(--text-faint)">{payment.reference ?? '—'}</Td>
-                    <Td className="text-(--text-soft)">{payment.recordedBy?.name ?? 'System'}</Td>
+                    <Td className="text-(--text-soft)">
+                      {payment.recordedBy?.name ?? t('System')}
+                    </Td>
                     <Td numeric className="font-medium">
                       <Money
                         currency={region.currency}

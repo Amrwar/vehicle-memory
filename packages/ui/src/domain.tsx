@@ -13,6 +13,12 @@ import { cn } from './cn';
 
 /* --- VIN and registration ------------------------------------------------ */
 
+/** Words in the person's language, from the page's translator; English when none is passed. */
+export type Translate = (text: string) => string;
+const same: Translate = (text) => text;
+/** Marks English translated later through t(), for the coverage script. */
+const msg = (text: string) => text;
+
 export function Vin({
   value,
   className,
@@ -91,14 +97,17 @@ export function Mileage({
   locale = 'en-GB',
   anomaly,
   className,
+  t = same,
 }: {
   km: number | null | undefined;
   locale?: string;
   anomaly?: 'NONE' | 'DECREASE' | 'IMPLAUSIBLE_RATE' | null;
   className?: string;
+  /** Translates the component's own words. Phase 40.5. */
+  t?: Translate;
 }) {
   if (km === null || km === undefined) {
-    return <span className={cn('text-(--text-faint)', className)}>Not recorded</span>;
+    return <span className={cn('text-(--text-faint)', className)}>{t('Not recorded')}</span>;
   }
 
   const flagged = anomaly && anomaly !== 'NONE';
@@ -107,8 +116,8 @@ export function Mileage({
     <span className={cn('tabular inline-flex items-center gap-1.5', className)}>
       {km.toLocaleString(locale)} km
       {flagged ? (
-        <Badge tone="danger" size="sm" title={describeAnomaly(anomaly)}>
-          Flagged
+        <Badge tone="danger" size="sm" title={t(describeAnomaly(anomaly))}>
+          {t('Flagged')}
         </Badge>
       ) : null}
     </span>
@@ -116,8 +125,8 @@ export function Mileage({
 }
 
 function describeAnomaly(anomaly: string | null | undefined): string {
-  if (anomaly === 'DECREASE') return 'Lower than a previously recorded reading';
-  if (anomaly === 'IMPLAUSIBLE_RATE') return 'Implies an unusually high daily distance';
+  if (anomaly === 'DECREASE') return msg('Lower than a previously recorded reading');
+  if (anomaly === 'IMPLAUSIBLE_RATE') return msg('Implies an unusually high daily distance');
   return '';
 }
 
@@ -129,17 +138,17 @@ const SEVERITY: Record<
   Severity,
   { label: string; tone: 'success' | 'warning' | 'danger' | 'neutral'; glyph: string }
 > = {
-  PASS: { label: 'Pass', tone: 'success', glyph: '✓' },
-  ADVISORY: { label: 'Advisory', tone: 'warning', glyph: '!' },
-  CRITICAL: { label: 'Critical', tone: 'danger', glyph: '×' },
-  NOT_CHECKED: { label: 'Not checked', tone: 'neutral', glyph: '–' },
+  PASS: { label: msg('Pass'), tone: 'success', glyph: '✓' },
+  ADVISORY: { label: msg('Advisory'), tone: 'warning', glyph: '!' },
+  CRITICAL: { label: msg('Critical'), tone: 'danger', glyph: '×' },
+  NOT_CHECKED: { label: msg('Not checked'), tone: 'neutral', glyph: '–' },
 };
 
-export function SeverityBadge({ severity }: { severity: Severity }) {
+export function SeverityBadge({ severity, t = same }: { severity: Severity; t?: Translate }) {
   const meta = SEVERITY[severity];
   return (
     <Badge tone={meta.tone} dot>
-      {meta.label}
+      {t(meta.label)}
     </Badge>
   );
 }
@@ -154,11 +163,14 @@ export function SeveritySummary({
   advisory,
   critical,
   className,
+  t = same,
 }: {
   pass: number;
   advisory: number;
   critical: number;
   className?: string;
+  /** Translates the component's own words. Phase 40.5. */
+  t?: Translate;
 }) {
   const items: { severity: Severity; count: number }[] = [
     { severity: 'CRITICAL', count: critical },
@@ -186,7 +198,7 @@ export function SeveritySummary({
               {meta.glyph}
             </span>
             <span className="tabular">{count}</span>
-            <span className="sr-only">{meta.label}</span>
+            <span className="sr-only">{t(meta.label)}</span>
           </span>
         );
       })}
@@ -209,7 +221,15 @@ export interface Stage {
  * checklist rather than a wizard, and it holds eleven stages without becoming
  * unreadably small on a laptop.
  */
-export function ProgressTrail({ stages, className }: { stages: Stage[]; className?: string }) {
+export function ProgressTrail({
+  stages,
+  className,
+  t = same,
+}: {
+  stages: Stage[];
+  className?: string;
+  t?: Translate;
+}) {
   return (
     <ol className={cn('relative', className)}>
       {stages.map((stage, index) => {
@@ -250,9 +270,13 @@ export function ProgressTrail({ stages, className }: { stages: Stage[]; classNam
                 stage.state === 'skipped' && 'text-(--text-faint) line-through decoration-1',
               )}
             >
-              {stage.label}
-              {stage.state === 'skipped' ? <span className="sr-only"> (skipped)</span> : null}
-              {stage.state === 'current' ? <span className="sr-only"> (current stage)</span> : null}
+              {t(stage.label)}
+              {stage.state === 'skipped' ? (
+                <span className="sr-only"> {t('(skipped)')}</span>
+              ) : null}
+              {stage.state === 'current' ? (
+                <span className="sr-only"> {t('(current stage)')}</span>
+              ) : null}
             </span>
           </li>
         );
@@ -271,32 +295,38 @@ const VERIFICATION: Record<
   { label: string; tone: 'neutral' | 'info' | 'success' | 'accent'; explain: string }
 > = {
   SELF_REPORTED: {
-    label: 'Owner',
+    label: msg('Owner'),
     tone: 'neutral',
-    explain: 'Reported by the vehicle owner',
+    explain: msg('Reported by the vehicle owner'),
   },
   WORKSHOP_RECORDED: {
-    label: 'Workshop',
+    label: msg('Workshop'),
     tone: 'info',
-    explain: 'Recorded by a workshop during work',
+    explain: msg('Recorded by a workshop during work'),
   },
   WORKSHOP_VERIFIED: {
-    label: 'Evidenced',
+    label: msg('Evidenced'),
     tone: 'success',
-    explain: 'Recorded by a workshop with photographic evidence',
+    explain: msg('Recorded by a workshop with photographic evidence'),
   },
   AUTHORITY: {
-    label: 'Official',
+    label: msg('Official'),
     tone: 'accent',
-    explain: 'Supplied by a registry, manufacturer or insurer',
+    explain: msg('Supplied by a registry, manufacturer or insurer'),
   },
 };
 
-export function VerificationBadge({ level }: { level: VerificationLevel }) {
+export function VerificationBadge({
+  level,
+  t = same,
+}: {
+  level: VerificationLevel;
+  t?: Translate;
+}) {
   const meta = VERIFICATION[level];
   return (
-    <Badge tone={meta.tone} size="sm" title={meta.explain}>
-      {meta.label}
+    <Badge tone={meta.tone} size="sm" title={t(meta.explain)}>
+      {t(meta.label)}
     </Badge>
   );
 }
@@ -323,10 +353,13 @@ export function TimelineEntry({
   event,
   locale = 'en-GB',
   className,
+  t = same,
 }: {
   event: TimelineEvent;
   locale?: string;
   className?: string;
+  /** Translates the component's own words. Phase 40.5. */
+  t?: Translate;
 }) {
   const date = event.occurredAt instanceof Date ? event.occurredAt : new Date(event.occurredAt);
 
@@ -368,7 +401,7 @@ export function TimelineEntry({
           ) : null}
           {event.superseded ? (
             <Badge tone="neutral" size="sm">
-              Superseded
+              {t('Superseded')}
             </Badge>
           ) : null}
         </div>
@@ -380,7 +413,7 @@ export function TimelineEntry({
         ) : null}
 
         <div className="flex flex-wrap items-center gap-2 mt-1.5">
-          <VerificationBadge level={event.verification} />
+          <VerificationBadge level={event.verification} t={t} />
           {event.recordedBy ? (
             <span className="text-[12px] text-(--text-faint)">{event.recordedBy}</span>
           ) : null}
@@ -398,10 +431,13 @@ export function ChainFingerprint({
   head,
   verified,
   className,
+  t = same,
 }: {
   head: string | null;
   verified: boolean;
   className?: string;
+  /** Translates the component's own words. Phase 40.5. */
+  t?: Translate;
 }) {
   const short = head ? `${head.slice(0, 4)}-${head.slice(4, 8)}`.toUpperCase() : '--------';
 
@@ -433,9 +469,11 @@ export function ChainFingerprint({
             verified ? 'text-(--success)' : 'text-(--danger)',
           )}
         >
-          {verified ? 'History intact' : 'History integrity check failed'}
+          {verified ? t('History intact') : t('History integrity check failed')}
         </p>
-        <p className="datum text-[11px] text-(--text-faint) leading-tight">Chain {short}</p>
+        <p className="datum text-[11px] text-(--text-faint) leading-tight">
+          {t('Chain')} {short}
+        </p>
       </div>
     </div>
   );

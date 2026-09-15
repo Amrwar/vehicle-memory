@@ -19,8 +19,12 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Recalls' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Recalls') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -39,6 +43,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function RecallsPage() {
   const { orgId, region } = await requireSession('vehicle:read');
+  const t = await tFor();
 
   // Vehicles this workshop has actually seen, rather than every vehicle in the
   // network. A recall on a car that has never been here is somebody else's to
@@ -72,56 +77,63 @@ export default async function RecallsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Vehicles"
-        title="Recalls"
-        description="Manufacturer campaigns against the vehicles this workshop has seen"
+        eyebrow={t('Vehicles')}
+        title={t('Recalls')}
+        description={t('Manufacturer campaigns against the vehicles this workshop has seen')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Outstanding"
+          label={t('Outstanding')}
           value={open.length}
           tone={open.length > 0 ? 'warning' : 'neutral'}
-          note="Not recorded as done"
+          note={t('Not recorded as done')}
         />
         <StatTile
-          label="Safety"
+          label={t('Safety')}
           value={safety.length}
           tone={safety.length > 0 ? 'danger' : 'neutral'}
-          note="Of those, safety-related"
+          note={t('Of those, safety-related')}
         />
-        <StatTile label="On record" value={rows.length} note="Across every vehicle seen here" />
+        <StatTile
+          label={t('On record')}
+          value={rows.length}
+          note={t('Across every vehicle seen here')}
+        />
       </StatRow>
 
       <Card className="mb-5">
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-          <strong className="font-semibold text-(--text)">This is a record, not a source.</strong>{' '}
-          It shows campaigns already recorded against these vehicles. It does not query the
-          manufacturer, so a vehicle showing nothing here has not been checked and cleared: it has
-          not been checked. Anything safety-related goes to a franchised dealer, who does the work
-          free and has the authoritative list.
+          <strong className="font-semibold text-(--text)">
+            {t('This is a record, not a source.')}
+          </strong>{' '}
+          {t(
+            'It shows campaigns already recorded against these vehicles. It does not query the manufacturer, so a vehicle showing nothing here has not been checked and cleared: it has not been checked. Anything safety-related goes to a franchised dealer, who does the work free and has the authoritative list.',
+          )}
         </CardBody>
       </Card>
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Campaigns"
-          description="Outstanding first, then everything already put right."
+          title={t('Campaigns')}
+          description={t('Outstanding first, then everything already put right.')}
         />
         {rows.length === 0 ? (
           <EmptyState
-            title="No recalls recorded"
-            description="Campaigns appear here once they are recorded against a vehicle this workshop has seen."
+            title={t('No recalls recorded')}
+            description={t(
+              'Campaigns appear here once they are recorded against a vehicle this workshop has seen.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Vehicle</Th>
-                  <Th>Campaign</Th>
-                  <Th>Issued</Th>
-                  <Th>State</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Campaign')}</Th>
+                  <Th>{t('Issued')}</Th>
+                  <Th>{t('State')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -157,11 +169,13 @@ export default async function RecallsPage() {
                     <Td>
                       {row.status === 'OPEN' ? (
                         <Badge tone={row.recall.severity === 'SAFETY' ? 'danger' : 'warning'} dot>
-                          {row.recall.severity === 'SAFETY' ? 'safety, outstanding' : 'outstanding'}
+                          {row.recall.severity === 'SAFETY'
+                            ? t('safety, outstanding')
+                            : t('outstanding')}
                         </Badge>
                       ) : (
                         <Badge tone="success" size="sm">
-                          done{' '}
+                          {t('done')}{' '}
                           {row.completedAt ? row.completedAt.toLocaleDateString(region.locale) : ''}
                         </Badge>
                       )}

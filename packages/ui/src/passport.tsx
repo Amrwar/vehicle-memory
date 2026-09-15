@@ -85,7 +85,10 @@ export function PassportCover({
   footer,
   className,
   children,
+  t = (text: string) => text,
 }: {
+  /** Translates the component's own words. Phase 40.5. */
+  t?: (text: string) => string;
   title?: string;
   issuer?: string;
   footer?: React.ReactNode;
@@ -97,13 +100,13 @@ export function PassportCover({
       <p className="passport-foil-text text-[13px]">{issuer}</p>
       <div className="grid place-items-center gap-4">
         <PassportEmblem size={104} />
-        <p className="passport-foil-text text-center text-[22px] leading-tight">{title}</p>
+        <p className="passport-foil-text text-center text-[22px] leading-tight">{t(title)}</p>
       </div>
       <div className="grid place-items-center gap-1 text-center">
         {children}
         {footer ?? (
           <p className="passport-foil-text text-[10px] opacity-80">
-            A record that belongs to the car
+            {t('A record that belongs to the car')}
           </p>
         )}
       </div>
@@ -119,7 +122,10 @@ export function PassportPage({
   bound = true,
   className,
   children,
+  t = (text: string) => text,
 }: {
+  /** Translates the component's own words. Phase 40.5. */
+  t?: (text: string) => string;
   /** The page number printed in the corner, as passports do. */
   number?: number;
   heading?: React.ReactNode;
@@ -137,7 +143,7 @@ export function PassportPage({
             {heading}
           </h2>
           {number !== undefined ? (
-            <span className="passport-label" aria-label={`Page ${number}`}>
+            <span className="passport-label" aria-label={t(`Page ${number}`)}>
               {String(number).padStart(2, '0')}
             </span>
           ) : null}
@@ -195,11 +201,19 @@ export function PassportPhoto({
 }
 
 /** The two lines at the foot of the identity page. */
-export function PassportMrz({ lines, className }: { lines: [string, string]; className?: string }) {
+export function PassportMrz({
+  lines,
+  className,
+  t = (text: string) => text,
+}: {
+  lines: [string, string];
+  className?: string;
+  t?: (text: string) => string;
+}) {
   return (
     <div
       className={cn('passport-mrz px-6 py-3 sm:px-8', className)}
-      aria-label="Machine readable zone"
+      aria-label={t('Machine readable zone')}
     >
       <div>{lines[0]}</div>
       <div>{lines[1]}</div>
@@ -293,7 +307,10 @@ export function PassportSeal({
   intact,
   head,
   className,
+  t = (text: string) => text,
 }: {
+  /** Translates the component's own words. Phase 40.5. */
+  t?: (text: string) => string;
   intact: boolean;
   /** The chain head, shortened, printed on the seal. */
   head: string | null;
@@ -305,7 +322,7 @@ export function PassportSeal({
         className="passport-seal"
         data-state={intact ? 'intact' : 'broken'}
         role="img"
-        aria-label={intact ? 'Seal: history intact' : 'Seal: history broken'}
+        aria-label={intact ? t('Seal: history intact') : t('Seal: history broken')}
       >
         <span className="passport-seal-ring" aria-hidden />
         <PassportEmblem size={44} className="[&_*]:stroke-current" />
@@ -314,7 +331,7 @@ export function PassportSeal({
         className="passport-label text-center"
         style={{ color: intact ? 'var(--passport-stamp-verified)' : 'var(--passport-stamp-alert)' }}
       >
-        {intact ? 'History intact' : 'History broken'}
+        {intact ? t('History intact') : t('History broken')}
       </p>
       {head ? (
         <p

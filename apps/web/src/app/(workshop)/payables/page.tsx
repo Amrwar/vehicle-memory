@@ -1,4 +1,4 @@
-import { fromDecimal, type PaymentMethod } from '@carnet/core';
+import { fromDecimal, msg, type PaymentMethod } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { heldCreditBySupplier } from '@/lib/returns';
 import {
   approveBill,
@@ -30,14 +31,17 @@ import {
   supplierPaymentsFor,
 } from '@/lib/payables';
 
-export const metadata: Metadata = { title: 'Suppliers owed' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Suppliers owed') };
+}
 export const dynamic = 'force-dynamic';
 
 const METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
-  { value: 'CARD', label: 'Card' },
-  { value: 'CHEQUE', label: 'Cheque' },
-  { value: 'CASH', label: 'Cash' },
+  { value: 'BANK_TRANSFER', label: msg('Bank transfer') },
+  { value: 'CARD', label: msg('Card') },
+  { value: 'CHEQUE', label: msg('Cheque') },
+  { value: 'CASH', label: msg('Cash') },
 ];
 
 /**
@@ -111,6 +115,7 @@ export default async function PayablesPage({
   searchParams: Promise<{ problem?: string; done?: string }>;
 }) {
   const { orgId, user, region } = await requireSession('ledger:read');
+  const t = await tFor();
   const notice = await searchParams;
 
   const [suppliers, payments, held] = await Promise.all([
@@ -127,60 +132,64 @@ export default async function PayablesPage({
   return (
     <>
       <PageHeader
-        eyebrow="Money"
-        title="Suppliers owed"
-        description="Bills to approve, suppliers to pay, and what has gone out"
+        eyebrow={t('Money')}
+        title={t('Suppliers owed')}
+        description={t('Bills to approve, suppliers to pay, and what has gone out')}
         actions={
           <Link href="/purchasing">
-            <Button>Purchasing</Button>
+            <Button>{t('Purchasing')}</Button>
           </Link>
         }
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Owed"
+          label={t('Owed')}
           value={<Money currency={region.currency} locale={region.locale} amount={owed / 100} />}
-          note="Every open bill"
+          note={t('Every open bill')}
         />
         <StatTile
-          label="Ready to pay"
+          label={t('Ready to pay')}
           value={<Money currency={region.currency} locale={region.locale} amount={payable / 100} />}
           tone={payable > 0 ? 'warning' : 'neutral'}
-          note="Approved and not yet settled"
+          note={t('Approved and not yet settled')}
         />
         <StatTile
-          label="Overdue bills"
+          label={t('Overdue bills')}
           value={overdue}
           tone={overdue > 0 ? 'danger' : 'success'}
-          note={overdue > 0 ? 'Past their due date' : 'Nothing past due'}
+          note={overdue > 0 ? t('Past their due date') : t('Nothing past due')}
         />
       </StatRow>
 
       {notice.problem ? (
         <Alert tone="danger" className="mb-5">
-          {notice.problem}
+          {t(notice.problem)}
         </Alert>
       ) : null}
 
       {notice.done ? (
         <Alert tone="success" className="mb-5">
           {notice.done === 'paid'
-            ? 'Paid and posted. The supplier has been sent a remittance advice naming each bill it covers.'
+            ? t(
+                'Paid and posted. The supplier has been sent a remittance advice naming each bill it covers.',
+              )
             : notice.done === 'approved'
-              ? 'Approved. It can be paid now.'
-              : 'Parked as disputed. It will not be paid until somebody approves it again.'}
+              ? t('Approved. It can be paid now.')
+              : t('Parked as disputed. It will not be paid until somebody approves it again.')}
         </Alert>
       ) : null}
 
       {suppliers.length === 0 ? (
         <Card>
           <EmptyState
-            title="Nothing is owed"
-            description="A supplier's bill is booked against its purchase order. Until one is, there is nobody to pay."
+            title={t('Nothing is owed')}
+            description={t(
+              'A supplier’s bill is booked against its purchase order. Until one is, there is nobody to pay.',
+            )}
             action={
               <Link href="/purchasing">
-                <Button variant="primary">See purchase orders</Button>
+                <Button variant="primary">{t('See purchase orders')}</Button>
               </Link>
             }
           />
@@ -191,7 +200,19 @@ export default async function PayablesPage({
             <Card key={entry.supplier.id} className="overflow-hidden">
               <CardHeader
                 title={entry.supplier.name}
-                description={`${entry.bills.length} open bill${entry.bills.length === 1 ? '' : 's'}${entry.overdue > 0 ? ` · ${entry.overdue} overdue` : ''}${held.get(entry.supplier.id) ? ` · ${held.get(entry.supplier.id)!.toFixed(2)} credit held from a return` : ''}`}
+                description={[
+                  entry.bills.length === 1
+                    ? t('1 open bill')
+                    : t('{count} open bills', { count: entry.bills.length }),
+                  entry.overdue > 0 ? t('{count} overdue', { count: entry.overdue }) : null,
+                  held.get(entry.supplier.id)
+                    ? t('{amount} credit held from a return', {
+                        amount: held.get(entry.supplier.id)!.toFixed(2),
+                      })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
                 action={
                   <span className="font-display text-[16px] font-semibold">
                     <Money
@@ -234,14 +255,14 @@ export default async function PayablesPage({
                         }
                         size="sm"
                       >
-                        {bill.status.replace('_', ' ').toLowerCase()}
+                        {t(bill.status.replace('_', ' ').toLowerCase())}
                       </Badge>
                       <span
                         className={`text-[12px] ${late ? 'text-(--danger)' : 'text-(--text-faint)'}`}
                       >
                         {bill.dueAt
-                          ? `due ${bill.dueAt.toLocaleDateString(region.locale)}`
-                          : 'no due date'}
+                          ? t('due {date}', { date: bill.dueAt.toLocaleDateString(region.locale) })
+                          : t('no due date')}
                       </span>
                       <span className="ml-auto tabular-nums">
                         <Money
@@ -255,7 +276,7 @@ export default async function PayablesPage({
                         <form action={approve}>
                           <input type="hidden" name="billId" value={bill.id} />
                           <Button type="submit" size="sm" variant="secondary">
-                            Approve
+                            {t('Approve')}
                           </Button>
                         </form>
                       ) : null}
@@ -265,11 +286,11 @@ export default async function PayablesPage({
                           <input type="hidden" name="billId" value={bill.id} />
                           <Input
                             name="reason"
-                            placeholder="What is wrong"
+                            placeholder={t('What is wrong')}
                             className="h-8 w-40 text-[12px]"
                           />
                           <Button type="submit" size="sm" variant="ghost">
-                            Dispute
+                            {t('Dispute')}
                           </Button>
                         </form>
                       ) : null}
@@ -283,8 +304,10 @@ export default async function PayablesPage({
                   <CardBody className="grid gap-3 border-t border-(--border) bg-(--surface-sunk) sm:grid-cols-[1fr_10rem_1fr_auto] sm:items-end">
                     <input type="hidden" name="supplierId" value={entry.supplier.id} />
                     <Field
-                      label="Pay"
-                      hint={`Up to ${(entry.payable.minor / 100).toFixed(2)} on approved bills`}
+                      label={t('Pay')}
+                      hint={t('Up to {amount} on approved bills', {
+                        amount: (entry.payable.minor / 100).toFixed(2),
+                      })}
                     >
                       <Input
                         name="amount"
@@ -294,20 +317,20 @@ export default async function PayablesPage({
                         required
                       />
                     </Field>
-                    <Field label="By">
+                    <Field label={t('By')}>
                       <Select name="method" defaultValue="BANK_TRANSFER">
                         {METHODS.map((m) => (
                           <option key={m.value} value={m.value}>
-                            {m.label}
+                            {t(m.label)}
                           </option>
                         ))}
                       </Select>
                     </Field>
-                    <Field label="Reference" hint="What they will see on their statement">
-                      <Input name="reference" placeholder="Optional" />
+                    <Field label={t('Reference')} hint={t('What they will see on their statement')}>
+                      <Input name="reference" placeholder={t('Optional')} />
                     </Field>
                     <Button type="submit" variant="primary">
-                      Pay {entry.supplier.name}
+                      {t('Pay {supplier}', { supplier: entry.supplier.name })}
                     </Button>
                   </CardBody>
                 </form>
@@ -319,11 +342,11 @@ export default async function PayablesPage({
 
       <Card className="mt-6 overflow-hidden">
         <CardHeader
-          title="Paid"
+          title={t('Paid')}
           description={
             payments.length === 0
-              ? 'Nothing has been paid yet.'
-              : 'Newest first, with what each payment covered.'
+              ? t('Nothing has been paid yet.')
+              : t('Newest first, with what each payment covered.')
           }
         />
         {payments.length > 0 ? (
@@ -334,7 +357,7 @@ export default async function PayablesPage({
                   <span className="font-medium">{payment.supplier.name}</span>
                   <span className="text-(--text-faint)">
                     {payment.paidAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })} ·{' '}
-                    {METHODS.find((m) => m.value === payment.method)?.label ?? payment.method}
+                    {t(METHODS.find((m) => m.value === payment.method)?.label ?? payment.method)}
                     {payment.reference ? (
                       <span className="datum"> · {payment.reference}</span>
                     ) : null}
@@ -351,7 +374,9 @@ export default async function PayablesPage({
                   {payment.allocations
                     .map((a) => `${a.bill.reference} ${Number(a.amount).toFixed(2)}`)
                     .join(' · ')}
-                  {payment.recordedBy ? ` · by ${payment.recordedBy.name}` : ''}
+                  {payment.recordedBy
+                    ? ` · ${t('by {name}', { name: payment.recordedBy.name })}`
+                    : ''}
                 </p>
               </li>
             ))}

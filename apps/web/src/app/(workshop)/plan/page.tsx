@@ -1,4 +1,4 @@
-import { clock, PlanError } from '@carnet/core';
+import { clock, msg, PlanError } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -14,9 +14,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { acceptPlan, capacityOn, proposeDay } from '@/lib/planning';
 
-export const metadata: Metadata = { title: 'Plan the day' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Plan the day') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -39,11 +43,11 @@ const REASON_TONE = {
 } as const;
 
 const REASON_LABEL = {
-  NOBODY_QUALIFIED: 'nobody qualified',
-  NO_ROOM: 'no room',
-  NO_BAY: 'no bay',
-  WAITING_ON_PARTS: 'waiting on parts',
-  TOO_LONG: 'too long for one day',
+  NOBODY_QUALIFIED: msg('nobody qualified'),
+  NO_ROOM: msg('no room'),
+  NO_BAY: msg('no bay'),
+  WAITING_ON_PARTS: msg('waiting on parts'),
+  TOO_LONG: msg('too long for one day'),
 } as const;
 
 async function accept(formData: FormData) {
@@ -77,6 +81,7 @@ export default async function PlanPage({
   const { orgId, user, region } = await requireSession('diary:read');
   const { on, accepted, problem } = await searchParams;
   const mayAccept = can(user.role, 'diary:write');
+  const t = await tFor();
 
   // Nine in the morning rather than midnight, so a bare date does not land on
   // the previous day for anybody west of London.
@@ -97,8 +102,8 @@ export default async function PlanPage({
   return (
     <>
       <PageHeader
-        eyebrow="Planning"
-        title="Plan the day"
+        eyebrow={t('Planning')}
+        title={t('Plan the day')}
         description={date.toLocaleDateString(region.locale, {
           weekday: 'long',
           day: 'numeric',
@@ -110,13 +115,13 @@ export default async function PlanPage({
               href={shift(-1)}
               className="rounded-(--radius) border border-(--border) px-3 py-1.5 text-[13px] hover:bg-(--surface-sunken)"
             >
-              Previous day
+              {t('Previous day')}
             </Link>
             <Link
               href={shift(1)}
               className="rounded-(--radius) border border-(--border) px-3 py-1.5 text-[13px] hover:bg-(--surface-sunken)"
             >
-              Next day
+              {t('Next day')}
             </Link>
           </>
         }
@@ -124,41 +129,48 @@ export default async function PlanPage({
 
       {accepted ? (
         <Alert tone="success" className="mb-5">
-          {accepted}
+          {t(accepted)}
         </Alert>
       ) : null}
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
       <Card className="mb-5">
         <CardBody className="grid gap-3 text-[13px] leading-relaxed sm:grid-cols-[1fr_auto] sm:items-start">
           <div>
-            <strong className="font-semibold">{plan.summary}</strong>{' '}
-            <span className="text-(--text-soft)">{capacity.summary}</span>
+            <strong className="font-semibold">{t(plan.summary)}</strong>{' '}
+            <span className="text-(--text-soft)">{t(capacity.summary)}</span>
             {plan.alreadyInDiary > 0 ? (
               <p className="mt-1 text-(--text-soft)">
-                {plan.alreadyInDiary} job{plan.alreadyInDiary === 1 ? ' is' : 's are'} already in
-                the diary for this day from an earlier acceptance, and{' '}
-                {plan.alreadyInDiary === 1 ? 'is' : 'are'} left where{' '}
-                {plan.alreadyInDiary === 1 ? 'it was' : 'they were'}.
+                {plan.alreadyInDiary === 1
+                  ? t(
+                      '1 job is already in the diary for this day from an earlier acceptance, and is left where it was.',
+                    )
+                  : t(
+                      '{count} jobs are already in the diary for this day from an earlier acceptance, and are left where they were.',
+                      { count: plan.alreadyInDiary },
+                    )}
               </p>
             ) : null}
             <p className="mt-2 text-[12px] text-(--text-faint)">
-              This is a proposal. Reading it writes nothing, and every line says why it is where it
-              is so you can disagree with it. Accepting writes each placement into the diary as a
-              booking against its job, between {clock(plan.openMinute)} and{' '}
-              {clock(plan.closeMinute)}, the site&rsquo;s hours.
+              {t(
+                'This is a proposal. Reading it writes nothing, and every line says why it is where it is so you can disagree with it. Accepting writes each placement into the diary as a booking against its job, between {open} and {close}, the site’s hours.',
+                { open: clock(plan.openMinute), close: clock(plan.closeMinute) },
+              )}
             </p>
           </div>
           {mayAccept && plan.assignments.length > 0 ? (
             <form action={accept}>
               <input type="hidden" name="on" value={iso(date)} />
               <Button type="submit" variant="primary">
-                Write {plan.assignments.length} placement{plan.assignments.length === 1 ? '' : 's'}{' '}
-                to the diary
+                {plan.assignments.length === 1
+                  ? t('Write 1 placement to the diary')
+                  : t('Write {count} placements to the diary', {
+                      count: plan.assignments.length,
+                    })}
               </Button>
             </form>
           ) : null}
@@ -168,13 +180,17 @@ export default async function PlanPage({
       <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
         <Card className="overflow-hidden">
           <CardHeader
-            title="The day"
-            description="Longest first within what was promised, on the least loaded person who can do it."
+            title={t('The day')}
+            description={t(
+              'Longest first within what was promised, on the least loaded person who can do it.',
+            )}
           />
           {plan.assignments.length === 0 ? (
             <EmptyState
-              title="Nothing could be placed"
-              description="Either nobody is in, no work is open, or everything open is waiting on something. The column beside this says which."
+              title={t('Nothing could be placed')}
+              description={t(
+                'Either nobody is in, no work is open, or everything open is waiting on something. The column beside this says which.',
+              )}
             />
           ) : (
             <ul className="divide-y divide-(--border)">
@@ -197,7 +213,7 @@ export default async function PlanPage({
                       {assignment.bayName}
                     </Badge>
                   </div>
-                  <p className="text-[12px] text-(--text-faint)">{assignment.why}</p>
+                  <p className="text-[12px] text-(--text-faint)">{t(assignment.why)}</p>
                 </li>
               ))}
             </ul>
@@ -206,12 +222,14 @@ export default async function PlanPage({
 
         <Card className="overflow-hidden">
           <CardHeader
-            title="Left over"
-            description="Each one says which of the reasons it is, so the morning meeting is short."
+            title={t('Left over')}
+            description={t(
+              'Each one says which of the reasons it is, so the morning meeting is short.',
+            )}
           />
           {plan.unplaced.length === 0 ? (
             <CardBody className="text-[13px] text-(--text-soft)">
-              Everything open fits into the day.
+              {t('Everything open fits into the day.')}
             </CardBody>
           ) : (
             <ul className="divide-y divide-(--border)">
@@ -225,10 +243,10 @@ export default async function PlanPage({
                       {entry.label}
                     </Link>
                     <Badge tone={REASON_TONE[entry.reason]} size="sm">
-                      {REASON_LABEL[entry.reason]}
+                      {t(REASON_LABEL[entry.reason])}
                     </Badge>
                   </div>
-                  <p className="text-[12px] text-(--text-faint)">{entry.why}</p>
+                  <p className="text-[12px] text-(--text-faint)">{t(entry.why)}</p>
                 </li>
               ))}
             </ul>
@@ -238,16 +256,13 @@ export default async function PlanPage({
 
       <Card className="mt-5">
         <CardBody className="text-[12px] leading-relaxed text-(--text-faint)">
-          <strong className="font-semibold text-(--text-soft)">How it decides.</strong> Work
-          promised soonest goes first; within the same promise, the longest job, because packing the
-          long ones first is what stops a six-hour clutch being the thing left at four
-          o&rsquo;clock. Skill is a hard rule, never a preference. Among people who can do it, the
-          least loaded, and among equals the one whose sign-off is lowest while still sufficient, so
-          an expert stays free for whatever comes through the door at eleven.{' '}
+          <strong className="font-semibold text-(--text-soft)">{t('How it decides.')}</strong>{' '}
+          {t(
+            'Work promised soonest goes first; within the same promise, the longest job, because packing the long ones first is what stops a six-hour clutch being the thing left at four o’clock. Skill is a hard rule, never a preference. Among people who can do it, the least loaded, and among equals the one whose sign-off is lowest while still sufficient, so an expert stays free for whatever comes through the door at eleven.',
+          )}{' '}
           <Link href="/skills" className="font-medium text-(--brand-text) hover:underline">
-            The skill matrix
-          </Link>{' '}
-          is where those sign-offs live.
+            {t('The skill matrix is where those sign-offs live.')}
+          </Link>
         </CardBody>
       </Card>
     </>

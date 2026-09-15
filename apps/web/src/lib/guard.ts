@@ -12,12 +12,14 @@ import {
   isWritePermission,
   type Subscription,
   subscriptionStateOf,
+  readingLocaleFor,
   type Role,
 } from '@carnet/core';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { currentUser, type CurrentUser } from './auth';
+import { currentLanguage } from './i18n';
 
 /**
  * Route guards.
@@ -81,7 +83,8 @@ export async function requireSession(permission?: Permission): Promise<Session> 
     orgId: user.orgId,
     db: forOrg(user.orgId),
     plan: planFor(user.orgPlan ?? 'CORE').id,
-    region: user.region,
+    // Dates and money in the reader's language, in the workshop's country. Phase 40.5.
+    region: { ...user.region, locale: readingLocaleFor(await currentLanguage(), user.region) },
     subscription:
       user.subscription ??
       subscriptionStateOf({

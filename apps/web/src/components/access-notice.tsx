@@ -3,6 +3,8 @@
 import { humanisePermission } from '@carnet/core';
 import { useSearchParams } from 'next/navigation';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * Says why the last click went somewhere else.
  *
@@ -12,6 +14,7 @@ import { useSearchParams } from 'next/navigation';
  * which, name the permission, and let them ask their manager for it.
  */
 export function AccessNotice() {
+  const t = useT();
   const denied = useSearchParams().get('denied');
   if (!denied) return null;
 
@@ -33,8 +36,10 @@ export function AccessNotice() {
         <circle cx="8" cy="11" r="0.85" fill="currentColor" />
       </svg>
       <p className="text-[13px] leading-relaxed text-(--warning)">
-        That page needs {humanisePermission(denied)}, which your role does not carry. You have been
-        brought back to your own workspace. Ask an owner or manager if you need it.
+        {t(
+          'That page needs {permission}, which your role does not carry. You have been brought back to your own workspace. Ask an owner or manager if you need it.',
+          { permission: t(humanisePermission(denied)) },
+        )}
       </p>
     </div>
   );

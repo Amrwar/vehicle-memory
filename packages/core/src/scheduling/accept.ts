@@ -96,5 +96,7 @@ export function describeAcceptance(written: number, unnamed: number, date: Date)
   const day = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
   const base = `${written} placement${written === 1 ? '' : 's'} written into the diary for ${day}.`;
   if (unnamed === 0) return base;
-  return `${base} ${unnamed} name${unnamed === 1 ? 's' : ''} no technician, because that person has no login yet.`;
+  return unnamed === 1
+    ? `${base} 1 of them has no technician, because that person has no login yet.`
+    : `${base} ${unnamed} of them have no technician, because those people have no login yet.`;
 }

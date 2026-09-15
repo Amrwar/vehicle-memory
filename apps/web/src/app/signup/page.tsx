@@ -23,11 +23,17 @@ import { createWorkshop } from '@/lib/onboarding';
 import { startTrialCheckout } from '@/lib/billing';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Start a workshop',
-  description: `Open a Carnet workshop. ${TRIAL_DAYS} days free; the card is charged only when the trial ends, and only if you have not cancelled.`,
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Start a workshop'),
+    description: t(
+      'Open a Carnet workshop. {days} days free; the card is charged only when the trial ends, and only if you have not cancelled.',
+      { days: TRIAL_DAYS },
+    ),
+    robots: { index: true, follow: true },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -141,8 +147,10 @@ export default async function SignupPage({
       return { field: field ?? '', message: rest.join(':') };
     });
 
-  const problemFor = (field: string) =>
-    problems.find((problem) => problem.field === field)?.message;
+  const problemFor = (field: string) => {
+    const message = problems.find((problem) => problem.field === field)?.message;
+    return message ? t(message) : undefined;
+  };
 
   const softEmailWarning =
     problems.length > 0 &&
@@ -172,9 +180,12 @@ export default async function SignupPage({
 
           <ul className="mt-7 grid gap-3">
             {[
-              `${TRIAL_DAYS} days free. Your card is charged only when the trial ends, and only if you have not cancelled`,
-              'Set up with bays, job types and VAT already configured',
-              'Every job you put through writes a permanent vehicle history',
+              t(
+                '{days} days free. Your card is charged only when the trial ends, and only if you have not cancelled',
+                { days: TRIAL_DAYS },
+              ),
+              t('Set up with bays, job types and VAT already configured'),
+              t('Every job you put through writes a permanent vehicle history'),
             ].map((line) => (
               <li key={line} className="flex items-start gap-2.5 text-[14px]">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-(--color-brass-300)" />
@@ -185,7 +196,7 @@ export default async function SignupPage({
         </div>
 
         <p className="text-[12px] text-(--color-petrol-200)">
-          Already have an account?{' '}
+          {t('Already have an account?')}{' '}
           <Link href="/login" className="underline underline-offset-2">
             {t('Sign in')}
           </Link>
@@ -203,7 +214,7 @@ export default async function SignupPage({
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="eyebrow">{t('Start your trial')}</p>
             <p className="text-[13px] text-(--text-soft)">
-              Already have an account?{' '}
+              {t('Already have an account?')}{' '}
               <Link
                 href="/login"
                 className="font-medium text-(--brand-text) underline underline-offset-2"
@@ -216,14 +227,19 @@ export default async function SignupPage({
             {t('Open your workshop')}
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
-            {`${TRIAL_DAYS} days free on ${PLANS[plan].name}. You add a card on the next page; it is charged on the day the trial ends unless you cancel before, and nothing is ever deleted.`}
+            {t(
+              '{days} days free on {plan}. You add a card on the next page; it is charged on the day the trial ends unless you cancel before, and nothing is ever deleted.',
+              { days: TRIAL_DAYS, plan: t(PLANS[plan].name) },
+            )}
           </p>
 
           {problems.length > 0 ? (
             <Alert tone={softEmailWarning ? 'warning' : 'danger'} className="mt-5">
               {softEmailWarning
-                ? 'One thing to check before we continue.'
-                : `${problems.length} thing${problems.length === 1 ? '' : 's'} to fix.`}
+                ? t('One thing to check before we continue.')
+                : problems.length === 1
+                  ? t('1 thing to fix.')
+                  : t('{count} things to fix.', { count: problems.length })}
             </Alert>
           ) : null}
 
@@ -240,7 +256,7 @@ export default async function SignupPage({
                 defaultValue={params.workshopName ?? ''}
                 autoComplete="organization"
                 required
-                placeholder="Hillside Motors"
+                placeholder={t('Hillside Motors')}
               />
             </Field>
 
@@ -251,6 +267,7 @@ export default async function SignupPage({
                   defaultValue={params.contactName ?? ''}
                   autoComplete="name"
                   required
+                  // i18n-ignore
                   placeholder="Ahmed Bakri"
                 />
               </Field>
@@ -279,7 +296,7 @@ export default async function SignupPage({
                 defaultValue={params.email ?? ''}
                 autoComplete="email"
                 required
-                placeholder="you@yourworkshop.co.uk"
+                placeholder={t('you@yourworkshop.co.uk')}
               />
             </Field>
 
@@ -326,11 +343,11 @@ export default async function SignupPage({
             <SignupPricing
               countries={COUNTRIES.map((c) => ({
                 code: c.code,
-                name: c.name,
+                name: t(c.name),
                 currency: c.currency,
                 locale: c.locale,
               }))}
-              plans={PLAN_ORDER.map((id) => ({ id, name: PLANS[id].name }))}
+              plans={PLAN_ORDER.map((id) => ({ id, name: t(PLANS[id].name) }))}
               book={Object.fromEntries(
                 PRICED_CURRENCIES.map((currency) => [
                   currency,
@@ -359,7 +376,7 @@ export default async function SignupPage({
           </form>
 
           <p className="mt-6 text-center text-[13px] text-(--text-soft) lg:hidden">
-            Already have an account?{' '}
+            {t('Already have an account?')}{' '}
             <Link href="/login" className="text-(--brand-text) underline underline-offset-2">
               {t('Sign in')}
             </Link>

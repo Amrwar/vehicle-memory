@@ -1,3 +1,5 @@
+import { tFor } from '@/lib/i18n';
+
 /**
  * What a page shows while it is still fetching.
  *
@@ -13,7 +15,8 @@
  * underneath. Everything stops for anybody who has asked their system not to
  * animate, and what remains is a drawn car rather than a frozen frame of one.
  */
-export function LoadingCar({ label = 'Loading' }: { label?: string }) {
+export async function LoadingCar({ label }: { label?: string }) {
+  const t = await tFor();
   return (
     <div
       className="flex min-h-[40vh] flex-col items-center justify-center gap-4"
@@ -76,8 +79,9 @@ export function LoadingCar({ label = 'Loading' }: { label?: string }) {
         </g>
       </svg>
 
-      <p className="text-[13px] text-(--text-faint)">{label}</p>
+      <p className="text-[13px] text-(--text-faint)">{label ? t(label) : t('Loading')}</p>
 
+      {/* i18n-ignore */}
       <style>{`
         @keyframes carnet-spin { to { transform: rotate(360deg); } }
         @keyframes carnet-settle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(1.5px); } }

@@ -21,9 +21,13 @@ import { prisma } from '@carnet/db';
 
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { inTransitNow, transferSuggestions } from '@/lib/transfers';
 
-export const metadata: Metadata = { title: 'Transfers' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Transfers') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -58,49 +62,53 @@ export default async function TransfersPage() {
 
   const roadValue = inFlight.reduce((total, transfer) => total + transfer.valueMinor, 0);
   const stale = inFlight.filter((transfer) => transfer.stale);
+  const t = await tFor();
 
   return (
     <>
       <PageHeader
-        eyebrow="Inventory"
-        title="Stock transfers"
-        description="Parts moving between sites, and what is on the road right now"
+        eyebrow={t('Inventory')}
+        title={t('Stock transfers')}
+        description={t('Parts moving between sites, and what is on the road right now')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="In transit"
+          label={t('In transit')}
           value={inFlight.length}
-          note={inFlight.length === 1 ? 'Transfer on the road' : 'Transfers on the road'}
+          note={inFlight.length === 1 ? t('Transfer on the road') : t('Transfers on the road')}
         />
         <StatTile
-          label="Value on the road"
+          label={t('Value on the road')}
           value={
             <Money currency={region.currency} locale={region.locale} amount={roadValue / 100} />
           }
-          note="Owned, but on nobody's shelf"
+          note={t('Owned, but on nobody’s shelf')}
         />
         <StatTile
-          label="Overdue"
+          label={t('Overdue')}
           value={stale.length}
           tone={stale.length > 0 ? 'warning' : 'neutral'}
-          note="Sent more than three days ago"
+          note={t('Sent more than three days ago')}
         />
         <StatTile
-          label="Suggested"
+          label={t('Suggested')}
           value={suggestions.length}
-          note="Shortages another site could cover"
+          note={t('Shortages another site could cover')}
         />
       </StatRow>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="grid gap-5">
           <Card className="overflow-hidden">
-            <CardHeader title="On the road" description="Sent, not yet booked in at the far end" />
+            <CardHeader
+              title={t('On the road')}
+              description={t('Sent, not yet booked in at the far end')}
+            />
             {inFlight.length === 0 ? (
               <EmptyState
-                title="Nothing in transit"
-                description="Every part that has left a site has arrived at the other one."
+                title={t('Nothing in transit')}
+                description={t('Every part that has left a site has arrived at the other one.')}
               />
             ) : (
               <div className="divide-y divide-(--border)">
@@ -116,14 +124,17 @@ export default async function TransfersPage() {
                           </span>
                         </p>
                         <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                          Sent{' '}
-                          {transfer.dispatchedAt?.toLocaleDateString(region.locale, {
-                            day: 'numeric',
-                            month: 'short',
+                          {t('Sent {date}', {
+                            date:
+                              transfer.dispatchedAt?.toLocaleDateString(region.locale, {
+                                day: 'numeric',
+                                month: 'short',
+                              }) ?? '',
                           })}
                           {' · '}
-                          {transfer.outstanding} item{transfer.outstanding === 1 ? '' : 's'}{' '}
-                          outstanding
+                          {transfer.outstanding === 1
+                            ? t('1 item outstanding')
+                            : t('{count} items outstanding', { count: transfer.outstanding })}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -133,8 +144,8 @@ export default async function TransfersPage() {
                           dot={transfer.stale}
                         >
                           {transfer.daysInTransit === 0
-                            ? 'today'
-                            : `${transfer.daysInTransit}d in transit`}
+                            ? t('today')
+                            : t('{days}d in transit', { days: transfer.daysInTransit })}
                         </Badge>
                         <Money
                           currency={region.currency}
@@ -160,7 +171,10 @@ export default async function TransfersPage() {
                             </span>
                             <span className="truncate text-(--text-soft)">{line.product.name}</span>
                             <span className="tabular">
-                              {outstanding} of {Number(line.quantity)}
+                              {t('{outstanding} of {total}', {
+                                outstanding,
+                                total: Number(line.quantity),
+                              })}
                             </span>
                           </li>
                         );
@@ -169,9 +183,9 @@ export default async function TransfersPage() {
 
                     {transfer.stale ? (
                       <p className="mt-2 rounded-(--radius-sm) bg-(--warning-soft) px-2.5 py-2 text-[12px] leading-relaxed text-(--warning)">
-                        Three days is longer than any van journey between these sites. Either it
-                        arrived and nobody booked it in, or it did not arrive. Both need a phone
-                        call, not a wait.
+                        {t(
+                          'Three days is longer than any van journey between these sites. Either it arrived and nobody booked it in, or it did not arrive. Both need a phone call, not a wait.',
+                        )}
                       </p>
                     ) : null}
                   </div>
@@ -181,19 +195,22 @@ export default async function TransfersPage() {
           </Card>
 
           <Card className="overflow-hidden">
-            <CardHeader title="Recent" description="Completed, cancelled and draft" />
+            <CardHeader title={t('Recent')} description={t('Completed, cancelled and draft')} />
             {recent.length === 0 ? (
-              <EmptyState title="No transfers yet" description="Nothing has moved between sites." />
+              <EmptyState
+                title={t('No transfers yet')}
+                description={t('Nothing has moved between sites.')}
+              />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Reference</Th>
-                      <Th>Route</Th>
-                      <Th numeric>Lines</Th>
-                      <Th>Status</Th>
-                      <Th>Completed</Th>
+                      <Th>{t('Reference')}</Th>
+                      <Th>{t('Route')}</Th>
+                      <Th numeric>{t('Lines')}</Th>
+                      <Th>{t('Status')}</Th>
+                      <Th>{t('Completed')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -217,7 +234,7 @@ export default async function TransfersPage() {
                             }
                             size="sm"
                           >
-                            {transfer.status.toLowerCase().replace('_', ' ')}
+                            {t(transfer.status.toLowerCase().replace('_', ' '))}
                           </Badge>
                         </Td>
                         <Td className="text-(--text-faint)">
@@ -240,12 +257,12 @@ export default async function TransfersPage() {
         <aside className="grid content-start gap-5">
           <Card className={suggestions.length > 0 ? 'border-(--brand)' : undefined}>
             <CardHeader
-              title="Worth moving"
-              description="One site is short, another is holding spare"
+              title={t('Worth moving')}
+              description={t('One site is short, another is holding spare')}
             />
             {suggestions.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-faint)">
-                No site is short of something another one can spare.
+                {t('No site is short of something another one can spare.')}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -261,7 +278,7 @@ export default async function TransfersPage() {
                       {suggestion.fromSite} → {suggestion.toSite}
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-(--text-faint)">
-                      {suggestion.reason}
+                      {t(suggestion.reason)}
                     </p>
                   </li>
                 ))}
@@ -270,22 +287,22 @@ export default async function TransfersPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Why in transit is its own state" />
+            <CardHeader title={t('Why in transit is its own state')} />
             <CardBody className="text-[12px] leading-relaxed text-(--text-soft)">
               <p>
-                Stock deducted on dispatch and added on receipt, with nothing holding the gap,
-                disappears from every report while it is in the van.
+                {t(
+                  'Stock deducted on dispatch and added on receipt, with nothing holding the gap, disappears from every report while it is in the van.',
+                )}
               </p>
               <p className="mt-2">
-                At the next stocktake that reads as shrinkage, and shrinkage gets investigated as
-                theft. So the difference between sent and received is a real balance, counted in the
-                group&rsquo;s stock value and shown here until somebody books it in.
+                {t(
+                  'At the next stocktake that reads as shrinkage, and shrinkage gets investigated as theft. So the difference between sent and received is a real balance, counted in the group’s stock value and shown here until somebody books it in.',
+                )}
               </p>
               <p className="mt-2">
                 <Link href="/financials" className="underline underline-offset-2">
-                  Group financials
-                </Link>{' '}
-                counts it too.
+                  {t('Group financials counts it too.')}
+                </Link>
               </p>
             </CardBody>
           </Card>

@@ -164,10 +164,13 @@ export function KeyValue({
   items,
   columns = 2,
   className,
+  t = (text: string) => text,
 }: {
   items: { label: string; value: React.ReactNode }[];
   columns?: 1 | 2 | 3;
   className?: string;
+  /** Translates the component's own words. Phase 40.5. */
+  t?: (text: string) => string;
 }) {
   return (
     <dl
@@ -183,7 +186,7 @@ export function KeyValue({
         <div key={item.label} className="min-w-0">
           <dt className="eyebrow mb-0.5">{item.label}</dt>
           <dd className="text-[13px] leading-snug break-words">
-            {item.value ?? <span className="text-(--text-faint)">Not recorded</span>}
+            {item.value ?? <span className="text-(--text-faint)">{t('Not recorded')}</span>}
           </dd>
         </div>
       ))}
@@ -200,7 +203,10 @@ export function UtilisationBar({
   capacityHours,
   state,
   className,
+  t = (text: string) => text,
 }: {
+  /** Translates the component's own words. Phase 40.5. */
+  t?: (text: string) => string;
   bookedHours: number;
   capacityHours: number;
   state: 'empty' | 'light' | 'healthy' | 'full' | 'over';
@@ -224,7 +230,7 @@ export function UtilisationBar({
         aria-valuenow={Math.round(bookedHours)}
         aria-valuemin={0}
         aria-valuemax={Math.round(capacityHours)}
-        aria-label="Workshop capacity used"
+        aria-label={t('Workshop capacity used')}
       >
         <div className={cn('h-full rounded-full', colour)} style={{ width: `${pct}%` }} />
       </div>

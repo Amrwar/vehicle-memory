@@ -27,7 +27,10 @@ import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { ownerDay } from '@/lib/owner';
 
-export const metadata: Metadata = { title: 'Dashboard' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Dashboard') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -375,7 +378,7 @@ export default async function DashboardPage({
                       {booking.job ? (
                         <Link href={`/jobs/${booking.job.id}`}>
                           <Badge tone={toneFor(booking.job.status)} dot>
-                            {humanise(booking.job.status)}
+                            {t(humanise(booking.job.status))}
                           </Badge>
                         </Link>
                       ) : (
@@ -482,7 +485,7 @@ export default async function DashboardPage({
             <CardBody>
               <ul className="grid gap-1.5 text-[14px] leading-relaxed">
                 {observations.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line}>{t(line)}</li>
                 ))}
               </ul>
             </CardBody>
@@ -589,8 +592,9 @@ export default async function DashboardPage({
                 >
                   <span className="text-[13px]">
                     <span className="font-medium">{entry.actor?.name ?? t('The system')}</span>{' '}
-                    <span className="text-(--text-soft)">{entry.action.replace(/[._]/g, ' ')}</span>{' '}
-                    <span className="text-(--text-faint)">{entry.entityType.toLowerCase()}</span>
+                    <span className="text-(--text-soft)">
+                      {t(entry.action.replace(/[._]/g, ' '))}
+                    </span>
                   </span>
                   <span className="text-[11px] tabular-nums text-(--text-faint)">
                     {entry.createdAt.toLocaleTimeString(region.locale, {

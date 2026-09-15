@@ -1,7 +1,10 @@
 'use client';
 
 import * as React from 'react';
+import { msg } from '@carnet/core';
 import { useRouter } from 'next/navigation';
+
+import { useT } from '@/components/language-provider';
 
 /**
  * Adding a piece of paperwork to a vehicle.
@@ -13,19 +16,20 @@ import { useRouter } from 'next/navigation';
  */
 
 const KINDS: { kind: string; label: string; expires: boolean }[] = [
-  { kind: 'PHOTO', label: 'Photograph', expires: false },
-  { kind: 'REGISTRATION_CERTIFICATE', label: 'Registration certificate', expires: false },
-  { kind: 'MOT_CERTIFICATE', label: 'MOT certificate', expires: true },
-  { kind: 'INSURANCE', label: 'Insurance', expires: true },
-  { kind: 'SERVICE_RECORD', label: 'Service record', expires: false },
-  { kind: 'PURCHASE_INVOICE', label: 'Purchase invoice', expires: false },
-  { kind: 'OTHER', label: 'Other', expires: false },
+  { kind: 'PHOTO', label: msg('Photograph'), expires: false },
+  { kind: 'REGISTRATION_CERTIFICATE', label: msg('Registration certificate'), expires: false },
+  { kind: 'MOT_CERTIFICATE', label: msg('MOT certificate'), expires: true },
+  { kind: 'INSURANCE', label: msg('Insurance'), expires: true },
+  { kind: 'SERVICE_RECORD', label: msg('Service record'), expires: false },
+  { kind: 'PURCHASE_INVOICE', label: msg('Purchase invoice'), expires: false },
+  { kind: 'OTHER', label: msg('Other'), expires: false },
 ];
 
 const field =
   'h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)';
 
 export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
+  const t = useT();
   const router = useRouter();
   const [kind, setKind] = React.useState('MOT_CERTIFICATE');
   const [title, setTitle] = React.useState('');
@@ -99,7 +103,7 @@ export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
         throw new Error(detail.error ?? 'Uploaded, but not recorded.');
       }
 
-      setDone(`${title || file.name} added.`);
+      setDone(t('{name} added.', { name: title || file.name }));
       setTitle('');
       setReference('');
       setExpiresAt('');
@@ -117,23 +121,25 @@ export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
     <form onSubmit={send} className="grid gap-3">
       <div className="grid gap-3 sm:grid-cols-[11rem_1fr]">
         <label className="grid gap-1 text-[12px] font-medium text-(--text-soft)">
-          What it is
+          {t('What it is')}
           <select value={kind} onChange={(event) => setKind(event.target.value)} className={field}>
             {KINDS.map((entry) => (
               <option key={entry.kind} value={entry.kind}>
-                {entry.label}
+                {t(entry.label)}
               </option>
             ))}
           </select>
         </label>
         <label className="grid gap-1 text-[12px] font-medium text-(--text-soft)">
-          Title
+          {t('Title')}
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             required
             maxLength={120}
-            placeholder={kind === 'PHOTO' ? 'Front bumper before repair' : 'MOT certificate 2026'}
+            placeholder={
+              kind === 'PHOTO' ? t('Front bumper before repair') : t('MOT certificate 2026')
+            }
             className={field}
           />
         </label>
@@ -141,18 +147,21 @@ export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-[12px] font-medium text-(--text-soft)">
-          Reference <span className="font-normal text-(--text-faint)">(optional)</span>
+          <span>
+            {t('Reference')}{' '}
+            <span className="font-normal text-(--text-faint)">{t('(optional)')}</span>
+          </span>
           <input
             value={reference}
             onChange={(event) => setReference(event.target.value)}
             maxLength={60}
-            placeholder="Policy or certificate number"
+            placeholder={t('Policy or certificate number')}
             className={field}
           />
         </label>
         {expires ? (
           <label className="grid gap-1 text-[12px] font-medium text-(--text-soft)">
-            Runs out on
+            {t('Runs out on')}
             <input
               type="date"
               value={expiresAt}
@@ -164,7 +173,12 @@ export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <label className="grid gap-1 text-[12px] font-medium text-(--text-soft)">
-        File <span className="font-normal text-(--text-faint)">(PDF or a picture, up to 12MB)</span>
+        <span>
+          {t('File')}{' '}
+          <span className="font-normal text-(--text-faint)">
+            {t('(PDF or a picture, up to 12MB)')}
+          </span>
+        </span>
         <input
           ref={input}
           type="file"
@@ -181,10 +195,10 @@ export function DocumentUpload({ vehicleId }: { vehicleId: string }) {
           disabled={busy}
           className="inline-flex h-9 items-center rounded-(--radius-md) bg-(--brand) px-3.5 text-[13px] font-medium text-(--on-brand) disabled:opacity-60"
         >
-          {busy ? 'Sending…' : 'Add to the vehicle'}
+          {busy ? t('Sending…') : t('Add to the vehicle')}
         </button>
         {done ? <span className="text-[12px] text-(--success)">{done}</span> : null}
-        {error ? <span className="text-[12px] text-(--danger)">{error}</span> : null}
+        {error ? <span className="text-[12px] text-(--danger)">{t(error)}</span> : null}
       </div>
     </form>
   );
@@ -198,6 +212,7 @@ export function DocumentRemove({
   vehicleId: string;
   documentId: string;
 }) {
+  const t = useT();
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [reason, setReason] = React.useState('');
@@ -234,7 +249,7 @@ export function DocumentRemove({
         onClick={() => setOpen(true)}
         className="text-[12px] text-(--text-soft) hover:text-(--danger) hover:underline"
       >
-        Remove
+        {t('Remove')}
       </button>
     );
   }
@@ -246,8 +261,8 @@ export function DocumentRemove({
         onChange={(event) => setReason(event.target.value)}
         required
         maxLength={120}
-        placeholder="Why? Kept on the record."
-        aria-label="Reason for removing"
+        placeholder={t('Why? Kept on the record.')}
+        aria-label={t('Reason for removing')}
         className="h-8 w-48 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 text-[12px]"
       />
       <button
@@ -255,16 +270,16 @@ export function DocumentRemove({
         disabled={busy}
         className="h-8 rounded-(--radius-sm) border border-(--danger) px-2.5 text-[12px] text-(--danger) disabled:opacity-60"
       >
-        {busy ? 'Removing…' : 'Remove'}
+        {busy ? t('Removing…') : t('Remove')}
       </button>
       <button
         type="button"
         onClick={() => setOpen(false)}
         className="text-[12px] text-(--text-faint)"
       >
-        Keep
+        {t('Keep')}
       </button>
-      {error ? <span className="text-[12px] text-(--danger)">{error}</span> : null}
+      {error ? <span className="text-[12px] text-(--danger)">{t(error)}</span> : null}
     </form>
   );
 }

@@ -26,8 +26,12 @@ import {
   reconciliation,
 } from '@/lib/banking';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Banking' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Banking') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -81,6 +85,7 @@ export default async function BankingPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { orgId, plan, region } = await requireSession('ledger:read');
+  const t = await tFor();
 
   if (!planIncludes(plan, 'ledger')) {
     return <PlanWall feature="ledger" plan={plan} />;
@@ -101,13 +106,13 @@ export default async function BankingPage({
   return (
     <>
       <PageHeader
-        eyebrow="Finance"
-        title="Banking and close"
-        description="What the bank says, against what the ledger says"
+        eyebrow={t('Finance')}
+        title={t('Banking and close')}
+        description={t('What the bank says, against what the ledger says')}
         actions={
           <Link href="/financials">
             <Button size="sm" variant="ghost">
-              Statements
+              {t('Statements')}
             </Button>
           </Link>
         }
@@ -115,13 +120,13 @@ export default async function BankingPage({
 
       {params.error ? (
         <Alert tone="danger" className="mb-5">
-          {params.error}
+          {t(params.error)}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="On the statement"
+          label={t('On the statement')}
           value={
             view ? (
               <Money
@@ -133,10 +138,10 @@ export default async function BankingPage({
               '—'
             )
           }
-          note={view?.statement ? 'Closing balance' : 'No statement imported'}
+          note={view?.statement ? t('Closing balance') : t('No statement imported')}
         />
         <StatTile
-          label="In the ledger"
+          label={t('In the ledger')}
           value={
             view ? (
               <Money
@@ -148,10 +153,10 @@ export default async function BankingPage({
               '—'
             )
           }
-          note="From postings to this account"
+          note={t('From postings to this account')}
         />
         <StatTile
-          label="Difference"
+          label={t('Difference')}
           value={
             view ? (
               <Money
@@ -164,12 +169,12 @@ export default async function BankingPage({
             )
           }
           tone={view?.state.reconciled ? 'success' : 'warning'}
-          note={view?.state.reconciled ? 'Agreed' : 'Explained below'}
+          note={view?.state.reconciled ? t('Agreed') : t('Explained below')}
         />
         <StatTile
-          label="Unmatched"
+          label={t('Unmatched')}
           value={view?.state.unmatchedOnStatement.length ?? 0}
-          note="Statement lines with nothing against them"
+          note={t('Statement lines with nothing against them')}
         />
       </StatRow>
 
@@ -177,19 +182,19 @@ export default async function BankingPage({
         <div className="grid gap-5">
           <Card>
             <CardHeader
-              title="Where this stands"
-              description={view?.account.name ?? 'No bank account set up'}
+              title={t('Where this stands')}
+              description={view?.account.name ?? t('No bank account set up')}
             />
             <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-              {view ? view.state.explanation : 'Add a bank account to reconcile against.'}
+              {view ? t(view.state.explanation) : t('Add a bank account to reconcile against.')}
             </CardBody>
           </Card>
 
           {view && view.matches.length > 0 ? (
             <Card className="overflow-hidden">
               <CardHeader
-                title="Suggested matches"
-                description="Each one says why it was suggested"
+                title={t('Suggested matches')}
+                description={t('Each one says why it was suggested')}
               />
               <ul className="divide-y divide-(--border)">
                 {view.matches.map((match) => {
@@ -208,10 +213,10 @@ export default async function BankingPage({
                         <div className="min-w-0">
                           <p className="text-[13px] font-medium">{line.description}</p>
                           <p className="mt-0.5 text-[12px] text-(--text-soft)">
-                            against {entry.description}
+                            {t('against {entry}', { entry: t(entry.description) })}
                           </p>
                           <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                            {match.reason}
+                            {t(match.reason)}
                           </p>
                         </div>
 
@@ -226,7 +231,7 @@ export default async function BankingPage({
                             }
                             size="sm"
                           >
-                            {match.confidence.toLowerCase()}
+                            {t(match.confidence.toLowerCase())}
                           </Badge>
                           <Money
                             currency={region.currency}
@@ -244,7 +249,7 @@ export default async function BankingPage({
                               size="sm"
                               variant={match.confidence === 'EXACT' ? 'primary' : 'secondary'}
                             >
-                              Match
+                              {t('Match')}
                             </Button>
                           </form>
                         </div>
@@ -254,8 +259,9 @@ export default async function BankingPage({
                 })}
               </ul>
               <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
-                Only the exact ones are safe to accept without reading. A likely match is usually
-                right, and usually is not a standard to reconcile a bank account to.
+                {t(
+                  'Only the exact ones are safe to accept without reading. A likely match is usually right, and usually is not a standard to reconcile a bank account to.',
+                )}
               </CardBody>
             </Card>
           ) : null}
@@ -263,8 +269,10 @@ export default async function BankingPage({
           {view && view.state.unmatchedOnStatement.length > 0 ? (
             <Card className="overflow-hidden">
               <CardHeader
-                title="Nothing recorded against these"
-                description="Usually a bank charge, a direct debit, or a payment nobody entered"
+                title={t('Nothing recorded against these')}
+                description={t(
+                  'Usually a bank charge, a direct debit, or a payment nobody entered',
+                )}
               />
               <ul className="divide-y divide-(--border)">
                 {view.state.unmatchedOnStatement.map((line) => (
@@ -297,8 +305,10 @@ export default async function BankingPage({
           {!view ? (
             <Card>
               <EmptyState
-                title="No bank account yet"
-                description="A bank account maps to a ledger account, so a statement has something to be compared against."
+                title={t('No bank account yet')}
+                description={t(
+                  'A bank account maps to a ledger account, so a statement has something to be compared against.',
+                )}
               />
             </Card>
           ) : null}
@@ -307,7 +317,7 @@ export default async function BankingPage({
         <aside className="grid content-start gap-5">
           {accounts.length > 1 ? (
             <Card>
-              <CardHeader title="Accounts" />
+              <CardHeader title={t('Accounts')} />
               <ul className="divide-y divide-(--border)">
                 {accounts.map((account) => (
                   <li key={account.id}>
@@ -334,7 +344,7 @@ export default async function BankingPage({
 
           {readiness ? (
             <Card className={blocking.length > 0 ? 'border-(--warning)' : 'border-(--success)'}>
-              <CardHeader title="Closing the period" description={readiness.period.name} />
+              <CardHeader title={t('Closing the period')} description={readiness.period.name} />
               <CardBody className="grid gap-2.5">
                 {readiness.checks.map((check) => (
                   <div key={check.label} className="flex items-start gap-2.5">
@@ -349,9 +359,9 @@ export default async function BankingPage({
                       }`}
                     />
                     <div className="min-w-0">
-                      <p className="text-[12px] font-medium">{check.label}</p>
+                      <p className="text-[12px] font-medium">{t(check.label)}</p>
                       <p className="text-[11px] leading-relaxed text-(--text-faint)">
-                        {check.detail}
+                        {t(check.detail)}
                       </p>
                     </div>
                   </div>
@@ -365,24 +375,31 @@ export default async function BankingPage({
                     block
                     disabled={blocking.length > 0}
                   >
-                    {blocking.length > 0 ? 'Not ready to close' : `Close ${readiness.period.name}`}
+                    {blocking.length > 0
+                      ? t('Not ready to close')
+                      : t('Close {period}', { period: readiness.period.name })}
                   </Button>
                 </form>
 
                 <p className="text-[11px] leading-relaxed text-(--text-faint)">
                   {warnings.length > 0
-                    ? 'The amber items are advice. A workshop that always has one stray bank charge should still be able to close its quarter.'
-                    : 'Closing stops the figures moving. Anything posted afterwards has to go into the next period.'}
+                    ? t(
+                        'The amber items are advice. A workshop that always has one stray bank charge should still be able to close its quarter.',
+                      )
+                    : t(
+                        'Closing stops the figures moving. Anything posted afterwards has to go into the next period.',
+                      )}
                 </p>
               </CardBody>
             </Card>
           ) : null}
 
           <Card>
-            <CardHeader title="Why this matters" />
+            <CardHeader title={t('Why this matters')} />
             <CardBody className="text-[12px] leading-relaxed text-(--text-soft)">
-              A trial balance that balances proves the arithmetic was consistent. It does not prove
-              it was right. Until the bank agrees, a set of books is a well-formed opinion.
+              {t(
+                'A trial balance that balances proves the arithmetic was consistent. It does not prove it was right. Until the bank agrees, a set of books is a well-formed opinion.',
+              )}
             </CardBody>
           </Card>
         </aside>

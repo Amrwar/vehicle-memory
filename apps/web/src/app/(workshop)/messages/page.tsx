@@ -21,9 +21,13 @@ import { redirect } from 'next/navigation';
 
 import { deliverability, lift, suppressions } from '@/lib/deliverability';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { outbound, outboundSummary } from '@/lib/messages';
 
-export const metadata: Metadata = { title: 'Messages' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Messages') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -65,6 +69,8 @@ async function unsuppress(formData: FormData) {
   const note = String(formData.get('note') ?? '').trim();
 
   if (!note) {
+    // The sentence stays English in the address; the page translates it.
+    // i18n-ignore
     redirect('/messages?error=' + encodeURIComponent('Say why it is safe to send there again.'));
   }
 
@@ -85,6 +91,7 @@ export default async function MessagesPage({
 }) {
   const notice = await searchParams;
   const { orgId, region } = await requireSession('settings:read');
+  const t = await tFor();
 
   const [messages, summary, health, blocked] = await Promise.all([
     outbound(orgId),
@@ -96,25 +103,29 @@ export default async function MessagesPage({
   return (
     <>
       <PageHeader
-        eyebrow="Admin"
-        title="Messages"
-        description="Everything sent to a customer, and everything that did not go"
+        eyebrow={t('Admin')}
+        title={t('Messages')}
+        description={t('Everything sent to a customer, and everything that did not go')}
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Sent" value={summary.sent} note="Handed to a provider" />
+        <StatTile label={t('Sent')} value={summary.sent} note={t('Handed to a provider')} />
         <StatTile
-          label="Failed"
+          label={t('Failed')}
           value={summary.failed}
           tone={summary.failed > 0 ? 'danger' : 'neutral'}
-          note="Nobody received these"
+          note={t('Nobody received these')}
         />
-        <StatTile label="Waiting" value={summary.waiting} note="Held on purpose, until later" />
         <StatTile
-          label="Stuck"
+          label={t('Waiting')}
+          value={summary.waiting}
+          note={t('Held on purpose, until later')}
+        />
+        <StatTile
+          label={t('Stuck')}
           value={summary.stuck}
           tone={summary.stuck > 0 ? 'warning' : 'neutral'}
-          note="Due and not gone"
+          note={t('Due and not gone')}
         />
       </StatRow>
 
@@ -122,11 +133,13 @@ export default async function MessagesPage({
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {summary.stuck} message{summary.stuck === 1 ? ' is' : 's are'} due and{' '}
-              {summary.stuck === 1 ? 'has' : 'have'} not gone.
+              {summary.stuck === 1
+                ? t('1 message is due and has not gone.')
+                : t('{count} messages are due and have not gone.', { count: summary.stuck })}
             </strong>{' '}
-            That usually means the background worker is not running. Nothing is lost, and everything
-            here will go out as soon as it starts, but until then no customer is hearing from you.
+            {t(
+              'That usually means the background worker is not running. Nothing is lost, and everything here will go out as soon as it starts, but until then no customer is hearing from you.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -135,34 +148,39 @@ export default async function MessagesPage({
         <Card className="mb-5 border-(--danger)">
           <CardBody className="text-[13px] leading-relaxed text-(--danger)">
             <strong className="font-semibold">
-              {summary.failed} message{summary.failed === 1 ? '' : 's'} will never arrive.
+              {summary.failed === 1
+                ? t('1 message will never arrive.')
+                : t('{count} messages will never arrive.', { count: summary.failed })}
             </strong>{' '}
-            Most of these are a wrong address rather than a fault. They are not retried, because an
-            address with a typo in it does not start working on the fourth attempt.
+            {t(
+              'Most of these are a wrong address rather than a fault. They are not retried, because an address with a typo in it does not start working on the fourth attempt.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Outbound"
-          description="Newest first. Addresses are shortened; this screen is open all day."
+          title={t('Outbound')}
+          description={t('Newest first. Addresses are shortened; this screen is open all day.')}
         />
         {messages.length === 0 ? (
           <EmptyState
-            title="Nothing has been sent"
-            description="Confirmations, reminders and quote links appear here the moment they are written, and again when they go."
+            title={t('Nothing has been sent')}
+            description={t(
+              'Confirmations, reminders and quote links appear here the moment they are written, and again when they go.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>When</Th>
-                  <Th>To</Th>
-                  <Th>About</Th>
-                  <Th>State</Th>
-                  <Th>Detail</Th>
+                  <Th>{t('When')}</Th>
+                  <Th>{t('To')}</Th>
+                  <Th>{t('About')}</Th>
+                  <Th>{t('State')}</Th>
+                  <Th>{t('Detail')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -174,9 +192,9 @@ export default async function MessagesPage({
                     <Td>
                       <span className="font-medium">{message.to}</span>
                       <span className="block text-[11px] text-(--text-faint)">
-                        {message.channel.toLowerCase()}
+                        {t(message.channel.toLowerCase())}
                         {message.segments && message.segments > 1
-                          ? ` · ${message.segments} segments`
+                          ? ` · ${t('{count} segments', { count: message.segments })}`
                           : ''}
                       </span>
                     </Td>
@@ -186,28 +204,33 @@ export default async function MessagesPage({
                     <Td>
                       {message.status === 'FAILED' ? (
                         <Badge tone="danger" size="sm">
-                          failed
+                          {t('failed')}
                         </Badge>
                       ) : message.overdue ? (
                         <Badge tone="warning" size="sm">
-                          stuck
+                          {t('stuck')}
                         </Badge>
                       ) : message.holdingUntil ? (
                         <Badge tone="neutral" size="sm">
-                          waiting
+                          {t('waiting')}
                         </Badge>
                       ) : (
                         <Badge tone="success" size="sm">
-                          sent
+                          {t('sent')}
                         </Badge>
                       )}
                     </Td>
                     <Td className="text-[12px] text-(--text-soft)">
-                      {message.error ??
-                        (message.provider ? `via ${message.provider}` : 'Not yet attempted.')}
-                      {message.attempts > 1 ? ` · ${message.attempts} attempts` : ''}
+                      {message.error
+                        ? t(message.error)
+                        : message.provider
+                          ? t('via {provider}', { provider: message.provider })
+                          : t('Not yet attempted.')}
+                      {message.attempts > 1
+                        ? ` · ${t('{count} attempts', { count: message.attempts })}`
+                        : ''}
                       {message.holdingUntil
-                        ? ` · until ${when(message.holdingUntil, region.locale)}`
+                        ? ` · ${t('until {date}', { date: when(message.holdingUntil, region.locale) })}`
                         : ''}
                     </Td>
                   </Tr>
@@ -220,24 +243,27 @@ export default async function MessagesPage({
 
       <Card className="mt-5 overflow-hidden">
         <CardHeader
-          title="Addresses nothing is sent to"
-          description="A mailbox that does not exist today will not exist tomorrow, and carrying on is how a sender's reputation goes."
+          title={t('Addresses nothing is sent to')}
+          description={t(
+            "A mailbox that does not exist today will not exist tomorrow, and carrying on is how a sender's reputation goes.",
+          )}
         />
 
         {notice.error ? (
           <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
-            {notice.error}
+            {t(notice.error)}
           </CardBody>
         ) : null}
 
         <CardBody className="border-b border-(--border) text-[13px] leading-relaxed text-(--text-soft)">
-          {health.summary}
+          {t(health.summary)}
         </CardBody>
 
         {blocked.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
-            Nothing is suppressed. Addresses appear here after a permanent bounce or a spam
-            complaint.
+            {t(
+              'Nothing is suppressed. Addresses appear here after a permanent bounce or a spam complaint.',
+            )}
           </CardBody>
         ) : (
           <ul className="divide-y divide-(--border)">
@@ -246,7 +272,7 @@ export default async function MessagesPage({
                 <div className="flex flex-wrap items-baseline gap-x-3">
                   <span className="datum text-[13px] font-medium">{row.address}</span>
                   <Badge tone={row.reason === 'COMPLAINT' ? 'danger' : 'warning'} size="sm">
-                    {row.reason === 'COMPLAINT' ? 'marked as spam' : 'permanent bounce'}
+                    {row.reason === 'COMPLAINT' ? t('marked as spam') : t('permanent bounce')}
                   </Badge>
                   <span className="ml-auto text-[11px] text-(--text-faint)">
                     {row.createdAt.toLocaleDateString(region.locale)}
@@ -259,11 +285,15 @@ export default async function MessagesPage({
 
                 <form action={unsuppress} className="mt-2 flex flex-wrap items-end gap-2">
                   <input type="hidden" name="suppressionId" value={row.id} />
-                  <Field label="Why it is safe again" className="min-w-[16rem] flex-1">
-                    <Input name="note" required placeholder="Corrected the address with them" />
+                  <Field label={t('Why it is safe again')} className="min-w-[16rem] flex-1">
+                    <Input
+                      name="note"
+                      required
+                      placeholder={t('Corrected the address with them')}
+                    />
                   </Field>
                   <Button type="submit" size="sm" variant="secondary">
-                    Send there again
+                    {t('Send there again')}
                   </Button>
                 </form>
               </li>

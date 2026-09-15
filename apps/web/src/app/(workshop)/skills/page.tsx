@@ -18,14 +18,18 @@ import {
   Th,
   Tr,
 } from '@carnet/ui';
-import type { SkillLevel } from '@carnet/core';
+import { msg, type SkillLevel } from '@carnet/core';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { addSkill, matrixFor, setSkill } from '@/lib/planning';
 
-export const metadata: Metadata = { title: 'Skills' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Skills') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -42,9 +46,9 @@ export const dynamic = 'force-dynamic';
  * product would ever say so.
  */
 const LEVELS: { value: SkillLevel; label: string }[] = [
-  { value: 'LEARNING', label: 'Learning' },
-  { value: 'COMPETENT', label: 'Competent' },
-  { value: 'EXPERT', label: 'Expert' },
+  { value: 'LEARNING', label: msg('Learning') },
+  { value: 'COMPETENT', label: msg('Competent') },
+  { value: 'EXPERT', label: msg('Expert') },
 ];
 
 const TONE = { LEARNING: 'warning', COMPETENT: 'brand', EXPERT: 'success' } as const;
@@ -55,7 +59,7 @@ async function create(formData: FormData) {
   const { orgId, user } = await requireSession('people:write');
 
   const name = String(formData.get('name') ?? '').trim();
-  if (!name) redirect('/skills?error=' + encodeURIComponent('A skill needs a name.'));
+  if (!name) redirect('/skills?error=' + encodeURIComponent(msg('A skill needs a name.')));
 
   await addSkill({
     orgId,
@@ -94,6 +98,7 @@ export default async function SkillsPage({
 }) {
   const { orgId } = await requireSession('people:read');
   const { error } = await searchParams;
+  const t = await tFor();
 
   const matrix = await matrixFor(orgId);
 
@@ -103,31 +108,35 @@ export default async function SkillsPage({
   return (
     <>
       <PageHeader
-        eyebrow="People"
-        title="Skills"
-        description="Who is signed off on what, and where the workshop is one person deep"
+        eyebrow={t('People')}
+        title={t('Skills')}
+        description={t('Who is signed off on what, and where the workshop is one person deep')}
       />
 
       {error ? (
-        <Alert tone="danger" title="That did not work" className="mb-5">
-          {error}
+        <Alert tone="danger" title={t('That did not work')} className="mb-5">
+          {t(error)}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
-        <StatTile label="Skills" value={matrix.skills.length} note="In this workshop's own words" />
-        <StatTile label="People" value={matrix.rows.length} note="Currently employed" />
         <StatTile
-          label="One person deep"
+          label={t('Skills')}
+          value={matrix.skills.length}
+          note={t('In this workshop’s own words')}
+        />
+        <StatTile label={t('People')} value={matrix.rows.length} note={t('Currently employed')} />
+        <StatTile
+          label={t('One person deep')}
           value={singlePoints.length}
           tone={singlePoints.length > 0 ? 'warning' : 'neutral'}
-          note="Lost the day they are ill"
+          note={t('Lost the day they are ill')}
         />
         <StatTile
-          label="Nobody at all"
+          label={t('Nobody at all')}
           value={uncovered.length}
           tone={uncovered.length > 0 ? 'danger' : 'neutral'}
-          note="Work that has to go out"
+          note={t('Work that has to go out')}
         />
       </StatRow>
 
@@ -135,40 +144,52 @@ export default async function SkillsPage({
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {singlePoints.length} skill{singlePoints.length === 1 ? '' : 's'} rest on one person.
+              {singlePoints.length === 1
+                ? t('1 skill rests on one person.')
+                : t('{count} skills rest on one person.', { count: singlePoints.length })}
             </strong>{' '}
-            {singlePoints.map((skill) => `${skill.name} is only ${skill.only}`).join('; ')}. That is
-            not a problem today. It is a problem on the day they are ill and three cars are booked
-            in for it.
+            {singlePoints
+              .map((skill) =>
+                t('{skill} is only {person}', { skill: skill.name, person: skill.only ?? '' }),
+              )
+              .join('; ')}
+            .{' '}
+            {t(
+              'That is not a problem today. It is a problem on the day they are ill and three cars are booked in for it.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="mb-5 overflow-hidden">
         <CardHeader
-          title="The matrix"
-          description="Every skill keeps its column even when nobody has it. The blanks are the point."
+          title={t('The matrix')}
+          description={t(
+            'Every skill keeps its column even when nobody has it. The blanks are the point.',
+          )}
         />
         {matrix.rows.length === 0 || matrix.skills.length === 0 ? (
           <EmptyState
-            title="Nothing recorded yet"
-            description="Add the kinds of work this workshop does, then sign people off on them. Scheduling will not give somebody work they are not signed off on."
+            title={t('Nothing recorded yet')}
+            description={t(
+              'Add the kinds of work this workshop does, then sign people off on them. Scheduling will not give somebody work they are not signed off on.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Person</Th>
+                  <Th>{t('Person')}</Th>
                   {matrix.skills.map((skill) => (
                     <Th key={skill.skillId}>
                       {skill.name}
                       <span className="block text-[10px] font-normal text-(--text-faint)">
                         {skill.cover === 0
-                          ? 'nobody'
+                          ? t('nobody')
                           : skill.cover === 1
-                            ? 'one person'
-                            : `${skill.cover} people`}
+                            ? t('one person')
+                            : t('{count} people', { count: skill.cover })}
                       </span>
                     </Th>
                   ))}
@@ -200,17 +221,17 @@ export default async function SkillsPage({
                               <option value="">—</option>
                               {LEVELS.map((entry) => (
                                 <option key={entry.value} value={entry.value}>
-                                  {entry.label}
+                                  {t(entry.label)}
                                 </option>
                               ))}
                             </Select>
                             <Button type="submit" size="sm" variant="secondary">
-                              Save
+                              {t('Save')}
                             </Button>
                           </form>
                           {level ? (
                             <Badge tone={TONE[level]} size="sm" className="mt-1">
-                              {level.toLowerCase()}
+                              {t(level.toLowerCase())}
                             </Badge>
                           ) : null}
                         </Td>
@@ -226,19 +247,24 @@ export default async function SkillsPage({
 
       <Card>
         <CardHeader
-          title="Add a skill"
-          description="Named by this workshop. A truck garage and a tyre bay do not share a vocabulary."
+          title={t('Add a skill')}
+          description={t(
+            'Named by this workshop. A truck garage and a tyre bay do not share a vocabulary.',
+          )}
         />
         <form action={create}>
           <CardBody className="grid gap-4 sm:grid-cols-[1fr_1.4fr_auto] sm:items-end">
-            <Field label="Name">
-              <Input name="name" required placeholder="MOT testing" />
+            <Field label={t('Name')}>
+              <Input name="name" required placeholder={t('MOT testing')} />
             </Field>
-            <Field label="What it covers" hint="Optional. Shown under the column heading.">
-              <Input name="note" placeholder="Class 4 and class 7" />
+            <Field
+              label={t('What it covers')}
+              hint={t('Optional. Shown under the column heading.')}
+            >
+              <Input name="note" placeholder={t('Class 4 and class 7')} />
             </Field>
             <Button type="submit" variant="primary">
-              Add
+              {t('Add')}
             </Button>
           </CardBody>
         </form>

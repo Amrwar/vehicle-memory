@@ -21,9 +21,13 @@ import Link from 'next/link';
 
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { groupPerformance, inTransitNow } from '@/lib/transfers';
 
-export const metadata: Metadata = { title: 'Group' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Group') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -40,6 +44,7 @@ export default async function GroupPage({
   searchParams: Promise<{ range?: string }>;
 }) {
   const { orgId, plan, region } = await requireSession('report:financial');
+  const t = await tFor();
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'multiSite')) {
@@ -69,10 +74,12 @@ export default async function GroupPage({
   if (group.sites.length < 2) {
     return (
       <>
-        <PageHeader eyebrow="Group" title="Sites" />
+        <PageHeader eyebrow={t('Group')} title={t('Sites')} />
         <EmptyState
-          title="One site so far"
-          description="This view compares sites against each other. It becomes useful when there are at least two."
+          title={t('One site so far')}
+          description={t(
+            'This view compares sites against each other. It becomes useful when there are at least two.',
+          )}
         />
       </>
     );
@@ -84,21 +91,28 @@ export default async function GroupPage({
   return (
     <>
       <PageHeader
-        eyebrow="Group"
-        title="Sites"
-        description={`${group.sites.length} sites · ${
+        eyebrow={t('Group')}
+        title={t('Sites')}
+        description={`${t('{count} sites', { count: group.sites.length })} · ${
           key === 'month'
             ? now.toLocaleString(region.locale, { month: 'long', year: 'numeric' })
             : key === 'quarter'
-              ? `${now.getFullYear()} Q${Math.floor(now.getMonth() / 3) + 1} to date`
-              : `${now.getFullYear()} to date`
+              ? t('{year} Q{quarter} to date', {
+                  year: now.getFullYear(),
+                  quarter: Math.floor(now.getMonth() / 3) + 1,
+                })
+              : t('{period} to date', { period: now.getFullYear() })
         }`}
         actions={
           <>
             {(['month', 'quarter', 'year'] as const).map((option) => (
               <Link key={option} href={`/group?range=${option}`}>
                 <Button size="sm" variant={option === key ? 'primary' : 'secondary'}>
-                  {option === 'month' ? 'Month' : option === 'quarter' ? 'Quarter' : 'Year'}
+                  {option === 'month'
+                    ? t('Month')
+                    : option === 'quarter'
+                      ? t('Quarter')
+                      : t('Year')}
                 </Button>
               </Link>
             ))}
@@ -108,7 +122,7 @@ export default async function GroupPage({
 
       <StatRow className="mb-5">
         <StatTile
-          label="Group revenue"
+          label={t('Group revenue')}
           value={
             <Money
               currency={region.currency}
@@ -116,10 +130,10 @@ export default async function GroupPage({
               amount={toNumber(total.revenue)}
             />
           }
-          note="Net of tax, across every site"
+          note={t('Net of tax, across every site')}
         />
         <StatTile
-          label="Gross profit"
+          label={t('Gross profit')}
           value={
             <Money
               currency={region.currency}
@@ -128,10 +142,14 @@ export default async function GroupPage({
             />
           }
           tone="brand"
-          note={total.marginPct === null ? 'No revenue yet' : `${total.marginPct}% net margin`}
+          note={
+            total.marginPct === null
+              ? t('No revenue yet')
+              : t('{pct}% net margin', { pct: total.marginPct })
+          }
         />
         <StatTile
-          label="Group productivity"
+          label={t('Group productivity')}
           value={total.productivityPct === null ? '—' : `${total.productivityPct}%`}
           tone={
             total.productivityPct === null
@@ -140,14 +158,18 @@ export default async function GroupPage({
                 ? 'success'
                 : 'warning'
           }
-          note="From the hours, not an average of sites"
+          note={t('From the hours, not an average of sites')}
         />
         <StatTile
-          label="Stock on the road"
+          label={t('Stock on the road')}
           value={
             <Money currency={region.currency} locale={region.locale} amount={roadValue / 100} />
           }
-          note={`${inFlight.length} transfer${inFlight.length === 1 ? '' : 's'} in transit`}
+          note={
+            inFlight.length === 1
+              ? t('1 transfer in transit')
+              : t('{count} transfers in transit', { count: inFlight.length })
+          }
         />
       </StatRow>
 
@@ -155,12 +177,20 @@ export default async function GroupPage({
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {group.spread.gapPoints} points between the best and worst site.
+              {t('{points} points between the best and worst site.', {
+                points: group.spread.gapPoints,
+              })}
             </strong>{' '}
-            {group.spread.best?.siteName} runs at {group.spread.best?.productivityPct}% while{' '}
-            {group.spread.worst?.siteName} runs at {group.spread.worst?.productivityPct}%. The group
-            average of {total.productivityPct}% describes neither of them. A gap this wide is a
-            management question, not a rounding one.
+            {t(
+              '{best} runs at {bestPct}% while {worst} runs at {worstPct}%. The group average of {groupPct}% describes neither of them. A gap this wide is a management question, not a rounding one.',
+              {
+                best: group.spread.best?.siteName ?? '',
+                bestPct: group.spread.best?.productivityPct ?? '',
+                worst: group.spread.worst?.siteName ?? '',
+                worstPct: group.spread.worst?.productivityPct ?? '',
+                groupPct: total.productivityPct ?? '',
+              },
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -168,22 +198,24 @@ export default async function GroupPage({
       <div className="grid gap-5">
         <Card className="overflow-hidden">
           <CardHeader
-            title="By site"
-            description="Ordered by revenue. Share of group is there so a small site reads as a small site."
+            title={t('By site')}
+            description={t(
+              'Ordered by revenue. Share of group is there so a small site reads as a small site.',
+            )}
           />
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Site</Th>
-                  <Th numeric>Revenue</Th>
-                  <Th numeric>Share</Th>
-                  <Th numeric>Gross profit</Th>
-                  <Th numeric>Jobs</Th>
-                  <Th numeric>Per job</Th>
-                  <Th numeric>Productivity</Th>
-                  <Th numeric>Stock</Th>
-                  <Th numeric>Owed to you</Th>
+                  <Th>{t('Site')}</Th>
+                  <Th numeric>{t('Revenue')}</Th>
+                  <Th numeric>{t('Share')}</Th>
+                  <Th numeric>{t('Gross profit')}</Th>
+                  <Th numeric>{t('Jobs')}</Th>
+                  <Th numeric>{t('Per job')}</Th>
+                  <Th numeric>{t('Productivity')}</Th>
+                  <Th numeric>{t('Stock')}</Th>
+                  <Th numeric>{t('Owed to you')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -193,7 +225,7 @@ export default async function GroupPage({
                       {site.siteName}
                       {group.laggards.some((laggard) => laggard.locationId === site.locationId) ? (
                         <Badge tone="warning" size="sm" className="ml-2">
-                          below group
+                          {t('below group')}
                         </Badge>
                       ) : null}
                     </Td>
@@ -254,7 +286,7 @@ export default async function GroupPage({
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-(--border-strong) bg-(--surface-sunk)">
-                  <Td className="font-semibold">Group</Td>
+                  <Td className="font-semibold">{t('Group')}</Td>
                   <Td numeric className="font-semibold">
                     <Money
                       currency={region.currency}
@@ -307,7 +339,7 @@ export default async function GroupPage({
 
         <div className="grid gap-5 lg:grid-cols-2">
           <Card>
-            <CardHeader title="Spread" description="The number the average hides" />
+            <CardHeader title={t('Spread')} description={t('The number the average hides')} />
             <CardBody className="grid gap-3">
               {group.sites.map((site) => {
                 const value = site.productivityPct ?? 0;
@@ -331,31 +363,36 @@ export default async function GroupPage({
                 );
               })}
               <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                Group productivity is computed from the underlying minutes, not by averaging these
-                bars. Averaging would weight a two-bay site the same as a six-bay one.
+                {t(
+                  'Group productivity is computed from the underlying minutes, not by averaging these bars. Averaging would weight a two-bay site the same as a six-bay one.',
+                )}
               </p>
             </CardBody>
           </Card>
 
           <Card>
-            <CardHeader title="What this view does not yet do" />
+            <CardHeader title={t('What this view does not yet do')} />
             <CardBody className="grid gap-2 text-[12px] leading-relaxed text-(--text-soft)">
               <p>
-                <span className="font-medium text-(--text)">Overheads are not apportioned.</span>{' '}
-                Rent belongs to a building and can be attributed; a group insurance premium does not
-                belong anywhere in particular. Rather than split it by revenue and present the guess
-                as a fact, site overheads read zero and net profit is shown at group level only.
+                <span className="font-medium text-(--text)">
+                  {t('Overheads are not apportioned.')}
+                </span>{' '}
+                {t(
+                  'Rent belongs to a building and can be attributed; a group insurance premium does not belong anywhere in particular. Rather than split it by revenue and present the guess as a fact, site overheads read zero and net profit is shown at group level only.',
+                )}
               </p>
               <p>
-                <span className="font-medium text-(--text)">Inter-site movements are netted.</span>{' '}
-                A part transferred between sites is one part. Counting both movements would inflate
-                group purchasing and make stock look like it turns over faster than it does.
+                <span className="font-medium text-(--text)">
+                  {t('Inter-site movements are netted.')}
+                </span>{' '}
+                {t(
+                  'A part transferred between sites is one part. Counting both movements would inflate group purchasing and make stock look like it turns over faster than it does.',
+                )}
               </p>
               <p>
                 <Link href="/transfers" className="underline underline-offset-2">
-                  Transfers
-                </Link>{' '}
-                shows what is moving right now.
+                  {t('Transfers shows what is moving right now.')}
+                </Link>
               </p>
             </CardBody>
           </Card>

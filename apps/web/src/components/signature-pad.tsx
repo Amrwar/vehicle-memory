@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * Somewhere to sign. Phase 35.
  *
@@ -21,6 +23,7 @@ export function SignaturePad({
   name?: string;
   height?: number;
 }) {
+  const t = useT();
   const canvas = React.useRef<HTMLCanvasElement>(null);
   const hidden = React.useRef<HTMLInputElement>(null);
   const strokes = React.useRef<[number, number][][]>([]);
@@ -91,7 +94,7 @@ export function SignaturePad({
           ref={canvas}
           className="block w-full touch-none text-(--text)"
           style={{ height }}
-          aria-label="Signature pad"
+          aria-label={t('Signature pad')}
           onPointerDown={(event) => {
             event.currentTarget.setPointerCapture(event.pointerId);
             drawing.current = true;
@@ -115,14 +118,16 @@ export function SignaturePad({
         />
         {!signed ? (
           <p className="pointer-events-none absolute inset-x-0 top-3 text-center text-[12px] text-(--text-faint)">
-            Sign here
+            {t('Sign here')}
           </p>
         ) : null}
       </div>
       <input ref={hidden} type="hidden" name={name} />
       <div className="flex items-center justify-between">
         <p className="text-[12px] text-(--text-faint)">
-          {signed ? 'Signed. Clear to start again.' : 'A finger, a stylus or a mouse all work.'}
+          {signed
+            ? t('Signed. Clear to start again.')
+            : t('A finger, a stylus or a mouse all work.')}
         </p>
         <button
           type="button"
@@ -133,7 +138,7 @@ export function SignaturePad({
             write();
           }}
         >
-          Clear
+          {t('Clear')}
         </button>
       </div>
     </div>
@@ -152,6 +157,7 @@ export function SignatureImage({
   height: number;
   className?: string;
 }) {
+  const t = useT();
   const d = strokes
     .map((stroke) => stroke.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join(' '))
     .join(' ');
@@ -160,7 +166,7 @@ export function SignatureImage({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       role="img"
-      aria-label="Signature"
+      aria-label={t('Signature')}
       preserveAspectRatio="xMidYMid meet"
     >
       <path d={d} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" />

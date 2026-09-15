@@ -29,8 +29,12 @@ import {
   saveFleetAgreement,
 } from '@/lib/fleet';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Fleet' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Fleet') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -114,6 +118,7 @@ export default async function FleetDetailPage({
   const { orgId, user, region } = await requireSession('customer:read');
   const { id } = await params;
   const notice = await searchParams;
+  const t = await tFor();
 
   const [fleet, agreement] = await Promise.all([
     fleetDetail(orgId, id),
@@ -130,42 +135,50 @@ export default async function FleetDetailPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/fleet">All fleets</BackLink>
+        <BackLink href="/fleet">{t('All fleets')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Fleet"
+        eyebrow={t('Fleet')}
         title={fleet.customer.displayName}
-        description={`${fleet.totals.vehicles} vehicles on the books`}
+        description={
+          fleet.totals.vehicles === 1
+            ? t('1 vehicle on the books')
+            : t('{count} vehicles on the books', { count: fleet.totals.vehicles })
+        }
         actions={
           <Link href={`/customers/${fleet.customer.id}`}>
             <Button size="sm" variant="secondary">
-              The account
+              {t('The account')}
             </Button>
           </Link>
         }
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Vehicles" value={fleet.totals.vehicles} note="Seen at least once" />
         <StatTile
-          label="Off the road"
+          label={t('Vehicles')}
+          value={fleet.totals.vehicles}
+          note={t('Seen at least once')}
+        />
+        <StatTile
+          label={t('Off the road')}
           value={fleet.totals.offTheRoad}
           tone={fleet.totals.offTheRoad > 0 ? 'warning' : 'neutral'}
-          note="In the workshop now"
+          note={t('In the workshop now')}
         />
         <StatTile
-          label="Waiting on them"
+          label={t('Waiting on them')}
           value={fleet.totals.awaiting}
           tone={fleet.totals.awaiting > 0 ? 'danger' : 'neutral'}
-          note="Quotes nobody has answered"
+          note={t('Quotes nobody has answered')}
         />
         <StatTile
-          label="Spent with you"
+          label={t('Spent with you')}
           value={
             <Money currency={region.currency} locale={region.locale} amount={fleet.totals.spend} />
           }
-          note="Across every vehicle"
+          note={t('Across every vehicle')}
         />
       </StatRow>
 
@@ -173,19 +186,21 @@ export default async function FleetDetailPage({
         <Card className="mb-5 border-(--danger)">
           <CardBody className="text-[13px] leading-relaxed text-(--danger)">
             <strong className="font-semibold">
-              {fleet.totals.awaiting} vehicle{fleet.totals.awaiting === 1 ? '' : 's'} waiting on a
-              decision.
+              {fleet.totals.awaiting === 1
+                ? t('1 vehicle waiting on a decision.')
+                : t('{count} vehicles waiting on a decision.', { count: fleet.totals.awaiting })}
             </strong>{' '}
-            A fleet quote usually sits with one person who has forty other things on. Nothing
-            happens until they answer, and the van is off the road the whole time.
+            {t(
+              'A fleet quote usually sits with one person who has forty other things on. Nothing happens until they answer, and the van is off the road the whole time.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       {fleet.vehicles.length === 0 ? (
         <EmptyState
-          title="No vehicles yet"
-          description="Vehicles appear here once this company has brought one in."
+          title={t('No vehicles yet')}
+          description={t('Vehicles appear here once this company has brought one in.')}
         />
       ) : (
         <div className="grid gap-3">
@@ -212,8 +227,8 @@ export default async function FleetDetailPage({
                     ) : null}
                   </div>
                   <p className="mt-1 text-[12px] text-(--text-faint)">
-                    <Mileage locale={region.locale} km={row.vehicle.lastOdometerKm} /> · last in{' '}
-                    {date(row.lastVisit, region.locale)}
+                    <Mileage t={t} locale={region.locale} km={row.vehicle.lastOdometerKm} /> ·{' '}
+                    {t('last in {date}', { date: date(row.lastVisit, region.locale) })}
                   </p>
                 </div>
 
@@ -221,32 +236,32 @@ export default async function FleetDetailPage({
                   {row.awaiting ? (
                     <Link href={`/jobs/${row.awaiting.id}`}>
                       <Badge tone="danger" dot>
-                        Waiting on a decision
+                        {t('Waiting on a decision')}
                       </Badge>
                     </Link>
                   ) : row.openJob ? (
                     <Link href={`/jobs/${row.openJob.id}`}>
                       <Badge tone="warning" dot>
-                        In the workshop
+                        {t('In the workshop')}
                       </Badge>
                     </Link>
                   ) : row.overdue ? (
                     <Badge tone="warning" size="sm">
-                      service overdue
+                      {t('service overdue')}
                     </Badge>
                   ) : row.dueSoon ? (
                     <Badge tone="brand" size="sm">
-                      due {date(row.dueAt, region.locale)}
+                      {t('due')} {date(row.dueAt, region.locale)}
                     </Badge>
                   ) : (
                     <Badge tone="success" size="sm">
-                      nothing due
+                      {t('nothing due')}
                     </Badge>
                   )}
                 </div>
 
                 <div className="text-[13px] sm:text-right">
-                  <span className="text-(--text-faint)">Spent </span>
+                  <span className="text-(--text-faint)">{t('Spent')} </span>
                   <Money currency={region.currency} locale={region.locale} amount={row.spend} />
                 </div>
               </CardBody>
@@ -257,13 +272,13 @@ export default async function FleetDetailPage({
 
       {notice.problem ? (
         <Alert tone="danger" className="mt-6">
-          {notice.problem}
+          {t(notice.problem)}
         </Alert>
       ) : null}
 
       {notice.done === 'terms' ? (
         <Alert tone="success" className="mt-6">
-          Terms saved. They apply to every invoice raised for this fleet from now on.
+          {t('Terms saved. They apply to every invoice raised for this fleet from now on.')}
         </Alert>
       ) : null}
 
@@ -273,18 +288,18 @@ export default async function FleetDetailPage({
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader
-            title="Agreed terms"
+            title={t('Agreed terms')}
             description={
               agreement
-                ? 'Applied at invoice time, so the job keeps its list figures.'
-                : 'None yet. Without terms this fleet pays list price like anybody else.'
+                ? t('Applied at invoice time, so the job keeps its list figures.')
+                : t('None yet. Without terms this fleet pays list price like anybody else.')
             }
           />
           <form action={saveTerms}>
             <CardBody className="grid gap-3">
               <input type="hidden" name="customerId" value={fleet.customer.id} />
               <div className="grid gap-3 sm:grid-cols-3">
-                <Field label="Labour discount" hint="%">
+                <Field label={t('Labour discount')} hint="%">
                   <Input
                     name="labourDiscountPct"
                     inputMode="decimal"
@@ -292,7 +307,7 @@ export default async function FleetDetailPage({
                     className="tabular-nums"
                   />
                 </Field>
-                <Field label="Parts discount" hint="%">
+                <Field label={t('Parts discount')} hint="%">
                   <Input
                     name="partsDiscountPct"
                     inputMode="decimal"
@@ -300,7 +315,7 @@ export default async function FleetDetailPage({
                     className="tabular-nums"
                   />
                 </Field>
-                <Field label="Payment terms" hint="days">
+                <Field label={t('Payment terms')} hint={t('days')}>
                   <Input
                     name="paymentTermsDays"
                     inputMode="numeric"
@@ -316,7 +331,9 @@ export default async function FleetDetailPage({
                   defaultChecked={agreement?.consolidateMonthly ?? true}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
                 />
-                <span>One invoice a month for everything completed, rather than one per job</span>
+                <span>
+                  {t('One invoice a month for everything completed, rather than one per job')}
+                </span>
               </label>
               <label className="flex items-start gap-2.5 text-[13px] leading-relaxed">
                 <input
@@ -325,14 +342,16 @@ export default async function FleetDetailPage({
                   defaultChecked={agreement?.purchaseOrderRequired ?? false}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
                 />
-                <span>Their purchase order number must be on every job before it is invoiced</span>
+                <span>
+                  {t('Their purchase order number must be on every job before it is invoiced')}
+                </span>
               </label>
-              <Field label="Notes" hint="Optional">
+              <Field label={t('Notes')} hint={t('Optional')}>
                 <Input name="notes" defaultValue={agreement?.notes ?? ''} />
               </Field>
               {can(user.role, 'customer:write') ? (
                 <Button type="submit" variant="secondary">
-                  {agreement ? 'Update the terms' : 'Save the terms'}
+                  {agreement ? t('Update the terms') : t('Save the terms')}
                 </Button>
               ) : null}
             </CardBody>
@@ -341,13 +360,15 @@ export default async function FleetDetailPage({
 
         <Card className={agreement ? 'border-(--brand)' : undefined}>
           <CardHeader
-            title="Invoice a month"
-            description="Every job completed in the month, on one invoice, at the agreed terms."
+            title={t('Invoice a month')}
+            description={t(
+              'Every job completed in the month, on one invoice, at the agreed terms.',
+            )}
           />
           <form action={invoiceMonth}>
             <CardBody className="grid gap-3">
               <input type="hidden" name="customerId" value={fleet.customer.id} />
-              <Field label="Month">
+              <Field label={t('Month')}>
                 <Select name="month" defaultValue={defaultMonth}>
                   {Array.from({ length: 6 }, (_, offset) => {
                     const when = new Date();
@@ -363,13 +384,13 @@ export default async function FleetDetailPage({
                 </Select>
               </Field>
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                Jobs already invoiced on their own are left alone. Each line on the invoice names
-                the vehicle and the job it came from, so their accounts department can tie a line to
-                a van.
+                {t(
+                  'Jobs already invoiced on their own are left alone. Each line on the invoice names the vehicle and the job it came from, so their accounts department can tie a line to a van.',
+                )}
               </p>
               {can(user.role, 'invoice:write') ? (
                 <Button type="submit" variant="primary" disabled={!agreement}>
-                  {agreement ? 'Issue the month’s invoice' : 'Save the terms first'}
+                  {agreement ? t('Issue the month’s invoice') : t('Save the terms first')}
                 </Button>
               ) : null}
             </CardBody>

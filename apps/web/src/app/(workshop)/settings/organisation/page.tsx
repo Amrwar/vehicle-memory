@@ -15,6 +15,7 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   organisationSettings,
   setNumberingPrefix,
@@ -22,7 +23,10 @@ import {
   updateOrganisation,
 } from '@/lib/settings';
 
-export const metadata: Metadata = { title: 'Organisation' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Organisation') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -96,62 +100,73 @@ export default async function OrganisationSettingsPage({
   const { orgId } = await requireSession('settings:write');
   const { saved, problem } = await searchParams;
   const org = await organisationSettings(orgId);
+  const t = await tFor();
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Settings"
-        title="Organisation"
-        description="What goes on the paperwork, and the two numbers that change how the product behaves"
+        eyebrow={t('Settings')}
+        title={t('Organisation')}
+        description={t(
+          'What goes on the paperwork, and the two numbers that change how the product behaves',
+        )}
       />
 
       {saved ? (
         <Alert tone="success" className="mb-5">
-          Saved. The change is in the audit log with what it was before.
+          {t('Saved. The change is in the audit log with what it was before.')}
         </Alert>
       ) : null}
       {problem ? (
-        <Alert tone="danger" title="Not saved" className="mb-5">
-          {problem}
+        <Alert tone="danger" title={t('Not saved')} className="mb-5">
+          {t(problem)}
         </Alert>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <Card>
-          <CardHeader title="Details" description="As they appear on invoices and messages" />
+          <CardHeader
+            title={t('Details')}
+            description={t('As they appear on invoices and messages')}
+          />
           <form action={save}>
             <CardBody className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Trading name">
+                <Field label={t('Trading name')}>
                   <Input name="name" defaultValue={org.name} required maxLength={120} />
                 </Field>
-                <Field label="Legal name" hint="If different. Goes on the invoice footer.">
+                <Field
+                  label={t('Legal name')}
+                  hint={t('If different. Goes on the invoice footer.')}
+                >
                   <Input name="legalName" defaultValue={org.legalName ?? ''} maxLength={120} />
                 </Field>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Tax number" hint="VAT or equivalent">
+                <Field label={t('Tax number')} hint={t('VAT or equivalent')}>
                   <Input name="taxNumber" defaultValue={org.taxNumber ?? ''} maxLength={40} />
                 </Field>
-                <Field label="Website">
+                <Field label={t('Website')}>
                   <Input name="website" defaultValue={org.website ?? ''} maxLength={200} />
                 </Field>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Email" hint="Where customers reply">
+                <Field label={t('Email')} hint={t('Where customers reply')}>
                   <Input name="email" type="email" defaultValue={org.email ?? ''} maxLength={200} />
                 </Field>
-                <Field label="Telephone">
+                <Field label={t('Telephone')}>
                   <Input name="phone" defaultValue={org.phone ?? ''} maxLength={40} />
                 </Field>
               </div>
               <Field
-                label="Re-approval threshold, %"
-                hint="Work that grows past an approved estimate by more than this goes back to the customer before it continues. Zero means every increase does."
+                label={t('Re-approval threshold, %')}
+                hint={t(
+                  'Work that grows past an approved estimate by more than this goes back to the customer before it continues. Zero means every increase does.',
+                )}
               >
                 <Input
                   name="reapprovalThresholdPct"
@@ -168,18 +183,20 @@ export default async function OrganisationSettingsPage({
                   keeps one set of books; the rest follows the country unless
                   somebody has a reason to differ. */}
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Country" hint="Where the workshop trades">
+                <Field label={t('Country')} hint={t('Where the workshop trades')}>
                   <Select name="country" defaultValue={org.country}>
                     {COUNTRIES.map((country) => (
                       <option key={country.code} value={country.code}>
-                        {country.name}
+                        {t(country.name)}
                       </option>
                     ))}
                   </Select>
                 </Field>
                 <Field
-                  label="Currency"
-                  hint="The books are kept in one currency. Changing it does not convert what is already recorded."
+                  label={t('Currency')}
+                  hint={t(
+                    'The books are kept in one currency. Changing it does not convert what is already recorded.',
+                  )}
                 >
                   <Select name="currency" defaultValue={org.baseCurrency}>
                     {CURRENCIES.map((code) => (
@@ -192,19 +209,19 @@ export default async function OrganisationSettingsPage({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field
-                  label="Language and region"
-                  hint="How dates and figures are written, such as en-CA or fr-FR"
+                  label={t('Language and region')}
+                  hint={t('How dates and figures are written, such as en-CA or fr-FR')}
                 >
                   <Input name="locale" defaultValue={org.locale} maxLength={12} required />
                 </Field>
-                <Field label="Timezone" hint="Such as America/Toronto">
+                <Field label={t('Timezone')} hint={t('Such as America/Toronto')}>
                   <Input name="timezone" defaultValue={org.timezone} maxLength={64} required />
                 </Field>
               </div>
             </CardBody>
             <CardBody className="border-t border-(--border)">
               <Button type="submit" variant="primary">
-                Save details
+                {t('Save details')}
               </Button>
             </CardBody>
           </form>
@@ -212,8 +229,8 @@ export default async function OrganisationSettingsPage({
 
         <Card>
           <CardHeader
-            title="Document numbering"
-            description="Sequential and gapless. The prefix can change; the counter cannot."
+            title={t('Document numbering')}
+            description={t('Sequential and gapless. The prefix can change; the counter cannot.')}
           />
           <CardBody className="grid gap-4">
             {org.sequences.map((sequence) => (
@@ -224,27 +241,31 @@ export default async function OrganisationSettingsPage({
               >
                 <input type="hidden" name="sequenceId" value={sequence.id} />
                 <Field
-                  label={sequence.kind.toLowerCase().replace(/_/g, ' ')}
-                  hint={`Next: ${sequence.prefix}${sequence.next}`}
+                  label={t(sequence.kind.toLowerCase().replace(/_/g, ' '))}
+                  hint={t('Next: {number}', { number: `${sequence.prefix}${sequence.next}` })}
                   className="min-w-0 flex-1"
                 >
                   <Input
                     name="prefix"
                     defaultValue={sequence.prefix}
                     maxLength={8}
+                    // i18n-ignore
                     placeholder="INV-"
                     className="font-mono uppercase"
-                    aria-label={`Prefix for ${sequence.kind.toLowerCase().replace(/_/g, ' ')}`}
+                    aria-label={t('Prefix for {kind}', {
+                      kind: t(sequence.kind.toLowerCase().replace(/_/g, ' ')),
+                    })}
                   />
                 </Field>
                 <Button type="submit" variant="secondary" size="sm">
-                  Save
+                  {t('Save')}
                 </Button>
               </form>
             ))}
             <p className="text-[12px] leading-relaxed text-(--text-faint)">
-              Numbers already issued keep the prefix they were issued with. A new prefix applies
-              from the next document.
+              {t(
+                'Numbers already issued keep the prefix they were issued with. A new prefix applies from the next document.',
+              )}
             </p>
           </CardBody>
         </Card>

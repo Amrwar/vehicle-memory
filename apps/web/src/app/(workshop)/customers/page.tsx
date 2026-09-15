@@ -14,8 +14,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Customers' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Customers') };
+}
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage({
@@ -26,6 +30,7 @@ export default async function CustomersPage({
   const { db } = await requireSession('customer:read');
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
+  const t = await tFor();
 
   const customers = await db.customer.findMany({
     where: query
@@ -48,12 +53,16 @@ export default async function CustomersPage({
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Customers"
-        description={`${customers.length} customer${customers.length === 1 ? '' : 's'}`}
+        eyebrow={t('Workshop')}
+        title={t('Customers')}
+        description={
+          customers.length === 1
+            ? t('1 customer')
+            : t('{count} customers', { count: customers.length })
+        }
         actions={
           <Link href="/customers/new">
-            <Button variant="primary">New customer</Button>
+            <Button variant="primary">{t('New customer')}</Button>
           </Link>
         }
       />
@@ -63,8 +72,8 @@ export default async function CustomersPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Name, phone or email"
-          aria-label="Search customers"
+          placeholder={t('Name, phone or email')}
+          aria-label={t('Search customers')}
           className="h-9 w-full max-w-sm rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
       </form>
@@ -72,20 +81,22 @@ export default async function CustomersPage({
       <Card className="overflow-hidden">
         {customers.length === 0 ? (
           <EmptyState
-            title="No customers found"
-            description={query ? 'Try a different search.' : 'Add your first customer to begin.'}
+            title={t('No customers found')}
+            description={
+              query ? t('Try a different search.') : t('Add your first customer to begin.')
+            }
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Name</Th>
-                  <Th>Type</Th>
-                  <Th>Mobile</Th>
-                  <Th>Email</Th>
-                  <Th>Source</Th>
-                  <Th numeric>Jobs</Th>
+                  <Th>{t('Name')}</Th>
+                  <Th>{t('Type')}</Th>
+                  <Th>{t('Mobile')}</Th>
+                  <Th>{t('Email')}</Th>
+                  <Th>{t('Source')}</Th>
+                  <Th numeric>{t('Jobs')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -101,7 +112,7 @@ export default async function CustomersPage({
                     </Td>
                     <Td>
                       <Badge tone={customer.kind === 'COMPANY' ? 'info' : 'neutral'} size="sm">
-                        {customer.kind === 'COMPANY' ? 'Company' : 'Individual'}
+                        {customer.kind === 'COMPANY' ? t('Company') : t('Individual')}
                       </Badge>
                     </Td>
                     <Td className="datum text-(--text-soft)">{customer.mobile ?? '—'}</Td>

@@ -1,4 +1,12 @@
-import { DAMAGE_AREAS, FUEL_LEVELS, fuelLabel, humanise, type JobStatus } from '@carnet/core';
+import {
+  DAMAGE_AREAS,
+  FUEL_LEVELS,
+  fuelLabel,
+  humanise,
+  type JobStatus,
+  msg,
+  type Translator,
+} from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -29,8 +37,12 @@ import {
   signatureFromForm,
 } from '@/lib/arrival';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Hand the car back' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Hand the car back') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -41,7 +53,27 @@ export const dynamic = 'force-dynamic';
  * to let a car leave with money owing unless somebody says why, and it
  * says so in a sentence rather than a disabled button.
  */
-const DOCUMENTS = ['Keys', 'Invoice', 'Old parts', 'Service book stamped', 'MOT certificate'];
+const DOCUMENTS = [
+  msg('Keys'),
+  msg('Invoice'),
+  msg('Old parts'),
+  msg('Service book stamped'),
+  msg('MOT certificate'),
+];
+
+/** When it was done, by whom, and whether it was signed, as one sentence. */
+function signedLine(
+  t: Translator,
+  when: string,
+  by: string | null | undefined,
+  signedBy: string | null | undefined,
+): string {
+  if (by && signedBy)
+    return t('{when} by {by}, signed by {signer}.', { when, by, signer: signedBy });
+  if (by) return t('{when} by {by}, not signed.', { when, by });
+  if (signedBy) return t('{when}, signed by {signer}.', { when, signer: signedBy });
+  return t('{when}, not signed.', { when });
+}
 
 async function save(formData: FormData) {
   'use server';
@@ -89,6 +121,7 @@ export default async function CheckOutPage({
   searchParams: Promise<{ problem?: string; saved?: string }>;
 }) {
   const { orgId, db, region } = await requireSession('job:write');
+  const t = await tFor();
   const { id } = await params;
   const { problem, saved } = await searchParams;
 
@@ -130,10 +163,10 @@ export default async function CheckOutPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href={`/jobs/${job.id}`}>Job #{job.number}</BackLink>
+        <BackLink href={`/jobs/${job.id}`}>{t('Job #{number}', { number: job.number })}</BackLink>
       </div>
       <PageHeader
-        eyebrow={`Job #${job.number} · check-out`}
+        eyebrow={t('Job #{number} · check-out', { number: job.number })}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {job.vehicle.year} {job.vehicle.make} {job.vehicle.model}
@@ -141,23 +174,28 @@ export default async function CheckOutPage({
               <Registration value={job.vehicle.registration} className="text-[15px]" />
             ) : null}
             <Badge tone={outstandingMinor > 0 ? 'warning' : 'success'} dot>
-              {outstandingMinor > 0 ? 'money owing' : 'nothing owing'}
+              {outstandingMinor > 0 ? t('money owing') : t('nothing owing')}
             </Badge>
           </span>
         }
-        description={`${job.customer.displayName} is collecting. What was done, what is owed, what goes back with the car.`}
+        description={t(
+          '{customer} is collecting. What was done, what is owed, what goes back with the car.',
+          { customer: job.customer.displayName },
+        )}
       />
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
       {!finished && !done ? (
-        <Alert tone="warning" title="The work is not marked completed" className="mb-5">
-          The job is {humanise(job.status as JobStatus).toLowerCase()}. Complete it first, so the
-          customer is handed back a finished car; then this page lets it go.
+        <Alert tone="warning" title={t('The work is not marked completed')} className="mb-5">
+          {t(
+            'The job is {status}. Complete it first, so the customer is handed back a finished car; then this page lets it go.',
+            { status: t(humanise(job.status as JobStatus)).toLowerCase() },
+          )}
         </Alert>
       ) : null}
 
@@ -165,43 +203,52 @@ export default async function CheckOutPage({
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Card className="border-(--success)">
             <CardHeader
-              title={saved ? 'Handed back' : 'Already handed back'}
-              description={`${done.at.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' })}${done.by ? ` by ${done.by}` : ''}${done.signedBy ? `, signed by ${done.signedBy}` : ', not signed'}.`}
+              title={saved ? t('Handed back') : t('Already handed back')}
+              description={signedLine(
+                t,
+                done.at.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' }),
+                done.by,
+                done.signedBy,
+              )}
             />
             <CardBody className="grid gap-4">
               <dl className="grid gap-x-6 gap-y-2 text-[13px] sm:grid-cols-2">
                 <div>
-                  <dt className="eyebrow">Mileage out</dt>
+                  <dt className="eyebrow">{t('Mileage out')}</dt>
                   <dd>
                     {done.odometerKm !== null
                       ? `${done.odometerKm.toLocaleString(region.locale)} km`
-                      : 'not noted'}
+                      : t('not noted')}
                   </dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Fuel</dt>
-                  <dd>{fuelLabel(done.fuelEighths)}</dd>
+                  <dt className="eyebrow">{t('Fuel')}</dt>
+                  <dd>{t(fuelLabel(done.fuelEighths))}</dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Went back with the car</dt>
-                  <dd>{done.documents.length ? done.documents.join(', ') : 'not noted'}</dd>
+                  <dt className="eyebrow">{t('Went back with the car')}</dt>
+                  <dd>
+                    {done.documents.length
+                      ? done.documents.map((doc) => t(doc)).join(', ')
+                      : t('not noted')}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Money</dt>
+                  <dt className="eyebrow">{t('Money')}</dt>
                   <dd>
                     {done.letGoOwingReason
-                      ? `Left owing: ${done.letGoOwingReason}`
-                      : 'Nothing owing at hand-back.'}
+                      ? t('Left owing: {reason}', { reason: done.letGoOwingReason })
+                      : t('Nothing owing at hand-back.')}
                   </dd>
                 </div>
               </dl>
               {done.damage.length > 0 ? (
                 <div>
-                  <p className="eyebrow mb-1">Noted at hand-back</p>
+                  <p className="eyebrow mb-1">{t('Noted at hand-back')}</p>
                   <ul className="grid gap-1 text-[13px]">
                     {done.damage.map((mark, i) => (
                       <li key={i}>
-                        <span className="font-medium">{mark.area}</span>
+                        <span className="font-medium">{t(mark.area)}</span>
                         {mark.note ? (
                           <span className="text-(--text-soft)">: {mark.note}</span>
                         ) : null}
@@ -212,7 +259,7 @@ export default async function CheckOutPage({
               ) : null}
               {done.notes ? <p className="text-[13px] text-(--text-soft)">{done.notes}</p> : null}
               <div className="border-t border-(--border) pt-4">
-                <p className="eyebrow mb-2">Photographs</p>
+                <p className="eyebrow mb-2">{t('Photographs')}</p>
                 {done.photos.length > 0 ? (
                   <ul className="mb-3 flex flex-wrap gap-2">
                     {done.photos.map((photo) =>
@@ -220,7 +267,7 @@ export default async function CheckOutPage({
                         <li key={photo.id}>
                           <img
                             src={photo.src}
-                            alt={photo.caption ?? 'The car at hand-back'}
+                            alt={photo.caption ?? t('The car at hand-back')}
                             className="h-24 w-32 rounded-(--radius-sm) object-cover"
                           />
                         </li>
@@ -235,7 +282,7 @@ export default async function CheckOutPage({
           <aside className="grid content-start gap-3">
             <Link href={`/jobs/${job.id}`}>
               <Button variant="primary" size="lg" block>
-                Back to the job
+                {t('Back to the job')}
               </Button>
             </Link>
           </aside>
@@ -245,14 +292,14 @@ export default async function CheckOutPage({
           <input type="hidden" name="jobId" value={job.id} />
           <div className="grid content-start gap-5">
             <Card>
-              <CardHeader title="What was done" />
+              <CardHeader title={t('What was done')} />
               <CardBody>
                 <ul className="grid gap-1 text-[13px]">
                   {[...job.labourLines, ...job.partLines, ...job.feeLines].map((line, i) => (
                     <li key={i}>{line.description}</li>
                   ))}
                   {job.labourLines.length + job.partLines.length + job.feeLines.length === 0 ? (
-                    <li className="text-(--text-faint)">No lines on the job.</li>
+                    <li className="text-(--text-faint)">{t('No lines on the job.')}</li>
                   ) : null}
                 </ul>
               </CardBody>
@@ -260,11 +307,11 @@ export default async function CheckOutPage({
 
             <Card className={outstandingMinor > 0 ? 'border-(--warning)' : undefined}>
               <CardHeader
-                title="The money"
+                title={t('The money')}
                 action={
                   invoice ? (
                     <Link href={`/invoices/${invoice.id}`} className="text-[13px] underline">
-                      Invoice {invoice.number}
+                      {t('Invoice {number}', { number: invoice.number })}
                     </Link>
                   ) : null
                 }
@@ -272,7 +319,7 @@ export default async function CheckOutPage({
               <CardBody className="grid gap-3 text-[13px]">
                 {invoice ? (
                   <div className="flex justify-between">
-                    <span className="text-(--text-faint)">Outstanding</span>
+                    <span className="text-(--text-faint)">{t('Outstanding')}</span>
                     <Money
                       amount={outstandingMinor / 100}
                       currency={invoice.currency}
@@ -280,24 +327,28 @@ export default async function CheckOutPage({
                     />
                   </div>
                 ) : (
-                  <p className="text-(--text-soft)">No invoice has been issued on this job.</p>
+                  <p className="text-(--text-soft)">
+                    {t('No invoice has been issued on this job.')}
+                  </p>
                 )}
                 {outstandingMinor > 0 ? (
                   <>
                     {invoice ? (
                       <Link href={`/invoices/${invoice.id}`}>
                         <Button variant="primary" size="lg" block>
-                          Take the payment first
+                          {t('Take the payment first')}
                         </Button>
                       </Link>
                     ) : null}
                     <Field
-                      label="Or say why the car is leaving unpaid"
-                      hint="An account customer, a fleet, an agreed later date. Recorded on the hand-back."
+                      label={t('Or say why the car is leaving unpaid')}
+                      hint={t(
+                        'An account customer, a fleet, an agreed later date. Recorded on the hand-back.',
+                      )}
                     >
                       <Input
                         name="letGoOwingReason"
-                        placeholder="Fleet account, invoiced monthly"
+                        placeholder={t('Fleet account, invoiced monthly')}
                       />
                     </Field>
                   </>
@@ -306,13 +357,15 @@ export default async function CheckOutPage({
             </Card>
 
             <Card>
-              <CardHeader title="Off the dash, and what goes back" />
+              <CardHeader title={t('Off the dash, and what goes back')} />
               <CardBody className="grid gap-4 sm:grid-cols-2">
                 <Field
-                  label="Mileage out (km)"
+                  label={t('Mileage out (km)')}
                   hint={
                     job.odometerInKm
-                      ? `Came in at ${job.odometerInKm.toLocaleString(region.locale)} km.`
+                      ? t('Came in at {km} km.', {
+                          km: job.odometerInKm.toLocaleString(region.locale),
+                        })
                       : undefined
                   }
                 >
@@ -325,7 +378,7 @@ export default async function CheckOutPage({
                     className="text-[18px]"
                   />
                 </Field>
-                <Field label="Fuel">
+                <Field label={t('Fuel')}>
                   <div className="grid grid-cols-9 gap-1">
                     {FUEL_LEVELS.map((level) => (
                       <label
@@ -339,13 +392,13 @@ export default async function CheckOutPage({
                           defaultChecked={level === (arrival?.in?.fuelEighths ?? 4)}
                           className="sr-only"
                         />
-                        <span className="font-medium">{fuelLabel(level)}</span>
+                        <span className="font-medium">{t(fuelLabel(level))}</span>
                       </label>
                     ))}
                   </div>
                 </Field>
                 <div className="sm:col-span-2">
-                  <p className="mb-1.5 text-[13px] font-medium">Goes back with the car</p>
+                  <p className="mb-1.5 text-[13px] font-medium">{t('Goes back with the car')}</p>
                   <div className="flex flex-wrap gap-2">
                     {DOCUMENTS.map((doc) => (
                       <label
@@ -359,17 +412,17 @@ export default async function CheckOutPage({
                           defaultChecked={doc === 'Keys' || doc === 'Invoice'}
                           className="h-4 w-4"
                         />
-                        {doc}
+                        {t(doc)}
                       </label>
                     ))}
                   </div>
                 </div>
                 <div className="sm:col-span-2">
-                  <Field label="Anything noted at hand-back">
+                  <Field label={t('Anything noted at hand-back')}>
                     <Textarea
                       name="notes"
                       rows={2}
-                      placeholder="Advisory explained; next service due…"
+                      placeholder={t('Advisory explained; next service due…')}
                     />
                   </Field>
                 </div>
@@ -378,7 +431,7 @@ export default async function CheckOutPage({
 
             <details className="rounded-(--radius-lg) border border-(--border) bg-(--surface) px-4 py-3">
               <summary className="cursor-pointer text-[13px] font-medium">
-                A new mark on the car since it arrived
+                {t('A new mark on the car since it arrived')}
               </summary>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {DAMAGE_AREAS.map((area) => (
@@ -396,11 +449,11 @@ export default async function CheckOutPage({
                       htmlFor={`out-${area}`}
                       className="w-32 shrink-0 text-[13px] font-medium"
                     >
-                      {area}
+                      {t(area)}
                     </label>
                     <input
                       name={`note-${area}`}
-                      placeholder="what, and where"
+                      placeholder={t('what, and where')}
                       className="min-w-0 flex-1 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-2 py-1 text-[13px]"
                     />
                   </div>
@@ -412,34 +465,49 @@ export default async function CheckOutPage({
           <aside className="grid content-start gap-5">
             <Card className="border-(--brand)">
               <CardHeader
-                title="Sign"
-                description="The customer signs that the car and the keys are back with them."
+                title={t('Sign')}
+                description={t('The customer signs that the car and the keys are back with them.')}
               />
               <CardBody className="grid gap-3">
                 <SignaturePad />
-                <Field label="Signed by">
+                <Field label={t('Signed by')}>
                   <Input name="signedByName" defaultValue={job.customer.displayName} />
                 </Field>
                 <Button type="submit" variant="primary" size="lg" block disabled={!finished}>
-                  Hand the car back
+                  {t('Hand the car back')}
                 </Button>
                 {arrival?.in ? (
                   <p className="text-[12px] leading-relaxed text-(--text-faint)">
-                    Came in{' '}
-                    {arrival.in.at.toLocaleString(region.locale, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })}{' '}
-                    at{' '}
-                    {arrival.in.odometerKm !== null
-                      ? `${arrival.in.odometerKm.toLocaleString(region.locale)} km`
-                      : 'no reading'}
-                    , fuel {fuelLabel(arrival.in.fuelEighths)}, {arrival.in.damage.length} mark
-                    {arrival.in.damage.length === 1 ? '' : 's'} noted.
+                    {arrival.in.damage.length === 1
+                      ? t('Came in {when} at {reading}, fuel {fuel}, 1 mark noted.', {
+                          when: arrival.in.at.toLocaleString(region.locale, {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          }),
+                          reading:
+                            arrival.in.odometerKm !== null
+                              ? `${arrival.in.odometerKm.toLocaleString(region.locale)} km`
+                              : t('no reading'),
+                          fuel: t(fuelLabel(arrival.in.fuelEighths)),
+                        })
+                      : t('Came in {when} at {reading}, fuel {fuel}, {count} marks noted.', {
+                          when: arrival.in.at.toLocaleString(region.locale, {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          }),
+                          reading:
+                            arrival.in.odometerKm !== null
+                              ? `${arrival.in.odometerKm.toLocaleString(region.locale)} km`
+                              : t('no reading'),
+                          fuel: t(fuelLabel(arrival.in.fuelEighths)),
+                          count: arrival.in.damage.length,
+                        })}
                   </p>
                 ) : (
                   <p className="text-[12px] leading-relaxed text-(--text-faint)">
-                    This car was not checked in, so there is no arrival record to compare with.
+                    {t(
+                      'This car was not checked in, so there is no arrival record to compare with.',
+                    )}
                   </p>
                 )}
               </CardBody>

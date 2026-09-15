@@ -13,6 +13,8 @@ import {
 import dynamic from 'next/dynamic';
 import * as React from 'react';
 
+import { useT } from '@/components/language-provider';
+
 import { DEMO_EVENTS } from './passport-scene';
 
 /**
@@ -50,6 +52,7 @@ const DEMO = {
 const STAMP_INK = { record: 'verified', advisory: 'recorded', alert: 'alert' } as const;
 
 export function PassportBooklet() {
+  const t = useT();
   const [open, setOpen] = React.useState(false);
   const [tilt, setTilt] = React.useState({ x: 0, y: 0 });
   const [selected, setSelected] = React.useState<string | null>('odometer');
@@ -96,7 +99,7 @@ export function PassportBooklet() {
           {/* The inside, always rendered so it is in the DOM for everybody. */}
           <div className="passport-page passport-document absolute inset-0 flex h-full flex-col overflow-hidden">
             <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 p-4 sm:p-5">
-              <PassportPhoto caption="The vehicle">
+              <PassportPhoto caption={t('The vehicle')}>
                 <div className="absolute inset-0" aria-hidden>
                   <PassportScene onSelect={setSelected} selectedId={selected} />
                 </div>
@@ -104,19 +107,25 @@ export function PassportBooklet() {
               <div className="grid content-start gap-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="passport-label">Type</p>
+                    <p className="passport-label">{t('Type')}</p>
+                    {/* i18n-ignore */}
                     <p className="passport-value">P · CNT</p>
                   </div>
-                  <PassportSeal intact head="C72EDAFC" className="scale-[0.72] origin-top-right" />
+                  <PassportSeal
+                    intact
+                    head="C72EDAFC"
+                    className="scale-[0.72] origin-top-right"
+                    t={t}
+                  />
                 </div>
                 <PassportFields
                   fields={[
-                    { label: 'Make and model', value: `${DEMO.make} ${DEMO.model}` },
-                    { label: 'Year', value: String(DEMO.year) },
-                    { label: 'Registration', value: DEMO.registration },
-                    { label: 'VIN', value: DEMO.vin, wide: true },
-                    { label: 'Owners on record', value: String(DEMO.owners) },
-                    { label: 'Entries', value: String(DEMO.entries) },
+                    { label: t('Make and model'), value: `${DEMO.make} ${DEMO.model}` },
+                    { label: t('Year'), value: String(DEMO.year) },
+                    { label: t('Registration'), value: DEMO.registration },
+                    { label: t('VIN'), value: DEMO.vin, wide: true },
+                    { label: t('Owners on record'), value: String(DEMO.owners) },
+                    { label: t('Entries'), value: String(DEMO.entries) },
                   ]}
                   className="gap-y-2"
                 />
@@ -126,36 +135,37 @@ export function PassportBooklet() {
             <div className="px-4 pb-4 sm:px-5">
               <PassportStamp
                 ink={STAMP_INK[event.tone]}
-                authority={event.workshop}
+                authority={t(event.workshop)}
                 kind={
                   event.tone === 'alert'
-                    ? 'Contradiction'
+                    ? t('Contradiction')
                     : event.tone === 'advisory'
-                      ? 'Advisory'
-                      : 'Recorded'
+                      ? t('Advisory')
+                      : t('Recorded')
                 }
-                date={event.year}
-                title={event.title}
+                date={t(event.year)}
+                title={t(event.title)}
                 tilt={-1.4}
               />
             </div>
-            <PassportMrz lines={[line1, line2]} />
+            <PassportMrz lines={[line1, line2]} t={t} />
           </div>
 
           {/* The cover, hinged on the left. */}
           <div className="passport-booklet-cover">
-            <PassportCover className="h-full">
+            <PassportCover className="h-full" t={t}>
               <p className="passport-foil-text text-[10px] opacity-80">{DEMO.registration}</p>
             </PassportCover>
             <div className="passport-booklet-inside passport-page passport-document grid place-items-center p-6 text-center">
               <div className="grid gap-2">
-                <p className="passport-label">Issued to the vehicle, not the owner</p>
+                <p className="passport-label">{t('Issued to the vehicle, not the owner')}</p>
                 <p
                   className="text-[13px] leading-relaxed"
                   style={{ color: 'var(--passport-ink-soft)' }}
                 >
-                  Every workshop that services this car writes to the same pages. Sell it and the
-                  pages go with it.
+                  {t(
+                    'Every workshop that services this car writes to the same pages. Sell it and the pages go with it.',
+                  )}
                 </p>
               </div>
             </div>
@@ -173,19 +183,19 @@ export function PassportBooklet() {
             'transition-colors hover:bg-(--surface-sunk)',
           )}
         >
-          {open ? 'Close the passport' : 'Open the passport'}
+          {open ? t('Close the passport') : t('Open the passport')}
         </button>
         <span className="text-[12px] text-(--text-faint)">
           {open
-            ? 'Drag the car to turn it. Tap a mark to read the entry.'
-            : 'A real vehicle, and its real record.'}
+            ? t('Drag the car to turn it. Tap a mark to read the entry.')
+            : t('A real vehicle, and its real record.')}
         </span>
       </div>
 
       {/* The same entries, as stamps and as buttons. */}
       <ul
         className="passport-page grid gap-3 p-3 sm:grid-cols-2"
-        aria-label="Entries on the demonstration vehicle"
+        aria-label={t('Entries on the demonstration vehicle')}
       >
         {DEMO_EVENTS.map((entry, index) => (
           <li key={entry.id}>
@@ -203,16 +213,16 @@ export function PassportBooklet() {
             >
               <PassportStamp
                 ink={STAMP_INK[entry.tone]}
-                authority={entry.workshop}
+                authority={t(entry.workshop)}
                 kind={
                   entry.tone === 'alert'
-                    ? 'Contradiction'
+                    ? t('Contradiction')
                     : entry.tone === 'advisory'
-                      ? 'Advisory'
-                      : 'Recorded'
+                      ? t('Advisory')
+                      : t('Recorded')
                 }
-                date={entry.year}
-                title={entry.title}
+                date={t(entry.year)}
+                title={t(entry.title)}
                 tilt={((index % 3) - 1) * 1.2}
               />
             </button>
@@ -221,7 +231,7 @@ export function PassportBooklet() {
       </ul>
 
       <p className="text-[13px] leading-relaxed text-(--text-soft)">
-        <span className="font-medium text-(--text)">{event.title}.</span> {event.detail}
+        <span className="font-medium text-(--text)">{t(event.title)}.</span> {t(event.detail)}
       </p>
     </div>
   );

@@ -7,10 +7,14 @@ import { BackLink } from '@/components/back-link';
 import { VehiclePassport } from '@/components/vehicle-passport';
 import { requireSession } from '@/lib/guard';
 import { reportFor } from '@/lib/handover';
+import { tFor } from '@/lib/i18n';
 import { mileageFindings } from '@/lib/insights';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 
-export const metadata: Metadata = { title: 'Passport' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Passport') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -28,6 +32,7 @@ export default async function WorkshopPassportPage({
 }) {
   const { orgId, region } = await requireSession('vehicle:read');
   const { id } = await params;
+  const t = await tFor();
 
   if (!(await orgCanReadVehicle(orgId, id))) notFound();
 
@@ -53,12 +58,14 @@ export default async function WorkshopPassportPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href={`/vehicles/${vehicle.id}`}>The vehicle</BackLink>
+        <BackLink href={`/vehicles/${vehicle.id}`}>{t('The vehicle')}</BackLink>
       </div>
       <PageHeader
-        eyebrow="Passport"
-        title="As the next owner will see it"
-        description="The document a buyer receives through a share link, word for word. No owner is named on it."
+        eyebrow={t('Passport')}
+        title={t('As the next owner will see it')}
+        description={t(
+          'The document a buyer receives through a share link, word for word. No owner is named on it.',
+        )}
       />
       <div className="mx-auto max-w-3xl">
         <VehiclePassport

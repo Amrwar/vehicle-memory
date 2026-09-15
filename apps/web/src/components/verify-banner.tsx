@@ -3,9 +3,11 @@ import { prisma } from '@carnet/db';
 import { Button, Card, CardBody } from '@carnet/ui';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import * as React from 'react';
 
 import { requestVerification } from '@/lib/credentials';
 import { requireUser } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
 /**
  * The strip that appears until an address is proven. FR-3904.
@@ -33,6 +35,7 @@ async function resend() {
 
 export async function VerifyBanner({ sent }: { sent?: boolean }) {
   const user = await requireUser();
+  const t = await tFor();
 
   const row = await prisma.user.findUnique({
     where: { id: user.userId },
@@ -50,8 +53,18 @@ export async function VerifyBanner({ sent }: { sent?: boolean }) {
     return (
       <Card className="mb-5 border-(--success)">
         <CardBody className="text-[13px] leading-relaxed text-(--success)">
-          A confirmation link is on its way to <span className="datum">{row.email}</span>. It lasts
-          three days.
+          {t('A confirmation link is on its way to {email}. It lasts three days.')
+            .split('{email}')
+            .map((part, index) =>
+              index === 0 ? (
+                part
+              ) : (
+                <React.Fragment key={index}>
+                  <span className="datum">{row.email}</span>
+                  {part}
+                </React.Fragment>
+              ),
+            )}
         </CardBody>
       </Card>
     );
@@ -60,11 +73,13 @@ export async function VerifyBanner({ sent }: { sent?: boolean }) {
   return (
     <Card className="mb-5 border-(--warning)">
       <CardBody className="flex flex-wrap items-center gap-3">
-        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-(--warning)">{warning}</p>
+        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-(--warning)">
+          {warning ? t(warning) : null}
+        </p>
 
         <form action={resend}>
           <Button type="submit" size="sm" variant="secondary">
-            Send the link
+            {t('Send the link')}
           </Button>
         </form>
       </CardBody>

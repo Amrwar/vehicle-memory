@@ -30,6 +30,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
 import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
@@ -44,7 +45,8 @@ export async function generateMetadata({
   const { id } = await params;
   const { db } = await requireSession('inventory:read');
   const product = await db.product.findUnique({ where: { id }, select: { name: true } });
-  return { title: product?.name ?? 'Part' };
+  const t = await tFor();
+  return { title: product?.name ?? t('Part') };
 }
 
 /**
@@ -119,6 +121,7 @@ export default async function PartPage({
 }) {
   const { id } = await params;
   const { db, orgId, region } = await requireSession('inventory:read');
+  const t = await tFor();
 
   const product = await db.product.findUnique({
     where: { id },
@@ -177,26 +180,28 @@ export default async function PartPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/parts">All parts</BackLink>
+        <BackLink href="/parts">{t('All parts')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow={product.category?.name ?? 'Part'}
+        eyebrow={product.category?.name ?? t('Part')}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {product.name}
             <Badge tone={stockTone(summary.state)} dot>
-              {describeStockState(summary.state)}
+              {t(describeStockState(summary.state))}
             </Badge>
           </span>
         }
         description={`${product.partNumber}${product.brand ? ` · ${product.brand}` : ''}`}
         actions={
           <>
-            <Button>Adjust stock</Button>
+            <Button>{t('Adjust stock')}</Button>
             {suggestion.quantity > 0 ? (
               <Link href={`/purchasing/new?product=${product.id}&qty=${suggestion.quantity}`}>
-                <Button variant="primary">Order {suggestion.quantity}</Button>
+                <Button variant="primary">
+                  {t('Order {quantity}', { quantity: suggestion.quantity })}
+                </Button>
               </Link>
             ) : null}
           </>
@@ -204,29 +209,34 @@ export default async function PartPage({
       />
 
       {summary.state === 'OVER' ? (
-        <Alert tone="danger" title="More has been issued than was recorded" className="mb-5">
-          The balance is {position.onHand}. Something was fitted without being booked in, or a
-          delivery was never received onto the system. A stocktake will correct it and record the
-          variance.
+        <Alert tone="danger" title={t('More has been issued than was recorded')} className="mb-5">
+          {t(
+            'The balance is {balance}. Something was fitted without being booked in, or a delivery was never received onto the system. A stocktake will correct it and record the variance.',
+            { balance: position.onHand },
+          )}
         </Alert>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="grid gap-5">
           <Card>
-            <CardHeader title="Stock" description={level?.warehouse.name ?? 'No stock record'} />
+            <CardHeader
+              title={t('Stock')}
+              description={level?.warehouse.name ?? t('No stock record')}
+            />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={3}
                 items={[
-                  { label: 'On hand', value: position.onHand },
-                  { label: 'Reserved', value: position.reserved },
-                  { label: 'Available', value: summary.available },
-                  { label: 'On order', value: onOrder || null },
-                  { label: 'Reorder point', value: Number(product.reorderPoint) },
-                  { label: 'Bin', value: level?.binLocation },
+                  { label: t('On hand'), value: position.onHand },
+                  { label: t('Reserved'), value: position.reserved },
+                  { label: t('Available'), value: summary.available },
+                  { label: t('On order'), value: onOrder || null },
+                  { label: t('Reorder point'), value: Number(product.reorderPoint) },
+                  { label: t('Bin'), value: level?.binLocation },
                   {
-                    label: 'Weighted average cost',
+                    label: t('Weighted average cost'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -236,7 +246,7 @@ export default async function PartPage({
                     ),
                   },
                   {
-                    label: 'Sell price',
+                    label: t('Sell price'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -246,7 +256,7 @@ export default async function PartPage({
                     ),
                   },
                   {
-                    label: 'Stock value',
+                    label: t('Stock value'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -262,22 +272,22 @@ export default async function PartPage({
 
           <Card>
             <CardHeader
-              title="Movements"
-              description="Every change to this balance, newest first"
+              title={t('Movements')}
+              description={t('Every change to this balance, newest first')}
             />
             {product.movements.length === 0 ? (
-              <EmptyState title="No movements" description="Nothing has moved yet." />
+              <EmptyState title={t('No movements')} description={t('Nothing has moved yet.')} />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Date</Th>
-                      <Th>Type</Th>
-                      <Th numeric>Quantity</Th>
-                      <Th numeric>Unit cost</Th>
-                      <Th numeric>Balance</Th>
-                      <Th>Reason</Th>
+                      <Th>{t('Date')}</Th>
+                      <Th>{t('Type')}</Th>
+                      <Th numeric>{t('Quantity')}</Th>
+                      <Th numeric>{t('Unit cost')}</Th>
+                      <Th numeric>{t('Balance')}</Th>
+                      <Th>{t('Reason')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -299,7 +309,7 @@ export default async function PartPage({
                               }
                               size="sm"
                             >
-                              {movement.type.toLowerCase().replace('_', ' ')}
+                              {t(movement.type.toLowerCase().replace('_', ' '))}
                             </Badge>
                           </Td>
                           <Td numeric className={quantity < 0 ? 'text-(--danger)' : ''}>
@@ -328,7 +338,7 @@ export default async function PartPage({
         <aside className="grid content-start gap-5">
           <Card className={suggestion.urgent ? 'border-(--danger)' : undefined}>
             <CardHeader
-              title="Reorder"
+              title={t('Reorder')}
               action={
                 <Badge
                   tone={
@@ -340,41 +350,45 @@ export default async function PartPage({
                   }
                   size="sm"
                 >
-                  {suggestion.confidence}
+                  {t(suggestion.confidence)}
                 </Badge>
               }
             />
             <CardBody className="grid gap-3">
               {suggestion.quantity > 0 ? (
                 <div>
-                  <p className="eyebrow">Suggested order</p>
+                  <p className="eyebrow">{t('Suggested order')}</p>
                   <p className="font-display text-[28px] font-semibold leading-none tabular">
                     {suggestion.quantity}
                   </p>
                 </div>
               ) : null}
 
-              <p className="text-[13px] leading-relaxed text-(--text-soft)">{suggestion.reason}</p>
+              <p className="text-[13px] leading-relaxed text-(--text-soft)">
+                {t(suggestion.reason)}
+              </p>
 
               <dl className="grid gap-1.5 border-t border-(--border) pt-3 text-[12px]">
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Average use</dt>
-                  <dd className="tabular">{suggestion.averageDailyUsage}/day</dd>
+                  <dt className="text-(--text-faint)">{t('Average use')}</dt>
+                  <dd className="tabular">
+                    {t('{count}/day', { count: suggestion.averageDailyUsage })}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Days of cover</dt>
+                  <dt className="text-(--text-faint)">{t('Days of cover')}</dt>
                   <dd className="tabular">
                     {suggestion.daysOfCover === null ? '—' : suggestion.daysOfCover}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Calculated reorder point</dt>
+                  <dt className="text-(--text-faint)">{t('Calculated reorder point')}</dt>
                   <dd className="tabular">{suggestion.reorderPoint}</dd>
                 </div>
               </dl>
 
               <p className="text-[11px] text-(--text-faint)">
-                {describeConfidence(suggestion.confidence)}.
+                {t(describeConfidence(suggestion.confidence))}.
               </p>
             </CardBody>
           </Card>
@@ -382,8 +396,12 @@ export default async function PartPage({
           {product.reservations.length > 0 ? (
             <Card>
               <CardHeader
-                title="Reserved for"
-                description={`${product.reservations.length} open reservation${product.reservations.length === 1 ? '' : 's'}`}
+                title={t('Reserved for')}
+                description={
+                  product.reservations.length === 1
+                    ? t('1 open reservation')
+                    : t('{count} open reservations', { count: product.reservations.length })
+                }
               />
               <ul className="divide-y divide-(--border)">
                 {product.reservations.map((reservation) => (
@@ -399,7 +417,7 @@ export default async function PartPage({
                         #{reservation.jobPartLine.job.number}
                       </Link>
                     ) : (
-                      <span className="text-(--text-faint)">Unlinked</span>
+                      <span className="text-(--text-faint)">{t('Unlinked')}</span>
                     )}
                     <span className="tabular">{Number(reservation.quantity)}</span>
                   </li>
@@ -415,34 +433,37 @@ export default async function PartPage({
         className={`mt-5 overflow-hidden ${summary.needsOrdering ? 'border-(--warning)' : ''}`}
       >
         <CardHeader
-          title="Who to buy it from"
+          title={t('Who to buy it from')}
           description={
             summary.needsOrdering
-              ? 'Short, and nothing on order. Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.'
-              : 'Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.'
+              ? t(
+                  'Short, and nothing on order. Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.',
+                )
+              : t(
+                  'Every supplier side by side: what they last charged for this part, and how they have delivered over the last year.',
+                )
           }
         />
         {suppliers.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
-            There are no suppliers yet.{' '}
+            {t('There are no suppliers yet.')}{' '}
             <Link href="/suppliers/new" className="font-medium hover:underline">
-              Add one
-            </Link>{' '}
-            to order from.
+              {t('Add one to order from.')}
+            </Link>
           </CardBody>
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Supplier</Th>
-                  <Th numeric>Last cost</Th>
-                  <Th numeric>Supplied</Th>
-                  <Th numeric>Typical wait</Th>
-                  <Th numeric>By the day promised</Th>
-                  <Th numeric>Sent back</Th>
+                  <Th>{t('Supplier')}</Th>
+                  <Th numeric>{t('Last cost')}</Th>
+                  <Th numeric>{t('Supplied')}</Th>
+                  <Th numeric>{t('Typical wait')}</Th>
+                  <Th numeric>{t('By the day promised')}</Th>
+                  <Th numeric>{t('Sent back')}</Th>
                   <Th>
-                    <span className="sr-only">Order</span>
+                    <span className="sr-only">{t('Order')}</span>
                   </Th>
                 </tr>
               </thead>
@@ -459,24 +480,24 @@ export default async function PartPage({
                       <span className="mt-0.5 flex flex-wrap gap-1">
                         {option.cheapest ? (
                           <Badge tone="success" size="sm">
-                            cheapest last time
+                            {t('cheapest last time')}
                           </Badge>
                         ) : null}
                         {option.quickest ? (
                           <Badge tone="info" size="sm">
-                            quickest
+                            {t('quickest')}
                           </Badge>
                         ) : null}
                         {option.mostReliable ? (
                           <Badge tone="brand" size="sm">
-                            most reliable
+                            {t('most reliable')}
                           </Badge>
                         ) : null}
                       </span>
                     </Td>
                     <Td numeric>
                       {option.lastCost === null ? (
-                        <span className="text-(--text-faint)">never bought</span>
+                        <span className="text-(--text-faint)">{t('never bought')}</span>
                       ) : (
                         <Money
                           currency={region.currency}
@@ -489,7 +510,9 @@ export default async function PartPage({
                       {option.timesSupplied}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      {option.measures.leadDays === null ? '—' : `${option.measures.leadDays}d`}
+                      {option.measures.leadDays === null
+                        ? '—'
+                        : t('{days}d', { days: option.measures.leadDays })}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {option.measures.onTimePct === null ? '—' : `${option.measures.onTimePct}%`}
@@ -507,7 +530,9 @@ export default async function PartPage({
                         }).toString()}`}
                       >
                         <Button size="sm" variant={summary.needsOrdering ? 'primary' : 'secondary'}>
-                          Order
+                          {t('Order {quantity}', {
+                            quantity: suggestion.quantity > 0 ? suggestion.quantity : 1,
+                          })}
                         </Button>
                       </Link>
                     </Td>
@@ -518,28 +543,31 @@ export default async function PartPage({
           </TableWrap>
         )}
         <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
-          A figure shows only when three orders or more stand behind it. Cheapest, quickest and most
-          reliable are marked only where two suppliers can be compared. The choice is yours: a part
-          needed by four o&rsquo;clock is worth the extra pound.
+          {t(
+            'A figure shows only when three orders or more stand behind it. Cheapest, quickest and most reliable are marked only where two suppliers can be compared. The choice is yours: a part needed by four o’clock is worth the extra pound.',
+          )}
         </CardBody>
       </Card>
 
       <Card className="mt-5 overflow-hidden">
         <CardHeader
-          title="What it fits"
-          description="Nothing recorded is not the same as fits anything. A part with no rows here raises no warning either way."
+          title={t('What it fits')}
+          description={t(
+            'Nothing recorded is not the same as fits anything. A part with no rows here raises no warning either way.',
+          )}
         />
 
         {error ? (
           <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
-            {error}
+            {t(error)}
           </CardBody>
         ) : null}
 
         {fitments.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
-            Nobody has recorded what this part fits. Until somebody does, putting it on a job raises
-            no warning, because silence here means unknown rather than approved.
+            {t(
+              'Nobody has recorded what this part fits. Until somebody does, putting it on a job raises no warning, because silence here means unknown rather than approved.',
+            )}
           </CardBody>
         ) : (
           <ul className="divide-y divide-(--border)">
@@ -557,8 +585,10 @@ export default async function PartPage({
                       : ''}
                   </span>
                   <span className="block text-[11px] text-(--text-faint)">
-                    {fitment.engineCode ? `Engine ${fitment.engineCode} · ` : ''}
-                    {fitment.source.toLowerCase()} · {fitment.createdBy?.name ?? 'unknown'}
+                    {fitment.engineCode
+                      ? `${t('Engine {code}', { code: fitment.engineCode })} · `
+                      : ''}
+                    {t(fitment.source.toLowerCase())} · {fitment.createdBy?.name ?? t('unknown')}
                   </span>
                 </div>
 
@@ -566,7 +596,7 @@ export default async function PartPage({
                   <input type="hidden" name="productId" value={id} />
                   <input type="hidden" name="fitmentId" value={fitment.id} />
                   <Button type="submit" size="sm" variant="secondary">
-                    Remove
+                    {t('Remove')}
                   </Button>
                 </form>
               </li>
@@ -577,23 +607,26 @@ export default async function PartPage({
         <form action={addFitment} className="border-t border-(--border)">
           <input type="hidden" name="productId" value={id} />
           <CardBody className="grid gap-3 sm:grid-cols-[1fr_1fr_5rem_5rem_1fr_auto] sm:items-end">
-            <Field label="Make">
+            <Field label={t('Make')}>
+              {/* i18n-ignore */}
               <Input name="make" required placeholder="Honda" />
             </Field>
-            <Field label="Model" hint="Blank means every model.">
+            <Field label={t('Model')} hint={t('Blank means every model.')}>
+              {/* i18n-ignore */}
               <Input name="model" placeholder="Civic" />
             </Field>
-            <Field label="From">
+            <Field label={t('From')}>
               <Input type="number" name="yearFrom" min={1885} max={2200} placeholder="2018" />
             </Field>
-            <Field label="To">
+            <Field label={t('To')}>
               <Input type="number" name="yearTo" min={1885} max={2200} placeholder="2022" />
             </Field>
-            <Field label="Engine" hint="Where one model spans two.">
+            <Field label={t('Engine')} hint={t('Where one model spans two.')}>
+              {/* i18n-ignore */}
               <Input name="engineCode" placeholder="L15B7" />
             </Field>
             <Button type="submit" variant="primary">
-              Record
+              {t('Record')}
             </Button>
           </CardBody>
         </form>

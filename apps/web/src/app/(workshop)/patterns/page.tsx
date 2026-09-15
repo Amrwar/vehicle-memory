@@ -12,15 +12,19 @@ import {
   Th,
   Tr,
 } from '@carnet/ui';
-import type { Weekday } from '@carnet/core';
+import { msg, type Weekday } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { patternsFor, setPattern } from '@/lib/planning';
 
-export const metadata: Metadata = { title: 'Working hours' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Working hours') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -37,13 +41,13 @@ export const dynamic = 'force-dynamic';
  * feeds is what a customer gets promised.
  */
 const DAYS: { weekday: Weekday; label: string; short: string }[] = [
-  { weekday: 1, label: 'Monday', short: 'Mon' },
-  { weekday: 2, label: 'Tuesday', short: 'Tue' },
-  { weekday: 3, label: 'Wednesday', short: 'Wed' },
-  { weekday: 4, label: 'Thursday', short: 'Thu' },
-  { weekday: 5, label: 'Friday', short: 'Fri' },
-  { weekday: 6, label: 'Saturday', short: 'Sat' },
-  { weekday: 7, label: 'Sunday', short: 'Sun' },
+  { weekday: 1, label: msg('Monday'), short: msg('Mon') },
+  { weekday: 2, label: msg('Tuesday'), short: msg('Tue') },
+  { weekday: 3, label: msg('Wednesday'), short: msg('Wed') },
+  { weekday: 4, label: msg('Thursday'), short: msg('Thu') },
+  { weekday: 5, label: msg('Friday'), short: msg('Fri') },
+  { weekday: 6, label: msg('Saturday'), short: msg('Sat') },
+  { weekday: 7, label: msg('Sunday'), short: msg('Sun') },
 ];
 
 /** Minutes from midnight as the value an `<input type="time">` wants. */
@@ -84,6 +88,7 @@ async function save(formData: FormData) {
 
 export default async function PatternsPage() {
   const { orgId } = await requireSession('people:read');
+  const t = await tFor();
 
   const people = await patternsFor(orgId);
 
@@ -102,42 +107,47 @@ export default async function PatternsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="People"
-        title="Working hours"
-        description="When each person is contracted to be here, which is what capacity is worked out from"
+        eyebrow={t('People')}
+        title={t('Working hours')}
+        description={t(
+          'When each person is contracted to be here, which is what capacity is worked out from',
+        )}
       />
 
       <Card className="mb-5">
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-          Leave a day blank and it means somebody is not in. Approved holiday comes off on top of
-          this automatically, so a week off does not need editing here and putting back afterwards.{' '}
+          {t(
+            'Leave a day blank and it means somebody is not in. Approved holiday comes off on top of this automatically, so a week off does not need editing here and putting back afterwards.',
+          )}{' '}
           <Link href="/capacity" className="font-medium text-(--brand-text) hover:underline">
-            Capacity
-          </Link>{' '}
-          shows what these hours add up to.
+            {t('Capacity shows what these hours add up to.')}
+          </Link>
         </CardBody>
       </Card>
 
       {people.length > 0 && nobodyHasHours ? (
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
-            <strong className="font-semibold">Nobody has working hours recorded yet.</strong> Until
-            they do, capacity reads as nought and the day cannot be planned, because there is
-            nothing to plan it against. Fill in one person and it starts working.
+            <strong className="font-semibold">{t('Nobody has working hours recorded yet.')}</strong>{' '}
+            {t(
+              'Until they do, capacity reads as nought and the day cannot be planned, because there is nothing to plan it against. Fill in one person and it starts working.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       {people.length === 0 ? (
         <EmptyState
-          title="Nobody on the books"
-          description="Working hours belong to employees. Add people first and they appear here."
+          title={t('Nobody on the books')}
+          description={t(
+            'Working hours belong to employees. Add people first and they appear here.',
+          )}
           action={
             <Link
               href="/people"
               className="text-[13px] font-medium text-(--brand-text) hover:underline"
             >
-              The team
+              {t('The team')}
             </Link>
           }
         />
@@ -147,16 +157,19 @@ export default async function PatternsPage() {
             <Card key={person.employeeId} className="overflow-hidden">
               <CardHeader
                 title={person.name}
-                description={`${person.jobTitle ?? 'No job title'} · ${(weekMinutes(person.week) / 60).toFixed(1)} hours a week`}
+                description={t('{title} · {hours} hours a week', {
+                  title: person.jobTitle ?? t('No job title'),
+                  hours: (weekMinutes(person.week) / 60).toFixed(1),
+                })}
               />
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Day</Th>
-                      <Th>From</Th>
-                      <Th>To</Th>
-                      <Th>Break</Th>
+                      <Th>{t('Day')}</Th>
+                      <Th>{t('From')}</Th>
+                      <Th>{t('To')}</Th>
+                      <Th>{t('Break')}</Th>
                       <Th> </Th>
                     </tr>
                   </thead>
@@ -166,7 +179,7 @@ export default async function PatternsPage() {
 
                       return (
                         <Tr key={day.weekday}>
-                          <Td className="font-medium">{day.label}</Td>
+                          <Td className="font-medium">{t(day.label)}</Td>
                           <Td colSpan={4}>
                             <form action={save} className="flex flex-wrap items-center gap-2">
                               <input type="hidden" name="employeeId" value={person.employeeId} />
@@ -175,14 +188,20 @@ export default async function PatternsPage() {
                                 type="time"
                                 name="start"
                                 defaultValue={toTime(pattern?.startMinute)}
-                                aria-label={`${person.name}, ${day.label}, from`}
+                                aria-label={t('{name}, {day}, from', {
+                                  name: person.name,
+                                  day: t(day.label),
+                                })}
                                 className="w-28"
                               />
                               <Input
                                 type="time"
                                 name="end"
                                 defaultValue={toTime(pattern?.endMinute)}
-                                aria-label={`${person.name}, ${day.label}, to`}
+                                aria-label={t('{name}, {day}, to', {
+                                  name: person.name,
+                                  day: t(day.label),
+                                })}
                                 className="w-28"
                               />
                               <Input
@@ -191,11 +210,14 @@ export default async function PatternsPage() {
                                 min={0}
                                 step={5}
                                 defaultValue={pattern?.breakMinutes ?? 0}
-                                aria-label={`${person.name}, ${day.label}, break in minutes`}
+                                aria-label={t('{name}, {day}, break in minutes', {
+                                  name: person.name,
+                                  day: t(day.label),
+                                })}
                                 className="w-24"
                               />
                               <Button type="submit" size="sm" variant="secondary">
-                                Save
+                                {t('Save')}
                               </Button>
                             </form>
                           </Td>

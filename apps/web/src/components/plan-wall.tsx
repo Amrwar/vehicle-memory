@@ -2,6 +2,8 @@ import { type FeatureKey, cheapestWith, describeFeature, PLANS, type PlanId } fr
 import { Button, Card, CardBody } from '@carnet/ui';
 import Link from 'next/link';
 
+import { tFor } from '@/lib/i18n';
+
 import { StrandedCar } from './stranded-car';
 
 /**
@@ -17,7 +19,8 @@ import { StrandedCar } from './stranded-car';
  * are different questions. A manager on Core genuinely has permission to see
  * the ledger. Their workshop has not bought one.
  */
-export function PlanWall({ feature, plan }: { feature: FeatureKey; plan: PlanId }) {
+export async function PlanWall({ feature, plan }: { feature: FeatureKey; plan: PlanId }) {
+  const t = await tFor();
   const suggestion = cheapestWith(feature);
   const target = suggestion ? PLANS[suggestion] : null;
   const current = PLANS[plan];
@@ -28,26 +31,33 @@ export function PlanWall({ feature, plan }: { feature: FeatureKey; plan: PlanId 
         <StrandedCar />
       </div>
 
-      <p className="eyebrow mt-6">Not on this plan</p>
+      <p className="eyebrow mt-6">{t('Not on this plan')}</p>
       <h1 className="mt-2 font-display text-[24px] font-semibold leading-tight tracking-tight">
-        {capitalise(describeFeature(feature))} is not part of {current.name}
+        {capitalise(
+          t('{feature} is not part of {plan}', {
+            feature: t(describeFeature(feature)),
+            plan: current.name,
+          }),
+        )}
       </h1>
 
       {target ? (
         <>
           <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-(--text-soft)">
-            It comes with {target.name}, at £{target.price.minor / 100} per bay per month billed
-            annually. Everything already in {current.name} stays exactly as it is.
+            {t(
+              'It comes with {plan}, at £{price} per bay per month billed annually. Everything already in {current} stays exactly as it is.',
+              { plan: target.name, price: target.price.minor / 100, current: current.name },
+            )}
           </p>
 
           <Card className="mx-auto mt-6 max-w-md text-left">
             <CardBody>
-              <p className="eyebrow mb-2.5">{target.name} adds</p>
+              <p className="eyebrow mb-2.5">{t('{plan} adds', { plan: target.name })}</p>
               <ul className="grid gap-1.5">
                 {target.headline.map((line) => (
                   <li key={line} className="flex items-start gap-2 text-[13px] leading-relaxed">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-(--accent)" />
-                    <span className="text-(--text-soft)">{line}</span>
+                    <span className="text-(--text-soft)">{t(line)}</span>
                   </li>
                 ))}
               </ul>
@@ -56,24 +66,25 @@ export function PlanWall({ feature, plan }: { feature: FeatureKey; plan: PlanId 
         </>
       ) : (
         <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-(--text-soft)">
-          This is not available on any plan yet.
+          {t('This is not available on any plan yet.')}
         </p>
       )}
 
       <div className="mt-7 flex flex-wrap justify-center gap-3">
         <Link href="/pricing">
           <Button variant="primary" size="lg">
-            Compare plans
+            {t('Compare plans')}
           </Button>
         </Link>
         <Link href="/dashboard">
-          <Button size="lg">Back to the workshop</Button>
+          <Button size="lg">{t('Back to the workshop')}</Button>
         </Link>
       </div>
 
       <p className="mt-5 text-[12px] leading-relaxed text-(--text-faint)">
-        Nothing you have recorded is affected by which plan you are on. The work, the invoices and
-        every vehicle passport stay where they are.
+        {t(
+          'Nothing you have recorded is affected by which plan you are on. The work, the invoices and every vehicle passport stay where they are.',
+        )}
       </p>
     </div>
   );

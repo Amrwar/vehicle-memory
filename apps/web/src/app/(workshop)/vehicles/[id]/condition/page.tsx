@@ -1,4 +1,5 @@
-import { Badge, Card, CardBody, CardHeader, EmptyState, Mileage, PageHeader } from '@carnet/ui';
+import { msg, type Translator } from '@carnet/core';
+import { Badge, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@carnet/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -7,9 +8,13 @@ import { BackLink } from '@/components/back-link';
 import { HealthDial } from '@/components/health-dial';
 import { conditionOf } from '@/lib/condition';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { orgCanReadVehicle } from '@/lib/passport';
 
-export const metadata: Metadata = { title: 'Condition' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Condition') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -40,18 +45,27 @@ function date(value: Date, locale: string): string {
   });
 }
 
-function away(km: number | null, days: number, locale: string): string {
+function away(t: Translator, km: number | null, days: number, locale: string): string {
   if (km != null) {
     return km < 0
-      ? `${Math.abs(km).toLocaleString(locale)} km past`
-      : `in about ${km.toLocaleString(locale)} km`;
+      ? t('{km} km past', { km: Math.abs(km).toLocaleString(locale) })
+      : t('in about {km} km', { km: km.toLocaleString(locale) });
   }
-  return days < 0 ? `${Math.abs(days)} days past` : `in about ${Math.round(days / 30)} months`;
+  return days < 0
+    ? t('{days} days past', { days: Math.abs(days) })
+    : t('in about {months} months', { months: Math.round(days / 30) });
 }
+
+const CONFIDENCE = {
+  HIGH: msg('Confidence high.'),
+  MEDIUM: msg('Confidence medium.'),
+  LOW: msg('Confidence low.'),
+} as const;
 
 export default async function ConditionPage({ params }: { params: Promise<{ id: string }> }) {
   const { orgId, region } = await requireSession('vehicle:read');
   const { id } = await params;
+  const t = await tFor();
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
@@ -72,13 +86,13 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
   return (
     <>
       <div className="mb-3">
-        <BackLink href={`/vehicles/${id}`}>Back to the vehicle</BackLink>
+        <BackLink href={`/vehicles/${id}`}>{t('Back to the vehicle')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Condition"
+        eyebrow={t('Condition')}
         title={name}
-        description="What this vehicle is in, and every figure that says so"
+        description={t('What this vehicle is in, and every figure that says so')}
       />
 
       <Card className="mb-5">
@@ -86,12 +100,12 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
           <HealthDial score={health.score} band={health.band} />
 
           <div>
-            <p className="text-[15px] leading-relaxed">{health.summary}</p>
+            <p className="text-[15px] leading-relaxed">{t(health.summary)}</p>
             <p className="mt-2 text-[12px] text-(--text-faint)">
-              Built from {health.factors.length} of 6 measures, covering{' '}
-              {Math.round(health.coverage * 100)}% of the weight. The score belongs to the vehicle,
-              not to this workshop: nothing in it measures what was spent here or how recently the
-              car visited.
+              {t(
+                'Built from {count} of 6 measures, covering {percent}% of the weight. The score belongs to the vehicle, not to this workshop: nothing in it measures what was spent here or how recently the car visited.',
+                { count: health.factors.length, percent: Math.round(health.coverage * 100) },
+              )}
             </p>
           </div>
         </CardBody>
@@ -101,20 +115,22 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="What makes up the score"
-              description="Worst first. Every one of these is checkable against the record."
+              title={t('What makes up the score')}
+              description={t('Worst first. Every one of these is checkable against the record.')}
             />
             {health.factors.length === 0 ? (
               <EmptyState
-                title="Nothing to score"
-                description="No visit, inspection, part or schedule is on record for this vehicle."
+                title={t('Nothing to score')}
+                description={t(
+                  'No visit, inspection, part or schedule is on record for this vehicle.',
+                )}
               />
             ) : (
               <ul className="divide-y divide-(--border)">
                 {health.factors.map((factor) => (
                   <li key={factor.id} className="px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[13px] font-medium">{factor.label}</span>
+                      <span className="text-[13px] font-medium">{t(factor.label)}</span>
                       <span className="datum text-[13px] font-semibold">{factor.score}</span>
                     </div>
                     <div
@@ -126,9 +142,11 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
                         style={{ width: `${factor.score}%` }}
                       />
                     </div>
-                    <p className="mt-1.5 text-[12px] text-(--text-soft)">{factor.why}</p>
+                    <p className="mt-1.5 text-[12px] text-(--text-soft)">{t(factor.why)}</p>
                     <p className="text-[11px] text-(--text-faint)">
-                      Counts for {Math.round(factor.weight * 100)}% of the score.
+                      {t('Counts for {percent}% of the score.', {
+                        percent: Math.round(factor.weight * 100),
+                      })}
                     </p>
                   </li>
                 ))}
@@ -139,14 +157,14 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
           {health.unknown.length > 0 ? (
             <Card>
               <CardHeader
-                title="What could not be scored"
-                description="Left out of the total rather than counted as a pass or a fail."
+                title={t('What could not be scored')}
+                description={t('Left out of the total rather than counted as a pass or a fail.')}
               />
               <ul className="divide-y divide-(--border)">
                 {health.unknown.map((entry) => (
                   <li key={entry.id} className="px-4 py-2.5 text-[13px]">
-                    <span className="font-medium">{entry.label}</span>
-                    <p className="text-[12px] text-(--text-faint)">{entry.why}</p>
+                    <span className="font-medium">{t(entry.label)}</span>
+                    <p className="text-[12px] text-(--text-faint)">{t(entry.why)}</p>
                   </li>
                 ))}
               </ul>
@@ -157,31 +175,33 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Likely due"
+              title={t('Likely due')}
               description={
                 condition.kmPerDay
-                  ? `From this vehicle's own mileage, about ${Math.round(condition.kmPerDay)} km a day.`
-                  : 'Not enough odometer history to work from distance, so these are from age.'
+                  ? t('From this vehicle’s own mileage, about {km} km a day.', {
+                      km: Math.round(condition.kmPerDay),
+                    })
+                  : t('Not enough odometer history to work from distance, so these are from age.')
               }
             />
             {condition.soon.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-soft)">
-                Nothing is due inside the next four months.
+                {t('Nothing is due inside the next four months.')}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {condition.soon.map((prediction) => (
                   <li key={prediction.component} className="px-4 py-2.5">
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-[13px] font-medium">{prediction.label}</span>
+                      <span className="text-[13px] font-medium">{t(prediction.label)}</span>
                       <span
                         className={`datum text-[13px] ${prediction.overdue ? 'font-semibold text-(--danger)' : ''}`}
                       >
-                        {away(prediction.kmAway, prediction.daysAway, region.locale)}
+                        {away(t, prediction.kmAway, prediction.daysAway, region.locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                      {prediction.why} Confidence {prediction.confidence.toLowerCase()}.
+                      {t(prediction.why)} {t(CONFIDENCE[prediction.confidence])}
                     </p>
                   </li>
                 ))}
@@ -191,31 +211,43 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
 
           <Card className="overflow-hidden">
             <CardHeader
-              title="Components"
-              description="What is on this vehicle, how old it is, and how far through its life."
+              title={t('Components')}
+              description={t(
+                'What is on this vehicle, how old it is, and how far through its life.',
+              )}
             />
             {condition.components.length === 0 ? (
               <EmptyState
-                title="No parts on record"
-                description="Components appear here as parts are fitted on a job."
+                title={t('No parts on record')}
+                description={t('Components appear here as parts are fitted on a job.')}
               />
             ) : (
               <ul className="divide-y divide-(--border)">
                 {condition.components.map((component) => (
                   <li key={component.component} className="px-4 py-2.5">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[13px] font-medium">{component.label}</span>
+                      <span className="text-[13px] font-medium">{t(component.label)}</span>
                       <Badge tone={CONDITION_TONE[component.condition]} size="sm">
-                        {component.condition.toLowerCase()}
+                        {t(component.condition.toLowerCase())}
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-[12px] text-(--text-soft)">
-                      {component.summary} Fitted {date(component.fittedOn, region.locale)}
-                      {component.brand ? `, ${component.brand}` : ''}.
+                      {t(component.summary)}{' '}
+                      {component.brand
+                        ? t('Fitted {date}, {brand}.', {
+                            date: date(component.fittedOn, region.locale),
+                            brand: component.brand,
+                          })
+                        : t('Fitted {date}.', { date: date(component.fittedOn, region.locale) })}
                     </p>
                     <p className="text-[11px] text-(--text-faint)">
-                      {Math.round(component.usedUp * 100)}% through its usual life, on{' '}
-                      {component.drivenBy === 'DISTANCE' ? 'distance' : 'age'}.
+                      {component.drivenBy === 'DISTANCE'
+                        ? t('{percent}% through its usual life, on distance.', {
+                            percent: Math.round(component.usedUp * 100),
+                          })
+                        : t('{percent}% through its usual life, on age.', {
+                            percent: Math.round(component.usedUp * 100),
+                          })}
                     </p>
                   </li>
                 ))}
@@ -226,12 +258,21 @@ export default async function ConditionPage({ params }: { params: Promise<{ id: 
           <Card>
             <CardBody className="text-[12px] leading-relaxed text-(--text-faint)">
               <strong className="font-semibold text-(--text-soft)">
-                {condition.missing.length} components have no record here.
+                {t('{count} components have no record here.', {
+                  count: condition.missing.length,
+                })}
               </strong>{' '}
-              That is not the same as them being new. This vehicle has{' '}
-              <Mileage locale={region.locale} km={vehicle.lastOdometerKm} /> on it and{' '}
-              {condition.visits} recorded visits, and anything fitted before those visits, or
-              elsewhere, is not in this list.
+              {t('That is not the same as them being new.')}{' '}
+              {t(
+                'This vehicle has {mileage} on it and {visits} recorded visits, and anything fitted before those visits, or elsewhere, is not in this list.',
+                {
+                  mileage:
+                    vehicle.lastOdometerKm != null
+                      ? `${vehicle.lastOdometerKm.toLocaleString(region.locale)} km`
+                      : t('Not recorded'),
+                  visits: condition.visits,
+                },
+              )}
             </CardBody>
           </Card>
         </div>

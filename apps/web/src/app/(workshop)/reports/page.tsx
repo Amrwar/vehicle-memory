@@ -20,8 +20,12 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Reports' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Reports') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -43,6 +47,7 @@ export default async function ReportsPage({
 }) {
   const { db, orgId, region } = await requireSession('report:operational');
   const { days } = await searchParams;
+  const t = await tFor();
   const window = Math.max(1, Number(days ?? 30) || 30);
 
   const since = new Date();
@@ -127,15 +132,15 @@ export default async function ReportsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Reporting"
-        title="Operational reports"
-        description={`Last ${window} days`}
+        eyebrow={t('Reporting')}
+        title={t('Operational reports')}
+        description={t('Last {days} days', { days: window })}
         actions={
           <>
             {[7, 30, 90].map((option) => (
               <Link key={option} href={`/reports?days=${option}`}>
                 <Button size="sm" variant={option === window ? 'primary' : 'secondary'}>
-                  {option}d
+                  {t('{days}d', { days: option })}
                 </Button>
               </Link>
             ))}
@@ -144,14 +149,22 @@ export default async function ReportsPage({
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Jobs created" value={jobs.length} note={`In the last ${window} days`} />
-        <StatTile label="Completed" value={completedJobs.length} note="Reached completion" />
-        <StatTile label="In the shop" value={inShop} note="Physically on site" />
         <StatTile
-          label="Awaiting approval"
+          label={t('Jobs created')}
+          value={jobs.length}
+          note={t('In the last {days} days', { days: window })}
+        />
+        <StatTile
+          label={t('Completed')}
+          value={completedJobs.length}
+          note={t('Reached completion')}
+        />
+        <StatTile label={t('In the shop')} value={inShop} note={t('Physically on site')} />
+        <StatTile
+          label={t('Awaiting approval')}
           value={awaiting}
           tone={awaiting > 0 ? 'warning' : 'neutral'}
-          note="Blocked on the customer"
+          note={t('Blocked on the customer')}
         />
       </StatRow>
 
@@ -159,22 +172,25 @@ export default async function ReportsPage({
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Technicians"
-              description="Clocked time, not charged time. This is cost, not revenue."
+              title={t('Technicians')}
+              description={t('Clocked time, not charged time. This is cost, not revenue.')}
             />
             {byTechnician.length === 0 ? (
-              <EmptyState title="No technicians" description="Add technicians in settings." />
+              <EmptyState
+                title={t('No technicians')}
+                description={t('Add technicians in settings.')}
+              />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Technician</Th>
-                      <Th numeric>Hours clocked</Th>
-                      <Th numeric>Jobs</Th>
-                      <Th numeric>Hours per job</Th>
-                      <Th numeric>Labour cost</Th>
-                      <Th>Share of hours</Th>
+                      <Th>{t('Technician')}</Th>
+                      <Th numeric>{t('Hours clocked')}</Th>
+                      <Th numeric>{t('Jobs')}</Th>
+                      <Th numeric>{t('Hours per job')}</Th>
+                      <Th numeric>{t('Labour cost')}</Th>
+                      <Th>{t('Share of hours')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -224,25 +240,33 @@ export default async function ReportsPage({
           </Card>
 
           <Card>
-            <CardHeader title="Flow" description="How long a vehicle actually spends here" />
+            <CardHeader
+              title={t('Flow')}
+              description={t('How long a vehicle actually spends here')}
+            />
             <CardBody className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p className="eyebrow mb-1">Median time in the shop</p>
+                <p className="eyebrow mb-1">{t('Median time in the shop')}</p>
                 <p className="font-display text-[24px] font-semibold tabular">
-                  {medianThrough === null ? '—' : `${medianThrough.toFixed(1)} h`}
+                  {medianThrough === null
+                    ? '—'
+                    : t('{hours} h', { hours: medianThrough.toFixed(1) })}
                 </p>
                 <p className="mt-1 text-[12px] text-(--text-faint)">
-                  Arrival to completion, across {throughTimes.length} completed job
-                  {throughTimes.length === 1 ? '' : 's'}.
+                  {throughTimes.length === 1
+                    ? t('Arrival to completion, across 1 completed job.')
+                    : t('Arrival to completion, across {count} completed jobs.', {
+                        count: throughTimes.length,
+                      })}
                 </p>
               </div>
               <div>
-                <p className="eyebrow mb-1">Completion rate</p>
+                <p className="eyebrow mb-1">{t('Completion rate')}</p>
                 <p className="font-display text-[24px] font-semibold tabular">
                   {jobs.length ? Math.round((completedJobs.length / jobs.length) * 100) : 0}%
                 </p>
                 <p className="mt-1 text-[12px] text-(--text-faint)">
-                  Of jobs created in this window.
+                  {t('Of jobs created in this window.')}
                 </p>
               </div>
             </CardBody>
@@ -256,12 +280,12 @@ export default async function ReportsPage({
             }
           >
             <CardHeader
-              title="Passport coverage"
-              description="The leading indicator for the whole product"
+              title={t('Passport coverage')}
+              description={t('The leading indicator for the whole product')}
             />
             <CardBody className="grid gap-3">
               <div>
-                <p className="eyebrow mb-1">Completed jobs writing history</p>
+                <p className="eyebrow mb-1">{t('Completed jobs writing history')}</p>
                 <p
                   className={`font-display text-[34px] font-semibold leading-none tabular ${
                     coveragePct !== null && coveragePct < 60
@@ -275,40 +299,41 @@ export default async function ReportsPage({
 
               <dl className="grid gap-1.5 border-t border-(--border) pt-3 text-[12px]">
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Entries written</dt>
+                  <dt className="text-(--text-faint)">{t('Entries written')}</dt>
                   <dd className="tabular">{totalEvents}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Per completed job</dt>
+                  <dt className="text-(--text-faint)">{t('Per completed job')}</dt>
                   <dd className="tabular">{eventsPerJob.toFixed(1)}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-(--text-faint)">Vehicles touched</dt>
+                  <dt className="text-(--text-faint)">{t('Vehicles touched')}</dt>
                   <dd className="tabular">{completedVehicleIds.length}</dd>
                 </div>
               </dl>
 
               {coveragePct !== null && coveragePct < 60 ? (
                 <p className="rounded-(--radius-sm) bg-(--danger-soft) px-2.5 py-2 text-[12px] leading-relaxed text-(--danger)">
-                  Below the 60% threshold. Jobs are completing without recording what was done, so
-                  those vehicles carry no history of this work. Usually it means inspections are
-                  being skipped on the shop floor.
+                  {t(
+                    'Below the 60% threshold. Jobs are completing without recording what was done, so those vehicles carry no history of this work. Usually it means inspections are being skipped on the shop floor.',
+                  )}
                 </p>
               ) : (
                 <p className="text-[12px] leading-relaxed text-(--text-faint)">
-                  Every completed job should contribute at least three entries: the work, the parts,
-                  and the odometer reading.
+                  {t(
+                    'Every completed job should contribute at least three entries: the work, the parts, and the odometer reading.',
+                  )}
                 </p>
               )}
             </CardBody>
           </Card>
 
           <Card>
-            <CardHeader title="Not here yet" />
+            <CardHeader title={t('Not here yet')} />
             <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-              Revenue, gross profit and job profitability need the ledger, which arrives in Phase 3.
-              Reporting figures that look financial but are not posted to accounts would be worse
-              than absent.
+              {t(
+                'Revenue, gross profit and job profitability need the ledger, which arrives in Phase 3. Reporting figures that look financial but are not posted to accounts would be worse than absent.',
+              )}
             </CardBody>
           </Card>
         </aside>

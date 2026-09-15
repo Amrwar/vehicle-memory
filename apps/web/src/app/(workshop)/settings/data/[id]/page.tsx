@@ -4,9 +4,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { importDetail, ImportError, runImport, saveMapping } from '@/lib/imports';
 
-export const metadata: Metadata = { title: 'Import' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Import') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -60,6 +64,7 @@ export default async function ImportPage({
   const { orgId, region } = await requireSession('settings:read');
   const { id } = await params;
   const { saved, done, problem } = await searchParams;
+  const t = await tFor();
   const batch = await importDetail(orgId, id);
   if (!batch) notFound();
 
@@ -72,60 +77,72 @@ export default async function ImportPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings/data">Data in and out</BackLink>
+        <BackLink href="/settings/data">{t('Data in and out')}</BackLink>
       </div>
       <PageHeader
-        eyebrow={`Import · ${spec.title}`}
+        eyebrow={`${t('Import')} · ${t(spec.title)}`}
         title={batch.fileName}
-        description={`${rows.length.toLocaleString(region.locale)} rows. ${spec.becomes}`}
+        description={`${t('{count} rows.', { count: rows.length.toLocaleString(region.locale) })} ${t(spec.becomes)}`}
         actions={
           <Badge tone={imported ? 'success' : ready ? 'warning' : 'neutral'} dot>
-            {imported ? 'Imported' : ready ? 'Ready to import' : 'Mapping needed'}
+            {imported ? t('Imported') : ready ? t('Ready to import') : t('Mapping needed')}
           </Badge>
         }
       />
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
       {saved ? (
         <Alert tone="success" className="mb-5">
-          Mapping saved. The preview below is run against it.
+          {t('Mapping saved. The preview below is run against it.')}
         </Alert>
       ) : null}
       {done && report ? (
         <Alert
           tone={report.failed.length || report.invalid ? 'warning' : 'success'}
-          title="Imported"
+          title={t('Imported')}
           className="mb-5"
         >
-          {report.imported.toLocaleString(region.locale)} went in.{' '}
-          {report.invalid ? `${report.invalid} failed the rules and were left out. ` : ''}
-          {report.failed.length ? `${report.failed.length} could not be written. ` : ''}
-          The report below says which, and why.
+          {t('{count} went in.', { count: report.imported.toLocaleString(region.locale) })}{' '}
+          {report.invalid
+            ? `${t('{count} failed the rules and were left out.', { count: report.invalid })} `
+            : ''}
+          {report.failed.length
+            ? `${t('{count} could not be written.', { count: report.failed.length })} `
+            : ''}
+          {t('The report below says which, and why.')}
         </Alert>
       ) : null}
 
       {imported && report ? (
         <Card className="mb-5">
           <CardHeader
-            title="What became of it"
-            description={`Run ${batch.importedAt?.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' })}.`}
+            title={t('What became of it')}
+            description={t('Run {date}.', {
+              date:
+                batch.importedAt?.toLocaleString(region.locale, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                }) ?? '',
+            })}
           />
           <CardBody className="grid gap-3 text-[13px]">
             <p>
-              <span className="font-medium">{report.imported.toLocaleString(region.locale)}</span>{' '}
-              imported. <span className="font-medium">{report.invalid}</span> failed the rules
-              before anything was written.{' '}
-              <span className="font-medium">{report.failed.length}</span> passed the rules and were
-              refused at the point of writing.
+              {t('{count} imported.', { count: report.imported.toLocaleString(region.locale) })}{' '}
+              {t('{count} failed the rules before anything was written.', {
+                count: report.invalid,
+              })}{' '}
+              {t('{count} passed the rules and were refused at the point of writing.', {
+                count: report.failed.length,
+              })}
             </p>
             {report.notes.length ? (
               <ul className="grid gap-1 text-(--text-soft)">
                 {report.notes.map((n, i) => (
-                  <li key={i}>{n}</li>
+                  <li key={i}>{t(n)}</li>
                 ))}
               </ul>
             ) : null}
@@ -133,15 +150,15 @@ export default async function ImportPage({
               <table className="w-full text-[13px]">
                 <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
                   <tr>
-                    <th className="py-1 pr-3">Row</th>
-                    <th className="py-1">Why it did not go in</th>
+                    <th className="py-1 pr-3">{t('Row')}</th>
+                    <th className="py-1">{t('Why it did not go in')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.failed.slice(0, 200).map((f) => (
                     <tr key={f.row} className="border-t border-(--border)">
                       <td className="py-1 pr-3 tabular-nums">{f.row}</td>
-                      <td className="py-1">{f.message}</td>
+                      <td className="py-1">{t(f.message)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -154,8 +171,10 @@ export default async function ImportPage({
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <Card>
           <CardHeader
-            title="1. Which column is which"
-            description="Suggested from your headers. Anything left as ignored is not imported."
+            title={t('1. Which column is which')}
+            description={t(
+              'Suggested from your headers. Anything left as ignored is not imported.',
+            )}
           />
           <CardBody>
             <form action={map} className="grid gap-3">
@@ -163,15 +182,17 @@ export default async function ImportPage({
               <table className="w-full text-[13px]">
                 <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
                   <tr>
-                    <th className="py-1 pr-3">Your column</th>
-                    <th className="py-1 pr-3">First rows</th>
-                    <th className="py-1">Becomes</th>
+                    <th className="py-1 pr-3">{t('Your column')}</th>
+                    <th className="py-1 pr-3">{t('First rows')}</th>
+                    <th className="py-1">{t('Becomes')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {headers.map((header, index) => (
                     <tr key={index} className="border-t border-(--border) align-top">
-                      <td className="py-2 pr-3 font-medium">{header || `Column ${index + 1}`}</td>
+                      <td className="py-2 pr-3 font-medium">
+                        {header || t('Column {number}', { number: index + 1 })}
+                      </td>
                       <td className="py-2 pr-3 text-(--text-faint)">
                         {sample
                           .map((r) => r[index])
@@ -186,11 +207,12 @@ export default async function ImportPage({
                           disabled={imported}
                           className="w-full rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         >
-                          <option value="">Ignore</option>
+                          <option value="">{t('Ignore')}</option>
                           {spec.fields.map((f) => (
                             <option key={f.key} value={f.key}>
-                              {f.label}
-                              {f.required ? ' (required)' : ''}
+                              {f.required
+                                ? t('{field} (required)', { field: t(f.label) })
+                                : t(f.label)}
                             </option>
                           ))}
                         </select>
@@ -202,7 +224,7 @@ export default async function ImportPage({
               {!imported ? (
                 <div>
                   <Button type="submit" variant="secondary">
-                    Save the mapping and preview
+                    {t('Save the mapping and preview')}
                   </Button>
                 </div>
               ) : null}
@@ -211,7 +233,8 @@ export default async function ImportPage({
                   .filter((f) => f.hint)
                   .map((f) => (
                     <li key={f.key}>
-                      <span className="font-medium text-(--text-soft)">{f.label}.</span> {f.hint}
+                      <span className="font-medium text-(--text-soft)">{t(f.label)}.</span>{' '}
+                      {t(f.hint ?? '')}
                     </li>
                   ))}
               </ul>
@@ -222,47 +245,54 @@ export default async function ImportPage({
         <div className="grid content-start gap-5">
           <Card className={ready && !imported ? 'border-(--brand)' : undefined}>
             <CardHeader
-              title="2. What would go in"
+              title={t('2. What would go in')}
               description={
                 validation.missingRequired.length
-                  ? `Map ${validation.missingRequired.join(' and ')} first.`
-                  : `${validation.rows.length.toLocaleString(region.locale)} rows pass, ${validation.problems.length.toLocaleString(region.locale)} do not.`
+                  ? t('Map these first: {fields}.', {
+                      fields: validation.missingRequired.map((field) => t(field)).join(', '),
+                    })
+                  : t('{passing} rows pass, {failing} do not.', {
+                      passing: validation.rows.length.toLocaleString(region.locale),
+                      failing: validation.problems.length.toLocaleString(region.locale),
+                    })
               }
             />
             <CardBody className="grid gap-3 text-[13px]">
               {validation.missingRequired.length === 0 &&
               spec.fields.some((f) => !placedKeys.has(f.key) && !f.required) ? (
                 <p className="text-(--text-faint)">
-                  Not mapped, so not imported:{' '}
-                  {spec.fields
-                    .filter((f) => !placedKeys.has(f.key))
-                    .map((f) => f.label)
-                    .join(', ')}
-                  .
+                  {t('Not mapped, so not imported: {fields}.', {
+                    fields: spec.fields
+                      .filter((f) => !placedKeys.has(f.key))
+                      .map((f) => t(f.label))
+                      .join(', '),
+                  })}
                 </p>
               ) : null}
               {spec.id === 'balances' && validation.rows.length > 0 ? (
                 <p className="text-(--text-soft)">
                   {batch.imbalance === 0
-                    ? 'The debits and credits balance.'
-                    : `The sides differ by ${Math.abs(batch.imbalance).toFixed(2)}; the difference goes to retained earnings.`}
+                    ? t('The debits and credits balance.')
+                    : t('The sides differ by {amount}; the difference goes to retained earnings.', {
+                        amount: Math.abs(batch.imbalance).toFixed(2),
+                      })}
                 </p>
               ) : null}
               {validation.problems.length ? (
                 <table className="w-full">
                   <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
                     <tr>
-                      <th className="py-1 pr-3">Row</th>
-                      <th className="py-1 pr-3">Field</th>
-                      <th className="py-1">Problem</th>
+                      <th className="py-1 pr-3">{t('Row')}</th>
+                      <th className="py-1 pr-3">{t('Field')}</th>
+                      <th className="py-1">{t('Problem')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {validation.problems.slice(0, 100).map((p, i) => (
                       <tr key={i} className="border-t border-(--border)">
                         <td className="py-1 pr-3 tabular-nums">{p.row}</td>
-                        <td className="py-1 pr-3">{p.field}</td>
-                        <td className="py-1">{p.message}</td>
+                        <td className="py-1 pr-3">{t(p.field)}</td>
+                        <td className="py-1">{t(p.message)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -270,20 +300,23 @@ export default async function ImportPage({
               ) : null}
               {validation.problems.length > 100 ? (
                 <p className="text-(--text-faint)">
-                  And {validation.problems.length - 100} more. Fix the file and upload it again, or
-                  import what passes.
+                  {t('And {count} more. Fix the file and upload it again, or import what passes.', {
+                    count: validation.problems.length - 100,
+                  })}
                 </p>
               ) : null}
               {!imported && ready ? (
                 <form action={run} className="mt-2">
                   <input type="hidden" name="batchId" value={batch.id} />
                   <Button type="submit" variant="primary" size="lg">
-                    Import {validation.rows.length.toLocaleString(region.locale)} rows
+                    {t('Import {count} rows', {
+                      count: validation.rows.length.toLocaleString(region.locale),
+                    })}
                   </Button>
                   <p className="mt-2 text-[12px] text-(--text-faint)">
-                    Rows that fail the rules are left out and listed in the report. Each row goes in
-                    through the same checks the pages use, so a duplicate customer is refused, not
-                    doubled.
+                    {t(
+                      'Rows that fail the rules are left out and listed in the report. Each row goes in through the same checks the pages use, so a duplicate customer is refused, not doubled.',
+                    )}
                   </p>
                 </form>
               ) : null}

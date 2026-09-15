@@ -39,8 +39,12 @@ import {
   sendCampaign,
 } from '@/lib/automation';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Customers' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Customers') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -128,12 +132,13 @@ export default async function CrmPage({
 }) {
   const { orgId, region } = await requireSession('customer:read');
   const { drafted, sent, held, error } = await searchParams;
+  const t = await tFor();
 
   const [segments, campaigns, cohortRows] = await Promise.all([
     Promise.all(
       SEGMENTS.map(async (segment) => ({
         ...segment,
-        label: segment.rules.map(describeSegment).join(', '),
+        label: segment.rules.map((rule) => t(describeSegment(rule))).join(', '),
         ...(await previewSegment(orgId, segment.rules, 'EMAIL')),
       })),
     ),
@@ -152,47 +157,57 @@ export default async function CrmPage({
   return (
     <>
       <PageHeader
-        eyebrow="Customers"
-        title="Relationships"
-        description="Who has stopped coming, who is staying, and who you are allowed to write to"
+        eyebrow={t('Customers')}
+        title={t('Relationships')}
+        description={t(
+          'Who has stopped coming, who is staying, and who you are allowed to write to',
+        )}
       />
 
       {error ? (
-        <Alert tone="danger" className="mb-5" title="Nothing was sent">
-          {error}
+        <Alert tone="danger" className="mb-5" title={t('Nothing was sent')}>
+          {t(error)}
         </Alert>
       ) : null}
 
       {drafted ? (
-        <Alert tone="info" className="mb-5" title="Saved as a draft">
-          Nothing has gone out. The campaign below will say how many people it reaches before you
-          commit to it.
+        <Alert tone="info" className="mb-5" title={t('Saved as a draft')}>
+          {t(
+            'Nothing has gone out. The campaign below will say how many people it reaches before you commit to it.',
+          )}
         </Alert>
       ) : null}
 
       {sent ? (
-        <Alert tone="success" className="mb-5" title="Sent">
-          {sent} written to, {held ?? 0} held back. There is no way to call it back.
+        <Alert tone="success" className="mb-5" title={t('Sent')}>
+          {t('{sent} written to, {held} held back. There is no way to call it back.', {
+            sent,
+            held: held ?? 0,
+          })}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="Lapsed a year"
+          label={t('Lapsed a year')}
           value={lapsed?.segment.members.length ?? 0}
           tone={(lapsed?.segment.members.length ?? 0) > 0 ? 'warning' : 'neutral'}
-          note="Not been in for 12 months"
+          note={t('Not been in for 12 months')}
         />
         <StatTile
-          label="Reachable"
+          label={t('Reachable')}
           value={lapsed?.segment.reachable.length ?? 0}
-          note="Of those, by email"
+          note={t('Of those, by email')}
         />
-        <StatTile label="Cohorts" value={cohortRows.length} note="Months with a first visit" />
         <StatTile
-          label="Campaigns sent"
+          label={t('Cohorts')}
+          value={cohortRows.length}
+          note={t('Months with a first visit')}
+        />
+        <StatTile
+          label={t('Campaigns sent')}
           value={campaigns.filter((campaign) => campaign.status === 'SENT').length}
-          note={`${campaigns.length} in total`}
+          note={t('{count} in total', { count: campaigns.length })}
         />
       </StatRow>
 
@@ -200,29 +215,34 @@ export default async function CrmPage({
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {unreachableTotal} of the people below cannot be written to.
+              {t('{count} of the people below cannot be written to.', {
+                count: unreachableTotal,
+              })}
             </strong>{' '}
-            Some never agreed to marketing and some have no address on file. They stay in the
-            segment and out of the send, and the reason is kept against each one.
+            {t(
+              'Some never agreed to marketing and some have no address on file. They stay in the segment and out of the send, and the reason is kept against each one.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="mb-5 overflow-hidden">
         <CardHeader
-          title="Segments"
-          description="The count that matters is the second one: how many can actually be reached."
+          title={t('Segments')}
+          description={t(
+            'The count that matters is the second one: how many can actually be reached.',
+          )}
         />
         <TableWrap className="rounded-none border-0">
           <Table>
             <thead>
               <tr>
-                <Th>Segment</Th>
-                <Th numeric>In it</Th>
-                <Th numeric>Reachable</Th>
-                <Th numeric>Held back</Th>
-                <Th numeric>Worth</Th>
-                <Th>If you sent it</Th>
+                <Th>{t('Segment')}</Th>
+                <Th numeric>{t('In it')}</Th>
+                <Th numeric>{t('Reachable')}</Th>
+                <Th numeric>{t('Held back')}</Th>
+                <Th numeric>{t('Worth')}</Th>
+                <Th>{t('If you sent it')}</Th>
               </tr>
             </thead>
             <tbody>
@@ -244,8 +264,11 @@ export default async function CrmPage({
                     />
                   </Td>
                   <Td className="text-[12px] text-(--text-soft)">
-                    {segment.plan.warnings[0] ??
-                      `${segment.plan.recipients} emails, nothing to pay.`}
+                    {segment.plan.warnings[0]
+                      ? t(segment.plan.warnings[0])
+                      : t('{count} emails, nothing to pay.', {
+                          count: segment.plan.recipients,
+                        })}
                   </Td>
                 </Tr>
               ))}
@@ -256,22 +279,24 @@ export default async function CrmPage({
 
       <Card className="mb-5 overflow-hidden">
         <CardHeader
-          title="Retention by cohort"
-          description="Share of each month's new customers who came back, by months since. An overall rate would move with acquisition and tell you nothing."
+          title={t('Retention by cohort')}
+          description={t(
+            'Share of each month’s new customers who came back, by months since. An overall rate would move with acquisition and tell you nothing.',
+          )}
         />
         {cohortRows.length === 0 ? (
           <EmptyState
-            title="No completed visits yet"
-            description="Cohorts appear once customers have a first visit to be counted from."
+            title={t('No completed visits yet')}
+            description={t('Cohorts appear once customers have a first visit to be counted from.')}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>First came in</Th>
-                  <Th numeric>Size</Th>
-                  <Th numeric>Worth each</Th>
+                  <Th>{t('First came in')}</Th>
+                  <Th numeric>{t('Size')}</Th>
+                  <Th numeric>{t('Worth each')}</Th>
                   {Array.from({ length: widest }, (_, month) => (
                     <Th key={month} numeric>
                       {month === 0 ? 'M0' : `+${month}`}
@@ -317,53 +342,63 @@ export default async function CrmPage({
 
       <Card className="mb-5">
         <CardHeader
-          title="Write a campaign"
-          description="Saving writes a draft and sends nothing. The audience is stored as its rules, so consent is rechecked against every person at the moment you send."
+          title={t('Write a campaign')}
+          description={t(
+            'Saving writes a draft and sends nothing. The audience is stored as its rules, so consent is rechecked against every person at the moment you send.',
+          )}
         />
         <CardBody>
           <form action={compose} className="grid gap-4">
             <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Call it" htmlFor="campaign-name" required>
-                <Input id="campaign-name" name="name" required placeholder="Winter check offer" />
+              <Field label={t('Call it')} htmlFor="campaign-name" required>
+                <Input
+                  id="campaign-name"
+                  name="name"
+                  required
+                  placeholder={t('Winter check offer')}
+                />
               </Field>
 
-              <Field label="Who" htmlFor="segment">
+              <Field label={t('Who')} htmlFor="segment">
                 <Select id="segment" name="segment" defaultValue="lapsed">
                   {segments.map((segment) => (
                     <option key={segment.key} value={segment.key}>
-                      {segment.label} ({segment.segment.reachable.length} reachable)
+                      {t('{segment} ({count} reachable)', {
+                        segment: segment.label,
+                        count: segment.segment.reachable.length,
+                      })}
                     </option>
                   ))}
                 </Select>
               </Field>
 
               <Field
-                label="How"
+                label={t('How')}
                 htmlFor="channel"
-                hint="A text costs money to send. Email does not."
+                hint={t('A text costs money to send. Email does not.')}
               >
                 <Select id="channel" name="channel" defaultValue="EMAIL">
-                  <option value="EMAIL">Email</option>
-                  <option value="SMS">Text</option>
+                  <option value="EMAIL">{t('Email')}</option>
+                  <option value="SMS">{t('Text')}</option>
                 </Select>
               </Field>
             </div>
 
-            <Field label="Subject" htmlFor="subject" hint="Email only.">
+            <Field label={t('Subject')} htmlFor="subject" hint={t('Email only.')}>
               <Input
                 id="subject"
                 name="subject"
-                placeholder="A free winter check while the weather turns"
+                placeholder={t('A free winter check while the weather turns')}
               />
             </Field>
 
-            <Field label="What it says" htmlFor="body" required>
+            <Field label={t('What it says')} htmlFor="body" required>
               <Textarea id="body" name="body" required rows={4} />
             </Field>
 
             <div>
               <Button type="submit" variant="secondary">
-                Save as a draft
+                {t('Save as a draft')}
               </Button>
             </div>
           </form>
@@ -372,25 +407,29 @@ export default async function CrmPage({
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Campaigns"
-          description="Consent is rechecked for every recipient at the moment of sending, never taken from when the list was built."
+          title={t('Campaigns')}
+          description={t(
+            'Consent is rechecked for every recipient at the moment of sending, never taken from when the list was built.',
+          )}
         />
         {campaigns.length === 0 ? (
           <EmptyState
-            title="No campaigns"
-            description="A campaign is a segment and a message. It is the one thing here that cannot be undone."
+            title={t('No campaigns')}
+            description={t(
+              'A campaign is a segment and a message. It is the one thing here that cannot be undone.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Campaign</Th>
-                  <Th>Channel</Th>
-                  <Th>State</Th>
-                  <Th numeric>Sent</Th>
-                  <Th numeric>Held back</Th>
-                  <Th>When</Th>
+                  <Th>{t('Campaign')}</Th>
+                  <Th>{t('Channel')}</Th>
+                  <Th>{t('State')}</Th>
+                  <Th numeric>{t('Sent')}</Th>
+                  <Th numeric>{t('Held back')}</Th>
+                  <Th>{t('When')}</Th>
                   <Th>&nbsp;</Th>
                 </tr>
               </thead>
@@ -398,7 +437,7 @@ export default async function CrmPage({
                 {campaigns.map((campaign) => (
                   <Tr key={campaign.id}>
                     <Td className="font-medium">{campaign.name}</Td>
-                    <Td className="text-(--text-soft)">{campaign.channel.toLowerCase()}</Td>
+                    <Td className="text-(--text-soft)">{t(campaign.channel.toLowerCase())}</Td>
                     <Td>
                       <Badge
                         tone={
@@ -410,7 +449,7 @@ export default async function CrmPage({
                         }
                         size="sm"
                       >
-                        {campaign.status.toLowerCase()}
+                        {t(campaign.status.toLowerCase())}
                       </Badge>
                     </Td>
                     <Td numeric>{campaign.plannedRecipients ?? '—'}</Td>
@@ -424,14 +463,14 @@ export default async function CrmPage({
                             month: 'short',
                             year: 'numeric',
                           })
-                        : 'Not sent'}
+                        : t('Not sent')}
                     </Td>
                     <Td>
                       {campaign.status === 'DRAFT' ? (
                         <form action={send}>
                           <input type="hidden" name="campaignId" value={campaign.id} />
                           <Button type="submit" size="sm" variant="secondary">
-                            Send it
+                            {t('Send it')}
                           </Button>
                         </form>
                       ) : null}

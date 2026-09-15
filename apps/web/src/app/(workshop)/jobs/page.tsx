@@ -17,8 +17,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Jobs' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Jobs') };
+}
 export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 40;
@@ -29,6 +33,7 @@ export default async function JobsPage({
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
   const { db, region } = await requireSession('job:read');
+  const t = await tFor();
   const params = await searchParams;
 
   const page = Math.max(1, Number(params.page ?? 1) || 1);
@@ -82,12 +87,16 @@ export default async function JobsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Jobs"
-        description={`${total.toLocaleString(region.locale)} job${total === 1 ? '' : 's'}`}
+        eyebrow={t('Workshop')}
+        title={t('Jobs')}
+        description={
+          total === 1
+            ? t('1 job')
+            : t('{count} jobs', { count: total.toLocaleString(region.locale) })
+        }
         actions={
           <Link href="/jobs/new">
-            <Button variant="primary">New job</Button>
+            <Button variant="primary">{t('New job')}</Button>
           </Link>
         }
       />
@@ -97,28 +106,28 @@ export default async function JobsPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Job number, customer or registration"
-          aria-label="Search jobs"
+          placeholder={t('Job number, customer or registration')}
+          aria-label={t('Search jobs')}
           className="h-9 w-full max-w-xs rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
         <select
           name="status"
           defaultValue={params.status ?? ''}
-          aria-label="Filter by status"
+          aria-label={t('Filter by status')}
           className="h-9 rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-2 pr-7 text-[13px]"
         >
-          <option value="">Any status</option>
-          <option value="in-shop">In the shop</option>
+          <option value="">{t('Any status')}</option>
+          <option value="in-shop">{t('In the shop')}</option>
           {JOB_STATUSES.map((status) => (
             <option key={status} value={status}>
-              {humanise(status)}
+              {t(humanise(status))}
             </option>
           ))}
         </select>
-        <Button type="submit">Filter</Button>
+        <Button type="submit">{t('Filter')}</Button>
         {query || params.status ? (
           <Link href="/jobs" className="text-[12px] text-(--text-faint) underline">
-            Clear
+            {t('Clear')}
           </Link>
         ) : null}
       </form>
@@ -126,11 +135,11 @@ export default async function JobsPage({
       <Card className="overflow-hidden">
         {jobs.length === 0 ? (
           <EmptyState
-            title="No jobs match"
+            title={t('No jobs match')}
             description={
               query || params.status
-                ? 'Try a different search or clear the filter.'
-                : 'Jobs appear here once a vehicle is checked in.'
+                ? t('Try a different search or clear the filter.')
+                : t('Jobs appear here once a vehicle is checked in.')
             }
           />
         ) : (
@@ -138,19 +147,20 @@ export default async function JobsPage({
             <Table>
               <thead>
                 <tr>
-                  <Th>Job</Th>
-                  <Th>Vehicle</Th>
-                  <Th>Customer</Th>
-                  <Th>Work</Th>
-                  <Th>Technician</Th>
-                  <Th numeric>Value</Th>
-                  <Th>Status</Th>
+                  <Th>{t('Job')}</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Customer')}</Th>
+                  <Th>{t('Work')}</Th>
+                  <Th>{t('Technician')}</Th>
+                  <Th numeric>{t('Value')}</Th>
+                  <Th>{t('Status')}</Th>
                 </tr>
               </thead>
               <tbody>
                 {jobs.map((job) => {
                   const estimate = job.estimates[0];
-                  const primary = job.technicians.find((t) => t.isPrimary) ?? job.technicians[0];
+                  const primary =
+                    job.technicians.find((tech) => tech.isPrimary) ?? job.technicians[0];
 
                   return (
                     <Tr key={job.id}>
@@ -182,7 +192,7 @@ export default async function JobsPage({
                       </Td>
                       <Td className="text-(--text-soft)">
                         {primary?.user.name ?? (
-                          <span className="text-(--text-faint)">Unassigned</span>
+                          <span className="text-(--text-faint)">{t('Unassigned')}</span>
                         )}
                       </Td>
                       <Td numeric className="text-(--text-soft)">
@@ -194,7 +204,7 @@ export default async function JobsPage({
                       </Td>
                       <Td>
                         <Badge tone={toneFor(job.status)} dot>
-                          {humanise(job.status)}
+                          {t(humanise(job.status))}
                         </Badge>
                       </Td>
                     </Tr>
@@ -207,19 +217,19 @@ export default async function JobsPage({
       </Card>
 
       {pages > 1 ? (
-        <nav className="mt-4 flex items-center justify-between" aria-label="Pagination">
+        <nav className="mt-4 flex items-center justify-between" aria-label={t('Pagination')}>
           <p className="text-[12px] text-(--text-faint)">
-            Page {page} of {pages}
+            {t('Page {page} of {pages}', { page, pages })}
           </p>
           <div className="flex gap-2">
             {page > 1 ? (
               <Link href={buildHref(params, page - 1)}>
-                <Button size="sm">Previous</Button>
+                <Button size="sm">{t('Previous')}</Button>
               </Link>
             ) : null}
             {page < pages ? (
               <Link href={buildHref(params, page + 1)}>
-                <Button size="sm">Next</Button>
+                <Button size="sm">{t('Next')}</Button>
               </Link>
             ) : null}
           </div>

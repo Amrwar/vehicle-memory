@@ -17,8 +17,12 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { CatalogueError, createProduct } from '@/lib/catalogue';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'New part' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('New part') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -98,6 +102,7 @@ export default async function NewPartPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { orgId } = await requireSession('inventory:write');
+  const t = await tFor();
   const params = await searchParams;
 
   const categories = await prisma.productCategory.findMany({
@@ -118,33 +123,33 @@ export default async function NewPartPage({
 
   return (
     <>
-      <BackLink href="/parts">All parts</BackLink>
+      <BackLink href="/parts">{t('All parts')}</BackLink>
 
       <PageHeader
-        eyebrow="Inventory"
-        title="New part"
-        description="The number on the box and a name a customer would understand."
+        eyebrow={t('Inventory')}
+        title={t('New part')}
+        description={t('The number on the box and a name a customer would understand.')}
       />
 
       {params.problem ? (
         <Alert tone="danger" className="mb-5">
-          {params.problem}
+          {t(params.problem)}
         </Alert>
       ) : null}
 
       {warning ? (
         <Alert tone="warning" className="mb-5">
-          {warning}
+          {t(warning)}
         </Alert>
       ) : null}
 
       <form action={save} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="grid gap-5">
           <Card>
-            <CardHeader title="What it is" />
+            <CardHeader title={t('What it is')} />
             <CardBody className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-[14rem_1fr]">
-                <Field label="Part number" hint="As printed by the supplier">
+                <Field label={t('Part number')} hint={t('As printed by the supplier')}>
                   <Input
                     name="partNumber"
                     defaultValue={params.partNumber ?? ''}
@@ -152,36 +157,38 @@ export default async function NewPartPage({
                     autoFocus
                     spellCheck={false}
                     className="font-mono uppercase"
+                    // i18n-ignore
                     placeholder="BP-1042"
                   />
                 </Field>
-                <Field label="Name" hint="Goes on the invoice">
+                <Field label={t('Name')} hint={t('Goes on the invoice')}>
                   <Input
                     name="name"
                     defaultValue={params.name ?? ''}
                     required
-                    placeholder="Front brake pads, ceramic"
+                    placeholder={t('Front brake pads, ceramic')}
                   />
                 </Field>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Brand" hint="Optional">
+                <Field label={t('Brand')} hint={t('Optional')}>
+                  {/* i18n-ignore */}
                   <Input name="brand" defaultValue={params.brand ?? ''} placeholder="Brembo" />
                 </Field>
-                <Field label="Sold by">
+                <Field label={t('Sold as')}>
                   <Select name="unit" defaultValue={params.unit ?? 'each'}>
-                    <option value="each">Each</option>
-                    <option value="pair">Pair</option>
-                    <option value="set">Set</option>
-                    <option value="litre">Litre</option>
-                    <option value="metre">Metre</option>
-                    <option value="kg">Kilogram</option>
+                    <option value="each">{t('Each')}</option>
+                    <option value="pair">{t('Pair')}</option>
+                    <option value="set">{t('Set')}</option>
+                    <option value="litre">{t('Litre')}</option>
+                    <option value="metre">{t('Metre')}</option>
+                    <option value="kg">{t('Kilogram')}</option>
                   </Select>
                 </Field>
-                <Field label="Category" hint="Optional">
+                <Field label={t('Category')} hint={t('Optional')}>
                   <Select name="categoryId" defaultValue={params.categoryId ?? ''}>
-                    <option value="">None</option>
+                    <option value="">{t('None')}</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
@@ -191,7 +198,7 @@ export default async function NewPartPage({
                 </Field>
               </div>
 
-              <Field label="Barcode" hint="Optional. Scanned at the counter.">
+              <Field label={t('Barcode')} hint={t('Optional. Scanned at the counter.')}>
                 <Input
                   name="barcode"
                   defaultValue={params.barcode ?? ''}
@@ -205,9 +212,9 @@ export default async function NewPartPage({
 
         <div className="grid content-start gap-5">
           <Card>
-            <CardHeader title="Prices" description="Before VAT" />
+            <CardHeader title={t('Prices')} description={t('Before VAT')} />
             <CardBody className="grid gap-4">
-              <Field label="Cost" hint="What you pay. Sets the opening average cost.">
+              <Field label={t('Cost')} hint={t('What you pay. Sets the opening average cost.')}>
                 <Input
                   name="costPrice"
                   inputMode="decimal"
@@ -216,7 +223,7 @@ export default async function NewPartPage({
                   className="tabular-nums"
                 />
               </Field>
-              <Field label="Sell price" hint="What the customer pays">
+              <Field label={t('Sell price')} hint={t('What the customer pays')}>
                 <Input
                   name="sellPrice"
                   inputMode="decimal"
@@ -229,7 +236,10 @@ export default async function NewPartPage({
           </Card>
 
           <Card>
-            <CardHeader title="Stock" description="Leave both at zero to be told nothing" />
+            <CardHeader
+              title={t('Stock')}
+              description={t('Leave both at zero to be told nothing')}
+            />
             <CardBody className="grid gap-4">
               <label className="flex items-start gap-2.5 text-[13px] leading-relaxed">
                 <input
@@ -239,12 +249,13 @@ export default async function NewPartPage({
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
                 />
                 <span>
-                  Held in stock. Untick for something fitted straight off the supplier&rsquo;s van,
-                  which then never shows as out.
+                  {t(
+                    'Held in stock. Untick for something fitted straight off the supplier’s van, which then never shows as out.',
+                  )}
                 </span>
               </label>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Reorder at" hint="Warn when on hand falls to this">
+                <Field label={t('Reorder at')} hint={t('Warn when on hand falls to this')}>
                   <Input
                     name="reorderPoint"
                     inputMode="numeric"
@@ -253,7 +264,7 @@ export default async function NewPartPage({
                     className="tabular-nums"
                   />
                 </Field>
-                <Field label="Reorder quantity" hint="How many to suggest">
+                <Field label={t('Reorder quantity')} hint={t('How many to suggest')}>
                   <Input
                     name="reorderQty"
                     inputMode="numeric"
@@ -267,7 +278,7 @@ export default async function NewPartPage({
           </Card>
 
           <Button type="submit" variant="primary" size="lg" block>
-            Add the part
+            {t('Add the part')}
           </Button>
         </div>
       </form>

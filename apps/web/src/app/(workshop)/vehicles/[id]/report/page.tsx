@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 
+import { msg, type Translator } from '@carnet/core';
 import {
   Badge,
   Button,
@@ -19,9 +20,13 @@ import { BackLink } from '@/components/back-link';
 import { hashShareToken } from '@/lib/auth';
 import { audit, requireSession } from '@/lib/guard';
 import { reportFor } from '@/lib/handover';
+import { tFor } from '@/lib/i18n';
 import { orgCanReadVehicle } from '@/lib/passport';
 
-export const metadata: Metadata = { title: 'Vehicle report' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Vehicle report') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -38,11 +43,11 @@ export const dynamic = 'force-dynamic';
  * wrong in a way nobody could see.
  */
 const KIND = {
-  PRIVATE: 'Private owner',
-  COMPANY: 'Company',
-  FLEET: 'Fleet',
-  DEALER: 'Dealer',
-  FINANCE: 'Finance company',
+  PRIVATE: msg('Private owner'),
+  COMPANY: msg('Company'),
+  FLEET: msg('Fleet'),
+  DEALER: msg('Dealer'),
+  FINANCE: msg('Finance company'),
 } as const;
 
 /**
@@ -74,7 +79,7 @@ async function issueCode(formData: FormData) {
     data: {
       vehicleId,
       tokenHash: hashShareToken(token),
-      label: 'Buyer check code',
+      label: msg('Buyer check code'),
       createdByUserId: user.userId,
       expiresAt,
     },
@@ -92,10 +97,18 @@ async function issueCode(formData: FormData) {
   redirect(`/vehicles/${vehicleId}/report?code=${encodeURIComponent(token)}`);
 }
 
-function held(months: number): string {
-  if (months < 1) return 'less than a month';
-  if (months < 24) return `${months} month${months === 1 ? '' : 's'}`;
-  return `${Math.floor(months / 12)} years`;
+function held(t: Translator, months: number, current: boolean): string {
+  if (months < 1) return current ? t('less than a month, still') : t('less than a month');
+  if (months === 1) return current ? t('1 month, still') : t('1 month');
+  if (months < 24) {
+    return current
+      ? t('{count} months, still', { count: months })
+      : t('{count} months', { count: months });
+  }
+  const years = Math.floor(months / 12);
+  return current
+    ? t('{count} years, still', { count: years })
+    : t('{count} years', { count: years });
 }
 
 export default async function VehicleReportPage({
@@ -108,6 +121,7 @@ export default async function VehicleReportPage({
   const { orgId } = await requireSession('vehicle:read');
   const { id } = await params;
   const { code } = await searchParams;
+  const t = await tFor();
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
@@ -122,11 +136,11 @@ export default async function VehicleReportPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href={`/vehicles/${id}`}>Back to the vehicle</BackLink>
+        <BackLink href={`/vehicles/${id}`}>{t('Back to the vehicle')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Carnet vehicle report"
+        eyebrow={t('Carnet vehicle report')}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {name}
@@ -135,7 +149,7 @@ export default async function VehicleReportPage({
             ) : null}
           </span>
         }
-        description={report.verdict}
+        description={t(report.verdict)}
       />
 
       <Card
@@ -153,26 +167,26 @@ export default async function VehicleReportPage({
             dot
           >
             {report.chain === 'INTACT'
-              ? 'Verified'
+              ? t('Verified')
               : report.chain === 'BROKEN'
-                ? 'Does not check out'
-                : 'Unverified'}
+                ? t('Does not check out')
+                : t('Unverified')}
           </Badge>
-          <p className="min-w-0 flex-1 text-[13px] leading-relaxed">{report.chainWords}</p>
+          <p className="min-w-0 flex-1 text-[13px] leading-relaxed">{t(report.chainWords)}</p>
         </CardBody>
       </Card>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <div className="grid gap-5">
           <Card className="overflow-hidden">
-            <CardHeader title="What the record says" />
+            <CardHeader title={t('What the record says')} />
             <ul className="divide-y divide-(--border)">
               {report.headline.map((line) => (
                 <li
                   key={line.label}
                   className="flex items-center justify-between gap-3 px-4 py-2.5"
                 >
-                  <span className="text-[13px] text-(--text-soft)">{line.label}</span>
+                  <span className="text-[13px] text-(--text-soft)">{t(line.label)}</span>
                   <span
                     className={`datum text-[13px] font-medium ${
                       line.concern === 'STOP'
@@ -182,12 +196,12 @@ export default async function VehicleReportPage({
                           : ''
                     }`}
                   >
-                    {line.value}
+                    {t(line.value)}
                   </span>
                 </li>
               ))}
               <li className="flex items-center justify-between gap-3 px-4 py-2.5">
-                <span className="text-[13px] text-(--text-soft)">VIN</span>
+                <span className="text-[13px] text-(--text-soft)">{t('VIN')}</span>
                 <Vin value={report.vehicle.vin} />
               </li>
             </ul>
@@ -195,24 +209,28 @@ export default async function VehicleReportPage({
 
           <Card className="overflow-hidden">
             <CardHeader
-              title="Owners"
-              description="How many, and how long each kept it. No names: those belong to them."
+              title={t('Owners')}
+              description={t(
+                'How many, and how long each kept it. No names: those belong to them.',
+              )}
             />
             <ul className="divide-y divide-(--border)">
               {report.owners.map((owner) => (
                 <li key={owner.position} className="flex items-center justify-between px-4 py-2.5">
                   <span className="text-[13px]">
-                    Owner {owner.position} · {KIND[owner.kind]}
+                    {t('Owner {position} · {kind}', {
+                      position: owner.position,
+                      kind: t(KIND[owner.kind]),
+                    })}
                   </span>
                   <span className="text-[12px] text-(--text-faint)">
-                    {held(owner.months)}
-                    {owner.current ? ', still' : ''}
+                    {held(t, owner.months, owner.current)}
                   </span>
                 </li>
               ))}
               {report.owners.length === 0 ? (
                 <li className="px-4 py-3 text-[13px] text-(--text-soft)">
-                  No ownership on record.
+                  {t('No ownership on record.')}
                 </li>
               ) : null}
             </ul>
@@ -222,13 +240,13 @@ export default async function VehicleReportPage({
         <div className="grid gap-5">
           <Card className="border-(--warning)">
             <CardHeader
-              title="What this does not cover"
-              description="Said here rather than left for somebody to discover."
+              title={t('What this does not cover')}
+              description={t('Said here rather than left for somebody to discover.')}
             />
             <CardBody>
               <ul className="grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
                 {report.gaps.map((gap) => (
-                  <li key={gap}>{gap}</li>
+                  <li key={gap}>{t(gap)}</li>
                 ))}
               </ul>
             </CardBody>
@@ -237,13 +255,15 @@ export default async function VehicleReportPage({
           {report.questions.length > 0 ? (
             <Card>
               <CardHeader
-                title="Worth asking about"
-                description="Each of these has an innocent explanation and at least one that is not."
+                title={t('Worth asking about')}
+                description={t(
+                  'Each of these has an innocent explanation and at least one that is not.',
+                )}
               />
               <CardBody>
                 <ul className="grid gap-2 text-[13px] leading-relaxed">
                   {report.questions.map((question) => (
-                    <li key={question}>{question}</li>
+                    <li key={question}>{t(question)}</li>
                   ))}
                 </ul>
               </CardBody>
@@ -252,25 +272,28 @@ export default async function VehicleReportPage({
 
           <Card>
             <CardHeader
-              title="Give a buyer a code"
-              description="They check the same figures at /verify, with no account and nothing about the owner."
+              title={t('Give a buyer a code')}
+              description={t(
+                'They check the same figures at /verify, with no account and nothing about the owner.',
+              )}
             />
             {code ? (
               <CardBody className="grid gap-2">
-                <p className="text-[13px]">Written down now, or it is gone:</p>
+                <p className="text-[13px]">{t('Written down now, or it is gone:')}</p>
                 <p className="datum rounded-md border border-(--border) bg-(--surface-sunken) px-3 py-2 text-[15px] font-semibold break-all">
                   {code}
                 </p>
                 <p className="text-[12px] text-(--text-faint)">
-                  Good for ninety days. Only its fingerprint is stored, so this screen is the one
-                  chance to copy it. Issue another whenever you need one.
+                  {t(
+                    'Good for ninety days. Only its fingerprint is stored, so this screen is the one chance to copy it. Issue another whenever you need one.',
+                  )}
                 </p>
               </CardBody>
             ) : (
               <form action={issueCode}>
                 <input type="hidden" name="vehicleId" value={id} />
                 <CardBody>
-                  <Button type="submit">Issue a check code</Button>
+                  <Button type="submit">{t('Issue a check code')}</Button>
                 </CardBody>
               </form>
             )}
@@ -279,7 +302,7 @@ export default async function VehicleReportPage({
           <Card>
             <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
               <Link href={`/vehicles/${id}`} className="font-medium text-(--brand-text) underline">
-                Back to the vehicle
+                {t('Back to the vehicle')}
               </Link>
             </CardBody>
           </Card>

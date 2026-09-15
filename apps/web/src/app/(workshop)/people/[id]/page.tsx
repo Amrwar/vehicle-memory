@@ -1,4 +1,4 @@
-import { explainCommission, toNumber } from '@carnet/core';
+import { explainCommission, toNumber, type Translator } from '@carnet/core';
 import {
   Badge,
   Card,
@@ -24,6 +24,7 @@ import { prisma } from '@carnet/db';
 import { PlanWall } from '@/components/plan-wall';
 import { BackLink } from '@/components/back-link';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { commissionFor, draftTimesheet, teamProductivity } from '@/lib/people';
 
 export const dynamic = 'force-dynamic';
@@ -34,12 +35,13 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const t = await tFor();
   const employee = await prisma.employee.findUnique({
     where: { id },
     select: { displayName: true },
   });
 
-  return { title: employee?.displayName ?? 'Employee' };
+  return { title: employee?.displayName ?? t('Employee') };
 }
 
 /**
@@ -51,6 +53,7 @@ export async function generateMetadata({
  */
 export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const { orgId, plan, region } = await requireSession('people:read');
+  const t = await tFor();
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'payroll')) {
@@ -104,7 +107,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/people">Everyone</BackLink>
+        <BackLink href="/people">{t('Everyone')}</BackLink>
       </div>
 
       <PageHeader
@@ -113,24 +116,24 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         description={[employee.jobTitle, employee.location?.name].filter(Boolean).join(' · ')}
         actions={
           <Badge tone={employee.isActive ? 'success' : 'neutral'}>
-            {employee.isActive ? 'Active' : 'Left'}
+            {employee.isActive ? t('Active') : t('Left')}
           </Badge>
         }
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Utilisation"
+          label={t('Utilisation')}
           value={mine?.utilisationPct === null || !mine ? '—' : `${mine.utilisationPct}%`}
-          note="Last 14 days"
+          note={t('Last 14 days')}
         />
         <StatTile
-          label="Efficiency"
+          label={t('Efficiency')}
           value={mine?.efficiencyPct === null || !mine ? '—' : `${mine.efficiencyPct}%`}
-          note="Sold against clocked"
+          note={t('Sold against clocked')}
         />
         <StatTile
-          label="Productivity"
+          label={t('Productivity')}
           value={mine?.productivityPct === null || !mine ? '—' : `${mine.productivityPct}%`}
           tone={
             !mine || mine.productivityPct === null
@@ -139,10 +142,10 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                 ? 'success'
                 : 'warning'
           }
-          note="Sold against paid"
+          note={t('Sold against paid')}
         />
         <StatTile
-          label="Cost per hour"
+          label={t('Cost per hour')}
           value={
             currentRate ? (
               <Money
@@ -156,8 +159,13 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           }
           note={
             currentRate
-              ? `Since ${currentRate.effectiveFrom.toLocaleDateString(region.locale, { month: 'short', year: 'numeric' })}`
-              : 'No rate set'
+              ? t('Since {time}', {
+                  time: currentRate.effectiveFrom.toLocaleDateString(region.locale, {
+                    month: 'short',
+                    year: 'numeric',
+                  }),
+                })
+              : t('No rate set')
           }
         />
       </StatRow>
@@ -166,24 +174,24 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Pay history"
-              description="A rate is closed and superseded, never edited"
+              title={t('Pay history')}
+              description={t('A rate is closed and superseded, never edited')}
             />
             {employee.payRates.length === 0 ? (
               <EmptyState
-                title="No pay rate"
-                description="Nothing this person works can be costed until a rate exists."
+                title={t('No pay rate')}
+                description={t('Nothing this person works can be costed until a rate exists.')}
               />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>From</Th>
-                      <Th>To</Th>
-                      <Th numeric>Cost per hour</Th>
-                      <Th numeric>Charge per hour</Th>
-                      <Th numeric>Margin</Th>
+                      <Th>{t('From')}</Th>
+                      <Th>{t('To')}</Th>
+                      <Th numeric>{t('Cost per hour')}</Th>
+                      <Th numeric>{t('Charge per hour')}</Th>
+                      <Th numeric>{t('Margin')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -210,7 +218,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                               })
                             ) : (
                               <Badge tone="brand" size="sm">
-                                In force
+                                {t('In force')}
                               </Badge>
                             )}
                           </Td>
@@ -243,34 +251,46 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
               </TableWrap>
             )}
             <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
-              Time worked last March is costed at March&rsquo;s rate. A rise does not travel
-              backwards through jobs that have already been invoiced, which is what a single
-              editable cost figure would have done, silently.
+              {t(
+                'Time worked last March is costed at March’s rate. A rise does not travel backwards through jobs that have already been invoiced, which is what a single editable cost figure would have done, silently.',
+              )}
             </CardBody>
           </Card>
 
           <Card>
             <CardHeader
-              title="This week"
-              description={`${periodStart.toLocaleDateString(region.locale, { day: 'numeric', month: 'short' })} to today, not yet submitted`}
+              title={t('This week')}
+              description={t('{date} to today, not yet submitted', {
+                date: periodStart.toLocaleDateString(region.locale, {
+                  day: 'numeric',
+                  month: 'short',
+                }),
+              })}
             />
             <CardBody>
               <KeyValue
+                t={t}
                 items={[
                   {
-                    label: 'Ordinary',
-                    value: `${(timesheet.totals.ordinaryMinutes / 60).toFixed(1)}h`,
+                    label: t('Ordinary'),
+                    value: t('{hours}h', {
+                      hours: (timesheet.totals.ordinaryMinutes / 60).toFixed(1),
+                    }),
                   },
                   {
-                    label: 'Overtime',
-                    value: `${(timesheet.totals.overtimeMinutes / 60).toFixed(1)}h`,
+                    label: t('Overtime'),
+                    value: t('{hours}h', {
+                      hours: (timesheet.totals.overtimeMinutes / 60).toFixed(1),
+                    }),
                   },
                   {
-                    label: 'Absence',
-                    value: `${(timesheet.totals.absenceMinutes / 60).toFixed(1)}h`,
+                    label: t('Absence'),
+                    value: t('{hours}h', {
+                      hours: (timesheet.totals.absenceMinutes / 60).toFixed(1),
+                    }),
                   },
                   {
-                    label: 'Ordinary pay',
+                    label: t('Ordinary pay'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -280,7 +300,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                     ),
                   },
                   {
-                    label: 'Overtime pay',
+                    label: t('Overtime pay'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -290,7 +310,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                     ),
                   },
                   {
-                    label: 'Gross',
+                    label: t('Gross'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -309,16 +329,16 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           {commission ? (
             <Card>
               <CardHeader
-                title="Commission"
-                description={`${commission.scheme.name} · last 14 days`}
+                title={t('Commission')}
+                description={`${commission.scheme.name} · ${t('last 14 days')}`}
               />
               <CardBody className="grid gap-2 text-[13px]">
                 <div className="flex justify-between">
-                  <span className="text-(--text-faint)">Basis</span>
-                  <span>{humaniseBasis(commission.scheme.basis)}</span>
+                  <span className="text-(--text-faint)">{t('Basis')}</span>
+                  <span>{humaniseBasis(commission.scheme.basis, t)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-(--text-faint)">Basis total</span>
+                  <span className="text-(--text-faint)">{t('Basis total')}</span>
                   <Money
                     currency={region.currency}
                     locale={region.locale}
@@ -326,7 +346,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   />
                 </div>
                 <div className="flex justify-between border-t border-(--border) pt-2 font-medium">
-                  <span>Earned</span>
+                  <span>{t('Earned')}</span>
                   <Money
                     currency={region.currency}
                     locale={region.locale}
@@ -334,7 +354,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   />
                 </div>
                 <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                  {explainCommission(commission.result)}
+                  {t(explainCommission(commission.result))}
                 </p>
               </CardBody>
             </Card>
@@ -343,14 +363,15 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
 
         <aside className="grid content-start gap-5">
           <Card>
-            <CardHeader title="Employment" />
+            <CardHeader title={t('Employment')} />
             <CardBody>
               <KeyValue
+                t={t}
                 items={[
-                  { label: 'Reference', value: employee.reference },
-                  { label: 'Type', value: employee.employment.toLowerCase() },
+                  { label: t('Reference'), value: employee.reference },
+                  { label: t('Type'), value: t(employee.employment.toLowerCase()) },
                   {
-                    label: 'Started',
+                    label: t('Started'),
                     value: employee.startedOn.toLocaleDateString(region.locale, {
                       day: 'numeric',
                       month: 'short',
@@ -358,11 +379,14 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                     }),
                   },
                   {
-                    label: 'Contracted',
-                    value: `${(employee.weeklyMinutes / 60).toFixed(1)}h/week`,
+                    label: t('Contracted'),
+                    value: t('{hours}h/week', { hours: (employee.weeklyMinutes / 60).toFixed(1) }),
                   },
-                  { label: 'Holiday', value: `${Number(employee.holidayEntitlementDays)} days` },
-                  { label: 'Account', value: employee.user?.email ?? 'No login' },
+                  {
+                    label: t('Holiday'),
+                    value: t('{days} days', { days: Number(employee.holidayEntitlementDays) }),
+                  },
+                  { label: t('Account'), value: employee.user?.email ?? t('No login') },
                 ]}
                 columns={1}
               />
@@ -370,9 +394,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           </Card>
 
           <Card>
-            <CardHeader title="Qualifications" />
+            <CardHeader title={t('Qualifications')} />
             {employee.certifications.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">None recorded.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">{t('None recorded.')}</CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {employee.certifications.map((certification) => {
@@ -389,14 +413,14 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                             tone={days < 0 ? 'danger' : days < 60 ? 'warning' : 'neutral'}
                             size="sm"
                           >
-                            {days < 0 ? 'Expired' : `${days}d`}
+                            {days < 0 ? t('Expired') : t('{days}d', { days })}
                           </Badge>
                         ) : null}
                       </div>
                       <p className="mt-0.5 text-[11px] text-(--text-faint)">
                         {[certification.authority, certification.reference]
                           .filter(Boolean)
-                          .join(' · ') || 'No reference'}
+                          .join(' · ') || t('No reference')}
                       </p>
                     </li>
                   );
@@ -406,9 +430,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           </Card>
 
           <Card>
-            <CardHeader title="Timesheets" />
+            <CardHeader title={t('Timesheets')} />
             {employee.timesheets.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">None yet.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">{t('None yet.')}</CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {employee.timesheets.map((sheet) => (
@@ -429,9 +453,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                         })}
                       </p>
                       <p className="text-[11px] text-(--text-faint)">
-                        {(sheet.ordinaryMinutes / 60).toFixed(1)}h
+                        {t('{hours}h', { hours: (sheet.ordinaryMinutes / 60).toFixed(1) })}
                         {sheet.overtimeMinutes > 0
-                          ? ` + ${(sheet.overtimeMinutes / 60).toFixed(1)}h overtime`
+                          ? ` + ${t('{hours}h overtime', { hours: (sheet.overtimeMinutes / 60).toFixed(1) })}`
                           : ''}
                       </p>
                     </div>
@@ -447,7 +471,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                         size="sm"
                         className="mt-0.5 block"
                       >
-                        {sheet.status.toLowerCase()}
+                        {t(sheet.status.toLowerCase())}
                       </Badge>
                     </div>
                   </li>
@@ -457,9 +481,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           </Card>
 
           <Card>
-            <CardHeader title="Absence" />
+            <CardHeader title={t('Absence')} />
             {employee.absences.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">None booked.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">{t('None booked.')}</CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {employee.absences.map((absence) => (
@@ -468,7 +492,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                     className="flex items-baseline justify-between gap-2 px-4 py-2.5"
                   >
                     <div>
-                      <p className="text-[13px] capitalize">{absence.type.toLowerCase()}</p>
+                      <p className="text-[13px] capitalize">{t(absence.type.toLowerCase())}</p>
                       <p className="text-[11px] text-(--text-faint)">
                         {absence.startsOn.toLocaleDateString(region.locale, {
                           day: 'numeric',
@@ -482,7 +506,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                       </p>
                     </div>
                     <span className="tabular text-[12px] text-(--text-soft)">
-                      {Number(absence.days)}d
+                      {t('{days}d', { days: Number(absence.days) })}
                     </span>
                   </li>
                 ))}
@@ -495,18 +519,18 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
   );
 }
 
-function humaniseBasis(basis: string): string {
+function humaniseBasis(basis: string, t: Translator): string {
   switch (basis) {
     case 'LABOUR_REVENUE':
-      return 'Labour sold';
+      return t('Labour sold');
     case 'LABOUR_PROFIT':
-      return 'Labour profit';
+      return t('Labour profit');
     case 'PARTS_PROFIT':
-      return 'Parts margin';
+      return t('Parts margin');
     case 'JOB_PROFIT':
-      return 'Whole job profit';
+      return t('Whole job profit');
     case 'PER_JOB':
-      return 'Per job completed';
+      return t('Per job completed');
     default:
       return basis;
   }

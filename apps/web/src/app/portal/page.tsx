@@ -21,7 +21,10 @@ import { referralsForPortalUser } from '@/lib/referrals';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Home' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Home') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -145,14 +148,22 @@ export default async function PortalPage() {
                               {orgName}
                               {estimate ? (
                                 <>
-                                  {' '}
-                                  · estimated{' '}
-                                  <span className="font-medium text-(--text)">
-                                    <Money
-                                      amount={Number(estimate.total)}
-                                      currency={estimate.currency}
-                                    />
-                                  </span>
+                                  {' · '}
+                                  {t('estimated {amount}')
+                                    .split('{amount}')
+                                    .flatMap((part, index) =>
+                                      index === 0
+                                        ? [part]
+                                        : [
+                                            <span key={index} className="font-medium text-(--text)">
+                                              <Money
+                                                amount={Number(estimate.total)}
+                                                currency={estimate.currency}
+                                              />
+                                            </span>,
+                                            part,
+                                          ],
+                                    )}
                                 </>
                               ) : null}
                             </p>
@@ -216,8 +227,9 @@ export default async function PortalPage() {
                             {vehicle.year} {vehicle.make} {vehicle.model}
                           </p>
                           <p className="text-[13px] text-(--text-soft)">
-                            The manufacturer has an open safety recall on this car. The fix is free;
-                            book it in.
+                            {t(
+                              'The manufacturer has an open safety recall on this car. The fix is free; book it in.',
+                            )}
                           </p>
                         </div>
                         <Link href={`/portal/book?vehicle=${vehicle.id}`}>
@@ -274,15 +286,17 @@ export default async function PortalPage() {
                           ) : null}
                         </div>
                         <p className="mt-3 text-[13px] text-(--text-soft)">
-                          <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events}{' '}
+                          <Mileage km={vehicle.lastOdometerKm} t={t} /> ·{' '}
                           {vehicle._count.events === 1
-                            ? t('entry on its passport')
-                            : t('entries on its passport')}
+                            ? t('1 entry on its passport')
+                            : t('{count} entries on its passport', {
+                                count: vehicle._count.events,
+                              })}
                         </p>
                         <div className="mt-4 flex items-center justify-between gap-2">
                           {active ? (
                             <Badge tone={toneFor(active.job.status as JobStatus)} dot>
-                              {humanise(active.job.status as JobStatus)}
+                              {t(humanise(active.job.status as JobStatus))}
                             </Badge>
                           ) : vehicle.recalls.length > 0 ? (
                             <Badge tone="danger" dot>
@@ -336,7 +350,7 @@ export default async function PortalPage() {
                         </span>
                       ) : null}
                       <Badge tone={toneFor(job.status as JobStatus)} size="sm">
-                        {humanise(job.status as JobStatus)}
+                        {t(humanise(job.status as JobStatus))}
                       </Badge>
                     </li>
                   ))}
@@ -361,8 +375,8 @@ export default async function PortalPage() {
               </p>
               <p className="mt-2 text-[12px] text-(--text-soft)">
                 {referrals.length > 0
-                  ? 'Your points and a code that brings a friend.'
-                  : 'Your points, workshop by workshop.'}
+                  ? t('Your points and a code that brings a friend.')
+                  : t('Your points, workshop by workshop.')}
               </p>
             </Link>
           ) : null}

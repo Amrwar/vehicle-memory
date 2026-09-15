@@ -7,8 +7,12 @@ import { requireUser } from '@/lib/guard';
 import { passportsForOwner } from '@/lib/passports';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
+import type { Translator } from '@carnet/core';
 
-export const metadata: Metadata = { title: 'Your passports' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Your passports') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -35,10 +39,17 @@ export default async function PortalPassportsPage() {
       </h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {rows.length === 0
-          ? 'Each car you own has a passport: its history, kept by every garage that worked on it.'
+          ? t(
+              'Each car you own has a passport: its history, kept by every garage that worked on it.',
+            )
           : summary.broken > 0
-            ? `${summary.passports} ${summary.passports === 1 ? 'car' : 'cars'}. One record does not verify; the garage that keeps it has been told.`
-            : `${summary.passports} ${summary.passports === 1 ? 'car' : 'cars'}, ${summary.entries} ${summary.entries === 1 ? 'entry' : 'entries'}, every record sound.`}
+            ? summary.passports === 1
+              ? t('1 car. One record does not verify; the garage that keeps it has been told.')
+              : t(
+                  '{count} cars. One record does not verify; the garage that keeps it has been told.',
+                  { count: summary.passports },
+                )
+            : soundSummary(t, summary.passports, summary.entries)}
       </p>
 
       {rows.length === 0 ? (
@@ -70,10 +81,8 @@ export default async function PortalPassportsPage() {
                       </div>
                       <p className="mt-1 text-[13px] text-(--text-faint)">
                         {row.entries === 0
-                          ? 'Nothing recorded yet.'
-                          : `${row.entries} ${row.entries === 1 ? 'entry' : 'entries'} from ${row.workshops} ${row.workshops === 1 ? 'garage' : 'garages'}${
-                              date(row.firstRecorded) ? `, since ${date(row.firstRecorded)}` : ''
-                            }.`}
+                          ? t('Nothing recorded yet.')
+                          : recordLine(t, row.entries, row.workshops, date(row.firstRecorded))}
                       </p>
                     </div>
                     {row.entries === 0 ? null : row.intact ? (
@@ -117,4 +126,30 @@ export default async function PortalPassportsPage() {
       </p>
     </PortalShell>
   );
+}
+
+function soundSummary(t: Translator, cars: number, entries: number): string {
+  const vars = { cars, entries };
+  if (cars === 1) {
+    return entries === 1
+      ? t('1 car, 1 entry, every record sound.')
+      : t('1 car, {entries} entries, every record sound.', vars);
+  }
+  return entries === 1
+    ? t('{cars} cars, 1 entry, every record sound.', vars)
+    : t('{cars} cars, {entries} entries, every record sound.', vars);
+}
+
+function recordLine(t: Translator, entries: number, garages: number, since: string | null): string {
+  const vars = { entries, garages, date: since ?? '' };
+  if (since) {
+    if (entries === 1) return t('1 entry from 1 garage, since {date}.', vars);
+    return garages === 1
+      ? t('{entries} entries from 1 garage, since {date}.', vars)
+      : t('{entries} entries from {garages} garages, since {date}.', vars);
+  }
+  if (entries === 1) return t('1 entry from 1 garage.');
+  return garages === 1
+    ? t('{entries} entries from 1 garage.', vars)
+    : t('{entries} entries from {garages} garages.', vars);
 }

@@ -1,4 +1,4 @@
-import { money, type Region } from '@carnet/core';
+import { money, msg, type Region } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -28,8 +28,12 @@ import { PlanWall } from '@/components/plan-wall';
 import { closeTill, completeSale, openTill, recentSales, sellableParts } from '@/lib/counter';
 import { findGiftCard, GiftCardError } from '@/lib/giftcards';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Counter' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Counter') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -120,7 +124,7 @@ async function sell(formData: FormData) {
   redirect(
     result.ok
       ? `/counter?sold=${result.reference}&change=${result.changeMinor ?? 0}`
-      : `/counter?error=${encodeURIComponent(result.error ?? 'That sale could not be taken.')}`,
+      : `/counter?error=${encodeURIComponent(result.error ?? msg('That sale could not be taken.'))}`,
   );
 }
 
@@ -152,6 +156,7 @@ export default async function CounterPage({
   }
 
   const params = await searchParams;
+  const t = await tFor();
 
   const [till, sales, parts] = await Promise.all([
     openTill(orgId, user.locationId),
@@ -166,13 +171,13 @@ export default async function CounterPage({
   return (
     <>
       <PageHeader
-        eyebrow="Counter"
-        title="Over the counter"
-        description="A sale with no job behind it"
+        eyebrow={t('Counter')}
+        title={t('Over the counter')}
+        description={t('A sale with no job behind it')}
         actions={
           <Link href="/parts">
             <Button size="sm" variant="ghost">
-              Parts
+              {t('Parts')}
             </Button>
           </Link>
         }
@@ -180,28 +185,31 @@ export default async function CounterPage({
 
       {params.error ? (
         <Alert tone="danger" className="mb-5">
-          {params.error}
+          {t(params.error)}
         </Alert>
       ) : null}
 
       {params.sold ? (
         <Alert tone="success" className="mb-5">
           {Number(params.change ?? 0) > 0
-            ? `${params.sold} taken. Change ${formatMoney(Number(params.change) / 100, region)}.`
-            : `${params.sold} taken.`}
+            ? t('{reference} taken. Change {change}.', {
+                reference: params.sold,
+                change: formatMoney(Number(params.change) / 100, region),
+              })
+            : t('{reference} taken.', { reference: params.sold })}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="Taken today"
+          label={t('Taken today')}
           value={
             <Money currency={region.currency} locale={region.locale} amount={todaysTotal / 100} />
           }
-          note="Counter sales only"
+          note={t('Counter sales only')}
         />
         <StatTile
-          label="Cash in the drawer"
+          label={t('Cash in the drawer')}
           value={
             <Money
               currency={region.currency}
@@ -209,10 +217,10 @@ export default async function CounterPage({
               amount={(till?.expectedMinor ?? 0) / 100}
             />
           }
-          note={till ? 'Float plus takings' : 'No till open'}
+          note={till ? t('Float plus takings') : t('No till open')}
         />
         <StatTile
-          label="On card"
+          label={t('On card')}
           value={
             <Money
               currency={region.currency}
@@ -220,24 +228,24 @@ export default async function CounterPage({
               amount={(till?.cardMinor ?? 0) / 100}
             />
           }
-          note="Settles with the processor"
+          note={t('Settles with the processor')}
         />
         <StatTile
-          label="Sales this session"
+          label={t('Sales this session')}
           value={till?.saleCount ?? 0}
-          note="Since the till opened"
+          note={t('Since the till opened')}
         />
       </StatRow>
 
       <div className="grid gap-5 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <div className="grid content-start gap-5">
           <Card>
-            <CardHeader title="New sale" description="One screen, one submit" />
+            <CardHeader title={t('New sale')} description={t('One screen, one submit')} />
             <CardBody>
               <form action={sell} className="grid gap-3.5">
-                <Field label="Part" hint="Or leave blank and describe it">
+                <Field label={t('Part')} hint={t('Or leave blank and describe it')}>
                   <Select name="productId" defaultValue="">
-                    <option value="">Something not in the catalogue</option>
+                    <option value="">{t('Something not in the catalogue')}</option>
                     {parts.map((part) => {
                       const onHand = part.stockLevels.reduce(
                         (total, level) => total + Number(level.onHand),
@@ -246,19 +254,20 @@ export default async function CounterPage({
 
                       return (
                         <option key={part.id} value={part.id}>
-                          {part.partNumber} — {part.name} ({onHand} on hand)
+                          {part.partNumber} — {part.name} ({t('{count} on hand', { count: onHand })}
+                          )
                         </option>
                       );
                     })}
                   </Select>
                 </Field>
 
-                <Field label="Description" hint="Used when no part is chosen">
-                  <Input name="description" placeholder="Wiper blade, generic" />
+                <Field label={t('Description')} hint={t('Used when no part is chosen')}>
+                  <Input name="description" placeholder={t('Wiper blade, generic')} />
                 </Field>
 
                 <div className="grid grid-cols-2 gap-3.5">
-                  <Field label="Quantity">
+                  <Field label={t('Quantity')}>
                     <Input
                       name="quantity"
                       type="number"
@@ -269,40 +278,45 @@ export default async function CounterPage({
                     />
                   </Field>
 
-                  <Field label="Price each" hint="Blank uses the catalogue">
+                  <Field label={t('Price each')} hint={t('Blank uses the catalogue')}>
                     <Input name="unitPrice" type="number" min={0} step="0.01" placeholder="0.00" />
                   </Field>
                 </div>
 
-                <Field label="Paid by">
+                <Field label={t('Paid by')}>
                   <Select name="tender" defaultValue="CASH">
-                    <option value="CASH">Cash</option>
-                    <option value="CARD">Card</option>
-                    <option value="GIFT_CARD">Gift card, the rest in cash</option>
+                    <option value="CASH">{t('Cash')}</option>
+                    <option value="CARD">{t('Card')}</option>
+                    <option value="GIFT_CARD">{t('Gift card, the rest in cash')}</option>
                   </Select>
                 </Field>
 
-                <Field label="Gift card number" hint="Only for a gift card. Read it off the card.">
+                <Field
+                  label={t('Gift card number')}
+                  hint={t('Only for a gift card. Read it off the card.')}
+                >
                   <Input
                     name="cardNumber"
                     maxLength={14}
                     autoCapitalize="characters"
                     className="datum uppercase tracking-[0.12em]"
+                    // i18n-ignore
                     placeholder="XXXX-XXXX-XXXX"
                   />
                 </Field>
 
-                <Field label="Cash given" hint="Leave blank for the exact amount">
+                <Field label={t('Cash given')} hint={t('Leave blank for the exact amount')}>
                   <Input name="given" type="number" min={0} step="0.01" placeholder="20.00" />
                 </Field>
 
                 <Button type="submit" variant="primary" size="touch" block>
-                  Take the sale
+                  {t('Take the sale')}
                 </Button>
 
                 <p className="text-[12px] leading-relaxed text-(--text-faint)">
-                  The stock comes off the shelf and the ledger is posted as part of this one submit.
-                  There is no job to do it later.
+                  {t(
+                    'The stock comes off the shelf and the ledger is posted as part of this one submit. There is no job to do it later.',
+                  )}
                 </p>
               </form>
             </CardBody>
@@ -311,13 +325,18 @@ export default async function CounterPage({
           {till ? (
             <Card>
               <CardHeader
-                title="Close the till"
-                description={`Open since ${till.session.openedAt.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' })}`}
+                title={t('Close the till')}
+                description={t('Open since {time}', {
+                  time: till.session.openedAt.toLocaleTimeString(region.locale, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
+                })}
               />
               <CardBody>
                 <dl className="mb-3 grid gap-1.5 text-[13px]">
                   <div className="flex justify-between">
-                    <dt className="text-(--text-faint)">Opening float</dt>
+                    <dt className="text-(--text-faint)">{t('Opening float')}</dt>
                     <dd>
                       <Money
                         currency={region.currency}
@@ -327,7 +346,7 @@ export default async function CounterPage({
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-(--text-faint)">Cash taken</dt>
+                    <dt className="text-(--text-faint)">{t('Cash taken')}</dt>
                     <dd>
                       <Money
                         currency={region.currency}
@@ -337,7 +356,7 @@ export default async function CounterPage({
                     </dd>
                   </div>
                   <div className="flex justify-between border-t border-(--border) pt-1.5 font-medium">
-                    <dt>Should be in the drawer</dt>
+                    <dt>{t('Should be in the drawer')}</dt>
                     <dd>
                       <Money
                         currency={region.currency}
@@ -351,22 +370,26 @@ export default async function CounterPage({
                 <form action={close} className="grid gap-3">
                   <input type="hidden" name="sessionId" value={till.session.id} />
 
-                  <Field label="Counted" hint="What is actually there">
+                  <Field label={t('Counted')} hint={t('What is actually there')}>
                     <Input name="counted" type="number" min={0} step="0.01" required />
                   </Field>
 
-                  <Field label="Note" hint="Optional">
-                    <Input name="note" placeholder="Twenty short, checking the card machine." />
+                  <Field label={t('Note')} hint={t('Optional')}>
+                    <Input
+                      name="note"
+                      placeholder={t('Twenty short, checking the card machine.')}
+                    />
                   </Field>
 
                   <Button type="submit" block>
-                    Close and record the count
+                    {t('Close and record the count')}
                   </Button>
                 </form>
 
                 <p className="mt-2.5 text-[12px] leading-relaxed text-(--text-faint)">
-                  The difference is recorded, not absorbed. A drawer that agrees with itself every
-                  evening is a formality, not a control.
+                  {t(
+                    'The difference is recorded, not absorbed. A drawer that agrees with itself every evening is a formality, not a control.',
+                  )}
                 </p>
               </CardBody>
             </Card>
@@ -374,22 +397,22 @@ export default async function CounterPage({
         </div>
 
         <Card className="overflow-hidden">
-          <CardHeader title="Recent sales" description="Newest first" />
+          <CardHeader title={t('Recent sales')} description={t('Newest first')} />
           {sales.length === 0 ? (
             <EmptyState
-              title="Nothing sold over the counter yet"
-              description="The first sale opens a till session."
+              title={t('Nothing sold over the counter yet')}
+              description={t('The first sale opens a till session.')}
             />
           ) : (
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Receipt</Th>
-                    <Th>What</Th>
-                    <Th>Paid by</Th>
-                    <Th>Sold by</Th>
-                    <Th numeric>Total</Th>
+                    <Th>{t('Receipt')}</Th>
+                    <Th>{t('What')}</Th>
+                    <Th>{t('Paid by')}</Th>
+                    <Th>{t('Sold by')}</Th>
+                    <Th numeric>{t('Total')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,7 +430,7 @@ export default async function CounterPage({
                       <Td>
                         {sale.tenders.map((tender) => (
                           <Badge key={tender.id} tone="neutral" size="sm" className="mr-1">
-                            {tender.kind.toLowerCase()}
+                            {t(tender.kind.toLowerCase().replace('_', ' '))}
                           </Badge>
                         ))}
                       </Td>

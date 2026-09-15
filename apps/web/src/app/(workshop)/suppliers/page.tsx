@@ -15,12 +15,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Suppliers' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Suppliers') };
+}
 export const dynamic = 'force-dynamic';
 
 export default async function SuppliersPage() {
   const { db, region } = await requireSession('inventory:read');
+  const t = await tFor();
 
   const suppliers = await db.supplier.findMany({
     where: { isActive: true },
@@ -34,16 +39,20 @@ export default async function SuppliersPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Inventory"
-        title="Suppliers"
-        description={`${suppliers.length} active supplier${suppliers.length === 1 ? '' : 's'}`}
+        eyebrow={t('Inventory')}
+        title={t('Suppliers')}
+        description={
+          suppliers.length === 1
+            ? t('1 active supplier')
+            : t('{count} active suppliers', { count: suppliers.length })
+        }
         actions={
           <>
             <Link href="/purchasing">
-              <Button>Purchasing</Button>
+              <Button>{t('Purchasing')}</Button>
             </Link>
             <Link href="/suppliers/new">
-              <Button variant="primary">New supplier</Button>
+              <Button variant="primary">{t('New supplier')}</Button>
             </Link>
           </>
         }
@@ -52,21 +61,21 @@ export default async function SuppliersPage() {
       <Card className="overflow-hidden">
         {suppliers.length === 0 ? (
           <EmptyState
-            title="No suppliers yet"
-            description="Add the motor factors you actually buy from."
+            title={t('No suppliers yet')}
+            description={t('Add the motor factors you actually buy from.')}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Supplier</Th>
-                  <Th>Account</Th>
-                  <Th>Contact</Th>
-                  <Th numeric>Terms</Th>
-                  <Th numeric>Open orders</Th>
-                  <Th numeric>Owed</Th>
-                  <Th>Flags</Th>
+                  <Th>{t('Supplier')}</Th>
+                  <Th>{t('Account')}</Th>
+                  <Th>{t('Contact')}</Th>
+                  <Th numeric>{t('Terms')}</Th>
+                  <Th numeric>{t('Open orders')}</Th>
+                  <Th numeric>{t('Owed')}</Th>
+                  <Th>{t('Flags')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -92,7 +101,7 @@ export default async function SuppliersPage() {
                         {supplier.email ?? supplier.phone ?? '—'}
                       </Td>
                       <Td numeric className="text-(--text-soft)">
-                        {supplier.paymentTermsDays} days
+                        {t('{count} days', { count: supplier.paymentTermsDays })}
                       </Td>
                       <Td numeric>{open || '—'}</Td>
                       <Td numeric className={owed > 0 ? 'font-medium' : 'text-(--text-faint)'}>
@@ -101,7 +110,7 @@ export default async function SuppliersPage() {
                       <Td>
                         {disputed > 0 ? (
                           <Badge tone="danger" size="sm">
-                            {disputed} disputed
+                            {t('{count} disputed', { count: disputed })}
                           </Badge>
                         ) : (
                           <span className="text-(--text-faint)">—</span>

@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * Taking a photograph of what was found.
  *
@@ -29,6 +31,7 @@ export function PhotoCapture({
   count: number;
   onDone?: () => void;
 }) {
+  const t = useT();
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [added, setAdded] = React.useState(count);
@@ -129,10 +132,14 @@ export function PhotoCapture({
           />
           <circle cx="10" cy="10.6" r="2.6" stroke="currentColor" strokeWidth="1.4" />
         </svg>
-        {busy ? 'Sending…' : added > 0 ? `Photo (${added})` : 'Take a photo'}
+        {busy
+          ? t('Sending…')
+          : added > 0
+            ? t('Photo ({count})', { count: added })
+            : t('Take a photo')}
       </label>
 
-      {error ? <p className="text-[12px] text-(--danger)">{error}</p> : null}
+      {error ? <p className="text-[12px] text-(--danger)">{t(error)}</p> : null}
     </div>
   );
 }

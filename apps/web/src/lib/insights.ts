@@ -15,6 +15,8 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { readerLocale } from './i18n';
+
 /**
  * What the data supports saying, against the database.
  *
@@ -59,7 +61,7 @@ export async function mileageFindings(
     orgName: row.org?.name ?? null,
   }));
 
-  const findings = inspectHistory(readings, now);
+  const findings = inspectHistory(readings, now, await readerLocale());
 
   return {
     findings,

@@ -496,12 +496,22 @@ where the work happens.
 | FR-7004 | AN3   | `PurchaseOrderLine`              | `measureSupplier()`, `compareSuppliers()`, `supplierOptionsFor()`, the part page, the order form | `owner.test.ts`, `verify-owner.ts`   | Done   |
 | FR-7005 | AN3   | `GoodsReceipt`, `SupplierReturn` | `performanceOverTime()`, `describePerformance()`, `supplierOverTime()`                           | `owner.test.ts`, `verify-owner.ts`   | Done   |
 | FR-7006 | AN4   | —                                | `ownerDay()`, the dashboard                                                                      | `verify-owner.ts`, `verify-authz.ts` | Done   |
-| FR-3907 | A1    | —                                | `assertNotFlooding()`                                                                            | `verify-credentials.ts`              | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`          | `digest()`                                                                                       | `verify-credentials.ts`              | Done   |
-| FR-3801 | —     | —                                | `/api/inbound/resend`                                                                            | `smoke.ts`                           | Done   |
-| FR-3802 | —     | —                                | `verify()` tolerance                                                                             | `smoke.ts`                           | Done   |
-| FR-3803 | —     | `Organization.slug`              | `organisationFor()`                                                                              | `smoke.ts`                           | Done   |
-| FR-3804 | —     | —                                | `INBOUND_WEBHOOK_SECRET`                                                                         | `smoke.ts`                           | Done   |
+
+## Every word translated
+
+| Req     | Story | Schema                  | Implementation                                                         | Test                                      | Status |
+| ------- | ----- | ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------- | ------ |
+| FR-7101 | AO1   | —                       | `tFor()`, `useT()`, `msg()`, `generateMetadata`, the area dictionaries | `i18n-scan.ts`, `verify-languages.ts`     | Done   |
+| FR-7102 | AO2   | —                       | `translate()` reading finished sentences through keys with slots       | `i18n.test.ts`, `i18n-scan.ts --messages` | Done   |
+| FR-7103 | AO1   | —                       | calendar words in the translator, `readerLocale()`                     | `verify-languages.ts`                     | Done   |
+| FR-7104 | AO1   | —                       | `i18n-ignore` on examples; no keys for names                           | `i18n.test.ts`                            | Done   |
+| FR-7105 | AO2   | —                       | `infra/scripts/i18n-scan.ts`, `i18n-missing.ts`                        | `verify-languages.ts`                     | Done   |
+| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                  | `verify-credentials.ts`                   | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                             | `verify-credentials.ts`                   | Done   |
+| FR-3801 | —     | —                       | `/api/inbound/resend`                                                  | `smoke.ts`                                | Done   |
+| FR-3802 | —     | —                       | `verify()` tolerance                                                   | `smoke.ts`                                | Done   |
+| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                    | `smoke.ts`                                | Done   |
+| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                               | `smoke.ts`                                | Done   |
 
 ## What people say afterwards
 
@@ -806,9 +816,10 @@ details without a provider behind it would be worse than not having one.
 | Parts back, work out                               | 7                   | 7                      |
 | Finding anything                                   | 5                   | 5                      |
 | The owner's day, sharpened                         | 6                   | 6                      |
-| **Total**                                          | **478**             | **472 (99%)**          |
+| Every word translated                              | 5                   | 5                      |
+| **Total**                                          | **483**             | **477 (99%)**          |
 
-The requirements document lists 562 requirements. 84 of
+The requirements document lists 567 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

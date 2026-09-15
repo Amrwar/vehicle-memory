@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 40.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 40.5.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -728,6 +728,22 @@ def build() -> None:
         works="Refusing to state a rate or an average on too little keeps the figures fair to the people they name. Laying suppliers side by side, and leaving the choice to the person, fits how parts are really bought: the cheapest is not always the one that arrives by four o'clock.",
         shots=[("dashboard", "The dashboard in three blocks.", 16.4), ("comebacks", "Comebacks on the business report.", 16.4), ("reputation-trend", "How reputation is moving.", 16.4)],
         source="docs/00-product/06-roadmap.md, Phase 40",
+    )
+
+    design(
+        doc,
+        title="Every word translated",
+        when="Phase 40.5, 15 September 2026.",
+        why="A page that is half English is useless to somebody who reads only French or only Arabic. "
+            "The workshop's own screens, and the sentences that refuse something, had stayed in English.",
+        meaning=[
+            "Nothing about the look changes with the language except the direction: Arabic mirrors the navigation, the tables and the forms from the root element, and French and English read left to right.",
+            "Headings, labels, empty states, buttons, badges and page titles all turn. Names, registrations and what staff typed never do.",
+            "A refusal keeps its values: the job number, the amount, the date, with the month in the reader's language.",
+        ],
+        works="English stays the source, so the dictionaries read as sentences a person can check, and the scan that names any text left outside the translator keeps the next page from shipping half translated.",
+        shots=[("dashboard-ar", "The dashboard in Arabic.", 16.4), ("job-fr", "The jobs list in French.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 40.5",
     )
 
     # 11. Counter

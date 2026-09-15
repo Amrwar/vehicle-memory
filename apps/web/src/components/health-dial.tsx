@@ -1,3 +1,5 @@
+import { tFor } from '@/lib/i18n';
+
 /**
  * The health score, drawn.
  *
@@ -13,7 +15,7 @@
  * underneath in words, because a red arc and an amber arc are the same arc to
  * a good few of the people reading it.
  */
-export function HealthDial({
+export async function HealthDial({
   score,
   band,
   size = 132,
@@ -22,6 +24,7 @@ export function HealthDial({
   band: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' | 'UNKNOWN';
   size?: number;
 }) {
+  const t = await tFor();
   // A 240-degree sweep from south-west round to south-east.
   const start = 150;
   const sweep = 240;
@@ -55,8 +58,11 @@ export function HealthDial({
 
   const words =
     band === 'UNKNOWN'
-      ? 'Not enough on record to score this vehicle.'
-      : `Health ${score} out of 100, which is ${band.toLowerCase()}.`;
+      ? t('Not enough on record to score this vehicle.')
+      : t('Health {score} out of 100, which is {band}.', {
+          score: score ?? 0,
+          band: t(band.toLowerCase()),
+        });
 
   return (
     <div className="flex flex-col items-center">
@@ -91,7 +97,7 @@ export function HealthDial({
         </text>
       </svg>
       <span className="mt-1 text-[11px] font-medium tracking-wide text-(--text-faint) uppercase">
-        {band === 'UNKNOWN' ? 'not scored' : band.toLowerCase()}
+        {band === 'UNKNOWN' ? t('not scored') : t(band.toLowerCase())}
       </span>
     </div>
   );

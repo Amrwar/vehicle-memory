@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   changeRole,
   deactivateMember,
@@ -30,7 +31,10 @@ import {
   teamFor,
 } from '@/lib/team';
 
-export const metadata: Metadata = { title: 'Team' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Team') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -128,6 +132,7 @@ export default async function TeamPage({
 }) {
   const { orgId, user, region } = await requireSession('settings:read');
   const params = await searchParams;
+  const t = await tFor();
 
   const { members, invitations, locations } = await teamFor(orgId);
   const roles = invitableRoles(user.role);
@@ -139,13 +144,20 @@ export default async function TeamPage({
   return (
     <>
       <PageHeader
-        eyebrow="Settings"
-        title="Team"
-        description={`${active.length} active · ${invitations.length} invitation${invitations.length === 1 ? '' : 's'} open`}
+        eyebrow={t('Settings')}
+        title={t('Team')}
+        description={
+          invitations.length === 1
+            ? t('{active} active · 1 invitation open', { active: active.length })
+            : t('{active} active · {count} invitations open', {
+                active: active.length,
+                count: invitations.length,
+              })
+        }
         actions={
           <Link href="/settings">
             <Button size="sm" variant="ghost">
-              All settings
+              {t('All settings')}
             </Button>
           </Link>
         }
@@ -153,24 +165,25 @@ export default async function TeamPage({
 
       {params.error ? (
         <Alert tone="danger" className="mb-5">
-          {params.error}
+          {t(params.error)}
         </Alert>
       ) : null}
 
       {params.token && params.invited ? (
         <Card className="mb-5 border-(--success)">
           <CardHeader
-            title={`Invitation ready for ${params.invited}`}
-            description="Send them this link. It works once and lasts seven days."
+            title={t('Invitation ready for {email}', { email: params.invited })}
+            description={t('Send them this link. It works once and lasts seven days.')}
           />
           <CardBody>
             <p className="scroll-x datum rounded-(--radius-sm) bg-(--surface-sunk) px-3 py-2.5 text-[12px]">
+              {/* i18n-ignore */}
               {`/invite/${params.token}`}
             </p>
             <p className="mt-2.5 text-[12px] leading-relaxed text-(--text-faint)">
-              Shown here once and never recoverable, because only its fingerprint is stored. An
-              email is on its way too, but a link you can read out over the counter does not depend
-              on a mail server agreeing.
+              {t(
+                'Shown here once and never recoverable, because only its fingerprint is stored. An email is on its way too, but a link you can read out over the counter does not depend on a mail server agreeing.',
+              )}
             </p>
           </CardBody>
         </Card>
@@ -179,15 +192,18 @@ export default async function TeamPage({
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="grid gap-5">
           <Card className="overflow-hidden">
-            <CardHeader title="In the workshop" description="Role decides which screens they see" />
+            <CardHeader
+              title={t('In the workshop')}
+              description={t('Role decides which screens they see')}
+            />
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Name</Th>
-                    <Th>Role</Th>
-                    <Th>Site</Th>
-                    <Th>Last signed in</Th>
+                    <Th>{t('Name')}</Th>
+                    <Th>{t('Role')}</Th>
+                    <Th>{t('Site')}</Th>
+                    <Th>{t('Last signed in')}</Th>
                     {mayAdminister ? <Th /> : null}
                   </tr>
                 </thead>
@@ -200,7 +216,9 @@ export default async function TeamPage({
                         <Td>
                           <span className="font-medium">{member.user.name}</span>
                           {isSelf ? (
-                            <span className="ml-1.5 text-[11px] text-(--text-faint)">you</span>
+                            <span className="ml-1.5 text-[11px] text-(--text-faint)">
+                              {t('you')}
+                            </span>
                           ) : null}
                           <span className="block text-[11px] text-(--text-faint)">
                             {member.user.email}
@@ -217,22 +235,22 @@ export default async function TeamPage({
                               >
                                 {roles.map((role) => (
                                   <option key={role} value={role}>
-                                    {humaniseRole(role)}
+                                    {t(humaniseRole(role))}
                                   </option>
                                 ))}
                               </Select>
                               <Button type="submit" size="sm" variant="ghost">
-                                Save
+                                {t('Save')}
                               </Button>
                             </form>
                           ) : (
                             <Badge tone={member.role === 'OWNER' ? 'brand' : 'neutral'} size="sm">
-                              {humaniseRole(member.role as Role)}
+                              {t(humaniseRole(member.role as Role))}
                             </Badge>
                           )}
                         </Td>
                         <Td className="text-(--text-soft)">
-                          {member.location?.name ?? 'All sites'}
+                          {member.location?.name ?? t('All sites')}
                         </Td>
                         <Td className="text-(--text-faint)">
                           {member.user.lastLoginAt
@@ -240,7 +258,7 @@ export default async function TeamPage({
                                 day: 'numeric',
                                 month: 'short',
                               })
-                            : 'Never'}
+                            : t('Never')}
                         </Td>
                         {mayAdminister ? (
                           <Td numeric>
@@ -248,7 +266,7 @@ export default async function TeamPage({
                               <form action={remove}>
                                 <input type="hidden" name="userId" value={member.userId} />
                                 <Button type="submit" size="sm" variant="ghost">
-                                  Remove
+                                  {t('Remove')}
                                 </Button>
                               </form>
                             )}
@@ -264,7 +282,7 @@ export default async function TeamPage({
 
           {invitations.length > 0 ? (
             <Card className="overflow-hidden">
-              <CardHeader title="Waiting to be accepted" description="Open invitations" />
+              <CardHeader title={t('Waiting to be accepted')} description={t('Open invitations')} />
               <ul className="divide-y divide-(--border)">
                 {invitations.map((invitation) => {
                   const days = Math.ceil(
@@ -279,16 +297,18 @@ export default async function TeamPage({
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium">{invitation.email}</p>
                         <p className="text-[11px] text-(--text-faint)">
-                          {humaniseRole(invitation.role as Role)}
-                          {invitation.invitedBy ? ` · sent by ${invitation.invitedBy.name}` : ''}
-                          {` · ${days} day${days === 1 ? '' : 's'} left`}
+                          {t(humaniseRole(invitation.role as Role))}
+                          {invitation.invitedBy
+                            ? ` · ${t('sent by {name}', { name: invitation.invitedBy.name })}`
+                            : ''}
+                          {` · ${days === 1 ? t('1 day left') : t('{count} days left', { count: days })}`}
                         </p>
                       </div>
                       {mayAdminister ? (
                         <form action={withdraw}>
                           <input type="hidden" name="invitationId" value={invitation.id} />
                           <Button type="submit" size="sm" variant="ghost">
-                            Withdraw
+                            {t('Withdraw')}
                           </Button>
                         </form>
                       ) : null}
@@ -302,8 +322,10 @@ export default async function TeamPage({
           {past.length > 0 ? (
             <Card className="overflow-hidden">
               <CardHeader
-                title="No longer here"
-                description="Kept, not deleted. Their work is what last year's costs are built on."
+                title={t('No longer here')}
+                description={t(
+                  "Kept, not deleted. Their work is what last year's costs are built on.",
+                )}
               />
               <ul className="divide-y divide-(--border)">
                 {past.map((member) => (
@@ -313,7 +335,7 @@ export default async function TeamPage({
                   >
                     <span className="text-[13px] text-(--text-soft)">{member.user.name}</span>
                     <span className="text-[11px] text-(--text-faint)">
-                      {humaniseRole(member.role as Role)}
+                      {t(humaniseRole(member.role as Role))}
                     </span>
                   </li>
                 ))}
@@ -325,33 +347,36 @@ export default async function TeamPage({
         <aside className="grid content-start gap-5">
           {mayAdminister ? (
             <Card>
-              <CardHeader title="Invite somebody" description="They set their own password" />
+              <CardHeader
+                title={t('Invite somebody')}
+                description={t('They set their own password')}
+              />
               <CardBody>
                 <form action={invite} className="grid gap-3.5">
-                  <Field label="Email">
+                  <Field label={t('Email')}>
                     <Input
                       name="email"
                       type="email"
                       inputMode="email"
                       required
-                      placeholder="them@yourworkshop.co.uk"
+                      placeholder={t('them@yourworkshop.co.uk')}
                     />
                   </Field>
 
-                  <Field label="Role" hint="Changeable later">
+                  <Field label={t('Role')} hint={t('Changeable later')}>
                     <Select name="role" defaultValue="TECHNICIAN">
                       {roles.map((role) => (
                         <option key={role} value={role}>
-                          {humaniseRole(role)}
+                          {t(humaniseRole(role))}
                         </option>
                       ))}
                     </Select>
                   </Field>
 
                   {locations.length > 1 ? (
-                    <Field label="Site" hint="Leave blank for all sites">
+                    <Field label={t('Site')} hint={t('Leave blank for all sites')}>
                       <Select name="locationId" defaultValue="">
-                        <option value="">All sites</option>
+                        <option value="">{t('All sites')}</option>
                         {locations.map((location) => (
                           <option key={location.id} value={location.id}>
                             {location.name}
@@ -361,37 +386,40 @@ export default async function TeamPage({
                     </Field>
                   ) : null}
 
-                  <Field label="Message" hint="Optional, shown on the invitation">
-                    <Input name="message" placeholder="Looking forward to having you." />
+                  <Field label={t('Message')} hint={t('Optional, shown on the invitation')}>
+                    <Input name="message" placeholder={t('Looking forward to having you.')} />
                   </Field>
 
                   <Button type="submit" variant="primary" block>
-                    Create invitation
+                    {t('Create invitation')}
                   </Button>
                 </form>
               </CardBody>
             </Card>
           ) : (
             <EmptyState
-              title="Read only"
-              description="Only an owner or a manager can change who is in the workshop."
+              title={t('Read only')}
+              description={t('Only an owner or a manager can change who is in the workshop.')}
             />
           )}
 
           <Card>
-            <CardHeader title="How roles work" />
+            <CardHeader title={t('How roles work')} />
             <CardBody className="grid gap-2 text-[12px] leading-relaxed text-(--text-soft)">
               <p>
-                A role decides which screens somebody reaches. Anything they cannot use is absent
-                rather than greyed out, because a disabled control is an invitation to ask why.
+                {t(
+                  'A role decides which screens somebody reaches. Anything they cannot use is absent rather than greyed out, because a disabled control is an invitation to ask why.',
+                )}
               </p>
               <p>
-                Nobody can hand out a role above their own, and nobody can change their own. A
-                manager promoting themselves is the exact thing roles exist to prevent, and the form
-                for it would look identical to changing anybody else.
+                {t(
+                  'Nobody can hand out a role above their own, and nobody can change their own. A manager promoting themselves is the exact thing roles exist to prevent, and the form for it would look identical to changing anybody else.',
+                )}
               </p>
               <p>
-                Removing somebody ends their sessions immediately and keeps every record they wrote.
+                {t(
+                  'Removing somebody ends their sessions immediately and keeps every record they wrote.',
+                )}
               </p>
             </CardBody>
           </Card>

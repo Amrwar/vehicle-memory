@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * The way back from a page reached by link.
  *
@@ -11,13 +13,8 @@ import * as React from 'react';
  * arrived from a message expects a way to the front door. This offers both:
  * history when it is ours to go back into, the front door otherwise.
  */
-export function BackToOrigin({
-  fallback = '/',
-  label = 'Back',
-}: {
-  fallback?: string;
-  label?: string;
-}) {
+export function BackToOrigin({ fallback = '/', label }: { fallback?: string; label?: string }) {
+  const t = useT();
   const [canGoBack, setCanGoBack] = React.useState(false);
 
   React.useEffect(() => {
@@ -36,7 +33,7 @@ export function BackToOrigin({
         onClick={() => window.history.back()}
         className="inline-flex items-center gap-1.5 text-[13px] text-(--text-soft) hover:text-(--text) hover:underline"
       >
-        <span aria-hidden>←</span> {label}
+        <span aria-hidden>←</span> {label ? t(label) : t('Back')}
       </button>
     );
   }

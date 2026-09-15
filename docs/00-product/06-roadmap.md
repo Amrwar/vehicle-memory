@@ -2053,6 +2053,52 @@ one part, reads one of them getting slower over the year, and reads the job,
 part, supplier, report, reputation and dashboard pages, the dashboard in
 French, and an order opened from a part arriving filled in.
 
+## Phase 40.5 — Every word translated
+
+**Scope.** Every piece of text a person reads, in French and in Arabic: every
+workshop page, the technician's surface, the shared components, the UI
+package's own words, page titles, and the sentences the product writes when
+it refuses something. Asked for by the user on 15 September 2026, during
+Phase 41: a page that is half English is useless to somebody who reads only
+French or only Arabic. Phase 41 was paused, its tested core kept aside, and
+resumed after.
+
+**Exit.** Somebody who reads no English can run the workshop from end to end
+in French or Arabic, and a sentence added later in English only is refused
+before it ships.
+
+**Status.** Built. A scanner reads the source with the TypeScript parser and
+names any text that reaches a page without passing through the translator:
+text between tags, text attributes, strings shown in braces on either side of
+a condition, text properties in objects on a page, the sentence handed to a
+?problem= redirect, and page titles. It found 4,322 pieces in 147 files, and
+now finds none. A second mode reads every sentence thrown by the web libraries
+and core, and every refusal returned as a message, including both sides of a
+condition and pieces joined with a plus; each is a key with numbered slots,
+and all 504 have French and Arabic. The translator matches a finished English
+sentence against keys with slots, fills the slots with the values it read,
+translates those values when they are known sentences, and puts English month
+and weekday names beside a number into the reader's language; a key whose
+fixed words are too small a share of the sentence is not trusted, so it cannot
+half-translate an unrelated sentence. The dictionaries are split by area of
+the product so each could be written without touching another's, and hold
+5,511 sentences in each language, from 417. Components that run in the browser
+read the language from the root layout; the UI package's components take the
+page's translator. Mileage findings and the buyer's report write their dates
+in the reader's locale. Changed on the way: the stock pages say "Still to
+arrive", "Arrived so far" and "Old unit (core)" where one English word had
+two meanings; the diary's placement sentence no longer reads "1 names no
+technician"; the inspection screen names the workshop's currency instead of
+pounds; names and example addresses are never translated. Left in English on
+purpose: what staff type, template bodies and drafted replies sent to the
+customer word for word, and the audit log's raw action codes on its own page.
+Emails and text messages to customers are not part of this phase: they
+depend on the recipient's language, not the reader's. The languages
+verification script now fails when the scanner finds any text or any refusal
+without both translations, reads five workshop pages in each language and
+checks a known sentence is translated and its English is not left on the
+page.
+
 ## Phase 41 — Tax, configurable
 
 Several taxes on a line, exempt customers, tax by site, inclusive or

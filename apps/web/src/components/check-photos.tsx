@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * Photographs of the car as it arrived or as it left. Phase 35.
  *
@@ -12,6 +14,7 @@ import { useRouter } from 'next/navigation';
  * times with a confirmation in between.
  */
 export function CheckPhotos({ checkId, count }: { checkId: string; count: number }) {
+  const t = useT();
   const router = useRouter();
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -106,9 +109,13 @@ export function CheckPhotos({ checkId, count }: { checkId: string; count: number
           />
           <circle cx="10" cy="10.6" r="2.6" stroke="currentColor" strokeWidth="1.4" />
         </svg>
-        {busy ? 'Sending…' : added > 0 ? `Add photos (${added} so far)` : 'Photograph the car'}
+        {busy
+          ? t('Sending…')
+          : added > 0
+            ? t('Add photos ({count} so far)', { count: added })
+            : t('Photograph the car')}
       </label>
-      {error ? <p className="text-[12px] text-(--danger)">{error}</p> : null}
+      {error ? <p className="text-[12px] text-(--danger)">{t(error)}</p> : null}
     </div>
   );
 }

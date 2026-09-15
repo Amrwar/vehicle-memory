@@ -1,7 +1,6 @@
 import {
   averageKmPerDay,
   humanise,
-  describeExpiry,
   documentKindLabel,
   humaniseEventType,
   projectServiceDue,
@@ -33,12 +32,21 @@ import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
 import { HealthDial } from '@/components/health-dial';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { DocumentUpload, DocumentRemove } from '@/components/document-upload';
 import { documentsFor, paperworkFor } from '@/lib/documents';
 import { networkStatementFor } from '@/lib/network';
 import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 import { conditionOf } from '@/lib/condition';
 import { coverForVehicle } from '@/lib/warranty';
+
+import {
+  expiryLabel,
+  insuranceLabel,
+  motLabel,
+  networkSentence,
+  paperworkSentence,
+} from '../statements';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,10 +60,11 @@ export async function generateMetadata({
     where: { id },
     select: { make: true, model: true, registration: true },
   });
+  const t = await tFor();
   return {
     title: vehicle
       ? `${vehicle.make} ${vehicle.model} ${vehicle.registration ?? ''}`.trim()
-      : 'Vehicle',
+      : t('Vehicle'),
   };
 }
 
@@ -76,6 +85,7 @@ export default async function VehiclePage({
   const { id } = await params;
   const notice = await searchParams;
   const { db, orgId, user, region } = await requireSession('vehicle:read');
+  const t = await tFor();
 
   const permitted = await orgCanReadVehicle(orgId, id);
   if (!permitted) notFound();
@@ -149,11 +159,11 @@ export default async function VehiclePage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/vehicles">All vehicles</BackLink>
+        <BackLink href="/vehicles">{t('All vehicles')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Vehicle passport"
+        eyebrow={t('Vehicle passport')}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {vehicle.year} {vehicle.make} {vehicle.model}
@@ -166,16 +176,16 @@ export default async function VehiclePage({
         actions={
           <>
             <Link href={`/audit/Vehicle/${vehicle.id}`}>
-              <Button variant="secondary">How this came to be</Button>
+              <Button variant="secondary">{t('How this came to be')}</Button>
             </Link>
             <Link href={`/vehicles/${vehicle.id}/report`}>
-              <Button>Buyer report</Button>
+              <Button>{t('Buyer report')}</Button>
             </Link>
             <Link href={`/vehicles/${vehicle.id}/transfer`}>
-              <Button>Transfer</Button>
+              <Button>{t('Transfer')}</Button>
             </Link>
             <Link href={`/jobs/new?vehicle=${vehicle.id}`}>
-              <Button variant="primary">New job</Button>
+              <Button variant="primary">{t('New job')}</Button>
             </Link>
           </>
         }
@@ -183,14 +193,17 @@ export default async function VehiclePage({
 
       {notice.adopted ? (
         <Alert tone="success" className="mb-5">
-          This vehicle is on your books now. Its history is below, and what you record continues it.
+          {t(
+            'This vehicle is on your books now. Its history is below, and what you record continues it.',
+          )}
         </Alert>
       ) : null}
 
       {notice.registered ? (
         <Alert tone={notice.warning ? 'warning' : 'success'} className="mb-5">
-          {notice.warning ??
-            'Added. Nobody on the network had seen this vehicle; its history starts here.'}
+          {notice.warning
+            ? t(notice.warning)
+            : t('Added. Nobody on the network had seen this vehicle; its history starts here.')}
         </Alert>
       ) : null}
 
@@ -199,16 +212,18 @@ export default async function VehiclePage({
           when and at what mileage, never what it cost or who did it. */}
       <Card className={`mb-5 ${network.otherEntries > 0 ? 'border-(--brand)' : ''}`}>
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[14px] leading-relaxed">{network.statement}</p>
+          <p className="text-[14px] leading-relaxed">
+            {networkSentence(t, network, region.locale)}
+          </p>
           <span className="flex flex-wrap gap-4">
             <Link
               href={`/vehicles/${vehicle.id}/passport`}
               className="text-[13px] font-medium text-(--brand-text) hover:underline"
             >
-              See it as the next owner will
+              {t('See it as the next owner will')}
             </Link>
             <Link href="/vehicles/find" className="text-[13px] text-(--brand-text) hover:underline">
-              Find another vehicle
+              {t('Find another vehicle')}
             </Link>
           </span>
         </CardBody>
@@ -218,40 +233,51 @@ export default async function VehiclePage({
         <div className="grid gap-5">
           <Card>
             <CardHeader
-              title="Identity"
-              action={<ChainFingerprint head={vehicle.chainHead} verified={verification.valid} />}
+              title={t('Identity')}
+              action={
+                <ChainFingerprint t={t} head={vehicle.chainHead} verified={verification.valid} />
+              }
             />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={3}
                 items={[
-                  { label: 'VIN', value: <Vin value={vehicle.vin} /> },
-                  { label: 'Registration', value: vehicle.registration },
-                  { label: 'Engine', value: vehicle.engineCode },
-                  { label: 'Fuel', value: vehicle.fuelType?.toLowerCase() },
-                  { label: 'Transmission', value: vehicle.transmission?.toLowerCase() },
-                  { label: 'Body', value: vehicle.bodyType },
-                  { label: 'Colour', value: vehicle.colour },
+                  { label: t('VIN'), value: <Vin value={vehicle.vin} /> },
+                  { label: t('Registration'), value: vehicle.registration },
+                  { label: t('Engine'), value: vehicle.engineCode },
                   {
-                    label: 'Odometer',
-                    value: <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />,
+                    label: t('Fuel'),
+                    value: vehicle.fuelType ? t(vehicle.fuelType.toLowerCase()) : null,
                   },
                   {
-                    label: 'Average use',
+                    label: t('Transmission'),
+                    value: vehicle.transmission ? t(vehicle.transmission.toLowerCase()) : null,
+                  },
+                  { label: t('Body'), value: vehicle.bodyType },
+                  { label: t('Colour'), value: vehicle.colour },
+                  {
+                    label: t('Odometer'),
+                    value: <Mileage t={t} locale={region.locale} km={vehicle.lastOdometerKm} />,
+                  },
+                  {
+                    label: t('Average use'),
                     value: kmPerDay
-                      ? `${Math.round(kmPerDay * 30).toLocaleString()} km/month`
+                      ? t('{km} km/month', {
+                          km: Math.round(kmPerDay * 30).toLocaleString(region.locale),
+                        })
                       : null,
                   },
                   {
-                    label: 'Current owner',
+                    label: t('Current owner'),
                     value: currentOwner?.ownerName,
                   },
                   {
-                    label: 'Owners on record',
+                    label: t('Owners on record'),
                     value: vehicle.ownerships.length || null,
                   },
                   {
-                    label: 'Events on record',
+                    label: t('Events on record'),
                     value: vehicle.eventCount,
                   },
                 ]}
@@ -259,11 +285,15 @@ export default async function VehiclePage({
 
               {!verification.valid ? (
                 <div className="mt-4 rounded-(--radius-md) border border-(--danger) bg-(--danger-soft) px-3 py-2.5 text-[13px] text-(--danger)">
-                  <p className="font-semibold">Integrity check failed</p>
+                  <p className="font-semibold">{t('Integrity check failed')}</p>
                   <p className="mt-0.5">
-                    The chain diverges at entry {verification.failedAt.sequence} (
-                    {verification.failedAt.reason.toLowerCase().replace('_', ' ')}). Entries before
-                    that point are unaffected.
+                    {t(
+                      'The chain diverges at entry {sequence} ({reason}). Entries before that point are unaffected.',
+                      {
+                        sequence: verification.failedAt.sequence,
+                        reason: t(verification.failedAt.reason.toLowerCase().replace('_', ' ')),
+                      },
+                    )}
                   </p>
                 </div>
               ) : null}
@@ -272,14 +302,18 @@ export default async function VehiclePage({
 
           <Card>
             <CardHeader
-              title="History"
-              description={`${vehicle.eventCount} entries, oldest first at the bottom`}
+              title={t('History')}
+              description={t('{count} entries, oldest first at the bottom', {
+                count: vehicle.eventCount,
+              })}
             />
 
             {vehicle.events.length === 0 ? (
               <EmptyState
-                title="No history yet"
-                description="Entries appear here automatically when a job on this vehicle is completed."
+                title={t('No history yet')}
+                description={t(
+                  'Entries appear here automatically when a job on this vehicle is completed.',
+                )}
               />
             ) : (
               <CardBody className="pt-2">
@@ -294,12 +328,14 @@ export default async function VehiclePage({
                         {events.map((event) => (
                           <TimelineEntry
                             key={event.id}
+                            t={t}
+                            locale={region.locale}
                             event={{
                               id: event.id,
                               type: event.type,
-                              typeLabel: humaniseEventType(event.type as VehicleEventType),
-                              title: event.title,
-                              summary: event.summary,
+                              typeLabel: t(humaniseEventType(event.type as VehicleEventType)),
+                              title: t(event.title),
+                              summary: event.summary ? t(event.summary) : null,
                               occurredAt: event.occurredAt,
                               odometerKm: event.odometerKm,
                               verification: event.verification,
@@ -319,7 +355,7 @@ export default async function VehiclePage({
         <aside className="grid content-start gap-5">
           {openRecalls.length > 0 ? (
             <Card className="border-(--danger)">
-              <CardHeader title="Open recalls" />
+              <CardHeader title={t('Open recalls')} />
               <ul className="divide-y divide-(--border)">
                 {openRecalls.map((item) => (
                   <li key={item.id} className="px-4 py-3">
@@ -335,23 +371,25 @@ export default async function VehiclePage({
 
           {due ? (
             <Card>
-              <CardHeader title="Next service" />
+              <CardHeader title={t('Next service')} />
               <CardBody className="grid gap-2 text-[13px]">
                 {due.dueKm ? (
                   <div className="flex justify-between">
-                    <span className="text-(--text-faint)">Due at</span>
-                    <span className="tabular">{due.dueKm.toLocaleString()} km</span>
+                    <span className="text-(--text-faint)">{t('Due at')}</span>
+                    <span className="tabular">{due.dueKm.toLocaleString(region.locale)} km</span>
                   </div>
                 ) : null}
                 {due.kmRemaining !== null ? (
                   <div className="flex justify-between">
-                    <span className="text-(--text-faint)">Remaining</span>
-                    <span className="tabular">{due.kmRemaining.toLocaleString()} km</span>
+                    <span className="text-(--text-faint)">{t('Remaining')}</span>
+                    <span className="tabular">
+                      {due.kmRemaining.toLocaleString(region.locale)} km
+                    </span>
                   </div>
                 ) : null}
                 {due.projectedDueAt ? (
                   <div className="flex justify-between">
-                    <span className="text-(--text-faint)">Projected</span>
+                    <span className="text-(--text-faint)">{t('Projected')}</span>
                     <span className="datum">
                       {due.projectedDueAt.toLocaleDateString(region.locale, {
                         month: 'short',
@@ -362,7 +400,7 @@ export default async function VehiclePage({
                 ) : null}
                 {due.isOverdue ? (
                   <Badge tone="danger" dot className="mt-1 w-fit">
-                    Overdue
+                    {t('Overdue')}
                   </Badge>
                 ) : null}
               </CardBody>
@@ -371,8 +409,8 @@ export default async function VehiclePage({
 
           <Card>
             <CardHeader
-              title="Paperwork"
-              description={paperwork.statement}
+              title={t('Paperwork')}
+              description={paperworkSentence(t, paperwork, region.locale)}
               action={
                 paperwork.mot !== 'NONE' || paperwork.insurance !== 'NONE' ? (
                   <span className="flex flex-wrap gap-1.5">
@@ -387,7 +425,7 @@ export default async function VehiclePage({
                         }
                         size="sm"
                       >
-                        MOT {describeExpiry(paperwork.motExpiresAt).toLowerCase()}
+                        {motLabel(t, paperwork.motExpiresAt, region.locale)}
                       </Badge>
                     ) : null}
                     {paperwork.insurance !== 'NONE' ? (
@@ -401,7 +439,7 @@ export default async function VehiclePage({
                         }
                         size="sm"
                       >
-                        Insurance {describeExpiry(paperwork.insuranceExpiresAt).toLowerCase()}
+                        {insuranceLabel(t, paperwork.insuranceExpiresAt, region.locale)}
                       </Badge>
                     ) : null}
                   </span>
@@ -410,8 +448,9 @@ export default async function VehiclePage({
             />
             {documents.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-soft)">
-                Nothing on file yet. The registration certificate, the MOT and the insurance are the
-                three worth having; a photograph of damage before repair is the fourth.
+                {t(
+                  'Nothing on file yet. The registration certificate, the MOT and the insurance are the three worth having; a photograph of damage before repair is the fourth.',
+                )}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -421,7 +460,7 @@ export default async function VehiclePage({
                     className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
                   >
                     <Badge tone="neutral" size="sm">
-                      {documentKindLabel(document.kind)}
+                      {t(documentKindLabel(document.kind))}
                     </Badge>
                     {document.url ? (
                       <a
@@ -451,11 +490,11 @@ export default async function VehiclePage({
                         }
                         size="sm"
                       >
-                        {describeExpiry(document.expiresAt)}
+                        {expiryLabel(t, document.expiresAt, region.locale)}
                       </Badge>
                     ) : null}
                     <span className="text-[12px] text-(--text-faint)">
-                      {document.addedBy} · {document.createdAt.toLocaleDateString(region.locale)}
+                      {t(document.addedBy)} · {document.createdAt.toLocaleDateString(region.locale)}
                     </span>
                     {document.mayRemove && mayAddDocuments ? (
                       <DocumentRemove vehicleId={vehicle.id} documentId={document.id} />
@@ -472,10 +511,10 @@ export default async function VehiclePage({
           </Card>
 
           <Card>
-            <CardHeader title="Jobs at this workshop" />
+            <CardHeader title={t('Jobs at this workshop')} />
             {jobs.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-faint)">
-                This vehicle has not been worked on here.
+                {t('This vehicle has not been worked on here.')}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -489,7 +528,7 @@ export default async function VehiclePage({
                         #{job.number}
                       </Link>
                       <Badge tone={toneFor(job.status as JobStatus)} size="sm">
-                        {humanise(job.status as JobStatus)}
+                        {t(humanise(job.status as JobStatus))}
                       </Badge>
                     </div>
                     <p className="mt-0.5 truncate text-[12px] text-(--text-soft)">
@@ -506,27 +545,28 @@ export default async function VehiclePage({
 
           <Card>
             <CardHeader
-              title="Condition"
-              description="Derived from what is on record, not stored anywhere."
+              title={t('Condition')}
+              description={t('Derived from what is on record, not stored anywhere.')}
             />
             <CardBody className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
               <HealthDial score={condition.health.score} band={condition.health.band} size={104} />
               <div>
-                <p className="text-[13px] leading-relaxed">{condition.health.summary}</p>
+                <p className="text-[13px] leading-relaxed">{t(condition.health.summary)}</p>
                 {condition.soon.length > 0 ? (
                   <p className="mt-2 text-[12px] text-(--text-soft)">
-                    Next likely: {condition.soon[0]!.label}
                     {condition.soon[0]!.kmAway != null
-                      ? ` in about ${Math.abs(condition.soon[0]!.kmAway).toLocaleString(region.locale)} km`
-                      : ''}
-                    .
+                      ? t('Next likely: {component} in about {km} km.', {
+                          component: t(condition.soon[0]!.label),
+                          km: Math.abs(condition.soon[0]!.kmAway).toLocaleString(region.locale),
+                        })
+                      : t('Next likely: {component}.', { component: t(condition.soon[0]!.label) })}
                   </p>
                 ) : null}
                 <Link
                   href={`/vehicles/${id}/condition`}
                   className="mt-2 inline-block text-[12px] font-medium text-(--brand-text) hover:underline"
                 >
-                  The whole working
+                  {t('The whole working')}
                 </Link>
               </div>
             </CardBody>
@@ -534,12 +574,12 @@ export default async function VehiclePage({
 
           <Card>
             <CardHeader
-              title="Under warranty"
-              description="What this workshop is still standing behind on this vehicle."
+              title={t('Under warranty')}
+              description={t('What this workshop is still standing behind on this vehicle.')}
             />
             {covers.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-soft)">
-                Nothing recorded. Cover is written as a job closes.
+                {t('Nothing recorded. Cover is written as a job closes.')}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -557,10 +597,14 @@ export default async function VehiclePage({
                         }
                         size="sm"
                       >
-                        {entry.status.active ? `${entry.status.daysLeft}d left` : 'expired'}
+                        {entry.status.active
+                          ? t('{days}d left', { days: entry.status.daysLeft })
+                          : t('expired')}
                       </Badge>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-(--text-faint)">{entry.status.summary}</p>
+                    <p className="mt-0.5 text-[11px] text-(--text-faint)">
+                      {t(entry.status.summary)}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -568,16 +612,16 @@ export default async function VehiclePage({
           </Card>
 
           <Card>
-            <CardHeader title="Ownership" />
+            <CardHeader title={t('Ownership')} />
             <ul className="divide-y divide-(--border)">
               {vehicle.ownerships.map((ownership) => (
                 <li key={ownership.id} className="px-4 py-2.5 text-[13px]">
-                  <p className="font-medium">{ownership.ownerName ?? 'Unnamed owner'}</p>
+                  <p className="font-medium">{ownership.ownerName ?? t('Unnamed owner')}</p>
                   <p className="datum text-[11px] text-(--text-faint)">
                     {ownership.startedAt.toLocaleDateString(region.locale)} —{' '}
                     {ownership.endedAt
                       ? ownership.endedAt.toLocaleDateString(region.locale)
-                      : 'present'}
+                      : t('present')}
                   </p>
                 </li>
               ))}

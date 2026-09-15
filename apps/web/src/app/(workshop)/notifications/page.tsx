@@ -1,12 +1,17 @@
 import { Badge, Button, Card, CardHeader, EmptyState, PageHeader } from '@carnet/ui';
+import { msg } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { markAllRead, notificationsFor } from '@/lib/search';
 
-export const metadata: Metadata = { title: 'Notifications' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Notifications') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -26,29 +31,30 @@ async function readAll() {
 }
 
 const KIND = {
-  ESTIMATE_DECIDED: 'quote',
-  MESSAGE_RECEIVED: 'message',
-  BOOKING_REQUESTED: 'booking',
-  PAYMENT_RECEIVED: 'payment',
-  PART_REQUESTED: 'part',
+  ESTIMATE_DECIDED: msg('quote'),
+  MESSAGE_RECEIVED: msg('message'),
+  BOOKING_REQUESTED: msg('booking'),
+  PAYMENT_RECEIVED: msg('payment'),
+  PART_REQUESTED: msg('part'),
 } as const;
 
 export default async function NotificationsPage() {
   const { orgId, user, region } = await requireSession();
   const rows = await notificationsFor(orgId, user.userId);
   const unread = rows.filter((row) => !row.readAt).length;
+  const t = await tFor();
 
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Notifications"
-        description="What happened that you may need to act on, each opening what it is about"
+        eyebrow={t('Workshop')}
+        title={t('Notifications')}
+        description={t('What happened that you may need to act on, each opening what it is about')}
         actions={
           unread > 0 ? (
             <form action={readAll}>
               <Button type="submit" variant="secondary">
-                Mark all read
+                {t('Mark all read')}
               </Button>
             </form>
           ) : undefined
@@ -56,11 +62,13 @@ export default async function NotificationsPage() {
       />
 
       <Card className="overflow-hidden">
-        <CardHeader title={unread > 0 ? `${unread} unread` : 'All read'} />
+        <CardHeader title={unread > 0 ? t('{count} unread', { count: unread }) : t('All read')} />
         {rows.length === 0 ? (
           <EmptyState
-            title="Nothing to tell you yet"
-            description="Approvals, messages from customers, online bookings, card payments and part requests appear here."
+            title={t('Nothing to tell you yet')}
+            description={t(
+              'Approvals, messages from customers, online bookings, card payments and part requests appear here.',
+            )}
           />
         ) : (
           <ul className="divide-y divide-(--border)">
@@ -75,7 +83,7 @@ export default async function NotificationsPage() {
                 >
                   <span className="min-w-0">
                     <span className={`block text-[14px] ${row.readAt ? '' : 'font-semibold'}`}>
-                      {row.title}
+                      {t(row.title)}
                     </span>
                     {row.body ? (
                       <span className="block truncate text-[12px] text-(--text-soft)">
@@ -92,7 +100,7 @@ export default async function NotificationsPage() {
                     </span>
                   </span>
                   <Badge tone={row.readAt ? 'neutral' : 'brand'} size="sm">
-                    {KIND[row.kind as keyof typeof KIND] ?? row.kind.toLowerCase()}
+                    {t(KIND[row.kind as keyof typeof KIND] ?? row.kind.toLowerCase())}
                   </Badge>
                 </Link>
               </li>

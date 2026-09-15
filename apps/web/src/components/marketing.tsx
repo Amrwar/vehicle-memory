@@ -164,6 +164,7 @@ export async function MarketingFooter() {
       <div className="border-t border-(--border)">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-2 px-4 py-4 text-[12px] text-(--text-faint) sm:px-6">
           <p>{t('Carnet is a working demonstration system. Figures shown are seeded data.')}</p>
+          {/* i18n-ignore */}
           <p>Amr Hefny</p>
         </div>
       </div>

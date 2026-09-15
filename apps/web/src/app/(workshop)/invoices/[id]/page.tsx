@@ -1,6 +1,7 @@
 import {
   describeSettlement,
   fromDecimal,
+  msg,
   type InvoiceState,
   type PaymentMethod,
   PaymentAttemptError,
@@ -47,6 +48,7 @@ import {
   recordPayment,
   recordRefund,
 } from '@/lib/money';
+import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,8 +59,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const { db } = await requireSession('invoice:read');
+  const t = await tFor();
   const invoice = await db.invoice.findUnique({ where: { id }, select: { number: true } });
-  return { title: invoice ? `Invoice ${invoice.number}` : 'Invoice' };
+  return { title: invoice ? t('Invoice {number}', { number: invoice.number }) : t('Invoice') };
 }
 
 const TONE = {
@@ -71,20 +74,20 @@ const TONE = {
 } as const;
 
 const METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'CARD', label: 'Card' },
-  { value: 'CASH', label: 'Cash' },
-  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
-  { value: 'CHEQUE', label: 'Cheque' },
-  { value: 'ONLINE', label: 'Online' },
-  { value: 'ACCOUNT', label: 'On account' },
+  { value: 'CARD', label: msg('Card') },
+  { value: 'CASH', label: msg('Cash') },
+  { value: 'BANK_TRANSFER', label: msg('Bank transfer') },
+  { value: 'CHEQUE', label: msg('Cheque') },
+  { value: 'ONLINE', label: msg('Online') },
+  { value: 'ACCOUNT', label: msg('On account') },
 ];
 
 /** Points are not typed in as an amount; they have a form of their own below. */
 const METHOD_LABELS: Record<string, string> = {
   ...Object.fromEntries(METHODS.map((m) => [m.value, m.label])),
-  LOYALTY: 'Points',
-  GIFT_CARD: 'Gift card',
-  DEPOSIT: 'Money held',
+  LOYALTY: msg('Points'),
+  GIFT_CARD: msg('Gift card'),
+  DEPOSIT: msg('Money held'),
 };
 
 /**
@@ -277,6 +280,7 @@ export default async function InvoicePage({
   const { id } = await params;
   const notice = await searchParams;
   const { orgId, user, region } = await requireSession('invoice:read');
+  const t = await tFor();
 
   const detail = await invoiceDetail(orgId, id);
   if (!detail) notFound();
@@ -316,29 +320,29 @@ export default async function InvoicePage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/invoices">All invoices</BackLink>
+        <BackLink href="/invoices">{t('All invoices')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow={`Invoice · ${invoice.customer.displayName}`}
+        eyebrow={t('Invoice · {customer}', { customer: invoice.customer.displayName })}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {invoice.number}
             <Badge tone={TONE[status]} dot>
-              {status.replace('_', ' ').toLowerCase()}
+              {t(status.replace('_', ' ').toLowerCase())}
             </Badge>
           </span>
         }
-        description={settlement}
+        description={t(settlement)}
         actions={
           <>
             {invoice.job ? (
               <Link href={`/jobs/${invoice.job.id}`}>
-                <Button>Job #{invoice.job.number}</Button>
+                <Button>{t('Job #{number}', { number: invoice.job.number })}</Button>
               </Link>
             ) : null}
             <Link href={`/customers/${invoice.customer.id}`}>
-              <Button variant="secondary">Customer</Button>
+              <Button variant="secondary">{t('Customer')}</Button>
             </Link>
           </>
         }
@@ -347,22 +351,30 @@ export default async function InvoicePage({
       {notice.done ? (
         <Alert tone="success" className="mb-5">
           {notice.done === 'paid'
-            ? 'Payment recorded and posted to the ledger.'
+            ? t('Payment recorded and posted to the ledger.')
             : notice.done === 'redeemed'
-              ? 'Points taken off the bill and booked as the cost of the programme, not as money in.'
+              ? t(
+                  'Points taken off the bill and booked as the cost of the programme, not as money in.',
+                )
               : notice.done === 'card'
-                ? 'Gift card redeemed. The money came in when the card was sold; this releases what was owed.'
+                ? t(
+                    'Gift card redeemed. The money came in when the card was sold; this releases what was owed.',
+                  )
                 : notice.done === 'held'
-                  ? 'Money held for the customer put against the bill. The books release what was owed; the bank saw the money when it was taken.'
+                  ? t(
+                      'Money held for the customer put against the bill. The books release what was owed; the bank saw the money when it was taken.',
+                    )
                   : notice.done === 'credited'
-                    ? 'Credit note raised. The customer has been told, and revenue has been reversed in proportion.'
-                    : 'Refund recorded. The customer has been told it is on its way.'}
+                    ? t(
+                        'Credit note raised. The customer has been told, and revenue has been reversed in proportion.',
+                      )
+                    : t('Refund recorded. The customer has been told it is on its way.')}
         </Alert>
       ) : null}
 
       {notice.problem ? (
         <Alert tone="danger" className="mb-5">
-          {notice.problem}
+          {t(notice.problem)}
         </Alert>
       ) : null}
 
@@ -370,7 +382,7 @@ export default async function InvoicePage({
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="What it was for"
+              title={t('What it was for')}
               description={
                 invoice.job
                   ? `${[invoice.job.vehicle.make, invoice.job.vehicle.model].filter(Boolean).join(' ')}${invoice.job.vehicle.registration ? ` · ${invoice.job.vehicle.registration}` : ''}`
@@ -386,18 +398,18 @@ export default async function InvoicePage({
               <Table>
                 <thead>
                   <tr>
-                    <Th>Line</Th>
-                    <Th numeric>Qty</Th>
-                    <Th numeric>Unit</Th>
-                    <Th numeric>Tax</Th>
-                    <Th numeric>Total</Th>
+                    <Th>{t('Line')}</Th>
+                    <Th numeric>{t('Qty')}</Th>
+                    <Th numeric>{t('Unit')}</Th>
+                    <Th numeric>{t('Tax')}</Th>
+                    <Th numeric>{t('Total')}</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoice.lines.map((line) => (
                     <Tr key={line.id}>
                       <Td>
-                        <span className="eyebrow mr-2">{line.kind.toLowerCase()}</span>
+                        <span className="eyebrow mr-2">{t(line.kind.toLowerCase())}</span>
                         {line.description}
                       </Td>
                       <Td numeric>{Number(line.quantity)}</Td>
@@ -417,15 +429,15 @@ export default async function InvoicePage({
             </TableWrap>
             <CardBody className="grid gap-1.5 text-[13px]">
               <div className="flex justify-between">
-                <span className="text-(--text-faint)">Net</span>
+                <span className="text-(--text-faint)">{t('Net')}</span>
                 <Money amount={Number(invoice.subtotal)} currency={invoice.currency} />
               </div>
               <div className="flex justify-between">
-                <span className="text-(--text-faint)">Tax</span>
+                <span className="text-(--text-faint)">{t('Tax')}</span>
                 <Money amount={Number(invoice.taxTotal)} currency={invoice.currency} />
               </div>
               <div className="flex justify-between border-t border-(--border) pt-2 font-display text-[16px] font-semibold">
-                <span>Total</span>
+                <span>{t('Total')}</span>
                 <Money amount={Number(invoice.total)} currency={invoice.currency} />
               </div>
             </CardBody>
@@ -433,11 +445,13 @@ export default async function InvoicePage({
 
           <Card className="overflow-hidden">
             <CardHeader
-              title="Money in"
+              title={t('Money in')}
               description={
                 invoice.payments.length === 0
-                  ? 'Nothing received yet.'
-                  : `${invoice.payments.length} payment${invoice.payments.length === 1 ? '' : 's'}`
+                  ? t('Nothing received yet.')
+                  : invoice.payments.length === 1
+                    ? t('1 payment')
+                    : t('{count} payments', { count: invoice.payments.length })
               }
             />
             {invoice.payments.length > 0 ? (
@@ -445,11 +459,11 @@ export default async function InvoicePage({
                 <Table>
                   <thead>
                     <tr>
-                      <Th>When</Th>
-                      <Th>How</Th>
-                      <Th>Reference</Th>
-                      <Th>Taken by</Th>
-                      <Th numeric>Amount</Th>
+                      <Th>{t('When')}</Th>
+                      <Th>{t('How')}</Th>
+                      <Th>{t('Reference')}</Th>
+                      <Th>{t('Taken by')}</Th>
+                      <Th numeric>{t('Amount')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -461,7 +475,7 @@ export default async function InvoicePage({
                             timeStyle: 'short',
                           })}
                         </Td>
-                        <Td>{METHOD_LABELS[payment.method] ?? payment.method}</Td>
+                        <Td>{t(METHOD_LABELS[payment.method] ?? payment.method)}</Td>
                         <Td className="datum">{payment.reference ?? '—'}</Td>
                         <Td>{payment.recordedBy?.name ?? '—'}</Td>
                         <Td numeric>
@@ -477,22 +491,25 @@ export default async function InvoicePage({
 
           {invoice.creditNotes.length > 0 || invoice.refunds.length > 0 ? (
             <Card className="overflow-hidden">
-              <CardHeader title="Put right" description="Credit notes and money returned" />
+              <CardHeader
+                title={t('Put right')}
+                description={t('Credit notes and money returned')}
+              />
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Document</Th>
-                      <Th>Why</Th>
-                      <Th>When</Th>
-                      <Th numeric>Amount</Th>
+                      <Th>{t('Document')}</Th>
+                      <Th>{t('Why')}</Th>
+                      <Th>{t('When')}</Th>
+                      <Th numeric>{t('Amount')}</Th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoice.creditNotes.map((note) => (
                       <Tr key={note.id}>
                         <Td>
-                          <span className="eyebrow mr-2">credit</span>
+                          <span className="eyebrow mr-2">{t('credit')}</span>
                           {note.number}
                         </Td>
                         <Td>{note.reason}</Td>
@@ -507,11 +524,11 @@ export default async function InvoicePage({
                     {invoice.refunds.map((row) => (
                       <Tr key={row.id}>
                         <Td>
-                          <span className="eyebrow mr-2">refund</span>
-                          against {row.creditNote.number}
+                          <span className="eyebrow mr-2">{t('refund')}</span>
+                          {t('against {number}', { number: row.creditNote.number })}
                         </Td>
                         <Td>
-                          {METHOD_LABELS[row.method] ?? row.method}
+                          {t(METHOD_LABELS[row.method] ?? row.method)}
                           {row.reference ? <span className="datum"> · {row.reference}</span> : null}
                         </Td>
                         <Td>
@@ -533,25 +550,26 @@ export default async function InvoicePage({
 
         <aside className="grid content-start gap-5">
           <Card>
-            <CardHeader title="Where it stands" />
+            <CardHeader title={t('Where it stands')} />
             <CardBody>
               <KeyValue
                 columns={1}
+                t={t}
                 items={[
-                  { label: 'Invoiced', value: format(money.total.minor) },
-                  { label: 'Paid', value: format(money.amountPaid.minor) },
+                  { label: t('Invoiced'), value: format(money.total.minor) },
+                  { label: t('Paid'), value: format(money.amountPaid.minor) },
                   ...(money.credited.minor > 0
-                    ? [{ label: 'Credited', value: format(money.credited.minor) }]
+                    ? [{ label: t('Credited'), value: format(money.credited.minor) }]
                     : []),
                   ...(money.refunded.minor > 0
-                    ? [{ label: 'Refunded', value: format(money.refunded.minor) }]
+                    ? [{ label: t('Refunded'), value: format(money.refunded.minor) }]
                     : []),
-                  { label: 'Outstanding', value: format(money.outstanding.minor) },
+                  { label: t('Outstanding'), value: format(money.outstanding.minor) },
                   ...(money.owedBack.minor > 0
-                    ? [{ label: 'Owed back to them', value: format(money.owedBack.minor) }]
+                    ? [{ label: t('Owed back to them'), value: format(money.owedBack.minor) }]
                     : []),
                   {
-                    label: 'Due',
+                    label: t('Due'),
                     value: invoice.dueAt
                       ? invoice.dueAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })
                       : '—',
@@ -564,13 +582,13 @@ export default async function InvoicePage({
           {mayPay ? (
             <Card className="border-(--brand)">
               <CardHeader
-                title="Take a payment"
-                description={`${format(money.outstanding.minor)} outstanding`}
+                title={t('Take a payment')}
+                description={t('{amount} outstanding', { amount: format(money.outstanding.minor) })}
               />
               <form action={pay}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <Field label="Amount">
+                  <Field label={t('Amount')}>
                     <Input
                       name="amount"
                       inputMode="decimal"
@@ -579,23 +597,23 @@ export default async function InvoicePage({
                       required
                     />
                   </Field>
-                  <Field label="How">
+                  <Field label={t('How')}>
                     <Select name="method" defaultValue="CARD">
                       {METHODS.map((m) => (
                         <option key={m.value} value={m.value}>
-                          {m.label}
+                          {t(m.label)}
                         </option>
                       ))}
                     </Select>
                   </Field>
                   <Field
-                    label="Reference"
-                    hint="Terminal receipt, transfer reference, cheque number"
+                    label={t('Reference')}
+                    hint={t('Terminal receipt, transfer reference, cheque number')}
                   >
-                    <Input name="reference" placeholder="Optional" />
+                    <Input name="reference" placeholder={t('Optional')} />
                   </Field>
                   <Button type="submit" variant="primary">
-                    Record the payment
+                    {t('Record the payment')}
                   </Button>
                 </CardBody>
               </form>
@@ -605,15 +623,21 @@ export default async function InvoicePage({
           {points && spendable > 0 ? (
             <Card>
               <CardHeader
-                title="Use their points"
-                description={`${points.balance.toLocaleString(region.locale)} held, worth ${format(points.valueMinor)}`}
+                title={t('Use their points')}
+                description={t('{points} held, worth {amount}', {
+                  points: points.balance.toLocaleString(region.locale),
+                  amount: format(points.valueMinor),
+                })}
               />
               <form action={redeem}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
                   <Field
-                    label="Points to use"
-                    hint={`Up to ${spendable.toLocaleString(region.locale)}, which is ${format(spendable)} off the bill`}
+                    label={t('Points to use')}
+                    hint={t('Up to {points}, which is {amount} off the bill', {
+                      points: spendable.toLocaleString(region.locale),
+                      amount: format(spendable),
+                    })}
                     htmlFor="redeem-points"
                   >
                     <Input
@@ -631,15 +655,16 @@ export default async function InvoicePage({
                   </Field>
                   {points.expiring.points > 0 && points.expiring.on ? (
                     <p className="text-[12px] text-(--warning)">
-                      {points.expiring.points.toLocaleString(region.locale)} of these lapse on{' '}
-                      {points.expiring.on.toLocaleDateString(region.locale, {
-                        dateStyle: 'medium',
+                      {t('{points} of these lapse on {date}.', {
+                        points: points.expiring.points.toLocaleString(region.locale),
+                        date: points.expiring.on.toLocaleDateString(region.locale, {
+                          dateStyle: 'medium',
+                        }),
                       })}
-                      .
                     </p>
                   ) : null}
                   <Button type="submit" variant="secondary">
-                    Take the points off
+                    {t('Take the points off')}
                   </Button>
                 </CardBody>
               </form>
@@ -649,17 +674,23 @@ export default async function InvoicePage({
           {held && held.heldMinor > 0 ? (
             <Card className="border-(--brand)">
               <CardHeader
-                title="Use money held"
-                description={`${format(held.heldMinor)} is held for this customer${
+                title={t('Use money held')}
+                description={
                   held.live.some((row) => row.kind === 'CREDIT')
-                    ? ', some of it credit from a refund'
-                    : ''
-                }. Leave the amount blank to use as much as the bill needs.`}
+                    ? t(
+                        '{amount} is held for this customer, some of it credit from a refund. Leave the amount blank to use as much as the bill needs.',
+                        { amount: format(held.heldMinor) },
+                      )
+                    : t(
+                        '{amount} is held for this customer. Leave the amount blank to use as much as the bill needs.',
+                        { amount: format(held.heldMinor) },
+                      )
+                }
               />
               <form action={useHeld}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <Field label="Amount" hint="Optional" htmlFor="held-amount">
+                  <Field label={t('Amount')} hint={t('Optional')} htmlFor="held-amount">
                     <Input
                       id="held-amount"
                       name="amount"
@@ -671,7 +702,7 @@ export default async function InvoicePage({
                     />
                   </Field>
                   <Button type="submit" variant="primary">
-                    Put it against the bill
+                    {t('Put it against the bill')}
                   </Button>
                 </CardBody>
               </form>
@@ -681,13 +712,15 @@ export default async function InvoicePage({
           {mayPay ? (
             <Card>
               <CardHeader
-                title="Redeem a gift card"
-                description="Read the number off the card. Leave the amount blank to use as much as the bill needs."
+                title={t('Redeem a gift card')}
+                description={t(
+                  'Read the number off the card. Leave the amount blank to use as much as the bill needs.',
+                )}
               />
               <form action={redeemCard}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <Field label="Card number" htmlFor="card-code">
+                  <Field label={t('Card number')} htmlFor="card-code">
                     <Input
                       id="card-code"
                       name="code"
@@ -695,10 +728,11 @@ export default async function InvoicePage({
                       maxLength={14}
                       autoCapitalize="characters"
                       className="datum uppercase tracking-[0.12em]"
+                      // i18n-ignore
                       placeholder="XXXX-XXXX-XXXX"
                     />
                   </Field>
-                  <Field label="Amount" hint="Optional" htmlFor="card-amount">
+                  <Field label={t('Amount')} hint={t('Optional')} htmlFor="card-amount">
                     <Input
                       id="card-amount"
                       name="amount"
@@ -708,7 +742,7 @@ export default async function InvoicePage({
                     />
                   </Field>
                   <Button type="submit" variant="secondary">
-                    Take it off the bill
+                    {t('Take it off the bill')}
                   </Button>
                 </CardBody>
               </form>
@@ -718,15 +752,17 @@ export default async function InvoicePage({
           {mayCredit ? (
             <Card>
               <CardHeader
-                title="Raise a credit note"
-                description="The invoice is never edited. This reduces what it was for."
+                title={t('Raise a credit note')}
+                description={t('The invoice is never edited. This reduces what it was for.')}
               />
               <form action={credit}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
                   <Field
-                    label="Amount"
-                    hint={`Up to ${format(money.total.minor - money.credited.minor)}`}
+                    label={t('Amount')}
+                    hint={t('Up to {amount}', {
+                      amount: format(money.total.minor - money.credited.minor),
+                    })}
                   >
                     <Input
                       name="amount"
@@ -736,16 +772,16 @@ export default async function InvoicePage({
                       placeholder="0.00"
                     />
                   </Field>
-                  <Field label="Why" hint="Goes on the credit note the customer receives">
+                  <Field label={t('Why')} hint={t('Goes on the credit note the customer receives')}>
                     <Input
                       name="reason"
                       required
-                      placeholder="Part was under warranty"
+                      placeholder={t('Part was under warranty')}
                       maxLength={200}
                     />
                   </Field>
                   <Button type="submit" variant="secondary">
-                    Raise the credit note
+                    {t('Raise the credit note')}
                   </Button>
                 </CardBody>
               </form>
@@ -755,13 +791,15 @@ export default async function InvoicePage({
           {mayRefund ? (
             <Card className="border-(--warning)">
               <CardHeader
-                title="Send money back"
-                description={`${format(money.owedBack.minor)} is owed to the customer`}
+                title={t('Send money back')}
+                description={t('{amount} is owed to the customer', {
+                  amount: format(money.owedBack.minor),
+                })}
               />
               <form action={refund}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <Field label="Against">
+                  <Field label={t('Against')}>
                     <Select name="creditNoteId" defaultValue={invoice.creditNotes[0]?.id ?? ''}>
                       {invoice.creditNotes.map((note) => (
                         <option key={note.id} value={note.id}>
@@ -770,7 +808,7 @@ export default async function InvoicePage({
                       ))}
                     </Select>
                   </Field>
-                  <Field label="Amount">
+                  <Field label={t('Amount')}>
                     <Input
                       name="amount"
                       inputMode="decimal"
@@ -780,10 +818,10 @@ export default async function InvoicePage({
                     />
                   </Field>
                   <Field
-                    label="How"
+                    label={t('How')}
                     hint={
                       paidWithCard
-                        ? 'This bill was paid with a gift card; the money can go back onto it.'
+                        ? t('This bill was paid with a gift card; the money can go back onto it.')
                         : undefined
                     }
                   >
@@ -792,26 +830,28 @@ export default async function InvoicePage({
                       defaultValue={paidWithCard ? 'GIFT_CARD' : 'BANK_TRANSFER'}
                     >
                       {paidWithCard ? (
-                        <option value="GIFT_CARD">Back onto the gift card</option>
+                        <option value="GIFT_CARD">{t('Back onto the gift card')}</option>
                       ) : null}
                       {paidThroughProvider ? (
-                        <option value="ONLINE">Back to their card, through the provider</option>
+                        <option value="ONLINE">
+                          {t('Back to their card, through the provider')}
+                        </option>
                       ) : null}
-                      <option value="DEPOSIT">Keep it as credit on their account</option>
+                      <option value="DEPOSIT">{t('Keep it as credit on their account')}</option>
                       {METHODS.filter((m) => m.value !== 'ACCOUNT' && m.value !== 'ONLINE').map(
                         (m) => (
                           <option key={m.value} value={m.value}>
-                            {m.label}
+                            {t(m.label)}
                           </option>
                         ),
                       )}
                     </Select>
                   </Field>
-                  <Field label="Reference" hint="Optional">
+                  <Field label={t('Reference')} hint={t('Optional')}>
                     <Input name="reference" />
                   </Field>
                   <Button type="submit" variant="secondary">
-                    Record the refund
+                    {t('Record the refund')}
                   </Button>
                 </CardBody>
               </form>

@@ -1,11 +1,16 @@
 import { Badge, Card, CardBody, EmptyState, PageHeader, StatRow, StatTile } from '@carnet/ui';
+import { msg } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { capacityAhead } from '@/lib/planning';
 
-export const metadata: Metadata = { title: 'Capacity' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Capacity') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -23,13 +28,13 @@ export const dynamic = 'force-dynamic';
  */
 const DAY_NAMES = [
   '',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
+  msg('Monday'),
+  msg('Tuesday'),
+  msg('Wednesday'),
+  msg('Thursday'),
+  msg('Friday'),
+  msg('Saturday'),
+  msg('Sunday'),
 ];
 
 function hours(minutes: number): string {
@@ -39,6 +44,7 @@ function hours(minutes: number): string {
 
 export default async function CapacityPage() {
   const { orgId, user, region } = await requireSession('diary:read');
+  const t = await tFor();
 
   const days = await capacityAhead(orgId, user.locationId, new Date(), 7);
 
@@ -51,36 +57,48 @@ export default async function CapacityPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Planning"
-        title="Capacity"
-        description="What the next week can take, from the people who will actually be here"
+        eyebrow={t('Planning')}
+        title={t('Capacity')}
+        description={t('What the next week can take, from the people who will actually be here')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Overbooked days"
+          label={t('Overbooked days')}
           value={overbooked.length}
           tone={overbooked.length > 0 ? 'danger' : 'neutral'}
-          note="In the next seven"
+          note={t('In the next seven')}
         />
-        <StatTile label="Spare" value={`${hours(totalSpare)}h`} note="Across the week" />
         <StatTile
-          label="Today"
-          value={`${hours(days[0]?.bookedMinutes ?? 0)}h`}
-          note={`of ${hours(days[0]?.effectiveMinutes ?? 0)}h`}
+          label={t('Spare')}
+          value={t('{hours}h', { hours: hours(totalSpare) })}
+          note={t('Across the week')}
         />
-        <StatTile label="Bays" value={days[0]?.bays ?? 0} note={days[0]?.locationName ?? 'Group'} />
+        <StatTile
+          label={t('Today')}
+          value={t('{hours}h', { hours: hours(days[0]?.bookedMinutes ?? 0) })}
+          note={t('of {hours}h', { hours: hours(days[0]?.effectiveMinutes ?? 0) })}
+        />
+        <StatTile
+          label={t('Bays')}
+          value={days[0]?.bays ?? 0}
+          note={days[0]?.locationName ?? t('Group')}
+        />
       </StatRow>
 
       {overbooked.length > 0 ? (
         <Card className="mb-5 border-(--danger)">
           <CardBody className="text-[13px] leading-relaxed text-(--danger)">
             <strong className="font-semibold">
-              {overbooked.length} day{overbooked.length === 1 ? '' : 's'} promised more work than
-              can be done.
+              {overbooked.length === 1
+                ? t('1 day promised more work than can be done.')
+                : t('{count} days promised more work than can be done.', {
+                    count: overbooked.length,
+                  })}
             </strong>{' '}
-            Nothing here is wrong yet. It becomes wrong at five o&rsquo;clock, when somebody rings
-            to say their car is not ready and nobody saw it coming this morning.
+            {t(
+              'Nothing here is wrong yet. It becomes wrong at five o’clock, when somebody rings to say their car is not ready and nobody saw it coming this morning.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -102,7 +120,7 @@ export default async function CapacityPage() {
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div>
                     <span className="font-display text-[15px] font-semibold">
-                      {DAY_NAMES[day.weekday]}
+                      {t(DAY_NAMES[day.weekday] ?? '')}
                     </span>
                     <span className="ml-2 text-[12px] text-(--text-faint)">
                       {day.date.toLocaleDateString(region.locale, {
@@ -114,15 +132,15 @@ export default async function CapacityPage() {
 
                   {day.overbookedMinutes > 0 ? (
                     <Badge tone="danger" dot>
-                      over by {hours(day.overbookedMinutes)}h
+                      {t('over by {hours}h', { hours: hours(day.overbookedMinutes) })}
                     </Badge>
                   ) : day.peopleMinutes === 0 ? (
                     <Badge tone="neutral" size="sm">
-                      closed
+                      {t('closed')}
                     </Badge>
                   ) : (
                     <Badge tone="success" size="sm">
-                      {hours(spare)}h spare
+                      {t('{hours}h spare', { hours: hours(spare) })}
                     </Badge>
                   )}
                 </div>
@@ -139,15 +157,16 @@ export default async function CapacityPage() {
                   />
                 </div>
 
-                <p className="mt-2 text-[13px] text-(--text-soft)">{day.summary}</p>
+                <p className="mt-2 text-[13px] text-(--text-soft)">{t(day.summary)}</p>
 
                 <p className="mt-1 text-[12px] text-(--text-faint)">
-                  People {hours(day.peopleMinutes)}h · bays {hours(day.bayMinutes)}h · promised{' '}
-                  {hours(day.bookedMinutes)}h
+                  {t('People {people}h · bays {bays}h · promised {booked}h', {
+                    people: hours(day.peopleMinutes),
+                    bays: hours(day.bayMinutes),
+                    booked: hours(day.bookedMinutes),
+                  })}
                   {day.constrainedBy
-                    ? day.constrainedBy === 'BAYS'
-                      ? ' · the bays bind'
-                      : ' · the people bind'
+                    ? ` · ${day.constrainedBy === 'BAYS' ? t('the bays bind') : t('the people bind')}`
                     : ''}
                 </p>
 
@@ -162,12 +181,15 @@ export default async function CapacityPage() {
                         >
                           <span className={person.absent ? 'text-(--text-faint)' : ''}>
                             {person.name}
-                            {person.absent ? ' · away' : ''}
+                            {person.absent ? ` · ${t('away')}` : ''}
                           </span>
                           <span className="datum text-(--text-soft)">
                             {person.absent
                               ? '—'
-                              : `${hours(person.bookedMinutes)} of ${hours(person.availableMinutes)}h`}
+                              : t('{booked} of {available}h', {
+                                  booked: hours(person.bookedMinutes),
+                                  available: hours(person.availableMinutes),
+                                })}
                           </span>
                         </li>
                       ))}
@@ -182,14 +204,16 @@ export default async function CapacityPage() {
       {days.every((day) => day.peopleMinutes === 0) ? (
         <EmptyState
           className="mt-5"
-          title="Nobody has working hours recorded"
-          description="Capacity is worked out from when people are contracted to be here. Set that up on the working patterns screen and this fills in."
+          title={t('Nobody has working hours recorded')}
+          description={t(
+            'Capacity is worked out from when people are contracted to be here. Set that up on the working patterns screen and this fills in.',
+          )}
           action={
             <Link
               href="/patterns"
               className="text-[13px] font-medium text-(--brand-text) hover:underline"
             >
-              Set working hours
+              {t('Set working hours')}
             </Link>
           }
         />

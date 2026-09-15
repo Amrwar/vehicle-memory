@@ -1,4 +1,4 @@
-import { humanise, toneFor, type JobStatus } from '@carnet/core';
+import { humanise, msg, toneFor, type JobStatus } from '@carnet/core';
 import { forOrg } from '@carnet/db';
 import { Badge, Button, EmptyState, Mileage, Registration } from '@carnet/ui';
 import type { Metadata } from 'next';
@@ -11,8 +11,12 @@ import { ArrivalError, moveKeys } from '@/lib/arrival';
 import { keyState } from '@carnet/core';
 import { OutboxStatus } from '@/components/outbox';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'My jobs' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('My jobs') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -81,7 +85,7 @@ async function askForPart(formData: FormData) {
 
   const notes = String(formData.get('notes') ?? '').trim();
 
-  if (!notes) redirect('/shop?error=' + encodeURIComponent('Say which part you need.'));
+  if (!notes) redirect('/shop?error=' + encodeURIComponent(msg('Say which part you need.')));
 
   await requestPart({
     orgId: user.orgId,
@@ -119,6 +123,7 @@ export default async function ShopFloorPage({
   searchParams: Promise<{ error?: string; requested?: string; inspected?: string }>;
 }) {
   const user = await requireUser();
+  const t = await tFor();
   const notice = await searchParams;
 
   if (user.role !== 'TECHNICIAN') {
@@ -176,7 +181,7 @@ export default async function ShopFloorPage({
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div>
             <p className="eyebrow">Carnet</p>
-            <h1 className="font-display text-[20px] font-semibold leading-tight">My jobs</h1>
+            <h1 className="font-display text-[20px] font-semibold leading-tight">{t('My jobs')}</h1>
           </div>
           <div className="flex items-center gap-3">
             {/* Night shifts run the bay lights low. The tablet's own setting
@@ -189,7 +194,7 @@ export default async function ShopFloorPage({
                   type="submit"
                   className="text-[13px] text-(--text-faint) underline underline-offset-2"
                 >
-                  Sign out
+                  {t('Sign out')}
                 </button>
               </form>
             </div>
@@ -202,14 +207,14 @@ export default async function ShopFloorPage({
 
         {notice.error ? (
           <div className="mb-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">
-            <p className="text-[14px] text-(--danger)">{notice.error}</p>
+            <p className="text-[14px] text-(--danger)">{t(notice.error)}</p>
           </div>
         ) : null}
 
         {notice.requested ? (
           <div className="mb-4 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
             <p className="text-[14px] text-(--success)">
-              Asked for. It will show up for whoever approves spending.
+              {t('Asked for. It will show up for whoever approves spending.')}
             </p>
           </div>
         ) : null}
@@ -217,10 +222,14 @@ export default async function ShopFloorPage({
         {notice.inspected ? (
           <div className="mb-4 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
             <p className="text-[14px] text-(--success)">
-              Inspection sent.{' '}
               {Number(notice.inspected) > 0
-                ? `${notice.inspected} item${notice.inspected === '1' ? '' : 's'} went onto a quote for the customer to approve.`
-                : 'Nothing needed quoting.'}
+                ? notice.inspected === '1'
+                  ? t('Inspection sent. 1 item went onto a quote for the customer to approve.')
+                  : t(
+                      'Inspection sent. {count} items went onto a quote for the customer to approve.',
+                      { count: notice.inspected },
+                    )
+                : t('Inspection sent. Nothing needed quoting.')}
             </p>
           </div>
         ) : null}
@@ -228,25 +237,26 @@ export default async function ShopFloorPage({
         {openEntry ? (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-(--radius-lg) border border-(--success) bg-(--success-soft) px-4 py-3">
             <div>
-              <p className="text-[14px] font-semibold text-(--success)">Clocked on</p>
+              <p className="text-[14px] font-semibold text-(--success)">{t('Clocked on')}</p>
               <p className="datum text-[13px] text-(--text-soft)">
-                Since{' '}
-                {openEntry.startedAt.toLocaleTimeString(user.region.locale, {
-                  hour: '2-digit',
-                  minute: '2-digit',
+                {t('Since {time}', {
+                  time: openEntry.startedAt.toLocaleTimeString(user.region.locale, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
                 })}
               </p>
             </div>
             <Button size="touch" variant="secondary">
-              Stop
+              {t('Stop')}
             </Button>
           </div>
         ) : null}
 
         {jobs.length === 0 ? (
           <EmptyState
-            title="Nothing assigned"
-            description="Jobs appear here when the front desk assigns one to you."
+            title={t('Nothing assigned')}
+            description={t('Jobs appear here when the front desk assigns one to you.')}
             className="rounded-(--radius-lg) border border-(--border) bg-(--surface)"
           />
         ) : (
@@ -291,40 +301,40 @@ export default async function ShopFloorPage({
                         </p>
                       </div>
                       <Badge tone={toneFor(job.status as JobStatus)} dot>
-                        {humanise(job.status as JobStatus)}
+                        {t(humanise(job.status as JobStatus))}
                       </Badge>
                     </div>
 
                     <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-(--text-faint)">
                       <div className="flex gap-1.5">
-                        <dt>Job</dt>
+                        <dt>{t('Job')}</dt>
                         <dd className="datum text-(--text-soft)">#{job.number}</dd>
                       </div>
                       {job.estimatedHours ? (
                         <div className="flex gap-1.5">
-                          <dt>Allowed</dt>
+                          <dt>{t('Allowed')}</dt>
                           <dd className="tabular text-(--text-soft)">
                             {Number(job.estimatedHours).toFixed(1)} h
                           </dd>
                         </div>
                       ) : null}
                       <div className="flex gap-1.5">
-                        <dt>Odometer</dt>
+                        <dt>{t('Odometer')}</dt>
                         <dd className="text-(--text-soft)">
-                          <Mileage km={job.odometerInKm ?? job.vehicle.lastOdometerKm} />
+                          <Mileage km={job.odometerInKm ?? job.vehicle.lastOdometerKm} t={t} />
                         </dd>
                       </div>
                       {job.tasks.length > 0 ? (
                         <div className="flex gap-1.5">
-                          <dt>Tasks</dt>
+                          <dt>{t('Tasks')}</dt>
                           <dd className="tabular text-(--text-soft)">
                             {done}/{job.tasks.length}
                           </dd>
                         </div>
                       ) : null}
                       <div className="flex items-center gap-1.5">
-                        <dt>Keys</dt>
-                        <dd className="text-(--text-soft)">{keysNow.sentence}</dd>
+                        <dt>{t('Keys')}</dt>
+                        <dd className="text-(--text-soft)">{t(keysNow.sentence)}</dd>
                         {keysNow.where === 'hook' || keysNow.where === 'unknown' ? (
                           <form action={keys}>
                             <input type="hidden" name="jobId" value={job.id} />
@@ -333,7 +343,7 @@ export default async function ShopFloorPage({
                               type="submit"
                               className="rounded-(--radius-sm) border border-(--border-strong) px-2 py-0.5 text-[12px] font-medium hover:bg-(--surface-sunk)"
                             >
-                              I have them
+                              {t('I have them')}
                             </button>
                           </form>
                         ) : keysNow.where === 'with' ? (
@@ -344,7 +354,7 @@ export default async function ShopFloorPage({
                               type="submit"
                               className="rounded-(--radius-sm) border border-(--border-strong) px-2 py-0.5 text-[12px] font-medium hover:bg-(--surface-sunk)"
                             >
-                              Back on the hook
+                              {t('Back on the hook')}
                             </button>
                           </form>
                         ) : null}
@@ -353,8 +363,9 @@ export default async function ShopFloorPage({
 
                     {blocked ? (
                       <p className="mt-3 rounded-(--radius-md) border-l-[3px] border-(--warning) bg-(--warning-soft) px-3 py-2.5 text-[14px] text-(--warning)">
-                        Waiting for the customer to approve the estimate. Do not start this work
-                        yet.
+                        {t(
+                          'Waiting for the customer to approve the estimate. Do not start this work yet.',
+                        )}
                       </p>
                     ) : null}
 
@@ -373,7 +384,7 @@ export default async function ShopFloorPage({
                           disabled={blocked && !running}
                           block
                         >
-                          {running ? 'Stop the clock' : 'Start the clock'}
+                          {running ? t('Stop the clock') : t('Start the clock')}
                         </Button>
                       </form>
 
@@ -381,10 +392,10 @@ export default async function ShopFloorPage({
                         <input type="hidden" name="jobId" value={job.id} />
                         <Button type="submit" size="touch" block>
                           {inspection?.status === 'COMPLETED'
-                            ? 'Inspection sent'
+                            ? t('Inspection sent')
                             : inspection
-                              ? 'Carry on inspecting'
-                              : 'Inspect'}
+                              ? t('Carry on inspecting')
+                              : t('Inspect')}
                         </Button>
                       </form>
 
@@ -392,12 +403,12 @@ export default async function ShopFloorPage({
                         <input type="hidden" name="jobId" value={job.id} />
                         <input
                           name="notes"
-                          placeholder="Part needed"
-                          aria-label={`Part needed for job ${job.number}`}
+                          placeholder={t('Part needed')}
+                          aria-label={t('Part needed for job {number}', { number: job.number })}
                           className="min-w-0 flex-1 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3 text-[15px]"
                         />
                         <Button type="submit" size="touch">
-                          Ask
+                          {t('Ask')}
                         </Button>
                       </form>
                     </div>

@@ -8,7 +8,10 @@ import { referralsForPortalUser } from '@/lib/referrals';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Rewards' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Rewards') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -67,24 +70,32 @@ export default async function PortalRewardsPage() {
                     }
                   />
                   <CardBody className="text-[13px] text-(--text-soft)">
-                    Worth{' '}
-                    <span className="font-medium text-(--text)">
-                      <Money
-                        amount={card.valueMinor / 100}
-                        currency={card.currency}
-                        locale={card.locale}
-                      />
-                    </span>{' '}
-                    off your next bill.
+                    {t('Worth {amount} off your next bill.')
+                      .split('{amount}')
+                      .flatMap((part, index) =>
+                        index === 0
+                          ? [part]
+                          : [
+                              <span key={index} className="font-medium text-(--text)">
+                                <Money
+                                  amount={card.valueMinor / 100}
+                                  currency={card.currency}
+                                  locale={card.locale}
+                                />
+                              </span>,
+                              part,
+                            ],
+                      )}
                     {card.expiring.points > 0 && card.expiring.on ? (
                       <span className="mt-1 block text-(--warning)">
-                        {card.expiring.points.toLocaleString(region.locale)} expire on{' '}
-                        {card.expiring.on.toLocaleDateString(region.locale, {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
+                        {t('{points} expire on {date}.', {
+                          points: card.expiring.points.toLocaleString(region.locale),
+                          date: card.expiring.on.toLocaleDateString(region.locale, {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          }),
                         })}
-                        .
                       </span>
                     ) : null}
                   </CardBody>
@@ -111,13 +122,23 @@ export default async function PortalRewardsPage() {
                     <div className="min-w-0">
                       <p className="text-[14px] font-medium">{card.workshop}</p>
                       <p className="text-[12px] text-(--text-faint)">
-                        After{' '}
-                        <Money
-                          amount={card.minimumMinor / 100}
-                          currency={card.currency}
-                          locale={card.locale}
-                        />{' '}
-                        of work, you both get {card.pointsEachSide} points.
+                        {t('After {amount} of work, you both get {points} points.', {
+                          points: card.pointsEachSide,
+                        })
+                          .split('{amount}')
+                          .flatMap((part, index) =>
+                            index === 0
+                              ? [part]
+                              : [
+                                  <Money
+                                    key={index}
+                                    amount={card.minimumMinor / 100}
+                                    currency={card.currency}
+                                    locale={card.locale}
+                                  />,
+                                  part,
+                                ],
+                          )}
                       </p>
                     </div>
                     <p className="datum rounded-(--radius-md) border border-dashed border-(--border-strong) bg-(--surface-sunk) px-3 py-1.5 text-[18px] font-semibold tracking-[0.2em]">

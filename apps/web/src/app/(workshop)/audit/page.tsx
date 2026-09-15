@@ -16,9 +16,13 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { READABLE } from '@/lib/provenance';
 
-export const metadata: Metadata = { title: 'Audit log' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Audit log') };
+}
 export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 60;
@@ -33,6 +37,7 @@ export default async function AuditPage({
 }) {
   const { orgId, region } = await requireSession('audit:read');
   const params = await searchParams;
+  const t = await tFor();
   const page = Math.max(1, Number(params.page ?? 1) || 1);
 
   const where = {
@@ -63,26 +68,29 @@ export default async function AuditPage({
   return (
     <>
       <PageHeader
-        eyebrow="Admin"
-        title="Audit log"
-        description={`${total.toLocaleString(region.locale)} recorded action${total === 1 ? '' : 's'}`}
+        eyebrow={t('Admin')}
+        title={t('Audit log')}
+        description={
+          total === 1
+            ? t('1 recorded action')
+            : t('{count} recorded actions', { count: total.toLocaleString(region.locale) })
+        }
       />
 
       <Card className="mb-5 border-(--brand)">
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-          Every state-changing action is recorded here with who did it, when, and what changed. The
-          table is immutable at the database level: a trigger refuses any update or delete, so these
-          entries cannot be edited even from a direct database session. A log the operator can
-          quietly amend would settle no dispute.
+          {t(
+            'Every state-changing action is recorded here with who did it, when, and what changed. The table is immutable at the database level: a trigger refuses any update or delete, so these entries cannot be edited even from a direct database session. A log the operator can quietly amend would settle no dispute.',
+          )}
         </CardBody>
       </Card>
 
       {entityTypes.length > 0 ? (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="eyebrow">Filter</span>
+          <span className="eyebrow">{t('Filter')}</span>
           <Link href="/audit">
             <Button size="sm" variant={params.entity ? 'secondary' : 'primary'}>
-              Everything
+              {t('Everything')}
             </Button>
           </Link>
           {entityTypes.map((row) => (
@@ -91,7 +99,7 @@ export default async function AuditPage({
                 size="sm"
                 variant={params.entity === row.entityType ? 'primary' : 'secondary'}
               >
-                {row.entityType}
+                {t(READABLE[row.entityType]?.label ?? row.entityType)}
                 <span className="ml-1.5 opacity-60">{row._count._all}</span>
               </Button>
             </Link>
@@ -102,19 +110,19 @@ export default async function AuditPage({
       <Card className="overflow-hidden">
         {entries.length === 0 ? (
           <EmptyState
-            title="Nothing recorded yet"
-            description="Actions appear here as people use the system."
+            title={t('Nothing recorded yet')}
+            description={t('Actions appear here as people use the system.')}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>When</Th>
-                  <Th>Who</Th>
-                  <Th>Action</Th>
-                  <Th>Subject</Th>
-                  <Th>Source</Th>
+                  <Th>{t('When')}</Th>
+                  <Th>{t('Who')}</Th>
+                  <Th>{t('Action')}</Th>
+                  <Th>{t('Subject')}</Th>
+                  <Th>{t('Source')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -130,7 +138,7 @@ export default async function AuditPage({
                       {entry.actor ? (
                         <span className="font-medium">{entry.actor.name}</span>
                       ) : (
-                        <span className="text-(--text-faint)">System</span>
+                        <span className="text-(--text-faint)">{t('System')}</span>
                       )}
                     </Td>
                     <Td>
@@ -144,7 +152,7 @@ export default async function AuditPage({
                           href={`/audit/${entry.entityType}/${entry.entityId}`}
                           className="hover:text-(--brand-text) hover:underline"
                         >
-                          {entry.entityType}
+                          {t(READABLE[entry.entityType]!.label)}
                         </Link>
                       ) : (
                         entry.entityType
@@ -163,23 +171,23 @@ export default async function AuditPage({
       </Card>
 
       {pages > 1 ? (
-        <nav className="mt-4 flex items-center justify-between" aria-label="Pagination">
+        <nav className="mt-4 flex items-center justify-between" aria-label={t('Pagination')}>
           <p className="text-[12px] text-(--text-faint)">
-            Page {page} of {pages}
+            {t('Page {page} of {pages}', { page, pages })}
           </p>
           <div className="flex gap-2">
             {page > 1 ? (
               <Link
                 href={`/audit?page=${page - 1}${params.entity ? `&entity=${params.entity}` : ''}`}
               >
-                <Button size="sm">Previous</Button>
+                <Button size="sm">{t('Previous')}</Button>
               </Link>
             ) : null}
             {page < pages ? (
               <Link
                 href={`/audit?page=${page + 1}${params.entity ? `&entity=${params.entity}` : ''}`}
               >
-                <Button size="sm">Next</Button>
+                <Button size="sm">{t('Next')}</Button>
               </Link>
             ) : null}
           </div>

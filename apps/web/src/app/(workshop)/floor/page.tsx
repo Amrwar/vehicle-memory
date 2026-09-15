@@ -8,13 +8,18 @@ import {
   StatRow,
   StatTile,
 } from '@carnet/ui';
+import type { Translator } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { floorNow } from '@/lib/diary';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'The floor' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('The floor') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -28,20 +33,23 @@ export const dynamic = 'force-dynamic';
  * Laid out as the bays are laid out, in a row, because that is how somebody
  * standing at the counter pictures the building.
  */
-function until(end: Date, now: Date): string {
+function until(end: Date, now: Date, t: Translator): string {
   const minutes = Math.round((end.getTime() - now.getTime()) / 60_000);
 
-  if (minutes <= 0) return 'over its time';
-  if (minutes < 60) return `${minutes} min left`;
+  if (minutes <= 0) return t('over its time');
+  if (minutes < 60) return t('{minutes} min left', { minutes });
 
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
 
-  return rest === 0 ? `${hours}h left` : `${hours}h ${rest}m left`;
+  return rest === 0
+    ? t('{hours}h left', { hours })
+    : t('{hours}h {minutes}m left', { hours, minutes: rest });
 }
 
 export default async function FloorPage() {
   const { orgId, region } = await requireSession('diary:read');
+  const t = await tFor();
 
   const now = new Date();
   const floor = await floorNow(orgId, now);
@@ -52,41 +60,49 @@ export default async function FloorPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="The floor"
-        description={`As at ${now.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' })}`}
+        eyebrow={t('Workshop')}
+        title={t('The floor')}
+        description={t('As at {time}', {
+          time: now.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' }),
+        })}
         actions={
           <Link href="/diary">
             <Button size="sm" variant="secondary">
-              The diary
+              {t('The diary')}
             </Button>
           </Link>
         }
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Bays" value={floor.length} note="In this workshop" />
+        <StatTile label={t('Bays')} value={floor.length} note={t('In this workshop')} />
         <StatTile
-          label="Occupied"
+          label={t('Occupied')}
           value={busy.length}
           tone={busy.length === floor.length && floor.length > 0 ? 'warning' : 'brand'}
-          note={busy.length === floor.length && floor.length > 0 ? 'Nothing free' : 'Cars in bays'}
+          note={
+            busy.length === floor.length && floor.length > 0 ? t('Nothing free') : t('Cars in bays')
+          }
         />
         <StatTile
-          label="Over their time"
+          label={t('Over their time')}
           value={overrunning.length}
           tone={overrunning.length > 0 ? 'danger' : 'neutral'}
-          note="Still in the bay past the slot"
+          note={t('Still in the bay past the slot')}
         />
-        <StatTile label="Free" value={floor.length - busy.length} note="Ready for the next one" />
+        <StatTile
+          label={t('Free')}
+          value={floor.length - busy.length}
+          note={t('Ready for the next one')}
+        />
       </StatRow>
 
       {floor.length === 0 ? (
         <Card>
           <CardBody className="py-10 text-center">
-            <p className="font-display text-[17px] font-semibold">No bays set up</p>
+            <p className="font-display text-[17px] font-semibold">{t('No bays set up')}</p>
             <p className="mt-1.5 text-[13px] text-(--text-soft)">
-              Add bays in settings and the floor appears here.
+              {t('Add bays in settings and the floor appears here.')}
             </p>
           </CardBody>
         </Card>
@@ -108,11 +124,11 @@ export default async function FloorPage() {
                     <h2 className="font-display text-[15px] font-semibold">{bay.name}</h2>
                     {car ? (
                       <Badge tone={late ? 'danger' : 'brand'} size="sm" dot>
-                        {late ? 'over' : 'in use'}
+                        {late ? t('over') : t('in use')}
                       </Badge>
                     ) : (
                       <Badge tone="success" size="sm">
-                        free
+                        {t('free')}
                       </Badge>
                     )}
                   </div>
@@ -137,23 +153,32 @@ export default async function FloorPage() {
                             : 'text-[12px] text-(--text-faint)'
                         }
                       >
-                        {until(car.endAt, now)}
+                        {until(car.endAt, now, t)}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-[13px] text-(--text-faint)">Empty.</p>
+                    <p className="text-[13px] text-(--text-faint)">{t('Empty.')}</p>
                   )}
 
                   {bay.upcoming.length > 0 ? (
                     <div className="mt-auto border-t border-(--border) pt-2">
                       <p className="text-[11px] text-(--text-faint)">
-                        Next:{' '}
-                        {bay.upcoming[0]!.startAt.toLocaleTimeString(region.locale, {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}{' '}
-                        {bay.upcoming[0]!.title}
-                        {bay.upcoming.length > 1 ? ` and ${bay.upcoming.length - 1} more` : ''}
+                        {bay.upcoming.length > 1
+                          ? t('Next: {time} {title} and {more} more', {
+                              time: bay.upcoming[0]!.startAt.toLocaleTimeString(region.locale, {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }),
+                              title: bay.upcoming[0]!.title,
+                              more: bay.upcoming.length - 1,
+                            })
+                          : t('Next: {time} {title}', {
+                              time: bay.upcoming[0]!.startAt.toLocaleTimeString(region.locale, {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }),
+                              title: bay.upcoming[0]!.title,
+                            })}
                       </p>
                     </div>
                   ) : null}

@@ -18,8 +18,12 @@ import Link from 'next/link';
 
 import { fleets } from '@/lib/fleet';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Fleets' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Fleets') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -35,6 +39,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function FleetPage() {
   const { orgId, region } = await requireSession('customer:read');
+  const t = await tFor();
 
   const accounts = await fleets(orgId);
 
@@ -46,59 +51,70 @@ export default async function FleetPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Customers"
-        title="Fleets"
-        description="Company accounts with more than one vehicle on the books"
+        eyebrow={t('Customers')}
+        title={t('Fleets')}
+        description={t('Company accounts with more than one vehicle on the books')}
       />
 
       <StatRow className="mb-5">
-        <StatTile label="Accounts" value={accounts.length} note="Companies with a fleet" />
-        <StatTile label="Vehicles" value={vehicles} note="Across all of them" />
         <StatTile
-          label="Off the road"
+          label={t('Accounts')}
+          value={accounts.length}
+          note={t('Companies with a fleet')}
+        />
+        <StatTile label={t('Vehicles')} value={vehicles} note={t('Across all of them')} />
+        <StatTile
+          label={t('Off the road')}
           value={off}
           tone={off > 0 ? 'warning' : 'neutral'}
-          note="In the workshop now"
+          note={t('In the workshop now')}
         />
         <StatTile
-          label="Last thirty days"
+          label={t('Last thirty days')}
           value={<Money currency={region.currency} locale={region.locale} amount={spend} />}
-          note="Invoiced to fleets"
+          note={t('Invoiced to fleets')}
         />
       </StatRow>
 
       {overdue > 0 ? (
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
-            <strong className="font-semibold">{overdue} fleet vehicles are past a service.</strong>{' '}
-            A fleet manager is measured on downtime, so an overdue van is their problem before it is
-            yours. Telling them first is worth more than the service itself.
+            <strong className="font-semibold">
+              {overdue === 1
+                ? t('1 fleet vehicle is past a service.')
+                : t('{count} fleet vehicles are past a service.', { count: overdue })}
+            </strong>{' '}
+            {t(
+              'A fleet manager is measured on downtime, so an overdue van is their problem before it is yours. Telling them first is worth more than the service itself.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="The accounts"
-          description="Most vehicles first. Open one to see what is wrong with which van."
+          title={t('The accounts')}
+          description={t('Most vehicles first. Open one to see what is wrong with which van.')}
         />
         {accounts.length === 0 ? (
           <EmptyState
-            title="No fleets yet"
-            description="A company customer with more than one vehicle appears here automatically. Nothing needs setting up."
+            title={t('No fleets yet')}
+            description={t(
+              'A company customer with more than one vehicle appears here automatically. Nothing needs setting up.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Company</Th>
-                  <Th numeric>Vehicles</Th>
-                  <Th numeric>Off the road</Th>
-                  <Th numeric>Due soon</Th>
-                  <Th numeric>Overdue</Th>
-                  <Th numeric>Waiting on them</Th>
-                  <Th numeric>30 days</Th>
+                  <Th>{t('Company')}</Th>
+                  <Th numeric>{t('Vehicles')}</Th>
+                  <Th numeric>{t('Off the road')}</Th>
+                  <Th numeric>{t('Due soon')}</Th>
+                  <Th numeric>{t('Overdue')}</Th>
+                  <Th numeric>{t('Waiting on them')}</Th>
+                  <Th numeric>{t('30 days')}</Th>
                 </tr>
               </thead>
               <tbody>

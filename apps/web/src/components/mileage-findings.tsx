@@ -2,6 +2,8 @@ import type { HistoryFinding } from '@carnet/core';
 import { Badge, Card, CardBody, CardHeader } from '@carnet/ui';
 import * as React from 'react';
 
+import { tFor } from '@/lib/i18n';
+
 /**
  * What the mileage record says about itself.
  *
@@ -18,7 +20,7 @@ import * as React from 'react';
  * and is stated as a question. Presenting the two the same way would make the
  * first look like an opinion and the second like an accusation.
  */
-export function MileageFindings({
+export async function MileageFindings({
   findings,
   summary,
   readings,
@@ -27,6 +29,7 @@ export function MileageFindings({
   summary: string;
   readings: number;
 }) {
+  const t = await tFor();
   const serious = findings.filter((finding) => finding.severity === 'SERIOUS');
   const concerns = findings.filter((finding) => finding.severity === 'CONCERN');
   const notes = findings.filter((finding) => finding.severity === 'INFO');
@@ -34,8 +37,11 @@ export function MileageFindings({
   return (
     <Card className={serious.length > 0 ? 'border-(--danger)' : undefined}>
       <CardHeader
-        title="The mileage record"
-        description={`Checked across every workshop that has recorded a reading. ${readings} on file.`}
+        title={t('The mileage record')}
+        description={t(
+          'Checked across every workshop that has recorded a reading. {count} on file.',
+          { count: readings },
+        )}
       />
       <CardBody className="grid gap-4">
         <p
@@ -45,7 +51,7 @@ export function MileageFindings({
               : 'text-[14px] leading-relaxed text-(--text-soft)'
           }
         >
-          {summary}
+          {t(summary)}
         </p>
 
         {[...serious, ...concerns].map((finding, index) => (
@@ -59,26 +65,28 @@ export function MileageFindings({
             }
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{finding.summary}</span>
+              <span className="font-medium">{t(finding.summary)}</span>
               <Badge tone={finding.confidence === 'CERTAIN' ? 'danger' : 'warning'} size="sm">
                 {finding.confidence === 'CERTAIN'
-                  ? 'arithmetic'
+                  ? t('arithmetic')
                   : finding.confidence === 'LIKELY'
-                    ? 'likely'
-                    : 'worth asking'}
+                    ? t('likely')
+                    : t('worth asking')}
               </Badge>
             </div>
-            <p className="mt-1 text-[13px] leading-relaxed text-(--text-soft)">{finding.detail}</p>
+            <p className="mt-1 text-[13px] leading-relaxed text-(--text-soft)">
+              {t(finding.detail)}
+            </p>
           </div>
         ))}
 
         {notes.length > 0 ? (
           <div className="border-t border-(--border) pt-3">
-            <p className="eyebrow">About the record itself</p>
+            <p className="eyebrow">{t('About the record itself')}</p>
             <ul className="mt-1.5 grid gap-1.5">
               {notes.map((finding, index) => (
                 <li key={`${finding.kind}-${index}`} className="text-[13px] text-(--text-soft)">
-                  {finding.summary}
+                  {t(finding.summary)}
                 </li>
               ))}
             </ul>
@@ -86,8 +94,9 @@ export function MileageFindings({
         ) : null}
 
         <p className="text-[12px] leading-relaxed text-(--text-faint)">
-          This checks the readings against each other. It cannot see mileage covered while nobody
-          was writing anything down, and it is not a warranty.
+          {t(
+            'This checks the readings against each other. It cannot see mileage covered while nobody was writing anything down, and it is not a warranty.',
+          )}
         </p>
       </CardBody>
     </Card>

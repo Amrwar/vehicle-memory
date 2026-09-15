@@ -21,7 +21,10 @@ import { invoicesFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Invoices' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Invoices') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -102,29 +105,37 @@ export default async function PortalInvoicesPage({
       <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Invoices')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {invoices.length === 0
-          ? 'Nothing has been invoiced to you yet.'
+          ? t('Nothing has been invoiced to you yet.')
           : owing.length === 0
-            ? 'Everything is settled. Nothing is owed.'
-            : `${owing.length} still to pay.`}
+            ? t('Everything is settled. Nothing is owed.')
+            : owing.length === 1
+              ? t('1 still to pay.')
+              : t('{count} still to pay.', { count: owing.length })}
       </p>
 
       {outcome?.status === 'SUCCEEDED' ? (
         <Alert tone="success" className="mt-4">
-          Paid. Thank you.{' '}
-          {outcome.number ? `Invoice ${outcome.number} is settled` : 'The invoice is settled'}, and
-          a receipt is on its way to you.
+          {outcome.number
+            ? t(
+                'Paid. Thank you. Invoice {number} is settled, and a receipt is on its way to you.',
+                {
+                  number: outcome.number,
+                },
+              )
+            : t('Paid. Thank you. The invoice is settled, and a receipt is on its way to you.')}
         </Alert>
       ) : null}
       {outcome?.status === 'FAILED' ? (
         <Alert tone="danger" title={t('That payment did not go through')} className="mt-4">
-          {outcome.reason ?? 'The provider did not say why.'} Nothing has been taken. You can try
-          again, or pay the workshop directly.
+          {outcome.reason ? t(outcome.reason) : t('The provider did not say why.')}{' '}
+          {t('Nothing has been taken. You can try again, or pay the workshop directly.')}
         </Alert>
       ) : null}
       {outcome?.status === 'PENDING' ? (
         <Alert tone="warning" className="mt-4">
-          The provider has not confirmed the payment yet. This page will show it once it does;
-          nothing needs doing.
+          {t(
+            'The provider has not confirmed the payment yet. This page will show it once it does; nothing needs doing.',
+          )}
         </Alert>
       ) : null}
       {cancelled ? (
@@ -134,7 +145,7 @@ export default async function PortalInvoicesPage({
       ) : null}
       {problem ? (
         <Alert tone="danger" className="mt-4">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
@@ -160,17 +171,20 @@ export default async function PortalInvoicesPage({
               <li key={invoice.id}>
                 <Card className="border-(--warning)">
                   <CardHeader
-                    title={invoice.number ?? 'Invoice'}
-                    description={`${invoice.org.name} · issued ${date(invoice.issuedAt, region.locale)}`}
+                    title={invoice.number ?? t('Invoice')}
+                    description={t('{workshop} · issued {date}', {
+                      workshop: invoice.org.name,
+                      date: date(invoice.issuedAt, region.locale),
+                    })}
                     action={
                       <Badge tone="warning" size="sm">
-                        {invoice.paidNumber > 0 ? 'part paid' : 'unpaid'}
+                        {invoice.paidNumber > 0 ? t('part paid') : t('unpaid')}
                       </Badge>
                     }
                   />
                   <CardBody className="grid gap-1.5 text-[13px]">
                     <p className="text-(--text-soft)">
-                      {invoice.job?.shortDescription ?? 'Counter sale'}
+                      {invoice.job?.shortDescription ?? t('Counter sale')}
                       {invoice.job?.vehicle?.registration ? (
                         <span className="ml-2 inline-block align-middle">
                           <Registration value={invoice.job.vehicle.registration} />
@@ -213,9 +227,20 @@ export default async function PortalInvoicesPage({
                             <path d="M2.5 10h19M6.5 14.5h4" />
                           </svg>
                           <span>
-                            {t('Pay')}
-                            <Money amount={invoice.outstanding} currency={invoice.currency} /> by
-                            card
+                            {t('Pay {amount} by card')
+                              .split('{amount}')
+                              .flatMap((part, index) =>
+                                index === 0
+                                  ? [part]
+                                  : [
+                                      <Money
+                                        key={index}
+                                        amount={invoice.outstanding}
+                                        currency={invoice.currency}
+                                      />,
+                                      part,
+                                    ],
+                              )}
                           </span>
                         </Button>
                         <p className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-(--text-faint)">
@@ -238,10 +263,12 @@ export default async function PortalInvoicesPage({
                     ) : null}
 
                     <p className="mt-1 text-[12px] text-(--text-faint)">
-                      {invoice.dueAt ? `Due ${date(invoice.dueAt, region.locale)}. ` : ''}
+                      {invoice.dueAt
+                        ? `${t('Due {date}.', { date: date(invoice.dueAt, region.locale) })} `
+                        : ''}
                       {offered
-                        ? 'You can also pay the workshop directly.'
-                        : 'Pay the workshop directly.'}
+                        ? t('You can also pay the workshop directly.')
+                        : t('Pay the workshop directly.')}
                     </p>
                   </CardBody>
                 </Card>
@@ -261,7 +288,7 @@ export default async function PortalInvoicesPage({
                 className="rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3.5 py-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium">{invoice.number ?? 'Invoice'}</span>
+                  <span className="font-medium">{invoice.number ?? t('Invoice')}</span>
                   <span className="font-medium tabular-nums">
                     <Money amount={invoice.totalNumber} currency={invoice.currency} />
                   </span>
@@ -269,11 +296,15 @@ export default async function PortalInvoicesPage({
                 <p className="mt-0.5 text-[13px] text-(--text-soft)">
                   {invoice.org.name} · {date(invoice.issuedAt, region.locale)}
                   {invoice.payments[0]
-                    ? invoice.payments[0].method === 'LOYALTY'
-                      ? ' · paid with points'
-                      : invoice.payments[0].method === 'ONLINE'
-                        ? ' · paid by card online'
-                        : ` · paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`
+                    ? ` · ${
+                        invoice.payments[0].method === 'LOYALTY'
+                          ? t('paid with points')
+                          : invoice.payments[0].method === 'ONLINE'
+                            ? t('paid by card online')
+                            : t(
+                                `paid by ${invoice.payments[0].method.toLowerCase().replace('_', ' ')}`,
+                              )
+                      }`
                     : ''}
                 </p>
               </li>

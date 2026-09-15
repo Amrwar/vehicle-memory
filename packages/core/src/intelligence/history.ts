@@ -92,12 +92,19 @@ function days(from: Date, to: Date): number {
   return (to.getTime() - from.getTime()) / 86_400_000;
 }
 
+/**
+ * The reader's locale while one inspection runs, so the dates and numbers
+ * inside a finding read in their language. Set and restored around a
+ * synchronous call, so no two readers can share it. Phase 40.5.
+ */
+let locale = 'en-GB';
+
 function on(date: Date): string {
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function km(value: number): string {
-  return value.toLocaleString('en-GB');
+  return value.toLocaleString(locale);
 }
 
 function perYear(kmPerDay: number): number {
@@ -302,21 +309,28 @@ const SEVERITY_ORDER: Record<HistorySeverity, number> = { SERIOUS: 0, CONCERN: 1
 export function inspectHistory(
   readings: readonly HistoryReading[],
   now: Date = new Date(),
+  readerLocale = 'en-GB',
 ): HistoryFinding[] {
   if (readings.length < 2) return [];
 
   const ordered = [...readings].sort((a, b) => a.readAt.getTime() - b.readAt.getTime());
 
-  return [
-    ...rollbacks(ordered),
-    ...implausibleRates(ordered),
-    ...rateCollapse(ordered),
-    ...conflicts(ordered),
-    ...thinHistory(ordered, now),
-  ].sort(
-    (a, b) =>
-      SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || b.at.getTime() - a.at.getTime(),
-  );
+  const previous = locale;
+  locale = readerLocale;
+  try {
+    return [
+      ...rollbacks(ordered),
+      ...implausibleRates(ordered),
+      ...rateCollapse(ordered),
+      ...conflicts(ordered),
+      ...thinHistory(ordered, now),
+    ].sort(
+      (a, b) =>
+        SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || b.at.getTime() - a.at.getTime(),
+    );
+  } finally {
+    locale = previous;
+  }
 }
 
 /**

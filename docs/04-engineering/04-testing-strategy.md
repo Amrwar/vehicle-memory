@@ -27,6 +27,7 @@ nothing ([ADR-0003](../03-adr/0003-monorepo-structure.md)).
 | Integrity  | `verify-integrity.ts`                              | Actively tries to violate every database guarantee                                                  |
 | Acceptance | `verify-*.ts`                                      | One script per phase, against a seeded database, asserting the phase's promise (below)              |
 | Crawls     | `verify-controls`, `verify-empty`, `verify-access` | Every page for every role: every control resolves, every page works empty, mechanical accessibility |
+| Languages  | `i18n-scan.ts`, `verify-languages`                 | No text outside the translator; every sentence and refusal in French and Arabic (Phase 40.5)        |
 | Usability  | Humans                                             | The four criteria in section 7                                                                      |
 
 ### The verification scripts

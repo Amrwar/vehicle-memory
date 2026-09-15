@@ -19,6 +19,7 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   catalogueSettings,
   saveJobType,
@@ -29,7 +30,10 @@ import {
   setTaxRateActive,
 } from '@/lib/settings';
 
-export const metadata: Metadata = { title: 'Tax rates and kinds of work' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Tax rates and kinds of work') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -159,6 +163,7 @@ export default async function CatalogueSettingsPage({
   const { orgId } = await requireSession('settings:write');
   const { saved, problem, rate: editRate, type: editType } = await searchParams;
   const { taxRates, jobTypes } = await catalogueSettings(orgId);
+  const t = await tFor();
 
   const editingRate = taxRates.find((row) => row.id === editRate) ?? null;
   const editingType = jobTypes.find((row) => row.id === editType) ?? null;
@@ -166,35 +171,38 @@ export default async function CatalogueSettingsPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Settings"
-        title="Tax rates and kinds of work"
-        description="The two lists every job reaches for"
+        eyebrow={t('Settings')}
+        title={t('Tax rates and kinds of work')}
+        description={t('The two lists every job reaches for')}
       />
 
       {saved ? (
         <Alert tone="success" className="mb-5">
-          Saved. The change is in the audit log with what it was before.
+          {t('Saved. The change is in the audit log with what it was before.')}
         </Alert>
       ) : null}
       {problem ? (
-        <Alert tone="danger" title="Not saved" className="mb-5">
-          {problem}
+        <Alert tone="danger" title={t('Not saved')} className="mb-5">
+          {t(problem)}
         </Alert>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="grid gap-5 content-start">
           <Card className="overflow-hidden">
-            <CardHeader title="Tax rates" description="Exactly one is the default for new lines" />
+            <CardHeader
+              title={t('Tax rates')}
+              description={t('Exactly one is the default for new lines')}
+            />
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Rate</Th>
+                    <Th>{t('Rate')}</Th>
                     <Th className="text-right">%</Th>
                     <Th />
                   </tr>
@@ -206,12 +214,12 @@ export default async function CatalogueSettingsPage({
                         {row.name}
                         {row.isDefault ? (
                           <Badge tone="brand" size="sm" className="ml-2">
-                            default
+                            {t('default')}
                           </Badge>
                         ) : null}
                         {!row.isActive ? (
                           <Badge tone="neutral" size="sm" className="ml-2">
-                            retired
+                            {t('retired')}
                           </Badge>
                         ) : null}
                       </Td>
@@ -222,14 +230,14 @@ export default async function CatalogueSettingsPage({
                             href={`/settings/catalogue?rate=${row.id}#rate`}
                             className="mr-2 text-[13px] text-(--brand-text) hover:underline"
                           >
-                            Edit
+                            {t('Edit')}
                           </a>
                         ) : null}
                         {row.isActive && !row.isDefault ? (
                           <form action={makeDefault} className="inline">
                             <input type="hidden" name="taxRateId" value={row.id} />
                             <Button type="submit" variant="ghost" size="sm">
-                              Make default
+                              {t('Make default')}
                             </Button>
                           </form>
                         ) : null}
@@ -242,7 +250,7 @@ export default async function CatalogueSettingsPage({
                               value={row.isActive ? 'no' : 'yes'}
                             />
                             <Button type="submit" variant="ghost" size="sm">
-                              {row.isActive ? 'Retire' : 'Restore'}
+                              {row.isActive ? t('Retire') : t('Restore')}
                             </Button>
                           </form>
                         ) : null}
@@ -255,20 +263,24 @@ export default async function CatalogueSettingsPage({
           </Card>
 
           <Card id="rate">
-            <CardHeader title={editingRate ? `Edit ${editingRate.name}` : 'Add a tax rate'} />
+            <CardHeader
+              title={
+                editingRate ? t('Edit {name}', { name: editingRate.name }) : t('Add a tax rate')
+              }
+            />
             <form action={saveRate}>
               {editingRate ? <input type="hidden" name="taxRateId" value={editingRate.id} /> : null}
               <CardBody className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-                <Field label="Name" hint="As it reads on the invoice">
+                <Field label={t('Name')} hint={t('As it reads on the invoice')}>
                   <Input
                     name="name"
                     defaultValue={editingRate?.name ?? ''}
                     required
                     maxLength={40}
-                    placeholder="VAT 20%"
+                    placeholder={t('VAT 20%')}
                   />
                 </Field>
-                <Field label="Percent">
+                <Field label={t('Percent')}>
                   <Input
                     name="rate"
                     type="number"
@@ -282,21 +294,22 @@ export default async function CatalogueSettingsPage({
               </CardBody>
               <CardBody className="flex gap-2 border-t border-(--border)">
                 <Button type="submit" variant="primary">
-                  {editingRate ? 'Save rate' : 'Add rate'}
+                  {editingRate ? t('Save rate') : t('Add rate')}
                 </Button>
                 {editingRate ? (
                   <a
                     href="/settings/catalogue"
                     className="self-center text-[13px] text-(--text-soft) hover:underline"
                   >
-                    Cancel
+                    {t('Cancel')}
                   </a>
                 ) : null}
               </CardBody>
             </form>
             <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
-              A rate that has been invoiced keeps its percentage. Add the new one and retire the
-              old, so what was invoiced still reads the way it was sent.
+              {t(
+                'A rate that has been invoiced keeps its percentage. Add the new one and retire the old, so what was invoiced still reads the way it was sent.',
+              )}
             </CardBody>
           </Card>
         </div>
@@ -304,16 +317,16 @@ export default async function CatalogueSettingsPage({
         <div className="grid gap-5 content-start">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Kinds of work"
-              description="Colour for the diary, hours for the planner"
+              title={t('Kinds of work')}
+              description={t('Colour for the diary, hours for the planner')}
             />
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Kind</Th>
-                    <Th className="text-right">Hours</Th>
-                    <Th>Checks</Th>
+                    <Th>{t('Kind')}</Th>
+                    <Th className="text-right">{t('Hours')}</Th>
+                    <Th>{t('Checks')}</Th>
                     <Th />
                   </tr>
                 </thead>
@@ -329,13 +342,19 @@ export default async function CatalogueSettingsPage({
                         {row.name}
                         {!row.isActive ? (
                           <Badge tone="neutral" size="sm" className="ml-2">
-                            retired
+                            {t('retired')}
                           </Badge>
                         ) : null}
                         <span className="ml-2 text-[12px] text-(--text-faint)">
-                          {row._count.jobs} job{row._count.jobs === 1 ? '' : 's'}
+                          {row._count.jobs === 1
+                            ? t('1 job')
+                            : t('{count} jobs', { count: row._count.jobs })}
                           {row._count.skills > 0
-                            ? ` · ${row._count.skills} skill${row._count.skills === 1 ? '' : 's'}`
+                            ? ` · ${
+                                row._count.skills === 1
+                                  ? t('1 skill')
+                                  : t('{count} skills', { count: row._count.skills })
+                              }`
                             : ''}
                         </span>
                       </Td>
@@ -343,7 +362,7 @@ export default async function CatalogueSettingsPage({
                         {row.defaultHours === null ? '—' : Number(row.defaultHours)}
                       </Td>
                       <Td className="text-(--text-soft)">
-                        {row.requiresQualityCheck ? 'Quality check' : '—'}
+                        {row.requiresQualityCheck ? t('Quality check') : '—'}
                       </Td>
                       <Td className="text-right whitespace-nowrap">
                         {row.isActive ? (
@@ -351,14 +370,14 @@ export default async function CatalogueSettingsPage({
                             href={`/settings/catalogue?type=${row.id}#type`}
                             className="mr-2 text-[13px] text-(--brand-text) hover:underline"
                           >
-                            Edit
+                            {t('Edit')}
                           </a>
                         ) : null}
                         <form action={toggleType} className="inline">
                           <input type="hidden" name="jobTypeId" value={row.id} />
                           <input type="hidden" name="active" value={row.isActive ? 'no' : 'yes'} />
                           <Button type="submit" variant="ghost" size="sm">
-                            {row.isActive ? 'Retire' : 'Restore'}
+                            {row.isActive ? t('Retire') : t('Restore')}
                           </Button>
                         </form>
                       </Td>
@@ -371,23 +390,27 @@ export default async function CatalogueSettingsPage({
 
           <Card id="type">
             <CardHeader
-              title={editingType ? `Edit ${editingType.name}` : 'Add a kind of work'}
-              description={editingType ? undefined : 'Skills it needs are set on the skills page'}
+              title={
+                editingType ? t('Edit {name}', { name: editingType.name }) : t('Add a kind of work')
+              }
+              description={
+                editingType ? undefined : t('Skills it needs are set on the skills page')
+              }
             />
             <form action={saveType}>
               {editingType ? <input type="hidden" name="jobTypeId" value={editingType.id} /> : null}
               <CardBody className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-[1fr_7rem_7rem]">
-                  <Field label="Name">
+                  <Field label={t('Name')}>
                     <Input
                       name="name"
                       defaultValue={editingType?.name ?? ''}
                       required
                       maxLength={60}
-                      placeholder="Brake repair"
+                      placeholder={t('Brake repair')}
                     />
                   </Field>
-                  <Field label="Colour">
+                  <Field label={t('Colour')}>
                     <Input
                       name="colour"
                       type="color"
@@ -396,7 +419,7 @@ export default async function CatalogueSettingsPage({
                       className="h-9 p-1"
                     />
                   </Field>
-                  <Field label="Hours" hint="Usual">
+                  <Field label={t('Hours')} hint={t('Usual')}>
                     <Input
                       name="defaultHours"
                       type="number"
@@ -418,19 +441,19 @@ export default async function CatalogueSettingsPage({
                     defaultChecked={editingType?.requiresQualityCheck ?? false}
                     className="h-4 w-4"
                   />
-                  Needs a quality check before the car goes back
+                  {t('Needs a quality check before the car goes back')}
                 </label>
               </CardBody>
               <CardBody className="flex gap-2 border-t border-(--border)">
                 <Button type="submit" variant="primary">
-                  {editingType ? 'Save kind of work' : 'Add kind of work'}
+                  {editingType ? t('Save kind of work') : t('Add kind of work')}
                 </Button>
                 {editingType ? (
                   <a
                     href="/settings/catalogue"
                     className="self-center text-[13px] text-(--text-soft) hover:underline"
                   >
-                    Cancel
+                    {t('Cancel')}
                   </a>
                 ) : null}
               </CardBody>

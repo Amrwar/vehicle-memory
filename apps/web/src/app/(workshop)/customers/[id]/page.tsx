@@ -23,6 +23,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { CustomerError, setPreferredTechnician } from '@/lib/customers';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   awardByHand,
   HAND_AWARD_CEILING,
@@ -47,7 +48,8 @@ export async function generateMetadata({
     where: { id },
     select: { displayName: true },
   });
-  return { title: customer?.displayName ?? 'Customer' };
+  const t = await tFor();
+  return { title: customer?.displayName ?? t('Customer') };
 }
 
 /**
@@ -207,6 +209,7 @@ export default async function CustomerPage({
   const { id } = await params;
   const { saved, problem } = await searchParams;
   const { db, orgId, user, region } = await requireSession('customer:read');
+  const t = await tFor();
 
   const { id: customerId } = await params;
 
@@ -260,20 +263,24 @@ export default async function CustomerPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/customers">All customers</BackLink>
+        <BackLink href="/customers">{t('All customers')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow={customer.kind === 'COMPANY' ? 'Company' : 'Individual'}
+        eyebrow={customer.kind === 'COMPANY' ? t('Company') : t('Individual')}
         title={customer.displayName}
-        description={customer.sourceOfBusiness ? `Source: ${customer.sourceOfBusiness}` : undefined}
+        description={
+          customer.sourceOfBusiness
+            ? t('Source: {source}', { source: customer.sourceOfBusiness })
+            : undefined
+        }
         actions={
           <>
             <Link href={`/audit/Customer/${customer.id}`}>
-              <Button variant="secondary">How this came to be</Button>
+              <Button variant="secondary">{t('How this came to be')}</Button>
             </Link>
             <Link href={`/jobs/new?customer=${customer.id}`}>
-              <Button variant="primary">New job</Button>
+              <Button variant="primary">{t('New job')}</Button>
             </Link>
           </>
         }
@@ -282,37 +289,44 @@ export default async function CustomerPage({
       {saved ? (
         <Alert tone="success" className="mb-5">
           {saved === 'points'
-            ? 'Points added. They can see them in the portal.'
+            ? t('Points added. They can see them in the portal.')
             : saved === 'deposit'
-              ? 'Deposit taken and booked as money held, not as revenue. It goes against the invoice when there is one.'
+              ? t(
+                  'Deposit taken and booked as money held, not as revenue. It goes against the invoice when there is one.',
+                )
               : saved === 'returned'
-                ? 'Money returned, with the reason kept.'
+                ? t('Money returned, with the reason kept.')
                 : saved === 'referral-paid'
-                  ? 'Code used. They had already had enough work done here, so both sides have been paid.'
+                  ? t(
+                      'Code used. They had already had enough work done here, so both sides have been paid.',
+                    )
                   : saved === 'referral'
-                    ? 'Code used. Both sides are paid once this customer has had enough work done.'
-                    : 'Saved.'}
+                    ? t(
+                        'Code used. Both sides are paid once this customer has had enough work done.',
+                      )
+                    : t('Saved.')}
         </Alert>
       ) : null}
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="grid gap-5">
           <Card>
-            <CardHeader title="Contact" />
+            <CardHeader title={t('Contact')} />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={3}
                 items={[
-                  { label: 'Mobile', value: customer.mobile },
-                  { label: 'Landline', value: customer.phone },
-                  { label: 'Email', value: customer.email },
+                  { label: t('Mobile'), value: customer.mobile },
+                  { label: t('Landline'), value: customer.phone },
+                  { label: t('Email'), value: customer.email },
                   {
-                    label: 'Address',
+                    label: t('Address'),
                     value:
                       [
                         customer.addressLine1,
@@ -324,22 +338,22 @@ export default async function CustomerPage({
                         .filter(Boolean)
                         .join(', ') || null,
                   },
-                  { label: 'Tax number', value: customer.taxNumber },
+                  { label: t('Tax number'), value: customer.taxNumber },
                   {
-                    label: 'Marketing consent',
+                    label: t('Marketing consent'),
                     value: (
                       <span className="flex gap-1.5">
                         <Badge
                           tone={customer.marketingEmailConsent ? 'success' : 'neutral'}
                           size="sm"
                         >
-                          Email {customer.marketingEmailConsent ? 'yes' : 'no'}
+                          {customer.marketingEmailConsent ? t('Email yes') : t('Email no')}
                         </Badge>
                         <Badge
                           tone={customer.marketingSmsConsent ? 'success' : 'neutral'}
                           size="sm"
                         >
-                          SMS {customer.marketingSmsConsent ? 'yes' : 'no'}
+                          {customer.marketingSmsConsent ? t('SMS yes') : t('SMS no')}
                         </Badge>
                       </span>
                     ),
@@ -348,7 +362,7 @@ export default async function CustomerPage({
               />
               {customer.notes ? (
                 <div className="mt-5 border-t border-(--border) pt-4">
-                  <p className="eyebrow mb-1">Notes</p>
+                  <p className="eyebrow mb-1">{t('Notes')}</p>
                   <p className="text-[13px] leading-relaxed">{customer.notes}</p>
                 </div>
               ) : null}
@@ -357,13 +371,17 @@ export default async function CustomerPage({
 
           <Card>
             <CardHeader
-              title="Vehicles"
-              description={`${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'}`}
+              title={t('Vehicles')}
+              description={
+                vehicles.length === 1
+                  ? t('1 vehicle')
+                  : t('{count} vehicles', { count: vehicles.length })
+              }
             />
             {vehicles.length === 0 ? (
               <EmptyState
-                title="No vehicles"
-                description="Vehicles appear once a job is created."
+                title={t('No vehicles')}
+                description={t('Vehicles appear once a job is created.')}
               />
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -382,17 +400,19 @@ export default async function CustomerPage({
                         ) : null}
                         {vehicle.recalls.length > 0 ? (
                           <Badge tone="danger" size="sm">
-                            Recall
+                            {t('Recall')}
                           </Badge>
                         ) : null}
                       </div>
                       <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                        <Mileage locale={region.locale} km={vehicle.lastOdometerKm} /> ·{' '}
-                        {vehicle._count.events} history entries
+                        <Mileage t={t} locale={region.locale} km={vehicle.lastOdometerKm} /> ·{' '}
+                        {vehicle._count.events === 1
+                          ? t('1 history entry')
+                          : t('{count} history entries', { count: vehicle._count.events })}
                       </p>
                     </div>
                     <Link href={`/vehicles/${vehicle.id}`}>
-                      <Button size="sm">Passport</Button>
+                      <Button size="sm">{t('Passport')}</Button>
                     </Link>
                   </li>
                 ))}
@@ -401,9 +421,9 @@ export default async function CustomerPage({
           </Card>
 
           <Card>
-            <CardHeader title="Recent jobs" />
+            <CardHeader title={t('Recent jobs')} />
             {customer.jobs.length === 0 ? (
-              <EmptyState title="No jobs yet" />
+              <EmptyState title={t('No jobs yet')} />
             ) : (
               <ul className="divide-y divide-(--border)">
                 {customer.jobs.map((job) => (
@@ -424,7 +444,7 @@ export default async function CustomerPage({
                       {job.createdAt.toLocaleDateString(region.locale)}
                     </time>
                     <Badge tone={toneFor(job.status as JobStatus)} size="sm">
-                      {humanise(job.status as JobStatus)}
+                      {t(humanise(job.status as JobStatus))}
                     </Badge>
                   </li>
                 ))}
@@ -436,8 +456,8 @@ export default async function CustomerPage({
         <aside className="grid content-start gap-5">
           <Card>
             <CardHeader
-              title="Preferences"
-              description="Preselected on a new job; the diary has the last word"
+              title={t('Preferences')}
+              description={t('Preselected on a new job; the diary has the last word')}
             />
             <CardBody>
               <form action={prefer} className="grid gap-2">
@@ -446,7 +466,7 @@ export default async function CustomerPage({
                   className="text-[12px] font-medium text-(--text-soft)"
                   htmlFor="preferred-technician"
                 >
-                  Asks for
+                  {t('Asks for')}
                 </label>
                 <select
                   id="preferred-technician"
@@ -455,7 +475,7 @@ export default async function CustomerPage({
                   disabled={!mayEditCustomer}
                   className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
                 >
-                  <option value="">Nobody in particular</option>
+                  <option value="">{t('Nobody in particular')}</option>
                   {technicians.map((person) => (
                     <option key={person.id} value={person.id}>
                       {person.name}
@@ -469,7 +489,7 @@ export default async function CustomerPage({
                     size="sm"
                     className="justify-self-start"
                   >
-                    Save preference
+                    {t('Save preference')}
                   </Button>
                 ) : null}
               </form>
@@ -477,16 +497,16 @@ export default async function CustomerPage({
           </Card>
 
           <Card className={outstanding > 0 ? 'border-(--warning)' : undefined}>
-            <CardHeader title="Account" />
+            <CardHeader title={t('Account')} />
             <CardBody className="grid gap-2 text-[13px]">
               <div className="flex justify-between">
-                <span className="text-(--text-faint)">Outstanding</span>
+                <span className="text-(--text-faint)">{t('Outstanding')}</span>
                 <span className="font-display text-[16px] font-semibold">
                   <Money currency={region.currency} locale={region.locale} amount={outstanding} />
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-(--text-faint)">Invoices</span>
+                <span className="text-(--text-faint)">{t('Invoices')}</span>
                 <span className="tabular">{customer.invoices.length}</span>
               </div>
             </CardBody>
@@ -497,16 +517,16 @@ export default async function CustomerPage({
               each row with what is left on it and a way to give it back. */}
           <Card className={held.heldMinor > 0 ? 'border-(--brand)' : undefined}>
             <CardHeader
-              title="Money held"
+              title={t('Money held')}
               description={
                 held.heldMinor > 0
-                  ? 'Deposits and credit, waiting for a bill'
-                  : 'A deposit before the work, or credit kept from a refund'
+                  ? t('Deposits and credit, waiting for a bill')
+                  : t('A deposit before the work, or credit kept from a refund')
               }
             />
             <CardBody className="grid gap-3 text-[13px]">
               <div className="flex items-baseline justify-between">
-                <span className="text-(--text-faint)">Held</span>
+                <span className="text-(--text-faint)">{t('Held')}</span>
                 <span className="font-display text-[22px] font-semibold tabular-nums">
                   <Money
                     currency={region.currency}
@@ -522,10 +542,10 @@ export default async function CustomerPage({
                     <li key={row.id} className="grid gap-2 py-2 text-[12px]">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="min-w-0 flex-1 truncate">
-                          {row.kind === 'CREDIT' ? 'Credit' : 'Deposit'}
+                          {row.kind === 'CREDIT' ? t('Credit') : t('Deposit')}
                           {row.job ? (
                             <Link href={`/jobs/${row.job.id}`} className="ml-1 hover:underline">
-                              for job #{row.job.number}
+                              {t('for job #{number}', { number: row.job.number })}
                             </Link>
                           ) : null}
                           <time className="datum ml-1.5 text-(--text-faint)">
@@ -551,7 +571,7 @@ export default async function CustomerPage({
                           <Input
                             name="amount"
                             inputMode="decimal"
-                            aria-label="Amount to return"
+                            aria-label={t('Amount to return')}
                             className="tabular-nums"
                             defaultValue={(row.heldMinor / 100).toFixed(2)}
                             required
@@ -559,13 +579,13 @@ export default async function CustomerPage({
                           <div className="flex gap-1.5">
                             <Input
                               name="reason"
-                              aria-label="Why it is going back"
-                              placeholder="Why it is going back"
+                              aria-label={t('Why it is going back')}
+                              placeholder={t('Why it is going back')}
                               required
                               maxLength={120}
                             />
                             <Button type="submit" variant="secondary" size="sm">
-                              Return
+                              {t('Return')}
                             </Button>
                           </div>
                         </form>
@@ -579,7 +599,7 @@ export default async function CustomerPage({
                 <form action={deposit} className="grid gap-2 border-t border-(--border-soft) pt-3">
                   <input type="hidden" name="customerId" value={customer.id} />
                   <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
-                    <Field label="Deposit" htmlFor="deposit-amount">
+                    <Field label={t('Deposit')} htmlFor="deposit-amount">
                       <Input
                         id="deposit-amount"
                         name="amount"
@@ -589,28 +609,28 @@ export default async function CustomerPage({
                         required
                       />
                     </Field>
-                    <Field label="How they paid" htmlFor="deposit-method">
+                    <Field label={t('How they paid')} htmlFor="deposit-method">
                       <select
                         id="deposit-method"
                         name="method"
                         defaultValue="CARD"
                         className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
                       >
-                        <option value="CARD">Card</option>
-                        <option value="CASH">Cash</option>
-                        <option value="BANK_TRANSFER">Bank transfer</option>
-                        <option value="CHEQUE">Cheque</option>
+                        <option value="CARD">{t('Card')}</option>
+                        <option value="CASH">{t('Cash')}</option>
+                        <option value="BANK_TRANSFER">{t('Bank transfer')}</option>
+                        <option value="CHEQUE">{t('Cheque')}</option>
                       </select>
                     </Field>
                   </div>
-                  <Field label="For which job" hint="Optional" htmlFor="deposit-job">
+                  <Field label={t('For which job')} hint={t('Optional')} htmlFor="deposit-job">
                     <select
                       id="deposit-job"
                       name="jobId"
                       defaultValue=""
                       className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
                     >
-                      <option value="">Not a particular job</option>
+                      <option value="">{t('Not a particular job')}</option>
                       {customer.jobs
                         .filter((job) => !['PAID', 'CANCELLED', 'INVOICED'].includes(job.status))
                         .map((job) => (
@@ -620,7 +640,7 @@ export default async function CustomerPage({
                         ))}
                     </select>
                   </Field>
-                  <Field label="Reference" hint="Optional" htmlFor="deposit-reference">
+                  <Field label={t('Reference')} hint={t('Optional')} htmlFor="deposit-reference">
                     <Input id="deposit-reference" name="reference" maxLength={60} />
                   </Field>
                   <Button
@@ -629,7 +649,7 @@ export default async function CustomerPage({
                     size="sm"
                     className="justify-self-start"
                   >
-                    Take the deposit
+                    {t('Take the deposit')}
                   </Button>
                 </form>
               ) : null}
@@ -642,25 +662,35 @@ export default async function CustomerPage({
               is for the points a rule cannot see coming. */}
           <Card className={points.expiring.points > 0 ? 'border-(--warning)' : undefined}>
             <CardHeader
-              title="Points"
+              title={t('Points')}
               description={
                 points.balance > 0
-                  ? `Worth ${new Intl.NumberFormat(region.locale, { style: 'currency', currency: region.currency }).format(points.valueMinor / 100)} off a bill`
-                  : `${points.perPound} point a pound on every bill paid in full`
+                  ? t('Worth {amount} off a bill', {
+                      amount: new Intl.NumberFormat(region.locale, {
+                        style: 'currency',
+                        currency: region.currency,
+                      }).format(points.valueMinor / 100),
+                    })
+                  : t('{count} point a pound on every bill paid in full', {
+                      count: points.perPound,
+                    })
               }
             />
             <CardBody className="grid gap-3 text-[13px]">
               <div className="flex items-baseline justify-between">
-                <span className="text-(--text-faint)">Balance</span>
+                <span className="text-(--text-faint)">{t('Balance')}</span>
                 <span className="font-display text-[22px] font-semibold tabular-nums">
                   {points.balance.toLocaleString(region.locale)}
                 </span>
               </div>
               {points.expiring.points > 0 && points.expiring.on ? (
                 <p className="rounded-(--radius-sm) bg-(--warning-soft) px-2.5 py-1.5 text-[12px] text-(--warning)">
-                  {points.expiring.points.toLocaleString(region.locale)} lapse on{' '}
-                  {points.expiring.on.toLocaleDateString(region.locale, { dateStyle: 'medium' })}.
-                  Worth mentioning at the next visit.
+                  {t('{points} lapse on {date}. Worth mentioning at the next visit.', {
+                    points: points.expiring.points.toLocaleString(region.locale),
+                    date: points.expiring.on.toLocaleDateString(region.locale, {
+                      dateStyle: 'medium',
+                    }),
+                  })}
                 </p>
               ) : null}
 
@@ -674,10 +704,10 @@ export default async function CustomerPage({
                       <span className="min-w-0 flex-1 truncate">
                         {entry.job ? (
                           <Link href={`/jobs/${entry.job.id}`} className="hover:underline">
-                            {entry.reason}
+                            {t(entry.reason)}
                           </Link>
                         ) : (
-                          entry.reason
+                          t(entry.reason)
                         )}
                         <time className="datum ml-1.5 text-(--text-faint)">
                           {entry.createdAt.toLocaleDateString(region.locale)}
@@ -698,7 +728,7 @@ export default async function CustomerPage({
                 </ul>
               ) : (
                 <p className="text-[12px] text-(--text-faint)">
-                  Nothing earned yet. The first bill they pay in full starts it.
+                  {t('Nothing earned yet. The first bill they pay in full starts it.')}
                 </p>
               )}
 
@@ -706,7 +736,7 @@ export default async function CustomerPage({
                 <form action={award} className="grid gap-2 border-t border-(--border-soft) pt-3">
                   <input type="hidden" name="customerId" value={customer.id} />
                   <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
-                    <Field label="Points" htmlFor="award-points">
+                    <Field label={t('Points')} htmlFor="award-points">
                       <Input
                         id="award-points"
                         name="points"
@@ -719,13 +749,13 @@ export default async function CustomerPage({
                         className="tabular-nums"
                       />
                     </Field>
-                    <Field label="Why" htmlFor="award-reason">
+                    <Field label={t('Why')} htmlFor="award-reason">
                       <Input
                         id="award-reason"
                         name="reason"
                         required
                         maxLength={120}
-                        placeholder="Sorry about the wait on Tuesday"
+                        placeholder={t('Sorry about the wait on Tuesday')}
                       />
                     </Field>
                   </div>
@@ -735,7 +765,7 @@ export default async function CustomerPage({
                     size="sm"
                     className="justify-self-start"
                   >
-                    Add points
+                    {t('Add points')}
                   </Button>
                 </form>
               ) : null}
@@ -747,12 +777,22 @@ export default async function CustomerPage({
               so nobody promises points on a sign-up. */}
           <Card>
             <CardHeader
-              title="Referrals"
-              description={`Both sides get ${referrals.pointsEachSide} points once the person brought in has had ${new Intl.NumberFormat(region.locale, { style: 'currency', currency: region.currency, maximumFractionDigits: 0 }).format(referrals.minimumMinor / 100)} of work done`}
+              title={t('Referrals')}
+              description={t(
+                'Both sides get {points} points once the person brought in has had {amount} of work done',
+                {
+                  points: referrals.pointsEachSide,
+                  amount: new Intl.NumberFormat(region.locale, {
+                    style: 'currency',
+                    currency: region.currency,
+                    maximumFractionDigits: 0,
+                  }).format(referrals.minimumMinor / 100),
+                },
+              )}
             />
             <CardBody className="grid gap-3 text-[13px]">
               <div>
-                <p className="eyebrow">Their code to hand out</p>
+                <p className="eyebrow">{t('Their code to hand out')}</p>
                 <p className="datum mt-1 text-[22px] font-semibold tracking-[0.2em]">
                   {referrals.code}
                 </p>
@@ -760,16 +800,19 @@ export default async function CustomerPage({
 
               {referrals.introducedBy ? (
                 <p className="text-[12px] text-(--text-soft)">
-                  Introduced by{' '}
+                  {t('Introduced by')}{' '}
                   <Link
                     href={`/customers/${referrals.introducedBy.referrer.id}`}
                     className="font-medium hover:underline"
                   >
                     {referrals.introducedBy.referrer.displayName}
                   </Link>
+                  {' · '}
                   {referrals.introducedBy.creditedAt
-                    ? ` · both sides paid on ${referrals.introducedBy.creditedAt.toLocaleDateString(region.locale)}`
-                    : ' · waiting on their first bill'}
+                    ? t('both sides paid on {date}', {
+                        date: referrals.introducedBy.creditedAt.toLocaleDateString(region.locale),
+                      })
+                    : t('waiting on their first bill')}
                 </p>
               ) : null}
 
@@ -789,7 +832,7 @@ export default async function CustomerPage({
                             {entry.referred.displayName}
                           </Link>
                         ) : (
-                          'A customer since removed'
+                          t('A customer since removed')
                         )}
                         {entry.usedAt ? (
                           <time className="datum ml-1.5 text-(--text-faint)">
@@ -799,26 +842,26 @@ export default async function CustomerPage({
                       </span>
                       {entry.creditedAt ? (
                         <Badge tone="success" size="sm">
-                          Paid
+                          {t('Paid')}
                         </Badge>
                       ) : (
                         <Badge tone="neutral" size="sm">
-                          Waiting on a bill
+                          {t('Waiting on a bill')}
                         </Badge>
                       )}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-[12px] text-(--text-faint)">Nobody brought in yet.</p>
+                <p className="text-[12px] text-(--text-faint)">{t('Nobody brought in yet.')}</p>
               )}
 
               {mayEditCustomer && !referrals.introducedBy ? (
                 <form action={refer} className="grid gap-2 border-t border-(--border-soft) pt-3">
                   <input type="hidden" name="customerId" value={customer.id} />
                   <Field
-                    label="Arrived with a code"
-                    hint="Somebody else's code, said at the counter"
+                    label={t('Arrived with a code')}
+                    hint={t('Somebody else’s code, said at the counter')}
                     htmlFor="refer-code"
                   >
                     <Input
@@ -828,6 +871,7 @@ export default async function CustomerPage({
                       maxLength={8}
                       autoCapitalize="characters"
                       className="datum uppercase tracking-[0.15em]"
+                      // i18n-ignore
                       placeholder="XXXXXX"
                     />
                   </Field>
@@ -837,7 +881,7 @@ export default async function CustomerPage({
                     size="sm"
                     className="justify-self-start"
                   >
-                    Use the code
+                    {t('Use the code')}
                   </Button>
                 </form>
               ) : null}
@@ -845,9 +889,11 @@ export default async function CustomerPage({
           </Card>
 
           <Card>
-            <CardHeader title="Recent payments" />
+            <CardHeader title={t('Recent payments')} />
             {customer.payments.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">Nothing recorded.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">
+                {t('Nothing recorded.')}
+              </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {customer.payments.map((payment) => (
@@ -861,7 +907,7 @@ export default async function CustomerPage({
                         />
                       </p>
                       <p className="datum text-[11px] text-(--text-faint)">
-                        {methodLabel(payment.method)} ·{' '}
+                        {t(methodLabel(payment.method))} ·{' '}
                         {payment.receivedAt.toLocaleDateString(region.locale)}
                       </p>
                     </div>
@@ -881,12 +927,12 @@ export default async function CustomerPage({
           had to open four pages and hold the dates in their head. */}
       <Card className="mt-6 overflow-hidden">
         <CardHeader
-          title="The whole story"
-          description="Every visit, quote, decision and payment, newest first."
+          title={t('The whole story')}
+          description={t('Every visit, quote, decision and payment, newest first.')}
         />
         {timeline.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
-            Nothing has happened yet. The thread fills itself as this customer is dealt with.
+            {t('Nothing has happened yet. The thread fills itself as this customer is dealt with.')}
           </CardBody>
         ) : (
           <ol className="divide-y divide-(--border-soft)">
@@ -906,13 +952,13 @@ export default async function CustomerPage({
                 <span className="min-w-0 flex-1 text-[13px]">
                   {entry.href ? (
                     <Link href={entry.href} className="hover:text-(--brand-text) hover:underline">
-                      {entry.title}
+                      {t(entry.title)}
                     </Link>
                   ) : (
-                    entry.title
+                    t(entry.title)
                   )}
                   {entry.detail ? (
-                    <span className="ml-2 text-[11px] text-(--text-faint)">{entry.detail}</span>
+                    <span className="ml-2 text-[11px] text-(--text-faint)">{t(entry.detail)}</span>
                   ) : null}
                 </span>
 
@@ -937,11 +983,13 @@ export default async function CustomerPage({
       {messages.length > 0 ? (
         <Card className="mt-6 overflow-hidden">
           <CardHeader
-            title="What they were sent"
-            description="Matched on the address on file, so it is a close record rather than a certain one."
+            title={t('What they were sent')}
+            description={t(
+              'Matched on the address on file, so it is a close record rather than a certain one.',
+            )}
             action={
               <Link href={`/inbox?customer=${customer.id}`} className="text-[12px] underline">
-                The conversation
+                {t('The conversation')}
               </Link>
             }
           />
@@ -953,9 +1001,9 @@ export default async function CustomerPage({
                     {message.subject ?? message.body.slice(0, 60)}
                   </span>
                   <span className="text-[11px] text-(--text-faint)">
-                    {message.channel.toLowerCase()} ·{' '}
+                    {t(message.channel.toLowerCase())} ·{' '}
                     {(message.sentAt ?? message.createdAt).toLocaleDateString(region.locale)}
-                    {message.status === 'FAILED' ? ' · did not arrive' : ''}
+                    {message.status === 'FAILED' ? ` · ${t('did not arrive')}` : ''}
                   </span>
                 </div>
                 {message.error ? (

@@ -26,7 +26,10 @@ import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/port
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Vehicle history' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Vehicle history') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -111,12 +114,15 @@ export default async function PortalVehiclePage({
       <p className="eyebrow">{t('Your vehicle')}</p>
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-[24px] font-semibold leading-tight">
-          {name || 'Your vehicle'}
+          {name || t('Your vehicle')}
         </h1>
         {vehicle.registration ? <Registration value={vehicle.registration} /> : null}
       </div>
       <p className="mt-1 text-[14px] text-(--text-soft)">
-        <Mileage km={vehicle.lastOdometerKm} /> · {vehicle.eventCount} entries on record
+        <Mileage km={vehicle.lastOdometerKm} t={t} /> ·{' '}
+        {vehicle.eventCount === 1
+          ? t('1 entry on record')
+          : t('{count} entries on record', { count: vehicle.eventCount })}
         {vehicle.colour ? ` · ${vehicle.colour}` : ''}
       </p>
 
@@ -130,7 +136,9 @@ export default async function PortalVehiclePage({
           title={t('Vehicle Passport')}
           footer={
             <p className="passport-foil-text text-[10px] opacity-90">
-              {vehicle.eventCount} entries · open the passport
+              {vehicle.eventCount === 1
+                ? t('1 entry · open the passport')
+                : t('{count} entries · open the passport', { count: vehicle.eventCount })}
             </p>
           }
         />
@@ -158,8 +166,10 @@ export default async function PortalVehiclePage({
           className="mt-4"
           title={t('There is an open safety recall on this vehicle')}
         >
-          {vehicle.recalls[0]?.recall.title}. Contact any workshop and the work is carried out free
-          of charge by the manufacturer.
+          {t(
+            '{title}. Contact any workshop and the work is carried out free of charge by the manufacturer.',
+            { title: vehicle.recalls[0]?.recall.title ?? '' },
+          )}
         </Alert>
       ) : null}
 
@@ -184,7 +194,13 @@ export default async function PortalVehiclePage({
                   {schedule.dueKm ? (
                     <>
                       {schedule.dueAt ? ' · ' : ''}
-                      at <Mileage km={schedule.dueKm} />
+                      {t('at {mileage}')
+                        .split('{mileage}')
+                        .flatMap((part, index) =>
+                          index === 0
+                            ? [part]
+                            : [<Mileage key={index} km={schedule.dueKm} t={t} />, part],
+                        )}
                     </>
                   ) : null}
                 </span>
@@ -226,21 +242,22 @@ export default async function PortalVehiclePage({
                       description={`${job.org.name} · ${date(job.completedAt ?? job.createdAt, region.locale)}`}
                       action={
                         <Badge tone={progress.done ? 'neutral' : 'brand'} size="sm">
-                          {progress.label}
+                          {t(progress.label)}
                         </Badge>
                       }
                     />
                     <CardBody className="grid gap-2 text-[13px] text-(--text-soft)">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <span>
-                          {job.odometerInKm ? (
-                            <>
-                              {t('At')}
-                              <Mileage km={job.odometerInKm} />
-                            </>
-                          ) : (
-                            'Mileage not recorded'
-                          )}
+                          {job.odometerInKm
+                            ? t('At {mileage}')
+                                .split('{mileage}')
+                                .flatMap((part, index) =>
+                                  index === 0
+                                    ? [part]
+                                    : [<Mileage key={index} km={job.odometerInKm} t={t} />, part],
+                                )
+                            : t('Mileage not recorded')}
                         </span>
                         {invoice ? (
                           <span className="font-medium text-(--text)">
@@ -254,20 +271,37 @@ export default async function PortalVehiclePage({
                             const marks = Array.isArray(check.damage) ? check.damage.length : 0;
                             return (
                               <li key={check.kind}>
-                                {check.kind === 'IN' ? 'Handed over' : 'Handed back'}{' '}
-                                {date(check.createdAt, region.locale)}
-                                {check.odometerKm !== null
-                                  ? ` at ${check.odometerKm.toLocaleString(region.locale)} km`
-                                  : ''}
-                                , fuel {fuelLabel(check.fuelEighths)}, {marks} mark
-                                {marks === 1 ? '' : 's'} noted
-                                {check._count.photos
-                                  ? `, ${check._count.photos} photo${check._count.photos === 1 ? '' : 's'}`
-                                  : ''}
-                                {check.signature
-                                  ? `, signed by ${check.signature.signedByName}`
-                                  : ''}
-                                .
+                                {t(
+                                  check.kind === 'IN'
+                                    ? '{when}: handed over, {details}.'
+                                    : '{when}: handed back, {details}.',
+                                  {
+                                    when: date(check.createdAt, region.locale),
+                                    details: [
+                                      check.odometerKm !== null
+                                        ? t('{km} km', {
+                                            km: check.odometerKm.toLocaleString(region.locale),
+                                          })
+                                        : null,
+                                      t('fuel {fuel}', { fuel: t(fuelLabel(check.fuelEighths)) }),
+                                      marks === 1
+                                        ? t('1 mark noted')
+                                        : t('{count} marks noted', { count: marks }),
+                                      check._count.photos === 1
+                                        ? t('1 photo')
+                                        : check._count.photos
+                                          ? t('{count} photos', { count: check._count.photos })
+                                          : null,
+                                      check.signature
+                                        ? t('signed by {name}', {
+                                            name: check.signature.signedByName,
+                                          })
+                                        : null,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(t(', ')),
+                                  },
+                                )}
                               </li>
                             );
                           })}
@@ -287,8 +321,9 @@ export default async function PortalVehiclePage({
           {t('Show this history to somebody')}
         </h2>
         <p className="mt-1 text-[13px] leading-relaxed text-(--text-soft)">
-          A buyer, an insurer, or the next garage. They see the vehicle&rsquo;s record and nothing
-          about you. You can take the link back at any time.
+          {t(
+            'A buyer, an insurer, or the next garage. They see the vehicle’s record and nothing about you. You can take the link back at any time.',
+          )}
         </p>
 
         <Card className="mt-3">
@@ -321,10 +356,12 @@ export default async function PortalVehiclePage({
                 className="flex flex-wrap items-center justify-between gap-2 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-3.5 py-2.5 text-[13px]"
               >
                 <span className="text-(--text-soft)">
-                  Live until {date(entry.expiresAt, region.locale)} ·{' '}
+                  {t('Live until {date}', { date: date(entry.expiresAt, region.locale) })} ·{' '}
                   {entry.openCount === 0
-                    ? 'not opened yet'
-                    : `opened ${entry.openCount} time${entry.openCount === 1 ? '' : 's'}`}
+                    ? t('not opened yet')
+                    : entry.openCount === 1
+                      ? t('opened once')
+                      : t('opened {count} times', { count: entry.openCount })}
                 </span>
                 <form action={withdraw}>
                   <input type="hidden" name="vehicleId" value={vehicle.id} />
@@ -340,11 +377,18 @@ export default async function PortalVehiclePage({
       </section>
 
       <Card className="mt-5">
-        <CardHeader title={t('Paperwork')} description={paperwork.statement} />
+        <CardHeader
+          title={t('Paperwork')}
+          description={paperwork.statement
+            .split(/(?<=\.)\s+/)
+            .map((sentence) => t(sentence))
+            .join(' ')}
+        />
         {documents.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
-            Keep the registration certificate, the MOT and the insurance here and they go with the
-            car. A workshop that services it sees them; nobody else does.
+            {t(
+              'Keep the registration certificate, the MOT and the insurance here and they go with the car. A workshop that services it sees them; nobody else does.',
+            )}
           </CardBody>
         ) : (
           <ul className="divide-y divide-(--border)">
@@ -354,7 +398,7 @@ export default async function PortalVehiclePage({
                 className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
               >
                 <Badge tone="neutral" size="sm">
-                  {documentKindLabel(document.kind)}
+                  {t(documentKindLabel(document.kind))}
                 </Badge>
                 {document.url ? (
                   <a
@@ -379,7 +423,7 @@ export default async function PortalVehiclePage({
                     }
                     size="sm"
                   >
-                    {describeExpiry(document.expiresAt)}
+                    {t(describeExpiry(document.expiresAt))}
                   </Badge>
                 ) : null}
                 <span className="text-[12px] text-(--text-faint)">{document.addedBy}</span>

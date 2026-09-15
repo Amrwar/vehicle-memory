@@ -1,4 +1,4 @@
-import { LANGUAGE_NAMES, LANGUAGES, type Language } from '@carnet/core';
+import { LANGUAGE_NAMES, LANGUAGES, type Language, translator } from '@carnet/core';
 
 /**
  * Three buttons, one per language, the current one pressed. Phase 37.5.
@@ -17,12 +17,13 @@ export function LanguageSwitch({
   compact?: boolean;
   className?: string;
 }) {
+  const t = translator(current);
   return (
     <form
       action="/api/language"
       method="post"
       className={['inline-flex items-center gap-1', className ?? ''].join(' ')}
-      aria-label="Language"
+      aria-label={t('Language')}
     >
       <input type="hidden" name="back" value={back} />
       {LANGUAGES.map((language) => (

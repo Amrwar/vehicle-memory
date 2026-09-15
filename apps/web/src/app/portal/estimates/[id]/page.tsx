@@ -10,7 +10,10 @@ import { decisionPreview, DecisionError, estimateForCustomer, recordDecision } f
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Your quote' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Your quote') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -78,7 +81,7 @@ export default async function PortalEstimatePage({
         preview={preview}
         action={answer}
         hiddenFields={{ estimateId: estimate.id }}
-        error={error}
+        error={error ? t(error) : undefined}
       />
 
       {preview.blockedReason ? (

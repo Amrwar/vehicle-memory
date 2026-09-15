@@ -16,10 +16,14 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { packagesFor } from '@/lib/packages';
 import { createJob, JobError, jobFormOptions, vehicleOption } from '@/lib/jobs';
 
-export const metadata: Metadata = { title: 'Open a job' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Open a job') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -75,6 +79,7 @@ export default async function NewJobPage({
   searchParams: Promise<{ error?: string; customer?: string; vehicle?: string; package?: string }>;
 }) {
   const { orgId } = await requireSession('job:write');
+  const t = await tFor();
   const { error, customer, vehicle, package: packageParam } = await searchParams;
 
   const [options, packages] = await Promise.all([
@@ -99,43 +104,45 @@ export default async function NewJobPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/jobs">All jobs</BackLink>
+        <BackLink href="/jobs">{t('All jobs')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Jobs"
-        title="Open a job"
-        description="What is in, whose it is, and what it is here for"
+        eyebrow={t('Jobs')}
+        title={t('Open a job')}
+        description={t('What is in, whose it is, and what it is here for')}
       />
 
       {error ? (
-        <Alert tone="danger" title="That cannot be opened" className="mb-5">
-          {error}
+        <Alert tone="danger" title={t('That cannot be opened')} className="mb-5">
+          {t(error)}
         </Alert>
       ) : null}
 
       {options.customers.length === 0 ? (
         <EmptyState
-          title="No customers yet"
-          description="A job belongs to somebody. Add a customer first, then find or add their vehicle, and this fills in."
+          title={t('No customers yet')}
+          description={t(
+            'A job belongs to somebody. Add a customer first, then find or add their vehicle, and this fills in.',
+          )}
           action={
             <Link
               href="/customers"
               className="text-[13px] font-medium text-(--brand-text) hover:underline"
             >
-              Customers
+              {t('Customers')}
             </Link>
           }
         />
       ) : (
         <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
           <Card>
-            <CardHeader title="The job" />
+            <CardHeader title={t('The job')} />
             <form action={open}>
               <CardBody className="grid gap-4">
-                <Field label="Customer">
+                <Field label={t('Customer')}>
                   <Select name="customerId" defaultValue={chosen?.id ?? ''} required>
-                    <option value="">Choose somebody</option>
+                    <option value="">{t('Choose somebody')}</option>
                     {options.customers.map((entry) => (
                       <option key={entry.id} value={entry.id}>
                         {entry.name}
@@ -145,16 +152,22 @@ export default async function NewJobPage({
                 </Field>
 
                 <Field
-                  label="Vehicle"
-                  hint="Vehicles this workshop has seen for the customers above. A car that is new here is found or added first."
+                  label={t('Vehicle')}
+                  hint={t(
+                    'Vehicles this workshop has seen for the customers above. A car that is new here is found or added first.',
+                  )}
                 >
                   <Select name="vehicleId" defaultValue={vehicle ?? ''} required>
-                    <option value="">Choose a vehicle</option>
+                    <option value="">{t('Choose a vehicle')}</option>
                     {newcomer ? (
                       <option value={newcomer.id}>
-                        {[newcomer.year, newcomer.make, newcomer.model].filter(Boolean).join(' ')}
-                        {newcomer.registration ? ` · ${newcomer.registration}` : ''} — first job
-                        here
+                        {t('{vehicle} — first job here', {
+                          vehicle:
+                            [newcomer.year, newcomer.make, newcomer.model]
+                              .filter(Boolean)
+                              .join(' ') +
+                            (newcomer.registration ? ` · ${newcomer.registration}` : ''),
+                        })}
                       </option>
                     ) : null}
                     {options.customers.flatMap((entry) =>
@@ -170,11 +183,13 @@ export default async function NewJobPage({
 
                 {packages.length > 0 ? (
                   <Field
-                    label="From a package"
-                    hint="Its labour, parts, checklist, kind of work and time go on the job in this one press."
+                    label={t('From a package')}
+                    hint={t(
+                      'Its labour, parts, checklist, kind of work and time go on the job in this one press.',
+                    )}
                   >
                     <Select name="packageId" defaultValue={preset?.id ?? ''}>
-                      <option value="">No package, just the description</option>
+                      <option value="">{t('No package, just the description')}</option>
                       {packages.map((pkg) => (
                         <option key={pkg.id} value={pkg.id}>
                           {pkg.name} · {pkg.hours}h
@@ -184,34 +199,43 @@ export default async function NewJobPage({
                   </Field>
                 ) : null}
 
-                <Field label="What it is in for">
+                <Field label={t('What it is in for')}>
                   <Input
                     name="shortDescription"
                     required
                     maxLength={120}
                     defaultValue={preset?.name ?? ''}
-                    placeholder="Grinding under braking"
+                    placeholder={t('Grinding under braking')}
                   />
                 </Field>
 
-                <Field label="What they said" hint="Optional. Their words, not a diagnosis.">
-                  <Input name="details" maxLength={500} placeholder="Worse when cold" />
+                <Field
+                  label={t('What they said')}
+                  hint={t('Optional. Their words, not a diagnosis.')}
+                >
+                  <Input name="details" maxLength={500} placeholder={t('Worse when cold')} />
                 </Field>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Mileage now" hint="Optional. Recorded against the vehicle too.">
+                  <Field
+                    label={t('Mileage now')}
+                    hint={t('Optional. Recorded against the vehicle too.')}
+                  >
                     <Input type="number" name="odometerInKm" min={0} placeholder="km" />
                   </Field>
 
-                  <Field label="Promised for">
+                  <Field label={t('Promised for')}>
                     <Input type="date" name="promisedAt" min={today} defaultValue={today} />
                   </Field>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Kind of work" hint="Optional. Drives the skills scheduling needs.">
+                  <Field
+                    label={t('Kind of work')}
+                    hint={t('Optional. Drives the skills scheduling needs.')}
+                  >
                     <Select name="jobTypeId" defaultValue="">
-                      <option value="">Not decided</option>
+                      <option value="">{t('Not decided')}</option>
                       {options.jobTypes.map((type) => (
                         <option key={type.id} value={type.id}>
                           {type.name}
@@ -221,18 +245,18 @@ export default async function NewJobPage({
                   </Field>
 
                   <Field
-                    label="Technician"
+                    label={t('Technician')}
                     hint={
                       chosen?.preferredTechnicianUserId
-                        ? 'Preselected: the person this customer asks for.'
-                        : 'Optional. Can be left for the diary.'
+                        ? t('Preselected: the person this customer asks for.')
+                        : t('Optional. Can be left for the diary.')
                     }
                   >
                     <Select
                       name="technicianUserId"
                       defaultValue={chosen?.preferredTechnicianUserId ?? ''}
                     >
-                      <option value="">Nobody yet</option>
+                      <option value="">{t('Nobody yet')}</option>
                       {options.technicians.map((person) => (
                         <option key={person.id} value={person.id}>
                           {person.name}
@@ -245,29 +269,29 @@ export default async function NewJobPage({
 
               <CardBody className="border-t border-(--border)">
                 <Button type="submit" variant="primary">
-                  Open the job
+                  {t('Open the job')}
                 </Button>
               </CardBody>
             </form>
           </Card>
 
           <Card>
-            <CardHeader title="What happens next" />
+            <CardHeader title={t('What happens next')} />
             <CardBody className="grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
               <p>
-                The job opens as received, with a number taken in the same breath so there is never
-                a gap in the sequence.
+                {t(
+                  'The job opens as received, with a number taken in the same breath so there is never a gap in the sequence.',
+                )}
               </p>
               <p>
-                A mileage reading goes onto the vehicle as well as the job, so the passport, the
-                service predictions and the mileage checks all see it straight away. A reading lower
-                than the last one is refused rather than written: one of the two figures is wrong
-                and somebody should say which.
+                {t(
+                  'A mileage reading goes onto the vehicle as well as the job, so the passport, the service predictions and the mileage checks all see it straight away. A reading lower than the last one is refused rather than written: one of the two figures is wrong and somebody should say which.',
+                )}
               </p>
               <p>
-                Everything else is added as it is known. The bay, the estimate and the inspection
-                all come from the job&rsquo;s own page, and a form that demanded them now would be
-                filled in with guesses.
+                {t(
+                  'Everything else is added as it is known. The bay, the estimate and the inspection all come from the job’s own page, and a form that demanded them now would be filled in with guesses.',
+                )}
               </p>
             </CardBody>
           </Card>

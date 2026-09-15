@@ -26,9 +26,13 @@ import { redirect } from 'next/navigation';
 import { PlanWall } from '@/components/plan-wall';
 import { approveExpense, expensesFor, recordExpense } from '@/lib/banking';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { periodFor } from '@/lib/reports';
 
-export const metadata: Metadata = { title: 'Expenses' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Expenses') };
+}
 export const dynamic = 'force-dynamic';
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -108,13 +112,14 @@ export default async function ExpensesPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { orgId, plan, region } = await requireSession('report:financial');
+  const t = await tFor();
 
   if (!planIncludes(plan, 'ledger')) {
     return <PlanWall feature="ledger" plan={plan} />;
   }
 
   const params = await searchParams;
-  const period = periodFor(params.range ?? 'year');
+  const period = periodFor(params.range ?? 'year', region.locale);
   const { rows, summary } = await expensesFor(orgId, period);
 
   const awaiting = rows.filter((row) => row.status === 'SUBMITTED');
@@ -122,16 +127,16 @@ export default async function ExpensesPage({
   return (
     <>
       <PageHeader
-        eyebrow="Finance"
-        title="Expenses"
-        description={period.label}
+        eyebrow={t('Finance')}
+        title={t('Expenses')}
+        description={t(period.label)}
         actions={(['month', 'quarter', 'year'] as const).map((option) => (
           <a key={option} href={`/expenses?range=${option}`}>
             <Button
               size="sm"
               variant={(params.range ?? 'year') === option ? 'primary' : 'secondary'}
             >
-              {option === 'month' ? 'Month' : option === 'quarter' ? 'Quarter' : 'Year'}
+              {option === 'month' ? t('Month') : option === 'quarter' ? t('Quarter') : t('Year')}
             </Button>
           </a>
         ))}
@@ -139,13 +144,13 @@ export default async function ExpensesPage({
 
       {params.error ? (
         <Alert tone="danger" className="mb-5">
-          {params.error}
+          {t(params.error)}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="Spent"
+          label={t('Spent')}
           value={
             <Money
               currency={region.currency}
@@ -153,10 +158,10 @@ export default async function ExpensesPage({
               amount={toNumber(summary.total)}
             />
           }
-          note="Excluding rejected claims"
+          note={t('Excluding rejected claims')}
         />
         <StatTile
-          label="Tax to reclaim"
+          label={t('Tax to reclaim')}
           value={
             <Money
               currency={region.currency}
@@ -164,10 +169,10 @@ export default async function ExpensesPage({
               amount={toNumber(summary.reclaimableTax)}
             />
           }
-          note="Input tax, separated"
+          note={t('Input tax, separated')}
         />
         <StatTile
-          label="Owed to staff"
+          label={t('Owed to staff')}
           value={
             <Money
               currency={region.currency}
@@ -176,13 +181,13 @@ export default async function ExpensesPage({
             />
           }
           tone={summary.owedToStaff.minor > 0 ? 'warning' : 'neutral'}
-          note="Paid personally, not yet repaid"
+          note={t('Paid personally, not yet repaid')}
         />
         <StatTile
-          label="Awaiting approval"
+          label={t('Awaiting approval')}
           value={summary.awaitingApproval}
           tone={summary.awaitingApproval > 0 ? 'warning' : 'neutral'}
-          note="Not yet in the accounts"
+          note={t('Not yet in the accounts')}
         />
       </StatRow>
 
@@ -190,11 +195,15 @@ export default async function ExpensesPage({
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {summary.missingReceipts} claim{summary.missingReceipts === 1 ? '' : 's'} over the
-              threshold with no receipt attached.
+              {summary.missingReceipts === 1
+                ? t('1 claim over the threshold with no receipt attached.')
+                : t('{count} claims over the threshold with no receipt attached.', {
+                    count: summary.missingReceipts,
+                  })}
             </strong>{' '}
-            An overhead figure built on remembered amounts cannot be defended to anybody, and the
-            person who has to defend it is not the person who skipped the photograph.
+            {t(
+              'An overhead figure built on remembered amounts cannot be defended to anybody, and the person who has to defend it is not the person who skipped the photograph.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -204,8 +213,8 @@ export default async function ExpensesPage({
           {awaiting.length > 0 ? (
             <Card className="overflow-hidden border-(--brand)">
               <CardHeader
-                title="Waiting on approval"
-                description="Nothing here is in the accounts yet"
+                title={t('Waiting on approval')}
+                description={t('Nothing here is in the accounts yet')}
               />
               <ul className="divide-y divide-(--border)">
                 {awaiting.map((row) => (
@@ -220,9 +229,11 @@ export default async function ExpensesPage({
                         {row.supplier}
                       </p>
                       <p className="text-[11px] text-(--text-faint)">
-                        {describeCategory(row.category as ExpenseCategory)}
-                        {row.claimedBy ? ` · claimed by ${row.claimedBy.displayName}` : ''}
-                        {row.receiptUrl ? '' : ' · no receipt'}
+                        {t(describeCategory(row.category as ExpenseCategory))}
+                        {row.claimedBy
+                          ? ` · ${t('claimed by {name}', { name: row.claimedBy.displayName })}`
+                          : ''}
+                        {row.receiptUrl ? '' : ` · ${t('no receipt')}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -235,7 +246,7 @@ export default async function ExpensesPage({
                       <form action={approve}>
                         <input type="hidden" name="expenseId" value={row.id} />
                         <Button type="submit" size="sm" variant="primary">
-                          Approve
+                          {t('Approve')}
                         </Button>
                       </form>
                     </div>
@@ -246,23 +257,25 @@ export default async function ExpensesPage({
           ) : null}
 
           <Card className="overflow-hidden">
-            <CardHeader title="Expenses" description="Newest first" />
+            <CardHeader title={t('Expenses')} description={t('Newest first')} />
             {rows.length === 0 ? (
               <EmptyState
-                title="Nothing recorded"
-                description="Rent, insurance, subscriptions and anything else that is not a supplier bill."
+                title={t('Nothing recorded')}
+                description={t(
+                  'Rent, insurance, subscriptions and anything else that is not a supplier bill.',
+                )}
               />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Reference</Th>
-                      <Th>Supplier</Th>
-                      <Th>Category</Th>
-                      <Th>Paid from</Th>
-                      <Th>Status</Th>
-                      <Th numeric>Total</Th>
+                      <Th>{t('Reference')}</Th>
+                      <Th>{t('Supplier')}</Th>
+                      <Th>{t('Category')}</Th>
+                      <Th>{t('Paid from')}</Th>
+                      <Th>{t('Status')}</Th>
+                      <Th numeric>{t('Total')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -271,10 +284,10 @@ export default async function ExpensesPage({
                         <Td className="datum font-medium">{row.reference}</Td>
                         <Td>{row.supplier}</Td>
                         <Td className="text-(--text-soft)">
-                          {describeCategory(row.category as ExpenseCategory)}
+                          {t(describeCategory(row.category as ExpenseCategory))}
                         </Td>
                         <Td className="text-(--text-soft) capitalize">
-                          {row.paidFrom.toLowerCase()}
+                          {t(row.paidFrom.toLowerCase())}
                         </Td>
                         <Td>
                           <Badge
@@ -287,7 +300,7 @@ export default async function ExpensesPage({
                             }
                             size="sm"
                           >
-                            {row.status.toLowerCase()}
+                            {t(row.status.toLowerCase())}
                           </Badge>
                         </Td>
                         <Td numeric className="font-medium">
@@ -308,33 +321,34 @@ export default async function ExpensesPage({
 
         <aside className="grid content-start gap-5">
           <Card>
-            <CardHeader title="Record an expense" description="Posted once approved" />
+            <CardHeader title={t('Record an expense')} description={t('Posted once approved')} />
             <CardBody>
               <form action={record} className="grid gap-3.5">
-                <Field label="Who was paid">
+                <Field label={t('Who was paid')}>
+                  {/* i18n-ignore */}
                   <Input name="supplier" required placeholder="Hillside Estates" />
                 </Field>
 
-                <Field label="Category">
+                <Field label={t('Category')}>
                   <Select name="category" defaultValue="OTHER">
                     {CATEGORIES.map((category) => (
                       <option key={category} value={category}>
-                        {describeCategory(category)}
+                        {t(describeCategory(category))}
                       </option>
                     ))}
                   </Select>
                 </Field>
 
                 <div className="grid grid-cols-2 gap-3.5">
-                  <Field label="Amount" hint="Before tax">
+                  <Field label={t('Amount')} hint={t('Before tax')}>
                     <Input name="net" type="number" min={0} step="0.01" required />
                   </Field>
-                  <Field label="Tax" hint="Reclaimable">
+                  <Field label={t('Tax')} hint={t('Reclaimable')}>
                     <Input name="tax" type="number" min={0} step="0.01" defaultValue="0" />
                   </Field>
                 </div>
 
-                <Field label="Date">
+                <Field label={t('Date')}>
                   <Input
                     name="incurredAt"
                     type="date"
@@ -343,35 +357,35 @@ export default async function ExpensesPage({
                   />
                 </Field>
 
-                <Field label="Paid from">
+                <Field label={t('Paid from')}>
                   <Select name="paidFrom" defaultValue="BANK">
-                    <option value="BANK">Bank</option>
-                    <option value="CARD">Company card</option>
-                    <option value="CASH">Cash</option>
-                    <option value="PERSONAL">Somebody&rsquo;s own money</option>
+                    <option value="BANK">{t('Bank')}</option>
+                    <option value="CARD">{t('Company card')}</option>
+                    <option value="CASH">{t('Cash')}</option>
+                    <option value="PERSONAL">{t('Somebody’s own money')}</option>
                   </Select>
                 </Field>
 
-                <Field label="Note" hint="Optional">
-                  <Input name="description" placeholder="September rent" />
+                <Field label={t('Note')} hint={t('Optional')}>
+                  <Input name="description" placeholder={t('September rent')} />
                 </Field>
 
                 <label className="flex items-start gap-2.5 text-[13px] leading-relaxed">
                   <input type="checkbox" name="hasReceipt" className="mt-0.5 h-4 w-4" />
-                  <span className="text-(--text-soft)">Receipt attached</span>
+                  <span className="text-(--text-soft)">{t('Receipt attached')}</span>
                 </label>
 
                 <Button type="submit" variant="primary" block>
-                  Record it
+                  {t('Record it')}
                 </Button>
               </form>
             </CardBody>
           </Card>
 
           <Card>
-            <CardHeader title="Where it went" description={period.label} />
+            <CardHeader title={t('Where it went')} description={t(period.label)} />
             {summary.byCategory.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">Nothing yet.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">{t('Nothing yet.')}</CardBody>
             ) : (
               <CardBody className="grid gap-2.5">
                 {summary.byCategory.map((row) => {
@@ -381,7 +395,7 @@ export default async function ExpensesPage({
                   return (
                     <div key={row.category}>
                       <div className="flex items-baseline justify-between text-[12px]">
-                        <span>{row.label}</span>
+                        <span>{t(row.label)}</span>
                         <Money
                           currency={region.currency}
                           locale={region.locale}
@@ -403,11 +417,11 @@ export default async function ExpensesPage({
           </Card>
 
           <Card>
-            <CardHeader title="Why tax is separate" />
+            <CardHeader title={t('Why tax is separate')} />
             <CardBody className="text-[12px] leading-relaxed text-(--text-soft)">
-              Input tax is posted to its own account so it can be reclaimed. Putting the gross into
-              overheads is the most common mistake in a small set of books, and it overstates costs
-              by a fifth, every month, invisibly.
+              {t(
+                'Input tax is posted to its own account so it can be reclaimed. Putting the gross into overheads is the most common mistake in a small set of books, and it overstates costs by a fifth, every month, invisibly.',
+              )}
             </CardBody>
           </Card>
         </aside>

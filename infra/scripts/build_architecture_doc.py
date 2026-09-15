@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 40"
+AFTER_PHASE = "Phase 40.5"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -437,7 +437,7 @@ VERIFY_TEXT = {
     "verify-owner": "a comeback offered, refused without a reason or on another car, recorded, counted against the technician and taken off; the reputation trend moved by an answer; two suppliers of a part compared and one read as slower; the pages, the dashboard in French",
     "verify-search": "a car by its plate typed two ways and its VIN, a customer by their number, a job, an invoice and a part exactly, a name as a list; a decision and a part request notifying the right people, and the screens",
     "verify-returns": "an order delivered and billed, faulty parts sent back and credited off the bill, a refusal written off, a core credited with the leftover held for the next bill, sublet work billed and invoiced, and the trial balance",
-    "verify-languages": "every sentence passed to the translator checked for both translations, eight pages read in each language for the root element's direction and a known sentence, and the switcher's cookie, account and redirect",
+    "verify-languages": "every sentence passed to the translator checked for both translations, the scan for text outside the translator and for refusals without translations, thirteen pages read in each language for the direction, a known sentence and no English left, and the switcher's cookie, account and redirect",
     "verify-packages": "a package saved with every refusal tried, a job made from it in one press, added to a job under way, booked and arrived, completed with the vehicle's next one set, offered online with its price",
     "verify-conversations": "a quote filed onto the job's thread, a WhatsApp reply landing on it unread, an answer with a file through the seam, templates filled and refused, a payment link, assignment, closing and reopening, and a stranger's message left for a person",
     "verify-arrival": "a car checked in with every refusal tried, the keys moved, a quote approved with a signature, the car refused unfinished and unpaid, handed back signed for, and a fleet car let go owing with the reason written down",
@@ -875,7 +875,21 @@ def build() -> None:
               "expected date and the shelf at average cost. The dashboard is translated through the same translator as the "
               "public site.")
 
-    doc.add_heading("6.20 Answers and the assistant", level=2)
+    doc.add_heading("6.20 Every word", level=2)
+    para(doc, "Pages ask tFor() for a translator bound to the request's language; components that run in the browser read "
+              "the language the root layout put in a context with useT(); labels defined outside a component are marked "
+              "with msg() and translated where they are shown; the UI package's components take the page's translator as a "
+              "prop. The dictionaries are one file per area of the product under packages/core/src/i18n/areas, merged "
+              "into one per language at start. translate() looks for the sentence exactly, then against keys with slots, "
+              "most fixed words first, trusting a key only when its fixed words are at least twenty characters or two "
+              "fifths of the sentence; values read out of the slots are translated in turn, and English month and "
+              "weekday names beside a number are replaced with the reader's from Intl. Refusals thrown by the libraries "
+              "and core reach the page through ?problem= and are translated there by the same matching. "
+              "infra/scripts/i18n-scan.ts parses the source with the TypeScript compiler to find text outside the "
+              "translator and, with --messages, every thrown or returned refusal sentence and whether it has both "
+              "translations; verify-languages fails on either.")
+
+    doc.add_heading("6.21 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

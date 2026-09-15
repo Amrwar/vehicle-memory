@@ -1,6 +1,7 @@
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Field, Input, Money } from '@carnet/ui';
 import * as React from 'react';
 
+import { tFor } from '@/lib/i18n';
 import type { DecisionPreview } from '@/lib/portal';
 
 /**
@@ -50,7 +51,7 @@ export interface ReviewEstimate {
   }[];
 }
 
-export function EstimateReview({
+export async function EstimateReview({
   estimate,
   preview,
   action,
@@ -66,6 +67,7 @@ export function EstimateReview({
   hiddenFields?: Record<string, string>;
   error?: string;
 }) {
+  const t = await tFor();
   const vehicle = estimate.job.vehicle;
   const name = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ');
 
@@ -73,7 +75,7 @@ export function EstimateReview({
     <>
       <p className="eyebrow">{estimate.job.org.name}</p>
       <h1 className="mt-1 font-display text-[24px] font-semibold leading-tight">
-        A quote for your {name || 'vehicle'}
+        {name ? t('A quote for your {vehicle}', { vehicle: name }) : t('A quote for your vehicle')}
       </h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {estimate.job.shortDescription}
@@ -81,15 +83,17 @@ export function EstimateReview({
       </p>
 
       {error ? (
-        <Alert tone="danger" className="mt-4" title="That did not go through">
-          {error}
+        <Alert tone="danger" className="mt-4" title={t('That did not go through')}>
+          {t(error)}
         </Alert>
       ) : null}
 
       {preview.blockedReason ? (
-        <Alert tone="info" className="mt-4" title="This quote is closed">
-          {preview.blockedReason}
-          {estimate.job.org.phone ? ` You can call them on ${estimate.job.org.phone}.` : ''}
+        <Alert tone="info" className="mt-4" title={t('This quote is closed')}>
+          {t(preview.blockedReason)}
+          {estimate.job.org.phone
+            ? ` ${t('You can call them on {phone}.', { phone: estimate.job.org.phone })}`
+            : ''}
         </Alert>
       ) : null}
 
@@ -100,8 +104,10 @@ export function EstimateReview({
 
         <Card>
           <CardHeader
-            title="What we recommend"
-            description="Tick what you would like done. Anything left unticked will not be carried out."
+            title={t('What we recommend')}
+            description={t(
+              'Tick what you would like done. Anything left unticked will not be carried out.',
+            )}
           />
           <CardBody className="grid gap-3">
             {estimate.lines.map((line) => {
@@ -128,11 +134,11 @@ export function EstimateReview({
                       <span className="font-medium">{line.description}</span>
                       {critical ? (
                         <Badge tone="danger" size="sm">
-                          safety
+                          {t('safety')}
                         </Badge>
                       ) : line.isOptional ? (
                         <Badge tone="neutral" size="sm">
-                          optional
+                          {t('optional')}
                         </Badge>
                       ) : null}
                     </span>
@@ -145,7 +151,7 @@ export function EstimateReview({
 
                     {line.inspectionResult?.note ? (
                       <span className="mt-0.5 block text-[13px] text-(--text-soft)">
-                        The technician noted: {line.inspectionResult.note}
+                        {t('The technician noted: {note}', { note: line.inspectionResult.note })}
                       </span>
                     ) : null}
                   </span>
@@ -162,24 +168,26 @@ export function EstimateReview({
         <Card>
           <CardBody className="grid gap-1.5 text-[14px]">
             <div className="flex justify-between text-(--text-soft)">
-              <span>Before tax, if you take everything</span>
+              <span>{t('Before tax, if you take everything')}</span>
               <Money amount={Number(estimate.subtotal)} currency={estimate.currency} />
             </div>
             <div className="flex justify-between text-(--text-soft)">
-              <span>Tax</span>
+              <span>{t('Tax')}</span>
               <Money amount={Number(estimate.taxTotal)} currency={estimate.currency} />
             </div>
             <div className="flex justify-between border-t border-(--border) pt-1.5 font-display text-[17px] font-semibold">
-              <span>Total</span>
+              <span>{t('Total')}</span>
               <Money amount={Number(estimate.total)} currency={estimate.currency} />
             </div>
             <p className="mt-1 text-[12px] text-(--text-faint)">
-              You will only be charged for what you tick.
+              {t('You will only be charged for what you tick.')}
               {estimate.validUntil
-                ? ` This price holds until ${estimate.validUntil.toLocaleDateString(locale, {
-                    day: 'numeric',
-                    month: 'long',
-                  })}.`
+                ? ` ${t('This price holds until {date}.', {
+                    date: estimate.validUntil.toLocaleDateString(locale, {
+                      day: 'numeric',
+                      month: 'long',
+                    }),
+                  })}`
                 : ''}
             </p>
           </CardBody>
@@ -187,7 +195,7 @@ export function EstimateReview({
 
         {estimate.notes ? (
           <Card>
-            <CardHeader title="From the workshop" />
+            <CardHeader title={t('From the workshop')} />
             <CardBody className="text-[14px] leading-relaxed text-(--text-soft)">
               {estimate.notes}
             </CardBody>
@@ -198,27 +206,27 @@ export function EstimateReview({
           <Card>
             <CardBody className="grid gap-4">
               <Field
-                label="Your name"
+                label={t('Your name')}
                 htmlFor="approvedByName"
                 required
-                hint="So the workshop knows who agreed to the work."
+                hint={t('So the workshop knows who agreed to the work.')}
               >
                 <Input id="approvedByName" name="approvedByName" required autoComplete="name" />
               </Field>
 
-              <Field label="Anything to add?" htmlFor="note" hint="Optional.">
+              <Field label={t('Anything to add?')} htmlFor="note" hint={t('Optional.')}>
                 <Input id="note" name="note" />
               </Field>
 
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                Sending this tells the workshop exactly which items to carry out. Anything you have
-                left unticked will not be done, and will stay on the vehicle&rsquo;s record as
-                recommended work that was turned down.
+                {t(
+                  'Sending this tells the workshop exactly which items to carry out. Anything you have left unticked will not be done, and will stay on the vehicle’s record as recommended work that was turned down.',
+                )}
               </p>
 
               <div>
                 <Button type="submit" size="lg" variant="primary">
-                  Send my answer
+                  {t('Send my answer')}
                 </Button>
               </div>
             </CardBody>

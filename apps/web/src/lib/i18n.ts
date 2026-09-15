@@ -4,6 +4,7 @@ import {
   isLanguage,
   type Language,
   pickLanguage,
+  readingLocaleFor,
   type Translator,
   translator,
 } from '@carnet/core';
@@ -78,5 +79,18 @@ export async function applySavedLanguage(userId: string) {
         httpOnly: false,
       });
     }
+  }
+}
+
+/**
+ * The locale dates and numbers are written in for this reader: their
+ * language, in the workshop's region where the two agree. English outside a
+ * request, for scripts and jobs. Phase 40.5.
+ */
+export async function readerLocale(regionLocale?: string | null): Promise<string> {
+  try {
+    return readingLocaleFor(await currentLanguage(), { locale: regionLocale ?? 'en-GB' });
+  } catch {
+    return regionLocale ?? 'en-GB';
   }
 }

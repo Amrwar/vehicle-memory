@@ -17,8 +17,12 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { CatalogueError, createPurchaseOrder, orderFormOptions } from '@/lib/catalogue';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'New purchase order' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('New purchase order') };
+}
 export const dynamic = 'force-dynamic';
 
 /** How many lines the form offers. Enough for a real order, few enough to scroll. */
@@ -94,6 +98,7 @@ export default async function NewOrderPage({
   }>;
 }) {
   const { orgId } = await requireSession('inventory:write');
+  const t = await tFor();
   const params = await searchParams;
 
   const { suppliers, products } = await orderFormOptions(orgId);
@@ -106,26 +111,26 @@ export default async function NewOrderPage({
 
   return (
     <>
-      <BackLink href="/purchasing">Purchasing</BackLink>
+      <BackLink href="/purchasing">{t('Purchasing')}</BackLink>
 
       <PageHeader
-        eyebrow="Inventory"
-        title="New purchase order"
-        description="Written down as a draft. Approving it is a separate step."
+        eyebrow={t('Inventory')}
+        title={t('New purchase order')}
+        description={t('Written down as a draft. Approving it is a separate step.')}
       />
 
       {params.problem ? (
         <Alert tone="danger" className="mb-5">
-          {params.problem}
+          {t(params.problem)}
         </Alert>
       ) : null}
 
       {suppliers.length === 0 ? (
         <Card className="mb-5">
           <CardBody className="flex flex-wrap items-center justify-between gap-3 text-[14px]">
-            <span>There are no suppliers to order from yet.</span>
+            <span>{t('There are no suppliers to order from yet.')}</span>
             <Link href="/suppliers/new">
-              <Button variant="primary">Add a supplier</Button>
+              <Button variant="primary">{t('Add a supplier')}</Button>
             </Link>
           </CardBody>
         </Card>
@@ -133,11 +138,11 @@ export default async function NewOrderPage({
 
       <form action={raise} className="grid gap-5">
         <Card>
-          <CardHeader title="Who and when" />
+          <CardHeader title={t('Who and when')} />
           <CardBody className="grid gap-4 sm:grid-cols-[1fr_12rem]">
-            <Field label="Supplier">
+            <Field label={t('Supplier')}>
               <Select name="supplierId" defaultValue={params.supplierId ?? ''} required>
-                <option value="">Choose a supplier</option>
+                <option value="">{t('Choose a supplier')}</option>
                 {suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}
@@ -145,7 +150,7 @@ export default async function NewOrderPage({
                 ))}
               </Select>
             </Field>
-            <Field label="Expected" hint="Optional">
+            <Field label={t('Expected')} hint={t('Optional')}>
               <Input name="expectedAt" type="date" />
             </Field>
           </CardBody>
@@ -153,17 +158,19 @@ export default async function NewOrderPage({
 
         <Card className="overflow-hidden">
           <CardHeader
-            title="Lines"
-            description="Pick a part from the catalogue, or describe something that is not in it yet."
+            title={t('Lines')}
+            description={t(
+              'Pick a part from the catalogue, or describe something that is not in it yet.',
+            )}
           />
           <div className="scroll-x">
             <table className="w-full min-w-[44rem] text-[13px]">
               <thead>
                 <tr className="border-b border-(--border) text-left text-(--text-faint)">
-                  <th className="px-4 py-2 font-medium">Part</th>
-                  <th className="px-2 py-2 font-medium">Or a description</th>
-                  <th className="w-24 px-2 py-2 font-medium">Qty</th>
-                  <th className="w-32 px-2 py-2 pr-4 font-medium">Unit cost</th>
+                  <th className="px-4 py-2 font-medium">{t('Part')}</th>
+                  <th className="px-2 py-2 font-medium">{t('Or a description')}</th>
+                  <th className="w-24 px-2 py-2 font-medium">{t('Qty')}</th>
+                  <th className="w-32 px-2 py-2 pr-4 font-medium">{t('Unit cost')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border)">
@@ -185,7 +192,7 @@ export default async function NewOrderPage({
                     <td className="px-2 py-1.5">
                       <Input
                         name={`line.${index}.description`}
-                        placeholder={index === 0 ? 'Wiper blade set, 26 inch' : ''}
+                        placeholder={index === 0 ? t('Wiper blade set, 26 inch') : ''}
                       />
                     </td>
                     <td className="px-2 py-1.5">
@@ -212,25 +219,26 @@ export default async function NewOrderPage({
             </table>
           </div>
           <CardBody className="text-[12px] leading-relaxed text-(--text-faint)">
-            Costs are before VAT. A line with a part and no cost uses whatever you type here, not
-            the catalogue price, because the quote in front of you is newer.
+            {t(
+              'Costs are before VAT. A line with a part and no cost uses whatever you type here, not the catalogue price, because the quote in front of you is newer.',
+            )}
           </CardBody>
         </Card>
 
         <Card>
-          <CardHeader title="Notes for the supplier" description="Optional" />
+          <CardHeader title={t('Notes for the supplier')} description={t('Optional')} />
           <CardBody>
             <Textarea
               name="notes"
               rows={2}
-              placeholder="Deliver to the rear entrance, before 10."
+              placeholder={t('Deliver to the rear entrance, before 10.')}
             />
           </CardBody>
         </Card>
 
         <div className="flex justify-end">
           <Button type="submit" variant="primary" size="lg" disabled={suppliers.length === 0}>
-            Save as a draft
+            {t('Save as a draft')}
           </Button>
         </div>
       </form>

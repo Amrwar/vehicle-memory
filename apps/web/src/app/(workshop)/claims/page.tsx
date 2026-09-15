@@ -18,8 +18,12 @@ import { redirect } from 'next/navigation';
 
 import { ClaimError, claimsFor, decideClaim } from '@/lib/claims';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Vehicle requests' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Vehicle requests') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -66,6 +70,7 @@ export default async function ClaimsPage({
   searchParams: Promise<{ problem?: string; done?: string }>;
 }) {
   const { orgId } = await requireSession('customer:read');
+  const t = await tFor();
   const params = await searchParams;
 
   const claims = await claimsFor(orgId);
@@ -78,34 +83,34 @@ export default async function ClaimsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Customers"
-        title="Vehicle requests"
-        description="Drivers asking to have their own car put on their account"
+        eyebrow={t('Customers')}
+        title={t('Vehicle requests')}
+        description={t('Drivers asking to have their own car put on their account')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Waiting on you"
+          label={t('Waiting on you')}
           value={pending.length}
           tone={pending.length > 0 ? 'warning' : 'neutral'}
-          note="Nobody else can answer these"
+          note={t('Nobody else can answer these')}
         />
         <StatTile
-          label="Waiting a while"
+          label={t('Waiting a while')}
           value={waiting.length}
           tone={waiting.length > 0 ? 'danger' : 'neutral'}
-          note={`Asked more than ${CHASE_AFTER_DAYS} days ago`}
+          note={t('Asked more than {days} days ago', { days: CHASE_AFTER_DAYS })}
         />
         <StatTile
-          label="Answered"
+          label={t('Answered')}
           value={claims.length - pending.length}
-          note="Approved, refused or withdrawn"
+          note={t('Approved, refused or withdrawn')}
         />
       </StatRow>
 
       {params.problem ? (
         <Card className="mb-5 border-(--danger)">
-          <CardBody className="text-[14px] text-(--danger)">{params.problem}</CardBody>
+          <CardBody className="text-[14px] text-(--danger)">{t(params.problem)}</CardBody>
         </Card>
       ) : null}
 
@@ -113,28 +118,32 @@ export default async function ClaimsPage({
         <Card className="mb-5 border-(--success)">
           <CardBody className="text-[14px] text-(--success)">
             {params.done === 'approved'
-              ? 'Approved. The vehicle is on their account and they have been emailed.'
-              : 'Refused, and they have been told what you wrote.'}
+              ? t('Approved. The vehicle is on their account and they have been emailed.')
+              : t('Refused, and they have been told what you wrote.')}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="mb-5">
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-          Nothing here is decided automatically, and nothing can be. A number plate is visible from
-          the pavement, so the only thing that makes a request genuine is you recognising the
-          person. Compare the name they signed up with against the customer you hold for that
-          vehicle, and ring them if it does not match.
+          {t(
+            'Nothing here is decided automatically, and nothing can be. A number plate is visible from the pavement, so the only thing that makes a request genuine is you recognising the person. Compare the name they signed up with against the customer you hold for that vehicle, and ring them if it does not match.',
+          )}
         </CardBody>
       </Card>
 
       <Card className="overflow-hidden">
-        <CardHeader title="Requests" description="Unanswered first, oldest first within them." />
+        <CardHeader
+          title={t('Requests')}
+          description={t('Unanswered first, oldest first within them.')}
+        />
 
         {claims.length === 0 ? (
           <EmptyState
-            title="Nobody has asked"
-            description="A driver who signs up and enters one of your customers' registrations appears here for you to confirm."
+            title={t('Nobody has asked')}
+            description={t(
+              'A driver who signs up and enters one of your customers’ registrations appears here for you to confirm.',
+            )}
           />
         ) : (
           <ul className="divide-y divide-(--border)">
@@ -157,7 +166,7 @@ export default async function ClaimsPage({
                       >
                         {[claim.vehicle.year, claim.vehicle.make, claim.vehicle.model]
                           .filter(Boolean)
-                          .join(' ') || 'Vehicle'}
+                          .join(' ') || t('Vehicle')}
                       </Link>
                     </div>
 
@@ -176,43 +185,47 @@ export default async function ClaimsPage({
                       dot
                     >
                       {claim.status === 'PENDING'
-                        ? `Waiting ${days} day${days === 1 ? '' : 's'}`
-                        : claim.status.toLowerCase()}
+                        ? days === 1
+                          ? t('Waiting 1 day')
+                          : t('Waiting {days} days', { days })
+                        : t(claim.status.toLowerCase())}
                     </Badge>
                   </div>
 
                   {/* The whole decision, side by side. */}
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-(--radius-md) bg-(--surface-sunk) p-3">
-                      <p className="eyebrow">Asking</p>
+                      <p className="eyebrow">{t('Asking')}</p>
                       <p className="mt-1 text-[14px] font-medium">{claim.user.name}</p>
                       <p className="datum text-[13px] text-(--text-soft)">{claim.user.email}</p>
                       <p className="mt-1 text-[12px] text-(--text-faint)">
                         {claim.user.emailVerifiedAt
-                          ? 'Email address confirmed'
-                          : 'Email address not confirmed'}
+                          ? t('Email address confirmed')
+                          : t('Email address not confirmed')}
                       </p>
                     </div>
 
                     <div className="rounded-(--radius-md) bg-(--surface-sunk) p-3">
-                      <p className="eyebrow">You have on record</p>
+                      <p className="eyebrow">{t('You have on record')}</p>
                       {claim.onRecord ? (
                         <>
                           <p className="mt-1 text-[14px] font-medium">
                             {claim.onRecord.displayName}
                           </p>
                           <p className="datum text-[13px] text-(--text-soft)">
-                            {claim.onRecord.email ?? claim.onRecord.mobile ?? 'No contact details'}
+                            {claim.onRecord.email ??
+                              claim.onRecord.mobile ??
+                              t('No contact details')}
                           </p>
                           <p
                             className={`mt-1 text-[12px] ${matches ? 'text-(--success)' : 'text-(--warning)'}`}
                           >
-                            {matches ? 'Same name' : 'Different name — worth a phone call'}
+                            {matches ? t('Same name') : t('Different name — worth a phone call')}
                           </p>
                         </>
                       ) : (
                         <p className="mt-1 text-[13px] text-(--text-soft)">
-                          No customer of yours has that vehicle any more.
+                          {t('No customer of yours has that vehicle any more.')}
                         </p>
                       )}
                     </div>
@@ -236,19 +249,19 @@ export default async function ClaimsPage({
                       <input type="hidden" name="claimId" value={claim.id} />
 
                       <label className="grid gap-1">
-                        <span className="eyebrow">If you are refusing, say why</span>
+                        <span className="eyebrow">{t('If you are refusing, say why')}</span>
                         <Input
                           name="reason"
-                          placeholder="Rang the owner and it is not them."
+                          placeholder={t('Rang the owner and it is not them.')}
                           maxLength={300}
                         />
                       </label>
 
                       <Button type="submit" name="approve" value="0" variant="ghost">
-                        Refuse
+                        {t('Refuse')}
                       </Button>
                       <Button type="submit" name="approve" value="1" variant="primary">
-                        Approve
+                        {t('Approve')}
                       </Button>
                     </form>
                   ) : claim.reason ? (
@@ -258,7 +271,7 @@ export default async function ClaimsPage({
                     </p>
                   ) : claim.decidedBy?.name ? (
                     <p className="mt-3 text-[13px] text-(--text-faint)">
-                      Answered by {claim.decidedBy.name}.
+                      {t('Answered by {name}.', { name: claim.decidedBy.name })}
                     </p>
                   ) : null}
                 </li>

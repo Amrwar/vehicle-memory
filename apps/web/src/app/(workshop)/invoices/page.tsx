@@ -18,8 +18,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Invoices' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Invoices') };
+}
 export const dynamic = 'force-dynamic';
 
 const TONE = {
@@ -44,6 +48,7 @@ export default async function InvoicesPage({
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
   const { db, region } = await requireSession('invoice:read');
+  const t = await tFor();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
 
@@ -101,16 +106,18 @@ export default async function InvoicesPage({
   return (
     <>
       <PageHeader
-        eyebrow="Money"
-        title="Invoices"
-        description={`${rows.length} invoice${rows.length === 1 ? '' : 's'}`}
+        eyebrow={t('Money')}
+        title={t('Invoices')}
+        description={
+          rows.length === 1 ? t('1 invoice') : t('{count} invoices', { count: rows.length })
+        }
         actions={
           <>
             <Link href="/payments">
-              <Button>Payments</Button>
+              <Button>{t('Payments')}</Button>
             </Link>
             <Link href="/jobs?status=COMPLETED">
-              <Button variant="primary">Invoice a job</Button>
+              <Button variant="primary">{t('Invoice a job')}</Button>
             </Link>
           </>
         }
@@ -119,25 +126,25 @@ export default async function InvoicesPage({
       <StatRow className="mb-5">
         <Link href="/invoices?status=unpaid" className="group">
           <StatTile
-            label="Outstanding"
+            label={t('Outstanding')}
             value={
               <Money currency={region.currency} locale={region.locale} amount={totalOutstanding} />
             }
             tone={totalOutstanding > 0 ? 'warning' : 'neutral'}
-            note="Invoiced but not yet paid"
+            note={t('Invoiced but not yet paid')}
           />
         </Link>
         <StatTile
-          label="Overdue"
+          label={t('Overdue')}
           value={<Money currency={region.currency} locale={region.locale} amount={overdueValue} />}
           tone={overdueValue > 0 ? 'danger' : 'success'}
-          note={overdueValue > 0 ? 'Past the due date' : 'Nothing past due'}
+          note={overdueValue > 0 ? t('Past the due date') : t('Nothing past due')}
         />
-        <StatTile label="Settled" value={paidCount} note="Paid in full" />
+        <StatTile label={t('Settled')} value={paidCount} note={t('Paid in full')} />
         <StatTile
-          label="Invoiced"
+          label={t('Invoiced')}
           value={<Money amount={rows.reduce((s, r) => s + Number(r.invoice.total), 0)} />}
-          note="Total value listed"
+          note={t('Total value listed')}
         />
       </StatRow>
 
@@ -146,21 +153,21 @@ export default async function InvoicesPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Invoice number or customer"
-          aria-label="Search invoices"
+          placeholder={t('Invoice number or customer')}
+          aria-label={t('Search invoices')}
           className="h-9 w-full max-w-xs rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
-        <Button type="submit">Search</Button>
+        <Button type="submit">{t('Search')}</Button>
         {params.status || query ? (
           <Link href="/invoices" className="text-[12px] text-(--text-faint) underline">
-            Clear
+            {t('Clear')}
           </Link>
         ) : (
           <Link
             href="/invoices?status=unpaid"
             className="text-[12px] text-(--text-faint) underline"
           >
-            Only unpaid
+            {t('Only unpaid')}
           </Link>
         )}
       </form>
@@ -168,11 +175,13 @@ export default async function InvoicesPage({
       <Card className="overflow-hidden">
         {rows.length === 0 ? (
           <EmptyState
-            title="No invoices"
-            description="An invoice is created from a completed job, carrying its approved lines."
+            title={t('No invoices')}
+            description={t(
+              'An invoice is created from a completed job, carrying its approved lines.',
+            )}
             action={
               <Link href="/jobs?status=COMPLETED">
-                <Button variant="primary">See completed jobs</Button>
+                <Button variant="primary">{t('See completed jobs')}</Button>
               </Link>
             }
           />
@@ -181,15 +190,15 @@ export default async function InvoicesPage({
             <Table>
               <thead>
                 <tr>
-                  <Th>Invoice</Th>
-                  <Th>Customer</Th>
-                  <Th>Vehicle</Th>
-                  <Th>Issued</Th>
-                  <Th>Due</Th>
-                  <Th numeric>Total</Th>
-                  <Th numeric>Paid</Th>
-                  <Th numeric>Outstanding</Th>
-                  <Th>Status</Th>
+                  <Th>{t('Invoice')}</Th>
+                  <Th>{t('Customer')}</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Issued')}</Th>
+                  <Th>{t('Due')}</Th>
+                  <Th numeric>{t('Total')}</Th>
+                  <Th numeric>{t('Paid')}</Th>
+                  <Th numeric>{t('Outstanding')}</Th>
+                  <Th>{t('Status')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -241,11 +250,11 @@ export default async function InvoicesPage({
                     <Td>
                       {overdue ? (
                         <Badge tone="danger" dot>
-                          {daysOverdue}d overdue
+                          {t('{days}d overdue', { days: daysOverdue })}
                         </Badge>
                       ) : (
                         <Badge tone={TONE[invoice.status]} dot>
-                          {invoice.status.toLowerCase().replace('_', ' ')}
+                          {t(invoice.status.toLowerCase().replace('_', ' '))}
                         </Badge>
                       )}
                     </Td>

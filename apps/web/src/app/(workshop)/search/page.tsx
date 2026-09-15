@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { searchEverything } from '@/lib/search';
 
-export const metadata: Metadata = { title: 'Search' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Search') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -28,6 +32,7 @@ export default async function SearchPage({
 }) {
   const { orgId } = await requireSession('customer:read');
   const { q = '', all } = await searchParams;
+  const t = await tFor();
   const query = q.trim();
   const hits = isSearchable(query) ? await searchEverything(orgId, query) : [];
 
@@ -42,30 +47,43 @@ export default async function SearchPage({
   return (
     <>
       <PageHeader
-        eyebrow="Search"
-        title={query ? `“${query}”` : 'Search'}
-        description="A plate, a VIN, a telephone number, a job or invoice number, a part number, or a name"
+        eyebrow={t('Search')}
+        title={query ? `“${query}”` : t('Search')}
+        description={t(
+          'A plate, a VIN, a telephone number, a job or invoice number, a part number, or a name',
+        )}
       />
 
       <form action="/search" method="get" role="search" className="mb-5 flex max-w-2xl gap-2">
-        <Input name="q" defaultValue={query} autoFocus aria-label="Search" placeholder="BJ21 OYD" />
+        <Input
+          name="q"
+          defaultValue={query}
+          autoFocus
+          aria-label={t('Search')}
+          // i18n-ignore
+          placeholder="BJ21 OYD"
+        />
         <Button type="submit" variant="primary">
-          Search
+          {t('Search')}
         </Button>
       </form>
 
       {!isSearchable(query) ? (
         <Card>
           <EmptyState
-            title="Type at least two characters"
-            description="Plates can be typed with or without the space, telephone numbers with or without the spaces and the country code."
+            title={t('Type at least two characters')}
+            description={t(
+              'Plates can be typed with or without the space, telephone numbers with or without the spaces and the country code.',
+            )}
           />
         </Card>
       ) : groups.length === 0 ? (
         <Card>
           <EmptyState
-            title="Nothing here matches"
-            description="Only this workshop's own customers, jobs, invoices, parts and the vehicles it has worked on are searched."
+            title={t('Nothing here matches')}
+            description={t(
+              'Only this workshop’s own customers, jobs, invoices, parts and the vehicles it has worked on are searched.',
+            )}
           />
         </Card>
       ) : (
@@ -73,8 +91,8 @@ export default async function SearchPage({
           {groups.map((group) => (
             <Card key={group.kind} className="overflow-hidden">
               <CardHeader
-                title={kindLabel(group.kind)}
-                description={`${group.hits.length} found`}
+                title={t(kindLabel(group.kind))}
+                description={t('{count} found', { count: group.hits.length })}
               />
               <ul className="divide-y divide-(--border)">
                 {group.hits.map((hit: SearchHit) => (
@@ -93,7 +111,7 @@ export default async function SearchPage({
                       </span>
                       {hit.exact ? (
                         <Badge tone="brand" size="sm">
-                          exact
+                          {t('exact')}
                         </Badge>
                       ) : null}
                     </Link>

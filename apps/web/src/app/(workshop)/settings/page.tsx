@@ -1,4 +1,4 @@
-import { humaniseRole, type Role, PlanLimitError } from '@carnet/core';
+import { humaniseRole, msg, type Role, PlanLimitError } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -24,10 +24,20 @@ import { redirect } from 'next/navigation';
 import { ApiKeyError, apiKeysFor, createApiKey, revokeApiKey } from '@/lib/api-keys';
 import { AssistantError, assistantUsage, setAssistantBudget } from '@/lib/assistant';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { packagesFor } from '@/lib/packages';
 
-export const metadata: Metadata = { title: 'Settings' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Settings') };
+}
 export const dynamic = 'force-dynamic';
+
+const PLAN_BADGES: Record<string, string> = {
+  CORE: msg('Core plan'),
+  COMPLETE: msg('Complete plan'),
+  GROUP: msg('Group plan'),
+};
 
 /**
  * Settings, at a glance.
@@ -100,6 +110,7 @@ export default async function SettingsPage({
 }) {
   const { db, user, orgId, region } = await requireSession('settings:read');
   const { token, problem, saved } = await searchParams;
+  const t = await tFor();
   const mayWrite = can(user.role, 'settings:write');
   const apiKeys = await apiKeysFor(orgId);
   const assistant = await assistantUsage(orgId);
@@ -127,12 +138,12 @@ export default async function SettingsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Admin"
-        title="Settings"
+        eyebrow={t('Admin')}
+        title={t('Settings')}
         description={org.name}
         actions={
           <Badge tone="brand" dot>
-            {org.plan.toLowerCase()} plan
+            {t(PLAN_BADGES[org.plan] ?? org.plan)}
           </Badge>
         }
       />
@@ -140,12 +151,12 @@ export default async function SettingsPage({
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader
-            title="Subscription"
-            description="Where the workshop stands, and what its plan allows"
+            title={t('Subscription')}
+            description={t('Where the workshop stands, and what its plan allows')}
             action={
               <Link href="/settings/subscription">
                 <Button variant="secondary" size="sm">
-                  Open
+                  {t('Open')}
                 </Button>
               </Link>
             }
@@ -154,12 +165,14 @@ export default async function SettingsPage({
 
         <Card>
           <CardHeader
-            title="Data in and out"
-            description="Import customers, vehicles, parts, suppliers and opening balances from a CSV; export everything"
+            title={t('Data in and out')}
+            description={t(
+              'Import customers, vehicles, parts, suppliers and opening balances from a CSV; export everything',
+            )}
             action={
               <Link href="/settings/data">
                 <Button variant="secondary" size="sm">
-                  Open
+                  {t('Open')}
                 </Button>
               </Link>
             }
@@ -168,53 +181,55 @@ export default async function SettingsPage({
 
         <Card>
           <CardHeader
-            title="Organisation"
+            title={t('Organisation')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/organisation"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit
+                  {t('Edit')}
                 </Link>
               ) : undefined
             }
           />
           <CardBody>
             <KeyValue
+              t={t}
               columns={2}
               items={[
-                { label: 'Trading name', value: org.name },
-                { label: 'Legal name', value: org.legalName },
-                { label: 'Tax number', value: org.taxNumber },
-                { label: 'Email', value: org.email },
-                { label: 'Telephone', value: org.phone },
-                { label: 'Base currency', value: org.baseCurrency },
-                { label: 'Timezone', value: org.timezone },
+                { label: t('Trading name'), value: org.name },
+                { label: t('Legal name'), value: org.legalName },
+                { label: t('Tax number'), value: org.taxNumber },
+                { label: t('Email'), value: org.email },
+                { label: t('Telephone'), value: org.phone },
+                { label: t('Base currency'), value: org.baseCurrency },
+                { label: t('Timezone'), value: org.timezone },
                 {
-                  label: 'Re-approval threshold',
+                  label: t('Re-approval threshold'),
                   value: `${Number(org.reapprovalThresholdPct)}%`,
                 },
               ]}
             />
             <p className="mt-4 border-t border-(--border) pt-3 text-[12px] leading-relaxed text-(--text-faint)">
-              Work exceeding an approved estimate by more than the threshold sends the job back for
-              a fresh decision. That is the rule that prevents an argument at the collection desk.
+              {t(
+                'Work exceeding an approved estimate by more than the threshold sends the job back for a fresh decision. That is the rule that prevents an argument at the collection desk.',
+              )}
             </p>
           </CardBody>
         </Card>
 
         <Card>
           <CardHeader
-            title="Location and bays"
-            description={location?.name ?? 'No location'}
+            title={t('Location and bays')}
+            description={location?.name ?? t('No location')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/site"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit
+                  {t('Edit')}
                 </Link>
               ) : undefined
             }
@@ -223,10 +238,11 @@ export default async function SettingsPage({
             {location ? (
               <>
                 <KeyValue
+                  t={t}
                   columns={2}
                   items={[
                     {
-                      label: 'Address',
+                      label: t('Address'),
                       value: [
                         location.addressLine1,
                         location.locality,
@@ -237,8 +253,10 @@ export default async function SettingsPage({
                         .join(', '),
                     },
                     {
-                      label: 'Daily capacity',
-                      value: `${Number(location.dailyCapacityHours)} technician hours`,
+                      label: t('Daily capacity'),
+                      value: t('{hours} technician hours', {
+                        hours: Number(location.dailyCapacityHours),
+                      }),
                     },
                   ]}
                 />
@@ -257,19 +275,23 @@ export default async function SettingsPage({
 
         <Card className="lg:col-span-2 overflow-hidden">
           <CardHeader
-            title="People"
-            description={`${org.memberships.length} active ${org.memberships.length === 1 ? 'person' : 'people'}`}
+            title={t('People')}
+            description={
+              org.memberships.length === 1
+                ? t('1 active person')
+                : t('{count} active people', { count: org.memberships.length })
+            }
           />
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Name</Th>
-                  <Th>Email</Th>
-                  <Th>Role</Th>
-                  <Th>Lands on</Th>
-                  <Th numeric>Cost rate</Th>
-                  <Th>Last signed in</Th>
+                  <Th>{t('Name')}</Th>
+                  <Th>{t('Email')}</Th>
+                  <Th>{t('Role')}</Th>
+                  <Th>{t('Lands on')}</Th>
+                  <Th numeric>{t('Cost rate')}</Th>
+                  <Th>{t('Last signed in')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -278,21 +300,21 @@ export default async function SettingsPage({
                     <Td className="font-medium">
                       {membership.user.name}
                       {membership.userId === user.userId ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">you</span>
+                        <span className="ml-2 text-[11px] text-(--text-faint)">{t('you')}</span>
                       ) : null}
                     </Td>
                     <Td className="datum text-(--text-soft)">{membership.user.email}</Td>
                     <Td>
                       <Badge tone="neutral" size="sm">
-                        {humaniseRole(membership.role as Role)}
+                        {t(humaniseRole(membership.role as Role))}
                       </Badge>
                     </Td>
                     <Td className="text-(--text-faint)">
                       {membership.role === 'TECHNICIAN'
-                        ? 'Shop floor'
+                        ? t('Shop floor')
                         : membership.role === 'CUSTOMER'
-                          ? 'Portal'
-                          : 'Workshop'}
+                          ? t('Portal')
+                          : t('Workshop')}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {membership.costRate ? (
@@ -306,7 +328,7 @@ export default async function SettingsPage({
                       )}
                     </Td>
                     <Td className="datum text-(--text-faint)">
-                      {membership.user.lastLoginAt?.toLocaleDateString(region.locale) ?? 'Never'}
+                      {membership.user.lastLoginAt?.toLocaleDateString(region.locale) ?? t('Never')}
                     </Td>
                   </Tr>
                 ))}
@@ -317,14 +339,14 @@ export default async function SettingsPage({
 
         <Card>
           <CardHeader
-            title="Tax rates"
+            title={t('Tax rates')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/catalogue"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit
+                  {t('Edit')}
                 </Link>
               ) : undefined
             }
@@ -336,7 +358,7 @@ export default async function SettingsPage({
                 <span className="flex items-center gap-2">
                   {rate.isDefault ? (
                     <Badge tone="brand" size="sm">
-                      default
+                      {t('default')}
                     </Badge>
                   ) : null}
                   <span className="tabular text-[13px]">{Number(rate.rate)}%</span>
@@ -345,22 +367,22 @@ export default async function SettingsPage({
             ))}
           </ul>
           <CardBody className="border-t border-(--border) text-[12px] leading-relaxed text-(--text-faint)">
-            Tax is calculated per line and then summed, never by applying one rate to the subtotal.
-            A document mixing rates gives a different answer each way, and only the per-line answer
-            is correct.
+            {t(
+              'Tax is calculated per line and then summed, never by applying one rate to the subtotal. A document mixing rates gives a different answer each way, and only the per-line answer is correct.',
+            )}
           </CardBody>
         </Card>
 
         <Card>
           <CardHeader
-            title="Job types"
+            title={t('Job types')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/catalogue#type"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit
+                  {t('Edit')}
                 </Link>
               ) : undefined
             }
@@ -379,7 +401,7 @@ export default async function SettingsPage({
                 <span className="flex items-center gap-2 text-[12px] text-(--text-faint)">
                   {type.requiresQualityCheck ? (
                     <Badge tone="warning" size="sm">
-                      QC required
+                      {t('QC required')}
                     </Badge>
                   ) : null}
                   {type.defaultHours ? `${Number(type.defaultHours)}h` : ''}
@@ -391,26 +413,26 @@ export default async function SettingsPage({
 
         <Card>
           <CardHeader
-            title="Service packages"
+            title={t('Service packages')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/packages"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit
+                  {t('Edit')}
                 </Link>
               ) : undefined
             }
           />
           {packages.length === 0 ? (
             <CardBody className="text-[13px] text-(--text-soft)">
-              None yet. A package puts the labour, the parts and the checklist on a job in one
-              press.{' '}
+              {t(
+                'None yet. A package puts the labour, the parts and the checklist on a job in one press.',
+              )}{' '}
               <Link href="/settings/packages" className="underline">
-                Add one
+                {t('Add one')}
               </Link>
-              .
             </CardBody>
           ) : (
             <ul className="divide-y divide-(--border)">
@@ -418,7 +440,7 @@ export default async function SettingsPage({
                 <li key={pkg.id} className="flex items-center justify-between px-4 py-2.5">
                   <span className="text-[13px] font-medium">{pkg.name}</span>
                   <span className="text-[12px] text-(--text-faint)">
-                    {pkg.hours}h · {pkg.lines.length} lines
+                    {t('{hours}h · {count} lines', { hours: pkg.hours, count: pkg.lines.length })}
                   </span>
                 </li>
               ))}
@@ -427,7 +449,7 @@ export default async function SettingsPage({
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardHeader title="Inspection templates" />
+          <CardHeader title={t('Inspection templates')} />
           <CardBody className="grid gap-4">
             {org.inspectionTemplates.map((template) => {
               const itemCount = template.sections.reduce(
@@ -440,11 +462,14 @@ export default async function SettingsPage({
                     <span className="text-[14px] font-medium">{template.name}</span>
                     {template.isDefault ? (
                       <Badge tone="brand" size="sm">
-                        default
+                        {t('default')}
                       </Badge>
                     ) : null}
                     <span className="text-[12px] text-(--text-faint)">
-                      {template.sections.length} sections, {itemCount} items
+                      {t('{sections} sections, {items} items', {
+                        sections: template.sections.length,
+                        items: itemCount,
+                      })}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -466,32 +491,44 @@ export default async function SettingsPage({
 
         <Card className="lg:col-span-2" id="assistant">
           <CardHeader
-            title="Assistant"
+            title={t('Assistant')}
             description={
               assistant.transport === 'anthropic'
-                ? `A model (${assistant.model}) tidies drafts within the budget below; every figure is checked against the record first.`
-                : 'No model is configured, so the assistant uses the plain text it composes from the record. That is a complete feature, not a degraded one.'
+                ? t(
+                    'A model ({model}) tidies drafts within the budget below; every figure is checked against the record first.',
+                    { model: assistant.model },
+                  )
+                : t(
+                    'No model is configured, so the assistant uses the plain text it composes from the record. That is a complete feature, not a degraded one.',
+                  )
             }
           />
           <CardBody className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
             <div className="grid gap-1 text-[13px]">
-              <p>{assistant.budget.statement}</p>
+              <p>{t(assistant.budget.statement)}</p>
               <p className="text-(--text-soft)">
-                {assistant.exchanges} exchange{assistant.exchanges === 1 ? '' : 's'} this month:{' '}
-                {assistant.byKind.QUESTION} question{assistant.byKind.QUESTION === 1 ? '' : 's'},{' '}
-                {assistant.byKind.DRAFT} draft{assistant.byKind.DRAFT === 1 ? '' : 's'},{' '}
-                {assistant.byKind.EXPLAIN} explanation{assistant.byKind.EXPLAIN === 1 ? '' : 's'}.
+                {t(
+                  'Exchanges this month: {exchanges}. Questions: {questions}, drafts: {drafts}, explanations: {explanations}.',
+                  {
+                    exchanges: assistant.exchanges,
+                    questions: assistant.byKind.QUESTION,
+                    drafts: assistant.byKind.DRAFT,
+                    explanations: assistant.byKind.EXPLAIN,
+                  },
+                )}{' '}
                 {assistant.costMinor > 0
-                  ? ` Roughly $${(assistant.costMinor / 100).toFixed(2)} at list prices.`
-                  : ' Nothing spent on a model.'}
+                  ? t('Roughly {amount} at list prices.', {
+                      amount: `$${(assistant.costMinor / 100).toFixed(2)}`,
+                    })
+                  : t('Nothing spent on a model.')}
               </p>
               {saved === 'assistant' ? (
-                <p className="text-[12px] text-(--success)">Budget saved.</p>
+                <p className="text-[12px] text-(--success)">{t('Budget saved.')}</p>
               ) : null}
             </div>
             {mayWrite ? (
               <form action={budget} className="flex flex-wrap items-end gap-2">
-                <Field label="Monthly token budget" hint="0 switches the model off">
+                <Field label={t('Monthly token budget')} hint={t('0 switches the model off')}>
                   <Input
                     name="tokens"
                     inputMode="numeric"
@@ -500,7 +537,7 @@ export default async function SettingsPage({
                   />
                 </Field>
                 <Button type="submit" variant="secondary" size="sm">
-                  Save
+                  {t('Save')}
                 </Button>
               </form>
             ) : null}
@@ -509,31 +546,33 @@ export default async function SettingsPage({
 
         <Card className="lg:col-span-2" id="api">
           <CardHeader
-            title="API keys"
-            description="For accounting software and anything else that reads this workshop's jobs, invoices and vehicles"
+            title={t('API keys')}
+            description={t(
+              "For accounting software and anything else that reads this workshop's jobs, invoices and vehicles",
+            )}
           />
           <CardBody className="grid gap-4">
             {token ? (
-              <Alert tone="success" title="Your new key. Copy it now; it is not shown again.">
+              <Alert tone="success" title={t('Your new key. Copy it now; it is not shown again.')}>
                 <code className="mt-1 block break-all rounded-(--radius-xs) bg-(--surface-sunk) px-2 py-1 font-mono text-[13px] select-all">
                   {token}
                 </code>
               </Alert>
             ) : null}
-            {problem ? <Alert tone="danger">{problem}</Alert> : null}
+            {problem ? <Alert tone="danger">{t(problem)}</Alert> : null}
 
             {apiKeys.length === 0 ? (
-              <p className="text-[13px] text-(--text-soft)">No keys yet.</p>
+              <p className="text-[13px] text-(--text-soft)">{t('No keys yet.')}</p>
             ) : (
               <TableWrap>
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Name</Th>
-                      <Th>Starts with</Th>
-                      <Th>Made by</Th>
-                      <Th>Last used</Th>
-                      <Th>State</Th>
+                      <Th>{t('Name')}</Th>
+                      <Th>{t('Starts with')}</Th>
+                      <Th>{t('Made by')}</Th>
+                      <Th>{t('Last used')}</Th>
+                      <Th>{t('State')}</Th>
                       <Th />
                     </tr>
                   </thead>
@@ -542,17 +581,17 @@ export default async function SettingsPage({
                       <Tr key={key.id}>
                         <Td>{key.name}</Td>
                         <Td className="font-mono text-[12px]">{key.prefix}…</Td>
-                        <Td>{key.createdBy?.name ?? 'Somebody since removed'}</Td>
+                        <Td>{key.createdBy?.name ?? t('Somebody since removed')}</Td>
                         <Td>
                           {key.lastUsedAt
                             ? key.lastUsedAt.toLocaleDateString(region.locale)
-                            : 'Never'}
+                            : t('Never')}
                         </Td>
                         <Td>
                           {key.revokedAt ? (
-                            <Badge tone="neutral">Revoked</Badge>
+                            <Badge tone="neutral">{t('Revoked')}</Badge>
                           ) : (
-                            <Badge tone="success">Live</Badge>
+                            <Badge tone="success">{t('Live')}</Badge>
                           )}
                         </Td>
                         <Td className="text-right">
@@ -560,7 +599,7 @@ export default async function SettingsPage({
                             <form action={revoke}>
                               <input type="hidden" name="keyId" value={key.id} />
                               <Button type="submit" variant="ghost" size="sm">
-                                Revoke
+                                {t('Revoke')}
                               </Button>
                             </form>
                           ) : null}
@@ -574,36 +613,38 @@ export default async function SettingsPage({
 
             {mayWrite ? (
               <form action={mint} className="flex flex-wrap items-end gap-3">
-                <Field label="Name for a new key" className="min-w-0 flex-1">
-                  <Input name="name" required maxLength={60} placeholder="Xero sync" />
+                <Field label={t('Name for a new key')} className="min-w-0 flex-1">
+                  <Input name="name" required maxLength={60} placeholder={t('Xero sync')} />
                 </Field>
                 <Button type="submit" variant="primary">
-                  Make a key
+                  {t('Make a key')}
                 </Button>
               </form>
             ) : null}
 
             <p className="text-[12px] leading-relaxed text-(--text-faint)">
-              Send it as <code className="font-mono">Authorization: Bearer cn_…</code> to{' '}
-              <code className="font-mono">/api/v1/jobs</code>,{' '}
-              <code className="font-mono">/api/v1/invoices</code> and{' '}
-              <code className="font-mono">/api/v1/vehicles/&lt;vin&gt;</code>. A key sees what this
-              workshop sees and nothing beyond it.
+              {t('Send the key in this header:')} {/* i18n-ignore */}
+              <code className="font-mono">Authorization: Bearer cn_…</code>{' '}
+              {t('It reads these addresses:')} {/* i18n-ignore */}
+              <code className="font-mono">/api/v1/jobs</code>, {/* i18n-ignore */}
+              <code className="font-mono">/api/v1/invoices</code>, {/* i18n-ignore */}
+              <code className="font-mono">/api/v1/vehicles/&lt;vin&gt;</code>.{' '}
+              {t('A key sees what this workshop sees and nothing beyond it.')}
             </p>
           </CardBody>
         </Card>
 
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Document numbering"
-            description="Sequential and gapless per organisation"
+            title={t('Document numbering')}
+            description={t('Sequential and gapless per organisation')}
             action={
               mayWrite ? (
                 <Link
                   href="/settings/organisation"
                   className="text-[13px] text-(--brand-text) hover:underline"
                 >
-                  Edit prefixes
+                  {t('Edit prefixes')}
                 </Link>
               ) : undefined
             }
@@ -611,7 +652,7 @@ export default async function SettingsPage({
           <CardBody className="flex flex-wrap gap-6">
             {org.sequences.map((sequence) => (
               <div key={sequence.id}>
-                <p className="eyebrow mb-0.5">{sequence.kind.toLowerCase().replace('_', ' ')}</p>
+                <p className="eyebrow mb-0.5">{t(sequence.kind.toLowerCase().replace('_', ' '))}</p>
                 <p className="datum text-[14px]">
                   {sequence.prefix}
                   {sequence.next}
@@ -623,11 +664,10 @@ export default async function SettingsPage({
       </div>
 
       <p className="mt-6 text-[12px] text-(--text-faint)">
-        Every change made here is recorded in{' '}
+        {t('Every change made here is recorded in the audit log with what it was before.')}{' '}
         <Link href="/audit" className="underline">
-          the audit log
-        </Link>{' '}
-        with what it was before.
+          {t('Open the audit log')}
+        </Link>
       </p>
     </>
   );

@@ -14,6 +14,7 @@
 
 import 'dotenv/config';
 
+import { execFileSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,6 +24,7 @@ import { prisma } from '@carnet/db';
 
 const BASE = process.argv[2] ?? 'http://localhost:3000';
 const ROOT = join(__dirname, '..', '..', 'apps', 'web', 'src');
+const UI = join(__dirname, '..', '..', 'packages', 'ui', 'src');
 
 let failures = 0;
 
@@ -49,14 +51,14 @@ function walk(dir: string, out: string[] = []): string[] {
 /** Every sentence passed to t() in the app, with the file it is in. */
 function sentencesInSource(): Map<string, string[]> {
   const found = new Map<string, string[]>();
-  for (const file of walk(ROOT)) {
+  for (const file of [...walk(ROOT), ...walk(UI)]) {
     const src = readFileSync(file, 'utf8');
-    for (const m of src.matchAll(/\bt\(\s*'((?:[^'\\]|\\.)*)'\s*[,)]/g)) {
+    for (const m of src.matchAll(/\b(?:t|msg)\(\s*'((?:[^'\\]|\\.)*)'\s*[,)]/g)) {
       const text = m[1]!.replace(/\\'/g, "'");
       if (!found.has(text)) found.set(text, []);
       found.get(text)!.push(file.replace(ROOT, ''));
     }
-    for (const m of src.matchAll(/\bt\(\s*"((?:[^"\\]|\\.)*)"\s*[,)]/g)) {
+    for (const m of src.matchAll(/\b(?:t|msg)\(\s*"((?:[^"\\]|\\.)*)"\s*[,)]/g)) {
       const text = m[1]!;
       if (!found.has(text)) found.set(text, []);
       found.get(text)!.push(file.replace(ROOT, ''));
@@ -86,6 +88,34 @@ async function main() {
     translate('fr', 'Hello {name}', { name: 'Maria' }).includes('Maria'),
     true,
   );
+  check(
+    'a finished sentence is read back through its key',
+    translate('fr', 'Hello Maria').includes('Maria') &&
+      translate('fr', 'Hello Maria') !== 'Hello Maria',
+    true,
+  );
+
+  /* --- nothing reaches a page without the translator (Phase 40.5) ----- */
+
+  console.info('\n  Every word\n');
+
+  const scan = (args: string[]) => {
+    try {
+      const out = execFileSync('npx', ['tsx', join(__dirname, 'i18n-scan.ts'), ...args], {
+        encoding: 'utf8',
+        shell: true,
+      });
+      return { ok: true, last: out.trim().split('\n').pop() ?? '' };
+    } catch (error) {
+      const out = String((error as { stdout?: string }).stdout ?? '');
+      console.error(out.split('\n').slice(0, 40).join('\n'));
+      return { ok: false, last: out.trim().split('\n').pop() ?? '' };
+    }
+  };
+  const pages = scan([]);
+  check(`the pages, the components and the UI package: ${pages.last.trim()}`, pages.ok, true);
+  const thrown = scan(['--messages', '--quiet']);
+  check(`sentences thrown when something is refused: ${thrown.last.trim()}`, thrown.ok, true);
 
   /* --- the pages, in each language ------------------------------------ */
 
@@ -108,6 +138,12 @@ async function main() {
     { path: '/portal', cookie: driverCookie, sentence: 'My cars' },
     { path: '/portal/settings', cookie: driverCookie, sentence: 'Your details' },
     { path: '/dashboard', cookie: ownerCookie, sentence: 'Diary' },
+    // The workshop's own pages, translated in Phase 40.5.
+    { path: '/dashboard', cookie: ownerCookie, sentence: 'Jobs today' },
+    { path: '/reputation', cookie: ownerCookie, sentence: 'How it is moving' },
+    { path: '/people', cookie: ownerCookie, sentence: 'Productivity' },
+    { path: '/settings', cookie: ownerCookie, sentence: 'Subscription' },
+    { path: '/reports/business?range=quarter', cookie: ownerCookie, sentence: 'What came back' },
   ];
 
   for (const language of LANGUAGES) {
@@ -132,6 +168,13 @@ async function main() {
         page.includes(escapeHtml(translated)),
         true,
       );
+      if (language !== 'en' && translated !== e.sentence && e.sentence.includes(' ')) {
+        check(
+          `${e.path} in ${language}: and the English "${e.sentence}" is not left on it`,
+          page.includes(`>${escapeHtml(e.sentence)}<`),
+          false,
+        );
+      }
     }
   }
 

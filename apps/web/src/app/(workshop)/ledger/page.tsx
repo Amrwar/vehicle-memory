@@ -24,8 +24,12 @@ import { prisma } from '@carnet/db';
 import { postedLines } from '@/lib/accounting';
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Ledger' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Ledger') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -43,6 +47,7 @@ export default async function LedgerPage({
   searchParams: Promise<{ view?: string; account?: string }>;
 }) {
   const { orgId, plan, region } = await requireSession('ledger:read');
+  const t = await tFor();
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'ledger')) {
@@ -60,24 +65,24 @@ export default async function LedgerPage({
   return (
     <>
       <PageHeader
-        eyebrow="Finance"
-        title="General ledger"
-        description="Every posting, and the document behind it"
+        eyebrow={t('Finance')}
+        title={t('General ledger')}
+        description={t('Every posting, and the document behind it')}
         actions={
           <>
             <Link href="/ledger?view=trial">
               <Button size="sm" variant={tab === 'trial' ? 'primary' : 'secondary'}>
-                Trial balance
+                {t('Trial balance')}
               </Button>
             </Link>
             <Link href="/ledger?view=journal">
               <Button size="sm" variant={tab === 'journal' ? 'primary' : 'secondary'}>
-                Journal
+                {t('Journal')}
               </Button>
             </Link>
             <Link href="/financials">
               <Button size="sm" variant="ghost">
-                Statements
+                {t('Statements')}
               </Button>
             </Link>
           </>
@@ -86,7 +91,7 @@ export default async function LedgerPage({
 
       <StatRow className="mb-5">
         <StatTile
-          label="Total debits"
+          label={t('Total debits')}
           value={
             <Money
               currency={region.currency}
@@ -94,10 +99,14 @@ export default async function LedgerPage({
               amount={toNumber(balance.totalDebits)}
             />
           }
-          note={`Across ${accountsUsed} account${accountsUsed === 1 ? '' : 's'}`}
+          note={
+            accountsUsed === 1
+              ? t('Across 1 account')
+              : t('Across {count} accounts', { count: accountsUsed })
+          }
         />
         <StatTile
-          label="Total credits"
+          label={t('Total credits')}
           value={
             <Money
               currency={region.currency}
@@ -105,10 +114,10 @@ export default async function LedgerPage({
               amount={toNumber(balance.totalCredits)}
             />
           }
-          note="Must equal debits"
+          note={t('Must equal debits')}
         />
         <StatTile
-          label="Difference"
+          label={t('Difference')}
           value={
             <Money
               currency={region.currency}
@@ -117,16 +126,17 @@ export default async function LedgerPage({
             />
           }
           tone={balance.balanced ? 'success' : 'danger'}
-          note={balance.balanced ? 'The books balance' : 'Stop and investigate'}
+          note={balance.balanced ? t('The books balance') : t('Stop and investigate')}
         />
-        <StatTile label="Entries" value={entries.length} note="Posted journal entries" />
+        <StatTile label={t('Entries')} value={entries.length} note={t('Posted journal entries')} />
       </StatRow>
 
       {!balance.balanced ? (
         <Card className="mb-5 border-(--danger)">
           <CardBody className="text-[13px] leading-relaxed text-(--danger)">
-            Debits and credits do not agree. Every figure on the financial statements is derived
-            from these postings, so none of them is meaningful until this is resolved.
+            {t(
+              'Debits and credits do not agree. Every figure on the financial statements is derived from these postings, so none of them is meaningful until this is resolved.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -134,25 +144,27 @@ export default async function LedgerPage({
       {tab === 'trial' ? (
         <Card className="overflow-hidden">
           <CardHeader
-            title="Trial balance"
-            description="Every account carrying a movement, on its normal side"
+            title={t('Trial balance')}
+            description={t('Every account carrying a movement, on its normal side')}
           />
           {balance.rows.length === 0 ? (
             <EmptyState
-              title="Nothing posted yet"
-              description="The ledger fills itself as invoices are issued, parts are consumed and payments land."
+              title={t('Nothing posted yet')}
+              description={t(
+                'The ledger fills itself as invoices are issued, parts are consumed and payments land.',
+              )}
             />
           ) : (
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Code</Th>
-                    <Th>Account</Th>
-                    <Th>Type</Th>
-                    <Th numeric>Debit</Th>
-                    <Th numeric>Credit</Th>
-                    <Th numeric>Balance</Th>
+                    <Th>{t('Code')}</Th>
+                    <Th>{t('Account')}</Th>
+                    <Th>{t('Type')}</Th>
+                    <Th numeric>{t('Debit')}</Th>
+                    <Th numeric>{t('Credit')}</Th>
+                    <Th numeric>{t('Balance')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -164,15 +176,15 @@ export default async function LedgerPage({
                           href={`/ledger?view=journal&account=${row.accountCode}`}
                           className="hover:text-(--brand-text) hover:underline"
                         >
-                          {row.accountName}
+                          {t(row.accountName)}
                         </Link>
                       </Td>
                       <Td>
                         <span className="text-[12px] text-(--text-soft)">
-                          {describeAccountType(row.accountType)}
+                          {t(describeAccountType(row.accountType))}
                           <span className="text-(--text-faint)">
                             {' · '}
-                            {normalBalance(row.accountType) === 'debit' ? 'Dr' : 'Cr'}
+                            {normalBalance(row.accountType) === 'debit' ? t('Dr') : t('Cr')}
                           </span>
                         </span>
                       </Td>
@@ -211,7 +223,7 @@ export default async function LedgerPage({
                 <tfoot>
                   <tr className="border-t-2 border-(--border-strong) bg-(--surface-sunk)">
                     <Td />
-                    <Td className="font-semibold">Total</Td>
+                    <Td className="font-semibold">{t('Total')}</Td>
                     <Td />
                     <Td numeric className="font-semibold">
                       <Money
@@ -229,7 +241,7 @@ export default async function LedgerPage({
                     </Td>
                     <Td numeric>
                       <Badge tone={balance.balanced ? 'success' : 'danger'} size="sm">
-                        {balance.balanced ? 'Balanced' : 'Out'}
+                        {balance.balanced ? t('Balanced') : t('Out')}
                       </Badge>
                     </Td>
                   </tr>
@@ -241,13 +253,13 @@ export default async function LedgerPage({
       ) : (
         <Card className="overflow-hidden">
           <CardHeader
-            title={account ? `Journal, account ${account}` : 'Journal'}
-            description="Newest first. Each entry names the document that caused it."
+            title={account ? t('Journal, account {account}', { account }) : t('Journal')}
+            description={t('Newest first. Each entry names the document that caused it.')}
             action={
               account ? (
                 <Link href="/ledger?view=journal">
                   <Button size="sm" variant="ghost">
-                    Clear filter
+                    {t('Clear filter')}
                   </Button>
                 </Link>
               ) : undefined
@@ -255,11 +267,11 @@ export default async function LedgerPage({
           />
           {entries.length === 0 ? (
             <EmptyState
-              title="No entries"
+              title={t('No entries')}
               description={
                 account
-                  ? 'Nothing has posted to this account yet.'
-                  : 'The journal fills itself as work is invoiced and paid.'
+                  ? t('Nothing has posted to this account yet.')
+                  : t('The journal fills itself as work is invoiced and paid.')
               }
             />
           ) : (
@@ -274,7 +286,7 @@ export default async function LedgerPage({
                         <p className="font-medium">
                           <span className="tabular text-(--text-faint)">{entry.reference}</span>
                           <span className="px-1.5 text-(--text-faint)">·</span>
-                          {entry.description}
+                          {t(entry.description)}
                         </p>
                         <p className="mt-0.5 text-[12px] text-(--text-faint)">
                           {entry.postedAt.toLocaleDateString(region.locale, {
@@ -283,13 +295,15 @@ export default async function LedgerPage({
                             year: 'numeric',
                           })}
                           {entry.period ? ` · ${entry.period.name}` : ''}
-                          {entry.sourceType ? ` · from ${entry.sourceType}` : ''}
+                          {entry.sourceType
+                            ? ` · ${t('from {source}', { source: t(entry.sourceType) })}`
+                            : ''}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         {entry.period?.isClosed ? (
                           <Badge tone="neutral" size="sm">
-                            Closed period
+                            {t('Closed period')}
                           </Badge>
                         ) : null}
                         <Money
@@ -309,9 +323,9 @@ export default async function LedgerPage({
                         >
                           <span className="tabular text-(--text-faint)">{line.account.code}</span>
                           <span className="truncate text-(--text-soft)">
-                            {line.account.name}
+                            {t(line.account.name)}
                             {line.memo ? (
-                              <span className="text-(--text-faint)"> · {line.memo}</span>
+                              <span className="text-(--text-faint)"> · {t(line.memo)}</span>
                             ) : null}
                           </span>
                           <span className="tabular w-24 text-right">

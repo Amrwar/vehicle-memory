@@ -11,6 +11,7 @@ import {
   PageHeader,
   Registration,
 } from '@carnet/ui';
+import { msg } from '@carnet/core';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -18,8 +19,12 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { bookingDetail, BookingError, setBookingStatus, startJobFromBooking } from '@/lib/bookings';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Booking' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Booking') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -87,12 +92,12 @@ const STATES: Record<
   string,
   { label: string; tone: 'neutral' | 'brand' | 'success' | 'warning' | 'danger' }
 > = {
-  SCHEDULED: { label: 'booked in', tone: 'brand' },
-  CONFIRMED: { label: 'confirmed', tone: 'success' },
-  ARRIVED: { label: 'arrived', tone: 'success' },
-  CONVERTED: { label: 'now a job', tone: 'neutral' },
-  NO_SHOW: { label: 'did not turn up', tone: 'warning' },
-  CANCELLED: { label: 'cancelled', tone: 'neutral' },
+  SCHEDULED: { label: msg('booked in'), tone: 'brand' },
+  CONFIRMED: { label: msg('confirmed'), tone: 'success' },
+  ARRIVED: { label: msg('arrived'), tone: 'success' },
+  CONVERTED: { label: msg('now a job'), tone: 'neutral' },
+  NO_SHOW: { label: msg('did not turn up'), tone: 'warning' },
+  CANCELLED: { label: msg('cancelled'), tone: 'neutral' },
 };
 
 export default async function BookingPage({
@@ -103,6 +108,7 @@ export default async function BookingPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { orgId, region } = await requireSession('diary:read');
+  const t = await tFor();
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -116,11 +122,11 @@ export default async function BookingPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/diary">The diary</BackLink>
+        <BackLink href="/diary">{t('The diary')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Diary"
+        eyebrow={t('Diary')}
         title={booking.description}
         description={booking.startAt.toLocaleString(region.locale, {
           weekday: 'long',
@@ -132,12 +138,12 @@ export default async function BookingPage({
         actions={
           <>
             <Badge tone={state.tone} dot>
-              {state.label}
+              {t(state.label)}
             </Badge>
             {booking.job ? (
               <Link href={`/jobs/${booking.job.id}`}>
                 <Button size="sm" variant="secondary">
-                  Open job {booking.job.number}
+                  {t('Open job {number}', { number: booking.job.number })}
                 </Button>
               </Link>
             ) : null}
@@ -146,14 +152,14 @@ export default async function BookingPage({
       />
 
       {error ? (
-        <Alert tone="danger" className="mb-5" title="Not changed">
-          {error}
+        <Alert tone="danger" className="mb-5" title={t('Not changed')}>
+          {t(error)}
         </Alert>
       ) : null}
 
       <div className="mb-5 grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader title="The vehicle" />
+          <CardHeader title={t('The vehicle')} />
           <CardBody className="grid gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -165,18 +171,20 @@ export default async function BookingPage({
               {vehicle.registration ? <Registration value={vehicle.registration} /> : null}
             </div>
             <p className="text-[13px] text-(--text-soft)">
-              Last recorded at <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />
+              {t('Last recorded at')}{' '}
+              <Mileage locale={region.locale} km={vehicle.lastOdometerKm} t={t} />
             </p>
           </CardBody>
         </Card>
 
         <Card>
-          <CardHeader title="Who to ring" />
+          <CardHeader title={t('Who to ring')} />
           <CardBody>
             <KeyValue
+              t={t}
               items={[
                 {
-                  label: 'Customer',
+                  label: t('Customer'),
                   value: (
                     <Link
                       href={`/customers/${booking.customer.id}`}
@@ -187,7 +195,7 @@ export default async function BookingPage({
                   ),
                 },
                 {
-                  label: 'Mobile',
+                  label: t('Mobile'),
                   value: booking.customer.mobile ? (
                     <a href={`tel:${booking.customer.mobile}`} className="hover:underline">
                       {booking.customer.mobile}
@@ -197,7 +205,7 @@ export default async function BookingPage({
                   ),
                 },
                 {
-                  label: 'Phone',
+                  label: t('Phone'),
                   value: booking.customer.phone ? (
                     <a href={`tel:${booking.customer.phone}`} className="hover:underline">
                       {booking.customer.phone}
@@ -206,7 +214,7 @@ export default async function BookingPage({
                     '—'
                   ),
                 },
-                { label: 'Email', value: booking.customer.email ?? '—' },
+                { label: t('Email'), value: booking.customer.email ?? '—' },
               ]}
             />
           </CardBody>
@@ -215,20 +223,30 @@ export default async function BookingPage({
 
       <div className="mb-5 grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader title="The slot" />
+          <CardHeader title={t('The slot')} />
           <CardBody>
             <KeyValue
+              t={t}
               items={[
-                { label: 'Site', value: booking.location.name },
-                { label: 'Bay', value: booking.bay?.name ?? 'Not assigned yet' },
-                { label: 'Technician', value: booking.technician?.name ?? 'Not assigned yet' },
-                { label: 'Allowed', value: `${Number(booking.estimatedHours)} hours` },
-                { label: 'Booked by', value: booking.source.toLowerCase().replace('_', ' ') },
+                { label: t('Site'), value: booking.location.name },
+                { label: t('Bay'), value: booking.bay?.name ?? t('Not assigned yet') },
                 {
-                  label: 'Reminder',
+                  label: t('Technician'),
+                  value: booking.technician?.name ?? t('Not assigned yet'),
+                },
+                {
+                  label: t('Allowed'),
+                  value: t('{hours} hours', { hours: Number(booking.estimatedHours) }),
+                },
+                {
+                  label: t('Booked by'),
+                  value: t(booking.source.toLowerCase().replace('_', ' ')),
+                },
+                {
+                  label: t('Reminder'),
                   value: booking.reminderSentAt
                     ? booking.reminderSentAt.toLocaleDateString(region.locale)
-                    : 'Not sent',
+                    : t('Not sent'),
                 },
               ]}
             />
@@ -243,17 +261,21 @@ export default async function BookingPage({
 
         <Card>
           <CardHeader
-            title="What happened"
-            description="One press each, because this is done while somebody is on the telephone."
+            title={t('What happened')}
+            description={t(
+              'One press each, because this is done while somebody is on the telephone.',
+            )}
           />
           <CardBody className="grid gap-3">
             {booking.status === 'CONVERTED' ? (
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                This booking became a job, so it is the job that changes from here.
+                {t('This booking became a job, so it is the job that changes from here.')}
               </p>
             ) : booking.status === 'CANCELLED' ? (
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                Cancelled{booking.cancelReason ? `: ${booking.cancelReason}` : '.'}
+                {booking.cancelReason
+                  ? t('Cancelled: {reason}', { reason: booking.cancelReason })
+                  : t('Cancelled.')}
               </p>
             ) : (
               <>
@@ -268,7 +290,7 @@ export default async function BookingPage({
                       variant="secondary"
                       disabled={booking.status === 'CONFIRMED'}
                     >
-                      They confirmed
+                      {t('They confirmed')}
                     </Button>
                   </form>
                   {/* One press. The booking already knows the customer, the
@@ -277,14 +299,14 @@ export default async function BookingPage({
                   <form action={start}>
                     <input type="hidden" name="bookingId" value={booking.id} />
                     <Button type="submit" size="touch" block variant="primary">
-                      Car is here, start the job
+                      {t('Car is here, start the job')}
                     </Button>
                   </form>
                   <form action={move}>
                     <input type="hidden" name="bookingId" value={booking.id} />
                     <input type="hidden" name="status" value="NO_SHOW" />
                     <Button type="submit" size="touch" block variant="secondary">
-                      Did not turn up
+                      {t('Did not turn up')}
                     </Button>
                   </form>
                 </div>
@@ -297,12 +319,12 @@ export default async function BookingPage({
                   <input type="hidden" name="status" value="CANCELLED" />
                   <label className="min-w-0 flex-1">
                     <span className="mb-1 block text-[12px] font-medium text-(--text-soft)">
-                      Cancelling? Say why
+                      {t('Cancelling? Say why')}
                     </span>
-                    <Input name="reason" placeholder="Goes on the record" />
+                    <Input name="reason" placeholder={t('Goes on the record')} />
                   </label>
                   <Button type="submit" variant="ghost">
-                    Cancel it
+                    {t('Cancel it')}
                   </Button>
                 </form>
               </>
@@ -310,8 +332,9 @@ export default async function BookingPage({
 
             {open && !booking.job ? (
               <p className="text-[12px] text-(--text-faint)">
-                A job is created when the car is received, so nothing is charged for an appointment
-                that never arrives.
+                {t(
+                  'A job is created when the car is received, so nothing is charged for an appointment that never arrives.',
+                )}
               </p>
             ) : null}
           </CardBody>

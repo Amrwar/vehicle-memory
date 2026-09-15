@@ -23,9 +23,13 @@ import { prisma } from '@carnet/db';
 
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { expiringCertifications, onSiteNow, teamProductivity } from '@/lib/people';
 
-export const metadata: Metadata = { title: 'People' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('People') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -45,6 +49,7 @@ export default async function PeoplePage({
   searchParams: Promise<{ days?: string; site?: string }>;
 }) {
   const { orgId, plan, region } = await requireSession('people:read');
+  const t = await tFor();
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'payroll')) {
@@ -86,16 +91,16 @@ export default async function PeoplePage({
   return (
     <>
       <PageHeader
-        eyebrow="People"
-        title="Team"
-        description={`Last ${window} days${siteFilter ? ` · ${locations.find((l) => l.id === siteFilter)?.name}` : ''}`}
+        eyebrow={t('People')}
+        title={t('Team')}
+        description={`${t('Last {days} days', { days: window })}${siteFilter ? ` · ${locations.find((l) => l.id === siteFilter)?.name}` : ''}`}
         actions={
           <>
             {locations.length > 1 ? (
               <>
                 <Link href={`/people?days=${window}`}>
                   <Button size="sm" variant={siteFilter ? 'secondary' : 'primary'}>
-                    All sites
+                    {t('All sites')}
                   </Button>
                 </Link>
                 {locations.map((location) => (
@@ -116,7 +121,7 @@ export default async function PeoplePage({
                 href={`/people?days=${option}${siteFilter ? `&site=${siteFilter}` : ''}`}
               >
                 <Button size="sm" variant={option === window ? 'accent' : 'ghost'}>
-                  {option}d
+                  {t('{days}d', { days: option })}
                 </Button>
               </Link>
             ))}
@@ -128,29 +133,32 @@ export default async function PeoplePage({
         <Card className="mb-5 border-(--danger)">
           <CardBody className="text-[13px] leading-relaxed text-(--danger)">
             <strong className="font-semibold">
-              {expired.length} qualification{expired.length === 1 ? ' has' : 's have'} expired.
+              {expired.length === 1
+                ? t('1 qualification has expired.')
+                : t('{count} qualifications have expired.', { count: expired.length })}
             </strong>{' '}
-            {expired.map((certification) => certification.employee.displayName).join(', ')} cannot
-            legally sign off work covered by{' '}
-            {expired.map((certification) => certification.name).join(', ')}. This is not a reminder,
-            it is work that has to stop.
+            {t('{people} cannot legally sign off work covered by {qualifications}.', {
+              people: expired.map((certification) => certification.employee.displayName).join(', '),
+              qualifications: expired.map((certification) => certification.name).join(', '),
+            })}{' '}
+            {t('This is not a reminder, it is work that has to stop.')}
           </CardBody>
         </Card>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="Utilisation"
+          label={t('Utilisation')}
           value={totals.utilisationPct === null ? '—' : `${totals.utilisationPct}%`}
-          note="Paid time that reached a vehicle"
+          note={t('Paid time that reached a vehicle')}
         />
         <StatTile
-          label="Efficiency"
+          label={t('Efficiency')}
           value={totals.efficiencyPct === null ? '—' : `${totals.efficiencyPct}%`}
-          note="Sold against clocked"
+          note={t('Sold against clocked')}
         />
         <StatTile
-          label="Productivity"
+          label={t('Productivity')}
           value={totals.productivityPct === null ? '—' : `${totals.productivityPct}%`}
           tone={
             totals.productivityPct === null
@@ -159,10 +167,10 @@ export default async function PeoplePage({
                 ? 'success'
                 : 'warning'
           }
-          note="Sold against paid. This one pays wages."
+          note={t('Sold against paid. This one pays wages.')}
         />
         <StatTile
-          label="Labour profit"
+          label={t('Labour profit')}
           value={
             <Money
               currency={region.currency}
@@ -171,7 +179,7 @@ export default async function PeoplePage({
             />
           }
           tone={totals.labourProfit.minor >= 0 ? 'neutral' : 'danger'}
-          note="Sold labour less the whole attended day"
+          note={t('Sold labour less the whole attended day')}
         />
       </StatRow>
 
@@ -179,27 +187,29 @@ export default async function PeoplePage({
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Productivity"
-              description="Three measures of the same day. The gaps between them are the finding."
+              title={t('Productivity')}
+              description={t(
+                'Three measures of the same day. The gaps between them are the finding.',
+              )}
             />
             {team.people.length === 0 ? (
               <EmptyState
-                title="Nobody on the books yet"
-                description="Add employees to see how the workshop's paid hours are spent."
+                title={t('Nobody on the books yet')}
+                description={t('Add employees to see how the workshop’s paid hours are spent.')}
               />
             ) : (
               <TableWrap className="rounded-none border-0">
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Person</Th>
-                      <Th numeric>Attended</Th>
-                      <Th numeric>Clocked</Th>
-                      <Th numeric>Sold</Th>
-                      <Th numeric>Util.</Th>
-                      <Th numeric>Effic.</Th>
-                      <Th numeric>Prod.</Th>
-                      <Th numeric>Labour profit</Th>
+                      <Th>{t('Person')}</Th>
+                      <Th numeric>{t('Attended')}</Th>
+                      <Th numeric>{t('Clocked')}</Th>
+                      <Th numeric>{t('Sold')}</Th>
+                      <Th numeric>{t('Util.')}</Th>
+                      <Th numeric>{t('Effic.')}</Th>
+                      <Th numeric>{t('Prod.')}</Th>
+                      <Th numeric>{t('Labour profit')}</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -214,13 +224,13 @@ export default async function PeoplePage({
                           </Link>
                         </Td>
                         <Td numeric className="text-(--text-soft)">
-                          {person.attendedHours}h
+                          {t('{hours}h', { hours: person.attendedHours })}
                         </Td>
                         <Td numeric className="text-(--text-soft)">
-                          {person.productiveHours}h
+                          {t('{hours}h', { hours: person.productiveHours })}
                         </Td>
                         <Td numeric className="text-(--text-soft)">
-                          {person.soldHours}h
+                          {t('{hours}h', { hours: person.soldHours })}
                         </Td>
                         <Td numeric>{pct(person.utilisationPct)}</Td>
                         <Td numeric>{pct(person.efficiencyPct)}</Td>
@@ -247,15 +257,15 @@ export default async function PeoplePage({
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-(--border-strong) bg-(--surface-sunk)">
-                      <Td className="font-semibold">Team</Td>
+                      <Td className="font-semibold">{t('Team')}</Td>
                       <Td numeric className="font-medium">
-                        {totals.attendedHours}h
+                        {t('{hours}h', { hours: totals.attendedHours })}
                       </Td>
                       <Td numeric className="font-medium">
-                        {totals.productiveHours}h
+                        {t('{hours}h', { hours: totals.productiveHours })}
                       </Td>
                       <Td numeric className="font-medium">
-                        {totals.soldHours}h
+                        {t('{hours}h', { hours: totals.soldHours })}
                       </Td>
                       <Td numeric className="font-medium">
                         {pct(totals.utilisationPct)}
@@ -283,36 +293,40 @@ export default async function PeoplePage({
           {team.suspect.length > 0 ? (
             <Card className="border-(--warning)">
               <CardHeader
-                title="Records that cannot be right"
-                description="More job time clocked than attendance recorded"
+                title={t('Records that cannot be right')}
+                description={t('More job time clocked than attendance recorded')}
               />
               <CardBody className="grid gap-2 text-[13px]">
                 {team.suspect.map((person) => (
                   <p key={person.technicianId} className="text-(--text-soft)">
                     <span className="font-medium text-(--text)">{person.technicianName}</span>{' '}
-                    clocked {person.productiveHours}h onto jobs but attended {person.attendedHours}
-                    h. Somebody forgot to clock out of a shift, or onto one.
+                    {t('clocked {productive}h onto jobs but attended {attended}h.', {
+                      productive: person.productiveHours,
+                      attended: person.attendedHours,
+                    })}{' '}
+                    {t('Somebody forgot to clock out of a shift, or onto one.')}
                   </p>
                 ))}
                 <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                  These are left in the figures above rather than removed. Averaging them away would
-                  make every other number on this page slightly wrong and give no clue why.
+                  {t(
+                    'These are left in the figures above rather than removed. Averaging them away would make every other number on this page slightly wrong and give no clue why.',
+                  )}
                 </p>
               </CardBody>
             </Card>
           ) : null}
 
           <Card className="overflow-hidden">
-            <CardHeader title="Employees" description="Pay, site and contracted hours" />
+            <CardHeader title={t('Employees')} description={t('Pay, site and contracted hours')} />
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Name</Th>
-                    <Th>Role</Th>
-                    <Th>Site</Th>
-                    <Th numeric>Contracted</Th>
-                    <Th numeric>Cost per hour</Th>
+                    <Th>{t('Name')}</Th>
+                    <Th>{t('Role')}</Th>
+                    <Th>{t('Site')}</Th>
+                    <Th numeric>{t('Contracted')}</Th>
+                    <Th numeric>{t('Cost per hour')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -327,9 +341,11 @@ export default async function PeoplePage({
                         </Link>
                       </Td>
                       <Td className="text-(--text-soft)">{employee.jobTitle ?? '—'}</Td>
-                      <Td className="text-(--text-soft)">{employee.location?.name ?? 'Group'}</Td>
+                      <Td className="text-(--text-soft)">
+                        {employee.location?.name ?? t('Group')}
+                      </Td>
                       <Td numeric className="text-(--text-soft)">
-                        {(employee.weeklyMinutes / 60).toFixed(1)}h
+                        {t('{hours}h', { hours: (employee.weeklyMinutes / 60).toFixed(1) })}
                       </Td>
                       <Td numeric>
                         {employee.payRates[0] ? (
@@ -339,7 +355,7 @@ export default async function PeoplePage({
                             amount={Number(employee.payRates[0].costPerHour)}
                           />
                         ) : (
-                          <span className="text-(--danger)">No rate set</span>
+                          <span className="text-(--danger)">{t('No rate set')}</span>
                         )}
                       </Td>
                     </Tr>
@@ -352,9 +368,11 @@ export default async function PeoplePage({
 
         <aside className="grid content-start gap-5">
           <Card>
-            <CardHeader title="On site now" description="Open shifts" />
+            <CardHeader title={t('On site now')} description={t('Open shifts')} />
             {onSite.length === 0 ? (
-              <CardBody className="text-[13px] text-(--text-faint)">Nobody is clocked in.</CardBody>
+              <CardBody className="text-[13px] text-(--text-faint)">
+                {t('Nobody is clocked in.')}
+              </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
                 {onSite.map((record) => {
@@ -370,10 +388,11 @@ export default async function PeoplePage({
                           {record.employee.displayName}
                         </p>
                         <p className="text-[11px] text-(--text-faint)">
-                          Since{' '}
-                          {record.startedAt.toLocaleTimeString(region.locale, {
-                            hour: '2-digit',
-                            minute: '2-digit',
+                          {t('Since {time}', {
+                            time: record.startedAt.toLocaleTimeString(region.locale, {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }),
                           })}
                           {record.location ? ` · ${record.location.name}` : ''}
                         </p>
@@ -381,7 +400,7 @@ export default async function PeoplePage({
                       <span
                         className={`tabular shrink-0 text-[12px] ${hours > 16 ? 'font-medium text-(--warning)' : 'text-(--text-soft)'}`}
                       >
-                        {hours.toFixed(1)}h
+                        {t('{hours}h', { hours: hours.toFixed(1) })}
                       </span>
                     </li>
                   );
@@ -391,10 +410,13 @@ export default async function PeoplePage({
           </Card>
 
           <Card className={certifications.length > 0 ? 'border-(--warning)' : undefined}>
-            <CardHeader title="Qualifications" description="Expired, or expiring within 60 days" />
+            <CardHeader
+              title={t('Qualifications')}
+              description={t('Expired, or expiring within 60 days')}
+            />
             {certifications.length === 0 ? (
               <CardBody className="text-[13px] text-(--text-faint)">
-                Nothing lapses in the next two months.
+                {t('Nothing lapses in the next two months.')}
               </CardBody>
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -404,8 +426,8 @@ export default async function PeoplePage({
                       <p className="text-[13px] font-medium">{certification.name}</p>
                       <Badge tone={certification.expired ? 'danger' : 'warning'} size="sm">
                         {certification.expired
-                          ? `${Math.abs(certification.daysRemaining)}d ago`
-                          : `${certification.daysRemaining}d`}
+                          ? t('{days}d ago', { days: Math.abs(certification.daysRemaining) })
+                          : t('{days}d', { days: certification.daysRemaining })}
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-[11px] text-(--text-faint)">
@@ -419,20 +441,25 @@ export default async function PeoplePage({
           </Card>
 
           <Card>
-            <CardHeader title="How to read this" />
+            <CardHeader title={t('How to read this')} />
             <CardBody className="grid gap-2 text-[12px] leading-relaxed text-(--text-soft)">
               <p>
-                <span className="font-medium text-(--text)">Utilisation</span> falls when people are
-                waiting: for parts, for a decision, for a bay. It is a scheduling problem.
+                <span className="font-medium text-(--text)">{t('Utilisation')}</span>{' '}
+                {t(
+                  'falls when people are waiting: for parts, for a decision, for a bay. It is a scheduling problem.',
+                )}
               </p>
               <p>
-                <span className="font-medium text-(--text)">Efficiency</span> above 100% means
-                beating the quoted time. It is a skill and estimating problem.
+                <span className="font-medium text-(--text)">{t('Efficiency')}</span>{' '}
+                {t(
+                  'above 100% means beating the quoted time. It is a skill and estimating problem.',
+                )}
               </p>
               <p>
-                <span className="font-medium text-(--text)">Productivity</span> is the two
-                multiplied. Somebody can be 95% utilised and 110% efficient and the business still
-                loses money, if the hours were never sold.
+                <span className="font-medium text-(--text)">{t('Productivity')}</span>{' '}
+                {t(
+                  'is the two multiplied. Somebody can be 95% utilised and 110% efficient and the business still loses money, if the hours were never sold.',
+                )}
               </p>
             </CardBody>
           </Card>

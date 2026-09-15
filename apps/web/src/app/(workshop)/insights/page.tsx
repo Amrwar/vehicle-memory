@@ -13,12 +13,17 @@ import {
   Th,
   Tr,
 } from '@carnet/ui';
+import type { Translator } from '@carnet/core';
 import type { Metadata } from 'next';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { quotingAssessments, stockDivergences } from '@/lib/insights';
 
-export const metadata: Metadata = { title: 'Insights' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Insights') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -39,14 +44,15 @@ export const dynamic = 'force-dynamic';
  * to tell. So this page says how many parts it could not assess, next to the
  * ones it could.
  */
-function hours(minutes: number): string {
-  if (minutes < 90) return `${Math.round(minutes)} min`;
+function hours(minutes: number, t: Translator): string {
+  if (minutes < 90) return t('{minutes} min', { minutes: Math.round(minutes) });
 
-  return `${(minutes / 60).toFixed(1)} hrs`;
+  return t('{hours} hrs', { hours: (minutes / 60).toFixed(1) });
 }
 
 export default async function InsightsPage() {
   const { orgId } = await requireSession('report:operational');
+  const t = await tFor();
 
   const [stock, quoting] = await Promise.all([stockDivergences(orgId), quotingAssessments(orgId)]);
 
@@ -56,34 +62,34 @@ export default async function InsightsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Reports"
-        title="Insights"
-        description="What your own history supports saying, and what it does not"
+        eyebrow={t('Reports')}
+        title={t('Insights')}
+        description={t('What your own history supports saying, and what it does not')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Settings to change"
+          label={t('Settings to change')}
           value={stock.divergences.length}
           tone={stock.divergences.length > 0 ? 'brand' : 'neutral'}
-          note={`Of ${stock.assessed} parts with enough history`}
+          note={t('Of {count} parts with enough history', { count: stock.assessed })}
         />
         <StatTile
-          label="Risk running out"
+          label={t('Risk running out')}
           value={tooLow.length}
           tone={tooLow.length > 0 ? 'warning' : 'neutral'}
-          note="Reorder point below real usage"
+          note={t('Reorder point below real usage')}
         />
         <StatTile
-          label="Underquoted work"
+          label={t('Underquoted work')}
           value={underquoted.length}
           tone={underquoted.length > 0 ? 'danger' : 'neutral'}
-          note="Takes longer than it is sold for"
+          note={t('Takes longer than it is sold for')}
         />
         <StatTile
-          label="Typical wait"
-          value={`${stock.leadTimeDays}d`}
-          note="Order to delivery, from your own orders"
+          label={t('Typical wait')}
+          value={t('{days}d', { days: stock.leadTimeDays })}
+          note={t('Order to delivery, from your own orders')}
         />
       </StatRow>
 
@@ -91,34 +97,43 @@ export default async function InsightsPage() {
         <Card className="mb-5">
           <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
             <strong className="font-semibold text-(--text)">
-              {stock.total - stock.assessed} of {stock.total} parts could not be assessed.
+              {t('{count} of {total} parts could not be assessed.', {
+                count: stock.total - stock.assessed,
+                total: stock.total,
+              })}
             </strong>{' '}
-            They have moved too rarely for an average to mean anything. A figure produced from two
-            movements looks exactly like one produced from two hundred, so none is offered.
+            {t(
+              'They have moved too rarely for an average to mean anything. A figure produced from two movements looks exactly like one produced from two hundred, so none is offered.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <Card className="mb-5 overflow-hidden">
         <CardHeader
-          title="Stock levels worth changing"
-          description={`Based on what left the shelf, and on orders taking about ${stock.leadTimeDays} days to arrive.`}
+          title={t('Stock levels worth changing')}
+          description={t(
+            'Based on what left the shelf, and on orders taking about {days} days to arrive.',
+            { days: stock.leadTimeDays },
+          )}
         />
         {stock.divergences.length === 0 ? (
           <EmptyState
-            title="Nothing worth changing"
-            description="Every part with enough history is set within a sensible distance of what its usage justifies."
+            title={t('Nothing worth changing')}
+            description={t(
+              'Every part with enough history is set within a sensible distance of what its usage justifies.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Part</Th>
-                  <Th numeric>Set to</Th>
-                  <Th numeric>Should be</Th>
-                  <Th>Which way</Th>
-                  <Th>Why</Th>
+                  <Th>{t('Part')}</Th>
+                  <Th numeric>{t('Set to')}</Th>
+                  <Th numeric>{t('Should be')}</Th>
+                  <Th>{t('Which way')}</Th>
+                  <Th>{t('Why')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -133,10 +148,10 @@ export default async function InsightsPage() {
                     </Td>
                     <Td>
                       <Badge tone={entry.direction === 'TOO_LOW' ? 'warning' : 'neutral'} size="sm">
-                        {entry.direction === 'TOO_LOW' ? 'runs out' : 'cash on a shelf'}
+                        {entry.direction === 'TOO_LOW' ? t('runs out') : t('cash on a shelf')}
                       </Badge>
                     </Td>
-                    <Td className="text-[12px] text-(--text-soft)">{entry.reason}</Td>
+                    <Td className="text-[12px] text-(--text-soft)">{t(entry.reason)}</Td>
                   </Tr>
                 ))}
               </tbody>
@@ -147,20 +162,27 @@ export default async function InsightsPage() {
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Work sold for the wrong time"
-          description="Ranked by what it costs across all the jobs of that kind, not by the gap on one."
+          title={t('Work sold for the wrong time')}
+          description={t(
+            'Ranked by what it costs across all the jobs of that kind, not by the gap on one.',
+          )}
         />
         {quoting.worst.length === 0 ? (
           <EmptyState
             title={
               quoting.measured === 0
-                ? 'Not enough completed work yet'
-                : 'Every kind of work is booked about right'
+                ? t('Not enough completed work yet')
+                : t('Every kind of work is booked about right')
             }
             description={
               quoting.measured === 0
-                ? 'This needs several completed jobs of the same kind, with time booked against them, before it can say anything.'
-                : `Measured across ${quoting.measured} of ${quoting.total} job types.`
+                ? t(
+                    'This needs several completed jobs of the same kind, with time booked against them, before it can say anything.',
+                  )
+                : t('Measured across {count} of {total} job types.', {
+                    count: quoting.measured,
+                    total: quoting.total,
+                  })
             }
           />
         ) : (
@@ -168,11 +190,11 @@ export default async function InsightsPage() {
             <Table>
               <thead>
                 <tr>
-                  <Th>Work</Th>
-                  <Th numeric>Booked at</Th>
-                  <Th numeric>Usually takes</Th>
-                  <Th numeric>Jobs</Th>
-                  <Th>What it means</Th>
+                  <Th>{t('Work')}</Th>
+                  <Th numeric>{t('Booked at')}</Th>
+                  <Th numeric>{t('Usually takes')}</Th>
+                  <Th numeric>{t('Jobs')}</Th>
+                  <Th>{t('What it means')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -185,20 +207,20 @@ export default async function InsightsPage() {
                           tone={entry.verdict === 'UNDERQUOTED' ? 'danger' : 'neutral'}
                           size="sm"
                         >
-                          {entry.verdict === 'UNDERQUOTED' ? 'runs over' : 'over-booked'}
+                          {entry.verdict === 'UNDERQUOTED' ? t('runs over') : t('over-booked')}
                         </Badge>
                       </span>
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      {entry.booked ? hours(entry.booked) : '—'}
+                      {entry.booked ? hours(entry.booked, t) : '—'}
                     </Td>
                     <Td numeric className="font-medium">
-                      {entry.estimate.known ? hours(entry.estimate.median) : '—'}
+                      {entry.estimate.known ? hours(entry.estimate.median, t) : '—'}
                     </Td>
                     <Td numeric className="text-(--text-soft)">
                       {entry.estimate.known ? entry.estimate.samples : '—'}
                     </Td>
-                    <Td className="text-[12px] text-(--text-soft)">{entry.note}</Td>
+                    <Td className="text-[12px] text-(--text-soft)">{t(entry.note)}</Td>
                   </Tr>
                 ))}
               </tbody>

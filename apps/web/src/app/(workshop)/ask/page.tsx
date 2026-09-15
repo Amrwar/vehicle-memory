@@ -5,8 +5,12 @@ import Link from 'next/link';
 
 import { askAssistant, exchangesFor } from '@/lib/assistant';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Ask' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Ask') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -24,6 +28,7 @@ export const dynamic = 'force-dynamic';
 export default async function AskPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { orgId, user, region } = await requireSession('report:operational');
   const { q } = await searchParams;
+  const t = await tFor();
 
   // Asked through the assistant so the exchange is recorded; the answer is
   // the same one the router gives.
@@ -35,9 +40,9 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
   return (
     <>
       <PageHeader
-        eyebrow="Command centre"
-        title="Ask"
-        description="A question in words, answered from the records with the working shown."
+        eyebrow={t('Command centre')}
+        title={t('Ask')}
+        description={t('A question in words, answered from the records with the working shown.')}
       />
 
       <Card className="mb-5">
@@ -47,12 +52,12 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
               name="q"
               defaultValue={q ?? ''}
               autoFocus
-              placeholder="What did we take this month?"
-              aria-label="Your question"
+              placeholder={t('What did we take this month?')}
+              aria-label={t('Your question')}
               className="min-w-0 flex-1 text-[15px]"
             />
             <Button type="submit" variant="primary">
-              Ask
+              {t('Ask')}
             </Button>
           </CardBody>
         </form>
@@ -60,15 +65,19 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
 
       {asked?.refusal ? (
         <Alert tone="warning" className="mb-5">
-          {asked.refusal}
+          {t(asked.refusal)}
         </Alert>
       ) : null}
 
       {asked?.answer ? (
         <Card className="mb-5 border-(--brand)">
           <CardHeader
-            title={asked.answer.headline}
-            description={asked.answer.period ? `Covering ${asked.answer.period}.` : undefined}
+            title={t(asked.answer.headline)}
+            description={
+              asked.answer.period
+                ? t('Covering {period}.', { period: t(asked.answer.period) })
+                : undefined
+            }
             action={
               asked.answer.figure !== null && typeof asked.answer.figure !== 'number' ? (
                 <span className="font-display text-[22px] font-semibold tabular-nums">
@@ -87,19 +96,18 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
               {asked.answer.reasoning.map((step, index) => (
                 <li key={index} className="flex gap-2">
                   <span className="datum shrink-0 text-(--text-faint)">{index + 1}.</span>
-                  <span>{step}</span>
+                  <span>{t(step)}</span>
                 </li>
               ))}
             </ol>
             <p className="text-[13px]">
-              The same figure as a page:{' '}
+              {t('The same figure as a page:')}{' '}
               <Link
                 href={asked.answer.source.href}
                 className="font-medium text-(--brand-text) underline underline-offset-2"
               >
-                {asked.answer.source.label}
+                {t(asked.answer.source.label)}
               </Link>
-              .
             </p>
           </CardBody>
         </Card>
@@ -108,8 +116,10 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       {recent.length > 0 ? (
         <Card className="mb-5">
           <CardHeader
-            title="Recently asked"
-            description="Every exchange with the assistant, here and on jobs, with what each cost"
+            title={t('Recently asked')}
+            description={t(
+              'Every exchange with the assistant, here and on jobs, with what each cost',
+            )}
           />
           <ul className="divide-y divide-(--border)">
             {recent.map((exchange) => (
@@ -130,7 +140,9 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
                       {exchange.prompt}
                     </Link>
                   )}
-                  <span className="text-(--text-faint)">{exchange.user?.name ?? 'Somebody'}</span>
+                  <span className="text-(--text-faint)">
+                    {exchange.user?.name ?? t('Somebody')}
+                  </span>
                   <span className="datum text-[12px] text-(--text-faint)">
                     {exchange.createdAt.toLocaleString(region.locale, {
                       dateStyle: 'medium',
@@ -139,9 +151,13 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
                   </span>
                 </div>
                 <p className="text-[12px] text-(--text-soft)">
-                  {describeExchange(exchange)}
+                  {t(describeExchange(exchange))}
                   {exchange.inputTokens + exchange.outputTokens > 0
-                    ? ` ${(exchange.inputTokens + exchange.outputTokens).toLocaleString(region.locale)} tokens.`
+                    ? ` ${t('{count} tokens.', {
+                        count: (exchange.inputTokens + exchange.outputTokens).toLocaleString(
+                          region.locale,
+                        ),
+                      })}`
                     : ''}
                 </p>
               </li>
@@ -152,8 +168,8 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
 
       <Card>
         <CardHeader
-          title="What the records can answer"
-          description="Ask in your own words. These are the shapes of question it recognises."
+          title={t('What the records can answer')}
+          description={t('Ask in your own words. These are the shapes of question it recognises.')}
         />
         <ul className="divide-y divide-(--border)">
           {COVERAGE.map((entry) => (
@@ -165,18 +181,16 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
                 href={`/ask?q=${encodeURIComponent(entry.example)}`}
                 className="font-medium text-(--brand-text) hover:underline"
               >
-                {entry.example}
+                {t(entry.example)}
               </Link>
-              <span className="text-(--text-faint)">{entry.answers}</span>
+              <span className="text-(--text-faint)">{t(entry.answers)}</span>
             </li>
           ))}
         </ul>
         <CardBody className="text-[13px] leading-relaxed text-(--text-soft)">
-          Nothing here decides anything, and nothing is estimated. A question outside this list is
-          refused rather than guessed at. A service adviser that suggests where to look on a fault
-          is deliberately not built: it needs a record of symptoms against confirmed causes that
-          does not exist yet, and a confident wrong suggestion on a braking fault is not a small
-          error.
+          {t(
+            'Nothing here decides anything, and nothing is estimated. A question outside this list is refused rather than guessed at. A service adviser that suggests where to look on a fault is deliberately not built: it needs a record of symptoms against confirmed causes that does not exist yet, and a confident wrong suggestion on a braking fault is not a small error.',
+          )}
         </CardBody>
       </Card>
     </>

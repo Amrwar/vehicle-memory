@@ -1,4 +1,5 @@
 import { LoadingCar } from '@/components/loading-car';
+import { tFor } from '@/lib/i18n';
 
 /**
  * Shown while any workshop page is still fetching.
@@ -8,6 +9,7 @@ import { LoadingCar } from '@/components/loading-car';
  * is slow enough to deserve a different message, it can add its own
  * `loading.tsx` beside it.
  */
-export default function Loading() {
-  return <LoadingCar label="Getting this from the workshop" />;
+export default async function Loading() {
+  const t = await tFor();
+  return <LoadingCar label={t('Getting this from the workshop')} />;
 }

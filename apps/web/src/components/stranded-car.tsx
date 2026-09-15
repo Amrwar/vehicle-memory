@@ -1,3 +1,5 @@
+import { tFor } from '@/lib/i18n';
+
 /**
  * The stranded car.
  *
@@ -13,15 +15,16 @@
  * Deliberately not comic. The audience is often a buyer about to spend real
  * money, and a jokey cartoon would undercut everything else on the page.
  */
-export function StrandedCar({ className }: { className?: string }) {
+export async function StrandedCar({ className }: { className?: string }) {
+  const t = await tFor();
   return (
     <svg
       viewBox="0 0 420 210"
       className={className}
       role="img"
-      aria-label="A line drawing of a car stopped at the end of a road, resting on a flat tyre"
+      aria-label={t('A line drawing of a car stopped at the end of a road, resting on a flat tyre')}
     >
-      <title>The road stops here</title>
+      <title>{t('The road stops here')}</title>
 
       <defs>
         {/* The road fades out rather than ending abruptly. */}

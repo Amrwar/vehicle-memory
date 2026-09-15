@@ -3,6 +3,7 @@ import {
   GIFT_CARD_MIN_MINOR,
   GIFT_CARD_TERMS_MONTHS,
   type GiftCardStatus,
+  msg,
   type GiftCardTender,
 } from '@carnet/core';
 import {
@@ -32,8 +33,12 @@ import { redirect } from 'next/navigation';
 
 import { GiftCardError, giftCardsFor, sellGiftCard, sitesFor } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Gift cards' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Gift cards') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -45,21 +50,21 @@ export const dynamic = 'force-dynamic';
  * confusing January.
  */
 const TENDERS: { value: GiftCardTender; label: string }[] = [
-  { value: 'CARD', label: 'Card' },
-  { value: 'CASH', label: 'Cash' },
-  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
-  { value: 'ONLINE', label: 'Online' },
-  { value: 'CHEQUE', label: 'Cheque' },
+  { value: 'CARD', label: msg('Card') },
+  { value: 'CASH', label: msg('Cash') },
+  { value: 'BANK_TRANSFER', label: msg('Bank transfer') },
+  { value: 'ONLINE', label: msg('Online') },
+  { value: 'CHEQUE', label: msg('Cheque') },
 ];
 
 const STATUS: Record<
   GiftCardStatus,
   { label: string; tone: 'success' | 'neutral' | 'warning' | 'danger' }
 > = {
-  ACTIVE: { label: 'Active', tone: 'success' },
-  DEPLETED: { label: 'Spent', tone: 'neutral' },
-  EXPIRED: { label: 'Lapsed', tone: 'warning' },
-  DISABLED: { label: 'Cancelled', tone: 'danger' },
+  ACTIVE: { label: msg('Active'), tone: 'success' },
+  DEPLETED: { label: msg('Spent'), tone: 'neutral' },
+  EXPIRED: { label: msg('Lapsed'), tone: 'warning' },
+  DISABLED: { label: msg('Cancelled'), tone: 'danger' },
 };
 
 async function sell(formData: FormData) {
@@ -78,7 +83,7 @@ async function sell(formData: FormData) {
       orgId,
       userId: user.userId,
       amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
-      method: TENDERS.some((t) => t.value === method) ? method : 'CARD',
+      method: TENDERS.some((tender) => tender.value === method) ? method : 'CARD',
       termMonths: term ? Number(term) : null,
       locationId: site || null,
       recipientName: String(formData.get('recipientName') ?? ''),
@@ -98,6 +103,7 @@ export default async function GiftCardsPage({
   searchParams: Promise<{ problem?: string }>;
 }) {
   const { orgId, user, region } = await requireSession('payment:read');
+  const t = await tFor();
   const { problem } = await searchParams;
 
   const [cards, sites] = await Promise.all([giftCardsFor(orgId), sitesFor(orgId)]);
@@ -106,20 +112,20 @@ export default async function GiftCardsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Money"
-        title="Gift cards"
-        description="Money taken in advance. Owed as work until it is spent."
+        eyebrow={t('Money')}
+        title={t('Gift cards')}
+        description={t('Money taken in advance. Owed as work until it is spent.')}
       />
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
       <StatRow className="mb-5">
         <StatTile
-          label="Outstanding"
+          label={t('Outstanding')}
           value={
             <Money
               currency={region.currency}
@@ -128,20 +134,20 @@ export default async function GiftCardsPage({
             />
           }
           tone={cards.outstandingMinor > 0 ? 'warning' : 'neutral'}
-          note="What the workshop owes as work"
+          note={t('What the workshop owes as work')}
         />
         <StatTile
-          label="Cards with money on"
+          label={t('Cards with money on')}
           value={cards.withBalance}
           note={
             cards.lapsingSoon > 0
-              ? `${cards.lapsingSoon} lapse within sixty days`
-              : `${cards.cards.length} sold in all`
+              ? t('{count} lapse within sixty days', { count: cards.lapsingSoon })
+              : t('{count} sold in all', { count: cards.cards.length })
           }
           tone={cards.lapsingSoon > 0 ? 'warning' : 'neutral'}
         />
         <StatTile
-          label="Sold"
+          label={t('Sold')}
           value={
             <Money
               currency={region.currency}
@@ -149,10 +155,10 @@ export default async function GiftCardsPage({
               amount={cards.soldMinor / 100}
             />
           }
-          note="Taken when the cards were bought"
+          note={t('Taken when the cards were bought')}
         />
         <StatTile
-          label="Spent"
+          label={t('Spent')}
           value={
             <Money
               currency={region.currency}
@@ -160,33 +166,35 @@ export default async function GiftCardsPage({
               amount={cards.spentMinor / 100}
             />
           }
-          note="Put against bills and counter sales"
+          note={t('Put against bills and counter sales')}
         />
       </StatRow>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <Card className="overflow-hidden">
           <CardHeader
-            title="Every card"
-            description="Newest first. Open one to see what happened on it."
+            title={t('Every card')}
+            description={t('Newest first. Open one to see what happened on it.')}
           />
           {cards.cards.length === 0 ? (
             <EmptyState
-              title="No cards sold yet"
-              description="The first one sold here appears with its number and what is left on it."
+              title={t('No cards sold yet')}
+              description={t(
+                'The first one sold here appears with its number and what is left on it.',
+              )}
             />
           ) : (
             <TableWrap className="rounded-none border-0">
               <Table>
                 <thead>
                   <tr>
-                    <Th>Number</Th>
-                    <Th>Sold</Th>
-                    <Th>For</Th>
-                    <Th>Good</Th>
-                    <Th numeric>Loaded</Th>
-                    <Th numeric>Left</Th>
-                    <Th>Status</Th>
+                    <Th>{t('Number')}</Th>
+                    <Th>{t('Sold')}</Th>
+                    <Th>{t('For')}</Th>
+                    <Th>{t('Good')}</Th>
+                    <Th numeric>{t('Loaded')}</Th>
+                    <Th numeric>{t('Left')}</Th>
+                    <Th>{t('Status')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -208,9 +216,13 @@ export default async function GiftCardsPage({
                       </Td>
                       <Td>{card.recipientName ?? '—'}</Td>
                       <Td className="text-(--text-soft)">
-                        {card.site ? `At ${card.site}` : 'Everywhere'}
+                        {card.site ? t('At {site}', { site: card.site }) : t('Everywhere')}
                         {card.expiresAt
-                          ? ` · until ${card.expiresAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}`
+                          ? ` · ${t('until {date}', {
+                              date: card.expiresAt.toLocaleDateString(region.locale, {
+                                dateStyle: 'medium',
+                              }),
+                            })}`
                           : ''}
                       </Td>
                       <Td numeric>
@@ -233,7 +245,7 @@ export default async function GiftCardsPage({
                       </Td>
                       <Td>
                         <Badge tone={STATUS[card.status].tone} size="sm">
-                          {STATUS[card.status].label}
+                          {t(STATUS[card.status].label)}
                         </Badge>
                       </Td>
                     </Tr>
@@ -247,12 +259,18 @@ export default async function GiftCardsPage({
         {maySell ? (
           <Card className="border-(--brand) self-start">
             <CardHeader
-              title="Sell a card"
-              description={`Whole pounds, ${GIFT_CARD_MIN_MINOR / 100} to ${(GIFT_CARD_MAX_MINOR / 100).toLocaleString(region.locale)}. Paid for with money, never with points.`}
+              title={t('Sell a card')}
+              description={t(
+                'Whole pounds, {min} to {max}. Paid for with money, never with points.',
+                {
+                  min: GIFT_CARD_MIN_MINOR / 100,
+                  max: (GIFT_CARD_MAX_MINOR / 100).toLocaleString(region.locale),
+                },
+              )}
             />
             <form action={sell}>
               <CardBody className="grid gap-3">
-                <Field label="Amount" htmlFor="sell-amount">
+                <Field label={t('Amount')} htmlFor="sell-amount">
                   <Input
                     id="sell-amount"
                     name="amount"
@@ -266,49 +284,60 @@ export default async function GiftCardsPage({
                     required
                   />
                 </Field>
-                <Field label="How they paid" htmlFor="sell-method">
+                <Field label={t('How they paid')} htmlFor="sell-method">
                   <Select id="sell-method" name="method" defaultValue="CARD">
-                    {TENDERS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
+                    {TENDERS.map((tender) => (
+                      <option key={tender.value} value={tender.value}>
+                        {t(tender.label)}
                       </option>
                     ))}
                   </Select>
                 </Field>
                 <Field
-                  label="Lasts"
-                  hint="Most cards should not lapse. A card that lapses is money paid for nothing."
+                  label={t('Lasts')}
+                  hint={t(
+                    'Most cards should not lapse. A card that lapses is money paid for nothing.',
+                  )}
                   htmlFor="sell-term"
                 >
                   <Select id="sell-term" name="term" defaultValue="">
-                    <option value="">For good</option>
+                    <option value="">{t('For good')}</option>
                     {GIFT_CARD_TERMS_MONTHS.map((months) => (
                       <option key={months} value={months}>
-                        {months === 12 ? 'A year' : `${months / 12} years`}
+                        {months === 12 ? t('A year') : t('{years} years', { years: months / 12 })}
                       </option>
                     ))}
                   </Select>
                 </Field>
                 {sites.length > 1 ? (
-                  <Field label="Good at" htmlFor="sell-site">
+                  <Field label={t('Good at')} htmlFor="sell-site">
                     <Select id="sell-site" name="locationId" defaultValue="">
-                      <option value="">Every site</option>
+                      <option value="">{t('Every site')}</option>
                       {sites.map((site) => (
                         <option key={site.id} value={site.id}>
-                          {site.name} only
+                          {t('{site} only', { site: site.name })}
                         </option>
                       ))}
                     </Select>
                   </Field>
                 ) : null}
-                <Field label="For" hint="Optional. Who it is a present for" htmlFor="sell-for">
-                  <Input id="sell-for" name="recipientName" maxLength={120} placeholder="Dad" />
+                <Field
+                  label={t('For')}
+                  hint={t('Optional. Who it is a present for')}
+                  htmlFor="sell-for"
+                >
+                  <Input
+                    id="sell-for"
+                    name="recipientName"
+                    maxLength={120}
+                    placeholder={t('Dad')}
+                  />
                 </Field>
-                <Field label="Note" hint="Optional" htmlFor="sell-note">
+                <Field label={t('Note')} hint={t('Optional')} htmlFor="sell-note">
                   <Input id="sell-note" name="note" maxLength={200} />
                 </Field>
                 <Button type="submit" variant="primary">
-                  Sell the card
+                  {t('Sell the card')}
                 </Button>
               </CardBody>
             </form>

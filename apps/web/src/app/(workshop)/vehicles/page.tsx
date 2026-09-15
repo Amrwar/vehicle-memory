@@ -18,8 +18,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Vehicles' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Vehicles') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -37,6 +41,7 @@ export default async function VehiclesPage({
   const { orgId, region } = await requireSession('vehicle:read');
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
+  const t = await tFor();
 
   const vehicles = await prisma.vehicle.findMany({
     where: {
@@ -71,12 +76,12 @@ export default async function VehiclesPage({
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Vehicles"
-        description="Vehicles this workshop has serviced or been granted access to."
+        eyebrow={t('Workshop')}
+        title={t('Vehicles')}
+        description={t('Vehicles this workshop has serviced or been granted access to.')}
         actions={
           <Link href="/vehicles/find">
-            <Button variant="primary">Find or add a vehicle</Button>
+            <Button variant="primary">{t('Find or add a vehicle')}</Button>
           </Link>
         }
       />
@@ -86,8 +91,8 @@ export default async function VehiclesPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Registration, VIN, make or model"
-          aria-label="Search vehicles"
+          placeholder={t('Registration, VIN, make or model')}
+          aria-label={t('Search vehicles')}
           className="h-9 w-full max-w-sm rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
       </form>
@@ -95,21 +100,23 @@ export default async function VehiclesPage({
       <Card className="overflow-hidden">
         {vehicles.length === 0 ? (
           <EmptyState
-            title="No vehicles yet"
-            description="A vehicle appears here once it is found on the network or added, or the first time you open a job for it."
+            title={t('No vehicles yet')}
+            description={t(
+              'A vehicle appears here once it is found on the network or added, or the first time you open a job for it.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Vehicle</Th>
-                  <Th>Registration</Th>
-                  <Th>VIN</Th>
-                  <Th>Owner</Th>
-                  <Th numeric>Odometer</Th>
-                  <Th numeric>History</Th>
-                  <Th>Flags</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Registration')}</Th>
+                  <Th>{t('VIN')}</Th>
+                  <Th>{t('Owner')}</Th>
+                  <Th numeric>{t('Odometer')}</Th>
+                  <Th numeric>{t('History')}</Th>
+                  <Th>{t('Flags')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -135,20 +142,23 @@ export default async function VehiclesPage({
                     </Td>
                     <Td className="text-(--text-soft)">
                       {vehicle.ownerships[0]?.ownerName ?? (
-                        <span className="text-(--text-faint)">Unknown</span>
+                        <span className="text-(--text-faint)">{t('Unknown')}</span>
                       )}
                     </Td>
                     <Td numeric>
-                      <Mileage locale={region.locale} km={vehicle.lastOdometerKm} />
+                      <Mileage t={t} locale={region.locale} km={vehicle.lastOdometerKm} />
                     </Td>
                     <Td numeric className="text-(--text-soft)">
-                      {vehicle._count.events} entries
+                      {vehicle._count.events === 1
+                        ? t('1 entry')
+                        : t('{count} entries', { count: vehicle._count.events })}
                     </Td>
                     <Td>
                       {vehicle.recalls.length > 0 ? (
                         <Badge tone="danger" size="sm">
-                          {vehicle.recalls.length} recall
-                          {vehicle.recalls.length === 1 ? '' : 's'}
+                          {vehicle.recalls.length === 1
+                            ? t('1 recall')
+                            : t('{count} recalls', { count: vehicle.recalls.length })}
                         </Badge>
                       ) : (
                         <span className="text-(--text-faint)">—</span>

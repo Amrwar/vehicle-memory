@@ -24,7 +24,10 @@ import { regionForUser } from '@/lib/region';
 import { bookableWorkshop, customerAt, workshopDirectory, workshopsUsedBy } from '@/lib/workshops';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Book a visit' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Book a visit') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -130,8 +133,12 @@ export default async function BookPage({
           {t('When suits you?')}
         </h1>
         <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
-          Every time below is one {customer.org.name} can actually do. Pick one and it is in the
-          diary.
+          {t(
+            'Every time below is one {workshop} can actually do. Pick one and it is in the diary.',
+            {
+              workshop: customer.org.name,
+            },
+          )}
         </p>
 
         <Card className="mt-5">
@@ -139,8 +146,8 @@ export default async function BookPage({
             title={org.name}
             description={
               used.has(org.id)
-                ? 'Your workshop. Any other on Carnet can take the car too.'
-                : 'A workshop you have not used before. Booking makes you their customer.'
+                ? t('Your workshop. Any other on Carnet can take the car too.')
+                : t('A workshop you have not used before. Booking makes you their customer.')
             }
             action={
               <form method="get" className="flex items-center gap-2">
@@ -151,7 +158,7 @@ export default async function BookPage({
                   {directory.map((w) => (
                     <option key={w.id} value={w.id}>
                       {w.name}
-                      {used.has(w.id) ? ' (yours)' : ''}
+                      {used.has(w.id) ? ` ${t('(yours)')}` : ''}
                     </option>
                   ))}
                 </Select>
@@ -165,7 +172,7 @@ export default async function BookPage({
 
         {params.error ? (
           <Alert tone="danger" className="mt-5">
-            {params.error}
+            {t(params.error)}
           </Alert>
         ) : null}
 
@@ -202,10 +209,18 @@ export default async function BookPage({
                         </span>
                       ) : null}
                       <span className="block text-[12px] text-(--text-faint)">
-                        {`About ${service.hours} hour${service.hours === 1 ? '' : 's'}`}
+                        {service.hours === 1
+                          ? t('About 1 hour')
+                          : t('About {hours} hours', { hours: service.hours })}
                         {service.price === null
                           ? ''
-                          : ` · ${service.kind === 'package' ? '' : 'from '}${formatMinor(Math.round(service.price * 100), region)}`}
+                          : ` · ${
+                              service.kind === 'package'
+                                ? formatMinor(Math.round(service.price * 100), region)
+                                : t('from {price}', {
+                                    price: formatMinor(Math.round(service.price * 100), region),
+                                  })
+                            }`}
                       </span>
                     </span>
                     {chosen?.id === service.id ? (
@@ -258,7 +273,7 @@ export default async function BookPage({
                 <CardHeader
                   title={t('When?')}
                   description={
-                    slots.length > 0 ? 'Times the workshop genuinely has free' : undefined
+                    slots.length > 0 ? t('Times the workshop genuinely has free') : undefined
                   }
                 />
                 {slots.length === 0 ? (
@@ -266,8 +281,13 @@ export default async function BookPage({
                     title={t('Nothing free in the next fortnight')}
                     description={
                       customer.org.phone
-                        ? `The diary is full for this length of work. Ring ${customer.org.phone} and they will find something.`
-                        : 'The diary is full for this length of work. Get in touch and they will find something.'
+                        ? t(
+                            'The diary is full for this length of work. Ring {phone} and they will find something.',
+                            { phone: customer.org.phone },
+                          )
+                        : t(
+                            'The diary is full for this length of work. Get in touch and they will find something.',
+                          )
                     }
                   />
                 ) : (

@@ -1,4 +1,4 @@
-import { PLANS } from '@carnet/core';
+import { msg, PLANS } from '@carnet/core';
 import { cn } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -8,12 +8,16 @@ import { PassportBooklet } from '@/components/passport-booklet';
 import { currentUser } from '@/lib/auth';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Carnet — workshop management with a service history that follows the car',
-  description:
-    'Run the diary, jobs, inspections, parts and the books in one system. Every job writes to a service history the vehicle keeps for life, and takes with it when it is sold.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Carnet — workshop management with a service history that follows the car'),
+    description: t(
+      'Run the diary, jobs, inspections, parts and the books in one system. Every job writes to a service history the vehicle keeps for life, and takes with it when it is sold.',
+    ),
+    robots: { index: true, follow: true },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -95,27 +99,37 @@ export default async function HomePage() {
           <SectionHead
             eyebrow={t('The problem')}
             title={t('A car outlives every system that ever recorded it')}
-            lede="Three garages, two owners and eleven years later, the folder in the glovebox is a stack of receipts and a guess. The work was real. The evidence is gone."
+            lede={t(
+              'Three garages, two owners and eleven years later, the folder in the glovebox is a stack of receipts and a guess. The work was real. The evidence is gone.',
+            )}
           />
 
           <div className="mt-8 grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border) sm:grid-cols-3">
             {[
               {
-                title: 'The garage owns the record',
-                body: 'Your history lives in your system. When the customer moves away, or you close, it goes with you. The car keeps nothing.',
+                title: msg('The garage owns the record'),
+                body: msg(
+                  'Your history lives in your system. When the customer moves away, or you close, it goes with you. The car keeps nothing.',
+                ),
               },
               {
-                title: 'Nobody can verify a claim',
-                body: '"Full service history" means a folder of paper anybody could print. A buyer discounts what they cannot check, and the seller pays for it.',
+                title: msg('Nobody can verify a claim'),
+                body: msg(
+                  '“Full service history” means a folder of paper anybody could print. A buyer discounts what they cannot check, and the seller pays for it.',
+                ),
               },
               {
-                title: 'The next garage starts blind',
-                body: 'A car arrives with no record of the cambelt, the fluid, or what the last workshop already advised on. The same checks get done twice and paid for once.',
+                title: msg('The next garage starts blind'),
+                body: msg(
+                  'A car arrives with no record of the cambelt, the fluid, or what the last workshop already advised on. The same checks get done twice and paid for once.',
+                ),
               },
             ].map((item) => (
               <div key={item.title} className="bg-(--surface) p-5">
-                <h3 className="font-display text-[15px] font-semibold">{item.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">{item.body}</p>
+                <h3 className="font-display text-[15px] font-semibold">{t(item.title)}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">
+                  {t(item.body)}
+                </p>
               </div>
             ))}
           </div>
@@ -128,36 +142,42 @@ export default async function HomePage() {
               <SectionHead
                 eyebrow={t('What makes this different')}
                 title={t('A record the vehicle keeps')}
-                lede="Every completed job writes entries against the car itself: the work, the parts, the mileage, the photographs. Not against your customer record. Against the VIN."
+                lede={t(
+                  'Every completed job writes entries against the car itself: the work, the parts, the mileage, the photographs. Not against your customer record. Against the VIN.',
+                )}
               />
 
               <dl className="mt-7 grid gap-5">
                 {[
                   {
-                    term: 'It transfers on sale',
-                    detail:
+                    term: msg('It transfers on sale'),
+                    detail: msg(
                       'Ownership changes hands and the history goes with the car. The new owner sees everything, including what a workshop they have never heard of did in 2019.',
+                    ),
                   },
                   {
-                    term: 'It cannot be quietly edited',
-                    detail:
+                    term: msg('It cannot be quietly edited'),
+                    detail: msg(
                       'Entries are appended and hash-linked. Correcting one leaves both versions visible. A history that can be rewritten is worth exactly as much as the folder it replaced.',
+                    ),
                   },
                   {
-                    term: 'It is worth money at resale',
-                    detail:
+                    term: msg('It is worth money at resale'),
+                    detail: msg(
                       'A verifiable record is the difference between a buyer taking your word for it and a buyer checking. That difference has a price, and the seller has been paying it.',
+                    ),
                   },
                   {
-                    term: 'It works even where Carnet does not',
-                    detail:
+                    term: msg('It works even where Carnet does not'),
+                    detail: msg(
                       'A passport opens as a public link. The next garage needs no account, no login and no relationship with us to read what you wrote.',
+                    ),
                   },
                 ].map((item) => (
                   <div key={item.term} className="border-l-2 border-(--accent) pl-4">
-                    <dt className="font-display text-[15px] font-semibold">{item.term}</dt>
+                    <dt className="font-display text-[15px] font-semibold">{t(item.term)}</dt>
                     <dd className="mt-1.5 text-[13px] leading-relaxed text-(--text-soft)">
-                      {item.detail}
+                      {t(item.detail)}
                     </dd>
                   </div>
                 ))}
@@ -173,39 +193,55 @@ export default async function HomePage() {
           <SectionHead
             eyebrow={t('What it does')}
             title={t('The whole job, from the phone call to the ledger')}
-            lede="One data model, so the estimate the customer approved is the job the technician worked, is the invoice they paid, is the entry in the accounts. Nothing is re-keyed."
+            lede={t(
+              'One data model, so the estimate the customer approved is the job the technician worked, is the invoice they paid, is the entry in the accounts. Nothing is re-keyed.',
+            )}
           />
 
           <div className="mt-8 grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border) sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                title: 'Diary and jobs',
-                body: 'Bay-level scheduling with real capacity. Fourteen job statuses that refuse the transitions that make no sense, and say why.',
+                title: msg('Diary and jobs'),
+                body: msg(
+                  'Bay-level scheduling with real capacity. Fourteen job statuses that refuse the transitions that make no sense, and say why.',
+                ),
               },
               {
-                title: 'Inspections with photographs',
-                body: 'Structured checks with measurements and pictures. A customer approving brake work can see the pads.',
+                title: msg('Inspections with photographs'),
+                body: msg(
+                  'Structured checks with measurements and pictures. A customer approving brake work can see the pads.',
+                ),
               },
               {
-                title: 'Estimates the customer decides on',
-                body: 'Sent as a link, approved line by line. Work exceeding what was approved needs approving again.',
+                title: msg('Estimates the customer decides on'),
+                body: msg(
+                  'Sent as a link, approved line by line. Work exceeding what was approved needs approving again.',
+                ),
               },
               {
-                title: 'Parts and purchasing',
-                body: 'Weighted average cost, reservations against jobs, reorder suggestions from actual usage, three-way bill matching.',
+                title: msg('Parts and purchasing'),
+                body: msg(
+                  'Weighted average cost, reservations against jobs, reorder suggestions from actual usage, three-way bill matching.',
+                ),
               },
               {
-                title: 'Invoicing and the ledger',
-                body: 'Double-entry posted from the work itself. Trial balance, profit and loss, balance sheet, VAT, aged debtors.',
+                title: msg('Invoicing and the ledger'),
+                body: msg(
+                  'Double-entry posted from the work itself. Trial balance, profit and loss, balance sheet, VAT, aged debtors.',
+                ),
               },
               {
-                title: 'People and productivity',
-                body: 'Attended, clocked and sold hours side by side, so utilisation and efficiency stop hiding each other.',
+                title: msg('People and productivity'),
+                body: msg(
+                  'Attended, clocked and sold hours side by side, so utilisation and efficiency stop hiding each other.',
+                ),
               },
             ].map((item) => (
               <div key={item.title} className="bg-(--surface) p-5">
-                <h3 className="font-display text-[15px] font-semibold">{item.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">{item.body}</p>
+                <h3 className="font-display text-[15px] font-semibold">{t(item.title)}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">
+                  {t(item.body)}
+                </p>
               </div>
             ))}
           </div>
@@ -216,34 +252,46 @@ export default async function HomePage() {
           <SectionHead
             eyebrow={t('A Tuesday')}
             title={t('What the flow actually looks like')}
-            lede="Every step below writes to the same job. The passport entries at the end are produced by the work, not typed in afterwards."
+            lede={t(
+              'Every step below writes to the same job. The passport entries at the end are produced by the work, not typed in afterwards.',
+            )}
           />
 
           <ol className="mt-8 grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border) md:grid-cols-2 lg:grid-cols-4">
             {[
               {
-                step: 'Books in',
-                body: 'Customer calls. Booking takes a bay and a technician, and checks the day has room for it.',
+                step: msg('Books in'),
+                body: msg(
+                  'Customer calls. Booking takes a bay and a technician, and checks the day has room for it.',
+                ),
               },
               {
-                step: 'Inspected',
-                body: 'Technician works the checklist on a tablet. Two reds and three ambers, with photographs.',
+                step: msg('Inspected'),
+                body: msg(
+                  'Technician works the checklist on a tablet. Two reds and three ambers, with photographs.',
+                ),
               },
               {
-                step: 'Approved',
-                body: 'Estimate goes out as a link. The customer approves the brakes and declines the tyres.',
+                step: msg('Approved'),
+                body: msg(
+                  'Estimate goes out as a link. The customer approves the brakes and declines the tyres.',
+                ),
               },
               {
-                step: 'Invoiced and recorded',
-                body: 'Parts leave stock, time is costed, the invoice posts to the ledger, and the car keeps the history.',
+                step: msg('Invoiced and recorded'),
+                body: msg(
+                  'Parts leave stock, time is costed, the invoice posts to the ledger, and the car keeps the history.',
+                ),
               },
             ].map((item, index) => (
               <li key={item.step} className="bg-(--surface) p-5">
                 <span className="datum text-[11px] text-(--accent)">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h3 className="mt-1.5 font-display text-[15px] font-semibold">{item.step}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">{item.body}</p>
+                <h3 className="mt-1.5 font-display text-[15px] font-semibold">{t(item.step)}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-(--text-soft)">
+                  {t(item.body)}
+                </p>
               </li>
             ))}
           </ol>
@@ -254,7 +302,9 @@ export default async function HomePage() {
           <SectionHead
             eyebrow={t('Pricing')}
             title={t('Priced per bay, published in full')}
-            lede="Three plans, and unlimited staff accounts on every one. The vehicle passport is in all of them, because a network nobody can join is not a network."
+            lede={t(
+              'Three plans, and unlimited staff accounts on every one. The vehicle passport is in all of them, because a network nobody can join is not a network.',
+            )}
             align="centre"
           />
 
@@ -271,7 +321,7 @@ export default async function HomePage() {
                   )}
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="font-display text-[16px] font-semibold">{plan.name}</h3>
+                    <h3 className="font-display text-[16px] font-semibold">{t(plan.name)}</h3>
                     {plan.popular ? (
                       <span className="rounded-(--radius-xs) bg-(--brand-soft) px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
                         {t('Most chosen')}
@@ -279,7 +329,7 @@ export default async function HomePage() {
                     ) : null}
                   </div>
                   <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                    {plan.audience}
+                    {t(plan.audience)}
                   </p>
                   <p className="mt-3">
                     <span className="tabular font-display text-[26px] font-semibold">
@@ -333,14 +383,14 @@ export default async function HomePage() {
                 their own rather than being left to work out that the trial is
                 not for them. */}
             <p className="mt-8 text-[14px] leading-relaxed text-(--color-petrol-200)">
-              Not a workshop?{' '}
+              {t('Not a workshop?')}{' '}
               <Link
                 href="/signup/customer"
                 className="text-(--color-brass-300) underline underline-offset-2"
               >
-                Keep your own car&rsquo;s history
+                {t('Keep your own car’s history instead.')}
               </Link>{' '}
-              instead. Free, and the record follows the car when you sell it.
+              {t('Free, and the record follows the car when you sell it.')}
             </p>
           </div>
         </section>
@@ -365,17 +415,17 @@ async function PassportSample() {
       <div className="grid gap-3">
         {[
           {
-            when: '12 March 2024',
+            when: msg('12 March 2024'),
             who: 'Pennine Motors',
-            title: 'Front brake pads and discs replaced',
-            detail: 'Pads at 2mm on inspection. Discs lipped. Photographs attached.',
+            title: msg('Front brake pads and discs replaced'),
+            detail: msg('Pads at 2mm on inspection. Discs lipped. Photographs attached.'),
             mileage: '84,102 mi',
           },
           {
-            when: '12 March 2024',
+            when: msg('12 March 2024'),
             who: 'Pennine Motors',
-            title: 'Advisory: rear tyres approaching limit',
-            detail: 'Declined by owner at the time. Recorded either way.',
+            title: msg('Advisory: rear tyres approaching limit'),
+            detail: msg('Declined by owner at the time. Recorded either way.'),
             mileage: '84,102 mi',
           },
         ].map((entry) => (
@@ -384,12 +434,12 @@ async function PassportSample() {
             className="rounded-(--radius-md) border border-(--border) bg-(--surface) p-3.5"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-              <p className="text-[13px] font-medium">{entry.title}</p>
+              <p className="text-[13px] font-medium">{t(entry.title)}</p>
               <span className="datum text-[11px] text-(--text-faint)">{entry.mileage}</span>
             </div>
-            <p className="mt-1 text-[12px] leading-relaxed text-(--text-soft)">{entry.detail}</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-(--text-soft)">{t(entry.detail)}</p>
             <p className="mt-1.5 text-[11px] text-(--text-faint)">
-              {entry.when} · {entry.who}
+              {t(entry.when)} · {entry.who}
             </p>
           </div>
         ))}

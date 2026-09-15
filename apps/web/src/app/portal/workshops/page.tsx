@@ -7,7 +7,10 @@ import { requireUser } from '@/lib/guard';
 import { workshopDirectory, workshopsUsedBy } from '@/lib/workshops';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Workshops' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Workshops') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -49,7 +52,7 @@ export default async function PortalWorkshopsPage({
                   {w.sites.length > 1 ? (
                     <span className="font-medium text-(--text)">{site.name}. </span>
                   ) : null}
-                  {site.address || 'Address not given'}
+                  {site.address || t('Address not given')}
                 </li>
               ))}
             </ul>
@@ -83,7 +86,7 @@ export default async function PortalWorkshopsPage({
     <PortalShell active="workshops">
       <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Workshops')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
-        Every workshop on Carnet. Book at any of them; your car&apos;s history goes with you.
+        {t('Every workshop on Carnet. Book at any of them; your car’s history goes with you.')}
       </p>
 
       <form method="get" className="mt-4 flex gap-2">
@@ -101,11 +104,11 @@ export default async function PortalWorkshopsPage({
       {workshops.length === 0 ? (
         <EmptyState
           className="mt-5 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-          title={q ? 'No workshop matches that' : 'No workshops yet'}
+          title={q ? t('No workshop matches that') : t('No workshops yet')}
           description={
             q
-              ? 'Try the town or the first part of the postcode.'
-              : 'Workshops appear here as they join Carnet.'
+              ? t('Try the town or the first part of the postcode.')
+              : t('Workshops appear here as they join Carnet.')
           }
         />
       ) : null}
@@ -119,7 +122,9 @@ export default async function PortalWorkshopsPage({
 
       {others.length > 0 ? (
         <section className="mt-6">
-          <h2 className="eyebrow mb-3">{mine.length > 0 ? 'Other workshops' : 'Workshops'}</h2>
+          <h2 className="eyebrow mb-3">
+            {mine.length > 0 ? t('Other workshops') : t('Workshops')}
+          </h2>
           <ul className="grid gap-3">{others.map(card)}</ul>
         </section>
       ) : null}

@@ -1,4 +1,4 @@
-import { suggestSeverity } from '@carnet/core';
+import { msg, suggestSeverity } from '@carnet/core';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Input, Registration } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -6,6 +6,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { PhotoCapture } from '@/components/photo-capture';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   completeInspection,
   inspectionFor,
@@ -13,7 +14,10 @@ import {
   recordResult,
 } from '@/lib/inspections';
 
-export const metadata: Metadata = { title: 'Inspection' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Inspection') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -95,9 +99,9 @@ async function finish(formData: FormData) {
 }
 
 const TONES = {
-  PASS: { label: 'Good', tone: 'success' as const },
-  ADVISORY: { label: 'Watch', tone: 'warning' as const },
-  CRITICAL: { label: 'Act now', tone: 'danger' as const },
+  PASS: { label: msg('Good'), tone: 'success' as const },
+  ADVISORY: { label: msg('Watch'), tone: 'warning' as const },
+  CRITICAL: { label: msg('Act now'), tone: 'danger' as const },
 };
 
 export default async function InspectPage({
@@ -107,7 +111,8 @@ export default async function InspectPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { orgId } = await requireSession('job:write');
+  const { orgId, region } = await requireSession('job:write');
+  const t = await tFor();
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -124,7 +129,7 @@ export default async function InspectPage({
         <div className="mx-auto max-w-3xl px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="eyebrow">Job {inspection.job.number}</p>
+              <p className="eyebrow">{t('Job {number}', { number: inspection.job.number })}</p>
               <h1 className="font-display text-[19px] font-semibold leading-tight">
                 {[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}
               </h1>
@@ -141,7 +146,7 @@ export default async function InspectPage({
               aria-valuenow={progress.checked}
               aria-valuemin={0}
               aria-valuemax={progress.total}
-              aria-label="Items checked"
+              aria-label={t('Items checked')}
             >
               <div
                 className="h-full bg-(--brand-solid)"
@@ -149,7 +154,7 @@ export default async function InspectPage({
               />
             </div>
             <span className="text-[12px] tabular-nums text-(--text-soft)">
-              {progress.checked} of {progress.total}
+              {t('{checked} of {total}', { checked: progress.checked, total: progress.total })}
             </span>
           </div>
         </div>
@@ -157,15 +162,16 @@ export default async function InspectPage({
 
       <main id="main" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-5 outline-none">
         {error ? (
-          <Alert tone="danger" className="mb-4" title="Not recorded">
-            {error}
+          <Alert tone="danger" className="mb-4" title={t('Not recorded')}>
+            {t(error)}
           </Alert>
         ) : null}
 
         {done ? (
-          <Alert tone="info" className="mb-4" title="Already sent">
-            This inspection has gone to the customer and cannot be changed. Start a new one to
-            record another look at the vehicle.
+          <Alert tone="info" className="mb-4" title={t('Already sent')}>
+            {t(
+              'This inspection has gone to the customer and cannot be changed. Start a new one to record another look at the vehicle.',
+            )}
           </Alert>
         ) : null}
 
@@ -197,11 +203,11 @@ export default async function InspectPage({
 
                         {answered ? (
                           <Badge tone={TONES[severity as keyof typeof TONES].tone} size="sm">
-                            {TONES[severity as keyof typeof TONES].label}
+                            {t(TONES[severity as keyof typeof TONES].label)}
                           </Badge>
                         ) : (
                           <Badge tone="neutral" size="sm">
-                            not checked
+                            {t('not checked')}
                           </Badge>
                         )}
                       </div>
@@ -213,7 +219,9 @@ export default async function InspectPage({
                       ) : null}
 
                       {suggestion ? (
-                        <p className="mt-2 text-[12px] text-(--text-faint)">{suggestion.because}</p>
+                        <p className="mt-2 text-[12px] text-(--text-faint)">
+                          {t(suggestion.because)}
+                        </p>
                       ) : null}
 
                       {done ? null : (
@@ -224,7 +232,7 @@ export default async function InspectPage({
                           {measures ? (
                             <label className="grid gap-1">
                               <span className="text-[12px] font-medium text-(--text-soft)">
-                                Measurement
+                                {t('Measurement')}
                               </span>
                               <Input
                                 name="measurementValue"
@@ -232,37 +240,39 @@ export default async function InspectPage({
                                 step="0.1"
                                 inputMode="decimal"
                                 defaultValue={result?.measurementValue ?? ''}
-                                placeholder={item.measurementType.replace(/_/g, ' ').toLowerCase()}
+                                placeholder={t(
+                                  item.measurementType.replace(/_/g, ' ').toLowerCase(),
+                                )}
                               />
                             </label>
                           ) : null}
 
                           <label className="grid gap-1">
                             <span className="text-[12px] font-medium text-(--text-soft)">
-                              What you found
+                              {t('What you found')}
                             </span>
                             <Input
                               name="note"
                               defaultValue={result?.note ?? ''}
-                              placeholder="Needed for anything not green"
+                              placeholder={t('Needed for anything not green')}
                             />
                           </label>
 
                           <div className="grid gap-3 sm:grid-cols-2">
                             <label className="grid gap-1">
                               <span className="text-[12px] font-medium text-(--text-soft)">
-                                What it needs
+                                {t('What it needs')}
                               </span>
                               <Input
                                 name="recommendedAction"
                                 defaultValue={result?.recommendedAction ?? ''}
-                                placeholder="Becomes the quote line"
+                                placeholder={t('Becomes the quote line')}
                               />
                             </label>
 
                             <label className="grid gap-1">
                               <span className="text-[12px] font-medium text-(--text-soft)">
-                                Roughly, in pounds
+                                {t('Roughly, in {currency}', { currency: region.currency })}
                               </span>
                               <Input
                                 name="estimatedCost"
@@ -285,7 +295,7 @@ export default async function InspectPage({
                               size="touch"
                               variant="secondary"
                             >
-                              Good
+                              {t('Good')}
                             </Button>
                             <Button
                               type="submit"
@@ -294,7 +304,7 @@ export default async function InspectPage({
                               size="touch"
                               variant="secondary"
                             >
-                              Watch
+                              {t('Watch')}
                             </Button>
                             <Button
                               type="submit"
@@ -303,7 +313,7 @@ export default async function InspectPage({
                               size="touch"
                               variant="primary"
                             >
-                              Act now
+                              {t('Act now')}
                             </Button>
                           </div>
                         </form>
@@ -329,14 +339,16 @@ export default async function InspectPage({
         {done ? (
           <Link href="/shop">
             <Button size="touch" variant="secondary">
-              Back to my jobs
+              {t('Back to my jobs')}
             </Button>
           </Link>
         ) : (
           <Card className="border-(--brand)">
             <CardHeader
-              title="Send it to the customer"
-              description="Anything marked amber or red becomes a quote line they can approve item by item."
+              title={t('Send it to the customer')}
+              description={t(
+                'Anything marked amber or red becomes a quote line they can approve item by item.',
+              )}
             />
             <CardBody>
               <form action={finish} className="grid gap-3">
@@ -344,21 +356,30 @@ export default async function InspectPage({
 
                 <label className="grid gap-1">
                   <span className="text-[12px] font-medium text-(--text-soft)">
-                    Anything to add for the customer
+                    {t('Anything to add for the customer')}
                   </span>
-                  <Input name="notes" placeholder="Optional" />
+                  <Input name="notes" placeholder={t('Optional')} />
                 </label>
 
                 <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                  You have checked {progress.checked} of {progress.total}.
                   {progress.remaining > 0
-                    ? ` The other ${progress.remaining} will be shown to the customer as not checked, which is honest and protects you if something fails later on a part nobody looked at.`
-                    : ''}
+                    ? t(
+                        'You have checked {checked} of {total}. The other {remaining} will be shown to the customer as not checked, which is honest and protects you if something fails later on a part nobody looked at.',
+                        {
+                          checked: progress.checked,
+                          total: progress.total,
+                          remaining: progress.remaining,
+                        },
+                      )
+                    : t('You have checked {checked} of {total}.', {
+                        checked: progress.checked,
+                        total: progress.total,
+                      })}
                 </p>
 
                 <div>
                   <Button type="submit" size="touch" variant="primary">
-                    Send to the customer
+                    {t('Send to the customer')}
                   </Button>
                 </div>
               </form>

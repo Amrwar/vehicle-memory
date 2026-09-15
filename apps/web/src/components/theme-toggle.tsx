@@ -1,7 +1,10 @@
 'use client';
 
 import { cn } from '@carnet/ui';
+import { msg } from '@carnet/core';
 import * as React from 'react';
+
+import { useT } from '@/components/language-provider';
 
 /**
  * Light, dark, or whatever the machine says.
@@ -23,7 +26,7 @@ export const THEME_STORAGE_KEY = 'carnet-theme';
 const OPTIONS: { value: ThemeChoice; label: string; icon: React.ReactNode }[] = [
   {
     value: 'light',
-    label: 'Light',
+    label: msg('Light'),
     icon: (
       <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
         <circle cx="8" cy="8" r="3.1" stroke="currentColor" strokeWidth="1.4" />
@@ -38,7 +41,7 @@ const OPTIONS: { value: ThemeChoice; label: string; icon: React.ReactNode }[] = 
   },
   {
     value: 'system',
-    label: 'Auto',
+    label: msg('Auto'),
     icon: (
       <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
         <rect
@@ -56,7 +59,7 @@ const OPTIONS: { value: ThemeChoice; label: string; icon: React.ReactNode }[] = 
   },
   {
     value: 'dark',
-    label: 'Dark',
+    label: msg('Dark'),
     icon: (
       <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
         <path
@@ -83,6 +86,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   // Rendered as "system" on the server, then corrected on mount. Reading
   // localStorage during render would mismatch the server HTML and React would
   // throw the whole tree away to recover from it.
+  const t = useT();
   const [choice, setChoice] = React.useState<ThemeChoice>('system');
   const [ready, setReady] = React.useState(false);
 
@@ -107,7 +111,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <div
       role="radiogroup"
-      aria-label="Colour theme"
+      aria-label={t('Colour theme')}
       className={cn(
         'grid grid-cols-3 gap-0.5 rounded-(--radius-sm) border border-(--border) bg-(--surface-sunk) p-0.5',
         className,
@@ -122,7 +126,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             type="button"
             role="radio"
             aria-checked={selected}
-            title={option.label}
+            title={t(option.label)}
             onClick={() => choose(option.value)}
             className={cn(
               'flex h-6 items-center justify-center rounded-(--radius-xs) transition-colors',
@@ -132,7 +136,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             )}
           >
             {option.icon}
-            <span className="sr-only">{option.label}</span>
+            <span className="sr-only">{t(option.label)}</span>
           </button>
         );
       })}

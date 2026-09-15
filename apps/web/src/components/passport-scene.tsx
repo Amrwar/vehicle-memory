@@ -1,5 +1,6 @@
 'use client';
 
+import { msg } from '@carnet/core';
 import * as React from 'react';
 import * as THREE from 'three';
 
@@ -50,9 +51,10 @@ export const DEMO_EVENTS: PassportEvent[] = [
     id: 'service',
     at: [1.12, 0.74, 0.0], // the bonnet
     year: '2022',
-    title: 'Full service, 58,940 miles',
-    detail:
+    title: msg('Full service, 58,940 miles'),
+    detail: msg(
       'Oil, filters and a 30-point inspection. Written to the chain the moment the job closed, and readable by every workshop the car visits afterwards.',
+    ),
     workshop: 'Kirkstall Autocentre',
     tone: 'record',
   },
@@ -60,30 +62,33 @@ export const DEMO_EVENTS: PassportEvent[] = [
     id: 'tyres',
     at: [0.92, 0.3, 0.86], // nearside front wheel
     year: '2023',
-    title: 'Nearside front tyre at 2.4mm',
-    detail:
+    title: msg('Nearside front tyre at 2.4mm'),
+    detail: msg(
       'Recorded as an advisory rather than sold as urgent. The next garage sees the measurement, not somebody else’s opinion of it.',
+    ),
     workshop: 'Kirkstall Autocentre',
     tone: 'advisory',
   },
   {
     id: 'brakes',
     at: [-0.92, 0.3, 0.86], // nearside rear wheel
-    year: 'Mar 2024',
-    title: 'Rear pads replaced',
-    detail:
+    year: msg('Mar 2024'),
+    title: msg('Rear pads replaced'),
+    detail: msg(
       'Quoted from an inspection, approved by the customer line by line from a text message, and fitted the same afternoon.',
+    ),
     workshop: 'Hillside Motors',
     tone: 'record',
   },
   {
     id: 'odometer',
     at: [-0.4, 1.19, 0.0], // just above the roof
-    year: 'Sep 2024',
-    title: 'The odometer went backwards',
-    detail:
+    year: msg('Sep 2024'),
+    title: msg('The odometer went backwards'),
+    detail: msg(
       'It read 67,410 in April and 62,000 in September. Every reading since has been consistent, so a garage comparing its own last two sees nothing wrong. Only the whole sequence shows it.',
-    workshop: 'Recorded between owners',
+    ),
+    workshop: msg('Recorded between owners'),
     tone: 'alert',
   },
 ];

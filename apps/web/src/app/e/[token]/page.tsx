@@ -5,9 +5,13 @@ import { redirect } from 'next/navigation';
 
 import { EstimateReview } from '@/components/estimate-review';
 import { PortalShell } from '@/components/portal-shell';
+import { tFor } from '@/lib/i18n';
 import { decisionPreview, DecisionError, estimateByToken, recordDecision } from '@/lib/portal';
 
-export const metadata: Metadata = { title: 'Your quote' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Your quote') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -62,6 +66,7 @@ export default async function SharedEstimatePage({
   params: Promise<{ token: string }>;
   searchParams: Promise<{ error?: string; answered?: string }>;
 }) {
+  const t = await tFor();
   const { token } = await params;
   const { error, answered } = await searchParams;
 
@@ -71,8 +76,10 @@ export default async function SharedEstimatePage({
     return (
       <PortalShell signedIn={false}>
         <EmptyState
-          title="This link is no longer live"
-          description="Quote links expire, and a workshop can withdraw one at any time. Ask them to send it again and it will work straight away."
+          title={t('This link is no longer live')}
+          description={t(
+            'Quote links expire, and a workshop can withdraw one at any time. Ask them to send it again and it will work straight away.',
+          )}
         />
       </PortalShell>
     );
@@ -84,7 +91,7 @@ export default async function SharedEstimatePage({
     <PortalShell signedIn={false}>
       {answered ? (
         <p className="mb-4 rounded-(--radius-sm) bg-(--success-soft) px-3.5 py-2.5 text-[13px] text-(--success)">
-          Thank you. Your workshop has your answer and will get on with it.
+          {t('Thank you. Your workshop has your answer and will get on with it.')}
         </p>
       ) : null}
 
@@ -93,7 +100,7 @@ export default async function SharedEstimatePage({
         preview={preview}
         action={answer}
         hiddenFields={{ token }}
-        error={error}
+        error={error ? t(error) : undefined}
       />
     </PortalShell>
   );

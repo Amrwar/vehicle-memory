@@ -60,7 +60,7 @@ describe('what may go back', () => {
         { reason: 'CORE', quantity: 1, unitCost: 80 },
       ]),
     ).toBe(25);
-    expect(reasonLabel('CORE')).toBe('Core');
+    expect(reasonLabel('CORE')).toBe('Old unit (core)');
   });
 });
 

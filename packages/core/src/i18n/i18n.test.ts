@@ -37,6 +37,13 @@ describe('languages', () => {
     expect(t('Sign in')).toBe(AR['Sign in']);
   });
 
+  it('translates a finished sentence through a key with slots', () => {
+    expect(translate('fr', 'Hello Maria')).toBe(FR['Hello {name}']!.replace('{name}', 'Maria'));
+    expect(translate('ar', 'Hello Maria')).toBe(AR['Hello {name}']!.replace('{name}', 'Maria'));
+    expect(translate('fr', 'Maria')).toBe('Maria');
+    expect(translate('en', 'Hello Maria')).toBe('Hello Maria');
+  });
+
   it('picks the chosen language, then the saved one, then the browser, then English', () => {
     expect(pickLanguage({ cookie: 'ar', saved: 'fr', acceptLanguage: 'en' })).toBe('ar');
     expect(pickLanguage({ cookie: null, saved: 'fr', acceptLanguage: 'en' })).toBe('fr');

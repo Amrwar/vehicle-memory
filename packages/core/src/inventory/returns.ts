@@ -35,7 +35,7 @@ export function reasonLabel(reason: ReturnReason | string): string {
     case 'SURPLUS':
       return 'Not needed';
     case 'CORE':
-      return 'Core';
+      return 'Old unit (core)';
     default:
       return String(reason);
   }

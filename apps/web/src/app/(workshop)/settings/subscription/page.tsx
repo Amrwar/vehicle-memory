@@ -1,5 +1,6 @@
 import {
   formatMinor,
+  msg,
   PLAN_ORDER,
   PLANS,
   type PlanId,
@@ -24,8 +25,12 @@ import {
   usageOf,
 } from '@/lib/billing';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Subscription and billing' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Subscription and billing') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -48,13 +53,13 @@ const TONE = {
 } as const;
 
 const LABEL = {
-  AWAITING_CARD: 'Card needed',
-  TRIAL: 'On trial',
-  GRACE: 'Trial ended',
-  ACTIVE: 'On a plan',
-  PAST_DUE: 'Payment failed',
-  SUSPENDED: 'Read-only',
-  CANCELLED: 'Cancelled',
+  AWAITING_CARD: msg('Card needed'),
+  TRIAL: msg('On trial'),
+  GRACE: msg('Trial ended'),
+  ACTIVE: msg('On a plan'),
+  PAST_DUE: msg('Payment failed'),
+  SUSPENDED: msg('Read-only'),
+  CANCELLED: msg('Cancelled'),
 } as const;
 
 async function choose(formData: FormData) {
@@ -110,6 +115,7 @@ export default async function SubscriptionPage({
 }) {
   const { orgId, user, region } = await requireSession('settings:read');
   const { saved, blocked, welcome, card, problem } = await searchParams;
+  const t = await tFor();
 
   // Back from the provider: ask it what it holds now, so the page the owner
   // lands on already shows the card and the trial's end.
@@ -131,53 +137,62 @@ export default async function SubscriptionPage({
     planPrice(subscription.plan, region.currency, 'monthly').minor * Math.max(1, usage.bays);
   const pricedIn = pricingCurrency(region.currency);
   const endingSoon = subscription.message.startsWith('Cancelled');
+  const allowance = (used: number, limit: number) =>
+    limit >= 1_000_000
+      ? t('{used} in use, no limit', { used: used.toLocaleString(region.locale) })
+      : t('{used} in use, up to {limit}', {
+          used: used.toLocaleString(region.locale),
+          limit: limit.toLocaleString(region.locale),
+        });
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Settings"
-        title="Subscription and billing"
-        description="Where the workshop stands, what it pays, and what its plan allows"
+        eyebrow={t('Settings')}
+        title={t('Subscription and billing')}
+        description={t('Where the workshop stands, what it pays, and what its plan allows')}
         actions={
           <Badge tone={TONE[subscription.state]} dot>
-            {LABEL[subscription.state]}
+            {t(LABEL[subscription.state])}
           </Badge>
         }
       />
 
       {blocked ? (
-        <Alert tone="danger" title="That could not be saved" className="mb-5">
-          {subscription.message} Nothing has been lost; reading and exporting still work.
+        <Alert tone="danger" title={t('That could not be saved')} className="mb-5">
+          {t(subscription.message)} {t('Nothing has been lost; reading and exporting still work.')}
         </Alert>
       ) : null}
       {welcome && subscription.state === 'TRIAL' ? (
-        <Alert tone="success" title="The trial has started" className="mb-5">
-          Your card is on file and nothing has been charged. {subscription.message}
+        <Alert tone="success" title={t('The trial has started')} className="mb-5">
+          {t('Your card is on file and nothing has been charged.')} {t(subscription.message)}
         </Alert>
       ) : null}
       {card === 'skipped' ? (
-        <Alert tone="warning" title="No card was added" className="mb-5">
-          The workshop exists and waits for you. Add a card below to start the {TRIAL_DAYS}-day
-          trial; nothing is charged until it ends, and cancelling before then costs nothing.
+        <Alert tone="warning" title={t('No card was added')} className="mb-5">
+          {t(
+            'The workshop exists and waits for you. Add a card below to start the {days}-day trial; nothing is charged until it ends, and cancelling before then costs nothing.',
+            { days: TRIAL_DAYS },
+          )}
         </Alert>
       ) : null}
       {saved === 'plan' ? (
         <Alert tone="success" className="mb-5">
-          Plan chosen. The workshop is open, and the change is in the audit log.
+          {t('Plan chosen. The workshop is open, and the change is in the audit log.')}
         </Alert>
       ) : null}
       {saved === 'cancelled' ? (
         <Alert tone="warning" className="mb-5">
-          Cancelled. {subscription.message} Choosing a plan reopens it.
+          {t('Cancelled.')} {t(subscription.message)} {t('Choosing a plan reopens it.')}
         </Alert>
       ) : null}
       {problem === 'nocustomer' ? (
         <Alert tone="danger" className="mb-5">
-          There is no billing account with the provider yet. Add a card first.
+          {t('There is no billing account with the provider yet. Add a card first.')}
         </Alert>
       ) : null}
 
@@ -186,84 +201,101 @@ export default async function SubscriptionPage({
           <Card
             className={subscription.state === 'AWAITING_CARD' ? 'border-(--warning)' : undefined}
           >
-            <CardHeader title="Where it stands" description={subscription.message} />
+            <CardHeader title={t('Where it stands')} description={t(subscription.message)} />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={2}
                 items={[
-                  { label: 'Plan', value: current.name },
-                  { label: 'State', value: LABEL[subscription.state] },
+                  { label: t('Plan'), value: current.name },
+                  { label: t('State'), value: t(LABEL[subscription.state]) },
                   {
-                    label: 'Days left',
+                    label: t('Days left'),
                     value: subscription.daysLeft === null ? '—' : String(subscription.daysLeft),
                   },
                   {
-                    label: 'Card on file',
+                    label: t('Card on file'),
                     value: billing.card
-                      ? `${billing.card.brand} ending ${billing.card.last4}`
-                      : 'None',
+                      ? t('{brand} ending {last4}', {
+                          brand: billing.card.brand,
+                          last4: billing.card.last4,
+                        })
+                      : t('None'),
                   },
                   {
-                    label: 'Next charge',
+                    label: t('Next charge'),
                     value: billing.nextCharge
-                      ? `${money(billing.nextCharge.amountMinor, billing.nextCharge.currency)} on ${date(billing.nextCharge.on)}`
-                      : 'None scheduled',
+                      ? t('{amount} on {date}', {
+                          amount: money(
+                            billing.nextCharge.amountMinor,
+                            billing.nextCharge.currency,
+                          ),
+                          date: date(billing.nextCharge.on),
+                        })
+                      : t('None scheduled'),
                   },
                   {
-                    label: 'Priced by',
-                    value: `${Math.max(1, usage.bays)} ${usage.bays === 1 ? 'bay' : 'bays'} on ${current.name}`,
+                    label: t('Priced by'),
+                    value:
+                      Math.max(1, usage.bays) === 1
+                        ? t('1 bay on {plan}', { plan: current.name })
+                        : t('{count} bays on {plan}', { count: usage.bays, plan: current.name }),
                   },
                 ]}
               />
               {subscription.state === 'AWAITING_CARD' && mayChange ? (
                 <form action={addCard} className="mt-4">
                   <Button type="submit" variant="primary" size="lg">
-                    Add a card and start the {TRIAL_DAYS}-day trial
+                    {t('Add a card and start the {days}-day trial', { days: TRIAL_DAYS })}
                   </Button>
                   <p className="mt-2 text-[12px] text-(--text-faint)">
-                    You will be charged {money(monthly, pricedIn)} a month from the day the trial
-                    ends, unless you cancel before then. The{' '}
+                    {t(
+                      'You will be charged {amount} a month from the day the trial ends, unless you cancel before then.',
+                      { amount: money(monthly, pricedIn) },
+                    )}{' '}
                     <Link href="/terms" className="underline">
-                      terms
-                    </Link>{' '}
-                    say the same.
+                      {t('The terms say the same.')}
+                    </Link>
                   </p>
                 </form>
               ) : null}
               {billing.card && mayChange ? (
                 <form action={manage} className="mt-4">
                   <Button type="submit" variant="secondary">
-                    Payment methods and invoices
+                    {t('Payment methods and invoices')}
                   </Button>
                   <p className="mt-2 text-[12px] text-(--text-faint)">
-                    Add, change or remove cards, and download invoices, on the payment
-                    provider&apos;s secure page. Card details never pass through Carnet.
+                    {t(
+                      'Add, change or remove cards, and download invoices, on the payment provider’s secure page. Card details never pass through Carnet.',
+                    )}
                   </p>
                 </form>
               ) : null}
               <p className="mt-4 text-[12px] leading-relaxed text-(--text-faint)">
-                Cancelling during the trial means nothing is ever charged. Cancelling later stops
-                the next charge and the workshop stays open to the end of the month paid for.
-                Nothing is deleted in any state.{' '}
-                <Link href="/terms" className="underline">
-                  The terms
-                </Link>
+                {t(
+                  'Cancelling during the trial means nothing is ever charged. Cancelling later stops the next charge and the workshop stays open to the end of the month paid for. Nothing is deleted in any state.',
+                )}{' '}
                 {billing.termsAcceptedAt
-                  ? ` were accepted on ${date(billing.termsAcceptedAt)}.`
-                  : '.'}
+                  ? `${t('The terms were accepted on {date}.', { date: date(billing.termsAcceptedAt) })} `
+                  : ''}
+                <Link href="/terms" className="underline">
+                  {t('Read the terms')}
+                </Link>
               </p>
             </CardBody>
           </Card>
 
           <Card>
             <CardHeader
-              title="Invoices"
+              title={t('Invoices')}
               description={
                 billing.invoices.length
-                  ? 'From the provider, newest first.'
+                  ? t('From the provider, newest first.')
                   : billing.nextCharge
-                    ? `The first invoice is issued on ${date(billing.nextCharge.on)}.`
-                    : 'Nothing has been charged.'
+                    ? t('The first invoice is issued on {date}.', {
+                        date: date(billing.nextCharge.on),
+                      })
+                    : t('Nothing has been charged.')
               }
             />
             {billing.invoices.length ? (
@@ -271,10 +303,10 @@ export default async function SubscriptionPage({
                 <table className="w-full text-[13px]">
                   <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
                     <tr>
-                      <th className="px-4 py-2">Date</th>
-                      <th className="px-4 py-2">Number</th>
-                      <th className="px-4 py-2 text-right">Amount</th>
-                      <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">{t('Date')}</th>
+                      <th className="px-4 py-2">{t('Number')}</th>
+                      <th className="px-4 py-2 text-right">{t('Amount')}</th>
+                      <th className="px-4 py-2">{t('Status')}</th>
                       <th className="px-4 py-2"></th>
                     </tr>
                   </thead>
@@ -297,7 +329,7 @@ export default async function SubscriptionPage({
                             }
                             size="sm"
                           >
-                            {i.status.toLowerCase()}
+                            {t(i.status.toLowerCase())}
                           </Badge>
                         </td>
                         <td className="px-4 py-2 text-right">
@@ -308,7 +340,7 @@ export default async function SubscriptionPage({
                               rel="noreferrer"
                               className="underline"
                             >
-                              {i.pdfUrl ? 'PDF' : 'Open'}
+                              {i.pdfUrl ? 'PDF' : t('Open')}
                             </a>
                           ) : null}
                         </td>
@@ -321,24 +353,28 @@ export default async function SubscriptionPage({
           </Card>
 
           <Card>
-            <CardHeader title="What the plan allows" />
+            <CardHeader title={t('What the plan allows')} />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={2}
                 items={[
                   {
-                    label: 'Sites',
-                    value: `${usage.locations} of ${current.limits.locations >= 1_000_000 ? 'any number' : current.limits.locations}`,
+                    label: t('Sites'),
+                    value: allowance(usage.locations, current.limits.locations),
                   },
                   {
-                    label: 'Bays',
-                    value: `${usage.bays} of ${current.limits.bays >= 1_000_000 ? 'any number' : current.limits.bays}`,
+                    label: t('Bays'),
+                    value: allowance(usage.bays, current.limits.bays),
                   },
                   {
-                    label: 'Vehicles',
-                    value: `${usage.vehicles.toLocaleString(region.locale)} of ${current.limits.vehicles >= 1_000_000 ? 'any number' : current.limits.vehicles.toLocaleString(region.locale)}`,
+                    label: t('Vehicles'),
+                    value: allowance(usage.vehicles, current.limits.vehicles),
                   },
-                  { label: 'Staff accounts', value: `${usage.users}, unlimited on every plan` },
+                  {
+                    label: t('Staff accounts'),
+                    value: t('{count}, unlimited on every plan', { count: usage.users }),
+                  },
                 ]}
               />
             </CardBody>
@@ -348,14 +384,13 @@ export default async function SubscriptionPage({
         <div className="grid content-start gap-5">
           <Card className="border-(--brand)">
             <CardHeader
-              title="Choose a plan"
+              title={t('Choose a plan')}
               description={
                 <>
-                  Per bay, per month. What each includes is on the{' '}
+                  {t('Per bay, per month.')}{' '}
                   <Link href="/pricing" className="underline">
-                    pricing page
+                    {t('See what each plan includes')}
                   </Link>
-                  .
                 </>
               }
             />
@@ -370,10 +405,10 @@ export default async function SubscriptionPage({
                         {money(planPrice(id, region.currency, 'monthly').minor, pricedIn)}
                       </span>
                       {id === subscription.plan && subscription.state !== 'AWAITING_CARD' ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">current</span>
+                        <span className="ml-2 text-[11px] text-(--text-faint)">{t('current')}</span>
                       ) : null}
                     </p>
-                    <p className="text-[12px] text-(--text-faint)">{PLANS[id].audience}</p>
+                    <p className="text-[12px] text-(--text-faint)">{t(PLANS[id].audience)}</p>
                   </div>
                   <Button
                     type="submit"
@@ -382,8 +417,8 @@ export default async function SubscriptionPage({
                     disabled={!mayChange}
                   >
                     {id === subscription.plan && subscription.state !== 'AWAITING_CARD'
-                      ? 'Keep'
-                      : 'Choose'}
+                      ? t('Keep')
+                      : t('Choose')}
                   </Button>
                 </form>
               ))}
@@ -396,17 +431,21 @@ export default async function SubscriptionPage({
           !endingSoon ? (
             <Card className="border-(--danger)">
               <CardHeader
-                title="Cancel"
+                title={t('Cancel')}
                 description={
                   subscription.state === 'TRIAL'
-                    ? 'The trial ends now and the card is never charged. Everything is kept, readable and exportable, and choosing a plan reopens it.'
-                    : 'The next charge is stopped and the workshop stays open to the end of the month paid for, then becomes read-only. Everything is kept.'
+                    ? t(
+                        'The trial ends now and the card is never charged. Everything is kept, readable and exportable, and choosing a plan reopens it.',
+                      )
+                    : t(
+                        'The next charge is stopped and the workshop stays open to the end of the month paid for, then becomes read-only. Everything is kept.',
+                      )
                 }
               />
               <CardBody>
                 <form action={cancel}>
                   <Button type="submit" variant="danger">
-                    Cancel the subscription
+                    {t('Cancel the subscription')}
                   </Button>
                 </form>
               </CardBody>

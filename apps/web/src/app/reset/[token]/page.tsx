@@ -5,13 +5,17 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { redeemReset, TokenError } from '@/lib/credentials';
+import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Choose a new password',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Choose a new password'),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Setting the new password. FR-3902.
@@ -50,6 +54,7 @@ export default async function ResetPage({
   params: Promise<{ token: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
+  const t = await tFor();
   const { token } = await params;
   const { error } = await searchParams;
 
@@ -58,12 +63,12 @@ export default async function ResetPage({
       <p className="text-[12px] font-medium tracking-wide text-(--brand-text) uppercase">Carnet</p>
 
       <h1 className="font-display text-[24px] leading-tight font-semibold">
-        Choose a new password
+        {t('Choose a new password')}
       </h1>
 
       {error ? (
         <Card className="border-(--danger)">
-          <CardBody className="text-[14px] leading-relaxed text-(--danger)">{error}</CardBody>
+          <CardBody className="text-[14px] leading-relaxed text-(--danger)">{t(error)}</CardBody>
         </Card>
       ) : null}
 
@@ -73,8 +78,11 @@ export default async function ResetPage({
 
           <CardBody className="grid gap-4">
             <Field
-              label="New password"
-              hint={`At least ${RESET_MIN_PASSWORD_LENGTH} characters. A short phrase you will remember beats a short word with a number after it.`}
+              label={t('New password')}
+              hint={t(
+                'At least {count} characters. A short phrase you will remember beats a short word with a number after it.',
+                { count: RESET_MIN_PASSWORD_LENGTH },
+              )}
             >
               <Input
                 type="password"
@@ -86,7 +94,7 @@ export default async function ResetPage({
               />
             </Field>
 
-            <Field label="And again">
+            <Field label={t('And again')}>
               <Input
                 type="password"
                 name="again"
@@ -97,19 +105,20 @@ export default async function ResetPage({
             </Field>
 
             <Button type="submit" variant="primary">
-              Set it and sign in
+              {t('Set it and sign in')}
             </Button>
           </CardBody>
         </form>
       </Card>
 
       <p className="text-[13px] leading-relaxed text-(--text-faint)">
-        Setting a new password signs you out everywhere else. If you are doing this because you
-        think somebody else has your password, that is the part that matters.
+        {t(
+          'Setting a new password signs you out everywhere else. If you are doing this because you think somebody else has your password, that is the part that matters.',
+        )}
       </p>
 
       <Link href="/forgot" className="text-[14px] font-medium text-(--brand-text) hover:underline">
-        Ask for a new link
+        {t('Ask for a new link')}
       </Link>
     </main>
   );

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { msg } from '@carnet/core';
 import * as React from 'react';
 
 import { Mark } from '@/components/marketing';
@@ -43,14 +44,14 @@ const TABS: {
   {
     key: 'home',
     href: '/portal',
-    label: 'Home',
+    label: msg('Home'),
     phone: true,
     icon: <path d="M3.5 10.5 12 3.5l8.5 7v9a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1v-9Z" />,
   },
   {
     key: 'passports',
     href: '/portal/passports',
-    label: 'Passports',
+    label: msg('Passports'),
     phone: true,
     icon: (
       <>
@@ -63,7 +64,7 @@ const TABS: {
   {
     key: 'invoices',
     href: '/portal/invoices',
-    label: 'Invoices',
+    label: msg('Invoices'),
     phone: true,
     icon: (
       <>
@@ -75,7 +76,7 @@ const TABS: {
   {
     key: 'updates',
     href: '/portal/updates',
-    label: 'Updates',
+    label: msg('Updates'),
     phone: true,
     icon: (
       <>
@@ -87,7 +88,7 @@ const TABS: {
   {
     key: 'rewards',
     href: '/portal/rewards',
-    label: 'Rewards',
+    label: msg('Rewards'),
     phone: false,
     icon: (
       <>
@@ -99,7 +100,7 @@ const TABS: {
   {
     key: 'workshops',
     href: '/portal/workshops',
-    label: 'Workshops',
+    label: msg('Workshops'),
     phone: false,
     icon: (
       <>
@@ -112,7 +113,7 @@ const TABS: {
   {
     key: 'book',
     href: '/portal/book',
-    label: 'Book',
+    label: msg('Book'),
     phone: true,
     icon: (
       <>
@@ -124,7 +125,7 @@ const TABS: {
   {
     key: 'settings',
     href: '/portal/settings',
-    label: 'Account',
+    label: msg('Account'),
     phone: false,
     icon: (
       <>

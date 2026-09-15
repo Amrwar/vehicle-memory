@@ -10,12 +10,16 @@ import { currentUser, startSession } from '@/lib/auth';
 import { ClaimError, registerCustomer } from '@/lib/claims';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Keep your car history',
-  description:
-    'A free Carnet account for drivers. Every service, repair and MOT on your car, in one place, and it stays with the car when you sell it.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Keep your car history'),
+    description: t(
+      'A free Carnet account for drivers. Every service, repair and MOT on your car, in one place, and it stays with the car when you sell it.',
+    ),
+    robots: { index: true, follow: true },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -98,10 +102,10 @@ export default async function CustomerSignupPage({
 
           <ul className="mt-7 grid gap-3">
             {[
-              'Every service, repair and part, with dates and mileages',
-              'What was recommended and declined, so nothing is a surprise later',
-              'A buyer report you can hand over when you sell',
-              'Free, and it stays free',
+              t('Every service, repair and part, with dates and mileages'),
+              t('What was recommended and declined, so nothing is a surprise later'),
+              t('A buyer report you can hand over when you sell'),
+              t('Free, and it stays free'),
             ].map((line) => (
               <li key={line} className="flex items-start gap-2.5 text-[14px]">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-(--color-brass-300)" />
@@ -112,7 +116,7 @@ export default async function CustomerSignupPage({
         </div>
 
         <p className="text-[12px] text-(--color-petrol-200)">
-          Run a workshop instead?{' '}
+          {t('Run a workshop instead?')}{' '}
           <Link href="/signup" className="underline underline-offset-2">
             {t('Open a workshop account')}
           </Link>
@@ -129,7 +133,7 @@ export default async function CustomerSignupPage({
 
           <p className="eyebrow mb-2">{t('For drivers')}</p>
           <h1 className="font-display text-[26px] leading-tight font-semibold tracking-tight">
-            Keep your car&rsquo;s history
+            {t('Keep your car’s history')}
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
             {t(
@@ -139,7 +143,7 @@ export default async function CustomerSignupPage({
 
           {params.problem ? (
             <Alert tone="danger" className="mt-5">
-              {params.problem}
+              {t(params.problem)}
             </Alert>
           ) : null}
 
@@ -150,6 +154,7 @@ export default async function CustomerSignupPage({
                 defaultValue={params.name ?? ''}
                 autoComplete="name"
                 required
+                // i18n-ignore
                 placeholder="Maria Okafor"
               />
             </Field>
@@ -162,11 +167,15 @@ export default async function CustomerSignupPage({
                 defaultValue={params.email ?? ''}
                 autoComplete="email"
                 required
+                // i18n-ignore
                 placeholder="you@example.com"
               />
             </Field>
 
-            <Field label={t('Password')} hint={`At least ${RESET_MIN_PASSWORD_LENGTH} characters`}>
+            <Field
+              label={t('Password')}
+              hint={t('At least {count} characters', { count: RESET_MIN_PASSWORD_LENGTH })}
+            >
               <Input
                 name="password"
                 type="password"
@@ -201,14 +210,14 @@ export default async function CustomerSignupPage({
           </Card>
 
           <p className="mt-6 text-center text-[13px] text-(--text-soft)">
-            Already have an account?{' '}
+            {t('Already have an account?')}{' '}
             <Link href="/login" className="text-(--brand-text) underline underline-offset-2">
               {t('Sign in')}
             </Link>
           </p>
 
           <p className="mt-2 text-center text-[13px] text-(--text-faint) lg:hidden">
-            Run a workshop instead?{' '}
+            {t('Run a workshop instead?')}{' '}
             <Link href="/signup" className="underline underline-offset-2">
               {t('Open a workshop account')}
             </Link>

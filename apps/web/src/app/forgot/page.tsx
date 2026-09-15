@@ -9,10 +9,13 @@ import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Set a new password',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Set a new password'),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Asking for a way back in. FR-3901.
@@ -57,7 +60,9 @@ export default async function ForgotPage({
       {sent ? (
         <>
           <Card>
-            <CardBody className="text-[15px] leading-relaxed">{RESET_REQUESTED_MESSAGE}</CardBody>
+            <CardBody className="text-[15px] leading-relaxed">
+              {t(RESET_REQUESTED_MESSAGE)}
+            </CardBody>
           </Card>
 
           <p className="text-[13px] leading-relaxed text-(--text-faint)">
@@ -91,6 +96,7 @@ export default async function ForgotPage({
                     required
                     autoFocus
                     autoComplete="email"
+                    // i18n-ignore
                     placeholder="you@yourworkshop.com"
                   />
                 </Field>

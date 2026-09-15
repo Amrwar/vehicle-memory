@@ -17,9 +17,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { passportsForOrg } from '@/lib/passports';
 
-export const metadata: Metadata = { title: 'Passports' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Passports') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -38,6 +42,7 @@ export default async function PassportsPage({
   const { orgId, region } = await requireSession('vehicle:read');
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
+  const t = await tFor();
 
   const { rows, summary } = await passportsForOrg(orgId, query);
 
@@ -47,37 +52,39 @@ export default async function PassportsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Passports"
-        description="The record that belongs to each car. One line per vehicle; open any to read it as the next owner will."
+        eyebrow={t('Workshop')}
+        title={t('Passports')}
+        description={t(
+          'The record that belongs to each car. One line per vehicle; open any to read it as the next owner will.',
+        )}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Passports"
+          label={t('Passports')}
           value={summary.passports}
-          note="Vehicles this workshop has written to"
+          note={t('Vehicles this workshop has written to')}
         />
         <StatTile
-          label="Entries"
+          label={t('Entries')}
           value={summary.entries.toLocaleString(region.locale)}
-          note="Across all of them"
+          note={t('Across all of them')}
         />
         <StatTile
-          label="Chains sound"
+          label={t('Chains sound')}
           value={summary.intact}
           tone={summary.broken > 0 ? 'danger' : 'success'}
           note={
             summary.broken > 0
-              ? `${summary.broken} do not verify`
-              : 'Every entry hashes to the one before'
+              ? t('{count} do not verify', { count: summary.broken })
+              : t('Every entry hashes to the one before')
           }
         />
         <StatTile
-          label="Shared with other workshops"
+          label={t('Shared with other workshops')}
           value={summary.sharedWithOthers}
           tone="brand"
-          note="Written to by more than one garage"
+          note={t('Written to by more than one garage')}
         />
       </StatRow>
 
@@ -86,8 +93,8 @@ export default async function PassportsPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Registration, VIN, make or model"
-          aria-label="Search passports"
+          placeholder={t('Registration, VIN, make or model')}
+          aria-label={t('Search passports')}
           className="h-9 w-full max-w-sm rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
       </form>
@@ -95,21 +102,23 @@ export default async function PassportsPage({
       <Card className="overflow-hidden">
         {rows.length === 0 ? (
           <EmptyState
-            title="No passports yet"
-            description="A passport appears here the first time a job is completed on a vehicle, or when one is found on the network."
+            title={t('No passports yet')}
+            description={t(
+              'A passport appears here the first time a job is completed on a vehicle, or when one is found on the network.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Vehicle</Th>
-                  <Th>Registration</Th>
-                  <Th>VIN</Th>
-                  <Th numeric>Entries</Th>
-                  <Th numeric>Workshops</Th>
-                  <Th>Recorded</Th>
-                  <Th>Chain</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Registration')}</Th>
+                  <Th>{t('VIN')}</Th>
+                  <Th numeric>{t('Entries')}</Th>
+                  <Th numeric>{t('Workshops')}</Th>
+                  <Th>{t('Recorded')}</Th>
+                  <Th>{t('Chain')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -124,7 +133,7 @@ export default async function PassportsPage({
                       </Link>
                       {row.openRecalls > 0 ? (
                         <Badge tone="danger" size="sm" className="ml-2">
-                          Recall
+                          {t('Recall')}
                         </Badge>
                       ) : null}
                     </Td>
@@ -145,7 +154,7 @@ export default async function PassportsPage({
                       {row.workshops}
                       {row.fromElsewhere ? (
                         <span className="ml-1 text-[11px] text-(--text-faint)">
-                          · {row.fromElsewhere} from elsewhere
+                          · {t('{count} from elsewhere', { count: row.fromElsewhere })}
                         </span>
                       ) : null}
                     </Td>
@@ -154,18 +163,18 @@ export default async function PassportsPage({
                         ? '—'
                         : date(row.firstRecorded) === date(row.lastRecorded)
                           ? date(row.firstRecorded)
-                          : `${date(row.firstRecorded)} to ${date(row.lastRecorded)}`}
+                          : `${date(row.firstRecorded)} – ${date(row.lastRecorded)}`}
                     </Td>
                     <Td>
                       {row.entries === 0 ? (
-                        <span className="text-(--text-faint)">Empty</span>
+                        <span className="text-(--text-faint)">{t('Empty')}</span>
                       ) : row.intact ? (
                         <Badge tone="success" size="sm" dot>
-                          Verifies
+                          {t('Verifies')}
                         </Badge>
                       ) : (
                         <Badge tone="danger" size="sm" dot>
-                          Does not verify
+                          {t('Does not verify')}
                         </Badge>
                       )}
                     </Td>

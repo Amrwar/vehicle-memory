@@ -20,11 +20,15 @@ import { revalidatePath } from 'next/cache';
 import { ClaimError, claimVehicle, myClaims, withdrawClaim } from '@/lib/claims';
 import { requireUser } from '@/lib/guard';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Add your car',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Add your car'),
+    robots: { index: false, follow: false },
+  };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -79,6 +83,7 @@ export default async function ClaimPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const params = await searchParams;
 
@@ -98,7 +103,7 @@ export default async function ClaimPage({
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3.5">
           <Link href="/portal" className="text-[13px] text-(--text-faint) hover:underline">
-            &larr; My vehicles
+            {t('← My vehicles')}
           </Link>
           <ThemeToggle className="w-[6.5rem]" />
         </div>
@@ -107,50 +112,59 @@ export default async function ClaimPage({
       <main id="main" className="mx-auto max-w-2xl px-4 py-6">
         {params.welcome ? (
           <Alert tone="success" className="mb-5">
-            Your account is ready. Check your email for the confirmation link, then add your car
-            below.
+            {t(
+              'Your account is ready. Check your email for the confirmation link, then add your car below.',
+            )}
           </Alert>
         ) : null}
 
-        <h1 className="font-display text-[24px] leading-tight font-semibold">Add your car</h1>
+        <h1 className="font-display text-[24px] leading-tight font-semibold">
+          {t('Add your car')}
+        </h1>
         <p className="mt-1.5 text-[14px] leading-relaxed text-(--text-soft)">
-          Enter the registration. We pass the request to the garage that last worked on it, and
-          somebody there confirms the car is yours.
+          {t(
+            'Enter the registration. We pass the request to the garage that last worked on it, and somebody there confirms the car is yours.',
+          )}
         </p>
 
         {!verified ? (
           // Checked here as well as in the service layer, so the person is
           // told before they fill the form in rather than after.
           <Alert tone="warning" className="mt-5">
-            Confirm your email address first. A garage is being asked to hand over a vehicle
-            history, and they should at least know the address is real. The link is in your inbox.
+            {t(
+              'Confirm your email address first. A garage is being asked to hand over a vehicle history, and they should at least know the address is real. The link is in your inbox.',
+            )}
           </Alert>
         ) : null}
 
         {params.problem ? (
           <Alert tone="danger" className="mt-5">
-            {params.problem}
+            {t(params.problem)}
           </Alert>
         ) : null}
 
         {params.asked ? (
           <Alert tone="success" className="mt-5">
-            Sent. The garage will see it on their next visit to Carnet, and you will get an email
-            either way.
+            {t(
+              'Sent. The garage will see it on their next visit to Carnet, and you will get an email either way.',
+            )}
           </Alert>
         ) : null}
 
         {atLimit ? (
           <Alert tone="warning" className="mt-5">
-            {`You have ${open.length} requests waiting. Wait for one to be answered before asking about another.`}
+            {t(
+              'You have {count} requests waiting. Wait for one to be answered before asking about another.',
+              { count: open.length },
+            )}
           </Alert>
         ) : (
           <Card className="mt-5">
             <form action={ask}>
               <CardBody className="grid gap-4">
                 <Field
-                  label="Registration"
-                  hint="Or the 17-character VIN, if you have a private plate"
+                  label={t('Registration')}
+                  hint={t('Or the 17-character VIN, if you have a private plate')}
                 >
                   <Input
                     name="identifier"
@@ -159,24 +173,25 @@ export default async function ClaimPage({
                     autoFocus
                     autoCapitalize="characters"
                     spellCheck={false}
+                    // i18n-ignore
                     placeholder="AB12 CDE"
                     className="font-mono tracking-[0.08em] uppercase"
                   />
                 </Field>
 
                 <Field
-                  label="Anything that helps them recognise you"
-                  hint="Optional. A phone number or the date of your last visit saves a call."
+                  label={t('Anything that helps them recognise you')}
+                  hint={t('Optional. A phone number or the date of your last visit saves a call.')}
                 >
                   <Textarea
                     name="note"
                     rows={2}
-                    placeholder="Serviced with you in March, under the name Maria Okafor."
+                    placeholder={t('Serviced with you in March, under the name Maria Okafor.')}
                   />
                 </Field>
 
                 <Button type="submit" variant="primary" size="lg" disabled={!verified}>
-                  Ask the workshop that last worked on it
+                  {t('Ask the workshop that last worked on it')}
                 </Button>
               </CardBody>
             </form>
@@ -184,13 +199,13 @@ export default async function ClaimPage({
         )}
 
         <section className="mt-8">
-          <h2 className="font-display text-[17px] font-semibold">Your requests</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Your requests')}</h2>
 
           {claims.length === 0 ? (
             <EmptyState
               className="mt-3 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-              title="Nothing asked for yet"
-              description="Requests you make appear here, with whatever the garage said."
+              title={t('Nothing asked for yet')}
+              description={t('Requests you make appear here, with whatever the garage said.')}
             />
           ) : (
             <ul className="mt-3 grid gap-3">
@@ -225,12 +240,14 @@ export default async function ClaimPage({
                             }
                             dot
                           >
-                            {claim.status === 'PENDING' ? 'Waiting' : claim.status.toLowerCase()}
+                            {claim.status === 'PENDING'
+                              ? t('Waiting')
+                              : t(claim.status.toLowerCase())}
                           </Badge>
                         </div>
 
                         <p className="text-[14px] leading-relaxed text-(--text-soft)">
-                          {claim.summary}
+                          {t(claim.summary)}
                         </p>
 
                         {claim.status === 'PENDING' ? (
@@ -240,7 +257,7 @@ export default async function ClaimPage({
                               type="submit"
                               className="text-left text-[13px] text-(--text-faint) underline underline-offset-2"
                             >
-                              Withdraw this request
+                              {t('Withdraw this request')}
                             </button>
                           </form>
                         ) : null}
@@ -256,8 +273,9 @@ export default async function ClaimPage({
         {vehicleCount > 0 ? (
           <p className="mt-6 text-[13px] text-(--text-faint)">
             <Link href="/portal" className="underline underline-offset-2">
-              {vehicleCount === 1 ? 'One vehicle is' : `${vehicleCount} vehicles are`} already on
-              your account.
+              {vehicleCount === 1
+                ? t('One vehicle is already on your account.')
+                : t('{count} vehicles are already on your account.', { count: vehicleCount })}
             </Link>
           </p>
         ) : null}
@@ -265,16 +283,17 @@ export default async function ClaimPage({
         {/* The honest version of what this page can and cannot do. */}
         <Card className="mt-8">
           <CardBody className="grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
-            <p className="font-medium text-(--text)">Why a person has to approve this</p>
+            <p className="font-medium text-(--text)">{t('Why a person has to approve this')}</p>
             <p>
-              A registration is painted on the outside of the car and a VIN is visible through the
-              windscreen. If either opened a service history, anybody walking through a car park
-              could read a stranger&rsquo;s.
+              {t(
+                'A registration is painted on the outside of the car and a VIN is visible through the windscreen. If either opened a service history, anybody walking through a car park could read a stranger’s.',
+              )}
             </p>
             <p>
-              So the garage decides. They know you, and they are the only ones who can say the car
-              is yours. If nothing has happened after {CHASE_AFTER_DAYS} days, ringing them is
-              usually quicker than waiting.
+              {t(
+                'So the garage decides. They know you, and they are the only ones who can say the car is yours. If nothing has happened after {days} days, ringing them is usually quicker than waiting.',
+                { days: CHASE_AFTER_DAYS },
+              )}
             </p>
           </CardBody>
         </Card>

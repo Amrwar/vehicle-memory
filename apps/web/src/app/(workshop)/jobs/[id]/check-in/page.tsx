@@ -1,4 +1,4 @@
-import { DAMAGE_AREAS, FUEL_LEVELS, fuelLabel } from '@carnet/core';
+import { DAMAGE_AREAS, FUEL_LEVELS, fuelLabel, type Translator } from '@carnet/core';
 import {
   Alert,
   Button,
@@ -21,8 +21,12 @@ import { CheckPhotos } from '@/components/check-photos';
 import { SignaturePad } from '@/components/signature-pad';
 import { ArrivalError, arrivalFor, checkIn, signatureFromForm } from '@/lib/arrival';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Check the car in' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Check the car in') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -72,6 +76,20 @@ async function save(formData: FormData) {
   redirect(`/jobs/${jobId}/check-in?saved=1`);
 }
 
+/** When it was done, by whom, and whether it was signed, as one sentence. */
+function signedLine(
+  t: Translator,
+  when: string,
+  by: string | null | undefined,
+  signedBy: string | null | undefined,
+): string {
+  if (by && signedBy)
+    return t('{when} by {by}, signed by {signer}.', { when, by, signer: signedBy });
+  if (by) return t('{when} by {by}, not signed.', { when, by });
+  if (signedBy) return t('{when}, signed by {signer}.', { when, signer: signedBy });
+  return t('{when}, not signed.', { when });
+}
+
 export default async function CheckInPage({
   params,
   searchParams,
@@ -80,6 +98,7 @@ export default async function CheckInPage({
   searchParams: Promise<{ problem?: string; saved?: string }>;
 }) {
   const { orgId, db, region } = await requireSession('job:write');
+  const t = await tFor();
   const { id } = await params;
   const { problem, saved } = await searchParams;
 
@@ -105,10 +124,10 @@ export default async function CheckInPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href={`/jobs/${job.id}`}>Job #{job.number}</BackLink>
+        <BackLink href={`/jobs/${job.id}`}>{t('Job #{number}', { number: job.number })}</BackLink>
       </div>
       <PageHeader
-        eyebrow={`Job #${job.number} · check-in`}
+        eyebrow={t('Job #{number} · check-in', { number: job.number })}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {job.vehicle.year} {job.vehicle.make} {job.vehicle.model}
@@ -117,12 +136,15 @@ export default async function CheckInPage({
             ) : null}
           </span>
         }
-        description={`${job.customer.displayName} is handing the car over. Note what it is like now, so nobody has to remember later.`}
+        description={t(
+          '{customer} is handing the car over. Note what it is like now, so nobody has to remember later.',
+          { customer: job.customer.displayName },
+        )}
       />
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
@@ -130,41 +152,52 @@ export default async function CheckInPage({
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Card className="border-(--success)">
             <CardHeader
-              title={saved ? 'Checked in' : 'Already checked in'}
-              description={`${done.at.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' })}${done.by ? ` by ${done.by}` : ''}${done.signedBy ? `, signed by ${done.signedBy}` : ', not signed'}.`}
+              title={saved ? t('Checked in') : t('Already checked in')}
+              description={signedLine(
+                t,
+                done.at.toLocaleString(region.locale, { dateStyle: 'medium', timeStyle: 'short' }),
+                done.by,
+                done.signedBy,
+              )}
             />
             <CardBody className="grid gap-4">
               <dl className="grid gap-x-6 gap-y-2 text-[13px] sm:grid-cols-2">
                 <div>
-                  <dt className="eyebrow">Mileage in</dt>
+                  <dt className="eyebrow">{t('Mileage in')}</dt>
                   <dd>
                     {done.odometerKm !== null
                       ? `${done.odometerKm.toLocaleString(region.locale)} km`
-                      : 'not noted'}
+                      : t('not noted')}
                   </dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Fuel</dt>
-                  <dd>{fuelLabel(done.fuelEighths)}</dd>
+                  <dt className="eyebrow">{t('Fuel')}</dt>
+                  <dd>{t(fuelLabel(done.fuelEighths))}</dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Keys</dt>
-                  <dd>{done.keysHook ? `hook ${done.keysHook}` : 'hook not noted'}</dd>
+                  <dt className="eyebrow">{t('Keys')}</dt>
+                  <dd>
+                    {done.keysHook
+                      ? t('hook {hook}', { hook: done.keysHook })
+                      : t('hook not noted')}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="eyebrow">Left in the car</dt>
-                  <dd>{done.belongings ?? 'nothing noted'}</dd>
+                  <dt className="eyebrow">{t('Left in the car')}</dt>
+                  <dd>{done.belongings ?? t('nothing noted')}</dd>
                 </div>
               </dl>
               <div>
-                <p className="eyebrow mb-1">Already marked</p>
+                <p className="eyebrow mb-1">{t('Already marked')}</p>
                 {done.damage.length === 0 ? (
-                  <p className="text-[13px] text-(--text-soft)">Nothing marked on arrival.</p>
+                  <p className="text-[13px] text-(--text-soft)">
+                    {t('Nothing marked on arrival.')}
+                  </p>
                 ) : (
                   <ul className="grid gap-1 text-[13px]">
                     {done.damage.map((mark, i) => (
                       <li key={i}>
-                        <span className="font-medium">{mark.area}</span>
+                        <span className="font-medium">{t(mark.area)}</span>
                         {mark.note ? (
                           <span className="text-(--text-soft)">: {mark.note}</span>
                         ) : null}
@@ -175,7 +208,7 @@ export default async function CheckInPage({
               </div>
               {done.notes ? <p className="text-[13px] text-(--text-soft)">{done.notes}</p> : null}
               <div className="border-t border-(--border) pt-4">
-                <p className="eyebrow mb-2">Photographs</p>
+                <p className="eyebrow mb-2">{t('Photographs')}</p>
                 {done.photos.length > 0 ? (
                   <ul className="mb-3 flex flex-wrap gap-2">
                     {done.photos.map((photo) =>
@@ -183,7 +216,7 @@ export default async function CheckInPage({
                         <li key={photo.id}>
                           <img
                             src={photo.src}
-                            alt={photo.caption ?? 'The car on arrival'}
+                            alt={photo.caption ?? t('The car on arrival')}
                             className="h-24 w-32 rounded-(--radius-sm) object-cover"
                           />
                         </li>
@@ -198,12 +231,13 @@ export default async function CheckInPage({
           <aside className="grid content-start gap-3">
             <Link href={`/jobs/${job.id}`}>
               <Button variant="primary" size="lg" block>
-                Back to the job
+                {t('Back to the job')}
               </Button>
             </Link>
             <p className="text-[12px] leading-relaxed text-(--text-faint)">
-              The record is on the job for whoever picks the car up, and on the customer&apos;s side
-              of Carnet so they can see it too.
+              {t(
+                'The record is on the job for whoever picks the car up, and on the customer’s side of Carnet so they can see it too.',
+              )}
             </p>
           </aside>
         </div>
@@ -212,14 +246,16 @@ export default async function CheckInPage({
           <input type="hidden" name="jobId" value={job.id} />
           <div className="grid content-start gap-5">
             <Card>
-              <CardHeader title="Off the dash" />
+              <CardHeader title={t('Off the dash')} />
               <CardBody className="grid gap-4 sm:grid-cols-2">
                 <Field
-                  label="Mileage in (km)"
+                  label={t('Mileage in (km)')}
                   hint={
                     job.vehicle.lastOdometerKm
-                      ? `Last recorded ${job.vehicle.lastOdometerKm.toLocaleString(region.locale)} km.`
-                      : 'First reading on this car.'
+                      ? t('Last recorded {km} km.', {
+                          km: job.vehicle.lastOdometerKm.toLocaleString(region.locale),
+                        })
+                      : t('First reading on this car.')
                   }
                 >
                   <Input
@@ -231,7 +267,7 @@ export default async function CheckInPage({
                     className="text-[18px]"
                   />
                 </Field>
-                <Field label="Fuel">
+                <Field label={t('Fuel')}>
                   <div className="grid grid-cols-9 gap-1">
                     {FUEL_LEVELS.map((level) => (
                       <label
@@ -245,7 +281,7 @@ export default async function CheckInPage({
                           defaultChecked={level === 4}
                           className="sr-only"
                         />
-                        <span className="font-medium">{fuelLabel(level)}</span>
+                        <span className="font-medium">{t(fuelLabel(level))}</span>
                       </label>
                     ))}
                   </div>
@@ -255,8 +291,10 @@ export default async function CheckInPage({
 
             <Card>
               <CardHeader
-                title="A walk round the car"
-                description="Tick what is already marked. A note against each says what and where."
+                title={t('A walk round the car')}
+                description={t(
+                  'Tick what is already marked. A note against each says what and where.',
+                )}
               />
               <CardBody className="grid gap-2 sm:grid-cols-2">
                 {DAMAGE_AREAS.map((area) => (
@@ -274,11 +312,11 @@ export default async function CheckInPage({
                       htmlFor={`mark-${area}`}
                       className="w-32 shrink-0 text-[13px] font-medium"
                     >
-                      {area}
+                      {t(area)}
                     </label>
                     <input
                       name={`note-${area}`}
-                      placeholder="scratch, dent, chip…"
+                      placeholder={t('scratch, dent, chip…')}
                       className="min-w-0 flex-1 rounded-(--radius-sm) border border-(--border) bg-(--surface) px-2 py-1 text-[13px]"
                     />
                   </div>
@@ -287,20 +325,23 @@ export default async function CheckInPage({
             </Card>
 
             <Card>
-              <CardHeader title="Inside, and the keys" />
+              <CardHeader title={t('Inside, and the keys')} />
               <CardBody className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-                <Field label="Left in the car" hint="Child seat, sat nav, the locking wheel nut.">
-                  <Input name="belongings" placeholder="nothing of note" />
+                <Field
+                  label={t('Left in the car')}
+                  hint={t('Child seat, sat nav, the locking wheel nut.')}
+                >
+                  <Input name="belongings" placeholder={t('nothing of note')} />
                 </Field>
-                <Field label="Keys on hook">
+                <Field label={t('Keys on hook')}>
                   <Input name="keysHook" placeholder="12" className="text-[18px]" />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Anything else">
+                  <Field label={t('Anything else')}>
                     <Textarea
                       name="notes"
                       rows={2}
-                      placeholder="Warning light on the dash, customer says…"
+                      placeholder={t('Warning light on the dash, customer says…')}
                     />
                   </Field>
                 </div>
@@ -311,20 +352,21 @@ export default async function CheckInPage({
           <aside className="grid content-start gap-5">
             <Card className="border-(--brand)">
               <CardHeader
-                title="Sign"
-                description="The customer signs that this is the car as handed over."
+                title={t('Sign')}
+                description={t('The customer signs that this is the car as handed over.')}
               />
               <CardBody className="grid gap-3">
                 <SignaturePad />
-                <Field label="Signed by">
+                <Field label={t('Signed by')}>
                   <Input name="signedByName" defaultValue={job.customer.displayName} />
                 </Field>
                 <Button type="submit" variant="primary" size="lg" block>
-                  Save the check-in
+                  {t('Save the check-in')}
                 </Button>
                 <p className="text-[12px] leading-relaxed text-(--text-faint)">
-                  Photographs are taken on the next screen, on the record this makes. A check-in
-                  without a signature is saved, and says so.
+                  {t(
+                    'Photographs are taken on the next screen, on the record this makes. A check-in without a signature is saved, and says so.',
+                  )}
                 </p>
               </CardBody>
             </Card>

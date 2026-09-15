@@ -33,10 +33,14 @@ import {
   threadFor,
 } from '@/lib/conversations';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { handleInbound, inbox } from '@/lib/retention';
 import { teamFor } from '@/lib/team';
 
-export const metadata: Metadata = { title: 'Conversations' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Conversations') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -205,6 +209,7 @@ export default async function ConversationsPage({
 }) {
   const { orgId, user, region } = await requireSession('customer:read');
   const params = await searchParams;
+  const t = await tFor();
 
   const [threads, unfiled, team, templates] = await Promise.all([
     conversationsFor(orgId, {
@@ -230,7 +235,7 @@ export default async function ConversationsPage({
   let draft = '';
   let draftProblem: string | null = null;
   if (thread && params.t) {
-    const chosen = templates.find((t) => t.key === params.t);
+    const chosen = templates.find((tpl) => tpl.key === params.t);
     if (chosen) {
       const filled = fillTemplate(chosen.body, await templateValues(orgId, thread.id));
       draft = filled.text ?? '';
@@ -242,33 +247,33 @@ export default async function ConversationsPage({
     draft = sentence ?? '';
     draftProblem = sentence
       ? null
-      : 'Nothing is owed on this job, so there is no payment link to send.';
+      : t('Nothing is owed on this job, so there is no payment link to send.');
   }
 
-  const unread = threads.filter((t) => t.unread).length;
+  const unread = threads.filter((th) => th.unread).length;
   const members = team.members ?? [];
 
   return (
     <>
       <PageHeader
-        eyebrow="Communication"
-        title="Conversations"
-        description="Every customer, every message, whatever carried it; unread first"
+        eyebrow={t('Communication')}
+        title={t('Conversations')}
+        description={t('Every customer, every message, whatever carried it; unread first')}
         actions={
           <>
             <Link href={params.mine ? '/inbox' : '/inbox?mine=1'}>
               <Button variant={params.mine ? 'primary' : 'secondary'} size="sm">
-                {params.mine ? 'Everyone’s' : 'Mine'}
+                {params.mine ? t('Everyone’s') : t('Mine')}
               </Button>
             </Link>
             <Link href={params.closed === '1' ? '/inbox' : '/inbox?closed=1'}>
               <Button variant="secondary" size="sm">
-                {params.closed === '1' ? 'Only open' : 'Closed too'}
+                {params.closed === '1' ? t('Only open') : t('Closed too')}
               </Button>
             </Link>
             <Link href={params.templates ? '/inbox' : '/inbox?templates=1'}>
               <Button variant="secondary" size="sm">
-                Templates
+                {t('Templates')}
               </Button>
             </Link>
           </>
@@ -277,74 +282,90 @@ export default async function ConversationsPage({
 
       {params.problem ? (
         <Alert tone="danger" className="mb-5">
-          {params.problem}
+          {t(params.problem)}
         </Alert>
       ) : null}
       {params.sent ? (
         <Alert tone="success" className="mb-5">
-          Sent. It is on the thread with what became of it.
+          {t('Sent. It is on the thread with what became of it.')}
         </Alert>
       ) : null}
 
       {params.templates ? (
         <Card className="mb-5">
           <CardHeader
-            title="Templates that are messages"
-            description="Written as the message a good service advisor would send, with the few facts that change filled from the job. Placeholders: {{firstName}}, {{vehicle}}, {{registration}}, {{jobNumber}}, {{amount}}, {{link}}, {{workshopName}}, {{workshopPhone}}."
+            title={t('Templates that are messages')}
+            description={t(
+              'Written as the message a good service advisor would send, with the few facts that change filled from the job. Placeholders: {placeholders}.',
+              {
+                placeholders:
+                  '{{firstName}}, {{vehicle}}, {{registration}}, {{jobNumber}}, {{amount}}, {{link}}, {{workshopName}}, {{workshopPhone}}',
+              },
+            )}
           />
           <CardBody className="grid gap-4 lg:grid-cols-2">
             <ul className="grid gap-2">
-              {templates.map((t) => (
+              {templates.map((tpl) => (
                 <li
-                  key={t.key}
+                  key={tpl.key}
                   className="rounded-(--radius-md) border border-(--border) px-3.5 py-2.5"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[13px] font-medium">
-                      {t.name}
-                      {!t.own ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">built in</span>
+                      {tpl.own ? tpl.name : t(tpl.name)}
+                      {!tpl.own ? (
+                        <span className="ml-2 text-[11px] text-(--text-faint)">
+                          {t('built in')}
+                        </span>
                       ) : null}
                     </span>
-                    {t.own && t.id ? (
+                    {tpl.own && tpl.id ? (
                       <form action={removeTemplate}>
-                        <input type="hidden" name="id" value={t.id} />
+                        <input type="hidden" name="id" value={tpl.id} />
                         <button type="submit" className="text-[12px] underline">
-                          Remove
+                          {t('Remove')}
                         </button>
                       </form>
                     ) : null}
                   </div>
-                  <p className="mt-1 text-[13px] text-(--text-soft)">{t.body}</p>
+                  <p className="mt-1 text-[13px] text-(--text-soft)">{tpl.body}</p>
                 </li>
               ))}
             </ul>
             <form action={addTemplate} className="grid content-start gap-3">
-              <Field label="Name">
-                <Input name="name" placeholder="MOT reminder" required />
+              <Field label={t('Name')}>
+                <Input name="name" placeholder={t('MOT reminder')} required />
               </Field>
-              <Field label="Channel">
+              <Field label={t('Channel')}>
                 <Select name="channel" defaultValue="">
-                  <option value="">Any</option>
-                  <option value="SMS">Text</option>
-                  <option value="WHATSAPP">WhatsApp</option>
-                  <option value="EMAIL">Email</option>
+                  <option value="">{t('Any')}</option>
+                  <option value="SMS">{t('Text')}</option>
+                  <option value="WHATSAPP">{t('WhatsApp')}</option>
+                  <option value="EMAIL">{t('Email')}</option>
                 </Select>
               </Field>
-              <Field label="The message" hint="A sentence you would send as it is.">
+              <Field label={t('The message')} hint={t('A sentence you would send as it is.')}>
                 <Textarea
                   name="body"
                   rows={4}
                   required
-                  placeholder="Hello {{firstName}}, the MOT on your {{vehicle}} is due next month. Reply here or ring {{workshopPhone}} to book it in. {{workshopName}}"
+                  placeholder={t(
+                    'Hello {name}, the MOT on your {vehicle} is due next month. Reply here or ring {phone} to book it in. {workshop}',
+                    {
+                      name: '{{firstName}}',
+                      vehicle: '{{vehicle}}',
+                      phone: '{{workshopPhone}}',
+                      workshop: '{{workshopName}}',
+                    },
+                  )}
                 />
               </Field>
               <div>
                 <Button type="submit" variant="primary">
-                  Save the template
+                  {t('Save the template')}
                 </Button>
               </div>
-              {params.saved ? <p className="text-[12px] text-(--success)">Saved.</p> : null}
+              {params.saved ? <p className="text-[12px] text-(--success)">{t('Saved.')}</p> : null}
             </form>
           </CardBody>
         </Card>
@@ -353,8 +374,14 @@ export default async function ConversationsPage({
       {stray.length > 0 ? (
         <Card className="mb-5 border-(--warning)">
           <CardHeader
-            title={`${stray.length} message${stray.length === 1 ? '' : 's'} nobody could file`}
-            description="No customer has that address. File each onto a job, or mark it dealt with."
+            title={
+              stray.length === 1
+                ? t('1 message nobody could file')
+                : t('{count} messages nobody could file', { count: stray.length })
+            }
+            description={t(
+              'No customer has that address. File each onto a job, or mark it dealt with.',
+            )}
           />
           <ul className="divide-y divide-(--border)">
             {stray.map((message) => (
@@ -362,23 +389,27 @@ export default async function ConversationsPage({
                 <div className="flex flex-wrap items-baseline gap-x-3">
                   <span className="datum font-medium">{message.fromAddress}</span>
                   <span className="text-[11px] text-(--text-faint)">
-                    {channelLabel(message.channel)} · {when(message.receivedAt, region.locale)}
+                    {t(channelLabel(message.channel))} · {when(message.receivedAt, region.locale)}
                   </span>
                   {message.priority.label ? (
                     <Badge tone={message.priority.rank === 0 ? 'danger' : 'warning'} size="sm">
-                      {message.priority.label}
+                      {t(message.priority.label)}
                     </Badge>
                   ) : null}
                 </div>
                 <p className="leading-relaxed">{message.body}</p>
                 <form action={file} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="messageId" value={message.id} />
-                  <Input name="jobId" placeholder="Job id to file it on" className="max-w-xs" />
+                  <Input
+                    name="jobId"
+                    placeholder={t('Job id to file it on')}
+                    className="max-w-xs"
+                  />
                   <Button type="submit" size="sm" variant="secondary">
-                    File it
+                    {t('File it')}
                   </Button>
                   <Button type="submit" name="done" value="1" size="sm">
-                    Dealt with
+                    {t('Dealt with')}
                   </Button>
                 </form>
               </li>
@@ -390,49 +421,51 @@ export default async function ConversationsPage({
       <div className="grid gap-5 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <Card className="overflow-hidden">
           <CardHeader
-            title={params.mine ? 'Assigned to me' : 'Every thread'}
-            description={unread > 0 ? `${unread} unread` : 'Nothing unread'}
+            title={params.mine ? t('Assigned to me') : t('Every thread')}
+            description={unread > 0 ? t('{count} unread', { count: unread }) : t('Nothing unread')}
           />
           {threads.length === 0 ? (
             <EmptyState
-              title="No conversations yet"
-              description="A thread appears the first time a customer is written to, or writes in."
+              title={t('No conversations yet')}
+              description={t(
+                'A thread appears the first time a customer is written to, or writes in.',
+              )}
             />
           ) : (
             <ul className="max-h-[70vh] divide-y divide-(--border) overflow-y-auto">
-              {threads.map((t) => (
-                <li key={t.id}>
+              {threads.map((th) => (
+                <li key={th.id}>
                   <Link
-                    href={`/inbox?c=${t.id}${params.mine ? '&mine=1' : ''}${params.closed === '1' ? '&closed=1' : ''}`}
+                    href={`/inbox?c=${th.id}${params.mine ? '&mine=1' : ''}${params.closed === '1' ? '&closed=1' : ''}`}
                     className={[
                       'block px-4 py-3 hover:bg-(--surface-sunk)',
-                      t.id === selectedId ? 'bg-(--surface-sunk)' : '',
+                      th.id === selectedId ? 'bg-(--surface-sunk)' : '',
                     ].join(' ')}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className={`truncate text-[13px] ${t.unread ? 'font-semibold' : 'font-medium'}`}
+                        className={`truncate text-[13px] ${th.unread ? 'font-semibold' : 'font-medium'}`}
                       >
-                        {t.unread ? (
+                        {th.unread ? (
                           <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-(--brand)" />
                         ) : null}
-                        {t.customer?.displayName ?? 'Unknown'}
+                        {th.customer?.displayName ?? t('Unknown')}
                       </span>
                       <span className="shrink-0 text-[11px] text-(--text-faint)">
-                        {when(t.lastMessageAt, region.locale)}
+                        {when(th.lastMessageAt, region.locale)}
                       </span>
                     </div>
                     <p className="truncate text-[12px] text-(--text-soft)">
-                      {t.job
-                        ? `#${t.job.number} ${t.job.vehicle.make} ${t.job.vehicle.model}`
-                        : 'General'}
-                      {t.assignedTo ? ` · ${t.assignedTo.name}` : ''}
-                      {t.status === 'CLOSED' ? ' · closed' : ''}
+                      {th.job
+                        ? `#${th.job.number} ${th.job.vehicle.make} ${th.job.vehicle.model}`
+                        : t('General')}
+                      {th.assignedTo ? ` · ${th.assignedTo.name}` : ''}
+                      {th.status === 'CLOSED' ? ` · ${t('closed')}` : ''}
                     </p>
-                    {t.preview ? (
+                    {th.preview ? (
                       <p className="mt-0.5 truncate text-[12px] text-(--text-faint)">
-                        {t.preview.direction === 'in' ? '← ' : '→ '}
-                        {t.preview.body}
+                        {th.preview.direction === 'in' ? '← ' : '→ '}
+                        {th.preview.body}
                       </p>
                     ) : null}
                   </Link>
@@ -445,25 +478,25 @@ export default async function ConversationsPage({
         {thread ? (
           <Card className="overflow-hidden">
             <CardHeader
-              title={thread.customer?.displayName ?? 'Unknown customer'}
+              title={thread.customer?.displayName ?? t('Unknown customer')}
               description={
                 thread.job
-                  ? `Job #${thread.job.number} · ${thread.job.vehicle.make} ${thread.job.vehicle.model}${thread.job.vehicle.registration ? ` · ${thread.job.vehicle.registration}` : ''}`
-                  : 'General, not about one job'
+                  ? `${t('Job #{number}', { number: thread.job.number })} · ${thread.job.vehicle.make} ${thread.job.vehicle.model}${thread.job.vehicle.registration ? ` · ${thread.job.vehicle.registration}` : ''}`
+                  : t('General, not about one job')
               }
               action={
                 <div className="flex flex-wrap items-center gap-2">
                   {thread.job ? (
                     <Link href={`/jobs/${thread.job.id}`}>
                       <Button size="sm" variant="secondary">
-                        Open the job
+                        {t('Open the job')}
                       </Button>
                     </Link>
                   ) : null}
                   {thread.customer ? (
                     <Link href={`/customers/${thread.customer.id}`}>
                       <Button size="sm" variant="secondary">
-                        The customer
+                        {t('The customer')}
                       </Button>
                     </Link>
                   ) : null}
@@ -475,7 +508,7 @@ export default async function ConversationsPage({
                       value={thread.status === 'OPEN' ? 'CLOSED' : 'OPEN'}
                     />
                     <Button type="submit" size="sm" variant="secondary">
-                      {thread.status === 'OPEN' ? 'Close' : 'Reopen'}
+                      {thread.status === 'OPEN' ? t('Close') : t('Reopen')}
                     </Button>
                   </form>
                 </div>
@@ -484,13 +517,13 @@ export default async function ConversationsPage({
             <CardBody className="flex flex-wrap items-center gap-2 border-b border-(--border) text-[12px] text-(--text-soft)">
               <form action={assign} className="flex items-center gap-2">
                 <input type="hidden" name="conversationId" value={thread.id} />
-                <span>Assigned to</span>
+                <span>{t('Assigned to')}</span>
                 <Select
                   name="assigneeUserId"
                   defaultValue={thread.assignedTo?.id ?? ''}
                   className="h-8 w-44 text-[12px]"
                 >
-                  <option value="">nobody</option>
+                  <option value="">{t('nobody')}</option>
                   {members.map((m) => (
                     <option key={m.user.id} value={m.user.id}>
                       {m.user.name}
@@ -498,14 +531,16 @@ export default async function ConversationsPage({
                   ))}
                 </Select>
                 <Button type="submit" size="sm" variant="secondary">
-                  Set
+                  {t('Set')}
                 </Button>
               </form>
             </CardBody>
 
             <CardBody className="grid max-h-[50vh] gap-3 overflow-y-auto">
               {thread.entries.length === 0 ? (
-                <p className="text-[13px] text-(--text-faint)">Nothing on this thread yet.</p>
+                <p className="text-[13px] text-(--text-faint)">
+                  {t('Nothing on this thread yet.')}
+                </p>
               ) : (
                 thread.entries.map((entry) => (
                   <div
@@ -541,9 +576,9 @@ export default async function ConversationsPage({
                     ) : null}
                     <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-(--text-faint)">
                       <Badge tone={STATE_TONE[entry.state]} size="sm">
-                        {entry.state}
+                        {t(entry.state)}
                       </Badge>
-                      {channelLabel(entry.channel)} · {when(entry.at, region.locale)}
+                      {t(channelLabel(entry.channel))} · {when(entry.at, region.locale)}
                       {entry.by ? ` · ${entry.by}` : ''}
                       {entry.detail ? ` · ${entry.detail}` : ''}
                     </p>
@@ -555,14 +590,16 @@ export default async function ConversationsPage({
             <CardBody className="border-t border-(--border)">
               {thread.channels.length === 0 ? (
                 <p className="text-[13px] text-(--text-soft)">
-                  {thread.customer?.displayName ?? 'This customer'} has no email address or mobile
-                  number on file, so there is nowhere to write to.
+                  {t(
+                    '{name} has no email address or mobile number on file, so there is nowhere to write to.',
+                    { name: thread.customer?.displayName ?? t('This customer') },
+                  )}
                 </p>
               ) : (
                 <form action={reply} className="grid gap-3">
                   <input type="hidden" name="conversationId" value={thread.id} />
                   <div className="flex flex-wrap items-end gap-2">
-                    <Field label="By">
+                    <Field label={t('By')}>
                       <Select
                         name="channel"
                         defaultValue={thread.preferred ?? thread.channels[0]}
@@ -570,36 +607,36 @@ export default async function ConversationsPage({
                       >
                         {thread.channels.map((c) => (
                           <option key={c} value={c}>
-                            {channelLabel(c)}
+                            {t(channelLabel(c))}
                           </option>
                         ))}
                       </Select>
                     </Field>
-                    <Field label="Start from" className="min-w-[14rem]">
+                    <Field label={t('Start from')} className="min-w-[14rem]">
                       <div className="flex flex-wrap gap-1.5">
-                        {templates.slice(0, 6).map((t) => (
+                        {templates.slice(0, 6).map((tpl) => (
                           <Link
-                            key={t.key}
-                            href={`/inbox?c=${thread.id}&t=${encodeURIComponent(t.key)}`}
+                            key={tpl.key}
+                            href={`/inbox?c=${thread.id}&t=${encodeURIComponent(tpl.key)}`}
                             className="rounded-(--radius-sm) border border-(--border) px-2 py-1 text-[12px] hover:bg-(--surface-sunk)"
                           >
-                            {t.name}
+                            {tpl.own ? tpl.name : t(tpl.name)}
                           </Link>
                         ))}
                         <Link
                           href={`/inbox?c=${thread.id}&pay=1`}
                           className="rounded-(--radius-sm) border border-(--brand) px-2 py-1 text-[12px] text-(--brand-text) hover:bg-(--brand-soft)"
                         >
-                          Payment link
+                          {t('Payment link')}
                         </Link>
                       </div>
                     </Field>
                   </div>
-                  {draftProblem ? <Alert tone="warning">{draftProblem}</Alert> : null}
+                  {draftProblem ? <Alert tone="warning">{t(draftProblem)}</Alert> : null}
                   {thread.channels.includes('EMAIL') ? (
                     <Input
                       name="subject"
-                      placeholder="Subject, for an email"
+                      placeholder={t('Subject, for an email')}
                       defaultValue={thread.subject ?? ''}
                     />
                   ) : null}
@@ -608,7 +645,9 @@ export default async function ConversationsPage({
                     rows={4}
                     required
                     defaultValue={draft}
-                    placeholder={`Write to ${thread.customer?.displayName ?? 'the customer'}…`}
+                    placeholder={t('Write to {name}…', {
+                      name: thread.customer?.displayName ?? t('the customer'),
+                    })}
                   />
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <label className="text-[12px] text-(--text-soft)">
@@ -621,12 +660,13 @@ export default async function ConversationsPage({
                       />
                     </label>
                     <Button type="submit" variant="primary">
-                      Send
+                      {t('Send')}
                     </Button>
                   </div>
                   <p className="text-[11px] text-(--text-faint)">
-                    Files are kept on the thread and named in the message; the email and text
-                    providers do not carry them yet.
+                    {t(
+                      'Files are kept on the thread and named in the message; the email and text providers do not carry them yet.',
+                    )}
                   </p>
                 </form>
               )}
@@ -634,7 +674,10 @@ export default async function ConversationsPage({
           </Card>
         ) : (
           <Card>
-            <EmptyState title="Pick a conversation" description="Choose one on the left." />
+            <EmptyState
+              title={t('Pick a conversation')}
+              description={t('Choose one on the left.')}
+            />
           </Card>
         )}
       </div>

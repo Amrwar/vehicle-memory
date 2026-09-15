@@ -18,8 +18,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Parts' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Parts') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -36,6 +40,7 @@ export default async function PartsPage({
   searchParams: Promise<{ q?: string; view?: string }>;
 }) {
   const { db, region } = await requireSession('inventory:read');
+  const t = await tFor();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
   const lowOnly = params.view === 'low';
@@ -117,16 +122,20 @@ export default async function PartsPage({
   return (
     <>
       <PageHeader
-        eyebrow="Inventory"
-        title="Parts"
-        description={`${rows.length} part${rows.length === 1 ? '' : 's'} in the catalogue`}
+        eyebrow={t('Inventory')}
+        title={t('Parts')}
+        description={
+          rows.length === 1
+            ? t('1 part in the catalogue')
+            : t('{count} parts in the catalogue', { count: rows.length })
+        }
         actions={
           <>
             <Link href="/purchasing">
-              <Button>Purchasing</Button>
+              <Button>{t('Purchasing')}</Button>
             </Link>
             <Link href="/parts/new">
-              <Button variant="primary">New part</Button>
+              <Button variant="primary">{t('New part')}</Button>
             </Link>
           </>
         }
@@ -134,30 +143,32 @@ export default async function PartsPage({
 
       <StatRow className="mb-5">
         <StatTile
-          label="Stock value"
+          label={t('Stock value')}
           value={<Money currency={region.currency} locale={region.locale} amount={totalValue} />}
-          note="At weighted average cost"
+          note={t('At weighted average cost')}
         />
         <Link href="/parts?view=low" className="group">
           <StatTile
-            label="Need ordering"
+            label={t('Need ordering')}
             value={needsOrdering}
             tone={needsOrdering > 0 ? 'warning' : 'neutral'}
             note={
-              needsOrdering > 0 ? 'Below reorder point, nothing on order' : 'Nothing outstanding'
+              needsOrdering > 0
+                ? t('Below reorder point, nothing on order')
+                : t('Nothing outstanding')
             }
           />
         </Link>
         <StatTile
-          label="Negative balances"
+          label={t('Negative balances')}
           value={negative}
           tone={negative > 0 ? 'danger' : 'neutral'}
-          note={negative > 0 ? 'Issued more than recorded' : 'All balances positive'}
+          note={negative > 0 ? t('Issued more than recorded') : t('All balances positive')}
         />
         <StatTile
-          label="On order"
+          label={t('On order')}
           value={[...onOrderByProduct.values()].reduce((a, b) => a + b, 0)}
-          note="Units on outstanding orders"
+          note={t('Units on outstanding orders')}
         />
       </StatRow>
 
@@ -166,18 +177,18 @@ export default async function PartsPage({
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="Name, part number or brand"
-          aria-label="Search parts"
+          placeholder={t('Name, part number or brand')}
+          aria-label={t('Search parts')}
           className="h-9 w-full max-w-xs rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px] placeholder:text-(--text-faint)"
         />
-        <Button type="submit">Search</Button>
+        <Button type="submit">{t('Search')}</Button>
         {lowOnly ? (
           <Link href="/parts" className="text-[12px] text-(--text-faint) underline">
-            Show all parts
+            {t('Show all parts')}
           </Link>
         ) : (
           <Link href="/parts?view=low" className="text-[12px] text-(--text-faint) underline">
-            Only those needing an order
+            {t('Only those needing an order')}
           </Link>
         )}
       </form>
@@ -185,11 +196,11 @@ export default async function PartsPage({
       <Card className="overflow-hidden">
         {visible.length === 0 ? (
           <EmptyState
-            title={lowOnly ? 'Nothing needs ordering' : 'No parts found'}
+            title={lowOnly ? t('Nothing needs ordering') : t('No parts found')}
             description={
               lowOnly
-                ? 'Every part is above its reorder point or already on order.'
-                : 'Add a part, or import your supplier catalogue.'
+                ? t('Every part is above its reorder point or already on order.')
+                : t('Add a part, or import your supplier catalogue.')
             }
           />
         ) : (
@@ -197,16 +208,16 @@ export default async function PartsPage({
             <Table>
               <thead>
                 <tr>
-                  <Th>Part</Th>
-                  <Th>Category</Th>
-                  <Th>Bin</Th>
-                  <Th numeric>On hand</Th>
-                  <Th numeric>Reserved</Th>
-                  <Th numeric>Available</Th>
-                  <Th numeric>On order</Th>
-                  <Th numeric>Cost</Th>
-                  <Th numeric>Value</Th>
-                  <Th>State</Th>
+                  <Th>{t('Part')}</Th>
+                  <Th>{t('Category')}</Th>
+                  <Th>{t('Bin')}</Th>
+                  <Th numeric>{t('On hand')}</Th>
+                  <Th numeric>{t('Reserved')}</Th>
+                  <Th numeric>{t('Available')}</Th>
+                  <Th numeric>{t('On order')}</Th>
+                  <Th numeric>{t('Cost')}</Th>
+                  <Th numeric>{t('Value')}</Th>
+                  <Th>{t('State')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -244,7 +255,7 @@ export default async function PartsPage({
                     </Td>
                     <Td>
                       <Badge tone={stockTone(summary.state)} dot>
-                        {describeStockState(summary.state)}
+                        {t(describeStockState(summary.state))}
                       </Badge>
                     </Td>
                   </Tr>

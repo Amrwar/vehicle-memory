@@ -19,9 +19,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { warrantyBook } from '@/lib/warranty';
 
-export const metadata: Metadata = { title: 'Warranty' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Warranty') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -47,40 +51,41 @@ function date(value: Date, locale: string): string {
 
 export default async function WarrantyPage() {
   const { orgId, region } = await requireSession('job:read');
+  const t = await tFor();
 
   const book = await warrantyBook(orgId);
 
   return (
     <>
       <PageHeader
-        eyebrow="Workshop"
-        title="Warranty"
-        description="What is still covered, what is running out, and who should be paying"
+        eyebrow={t('Workshop')}
+        title={t('Warranty')}
+        description={t('What is still covered, what is running out, and who should be paying')}
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Under cover"
+          label={t('Under cover')}
           value={book.active.length}
-          note={`${book.all.length} on record`}
+          note={t('{count} on record', { count: book.all.length })}
         />
         <StatTile
-          label="Running out"
+          label={t('Running out')}
           value={book.expiring.length}
           tone={book.expiring.length > 0 ? 'warning' : 'neutral'}
-          note="Inside the next month"
+          note={t('Inside the next month')}
         />
         <StatTile
-          label="Open claims"
+          label={t('Open claims')}
           value={book.openClaims.length}
           tone={book.openClaims.length > 0 ? 'brand' : 'neutral'}
-          note="Not yet settled"
+          note={t('Not yet settled')}
         />
         <StatTile
-          label="Carrying"
+          label={t('Carrying')}
           value={<Money currency={region.currency} locale={region.locale} amount={book.exposure} />}
           tone={book.exposure > 0 ? 'danger' : 'neutral'}
-          note="What nobody else will cover"
+          note={t('What nobody else will cover')}
         />
       </StatRow>
 
@@ -88,11 +93,15 @@ export default async function WarrantyPage() {
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {book.expiring.length} warrant{book.expiring.length === 1 ? 'y runs' : 'ies run'} out
-              within a month.
+              {book.expiring.length === 1
+                ? t('1 warranty runs out within a month.')
+                : t('{count} warranties run out within a month.', {
+                    count: book.expiring.length,
+                  })}
             </strong>{' '}
-            A vehicle whose cover is about to lapse is a reason to get it in while the workshop is
-            still the one who would put it right.
+            {t(
+              'A vehicle whose cover is about to lapse is a reason to get it in while the workshop is still the one who would put it right.',
+            )}
           </CardBody>
         </Card>
       ) : null}
@@ -100,18 +109,20 @@ export default async function WarrantyPage() {
       {book.openClaims.length > 0 ? (
         <Card className="mb-5 overflow-hidden">
           <CardHeader
-            title="Claims nobody has settled"
-            description="Each one is money sitting with a supplier who has not been chased, or a cost the workshop has already absorbed."
+            title={t('Claims nobody has settled')}
+            description={t(
+              'Each one is money sitting with a supplier who has not been chased, or a cost the workshop has already absorbed.',
+            )}
           />
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>What failed</Th>
-                  <Th>Vehicle</Th>
-                  <Th>Complaint</Th>
-                  <Th numeric>Recoverable</Th>
-                  <Th numeric>On us</Th>
+                  <Th>{t('What failed')}</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('Complaint')}</Th>
+                  <Th numeric>{t('Recoverable')}</Th>
+                  <Th numeric>{t('On us')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -133,7 +144,7 @@ export default async function WarrantyPage() {
                         {claim.complaint}
                         {claim.outsideCover ? (
                           <Badge tone="warning" size="sm" className="ml-2">
-                            goodwill
+                            {t('goodwill')}
                           </Badge>
                         ) : null}
                       </Td>
@@ -162,24 +173,28 @@ export default async function WarrantyPage() {
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Everything covered"
-          description="Cover runs from the day the work was done, and ends on time or on mileage, whichever comes first."
+          title={t('Everything covered')}
+          description={t(
+            'Cover runs from the day the work was done, and ends on time or on mileage, whichever comes first.',
+          )}
         />
         {book.all.length === 0 ? (
           <EmptyState
-            title="Nothing recorded yet"
-            description="Cover is recorded as a job closes, and appears here with the date and mileage it runs to."
+            title={t('Nothing recorded yet')}
+            description={t(
+              'Cover is recorded as a job closes, and appears here with the date and mileage it runs to.',
+            )}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>What</Th>
-                  <Th>Vehicle</Th>
-                  <Th>From</Th>
-                  <Th>State</Th>
-                  <Th>Behind it</Th>
+                  <Th>{t('What')}</Th>
+                  <Th>{t('Vehicle')}</Th>
+                  <Th>{t('From')}</Th>
+                  <Th>{t('State')}</Th>
+                  <Th>{t('Behind it')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -188,7 +203,8 @@ export default async function WarrantyPage() {
                     <Td>
                       <span className="font-medium">{entry.row.description}</span>
                       <span className="block text-[11px] text-(--text-faint)">
-                        {entry.row.kind === 'PART' ? 'Part' : 'Labour'} · job {entry.row.job.number}
+                        {entry.row.kind === 'PART' ? t('Part') : t('Labour')} ·{' '}
+                        {t('job {number}', { number: entry.row.job.number })}
                       </span>
                     </Td>
                     <Td>
@@ -218,16 +234,21 @@ export default async function WarrantyPage() {
                         }
                         size="sm"
                       >
-                        {entry.status.active ? `${entry.status.daysLeft}d left` : 'expired'}
+                        {entry.status.active
+                          ? t('{days}d left', { days: entry.status.daysLeft })
+                          : t('expired')}
                       </Badge>
                       <span className="block text-[11px] text-(--text-faint)">
-                        {entry.status.summary}
+                        {t(entry.status.summary)}
                       </span>
                     </Td>
                     <Td className="text-[12px] text-(--text-soft)">
                       {entry.cover.supplierName
-                        ? `${entry.cover.supplierName}, ${entry.cover.supplierMonths ?? '—'} months`
-                        : 'Nobody. All of it falls on the workshop.'}
+                        ? t('{supplier}, {months} months', {
+                            supplier: entry.cover.supplierName,
+                            months: entry.cover.supplierMonths ?? '—',
+                          })
+                        : t('Nobody. All of it falls on the workshop.')}
                     </Td>
                   </Tr>
                 ))}

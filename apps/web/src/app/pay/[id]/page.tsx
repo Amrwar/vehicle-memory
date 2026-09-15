@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { settleAttempt } from '@/lib/card-payments';
+import { tFor } from '@/lib/i18n';
 import { paymentProvider } from '@/lib/payments/provider';
 import { stubRemember } from '@/lib/payments/stub';
 
-export const metadata: Metadata = { title: 'Test checkout' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Test checkout') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -62,6 +66,7 @@ async function decide(formData: FormData) {
 }
 
 export default async function StubCheckoutPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await tFor();
   const { id } = await params;
   if (paymentProvider().name !== 'stub') notFound();
 
@@ -87,20 +92,26 @@ export default async function StubCheckoutPage({ params }: { params: Promise<{ i
     <main className="min-h-dvh bg-[#f3f4f6] px-4 py-10 font-sans text-[#111827]">
       <div className="mx-auto max-w-md rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">
-          Test checkout
+          {t('Test checkout')}
         </p>
         <h1 className="mt-1 text-[20px] font-semibold">{attempt.invoice.org.name}</h1>
         <p className="mt-1 text-[14px] text-[#6b7280]">
-          Invoice {attempt.invoice.number ?? ''}. No card is charged here: this page stands in for a
-          payment provider while none is connected.
+          {t(
+            'Invoice {number}. No card is charged here: this page stands in for a payment provider while none is connected.',
+            { number: attempt.invoice.number ?? '' },
+          )}
         </p>
         <p className="mt-5 text-[32px] font-semibold tabular-nums">{amount}</p>
 
         {attempt.status !== 'PENDING' ? (
           <div className="mt-5 rounded-lg bg-[#f9fafb] p-4 text-[14px]">
-            <p>This checkout is finished: {attempt.status.toLowerCase()}.</p>
+            <p>
+              {t('This checkout is finished: {status}.', {
+                status: t(attempt.status.toLowerCase()),
+              })}
+            </p>
             <Link href={attempt.returnUrl} className="mt-2 inline-block underline">
-              Back to your invoices
+              {t('Back to your invoices')}
             </Link>
           </div>
         ) : (
@@ -112,7 +123,7 @@ export default async function StubCheckoutPage({ params }: { params: Promise<{ i
               value="pay"
               className="rounded-lg bg-[#111827] px-4 py-3 text-[15px] font-semibold text-white"
             >
-              Pay {amount}
+              {t('Pay {amount}', { amount })}
             </button>
             <button
               type="submit"
@@ -120,7 +131,7 @@ export default async function StubCheckoutPage({ params }: { params: Promise<{ i
               value="decline"
               className="rounded-lg border border-[#e5e7eb] px-4 py-3 text-[14px]"
             >
-              Have the card declined
+              {t('Have the card declined')}
             </button>
             <button
               type="submit"
@@ -128,7 +139,7 @@ export default async function StubCheckoutPage({ params }: { params: Promise<{ i
               value="cancel"
               className="rounded-lg px-4 py-3 text-[14px] text-[#6b7280] underline"
             >
-              Cancel and go back
+              {t('Cancel and go back')}
             </button>
           </form>
         )}

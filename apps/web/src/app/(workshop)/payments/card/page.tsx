@@ -16,9 +16,13 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { attemptsFor, checkAttempt, reconcileFor } from '@/lib/card-payments';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { paymentProvider } from '@/lib/payments/provider';
 
-export const metadata: Metadata = { title: 'Card payments' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Card payments') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -53,6 +57,7 @@ export default async function CardPaymentsPage({
   searchParams: Promise<{ checked?: string; reconcile?: string }>;
 }) {
   const { orgId, user, region } = await requireSession('payment:read');
+  const t = await tFor();
   const { checked, reconcile } = await searchParams;
   const attempts = await attemptsFor(orgId);
   const reconciliation = reconcile ? await reconcileFor(orgId) : null;
@@ -62,16 +67,20 @@ export default async function CardPaymentsPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/payments">Payments</BackLink>
+        <BackLink href="/payments">{t('Payments')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Money"
-        title="Card payments"
-        description={`Taken online through ${provider === 'stub' ? 'the test provider' : provider}`}
+        eyebrow={t('Money')}
+        title={t('Card payments')}
+        description={
+          provider === 'stub'
+            ? t('Taken online through the test provider')
+            : t('Taken online through {provider}', { provider })
+        }
         actions={
           <Link href="/payments/card?reconcile=1">
-            <Button variant="secondary">Reconcile with the provider</Button>
+            <Button variant="secondary">{t('Reconcile with the provider')}</Button>
           </Link>
         }
       />
@@ -79,12 +88,12 @@ export default async function CardPaymentsPage({
       {checked ? (
         <Alert tone={checked === 'recorded' ? 'success' : 'info'} className="mb-5">
           {checked === 'recorded'
-            ? 'The provider says it was paid, and the payment is now recorded.'
+            ? t('The provider says it was paid, and the payment is now recorded.')
             : checked === 'moved'
-              ? 'The provider answered, and the attempt has moved.'
+              ? t('The provider answered, and the attempt has moved.')
               : checked === 'unknown'
-                ? 'The provider has no record of that attempt.'
-                : 'The provider says nothing new.'}
+                ? t('The provider has no record of that attempt.')
+                : t('The provider says nothing new.')}
         </Alert>
       ) : null}
 
@@ -94,11 +103,26 @@ export default async function CardPaymentsPage({
         >
           <CardHeader
             title={
-              reconciliation.differences.length
-                ? `${reconciliation.differences.length} difference${reconciliation.differences.length === 1 ? '' : 's'} between the provider and the books`
-                : 'The provider and the books agree'
+              reconciliation.differences.length === 1
+                ? t('1 difference between the provider and the books')
+                : reconciliation.differences.length
+                  ? t('{count} differences between the provider and the books', {
+                      count: reconciliation.differences.length,
+                    })
+                  : t('The provider and the books agree')
             }
-            description={`${reconciliation.asked} attempt${reconciliation.asked === 1 ? '' : 's'} from the last ninety days asked about, ${reconciliation.askedAt.toLocaleTimeString(region.locale, { hour: '2-digit', minute: '2-digit' })}.`}
+            description={t(
+              reconciliation.asked === 1
+                ? '1 attempt from the last ninety days asked about, {time}.'
+                : '{count} attempts from the last ninety days asked about, {time}.',
+              {
+                count: reconciliation.asked,
+                time: reconciliation.askedAt.toLocaleTimeString(region.locale, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+              },
+            )}
           />
           {reconciliation.differences.length ? (
             <CardBody>
@@ -109,17 +133,18 @@ export default async function CardPaymentsPage({
                     className="flex flex-wrap items-baseline gap-2"
                   >
                     <Badge tone="warning" size="sm">
-                      {d.kind.toLowerCase().replace(/_/g, ' ')}
+                      {t(d.kind.toLowerCase().replace(/_/g, ' '))}
                     </Badge>
                     <span>
-                      {d.invoiceNumber ?? 'Invoice'}, {d.customer}: {d.message}
+                      {d.invoiceNumber ?? t('Invoice')}, {d.customer}: {t(d.message)}
                     </span>
                   </li>
                 ))}
               </ul>
               <p className="mt-3 text-[12px] text-(--text-faint)">
-                Nothing has been changed. A payment the provider took and the books lack is recorded
-                by checking that attempt below; anything else is a conversation with the provider.
+                {t(
+                  'Nothing has been changed. A payment the provider took and the books lack is recorded by checking that attempt below; anything else is a conversation with the provider.',
+                )}
               </p>
             </CardBody>
           ) : null}
@@ -128,24 +153,26 @@ export default async function CardPaymentsPage({
 
       {attempts.length === 0 ? (
         <EmptyState
-          title="No card payments yet"
-          description="When a customer pays an invoice online from their portal, every try appears here: paid, declined with the reason, or cancelled."
+          title={t('No card payments yet')}
+          description={t(
+            'When a customer pays an invoice online from their portal, every try appears here: paid, declined with the reason, or cancelled.',
+          )}
         />
       ) : (
         <Card>
           <CardHeader
-            title="Every attempt"
-            description="Newest first. A declined card is kept with its reason."
+            title={t('Every attempt')}
+            description={t('Newest first. A declined card is kept with its reason.')}
           />
           <CardBody className="overflow-x-auto p-0">
             <table className="w-full text-[13px]">
               <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
                 <tr>
-                  <th className="px-4 py-2">When</th>
-                  <th className="px-4 py-2">Invoice</th>
-                  <th className="px-4 py-2">Customer</th>
-                  <th className="px-4 py-2 text-right">Amount</th>
-                  <th className="px-4 py-2">Outcome</th>
+                  <th className="px-4 py-2">{t('When')}</th>
+                  <th className="px-4 py-2">{t('Invoice')}</th>
+                  <th className="px-4 py-2">{t('Customer')}</th>
+                  <th className="px-4 py-2 text-right">{t('Amount')}</th>
+                  <th className="px-4 py-2">{t('Outcome')}</th>
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
@@ -160,7 +187,7 @@ export default async function CardPaymentsPage({
                     </td>
                     <td className="px-4 py-2">
                       <Link href={`/invoices/${a.invoice.id}`} className="underline">
-                        {a.invoice.number ?? 'Invoice'}
+                        {a.invoice.number ?? t('Invoice')}
                       </Link>
                     </td>
                     <td className="px-4 py-2">
@@ -177,14 +204,16 @@ export default async function CardPaymentsPage({
                     </td>
                     <td className="px-4 py-2">
                       <Badge tone={TONE[a.status]} size="sm" dot>
-                        {a.status.toLowerCase()}
+                        {t(a.status.toLowerCase())}
                       </Badge>
                       {a.failureReason ? (
-                        <span className="ml-2 text-(--text-soft)">{a.failureReason}</span>
+                        <span className="ml-2 text-(--text-soft)">{t(a.failureReason)}</span>
                       ) : null}
                       {a.refunds.length ? (
                         <span className="ml-2 text-(--text-faint)">
-                          {a.refunds.length} refund{a.refunds.length === 1 ? '' : 's'} sent back
+                          {a.refunds.length === 1
+                            ? t('1 refund sent back')
+                            : t('{count} refunds sent back', { count: a.refunds.length })}
                         </span>
                       ) : null}
                     </td>
@@ -193,7 +222,7 @@ export default async function CardPaymentsPage({
                         <form action={check}>
                           <input type="hidden" name="attemptId" value={a.id} />
                           <Button type="submit" size="sm" variant="secondary">
-                            Check with the provider
+                            {t('Check with the provider')}
                           </Button>
                         </form>
                       ) : null}

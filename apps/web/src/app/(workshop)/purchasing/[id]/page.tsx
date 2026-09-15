@@ -25,10 +25,11 @@ import { revalidatePath } from 'next/cache';
 
 import { BackLink } from '@/components/back-link';
 import { audit, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { receiveGoods } from '@/lib/inventory';
 import { bookBill, PayablesError } from '@/lib/payables';
 import { ReturnError, returnsFor, sendReturn } from '@/lib/returns';
-import { reasonLabel, RETURN_REASONS, type ReturnReason } from '@carnet/core';
+import { msg, reasonLabel, RETURN_REASONS, type ReturnReason } from '@carnet/core';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,7 +105,10 @@ export async function generateMetadata({
   const { id } = await params;
   const { db } = await requireSession('inventory:read');
   const order = await db.purchaseOrder.findUnique({ where: { id }, select: { number: true } });
-  return { title: order ? `Order ${order.number}` : 'Purchase order' };
+  const t = await tFor();
+  return {
+    title: order ? t('Order {number}', { number: order.number }) : t('Purchase order'),
+  };
 }
 
 /**
@@ -126,6 +130,7 @@ export default async function PurchaseOrderPage({
   const { id } = await params;
   const { error, received, returned } = await searchParams;
   const { db, region, orgId } = await requireSession('inventory:read');
+  const t = await tFor();
   const returns = await returnsFor(orgId, { orderId: id });
 
   const order = await db.purchaseOrder.findUnique({
@@ -173,7 +178,7 @@ export default async function PurchaseOrderPage({
       select: { id: true },
     });
     if (!store) {
-      redirect(`/purchasing/${id}?error=${encodeURIComponent('No warehouse is configured.')}`);
+      redirect(`/purchasing/${id}?error=${encodeURIComponent(msg('No warehouse is configured.'))}`);
     }
 
     const receiptLines = target.lines
@@ -193,7 +198,7 @@ export default async function PurchaseOrderPage({
 
     if (receiptLines.length === 0) {
       redirect(
-        `/purchasing/${id}?error=${encodeURIComponent('Enter a quantity for at least one line.')}`,
+        `/purchasing/${id}?error=${encodeURIComponent(msg('Enter a quantity for at least one line.'))}`,
       );
     }
 
@@ -226,11 +231,11 @@ export default async function PurchaseOrderPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/purchasing">Purchasing</BackLink>
+        <BackLink href="/purchasing">{t('Purchasing')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow={`Purchase order · ${order.supplier.name}`}
+        eyebrow={t('Purchase order · {supplier}', { supplier: order.supplier.name })}
         title={
           <span className="flex flex-wrap items-center gap-3">
             {order.number}
@@ -244,28 +249,32 @@ export default async function PurchaseOrderPage({
               }
               dot
             >
-              {order.status.toLowerCase().replace('_', ' ')}
+              {t(order.status.toLowerCase().replace('_', ' '))}
             </Badge>
           </span>
         }
         description={order.notes ?? undefined}
         actions={
           <Link href="/purchasing">
-            <Button>All purchasing</Button>
+            <Button>{t('All purchasing')}</Button>
           </Link>
         }
       />
 
       {error ? (
-        <Alert tone="danger" title="That delivery was not booked in" className="mb-5">
-          {error}
+        <Alert tone="danger" title={t('That delivery was not booked in')} className="mb-5">
+          {t(error)}
         </Alert>
       ) : null}
 
       {received ? (
-        <Alert tone="success" title="Delivery booked in" className="mb-5">
-          {received} line{received === '1' ? '' : 's'} received. Stock levels and weighted average
-          cost have been updated.
+        <Alert tone="success" title={t('Delivery booked in')} className="mb-5">
+          {received === '1'
+            ? t('1 line received. Stock levels and weighted average cost have been updated.')
+            : t(
+                '{count} lines received. Stock levels and weighted average cost have been updated.',
+                { count: received },
+              )}
         </Alert>
       ) : null}
 
@@ -273,11 +282,13 @@ export default async function PurchaseOrderPage({
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="Lines"
+              title={t('Lines')}
               description={
                 receivable
-                  ? `Booking in to ${warehouse?.name ?? 'the default store'}`
-                  : 'This order is closed'
+                  ? warehouse?.name
+                    ? t('Booking in to {store}', { store: warehouse.name })
+                    : t('Booking in to the default store')
+                  : t('This order is closed')
               }
             />
 
@@ -286,13 +297,13 @@ export default async function PurchaseOrderPage({
                 <Table>
                   <thead>
                     <tr>
-                      <Th>Description</Th>
-                      <Th numeric>Ordered</Th>
-                      <Th numeric>Received</Th>
-                      <Th numeric>Outstanding</Th>
-                      <Th numeric>Unit cost</Th>
-                      {receivable ? <Th numeric>Receiving now</Th> : null}
-                      {receivable ? <Th numeric>Actual cost</Th> : null}
+                      <Th>{t('Description')}</Th>
+                      <Th numeric>{t('Ordered')}</Th>
+                      <Th numeric>{t('Arrived so far')}</Th>
+                      <Th numeric>{t('Still to arrive')}</Th>
+                      <Th numeric>{t('Unit cost')}</Th>
+                      {receivable ? <Th numeric>{t('Receiving now')}</Th> : null}
+                      {receivable ? <Th numeric>{t('Actual cost')}</Th> : null}
                     </tr>
                   </thead>
                   <tbody>
@@ -350,7 +361,9 @@ export default async function PurchaseOrderPage({
                                 // is what usually turns up.
                                 defaultValue={outstanding || ''}
                                 disabled={outstanding === 0}
-                                aria-label={`Quantity received of ${line.description}`}
+                                aria-label={t('Quantity received of {part}', {
+                                  part: line.description,
+                                })}
                                 className="w-24 text-right"
                               />
                             </Td>
@@ -364,7 +377,9 @@ export default async function PurchaseOrderPage({
                                 inputMode="decimal"
                                 defaultValue={line.unitCost.toString()}
                                 disabled={outstanding === 0}
-                                aria-label={`Actual unit cost of ${line.description}`}
+                                aria-label={t('Actual unit cost of {part}', {
+                                  part: line.description,
+                                })}
                                 className="w-24 text-right"
                               />
                             </Td>
@@ -380,16 +395,18 @@ export default async function PurchaseOrderPage({
                 <CardBody className="flex flex-wrap items-end gap-3 border-t border-(--border)">
                   <label className="grid gap-1.5">
                     <span className="text-[12px] font-medium text-(--text-soft)">
-                      Delivery note reference
+                      {t('Delivery note reference')}
                     </span>
+                    {/* i18n-ignore */}
                     <Input name="reference" placeholder="DN-88210" className="w-48" />
                   </label>
                   <Button type="submit" variant="primary" size="lg">
-                    Book in delivery
+                    {t('Book in delivery')}
                   </Button>
                   <p className="text-[12px] text-(--text-faint)">
-                    The delivery note price wins over the ordered price, because that is what you
-                    will be billed.
+                    {t(
+                      'The delivery note price wins over the ordered price, because that is what you will be billed.',
+                    )}
                   </p>
                 </CardBody>
               ) : null}
@@ -397,38 +414,41 @@ export default async function PurchaseOrderPage({
           </Card>
 
           {returned ? (
-            <Alert tone="success" title={`Sent back, ${returned}`}>
-              The parts are off the shelf and their cost is held as a credit the supplier owes.
-              Record the credit note on the{' '}
+            <Alert tone="success" title={t('Sent back, {number}', { number: returned })}>
+              {t(
+                'The parts are off the shelf and their cost is held as a credit the supplier owes.',
+              )}{' '}
               <Link href="/purchasing/returns" className="underline">
-                returns page
-              </Link>{' '}
-              when it arrives.
+                {t('Record the credit note on the returns page when it arrives.')}
+              </Link>
             </Alert>
           ) : null}
 
           {order.receipts.length > 0 ? (
             <Card id="send-back">
               <CardHeader
-                title="Send parts back"
-                description="Faulty, wrong, not needed, or the old unit a core charge was paid on."
+                title={t('Send parts back')}
+                description={t(
+                  'Faulty, wrong, not needed, or the old unit a core charge was paid on.',
+                )}
               />
               <CardBody>
                 <form action={sendBack} className="grid gap-3">
                   <input type="hidden" name="orderId" value={order.id} />
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_6rem_10rem]">
-                    <Field label="Which part">
+                    <Field label={t('Which part')}>
                       <Select name="orderLineId" required>
                         {order.lines
                           .filter((line) => Number(line.received) > 0)
                           .map((line) => (
                             <option key={line.id} value={line.id}>
-                              {line.description} · {Number(line.received)} received
+                              {line.description} ·{' '}
+                              {t('{count} received', { count: Number(line.received) })}
                             </option>
                           ))}
                       </Select>
                     </Field>
-                    <Field label="How many">
+                    <Field label={t('How many')}>
                       <Input
                         name="quantity"
                         type="number"
@@ -438,27 +458,27 @@ export default async function PurchaseOrderPage({
                         required
                       />
                     </Field>
-                    <Field label="Why">
+                    <Field label={t('Why')}>
                       <Select name="reason" defaultValue="DEFECTIVE">
                         {RETURN_REASONS.map((reason) => (
                           <option key={reason} value={reason}>
-                            {reasonLabel(reason)}
+                            {t(reasonLabel(reason))}
                           </option>
                         ))}
                       </Select>
                     </Field>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
-                    <Field label="Core charge, each" hint="Only for a core.">
+                    <Field label={t('Core charge, each')} hint={t('Only for a core.')}>
                       <Input name="coreCharge" type="number" step="0.01" min="0" />
                     </Field>
-                    <Field label="Note for the supplier">
-                      <Input name="notes" placeholder="Pads squeal from new; batch 2291" />
+                    <Field label={t('Note for the supplier')}>
+                      <Input name="notes" placeholder={t('Pads squeal from new; batch 2291')} />
                     </Field>
                   </div>
                   <div>
                     <Button type="submit" variant="secondary">
-                      Send back
+                      {t('Send back')}
                     </Button>
                   </div>
                 </form>
@@ -471,7 +491,7 @@ export default async function PurchaseOrderPage({
                           {r.lines
                             .map((l) => `${Number(l.quantity)} × ${l.description}`)
                             .join(', ')}{' '}
-                          · {reasonLabel(r.reason)}
+                          · {t(reasonLabel(r.reason))}
                         </span>
                         <Badge
                           tone={
@@ -483,7 +503,7 @@ export default async function PurchaseOrderPage({
                           }
                           size="sm"
                         >
-                          {r.status === 'SENT' ? 'awaiting credit' : r.status.toLowerCase()}
+                          {r.status === 'SENT' ? t('awaiting credit') : t(r.status.toLowerCase())}
                         </Badge>
                       </li>
                     ))}
@@ -495,12 +515,14 @@ export default async function PurchaseOrderPage({
 
           {order.receipts.length > 0 ? (
             <Card>
-              <CardHeader title="Deliveries" />
+              <CardHeader title={t('Deliveries')} />
               <ul className="divide-y divide-(--border)">
                 {order.receipts.map((receipt) => (
                   <li key={receipt.id} className="flex items-center justify-between px-4 py-2.5">
                     <div>
-                      <p className="text-[13px] font-medium">{receipt.reference ?? 'Delivery'}</p>
+                      <p className="text-[13px] font-medium">
+                        {receipt.reference ?? t('Delivery')}
+                      </p>
                       <p className="datum text-[11px] text-(--text-faint)">
                         {receipt.receivedAt.toLocaleString(region.locale, {
                           dateStyle: 'medium',
@@ -509,7 +531,9 @@ export default async function PurchaseOrderPage({
                       </p>
                     </div>
                     <span className="text-[13px] text-(--text-soft)">
-                      {receipt.lines.length} line{receipt.lines.length === 1 ? '' : 's'}
+                      {receipt.lines.length === 1
+                        ? t('1 line')
+                        : t('{count} lines', { count: receipt.lines.length })}
                     </span>
                   </li>
                 ))}
@@ -520,20 +544,24 @@ export default async function PurchaseOrderPage({
 
         <aside className="grid content-start gap-5">
           <Card>
-            <CardHeader title="Order" />
+            <CardHeader title={t('Order')} />
             <CardBody>
               <KeyValue
+                t={t}
                 columns={1}
                 items={[
-                  { label: 'Supplier', value: order.supplier.name },
-                  { label: 'Account', value: order.supplier.accountRef },
-                  { label: 'Payment terms', value: `${order.supplier.paymentTermsDays} days` },
+                  { label: t('Supplier'), value: order.supplier.name },
+                  { label: t('Account'), value: order.supplier.accountRef },
                   {
-                    label: 'Expected',
+                    label: t('Payment terms'),
+                    value: t('{count} days', { count: order.supplier.paymentTermsDays }),
+                  },
+                  {
+                    label: t('Expected'),
                     value: order.expectedAt?.toLocaleDateString(region.locale),
                   },
                   {
-                    label: 'Value',
+                    label: t('Value'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -543,7 +571,7 @@ export default async function PurchaseOrderPage({
                     ),
                   },
                   {
-                    label: 'Outstanding',
+                    label: t('Still to arrive'),
                     value:
                       totals.outstandingValue.minor > 0 ? (
                         <Money
@@ -560,19 +588,20 @@ export default async function PurchaseOrderPage({
 
           <Card>
             <CardHeader
-              title="Book the supplier's bill"
-              description="Their invoice number and figures, as printed"
+              title={t('Book the supplier’s bill')}
+              description={t('Their invoice number and figures, as printed')}
             />
             <form action={book}>
               <CardBody className="grid gap-3">
                 <input type="hidden" name="orderId" value={order.id} />
                 <label className="grid gap-1">
-                  <span className="eyebrow">Their invoice number</span>
+                  <span className="eyebrow">{t('Their invoice number')}</span>
+                  {/* i18n-ignore */}
                   <Input name="reference" required placeholder="PMF-40128" className="font-mono" />
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1">
-                    <span className="eyebrow">Net</span>
+                    <span className="eyebrow">{t('Net')}</span>
                     <Input
                       name="subtotal"
                       inputMode="decimal"
@@ -582,7 +611,7 @@ export default async function PurchaseOrderPage({
                     />
                   </label>
                   <label className="grid gap-1">
-                    <span className="eyebrow">VAT</span>
+                    <span className="eyebrow">{t('VAT')}</span>
                     <Input
                       name="taxTotal"
                       inputMode="decimal"
@@ -592,11 +621,11 @@ export default async function PurchaseOrderPage({
                   </label>
                 </div>
                 <label className="grid gap-1">
-                  <span className="eyebrow">Dated</span>
+                  <span className="eyebrow">{t('Dated')}</span>
                   <Input name="billedAt" type="date" />
                 </label>
                 <Button type="submit" variant="secondary">
-                  Book the bill
+                  {t('Book the bill')}
                 </Button>
               </CardBody>
             </form>
@@ -604,14 +633,14 @@ export default async function PurchaseOrderPage({
 
           {order.bills.length > 0 ? (
             <Card>
-              <CardHeader title="Bills" />
+              <CardHeader title={t('Bills')} />
               <ul className="divide-y divide-(--border)">
                 {order.bills.map((bill) => (
                   <li key={bill.id} className="px-4 py-2.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="datum text-[12px] font-medium">{bill.reference}</span>
                       <Badge tone={bill.status === 'DISPUTED' ? 'danger' : 'neutral'} size="sm">
-                        {bill.status.toLowerCase()}
+                        {t(bill.status.toLowerCase().replace('_', ' '))}
                       </Badge>
                     </div>
                     <p className="mt-0.5 text-[13px]">

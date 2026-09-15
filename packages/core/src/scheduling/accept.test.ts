@@ -81,7 +81,10 @@ describe('describeAcceptance', () => {
       '3 placements written into the diary for Monday 14 September.',
     );
     expect(describeAcceptance(1, 1, monday)).toMatch(
-      /1 placement written .* 1 names no technician/,
+      /1 placement written .* 1 of them has no technician, because that person/,
+    );
+    expect(describeAcceptance(3, 2, monday)).toMatch(
+      /2 of them have no technician, because those people/,
     );
   });
 });

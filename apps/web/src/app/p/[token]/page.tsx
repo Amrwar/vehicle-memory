@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { BackToOrigin } from '@/components/back-to-origin';
 import { VehiclePassport } from '@/components/vehicle-passport';
 import { hashShareToken } from '@/lib/auth';
+import { tFor } from '@/lib/i18n';
 import { reportFor } from '@/lib/handover';
 import { mileageFindings } from '@/lib/insights';
 import { verifyVehicleChain } from '@/lib/passport';
@@ -14,10 +15,13 @@ import { safeLocale } from '@carnet/core';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Vehicle passport',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Vehicle passport'),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * The public vehicle passport, as a passport. Phase 23.
@@ -38,6 +42,7 @@ export default async function PublicPassportPage({
 }: {
   params: Promise<{ token: string }>;
 }) {
+  const t = await tFor();
   const { token } = await params;
 
   const share = await prisma.passportShare.findUnique({
@@ -96,10 +101,10 @@ export default async function PublicPassportPage({
     <div className="min-h-dvh bg-(--ground)">
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-          <BackToOrigin label="Back" />
+          <BackToOrigin label={t('Back')} />
           <span className="ml-auto flex items-center gap-2">
             <PassportEmblem size={20} className="text-(--accent)" />
-            <span className="eyebrow">Vehicle passport</span>
+            <span className="eyebrow">{t('Vehicle passport')}</span>
           </span>
         </div>
       </header>
@@ -116,20 +121,29 @@ export default async function PublicPassportPage({
 
         <footer className="mt-6 border-t border-(--border) pt-4 text-[12px] text-(--text-faint)">
           <p>
-            Shared by the vehicle&rsquo;s owner. This link expires on{' '}
-            <time className="datum">
-              {share.expiresAt.toLocaleDateString(locale, {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </time>
-            , and the owner can revoke it at any time. Your visit has been recorded and is visible
-            to them.
+            {t(
+              'Shared by the vehicle’s owner. This link expires on {date}, and the owner can revoke it at any time. Your visit has been recorded and is visible to them.',
+            )
+              .split('{date}')
+              .flatMap((part, index) =>
+                index === 0
+                  ? [part]
+                  : [
+                      <time key={index} className="datum">
+                        {share.expiresAt.toLocaleDateString(locale, {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </time>,
+                      part,
+                    ],
+              )}
           </p>
           <p className="mt-2">
-            No personal details of any owner are shown. Carnet does not verify claims made outside
-            this record.
+            {t(
+              'No personal details of any owner are shown. Carnet does not verify claims made outside this record.',
+            )}
           </p>
         </footer>
       </main>

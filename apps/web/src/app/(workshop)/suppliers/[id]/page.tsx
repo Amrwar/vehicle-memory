@@ -21,10 +21,14 @@ import { notFound } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { supplierOverTime } from '@/lib/owner';
 import { supplierDetail } from '@/lib/suppliers';
 
-export const metadata: Metadata = { title: 'Supplier' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Supplier') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -46,6 +50,7 @@ function date(value: Date | null, locale: string): string {
 
 export default async function SupplierPage({ params }: { params: Promise<{ id: string }> }) {
   const { orgId, region } = await requireSession('inventory:read');
+  const t = await tFor();
   const { id } = await params;
 
   const supplier = await supplierDetail(orgId, id);
@@ -55,40 +60,44 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/suppliers">All suppliers</BackLink>
+        <BackLink href="/suppliers">{t('All suppliers')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Suppliers"
+        eyebrow={t('Suppliers')}
         title={supplier.name}
         description={
-          supplier.accountRef ? `Account ${supplier.accountRef}` : 'No account reference on file'
+          supplier.accountRef
+            ? t('Account {reference}', { reference: supplier.accountRef })
+            : t('No account reference on file')
         }
       />
 
       <StatRow className="mb-5">
         <StatTile
-          label="Orders placed"
+          label={t('Orders placed')}
           value={supplier.orderCount}
-          note={`${supplier.openOrders} still open`}
+          note={t('{count} still open', { count: supplier.openOrders })}
         />
         <StatTile
-          label="Typical wait"
-          value={supplier.leadTimeDays === null ? '—' : `${supplier.leadTimeDays}d`}
+          label={t('Typical wait')}
+          value={
+            supplier.leadTimeDays === null ? '—' : t('{days}d', { days: supplier.leadTimeDays })
+          }
           note={
             supplier.leadTimeDays === null
-              ? 'Not enough received orders'
-              : 'Order to delivery, measured'
+              ? t('Not enough received orders')
+              : t('Order to delivery, measured')
           }
         />
         <StatTile
-          label="Arrived late"
+          label={t('Arrived late')}
           value={supplier.lateCount}
           tone={supplier.lateCount > 0 ? 'warning' : 'neutral'}
-          note="Past the date they promised"
+          note={t('Past the date they promised')}
         />
         <StatTile
-          label="Owed"
+          label={t('Owed')}
           value={
             <Money
               currency={region.currency}
@@ -96,7 +105,11 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
               amount={supplier.outstanding}
             />
           }
-          note={`${supplier.openBills} bill${supplier.openBills === 1 ? '' : 's'} unpaid`}
+          note={
+            supplier.openBills === 1
+              ? t('1 bill unpaid')
+              : t('{count} bills unpaid', { count: supplier.openBills })
+          }
         />
       </StatRow>
 
@@ -104,39 +117,46 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
             <strong className="font-semibold">
-              {supplier.disputed} bill{supplier.disputed === 1 ? '' : 's'} in dispute.
+              {supplier.disputed === 1
+                ? t('1 bill in dispute.')
+                : t('{count} bills in dispute.', { count: supplier.disputed })}
             </strong>{' '}
-            The invoice does not match what was ordered or what arrived. Nothing is paid until
-            somebody resolves it, which is the point of the three-way match.
+            {t(
+              'The invoice does not match what was ordered or what arrived. Nothing is paid until somebody resolves it, which is the point of the three-way match.',
+            )}
           </CardBody>
         </Card>
       ) : null}
 
       <div className="mb-5 grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Getting hold of them" />
+          <CardHeader title={t('Getting hold of them')} />
           <CardBody>
             <KeyValue
+              t={t}
               items={[
-                { label: 'Email', value: supplier.email ?? '—' },
-                { label: 'Phone', value: supplier.phone ?? '—' },
+                { label: t('Email'), value: supplier.email ?? '—' },
+                { label: t('Phone'), value: supplier.phone ?? '—' },
                 {
-                  label: 'Address',
+                  label: t('Address'),
                   value:
                     [supplier.addressLine1, supplier.locality, supplier.postcode]
                       .filter(Boolean)
                       .join(', ') || '—',
                 },
-                { label: 'Payment terms', value: `${supplier.paymentTermsDays} days` },
                 {
-                  label: 'Status',
+                  label: t('Payment terms'),
+                  value: t('{count} days', { count: supplier.paymentTermsDays }),
+                },
+                {
+                  label: t('Status'),
                   value: supplier.isActive ? (
                     <Badge tone="success" size="sm">
-                      active
+                      {t('active')}
                     </Badge>
                   ) : (
                     <Badge tone="neutral" size="sm">
-                      no longer used
+                      {t('no longer used')}
                     </Badge>
                   ),
                 },
@@ -147,14 +167,18 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
 
         <Card>
           <CardHeader
-            title="What they charge"
-            description="The last price paid for each part, so a rise is visible rather than absorbed."
+            title={t('What they charge')}
+            description={t(
+              'The last price paid for each part, so a rise is visible rather than absorbed.',
+            )}
           />
           <CardBody className="p-0">
             {supplier.prices.length === 0 ? (
               <EmptyState
-                title="Nothing received yet"
-                description="Prices appear here once an order from this supplier has been received."
+                title={t('Nothing received yet')}
+                description={t(
+                  'Prices appear here once an order from this supplier has been received.',
+                )}
               />
             ) : (
               <ul className="divide-y divide-(--border-soft)">
@@ -171,7 +195,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         {price.name}
                       </Link>
                       <span className="block text-[11px] text-(--text-faint)">
-                        last on {date(price.lastAt, region.locale)}
+                        {t('last on {date}', { date: date(price.lastAt, region.locale) })}
                       </span>
                     </span>
                     <span className="text-right text-[13px] font-medium tabular-nums">
@@ -188,7 +212,9 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                               : 'block text-[11px] font-normal text-(--success)'
                           }
                         >
-                          {price.change > 0 ? 'up' : 'down'} {Math.abs(price.change).toFixed(1)}%
+                          {price.change > 0
+                            ? t('up {percent}%', { percent: Math.abs(price.change).toFixed(1) })
+                            : t('down {percent}%', { percent: Math.abs(price.change).toFixed(1) })}
                         </span>
                       ) : null}
                     </span>
@@ -202,13 +228,15 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
 
       <Card id="over-time" className="mb-5 overflow-hidden">
         <CardHeader
-          title="Over the year"
-          description="Quarter by quarter, measured from their orders. A figure shows only when three orders or more stand behind it."
+          title={t('Over the year')}
+          description={t(
+            'Quarter by quarter, measured from their orders. A figure shows only when three orders or more stand behind it.',
+          )}
         />
         <CardBody className="border-b border-(--border) text-[13px] leading-relaxed">
           <ul className="grid gap-1">
             {history.sentences.map((sentence) => (
-              <li key={sentence}>{sentence}</li>
+              <li key={sentence}>{t(sentence)}</li>
             ))}
           </ul>
         </CardBody>
@@ -216,23 +244,30 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
           <Table>
             <thead>
               <tr>
-                <Th>Quarter</Th>
-                <Th numeric>Orders</Th>
-                <Th numeric>Typical wait</Th>
-                <Th numeric>By the day promised</Th>
-                <Th numeric>Delivered in full</Th>
-                <Th numeric>Sent back as faulty or wrong</Th>
+                <Th>{t('Quarter')}</Th>
+                <Th numeric>{t('Orders')}</Th>
+                <Th numeric>{t('Typical wait')}</Th>
+                <Th numeric>{t('By the day promised')}</Th>
+                <Th numeric>{t('Delivered in full')}</Th>
+                <Th numeric>{t('Sent back as faulty or wrong')}</Th>
               </tr>
             </thead>
             <tbody>
               {history.periods.map((period) => (
                 <Tr key={period.label}>
-                  <Td className="font-medium">{period.label}</Td>
+                  <Td className="font-medium">
+                    {t('Q{quarter} {year}', {
+                      quarter: Math.floor(period.start.getMonth() / 3) + 1,
+                      year: period.start.getFullYear(),
+                    })}
+                  </Td>
                   <Td numeric className="text-(--text-soft)">
                     {period.measures.orders}
                   </Td>
                   <Td numeric>
-                    {period.measures.leadDays === null ? '—' : `${period.measures.leadDays}d`}
+                    {period.measures.leadDays === null
+                      ? '—'
+                      : t('{days}d', { days: period.measures.leadDays })}
                   </Td>
                   <Td numeric>
                     {period.measures.onTimePct === null ? '—' : `${period.measures.onTimePct}%`}
@@ -252,25 +287,25 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
 
       <Card className="overflow-hidden">
         <CardHeader
-          title="Orders"
-          description="Newest first, with what was promised against what happened."
+          title={t('Orders')}
+          description={t('Newest first, with what was promised against what happened.')}
         />
         {supplier.orders.length === 0 ? (
           <EmptyState
-            title="No orders yet"
-            description="Raise one from the purchasing screen and it will appear here."
+            title={t('No orders yet')}
+            description={t('Raise one from the purchasing screen and it will appear here.')}
           />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Order</Th>
-                  <Th>Placed</Th>
-                  <Th>Promised</Th>
-                  <Th>Arrived</Th>
-                  <Th>State</Th>
-                  <Th numeric>Value</Th>
+                  <Th>{t('Order')}</Th>
+                  <Th>{t('Placed')}</Th>
+                  <Th>{t('Promised')}</Th>
+                  <Th>{t('Arrived')}</Th>
+                  <Th>{t('State')}</Th>
+                  <Th numeric>{t('Value')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -292,7 +327,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                           {date(order.receivedAt, region.locale)}
                         </span>
                       ) : (
-                        <span className="text-(--text-faint)">not yet</span>
+                        <span className="text-(--text-faint)">{t('not yet')}</span>
                       )}
                     </Td>
                     <Td>
@@ -306,7 +341,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         }
                         size="sm"
                       >
-                        {order.status.toLowerCase().replace('_', ' ')}
+                        {t(order.status.toLowerCase().replace('_', ' '))}
                       </Badge>
                     </Td>
                     <Td numeric>

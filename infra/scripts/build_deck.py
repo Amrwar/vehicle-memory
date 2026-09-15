@@ -572,8 +572,8 @@ def build() -> Path:
     rule(slide, Inches(2.15))
 
     phases = [
-        ('39', 'Finding anything', 'Built: one box for a plate however typed, a VIN, a phone number, a job, an invoice or a part, straight to the record; notifications for staff.'),
         ('40', 'The owner\'s day, sharpened', 'Built: the comeback rate by site and person; the reputation trend; suppliers side by side on every part and over the year; the dashboard in three blocks.'),
+        ('40.5', 'Every word translated', 'Built: every page, component, page title and refusal in French and Arabic; a scan that fails on any text left outside the translator.'),
         ('41', 'Tax, configurable', 'Several taxes on a line, exempt customers, tax by site, inclusive or exclusive prices, a report per tax.'),
         ('42', 'Paper', 'Print styles for every document; work order, invoice, estimate and inspection as PDF; labels, key tags and QR codes.'),
         ('43', 'Providers', 'VIN decoding and a fitment feed behind seams; payroll exported; reviews posted to Google.'),

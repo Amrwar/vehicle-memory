@@ -18,9 +18,13 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { EXPORTS } from '@/lib/exports';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { ImportError, importsFor, uploadImport } from '@/lib/imports';
 
-export const metadata: Metadata = { title: 'Data in and out' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Data in and out') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -67,21 +71,24 @@ export default async function DataPage({
   const { orgId, region } = await requireSession('settings:read');
   const { problem } = await searchParams;
   const imports = await importsFor(orgId);
+  const t = await tFor();
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
       <PageHeader
-        eyebrow="Settings"
-        title="Data in and out"
-        description="Bring what you have from another system; take everything with you whenever you like"
+        eyebrow={t('Settings')}
+        title={t('Data in and out')}
+        description={t(
+          'Bring what you have from another system; take everything with you whenever you like',
+        )}
       />
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
@@ -89,23 +96,27 @@ export default async function DataPage({
         <div className="grid content-start gap-5">
           <Card className="border-(--brand)">
             <CardHeader
-              title="Import a file"
-              description="A CSV from any system. You map the columns on the next page, see every problem row by row, then import."
+              title={t('Import a file')}
+              description={t(
+                'A CSV from any system. You map the columns on the next page, see every problem row by row, then import.',
+              )}
             />
             <CardBody>
               <form action={upload} className="grid gap-4">
-                <Field label="What is in the file?">
+                <Field label={t('What is in the file?')}>
                   <Select name="dataset" defaultValue="customers">
                     {DATASETS.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.title}
+                        {t(d.title)}
                       </option>
                     ))}
                   </Select>
                 </Field>
                 <Field
-                  label="The file"
-                  hint="CSV, up to 20,000 rows. Commas, semicolons or tabs; the first line is the headers."
+                  label={t('The file')}
+                  hint={t(
+                    'CSV, up to 20,000 rows. Commas, semicolons or tabs; the first line is the headers.',
+                  )}
                 >
                   <input
                     type="file"
@@ -117,14 +128,15 @@ export default async function DataPage({
                 </Field>
                 <div>
                   <Button type="submit" variant="primary">
-                    Upload and map the columns
+                    {t('Upload and map the columns')}
                   </Button>
                 </div>
               </form>
               <ul className="mt-4 grid gap-1 text-[12px] text-(--text-faint)">
                 {DATASETS.map((d) => (
                   <li key={d.id}>
-                    <span className="font-medium text-(--text-soft)">{d.title}.</span> {d.becomes}
+                    <span className="font-medium text-(--text-soft)">{t(d.title)}.</span>{' '}
+                    {t(d.becomes)}
                   </li>
                 ))}
               </ul>
@@ -132,11 +144,11 @@ export default async function DataPage({
           </Card>
 
           <Card>
-            <CardHeader title="Imports so far" />
+            <CardHeader title={t('Imports so far')} />
             {imports.length === 0 ? (
               <EmptyState
-                title="Nothing imported yet"
-                description="Files you bring appear here with what became of them."
+                title={t('Nothing imported yet')}
+                description={t('Files you bring appear here with what became of them.')}
               />
             ) : (
               <ul className="divide-y divide-(--border)">
@@ -159,8 +171,12 @@ export default async function DataPage({
                           {batch.fileName}
                         </Link>
                         <p className="text-[12px] text-(--text-faint)">
-                          {DATASETS.find((d) => d.id === batch.dataset)?.title ?? batch.dataset} ·{' '}
-                          {batch.rowCount.toLocaleString(region.locale)} rows ·{' '}
+                          {t(DATASETS.find((d) => d.id === batch.dataset)?.title ?? batch.dataset)}{' '}
+                          ·{' '}
+                          {t('{count} rows', {
+                            count: batch.rowCount.toLocaleString(region.locale),
+                          })}{' '}
+                          ·{' '}
                           {batch.createdAt.toLocaleDateString(region.locale, {
                             day: 'numeric',
                             month: 'short',
@@ -168,16 +184,19 @@ export default async function DataPage({
                           })}
                           {batch.createdBy ? ` · ${batch.createdBy.name}` : ''}
                           {report
-                            ? ` · ${report.imported ?? 0} in, ${(report.failed?.length ?? 0) + (report.invalid ?? 0)} not`
+                            ? ` · ${t('{imported} in, {left} not', {
+                                imported: report.imported ?? 0,
+                                left: (report.failed?.length ?? 0) + (report.invalid ?? 0),
+                              })}`
                             : ''}
                         </p>
                       </div>
                       <Badge tone={TONE[batch.status]} size="sm" dot>
                         {batch.status === 'UPLOADED'
-                          ? 'to map'
+                          ? t('to map')
                           : batch.status === 'MAPPED'
-                            ? 'ready'
-                            : 'imported'}
+                            ? t('ready')
+                            : t('imported')}
                       </Badge>
                     </li>
                   );
@@ -189,8 +208,10 @@ export default async function DataPage({
 
         <Card>
           <CardHeader
-            title="Export everything"
-            description="Each dataset whole, in the shape the import reads. The passports go out as the network exchanges them."
+            title={t('Export everything')}
+            description={t(
+              'Each dataset whole, in the shape the import reads. The passports go out as the network exchanges them.',
+            )}
           />
           <CardBody>
             <ul className="grid gap-2">
@@ -199,18 +220,19 @@ export default async function DataPage({
                   key={e.id}
                   className="flex items-center justify-between gap-3 rounded-(--radius-md) border border-(--border) px-3.5 py-2.5"
                 >
-                  <span className="text-[14px] font-medium">{e.title}</span>
+                  <span className="text-[14px] font-medium">{t(e.title)}</span>
                   <a href={`/api/exports/${e.id}`} className="shrink-0">
                     <Button variant={e.id === 'everything' ? 'primary' : 'secondary'} size="sm">
-                      {e.kind === 'csv' ? 'Download CSV' : 'Download JSON'}
+                      {e.kind === 'csv' ? t('Download CSV') : t('Download JSON')}
                     </Button>
                   </a>
                 </li>
               ))}
             </ul>
             <p className="mt-4 text-[12px] leading-relaxed text-(--text-faint)">
-              Exports work in every state of the subscription, including read-only and cancelled.
-              Your data is yours; the terms say so and this page keeps the promise.
+              {t(
+                'Exports work in every state of the subscription, including read-only and cancelled. Your data is yours; the terms say so and this page keeps the promise.',
+              )}
             </p>
           </CardBody>
         </Card>

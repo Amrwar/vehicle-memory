@@ -39,6 +39,8 @@ export interface ReportInput {
   /** The chain verification, which is the only part a buyer cannot fake. */
   chain: Verdict;
   now?: Date;
+  /** The reader's locale, for the dates and numbers inside the sentences. Phase 40.5. */
+  locale?: string;
 }
 
 export interface ReportLine {
@@ -67,8 +69,11 @@ function years(from: Date, to: Date): number {
   return Math.max(0, (to.getTime() - from.getTime()) / (365.25 * 86_400_000));
 }
 
+/** Set and restored around one synchronous buildReport call. */
+let locale = 'en-GB';
+
 function date(value: Date): string {
-  return value.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  return value.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 /**
@@ -79,6 +84,16 @@ function date(value: Date): string {
  * three implementations drifting apart.
  */
 export function buildReport(input: ReportInput): Report {
+  const previous = locale;
+  locale = input.locale ?? 'en-GB';
+  try {
+    return reportOf(input);
+  } finally {
+    locale = previous;
+  }
+}
+
+function reportOf(input: ReportInput): Report {
   const now = input.now ?? new Date();
 
   const headline: ReportLine[] = [
@@ -98,7 +113,7 @@ export function buildReport(input: ReportInput): Report {
     },
     {
       label: 'Mileage recorded',
-      value: input.odometerKm == null ? 'None' : `${input.odometerKm.toLocaleString('en-GB')} km`,
+      value: input.odometerKm == null ? 'None' : `${input.odometerKm.toLocaleString(locale)} km`,
     },
     {
       label: 'Last service',

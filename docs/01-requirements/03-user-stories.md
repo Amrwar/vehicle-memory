@@ -1566,6 +1566,33 @@ shelf as figures **so that** I know what needs me before the doors open.
 
 ---
 
+## Epic AO — Every word translated (Phase 40.5)
+
+### AO1 — A workshop in French
+
+**As** Claire, who runs a workshop in Lyon and reads no English, **I want**
+every screen in French **so that** I never meet a page I cannot use.
+**Size** 8 · **Satisfies** FR-7101, FR-7103, FR-7104
+
+- **Given** French is chosen, **when** I open any workshop page, **then**
+  every heading, label, button, empty state and page title is French.
+- **Given** a customer called Maria, **when** I read her record in French,
+  **then** she is still Maria.
+
+### AO2 — Refused in Arabic
+
+**As** a receptionist in Cairo **I want** a refusal in Arabic **so that** I
+know what to do next.
+**Size** 3 · **Satisfies** FR-7102, FR-7105
+
+- **Given** Arabic is chosen, **when** I try to record a comeback with no
+  reason, **then** the sentence that refuses it is Arabic, with the job
+  number in it.
+- **Given** a developer adds a heading in English only, **when** the checks
+  run, **then** the scanner names the file and line and the phase fails.
+
+---
+
 ## Story map
 
 ```

@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { applyBillingEvent } from '@/lib/billing';
+import { tFor } from '@/lib/i18n';
 import { paymentProvider } from '@/lib/payments/provider';
 import { stubAddCard, stubCharge, stubSubscriptionOf } from '@/lib/payments/stub';
 
-export const metadata: Metadata = { title: 'Test billing' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Test billing') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -77,6 +81,7 @@ export default async function StubSubscribePage({
   searchParams: Promise<{ portal?: string; return?: string }>;
 }) {
   if (paymentProvider().name !== 'stub') notFound();
+  const t = await tFor();
   const { orgId } = await params;
   const { portal, return: back } = await searchParams;
   const org = await prisma.organization.findUnique({
@@ -90,42 +95,57 @@ export default async function StubSubscribePage({
     formatMinor(minor, { currency: sub.currency, locale: org.locale });
   const monthly = sub.amountMinor * sub.quantity;
   const isPortal = portal === '1' && sub.status !== 'INCOMPLETE';
+  const planName = t(sub.plan.charAt(0) + sub.plan.slice(1).toLowerCase());
 
   return (
     <main className="min-h-dvh bg-[#f3f4f6] px-4 py-10 font-sans text-[#111827]">
       <div className="mx-auto max-w-md rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">
-          {isPortal ? 'Test billing portal' : 'Test checkout'}
+          {isPortal ? t('Test billing portal') : t('Test checkout')}
         </p>
-        <h1 className="mt-1 text-[20px] font-semibold">Carnet, for {org.name}</h1>
+        <h1 className="mt-1 text-[20px] font-semibold">
+          {t('Carnet, for {workshop}', { workshop: org.name })}
+        </h1>
 
         {isPortal ? (
           <>
             <p className="mt-1 text-[14px] text-[#6b7280]">
-              This page stands in for the provider&apos;s billing portal while none is connected.
+              {t('This page stands in for the provider’s billing portal while none is connected.')}
             </p>
             <dl className="mt-5 grid gap-2 text-[14px]">
               <div className="flex justify-between">
-                <dt className="text-[#6b7280]">Card</dt>
-                <dd>{sub.card ? `${sub.card.brand} ending ${sub.card.last4}` : 'none'}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-[#6b7280]">Plan</dt>
+                <dt className="text-[#6b7280]">{t('Card')}</dt>
                 <dd>
-                  {sub.plan}, {sub.quantity} {sub.quantity === 1 ? 'bay' : 'bays'}, {money(monthly)}{' '}
-                  a month
+                  {sub.card
+                    ? t('{brand} ending {last4}', { brand: sub.card.brand, last4: sub.card.last4 })
+                    : t('none')}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-[#6b7280]">Status</dt>
-                <dd>{sub.status.toLowerCase().replace('_', ' ')}</dd>
+                <dt className="text-[#6b7280]">{t('Plan')}</dt>
+                <dd>
+                  {sub.quantity === 1
+                    ? t('{plan}, 1 bay, {amount} a month', {
+                        plan: planName,
+                        amount: money(monthly),
+                      })
+                    : t('{plan}, {count} bays, {amount} a month', {
+                        plan: planName,
+                        count: sub.quantity,
+                        amount: money(monthly),
+                      })}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-[#6b7280]">{t('Status')}</dt>
+                <dd>{t(sub.status.toLowerCase().replace('_', ' '))}</dd>
               </div>
             </dl>
             <h2 className="mt-5 text-[13px] font-semibold uppercase tracking-wider text-[#6b7280]">
-              Invoices
+              {t('Invoices')}
             </h2>
             {sub.invoices.length === 0 ? (
-              <p className="mt-1 text-[14px] text-[#6b7280]">None yet.</p>
+              <p className="mt-1 text-[14px] text-[#6b7280]">{t('None yet.')}</p>
             ) : (
               <ul className="mt-1 divide-y divide-[#e5e7eb] text-[14px]">
                 {sub.invoices.map((i) => (
@@ -134,7 +154,7 @@ export default async function StubSubscribePage({
                       {i.number} · {new Date(i.issuedAt).toLocaleDateString(org.locale)}
                     </span>
                     <span>
-                      {money(i.amountMinor)} · {i.status.toLowerCase()}
+                      {money(i.amountMinor)} · {t(i.status.toLowerCase())}
                     </span>
                   </li>
                 ))}
@@ -149,7 +169,7 @@ export default async function StubSubscribePage({
                 value="charge"
                 className="rounded-lg border border-[#e5e7eb] px-4 py-3 text-[14px]"
               >
-                Simulate the next charge succeeding ({money(monthly)})
+                {t('Simulate the next charge succeeding ({amount})', { amount: money(monthly) })}
               </button>
               <button
                 type="submit"
@@ -157,7 +177,7 @@ export default async function StubSubscribePage({
                 value="fail"
                 className="rounded-lg border border-[#e5e7eb] px-4 py-3 text-[14px]"
               >
-                Simulate the next charge failing
+                {t('Simulate the next charge failing')}
               </button>
               <button
                 type="submit"
@@ -165,22 +185,33 @@ export default async function StubSubscribePage({
                 value="back"
                 className="rounded-lg px-4 py-3 text-[14px] text-[#6b7280] underline"
               >
-                Back to Carnet
+                {t('Back to Carnet')}
               </button>
             </form>
           </>
         ) : (
           <>
             <p className="mt-1 text-[14px] text-[#6b7280]">
-              No card is charged here: this page stands in for a payment provider while none is
-              connected.
+              {t(
+                'No card is charged here: this page stands in for a payment provider while none is connected.',
+              )}
             </p>
             <p className="mt-5 text-[32px] font-semibold tabular-nums">{money(0)}</p>
             <p className="text-[14px] text-[#6b7280]">
-              due today. {TRIAL_DAYS} days free, then {money(monthly)} a month for {sub.quantity}{' '}
-              {sub.quantity === 1 ? 'bay' : 'bays'} on{' '}
-              {sub.plan.charAt(0) + sub.plan.slice(1).toLowerCase()}, charged to the card unless
-              cancelled before the trial ends.
+              {sub.quantity === 1
+                ? t(
+                    'due today. {days} days free, then {amount} a month for 1 bay on {plan}, charged to the card unless cancelled before the trial ends.',
+                    { days: TRIAL_DAYS, amount: money(monthly), plan: planName },
+                  )
+                : t(
+                    'due today. {days} days free, then {amount} a month for {count} bays on {plan}, charged to the card unless cancelled before the trial ends.',
+                    {
+                      days: TRIAL_DAYS,
+                      amount: money(monthly),
+                      count: sub.quantity,
+                      plan: planName,
+                    },
+                  )}
             </p>
             <form action={decide} className="mt-6 grid gap-2">
               <input type="hidden" name="orgId" value={org.id} />
@@ -190,7 +221,7 @@ export default async function StubSubscribePage({
                 value="card"
                 className="rounded-lg bg-[#111827] px-4 py-3 text-[15px] font-semibold text-white"
               >
-                Add a test card and start the trial
+                {t('Add a test card and start the trial')}
               </button>
               <button
                 type="submit"
@@ -198,14 +229,22 @@ export default async function StubSubscribePage({
                 value="back"
                 className="rounded-lg px-4 py-3 text-[14px] text-[#6b7280] underline"
               >
-                Go back without adding a card
+                {t('Go back without adding a card')}
               </button>
             </form>
             <p className="mt-4 text-[12px] text-[#9ca3af]">
-              <Link href="/terms" className="underline">
-                The terms
-              </Link>{' '}
-              say the same thing as this page.
+              {t('{terms} say the same thing as this page.')
+                .split('{terms}')
+                .flatMap((part, index) =>
+                  index === 0
+                    ? [part]
+                    : [
+                        <Link key={index} href="/terms" className="underline">
+                          {t('The terms')}
+                        </Link>,
+                        part,
+                      ],
+                )}
             </p>
           </>
         )}

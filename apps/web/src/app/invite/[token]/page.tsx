@@ -1,4 +1,4 @@
-import { humaniseRole, type Role, statusOf } from '@carnet/core';
+import { humaniseRole, msg, type Role, statusOf } from '@carnet/core';
 import { Alert, Button, Field, Input } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -7,12 +7,16 @@ import { redirect } from 'next/navigation';
 import { Mark } from '@/components/marketing';
 import { StrandedCar } from '@/components/stranded-car';
 import { startSession } from '@/lib/auth';
+import { tFor } from '@/lib/i18n';
 import { acceptInvitation, invitationByToken } from '@/lib/team';
 
-export const metadata: Metadata = {
-  title: 'Join a workshop',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: t('Join a workshop'),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +55,7 @@ export default async function InvitePage({
   params: Promise<{ token: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
+  const t = await tFor();
   const { token } = await params;
   const { error } = await searchParams;
 
@@ -65,24 +70,26 @@ export default async function InvitePage({
           </div>
 
           <h1 className="mt-6 font-display text-[22px] font-semibold tracking-tight">
-            {reasonTitle(invitation ? statusOf(invitation) : 'MISSING')}
+            {t(reasonTitle(invitation ? statusOf(invitation) : 'MISSING'))}
           </h1>
           <p className="mx-auto mt-2.5 max-w-sm text-[14px] leading-relaxed text-(--text-soft)">
-            {reasonBody(invitation ? statusOf(invitation) : 'MISSING')}
+            {t(reasonBody(invitation ? statusOf(invitation) : 'MISSING'))}
           </p>
 
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link href="/login">
-              <Button variant="primary">Sign in</Button>
+              <Button variant="primary">{t('Sign in')}</Button>
             </Link>
             <Link href="/">
-              <Button>About Carnet</Button>
+              <Button>{t('About Carnet')}</Button>
             </Link>
           </div>
         </div>
       </main>
     );
   }
+
+  const role = t(humaniseRole(invitation.role as Role).toLowerCase());
 
   return (
     <main id="main" className="grid min-h-dvh lg:grid-cols-[1fr_minmax(26rem,32rem)]">
@@ -95,14 +102,17 @@ export default async function InvitePage({
         </Link>
 
         <div className="max-w-md">
-          <p className="eyebrow mb-3 text-(--color-brass-300)">You have been invited</p>
+          <p className="eyebrow mb-3 text-(--color-brass-300)">{t('You have been invited')}</p>
           <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight">
             {invitation.org.name}
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-(--color-petrol-100)">
             {invitation.invitedBy?.name
-              ? `${invitation.invitedBy.name} has invited you to join as ${humaniseRole(invitation.role as Role).toLowerCase()}.`
-              : `You have been invited to join as ${humaniseRole(invitation.role as Role).toLowerCase()}.`}
+              ? t('{name} has invited you to join as {role}.', {
+                  name: invitation.invitedBy.name,
+                  role,
+                })
+              : t('You have been invited to join as {role}.', { role })}
           </p>
 
           {invitation.message ? (
@@ -113,7 +123,9 @@ export default async function InvitePage({
         </div>
 
         <p className="text-[12px] text-(--color-petrol-200)">
-          Your account belongs to you. The workshop decides what you can see, not who you are.
+          {t(
+            'Your account belongs to you. The workshop decides what you can see, not who you are.',
+          )}
         </p>
       </section>
 
@@ -124,28 +136,34 @@ export default async function InvitePage({
             <span className="font-display text-[16px] font-semibold">Carnet</span>
           </Link>
 
-          <p className="eyebrow mb-2">Join {invitation.org.name}</p>
+          <p className="eyebrow mb-2">{t('Join {workshop}', { workshop: invitation.org.name })}</p>
           <h1 className="font-display text-[26px] font-semibold leading-tight tracking-tight">
-            Set up your account
+            {t('Set up your account')}
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
-            {`You are joining as ${humaniseRole(invitation.role as Role).toLowerCase()}, using ${invitation.email}.`}
+            {t('You are joining as {role}, using {email}.', { role, email: invitation.email })}
           </p>
 
           {error ? (
             <Alert tone="danger" className="mt-5">
-              {error}
+              {t(error)}
             </Alert>
           ) : null}
 
           <form action={accept} className="mt-6 grid gap-4">
             <input type="hidden" name="token" value={token} />
 
-            <Field label="Your name">
-              <Input name="name" autoComplete="name" required placeholder="Priya Raman" />
+            <Field label={t('Your name')}>
+              <Input
+                name="name"
+                autoComplete="name"
+                required
+                // i18n-ignore
+                placeholder="Priya Raman"
+              />
             </Field>
 
-            <Field label="Choose a password" hint="At least 10 characters">
+            <Field label={t('Choose a password')} hint={t('At least 10 characters')}>
               <Input
                 name="password"
                 type="password"
@@ -156,12 +174,13 @@ export default async function InvitePage({
             </Field>
 
             <Button type="submit" variant="primary" size="lg" block className="mt-1">
-              Join {invitation.org.name}
+              {t('Join {workshop}', { workshop: invitation.org.name })}
             </Button>
 
             <p className="text-center text-[12px] leading-relaxed text-(--text-faint)">
-              Already have a Carnet account on this address? Use the same password and this
-              invitation attaches the workshop to it.
+              {t(
+                'Already have a Carnet account on this address? Use the same password and this invitation attaches the workshop to it.',
+              )}
             </p>
           </form>
         </div>
@@ -173,25 +192,27 @@ export default async function InvitePage({
 function reasonTitle(status: string): string {
   switch (status) {
     case 'ACCEPTED':
-      return 'This invitation has been used';
+      return msg('This invitation has been used');
     case 'REVOKED':
-      return 'This invitation was withdrawn';
+      return msg('This invitation was withdrawn');
     case 'EXPIRED':
-      return 'This invitation has run out';
+      return msg('This invitation has run out');
     default:
-      return 'We did not issue this link';
+      return msg('We did not issue this link');
   }
 }
 
 function reasonBody(status: string): string {
   switch (status) {
     case 'ACCEPTED':
-      return 'The account already exists. Sign in with the address it was sent to.';
+      return msg('The account already exists. Sign in with the address it was sent to.');
     case 'REVOKED':
-      return 'Whoever sent it has withdrawn it. Ask them for a new one.';
+      return msg('Whoever sent it has withdrawn it. Ask them for a new one.');
     case 'EXPIRED':
-      return 'Invitations last seven days. Ask whoever sent it to send another.';
+      return msg('Invitations last seven days. Ask whoever sent it to send another.');
     default:
-      return 'Check the link is complete. If it was copied out of an email, part of it may have been left behind.';
+      return msg(
+        'Check the link is complete. If it was copied out of an email, part of it may have been left behind.',
+      );
   }
 }

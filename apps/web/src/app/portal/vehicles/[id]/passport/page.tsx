@@ -10,9 +10,13 @@ import { requireUser } from '@/lib/guard';
 import { reportFor } from '@/lib/handover';
 import { mileageFindings } from '@/lib/insights';
 import { verifyVehicleChain } from '@/lib/passport';
+import { tFor } from '@/lib/i18n';
 import { regionForUser } from '@/lib/region';
 
-export const metadata: Metadata = { title: 'Your vehicle’s passport' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Your vehicle’s passport') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -23,6 +27,7 @@ export const dynamic = 'force-dynamic';
  * the wording of the observations page, which speaks to the owner.
  */
 export default async function PortalPassportPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const { id } = await params;
@@ -55,13 +60,13 @@ export default async function PortalPassportPage({ params }: { params: Promise<{
           href={`/portal/vehicles/${vehicle.id}`}
           className="text-[13px] text-(--text-soft) hover:underline"
         >
-          ← Back to the vehicle
+          {t('← Back to the vehicle')}
         </Link>
         <Link
           href={`/portal/vehicles/${vehicle.id}#share`}
           className="text-[13px] font-medium text-(--brand-text) hover:underline"
         >
-          Show this to somebody
+          {t('Show this to somebody')}
         </Link>
       </div>
 
@@ -75,8 +80,9 @@ export default async function PortalPassportPage({ params }: { params: Promise<{
       />
 
       <p className="mt-6 text-[12px] leading-relaxed text-(--text-faint)">
-        This is the document a buyer sees when you share a link, word for word. Nothing about you is
-        on it.
+        {t(
+          'This is the document a buyer sees when you share a link, word for word. Nothing about you is on it.',
+        )}
       </p>
     </PortalShell>
   );

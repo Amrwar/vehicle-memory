@@ -8,7 +8,10 @@ import { currentUser, signIn } from '@/lib/auth';
 import { Mark } from '@/components/marketing';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Sign in' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Sign in') };
+}
 
 async function attemptSignIn(formData: FormData) {
   'use server';
@@ -55,8 +58,9 @@ export default async function LoginPage({
             {t('The history should belong to the car.')}
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-(--color-petrol-200)">
-            Every job you complete writes a verified, tamper-evident entry to the vehicle&rsquo;s
-            permanent record. When the car is sold, the history goes with it.
+            {t(
+              'Every job you complete writes a verified, tamper-evident entry to the vehicle’s permanent record. When the car is sold, the history goes with it.',
+            )}
           </p>
         </div>
 
@@ -102,7 +106,7 @@ export default async function LoginPage({
 
           {error ? (
             <Alert tone="danger" className="mt-5">
-              {error}
+              {t(error)}
             </Alert>
           ) : null}
 
@@ -115,6 +119,7 @@ export default async function LoginPage({
                 autoComplete="username"
                 autoFocus
                 required
+                // i18n-ignore
                 placeholder="you@workshop.co.uk"
               />
             </Field>
@@ -144,39 +149,54 @@ export default async function LoginPage({
               to "sign up" lands on a form asking for their workshop's VAT
               arrangements and concludes the product is not for them. */}
           <p className="mt-5 text-center text-[13px] leading-relaxed text-(--text-faint)">
-            No account yet?{' '}
-            <Link href="/signup/customer" className="text-(--brand-text) hover:underline">
-              Keep your car&rsquo;s history
-            </Link>{' '}
-            as a driver, or{' '}
-            <Link href="/signup" className="text-(--brand-text) hover:underline">
-              {t('open a workshop')}
-            </Link>
-            .
+            {t('No account yet? {driver} as a driver, or {workshop}.')
+              .split(/(\{\w+\})/)
+              .map((part, index) =>
+                part === '{driver}' ? (
+                  <Link
+                    key={index}
+                    href="/signup/customer"
+                    className="text-(--brand-text) hover:underline"
+                  >
+                    {t('Keep your car’s history')}
+                  </Link>
+                ) : part === '{workshop}' ? (
+                  <Link key={index} href="/signup" className="text-(--brand-text) hover:underline">
+                    {t('open a workshop')}
+                  </Link>
+                ) : (
+                  part
+                ),
+              )}
           </p>
 
           <div className="mt-8 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-3.5">
             <p className="eyebrow mb-2">{t('Demo accounts')}</p>
             <ul className="grid gap-1.5 text-[12px] text-(--text-soft)">
               <li>
+                {/* i18n-ignore */}
                 <span className="datum">ahmed@hillsidemotors.test</span>
                 {t('— owner')}
               </li>
               <li>
+                {/* i18n-ignore */}
                 <span className="datum">sara@hillsidemotors.test</span>
                 {t('— service advisor')}
               </li>
               <li>
+                {/* i18n-ignore */}
                 <span className="datum">john@hillsidemotors.test</span>
                 {t('— technician')}
               </li>
               <li>
+                {/* i18n-ignore */}
                 <span className="datum">maria@example.test</span>
                 {t('— customer portal')}
               </li>
             </ul>
             <p className="mt-2 text-[12px] text-(--text-faint)">
               {t('Password for all:')}
+              {/* i18n-ignore */}
               <span className="datum">carnet-demo-2026</span>
             </p>
           </div>

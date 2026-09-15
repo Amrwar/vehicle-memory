@@ -9,6 +9,7 @@ import {
   PageHeader,
   Select,
 } from '@carnet/ui';
+import { msg } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
@@ -16,9 +17,13 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { bookableCustomers, createBooking } from '@/lib/bookings';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { packagesFor } from '@/lib/packages';
 
-export const metadata: Metadata = { title: 'Take a booking' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Take a booking') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -45,13 +50,15 @@ async function take(formData: FormData) {
   const description = String(formData.get('description') ?? '').trim();
 
   if (!date || (!description && !packageId)) {
-    redirect('/bookings/new?error=' + encodeURIComponent('A booking needs a date and a reason.'));
+    redirect(
+      '/bookings/new?error=' + encodeURIComponent(msg('A booking needs a date and a reason.')),
+    );
   }
 
   const startAt = new Date(`${date}T${time}`);
 
   if (Number.isNaN(startAt.getTime())) {
-    redirect('/bookings/new?error=' + encodeURIComponent('That date could not be read.'));
+    redirect('/bookings/new?error=' + encodeURIComponent(msg('That date could not be read.')));
   }
 
   const id = await createBooking({
@@ -81,6 +88,7 @@ export default async function NewBookingPage({
   searchParams: Promise<{ error?: string; vehicle?: string }>;
 }) {
   const { orgId } = await requireSession('diary:write');
+  const t = await tFor();
   const { error } = await searchParams;
 
   const packages = await packagesFor(orgId, { activeOnly: true });
@@ -107,32 +115,32 @@ export default async function NewBookingPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/diary">The diary</BackLink>
+        <BackLink href="/diary">{t('The diary')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Diary"
-        title="Take a booking"
-        description="For the ones that arrive by telephone, which is still most of them"
+        eyebrow={t('Diary')}
+        title={t('Take a booking')}
+        description={t('For the ones that arrive by telephone, which is still most of them')}
       />
 
       {error ? (
-        <Alert tone="danger" className="mb-5" title="Not booked">
-          {error}
+        <Alert tone="danger" className="mb-5" title={t('Not booked')}>
+          {t(error)}
         </Alert>
       ) : null}
 
       {customers.length === 0 ? (
-        <Alert tone="info" title="No customers yet">
-          Add a customer and a vehicle first, then their appointments can be booked here.
+        <Alert tone="info" title={t('No customers yet')}>
+          {t('Add a customer and a vehicle first, then their appointments can be booked here.')}
         </Alert>
       ) : (
         <Card className="max-w-3xl">
-          <CardHeader title="The appointment" />
+          <CardHeader title={t('The appointment')} />
           <CardBody>
             <form action={take} className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Customer" htmlFor="customerId" required>
+                <Field label={t('Customer')} htmlFor="customerId" required>
                   <Select id="customerId" name="customerId" required>
                     {customers.map((customer) => (
                       <option key={customer.id} value={customer.id}>
@@ -143,10 +151,10 @@ export default async function NewBookingPage({
                 </Field>
 
                 <Field
-                  label="Vehicle"
+                  label={t('Vehicle')}
                   htmlFor="vehicleId"
                   required
-                  hint="Every vehicle these customers have had in."
+                  hint={t('Every vehicle these customers have had in.')}
                 >
                   <Select id="vehicleId" name="vehicleId" required>
                     {customers.flatMap((customer) =>
@@ -165,12 +173,12 @@ export default async function NewBookingPage({
 
               {packages.length > 0 ? (
                 <Field
-                  label="A package"
+                  label={t('A package')}
                   htmlFor="packageId"
-                  hint="Sets the time, and the job starts from it when the car arrives."
+                  hint={t('Sets the time, and the job starts from it when the car arrives.')}
                 >
                   <Select id="packageId" name="packageId" defaultValue="">
-                    <option value="">Not a package</option>
+                    <option value="">{t('Not a package')}</option>
                     {packages.map((pkg) => (
                       <option key={pkg.id} value={pkg.id}>
                         {pkg.name} · {pkg.hours}h
@@ -181,26 +189,30 @@ export default async function NewBookingPage({
               ) : null}
 
               <Field
-                label="What needs doing"
+                label={t('What needs doing')}
                 htmlFor="description"
-                hint="Blank with a package takes the package's name."
+                hint={t('Blank with a package takes the package’s name.')}
               >
-                <Input id="description" name="description" placeholder="Full service and MOT" />
+                <Input
+                  id="description"
+                  name="description"
+                  placeholder={t('Full service and MOT')}
+                />
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Day" htmlFor="date" required>
+                <Field label={t('Day')} htmlFor="date" required>
                   <Input id="date" name="date" type="date" required defaultValue={today} />
                 </Field>
 
-                <Field label="Time" htmlFor="time" required>
+                <Field label={t('Time')} htmlFor="time" required>
                   <Input id="time" name="time" type="time" required defaultValue="09:00" />
                 </Field>
 
                 <Field
-                  label="Hours to allow"
+                  label={t('Hours to allow')}
                   htmlFor="estimatedHours"
-                  hint="Blank with a package: its own time."
+                  hint={t('Blank with a package: its own time.')}
                 >
                   <Input
                     id="estimatedHours"
@@ -216,7 +228,7 @@ export default async function NewBookingPage({
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Site" htmlFor="locationId" required>
+                <Field label={t('Site')} htmlFor="locationId" required>
                   <Select id="locationId" name="locationId" required>
                     {locations.map((location) => (
                       <option key={location.id} value={location.id}>
@@ -226,9 +238,9 @@ export default async function NewBookingPage({
                   </Select>
                 </Field>
 
-                <Field label="Bay" htmlFor="bayId" hint="Can wait until it arrives.">
+                <Field label={t('Bay')} htmlFor="bayId" hint={t('Can wait until it arrives.')}>
                   <Select id="bayId" name="bayId" defaultValue="">
-                    <option value="">Decide later</option>
+                    <option value="">{t('Decide later')}</option>
                     {bays.map((bay) => (
                       <option key={bay.id} value={bay.id}>
                         {bay.name}
@@ -237,9 +249,9 @@ export default async function NewBookingPage({
                   </Select>
                 </Field>
 
-                <Field label="Technician" htmlFor="technicianId" hint="Can wait too.">
+                <Field label={t('Technician')} htmlFor="technicianId" hint={t('Can wait too.')}>
                   <Select id="technicianId" name="technicianId" defaultValue="">
-                    <option value="">Decide later</option>
+                    <option value="">{t('Decide later')}</option>
                     {technicians.map((membership) => (
                       <option key={membership.user.id} value={membership.user.id}>
                         {membership.user.name}
@@ -249,13 +261,13 @@ export default async function NewBookingPage({
                 </Field>
               </div>
 
-              <Field label="Anything else" htmlFor="notes" hint="What the customer said.">
+              <Field label={t('Anything else')} htmlFor="notes" hint={t('What the customer said.')}>
                 <Input id="notes" name="notes" />
               </Field>
 
               <div>
                 <Button type="submit" variant="primary">
-                  Book it in
+                  {t('Book it in')}
                 </Button>
               </div>
             </form>

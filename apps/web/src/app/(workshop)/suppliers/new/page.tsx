@@ -1,12 +1,17 @@
+import { msg } from '@carnet/core';
 import { Alert, Button, Card, CardBody, CardHeader, Field, Input, PageHeader } from '@carnet/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { createSupplier, SupplierError } from '@/lib/suppliers';
 
-export const metadata: Metadata = { title: 'Add a supplier' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Add a supplier') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -28,7 +33,7 @@ async function create(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim();
 
   if (!name) {
-    redirect('/suppliers/new?error=' + encodeURIComponent('A supplier needs a name.'));
+    redirect('/suppliers/new?error=' + encodeURIComponent(msg('A supplier needs a name.')));
   }
 
   let id = '';
@@ -63,47 +68,49 @@ export default async function NewSupplierPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   await requireSession('inventory:write');
+  const t = await tFor();
   const { error } = await searchParams;
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/suppliers">All suppliers</BackLink>
+        <BackLink href="/suppliers">{t('All suppliers')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Suppliers"
-        title="Add a supplier"
-        description="A name is enough to start. The rest can wait for the first order."
+        eyebrow={t('Suppliers')}
+        title={t('Add a supplier')}
+        description={t('A name is enough to start. The rest can wait for the first order.')}
       />
 
       {error ? (
-        <Alert tone="danger" className="mb-5" title="Not added">
-          {error}
+        <Alert tone="danger" className="mb-5" title={t('Not added')}>
+          {t(error)}
         </Alert>
       ) : null}
 
       <Card className="max-w-2xl">
-        <CardHeader title="Who they are" />
+        <CardHeader title={t('Who they are')} />
         <CardBody>
           <form action={create} className="grid gap-4">
-            <Field label="Name" htmlFor="name" required>
+            <Field label={t('Name')} htmlFor="name" required>
+              {/* i18n-ignore */}
               <Input id="name" name="name" required autoFocus placeholder="Euro Car Parts" />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
-                label="Your account with them"
+                label={t('Your account with them')}
                 htmlFor="accountRef"
-                hint="Goes on every order."
+                hint={t('Goes on every order.')}
               >
                 <Input id="accountRef" name="accountRef" />
               </Field>
 
               <Field
-                label="Days to pay"
+                label={t('Days to pay')}
                 htmlFor="paymentTermsDays"
-                hint="Drives when a bill shows as overdue."
+                hint={t('Drives when a bill shows as overdue.')}
               >
                 <Input
                   id="paymentTermsDays"
@@ -117,32 +124,32 @@ export default async function NewSupplierPage({
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Email" htmlFor="email">
+              <Field label={t('Email')} htmlFor="email">
                 <Input id="email" name="email" type="email" autoComplete="off" />
               </Field>
 
-              <Field label="Phone" htmlFor="phone">
+              <Field label={t('Phone')} htmlFor="phone">
                 <Input id="phone" name="phone" autoComplete="off" />
               </Field>
             </div>
 
-            <Field label="Address" htmlFor="addressLine1">
+            <Field label={t('Address')} htmlFor="addressLine1">
               <Input id="addressLine1" name="addressLine1" />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Town" htmlFor="locality">
+              <Field label={t('Town')} htmlFor="locality">
                 <Input id="locality" name="locality" />
               </Field>
 
-              <Field label="Postcode" htmlFor="postcode">
+              <Field label={t('Postcode')} htmlFor="postcode">
                 <Input id="postcode" name="postcode" />
               </Field>
             </div>
 
             <div>
               <Button type="submit" variant="primary">
-                Add the supplier
+                {t('Add the supplier')}
               </Button>
             </div>
           </form>

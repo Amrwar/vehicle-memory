@@ -10,6 +10,8 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { readerLocale } from './i18n';
+
 import { audit } from './guard';
 import { appendEvents, verifyVehicleChain } from './passport';
 
@@ -234,6 +236,7 @@ export async function reportFor(
   const chain: Verdict = events === 0 ? 'UNVERIFIED' : verification.valid ? 'INTACT' : 'BROKEN';
 
   const report = buildReport({
+    locale: await readerLocale(),
     owners: vehicle.ownerships.length,
     events,
     serviceEvents,

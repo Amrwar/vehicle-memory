@@ -15,7 +15,10 @@ import {
   updateProfile,
 } from '@/lib/portal-account';
 
-export const metadata: Metadata = { title: 'Account' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Account') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -122,7 +125,7 @@ export default async function PortalSettingsPage({
       ) : null}
       {failed ? (
         <Alert tone="danger" className="mt-4">
-          {failed}
+          {t(failed)}
         </Alert>
       ) : null}
 
@@ -141,8 +144,8 @@ export default async function PortalSettingsPage({
                 label={t('Email')}
                 hint={
                   account.emailVerifiedAt
-                    ? 'Confirmed. To change it, get in touch with a workshop you use.'
-                    : 'Not confirmed yet. Check your inbox for the link.'
+                    ? t('Confirmed. To change it, get in touch with a workshop you use.')
+                    : t('Not confirmed yet. Check your inbox for the link.')
                 }
               >
                 <Input value={account.email} readOnly />
@@ -170,7 +173,7 @@ export default async function PortalSettingsPage({
         <Card>
           <CardHeader
             title={t('Password')}
-            description={`At least ${MIN_PASSWORD_LENGTH} characters.`}
+            description={t('At least {count} characters.', { count: MIN_PASSWORD_LENGTH })}
           />
           <CardBody>
             <form action={savePassword} className="grid gap-4">
@@ -193,11 +196,18 @@ export default async function PortalSettingsPage({
               </div>
             </form>
             <p className="mt-3 text-[12px] text-(--text-faint)">
-              Forgotten it?{' '}
-              <Link href="/forgot" className="underline">
-                {t('Reset it by email')}
-              </Link>
-              .
+              {t('Forgotten it? {link}.')
+                .split('{link}')
+                .flatMap((part, index) =>
+                  index === 0
+                    ? [part]
+                    : [
+                        <Link key={index} href="/forgot" className="underline">
+                          {t('Reset it by email')}
+                        </Link>,
+                        part,
+                      ],
+                )}
             </p>
           </CardBody>
         </Card>

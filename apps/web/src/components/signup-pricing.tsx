@@ -4,6 +4,8 @@ import * as React from 'react';
 
 import { Field, Select } from '@carnet/ui';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * The part of the sign-up form where the country decides the currency and
  * the currency decides the price. Phase 32.7.
@@ -47,6 +49,7 @@ export function SignupPricing({
   countryError?: string;
   termsHref: string;
 }) {
+  const t = useT();
   const [countryCode, setCountryCode] = React.useState(defaultCountry);
   const [planId, setPlanId] = React.useState(defaultPlan);
   const country = countries.find((c) => c.code === countryCode) ?? countries[0]!;
@@ -58,8 +61,11 @@ export function SignupPricing({
   return (
     <>
       <Field
-        label="Country"
-        hint={`Sets the currency you are billed in and keep your books in (${currency}), the language and the clock. Changeable in settings.`}
+        label={t('Country')}
+        hint={t(
+          'Sets the currency you are billed in and keep your books in ({currency}), the language and the clock. Changeable in settings.',
+          { currency },
+        )}
         error={countryError}
       >
         <Select
@@ -69,17 +75,20 @@ export function SignupPricing({
         >
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
-              {c.name} · {c.currency}
+              {t(c.name)} · {c.currency}
             </option>
           ))}
         </Select>
       </Field>
 
-      <Field label="Plan" hint="Changeable at any point during the trial">
+      <Field label={t('Plan')} hint={t('Changeable at any point during the trial')}>
         <Select name="plan" value={planId} onChange={(event) => setPlanId(event.target.value)}>
           {plans.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name} — {price(p.id)} per bay, per month, paid monthly
+              {t('{plan} — {price} per bay, per month, paid monthly', {
+                plan: p.name,
+                price: price(p.id),
+              })}
             </option>
           ))}
         </Select>
@@ -88,18 +97,29 @@ export function SignupPricing({
       <label className="flex items-start gap-2.5 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) px-3 py-2.5 text-[13px] leading-relaxed">
         <input type="checkbox" name="agree" required className="mt-1 h-4 w-4 accent-(--brand)" />
         <span>
-          I have read the{' '}
-          <a
-            href={termsHref}
-            className="text-(--brand-text) underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            terms
-          </a>
-          . The trial is free for {trialDays} days. On the day it ends, the card I add next is
-          charged {price(plan.id)} per bay per month for the {plan.name} plan, in {currency}, and
-          monthly after that, unless I cancel before then. I can cancel at any time from Settings.
+          {t('I have read the {terms}.')
+            .split('{terms}')
+            .map((part, index) =>
+              index === 0 ? (
+                part
+              ) : (
+                <React.Fragment key={index}>
+                  <a
+                    href={termsHref}
+                    className="text-(--brand-text) underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t('terms')}
+                  </a>
+                  {part}
+                </React.Fragment>
+              ),
+            )}{' '}
+          {t(
+            'The trial is free for {days} days. On the day it ends, the card I add next is charged {price} per bay per month for the {plan} plan, in {currency}, and monthly after that, unless I cancel before then. I can cancel at any time from Settings.',
+            { days: trialDays, price: price(plan.id), plan: plan.name, currency },
+          )}
         </span>
       </label>
     </>

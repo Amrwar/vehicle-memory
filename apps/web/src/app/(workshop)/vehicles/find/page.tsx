@@ -5,10 +5,16 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { adoptVehicle, findOnNetwork, NetworkError, registerVehicle } from '@/lib/network';
 import { PlanLimitError } from '@carnet/core';
 
-export const metadata: Metadata = { title: 'Find a vehicle' };
+import { networkSentence } from '../statements';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Find a vehicle') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -76,7 +82,7 @@ export default async function FindVehiclePage({
 }: {
   searchParams: Promise<{ q?: string; problem?: string }>;
 }) {
-  const { orgId, user } = await requireSession('vehicle:read');
+  const { orgId, user, region } = await requireSession('vehicle:read');
   const params = await searchParams;
   const q = params.q?.trim() ?? '';
 
@@ -93,35 +99,38 @@ export default async function FindVehiclePage({
   }
 
   const mayWrite = can(user.role, 'vehicle:write');
+  const t = await tFor();
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/vehicles">All vehicles</BackLink>
+        <BackLink href="/vehicles">{t('All vehicles')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Vehicles"
-        title="Find a vehicle"
-        description="By registration or VIN. If another Carnet workshop has seen it, its history is already here."
+        eyebrow={t('Vehicles')}
+        title={t('Find a vehicle')}
+        description={t(
+          'By registration or VIN. If another Carnet workshop has seen it, its history is already here.',
+        )}
       />
 
       <Card className="mb-5">
         <form action="/vehicles/find" method="get">
           <CardBody className="flex flex-wrap items-end gap-3">
-            <Field label="Registration or VIN" className="min-w-0 flex-1">
+            <Field label={t('Registration or VIN')} className="min-w-0 flex-1">
               <Input
                 name="q"
                 defaultValue={q}
                 autoFocus
                 autoCapitalize="characters"
                 spellCheck={false}
-                placeholder="AB12 CDE or WVWZZZ1JZ3W386752"
+                placeholder={t('AB12 CDE or WVWZZZ1JZ3W386752')}
                 className="font-mono uppercase"
               />
             </Field>
             <Button type="submit" variant="primary">
-              Look it up
+              {t('Look it up')}
             </Button>
           </CardBody>
         </form>
@@ -129,7 +138,7 @@ export default async function FindVehiclePage({
 
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
@@ -139,20 +148,21 @@ export default async function FindVehiclePage({
             title={
               [found.vehicle.year, found.vehicle.make, found.vehicle.model]
                 .filter(Boolean)
-                .join(' ') || 'Vehicle'
+                .join(' ') || t('Vehicle')
             }
-            description={`${found.vehicle.registration ?? 'No plate on record'} · VIN ${found.vehicle.vin}`}
+            description={`${found.vehicle.registration ?? t('No plate on record')} · ${t('VIN {vin}', { vin: found.vehicle.vin })}`}
           />
           <CardBody className="grid gap-3">
             {/* The point of the network, in one sentence. */}
-            <p className="text-[15px] leading-relaxed">{found.summary?.statement}</p>
+            <p className="text-[15px] leading-relaxed">
+              {found.summary ? networkSentence(t, found.summary, region.locale) : null}
+            </p>
 
             {found.summary && found.summary.otherEntries > 0 ? (
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                What you will see: every service, part, inspection and mileage reading, with the
-                verification each carries. What you will not see: what they charged, their job
-                numbers, or who did the work. The car&rsquo;s history is the car&rsquo;s; their
-                margins are theirs.
+                {t(
+                  'What you will see: every service, part, inspection and mileage reading, with the verification each carries. What you will not see: what they charged, their job numbers, or who did the work. The car’s history is the car’s; their margins are theirs.',
+                )}
               </p>
             ) : null}
 
@@ -160,10 +170,10 @@ export default async function FindVehiclePage({
               {found.servicedHere ? (
                 <>
                   <Link href={`/vehicles/${found.vehicle.id}`}>
-                    <Button>Open the vehicle</Button>
+                    <Button>{t('Open the vehicle')}</Button>
                   </Link>
                   <Link href={`/jobs/new?vehicle=${found.vehicle.id}`}>
-                    <Button variant="primary">New job</Button>
+                    <Button variant="primary">{t('New job')}</Button>
                   </Link>
                 </>
               ) : mayWrite ? (
@@ -171,12 +181,12 @@ export default async function FindVehiclePage({
                   <input type="hidden" name="vehicleId" value={found.vehicle.id} />
                   <input type="hidden" name="q" value={q} />
                   <Button type="submit" variant="primary">
-                    Take it on and see the history
+                    {t('Take it on and see the history')}
                   </Button>
                 </form>
               ) : (
                 <p className="text-[13px] text-(--text-faint)">
-                  Somebody with vehicle access can take this car on.
+                  {t('Somebody with vehicle access can take this car on.')}
                 </p>
               )}
             </div>
@@ -187,13 +197,19 @@ export default async function FindVehiclePage({
       {found && !found.vehicle ? (
         <Card className="mb-5">
           <CardHeader
-            title="Not on the network"
-            description={`No Carnet workshop has recorded ${found.identifier}. Its history starts with you.`}
+            title={t('Not on the network')}
+            description={t(
+              'No Carnet workshop has recorded {identifier}. Its history starts with you.',
+              { identifier: found.identifier },
+            )}
           />
           <form action={register}>
             <CardBody className="grid gap-4">
               <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-                <Field label="VIN" hint="17 characters, from the windscreen or the door frame">
+                <Field
+                  label={t('VIN')}
+                  hint={t('17 characters, from the windscreen or the door frame')}
+                >
                   <Input
                     name="vin"
                     defaultValue={found.kind === 'VIN' ? found.identifier : ''}
@@ -204,7 +220,7 @@ export default async function FindVehiclePage({
                     className="font-mono uppercase"
                   />
                 </Field>
-                <Field label="Registration">
+                <Field label={t('Registration')}>
                   <Input
                     name="registration"
                     defaultValue={found.kind === 'REGISTRATION' ? found.identifier : ''}
@@ -214,23 +230,26 @@ export default async function FindVehiclePage({
                 </Field>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Make">
+                <Field label={t('Make')}>
+                  {/* i18n-ignore */}
                   <Input name="make" placeholder="Volkswagen" />
                 </Field>
-                <Field label="Model">
+                <Field label={t('Model')}>
+                  {/* i18n-ignore */}
                   <Input name="model" placeholder="Golf" />
                 </Field>
-                <Field label="Year">
+                <Field label={t('Year')}>
                   <Input name="year" inputMode="numeric" placeholder="2019" />
                 </Field>
               </div>
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
-                A VIN whose check digit does not add up is recorded as typed and flagged, not
-                refused. You have the car in front of you; the algorithm does not.
+                {t(
+                  'A VIN whose check digit does not add up is recorded as typed and flagged, not refused. You have the car in front of you; the algorithm does not.',
+                )}
               </p>
               {mayWrite ? (
                 <Button type="submit" variant="primary">
-                  Add the vehicle
+                  {t('Add the vehicle')}
                 </Button>
               ) : null}
             </CardBody>
@@ -241,11 +260,11 @@ export default async function FindVehiclePage({
       {!q ? (
         <Card>
           <CardBody className="grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
-            <p className="font-medium text-(--text)">Why look first</p>
+            <p className="font-medium text-(--text)">{t('Why look first')}</p>
             <p>
-              A vehicle is one record wherever it is serviced. Adding a car that another workshop
-              already keeps would start a second history for the same VIN, so the network refuses
-              that and offers the existing one instead.
+              {t(
+                'A vehicle is one record wherever it is serviced. Adding a car that another workshop already keeps would start a second history for the same VIN, so the network refuses that and offers the existing one instead.',
+              )}
             </p>
           </CardBody>
         </Card>

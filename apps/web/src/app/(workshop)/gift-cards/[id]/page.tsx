@@ -1,4 +1,4 @@
-import type { GiftCardStatus } from '@carnet/core';
+import { type GiftCardStatus, msg } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -19,6 +19,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { adjustGiftCard, disableGiftCard, GiftCardError, giftCardDetail } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,33 +30,34 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const { orgId } = await requireSession('payment:read');
+  const t = await tFor();
   const card = await giftCardDetail(orgId, id);
-  return { title: card ? `Gift card ${card.code}` : 'Gift card' };
+  return { title: card ? t('Gift card {code}', { code: card.code }) : t('Gift card') };
 }
 
 const TENDER_LABEL: Record<string, string> = {
-  CARD: 'card',
-  CASH: 'cash',
-  BANK_TRANSFER: 'bank transfer',
-  ONLINE: 'online',
-  CHEQUE: 'cheque',
+  CARD: msg('card'),
+  CASH: msg('cash'),
+  BANK_TRANSFER: msg('bank transfer'),
+  ONLINE: msg('online'),
+  CHEQUE: msg('cheque'),
 };
 
 const KIND_LABEL: Record<string, string> = {
-  ISSUE: 'Loaded',
-  REDEEM: 'Spent',
-  REFUND: 'Returned',
-  ADJUSTMENT: 'By hand',
+  ISSUE: msg('Loaded'),
+  REDEEM: msg('Spent'),
+  REFUND: msg('Returned'),
+  ADJUSTMENT: msg('By hand'),
 };
 
 const STATUS: Record<
   GiftCardStatus,
   { label: string; tone: 'success' | 'neutral' | 'warning' | 'danger' }
 > = {
-  ACTIVE: { label: 'Active', tone: 'success' },
-  DEPLETED: { label: 'Fully spent', tone: 'neutral' },
-  EXPIRED: { label: 'Lapsed', tone: 'warning' },
-  DISABLED: { label: 'Cancelled', tone: 'danger' },
+  ACTIVE: { label: msg('Active'), tone: 'success' },
+  DEPLETED: { label: msg('Fully spent'), tone: 'neutral' },
+  EXPIRED: { label: msg('Lapsed'), tone: 'warning' },
+  DISABLED: { label: msg('Cancelled'), tone: 'danger' },
 };
 
 /**
@@ -120,6 +122,7 @@ export default async function GiftCardPage({
   const { id } = await params;
   const { done, problem } = await searchParams;
   const { orgId, user, region } = await requireSession('payment:read');
+  const t = await tFor();
 
   const card = await giftCardDetail(orgId, id);
   if (!card) notFound();
@@ -129,38 +132,44 @@ export default async function GiftCardPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/gift-cards">All gift cards</BackLink>
+        <BackLink href="/gift-cards">{t('All gift cards')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Gift card"
+        eyebrow={t('Gift card')}
         title={
           <span className="flex flex-wrap items-center gap-3">
             <span className="datum tracking-[0.15em]">{card.code}</span>
             <Badge tone={STATUS[card.status].tone} dot>
-              {STATUS[card.status].label}
+              {t(STATUS[card.status].label)}
             </Badge>
           </span>
         }
         description={
           card.recipientName
-            ? `For ${card.recipientName}`
-            : 'Read the number out in groups of four.'
+            ? t('For {name}', { name: card.recipientName })
+            : t('Read the number out in groups of four.')
         }
       />
 
       {done ? (
         <Alert tone="success" className="mb-5">
           {done === 'sold'
-            ? 'Card sold and booked as owed work, not as revenue. Read the number to the customer or write it on the card.'
+            ? t(
+                'Card sold and booked as owed work, not as revenue. Read the number to the customer or write it on the card.',
+              )
             : done === 'adjusted'
-              ? 'Changed, with the reason kept on the card and the books moved by the same amount.'
-              : 'Cancelled. Whatever was on it has been written off with the reason, and the number will not be taken again.'}
+              ? t(
+                  'Changed, with the reason kept on the card and the books moved by the same amount.',
+                )
+              : t(
+                  'Cancelled. Whatever was on it has been written off with the reason, and the number will not be taken again.',
+                )}
         </Alert>
       ) : null}
       {problem ? (
         <Alert tone="danger" className="mb-5">
-          {problem}
+          {t(problem)}
         </Alert>
       ) : null}
 
@@ -168,8 +177,8 @@ export default async function GiftCardPage({
         <div className="grid gap-5">
           <Card className="overflow-hidden">
             <CardHeader
-              title="What happened on it"
-              description="Oldest first. Every movement says what it was for."
+              title={t('What happened on it')}
+              description={t('Oldest first. Every movement says what it was for.')}
             />
             <ul className="divide-y divide-(--border)">
               {card.entries.map((entry) => (
@@ -182,19 +191,19 @@ export default async function GiftCardPage({
                     })}
                   </time>
                   <span className="eyebrow w-16 shrink-0">
-                    {KIND_LABEL[entry.kind] ?? entry.kind}
+                    {t(KIND_LABEL[entry.kind] ?? entry.kind)}
                   </span>
                   <span className="min-w-0 flex-1 text-[13px]">
                     {entry.invoice ? (
                       <Link href={`/invoices/${entry.invoice.id}`} className="hover:underline">
-                        {entry.reason}
+                        {t(entry.reason)}
                       </Link>
                     ) : entry.counterSale ? (
                       <Link href="/counter" className="hover:underline">
-                        {entry.reason}
+                        {t(entry.reason)}
                       </Link>
                     ) : (
-                      entry.reason
+                      t(entry.reason)
                     )}
                     {entry.createdBy ? (
                       <span className="ml-2 text-[11px] text-(--text-faint)">
@@ -224,24 +233,26 @@ export default async function GiftCardPage({
           {mayChange ? (
             <Card>
               <CardHeader
-                title="Change it by hand"
-                description="Money added is a gift from the workshop; money taken off is a card it no longer owes on. The reason stays on the card."
+                title={t('Change it by hand')}
+                description={t(
+                  'Money added is a gift from the workshop; money taken off is a card it no longer owes on. The reason stays on the card.',
+                )}
               />
               <form action={adjust}>
                 <CardBody className="grid gap-3 sm:grid-cols-[8rem_9rem_minmax(0,1fr)_auto] sm:items-end">
                   <input type="hidden" name="id" value={card.id} />
-                  <Field label="Which way" htmlFor="adjust-direction">
+                  <Field label={t('Which way')} htmlFor="adjust-direction">
                     <select
                       id="adjust-direction"
                       name="direction"
                       defaultValue="UP"
                       className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 text-[13px]"
                     >
-                      <option value="UP">Add</option>
-                      <option value="DOWN">Take off</option>
+                      <option value="UP">{t('Add')}</option>
+                      <option value="DOWN">{t('Take off')}</option>
                     </select>
                   </Field>
-                  <Field label="Amount" htmlFor="adjust-amount">
+                  <Field label={t('Amount')} htmlFor="adjust-amount">
                     <Input
                       id="adjust-amount"
                       name="amount"
@@ -251,17 +262,17 @@ export default async function GiftCardPage({
                       required
                     />
                   </Field>
-                  <Field label="Why" htmlFor="adjust-reason">
+                  <Field label={t('Why')} htmlFor="adjust-reason">
                     <Input
                       id="adjust-reason"
                       name="reason"
                       required
                       maxLength={200}
-                      placeholder="Sorry about the wait on Tuesday"
+                      placeholder={t('Sorry about the wait on Tuesday')}
                     />
                   </Field>
                   <Button type="submit" variant="secondary">
-                    Change it
+                    {t('Change it')}
                   </Button>
                 </CardBody>
               </form>
@@ -271,10 +282,10 @@ export default async function GiftCardPage({
 
         <aside className="grid content-start gap-5">
           <Card className={card.status === 'ACTIVE' ? 'border-(--brand)' : undefined}>
-            <CardHeader title="Where it stands" />
+            <CardHeader title={t('Where it stands')} />
             <CardBody className="grid gap-3">
               <div className="flex items-baseline justify-between text-[13px]">
-                <span className="text-(--text-faint)">Left on the card</span>
+                <span className="text-(--text-faint)">{t('Left on the card')}</span>
                 <span className="font-display text-[22px] font-semibold tabular-nums">
                   <Money
                     currency={region.currency}
@@ -285,9 +296,10 @@ export default async function GiftCardPage({
               </div>
               <KeyValue
                 columns={1}
+                t={t}
                 items={[
                   {
-                    label: 'Loaded',
+                    label: t('Loaded'),
                     value: (
                       <Money
                         currency={region.currency}
@@ -296,23 +308,30 @@ export default async function GiftCardPage({
                       />
                     ),
                   },
-                  { label: 'Paid for by', value: TENDER_LABEL[card.method] ?? card.method },
+                  { label: t('Paid for by'), value: t(TENDER_LABEL[card.method] ?? card.method) },
                   {
-                    label: 'Sold',
-                    value: `${card.soldAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}${card.soldBy ? ` by ${card.soldBy.name}` : ''}`,
+                    label: t('Sold'),
+                    value: `${card.soldAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}${card.soldBy ? ` ${t('by {name}', { name: card.soldBy.name })}` : ''}`,
                   },
-                  { label: 'Good at', value: card.site ? `${card.site} only` : 'Every site' },
                   {
-                    label: 'Lasts',
+                    label: t('Good at'),
+                    value: card.site ? t('{site} only', { site: card.site }) : t('Every site'),
+                  },
+                  {
+                    label: t('Lasts'),
                     value: card.expiresAt
-                      ? `Until ${card.expiresAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}`
-                      : 'For good',
+                      ? t('Until {date}', {
+                          date: card.expiresAt.toLocaleDateString(region.locale, {
+                            dateStyle: 'medium',
+                          }),
+                        })
+                      : t('For good'),
                   },
-                  { label: 'Note', value: card.note },
+                  { label: t('Note'), value: card.note },
                   ...(card.disabledAt
                     ? [
                         {
-                          label: 'Cancelled',
+                          label: t('Cancelled'),
                           value: `${card.disabledAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}: ${card.disabledReason ?? ''}`,
                         },
                       ]
@@ -320,8 +339,9 @@ export default async function GiftCardPage({
                 ]}
               />
               <p className="text-[12px] text-(--text-faint)">
-                To spend it, open the invoice and use &ldquo;Redeem a gift card&rdquo;, or take it
-                at the counter.
+                {t('To spend it, open the invoice and use “{action}”, or take it at the counter.', {
+                  action: t('Redeem a gift card'),
+                })}
               </p>
             </CardBody>
           </Card>
@@ -329,23 +349,25 @@ export default async function GiftCardPage({
           {mayChange ? (
             <Card className="border-(--danger)">
               <CardHeader
-                title="Cancel this card"
-                description="For a card lost, stolen or sold in error. Whatever is on it is written off with the reason. There is no way back."
+                title={t('Cancel this card')}
+                description={t(
+                  'For a card lost, stolen or sold in error. Whatever is on it is written off with the reason. There is no way back.',
+                )}
               />
               <form action={cancel}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="id" value={card.id} />
-                  <Field label="Why" htmlFor="cancel-reason">
+                  <Field label={t('Why')} htmlFor="cancel-reason">
                     <Input
                       id="cancel-reason"
                       name="reason"
                       required
                       maxLength={200}
-                      placeholder="Reported lost by the buyer"
+                      placeholder={t('Reported lost by the buyer')}
                     />
                   </Field>
                   <Button type="submit" variant="danger">
-                    Cancel the card
+                    {t('Cancel the card')}
                   </Button>
                 </CardBody>
               </form>

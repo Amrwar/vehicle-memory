@@ -1,4 +1,4 @@
-import { customerProgressFor } from '@carnet/core';
+import { customerProgressFor, type Translator } from '@carnet/core';
 import {
   Badge,
   Button,
@@ -18,7 +18,10 @@ import { updatesFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Updates' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Updates') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -36,15 +39,17 @@ export const dynamic = 'force-dynamic';
  * Anything needing an answer comes first and says what to do about it. A
  * timeline that reports without asking is a timeline nobody opens twice.
  */
-function when(value: Date, locale: string): string {
+function when(value: Date, locale: string, t: Translator): string {
   const days = Math.floor((Date.now() - value.getTime()) / 86_400_000);
 
   if (days === 0) {
-    return `today at ${value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`;
+    return t('today at {time}', {
+      time: value.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
+    });
   }
 
-  if (days === 1) return 'yesterday';
-  if (days < 7) return `${days} days ago`;
+  if (days === 1) return t('yesterday');
+  if (days < 7) return t('{days} days ago', { days });
 
   return value.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
 }
@@ -68,10 +73,14 @@ export default async function PortalUpdatesPage() {
       <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Updates')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {waiting.length > 0
-          ? `${waiting.length} ${waiting.length === 1 ? 'quote needs' : 'quotes need'} your answer.`
+          ? waiting.length === 1
+            ? t('1 quote needs your answer.')
+            : t('{count} quotes need your answer.', { count: waiting.length })
           : active.length > 0
-            ? `${active.length} ${active.length === 1 ? 'visit is' : 'visits are'} under way.`
-            : 'Nothing is happening right now.'}
+            ? active.length === 1
+              ? t('1 visit is under way.')
+              : t('{count} visits are under way.', { count: active.length })
+            : t('Nothing is happening right now.')}
       </p>
 
       {jobs.length === 0 ? (
@@ -94,7 +103,8 @@ export default async function PortalUpdatesPage() {
               <Card key={job.id} className="border-(--warning)">
                 <CardHeader
                   title={
-                    `${job.vehicle.make ?? ''} ${job.vehicle.model ?? ''}`.trim() || 'Your vehicle'
+                    `${job.vehicle.make ?? ''} ${job.vehicle.model ?? ''}`.trim() ||
+                    t('Your vehicle')
                   }
                   description={`${job.org.name} · ${job.shortDescription}`}
                   action={
@@ -132,24 +142,27 @@ export default async function PortalUpdatesPage() {
               <Card key={job.id}>
                 <CardHeader
                   title={
-                    `${job.vehicle.make ?? ''} ${job.vehicle.model ?? ''}`.trim() || 'Your vehicle'
+                    `${job.vehicle.make ?? ''} ${job.vehicle.model ?? ''}`.trim() ||
+                    t('Your vehicle')
                   }
                   description={`${job.org.name} · ${job.shortDescription}`}
                   action={
                     <Badge tone="brand" dot>
-                      {progress.label}
+                      {t(progress.label)}
                     </Badge>
                   }
                 />
                 <CardBody className="grid gap-3">
                   <p className="text-[14px] text-(--text-soft)">
-                    {progress.detail}
+                    {t(progress.detail)}
                     {job.promisedAt
-                      ? ` Promised for ${job.promisedAt.toLocaleDateString(region.locale, {
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long',
-                        })}.`
+                      ? ` ${t('Promised for {date}.', {
+                          date: job.promisedAt.toLocaleDateString(region.locale, {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                          }),
+                        })}`
                       : ''}
                   </p>
 
@@ -161,9 +174,9 @@ export default async function PortalUpdatesPage() {
                     <ol className="grid gap-1.5 border-t border-(--border) pt-3 text-[13px]">
                       {job.statusEvents.map((event) => (
                         <li key={event.id} className="flex flex-wrap justify-between gap-2">
-                          <span>{customerProgressFor(event.toStatus).label}</span>
+                          <span>{t(customerProgressFor(event.toStatus).label)}</span>
                           <span className="text-(--text-faint)">
-                            {when(event.createdAt, region.locale)}
+                            {when(event.createdAt, region.locale, t)}
                           </span>
                         </li>
                       ))}
@@ -172,7 +185,10 @@ export default async function PortalUpdatesPage() {
 
                   {job.org.phone ? (
                     <p className="text-[12px] text-(--text-faint)">
-                      Any questions, ring {job.org.name} on {job.org.phone}.
+                      {t('Any questions, ring {workshop} on {phone}.', {
+                        workshop: job.org.name,
+                        phone: job.org.phone,
+                      })}
                     </p>
                   ) : null}
                 </CardBody>
@@ -197,10 +213,10 @@ export default async function PortalUpdatesPage() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium">{job.shortDescription}</span>
-                    <span className="text-[13px] text-(--text-soft)">{progress.label}</span>
+                    <span className="text-[13px] text-(--text-soft)">{t(progress.label)}</span>
                   </div>
                   <p className="mt-0.5 text-[13px] text-(--text-soft)">
-                    {job.org.name} · {when(job.updatedAt, region.locale)}
+                    {job.org.name} · {when(job.updatedAt, region.locale, t)}
                     {invoice ? (
                       <>
                         {' · '}

@@ -21,8 +21,12 @@ import Link from 'next/link';
 import { can } from '@/lib/guard';
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Purchasing' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Purchasing') };
+}
 export const dynamic = 'force-dynamic';
 
 const ORDER_TONE = {
@@ -49,6 +53,7 @@ export default async function PurchasingPage() {
     return <PlanWall feature="purchasing" plan={plan} />;
   }
   const mayApprove = can(user.role, 'purchase:approve');
+  const t = await tFor();
 
   const [requests, orders, bills] = await Promise.all([
     db.purchaseRequest.findMany({
@@ -118,19 +123,19 @@ export default async function PurchasingPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Inventory"
-        title="Purchasing"
-        description="Requests, orders and supplier bills"
+        eyebrow={t('Inventory')}
+        title={t('Purchasing')}
+        description={t('Requests, orders and supplier bills')}
         actions={
           <>
             <Link href="/suppliers">
-              <Button>Suppliers</Button>
+              <Button>{t('Suppliers')}</Button>
             </Link>
             <Link href="/purchasing/returns">
-              <Button>Returns</Button>
+              <Button>{t('Returns')}</Button>
             </Link>
             <Link href="/purchasing/new">
-              <Button variant="primary">New order</Button>
+              <Button variant="primary">{t('New order')}</Button>
             </Link>
           </>
         }
@@ -138,47 +143,53 @@ export default async function PurchasingPage() {
 
       <StatRow className="mb-5">
         <StatTile
-          label="Awaiting approval"
+          label={t('Awaiting approval')}
           value={pending.length}
           tone={pending.length > 0 ? 'warning' : 'neutral'}
-          note={pending.length > 0 ? 'Somebody is waiting' : 'Nothing pending'}
+          note={pending.length > 0 ? t('Somebody is waiting') : t('Nothing pending')}
         />
-        <StatTile label="Open orders" value={openOrders.length} note="Sent or part received" />
         <StatTile
-          label="Outstanding value"
+          label={t('Open orders')}
+          value={openOrders.length}
+          note={t('Sent or part received')}
+        />
+        <StatTile
+          label={t('Outstanding value')}
           value={
             <Money currency={region.currency} locale={region.locale} amount={outstandingValue} />
           }
-          note="Ordered but not yet delivered"
+          note={t('Ordered but not yet delivered')}
         />
         <StatTile
-          label="Bills to query"
+          label={t('Bills to query')}
           value={problemBills}
           tone={problemBills > 0 ? 'danger' : 'neutral'}
-          note={problemBills > 0 ? 'Do not pay before checking' : 'All bills reconcile'}
+          note={problemBills > 0 ? t('Do not pay before checking') : t('All bills reconcile')}
         />
       </StatRow>
 
       <Card className={pending.length > 0 ? 'mb-5 border-(--warning)' : 'mb-5'}>
         <CardHeader
-          title="Purchase requests"
+          title={t('Purchase requests')}
           description={
             mayApprove
-              ? 'Approve to turn a request into an order.'
-              : 'A manager approves these before they can be ordered.'
+              ? t('Approve to turn a request into an order.')
+              : t('A manager approves these before they can be ordered.')
           }
         />
         {requests.length === 0 ? (
           <EmptyState
-            title="No requests"
-            description="A request is raised automatically when a job needs a part that is short."
+            title={t('No requests')}
+            description={t(
+              'A request is raised automatically when a job needs a part that is short.',
+            )}
           />
         ) : (
           <ul className="divide-y divide-(--border)">
             {requests.map((request) => (
               <li key={request.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px]">{request.notes ?? 'Purchase request'}</p>
+                  <p className="text-[13px]">{request.notes ?? t('Purchase request')}</p>
                   <p className="mt-0.5 text-[12px] text-(--text-faint)">
                     {request.job ? (
                       <>
@@ -193,7 +204,9 @@ export default async function PurchasingPage() {
                     <time className="datum">
                       {request.createdAt.toLocaleDateString(region.locale)}
                     </time>
-                    {request.approvedBy ? ` · approved by ${request.approvedBy.name}` : ''}
+                    {request.approvedBy
+                      ? ` · ${t('approved by {name}', { name: request.approvedBy.name })}`
+                      : ''}
                   </p>
                 </div>
 
@@ -207,15 +220,15 @@ export default async function PurchasingPage() {
                   }
                   dot
                 >
-                  {request.status.toLowerCase()}
+                  {t(request.status.toLowerCase())}
                 </Badge>
 
                 {request.status === 'PENDING' && mayApprove ? (
                   <div className="flex gap-2">
                     <Button size="sm" variant="primary">
-                      Approve
+                      {t('Approve')}
                     </Button>
-                    <Button size="sm">Reject</Button>
+                    <Button size="sm">{t('Reject')}</Button>
                   </div>
                 ) : null}
               </li>
@@ -225,21 +238,24 @@ export default async function PurchasingPage() {
       </Card>
 
       <Card className="mb-5 overflow-hidden">
-        <CardHeader title="Purchase orders" />
+        <CardHeader title={t('Purchase orders')} />
         {orders.length === 0 ? (
-          <EmptyState title="No orders" description="Approved requests become orders here." />
+          <EmptyState
+            title={t('No orders')}
+            description={t('Approved requests become orders here.')}
+          />
         ) : (
           <TableWrap className="rounded-none border-0">
             <Table>
               <thead>
                 <tr>
-                  <Th>Order</Th>
-                  <Th>Supplier</Th>
-                  <Th>Expected</Th>
-                  <Th numeric>Lines</Th>
-                  <Th numeric>Value</Th>
-                  <Th numeric>Outstanding</Th>
-                  <Th>Status</Th>
+                  <Th>{t('Order')}</Th>
+                  <Th>{t('Supplier')}</Th>
+                  <Th>{t('Expected')}</Th>
+                  <Th numeric>{t('Lines')}</Th>
+                  <Th numeric>{t('Value')}</Th>
+                  <Th numeric>{t('Still to arrive')}</Th>
+                  <Th>{t('Status')}</Th>
                   <Th></Th>
                 </tr>
               </thead>
@@ -296,14 +312,14 @@ export default async function PurchasingPage() {
                       </Td>
                       <Td>
                         <Badge tone={ORDER_TONE[order.status]} dot>
-                          {order.status.toLowerCase().replace('_', ' ')}
+                          {t(order.status.toLowerCase().replace('_', ' '))}
                         </Badge>
                       </Td>
                       <Td>
                         {['SENT', 'PART_RECEIVED'].includes(order.status) ? (
                           <Link href={`/purchasing/${order.id}`}>
                             <Button size="sm" variant="primary">
-                              Receive
+                              {t('Receive')}
                             </Button>
                           </Link>
                         ) : null}
@@ -319,11 +335,11 @@ export default async function PurchasingPage() {
 
       <Card>
         <CardHeader
-          title="Supplier bills"
-          description="Checked against what was ordered and what actually arrived"
+          title={t('Supplier bills')}
+          description={t('Checked against what was ordered and what actually arrived')}
         />
         {matched.length === 0 ? (
-          <EmptyState title="No open bills" description="Everything is settled." />
+          <EmptyState title={t('No open bills')} description={t('Everything is settled.')} />
         ) : (
           <ul className="divide-y divide-(--border)">
             {matched.map(({ bill, match }) => (
@@ -334,7 +350,7 @@ export default async function PurchasingPage() {
                     <span className="text-[13px] text-(--text-soft)">{bill.supplier.name}</span>
                   </div>
                   <p className="mt-0.5 text-[12px] text-(--text-faint)">
-                    {match?.message ?? 'Not linked to a purchase order.'}
+                    {match ? t(match.message) : t('Not linked to a purchase order.')}
                   </p>
                 </div>
 
@@ -347,7 +363,7 @@ export default async function PurchasingPage() {
                 </span>
 
                 <Badge tone={match ? matchTone(match.status) : 'neutral'} dot>
-                  {match ? match.status.toLowerCase().replace('_', ' ') : 'unmatched'}
+                  {match ? t(match.status.toLowerCase().replace('_', ' ')) : t('unmatched')}
                 </Badge>
               </li>
             ))}

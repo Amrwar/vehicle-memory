@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Fraunces, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
 
+import { LanguageProvider } from '@/components/language-provider';
 import { THEME_SCRIPT } from '@/components/theme-toggle';
 import { htmlAttributes, tFor } from '@/lib/i18n';
 
@@ -46,21 +47,25 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Carnet',
-    template: '%s · Carnet',
-  },
-  description:
-    'Workshop management with a portable vehicle history that follows the car, not the owner or the garage.',
-  applicationName: 'Carnet',
-  // The manifest is scoped to the shop floor, so installing puts the
-  // technician's own screens on a home screen and nothing else. Nobody wants
-  // an icon that opens a ledger.
-  manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'Carnet', statusBarStyle: 'black-translucent' },
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return {
+    title: {
+      default: 'Carnet',
+      template: '%s · Carnet',
+    },
+    description: t(
+      'Workshop management with a portable vehicle history that follows the car, not the owner or the garage.',
+    ),
+    applicationName: 'Carnet',
+    // The manifest is scoped to the shop floor, so installing puts the
+    // technician's own screens on a home screen and nothing else. Nobody wants
+    // an icon that opens a ledger.
+    manifest: '/manifest.webmanifest',
+    appleWebApp: { capable: true, title: 'Carnet', statusBarStyle: 'black-translucent' },
+    robots: { index: false, follow: false },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -100,7 +105,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           {t('Skip to content')}
         </a>
-        {children}
+        <LanguageProvider language={html.language}>{children}</LanguageProvider>
       </body>
     </html>
   );

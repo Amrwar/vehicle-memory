@@ -4,15 +4,18 @@ import {
   can,
   humaniseRole,
   type Language,
+  msg,
   type Permission,
   type Role,
-  translate,
+  translator,
 } from '@carnet/core';
 import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
+
+import { useT } from '@/components/language-provider';
 
 import { NavIcon, type NavIconName } from './nav-icons';
 import { ThemeToggle } from './theme-toggle';
@@ -55,98 +58,168 @@ function PendingRule() {
 
 const GROUPS: Group[] = [
   {
-    label: 'Workshop',
+    label: msg('Workshop'),
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: 'dashboard', permission: 'job:read' },
-      { href: '/ask', label: 'Ask', icon: 'ask', permission: 'report:operational' },
-      { href: '/diary', label: 'Diary', icon: 'diary', permission: 'diary:read' },
-      { href: '/floor', label: 'The floor', icon: 'floor', permission: 'diary:read' },
-      { href: '/jobs', label: 'Jobs', icon: 'jobs', permission: 'job:read' },
-      { href: '/inspections', label: 'Inspections', icon: 'inspections', permission: 'job:read' },
-      { href: '/warranty', label: 'Warranty', icon: 'warranty', permission: 'job:read' },
-      { href: '/recalls', label: 'Recalls', icon: 'recalls', permission: 'vehicle:read' },
-      { href: '/capacity', label: 'Capacity', icon: 'capacity', permission: 'diary:read' },
-      { href: '/plan', label: 'Plan the day', icon: 'plan', permission: 'diary:read' },
-      { href: '/skills', label: 'Skills', icon: 'skills', permission: 'people:read' },
-      { href: '/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
-      { href: '/vehicles', label: 'Vehicles', icon: 'vehicles', permission: 'vehicle:read' },
-      { href: '/passports', label: 'Passports', icon: 'passports', permission: 'vehicle:read' },
-      { href: '/reminders', label: 'Reminders', icon: 'reminders', permission: 'customer:read' },
-      { href: '/crm', label: 'Relationships', icon: 'crm', permission: 'customer:read' },
-      { href: '/fleet', label: 'Fleets', icon: 'fleet', permission: 'customer:read' },
-      { href: '/reputation', label: 'Reputation', icon: 'reputation', permission: 'customer:read' },
-      { href: '/inbox', label: 'Conversations', icon: 'inbox', permission: 'customer:read' },
+      { href: '/dashboard', label: msg('Dashboard'), icon: 'dashboard', permission: 'job:read' },
+      { href: '/ask', label: msg('Ask'), icon: 'ask', permission: 'report:operational' },
+      { href: '/diary', label: msg('Diary'), icon: 'diary', permission: 'diary:read' },
+      { href: '/floor', label: msg('The floor'), icon: 'floor', permission: 'diary:read' },
+      { href: '/jobs', label: msg('Jobs'), icon: 'jobs', permission: 'job:read' },
+      {
+        href: '/inspections',
+        label: msg('Inspections'),
+        icon: 'inspections',
+        permission: 'job:read',
+      },
+      { href: '/warranty', label: msg('Warranty'), icon: 'warranty', permission: 'job:read' },
+      { href: '/recalls', label: msg('Recalls'), icon: 'recalls', permission: 'vehicle:read' },
+      { href: '/capacity', label: msg('Capacity'), icon: 'capacity', permission: 'diary:read' },
+      { href: '/plan', label: msg('Plan the day'), icon: 'plan', permission: 'diary:read' },
+      { href: '/skills', label: msg('Skills'), icon: 'skills', permission: 'people:read' },
+      {
+        href: '/customers',
+        label: msg('Customers'),
+        icon: 'customers',
+        permission: 'customer:read',
+      },
+      { href: '/vehicles', label: msg('Vehicles'), icon: 'vehicles', permission: 'vehicle:read' },
+      {
+        href: '/passports',
+        label: msg('Passports'),
+        icon: 'passports',
+        permission: 'vehicle:read',
+      },
+      {
+        href: '/reminders',
+        label: msg('Reminders'),
+        icon: 'reminders',
+        permission: 'customer:read',
+      },
+      { href: '/crm', label: msg('Relationships'), icon: 'crm', permission: 'customer:read' },
+      { href: '/fleet', label: msg('Fleets'), icon: 'fleet', permission: 'customer:read' },
+      {
+        href: '/reputation',
+        label: msg('Reputation'),
+        icon: 'reputation',
+        permission: 'customer:read',
+      },
+      { href: '/inbox', label: msg('Conversations'), icon: 'inbox', permission: 'customer:read' },
       {
         href: '/claims',
-        label: 'Vehicle requests',
+        label: msg('Vehicle requests'),
         icon: 'claims',
         permission: 'customer:read',
       },
     ],
   },
   {
-    label: 'Money',
+    label: msg('Money'),
     items: [
-      { href: '/estimates', label: 'Estimates', icon: 'estimates', permission: 'estimate:read' },
-      { href: '/invoices', label: 'Invoices', icon: 'invoices', permission: 'invoice:read' },
-      { href: '/payments', label: 'Payments', icon: 'payments', permission: 'payment:read' },
-      { href: '/gift-cards', label: 'Gift cards', icon: 'giftcards', permission: 'payment:read' },
-      { href: '/payables', label: 'Suppliers owed', icon: 'payables', permission: 'ledger:read' },
-      { href: '/reports', label: 'Reports', icon: 'reports', permission: 'report:operational' },
+      {
+        href: '/estimates',
+        label: msg('Estimates'),
+        icon: 'estimates',
+        permission: 'estimate:read',
+      },
+      { href: '/invoices', label: msg('Invoices'), icon: 'invoices', permission: 'invoice:read' },
+      { href: '/payments', label: msg('Payments'), icon: 'payments', permission: 'payment:read' },
+      {
+        href: '/gift-cards',
+        label: msg('Gift cards'),
+        icon: 'giftcards',
+        permission: 'payment:read',
+      },
+      {
+        href: '/payables',
+        label: msg('Suppliers owed'),
+        icon: 'payables',
+        permission: 'ledger:read',
+      },
+      {
+        href: '/reports',
+        label: msg('Reports'),
+        icon: 'reports',
+        permission: 'report:operational',
+      },
       {
         href: '/reports/business',
-        label: 'Business',
+        label: msg('Business'),
         icon: 'business',
         permission: 'report:operational',
       },
-      { href: '/insights', label: 'Insights', icon: 'insights', permission: 'report:operational' },
-      { href: '/counter', label: 'Counter', icon: 'counter', permission: 'invoice:write' },
+      {
+        href: '/insights',
+        label: msg('Insights'),
+        icon: 'insights',
+        permission: 'report:operational',
+      },
+      { href: '/counter', label: msg('Counter'), icon: 'counter', permission: 'invoice:write' },
     ],
   },
   {
-    label: 'Inventory',
+    label: msg('Inventory'),
     items: [
-      { href: '/parts', label: 'Parts', icon: 'parts', permission: 'inventory:read' },
-      { href: '/suppliers', label: 'Suppliers', icon: 'suppliers', permission: 'inventory:read' },
+      { href: '/parts', label: msg('Parts'), icon: 'parts', permission: 'inventory:read' },
+      {
+        href: '/suppliers',
+        label: msg('Suppliers'),
+        icon: 'suppliers',
+        permission: 'inventory:read',
+      },
       {
         href: '/purchasing',
-        label: 'Purchasing',
+        label: msg('Purchasing'),
         icon: 'purchasing',
         permission: 'purchase:request',
       },
-      { href: '/transfers', label: 'Transfers', icon: 'transfers', permission: 'stock:transfer' },
+      {
+        href: '/transfers',
+        label: msg('Transfers'),
+        icon: 'transfers',
+        permission: 'stock:transfer',
+      },
     ],
   },
   {
-    label: 'Team',
+    label: msg('Team'),
     items: [
-      { href: '/people', label: 'People', icon: 'people', permission: 'people:read' },
-      { href: '/payroll', label: 'Payroll', icon: 'payroll', permission: 'payroll:read' },
-      { href: '/group', label: 'Sites', icon: 'sites', permission: 'report:financial' },
+      { href: '/people', label: msg('People'), icon: 'people', permission: 'people:read' },
+      { href: '/payroll', label: msg('Payroll'), icon: 'payroll', permission: 'payroll:read' },
+      { href: '/group', label: msg('Sites'), icon: 'sites', permission: 'report:financial' },
     ],
   },
   {
-    label: 'Finance',
+    label: msg('Finance'),
     items: [
-      { href: '/ledger', label: 'Ledger', icon: 'ledger', permission: 'ledger:read' },
-      { href: '/expenses', label: 'Expenses', icon: 'expenses', permission: 'report:financial' },
-      { href: '/banking', label: 'Banking', icon: 'banking', permission: 'ledger:read' },
+      { href: '/ledger', label: msg('Ledger'), icon: 'ledger', permission: 'ledger:read' },
+      {
+        href: '/expenses',
+        label: msg('Expenses'),
+        icon: 'expenses',
+        permission: 'report:financial',
+      },
+      { href: '/banking', label: msg('Banking'), icon: 'banking', permission: 'ledger:read' },
       {
         href: '/financials',
-        label: 'Statements',
+        label: msg('Statements'),
         icon: 'statements',
         permission: 'report:financial',
       },
     ],
   },
   {
-    label: 'Admin',
+    label: msg('Admin'),
     items: [
-      { href: '/settings', label: 'Settings', icon: 'settings', permission: 'settings:read' },
-      { href: '/settings/team', label: 'Team', icon: 'team', permission: 'settings:read' },
-      { href: '/automation', label: 'Automation', icon: 'automation', permission: 'settings:read' },
-      { href: '/messages', label: 'Messages', icon: 'messages', permission: 'settings:read' },
-      { href: '/audit', label: 'Audit log', icon: 'audit', permission: 'audit:read' },
+      { href: '/settings', label: msg('Settings'), icon: 'settings', permission: 'settings:read' },
+      { href: '/settings/team', label: msg('Team'), icon: 'team', permission: 'settings:read' },
+      {
+        href: '/automation',
+        label: msg('Automation'),
+        icon: 'automation',
+        permission: 'settings:read',
+      },
+      { href: '/messages', label: msg('Messages'), icon: 'messages', permission: 'settings:read' },
+      { href: '/audit', label: msg('Audit log'), icon: 'audit', permission: 'audit:read' },
     ],
   },
 ];
@@ -156,7 +229,7 @@ export function WorkshopNav({
   orgName,
   userName,
   approvalsWaiting = 0,
-  language = 'en',
+  language,
   unreadNotifications = 0,
 }: {
   /** Unread notifications for this person. Phase 39. */
@@ -168,7 +241,11 @@ export function WorkshopNav({
   /** The person's language; labels are translated on the way out. Phase 37.5. */
   language?: Language;
 }) {
-  const t = (text: string) => translate(language, text);
+  const fromContext = useT();
+  const t = React.useMemo(
+    () => (language ? translator(language) : fromContext),
+    [language, fromContext],
+  );
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
@@ -215,7 +292,7 @@ export function WorkshopNav({
           'bg-(--surface) transition-transform lg:translate-x-0',
           open ? 'translate-x-0 shadow-lg' : '-translate-x-full',
         )}
-        aria-label="Workshop"
+        aria-label={t('Workshop')}
       >
         {/* Identity. The mark is the workshop's initials rather than a stock
             glyph, so somebody with two tabs open knows which is which. */}
@@ -364,7 +441,7 @@ export function WorkshopNav({
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium leading-tight">{userName}</p>
-              <p className="truncate text-[11px] text-(--text-faint)">{humaniseRole(role)}</p>
+              <p className="truncate text-[11px] text-(--text-faint)">{t(humaniseRole(role))}</p>
             </div>
             <form action="/api/sign-out" method="post">
               <button

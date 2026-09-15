@@ -18,10 +18,14 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { PackageError, packagesFor, savePackage, setPackageActive } from '@/lib/packages';
 import { prisma } from '@carnet/db';
 
-export const metadata: Metadata = { title: 'Service packages' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Service packages') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -62,6 +66,8 @@ async function save(formData: FormData) {
     });
     if (partNumber && !product) {
       redirect(
+        // The sentence stays English in the address; the page translates it.
+        // i18n-ignore
         `/settings/packages?${packageId ? `edit=${packageId}&` : ''}problem=${encodeURIComponent(`No part ${partNumber} on your books.`)}`,
       );
     }
@@ -120,6 +126,7 @@ export default async function PackagesPage({
 }) {
   const { orgId, region } = await requireSession('settings:read');
   const params = await searchParams;
+  const t = await tFor();
   const [packages, jobTypes] = await Promise.all([
     packagesFor(orgId),
     prisma.jobType.findMany({
@@ -135,32 +142,36 @@ export default async function PackagesPage({
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
       <PageHeader
-        eyebrow="Settings"
-        title="Service packages"
-        description="Work priced and described as one thing, so a job starts with everything on it"
+        eyebrow={t('Settings')}
+        title={t('Service packages')}
+        description={t(
+          'Work priced and described as one thing, so a job starts with everything on it',
+        )}
       />
 
       {params.problem ? (
-        <Alert tone="danger" title="Not saved" className="mb-5">
-          {params.problem}
+        <Alert tone="danger" title={t('Not saved')} className="mb-5">
+          {t(params.problem)}
         </Alert>
       ) : null}
       {params.saved ? (
         <Alert tone="success" className="mb-5">
-          Saved. It is offered on new jobs, bookings, and to customers booking online.
+          {t('Saved. It is offered on new jobs, bookings, and to customers booking online.')}
         </Alert>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <Card className="overflow-hidden">
-          <CardHeader title="Packages" description="One press puts all of it on a job." />
+          <CardHeader title={t('Packages')} description={t('One press puts all of it on a job.')} />
           {packages.length === 0 ? (
             <EmptyState
-              title="No packages yet"
-              description="Start with the one you sell most: a full service, an MOT with a check, a brake job."
+              title={t('No packages yet')}
+              description={t(
+                'Start with the one you sell most: a full service, an MOT with a check, a brake job.',
+              )}
             />
           ) : (
             <ul className="divide-y divide-(--border)">
@@ -172,7 +183,7 @@ export default async function PackagesPage({
                       {pkg.name}
                       {!pkg.isActive ? (
                         <Badge tone="neutral" size="sm" className="ml-2">
-                          retired
+                          {t('retired')}
                         </Badge>
                       ) : null}
                     </span>
@@ -180,29 +191,49 @@ export default async function PackagesPage({
                       {money(pkg.total.price)}
                       {pkg.total.fixed && pkg.total.saving > 0 ? (
                         <span className="ml-1.5 text-[11px] font-normal text-(--success)">
-                          saves {money(pkg.total.saving)}
+                          {t('saves {amount}', { amount: money(pkg.total.saving) })}
                         </span>
                       ) : null}
                     </span>
                   </div>
                   <p className="text-(--text-soft)">
-                    {pkg.hours} h · {pkg.lines.length} line{pkg.lines.length === 1 ? '' : 's'}
-                    {pkg.checks.length ? ` · ${pkg.checks.length} checks` : ''}
-                    {pkg.jobType ? ` · ${pkg.jobType.name}` : ''}
-                    {pkg.intervalMonths || pkg.intervalKm
-                      ? ` · every ${[pkg.intervalMonths ? `${pkg.intervalMonths} months` : null, pkg.intervalKm ? `${pkg.intervalKm.toLocaleString(region.locale)} km` : null].filter(Boolean).join(' or ')}`
-                      : ''}
-                    {pkg.bookable ? ' · bookable online' : ''}
+                    {[
+                      t('{hours} h', { hours: pkg.hours }),
+                      pkg.lines.length === 1
+                        ? t('1 line')
+                        : t('{count} lines', { count: pkg.lines.length }),
+                      pkg.checks.length === 0
+                        ? null
+                        : pkg.checks.length === 1
+                          ? t('1 check')
+                          : t('{count} checks', { count: pkg.checks.length }),
+                      pkg.jobType?.name ?? null,
+                      pkg.intervalMonths && pkg.intervalKm
+                        ? t('every {months} months or {km} km', {
+                            months: pkg.intervalMonths,
+                            km: pkg.intervalKm.toLocaleString(region.locale),
+                          })
+                        : pkg.intervalMonths
+                          ? t('every {months} months', { months: pkg.intervalMonths })
+                          : pkg.intervalKm
+                            ? t('every {km} km', {
+                                km: pkg.intervalKm.toLocaleString(region.locale),
+                              })
+                            : null,
+                      pkg.bookable ? t('bookable online') : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </p>
                   <div className="flex gap-3 text-[12px]">
                     <Link href={`/settings/packages?edit=${pkg.id}#editor`} className="underline">
-                      Edit
+                      {t('Edit')}
                     </Link>
                     <form action={toggle}>
                       <input type="hidden" name="packageId" value={pkg.id} />
                       <input type="hidden" name="isActive" value={pkg.isActive ? '0' : '1'} />
                       <button type="submit" className="underline">
-                        {pkg.isActive ? 'Retire' : 'Bring back'}
+                        {pkg.isActive ? t('Retire') : t('Bring back')}
                       </button>
                     </form>
                   </div>
@@ -214,31 +245,37 @@ export default async function PackagesPage({
 
         <Card id="editor">
           <CardHeader
-            title={editing ? `Edit ${editing.name}` : 'Add a package'}
-            description="Labour by the hour, parts by the unit, fees as an amount. A fixed price overrides what the lines add up to."
+            title={editing ? t('Edit {name}', { name: editing.name }) : t('Add a package')}
+            description={t(
+              'Labour by the hour, parts by the unit, fees as an amount. A fixed price overrides what the lines add up to.',
+            )}
           />
           <CardBody>
             <form action={save} className="grid gap-4">
               {editing ? <input type="hidden" name="packageId" value={editing.id} /> : null}
               <div className="grid gap-4 sm:grid-cols-[7rem_minmax(0,1fr)]">
-                <Field label="Code">
+                <Field label={t('Code')}>
                   <Input
                     name="code"
                     defaultValue={editing?.code ?? ''}
+                    // i18n-ignore
                     placeholder="FULL"
                     required
                   />
                 </Field>
-                <Field label="Name">
+                <Field label={t('Name')}>
                   <Input
                     name="name"
                     defaultValue={editing?.name ?? ''}
-                    placeholder="Full service"
+                    placeholder={t('Full service')}
                     required
                   />
                 </Field>
               </div>
-              <Field label="What the customer reads" hint="Optional. Shown when they book online.">
+              <Field
+                label={t('What the customer reads')}
+                hint={t('Optional. Shown when they book online.')}
+              >
                 <Input
                   name="description"
                   defaultValue={editing?.description ?? ''}
@@ -246,7 +283,7 @@ export default async function PackagesPage({
                 />
               </Field>
               <div className="grid gap-4 sm:grid-cols-4">
-                <Field label="Minutes">
+                <Field label={t('Minutes')}>
                   <Input
                     name="durationMinutes"
                     type="number"
@@ -255,7 +292,10 @@ export default async function PackagesPage({
                     defaultValue={editing?.durationMinutes ?? 60}
                   />
                 </Field>
-                <Field label={`Fixed price (${region.currency})`} hint="Blank: the lines add up.">
+                <Field
+                  label={t('Fixed price ({currency})', { currency: region.currency })}
+                  hint={t('Blank: the lines add up.')}
+                >
                   <Input
                     name="price"
                     type="number"
@@ -264,7 +304,7 @@ export default async function PackagesPage({
                     defaultValue={editing?.price ?? ''}
                   />
                 </Field>
-                <Field label="Every, months">
+                <Field label={t('Every, months')}>
                   <Input
                     name="intervalMonths"
                     type="number"
@@ -272,7 +312,7 @@ export default async function PackagesPage({
                     defaultValue={editing?.intervalMonths ?? ''}
                   />
                 </Field>
-                <Field label="Or every, km">
+                <Field label={t('Or every, km')}>
                   <Input
                     name="intervalKm"
                     type="number"
@@ -283,12 +323,12 @@ export default async function PackagesPage({
                 </Field>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Kind of work">
+                <Field label={t('Kind of work')}>
                   <Select name="jobTypeId" defaultValue={editing?.jobType?.id ?? ''}>
-                    <option value="">Not set</option>
-                    {jobTypes.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
+                    <option value="">{t('Not set')}</option>
+                    {jobTypes.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
                       </option>
                     ))}
                   </Select>
@@ -300,12 +340,12 @@ export default async function PackagesPage({
                     defaultChecked={editing?.bookable ?? true}
                     className="h-4 w-4"
                   />
-                  Customers can book this online
+                  {t('Customers can book this online')}
                 </label>
               </div>
 
               <div>
-                <p className="mb-1.5 text-[13px] font-medium">Lines</p>
+                <p className="mb-1.5 text-[13px] font-medium">{t('Lines')}</p>
                 <div className="grid gap-1.5">
                   {Array.from({ length: LINE_SLOTS }).map((_, i) => {
                     const line = editing?.lines[i];
@@ -319,14 +359,14 @@ export default async function PackagesPage({
                           defaultValue={line?.kind ?? 'LABOUR'}
                           className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 text-[12px]"
                         >
-                          <option value="LABOUR">Labour</option>
-                          <option value="PART">Part</option>
-                          <option value="FEE">Fee</option>
+                          <option value="LABOUR">{t('Labour')}</option>
+                          <option value="PART">{t('Part')}</option>
+                          <option value="FEE">{t('Fee')}</option>
                         </select>
                         <input
                           name={`line-${i}-description`}
                           defaultValue={line?.description ?? ''}
-                          placeholder={i === 0 ? 'Service labour' : ''}
+                          placeholder={i === 0 ? t('Service labour') : ''}
                           className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                         <input
@@ -335,7 +375,7 @@ export default async function PackagesPage({
                           step="0.25"
                           min="0"
                           defaultValue={line?.quantity ?? ''}
-                          placeholder="qty"
+                          placeholder={t('qty')}
                           className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                         <input
@@ -344,13 +384,13 @@ export default async function PackagesPage({
                           step="0.01"
                           min="0"
                           defaultValue={line?.unitPrice ?? ''}
-                          placeholder="each"
+                          placeholder={t('each')}
                           className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                         <input
                           name={`line-${i}-part`}
                           defaultValue={line?.partNumber ?? ''}
-                          placeholder="part no."
+                          placeholder={t('part no.')}
                           className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                       </div>
@@ -358,20 +398,21 @@ export default async function PackagesPage({
                   })}
                 </div>
                 <p className="mt-1 text-[11px] text-(--text-faint)">
-                  Labour: hours and the rate. Part: units and the unit price; a part number reserves
-                  stock when the job is approved. Fee: 1 and the amount.
+                  {t(
+                    'Labour: hours and the rate. Part: units and the unit price; a part number reserves stock when the job is approved. Fee: 1 and the amount.',
+                  )}
                 </p>
               </div>
 
               <div>
-                <p className="mb-1.5 text-[13px] font-medium">Checklist</p>
+                <p className="mb-1.5 text-[13px] font-medium">{t('Checklist')}</p>
                 <div className="grid gap-1.5 sm:grid-cols-2">
                   {Array.from({ length: CHECK_SLOTS }).map((_, i) => (
                     <input
                       key={i}
                       name={`check-${i}`}
                       defaultValue={editing?.checks[i]?.title ?? ''}
-                      placeholder={i === 0 ? 'Reset the service indicator' : ''}
+                      placeholder={i === 0 ? t('Reset the service indicator') : ''}
                       className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                     />
                   ))}
@@ -380,11 +421,11 @@ export default async function PackagesPage({
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" variant="primary">
-                  {editing ? 'Save the package' : 'Add the package'}
+                  {editing ? t('Save the package') : t('Add the package')}
                 </Button>
                 {editing ? (
                   <Link href="/settings/packages" className="text-[13px] underline">
-                    Cancel
+                    {t('Cancel')}
                   </Link>
                 ) : null}
               </div>

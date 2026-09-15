@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { useT } from '@/components/language-provider';
+
 /**
  * The diary you can pick things up in.
  *
@@ -53,6 +55,7 @@ export function DiaryBoard({
   laneKind: 'bay' | 'technician' | 'none';
   onMove: (bookingId: string, laneId: string) => Promise<{ ok: boolean; reason: string }>;
 }) {
+  const t = useT();
   const [board, setBoard] = React.useState(lanes);
   const [held, setHeld] = React.useState<string | null>(null);
   const [over, setOver] = React.useState<string | null>(null);
@@ -122,7 +125,7 @@ export function DiaryBoard({
               : 'rounded-(--radius-sm) bg-(--success-soft) px-3 py-2 text-[13px] text-(--success)'
           }
         >
-          {notice.text}
+          {t(notice.text)}
         </p>
       ) : null}
 
@@ -202,7 +205,7 @@ export function DiaryBoard({
                             aria-expanded={menuFor === entry.id}
                             className="mt-2 text-[11px] text-(--brand-text) underline"
                           >
-                            Move
+                            {t('Move')}
                           </button>
                         ) : null}
                       </div>
@@ -235,8 +238,13 @@ export function DiaryBoard({
 
       {movable ? (
         <p className="text-[12px] text-(--text-faint)">
-          Drag a card to another {laneKind === 'bay' ? 'bay' : 'person'}, or use Move on the card. A
-          clash is refused and says why.
+          {laneKind === 'bay'
+            ? t(
+                'Drag a card to another bay, or use Move on the card. A clash is refused and says why.',
+              )
+            : t(
+                'Drag a card to another person, or use Move on the card. A clash is refused and says why.',
+              )}
         </p>
       ) : null}
     </div>

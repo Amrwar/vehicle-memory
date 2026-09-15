@@ -21,9 +21,13 @@ import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import { saveBay, setBayActive, SettingsError, siteSettings, updateSite } from '@/lib/settings';
 
-export const metadata: Metadata = { title: 'Site and bays' };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tFor();
+  return { title: t('Site and bays') };
+}
 export const dynamic = 'force-dynamic';
 
 /**
@@ -126,52 +130,57 @@ export default async function SiteSettingsPage({
   const { orgId, user } = await requireSession('settings:write');
   const { saved, problem, edit } = await searchParams;
   const site = await siteSettings(orgId, user.locationId);
+  const t = await tFor();
 
   const editing = site?.bays.find((bay) => bay.id === edit) ?? null;
 
   return (
     <>
       <div className="mb-3">
-        <BackLink href="/settings">Settings</BackLink>
+        <BackLink href="/settings">{t('Settings')}</BackLink>
       </div>
 
       <PageHeader
-        eyebrow="Settings"
-        title="Site and bays"
-        description="Where the work happens, when the doors are open, and what each bay can take"
+        eyebrow={t('Settings')}
+        title={t('Site and bays')}
+        description={t(
+          'Where the work happens, when the doors are open, and what each bay can take',
+        )}
       />
 
       {saved ? (
         <Alert tone="success" className="mb-5">
-          Saved. The change is in the audit log with what it was before.
+          {t('Saved. The change is in the audit log with what it was before.')}
         </Alert>
       ) : null}
       {problem ? (
-        <Alert tone="danger" title="Not saved" className="mb-5">
-          {problem}
+        <Alert tone="danger" title={t('Not saved')} className="mb-5">
+          {t(problem)}
         </Alert>
       ) : null}
 
       {!site ? (
         <EmptyState
-          title="No site yet"
-          description="A workshop has at least one site, and sign-up creates it. If you are seeing this, something went wrong at sign-up; get in touch."
+          title={t('No site yet')}
+          description={t(
+            'A workshop has at least one site, and sign-up creates it. If you are seeing this, something went wrong at sign-up; get in touch.',
+          )}
         />
       ) : (
         <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
           <Card>
             <CardHeader
               title={site.name}
-              description={site.isDefault ? 'Default site' : undefined}
+              description={site.isDefault ? t('Default site') : undefined}
             />
             <form action={saveSite}>
               <input type="hidden" name="locationId" value={site.id} />
               <CardBody className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-                  <Field label="Name">
+                  <Field label={t('Name')}>
                     <Input name="name" defaultValue={site.name} required maxLength={80} />
                   </Field>
-                  <Field label="Code" hint="On the diary">
+                  <Field label={t('Code')} hint={t('On the diary')}>
                     <Input
                       name="code"
                       defaultValue={site.code}
@@ -181,29 +190,29 @@ export default async function SiteSettingsPage({
                     />
                   </Field>
                 </div>
-                <Field label="Address">
+                <Field label={t('Address')}>
                   <Input
                     name="addressLine1"
                     defaultValue={site.addressLine1 ?? ''}
                     maxLength={120}
-                    placeholder="Line 1"
+                    placeholder={t('Line 1')}
                   />
                 </Field>
                 <Input
                   name="addressLine2"
                   defaultValue={site.addressLine2 ?? ''}
                   maxLength={120}
-                  placeholder="Line 2"
-                  aria-label="Address line 2"
+                  placeholder={t('Line 2')}
+                  aria-label={t('Address line 2')}
                 />
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Town">
+                  <Field label={t('Town')}>
                     <Input name="locality" defaultValue={site.locality ?? ''} maxLength={80} />
                   </Field>
-                  <Field label="County or region">
+                  <Field label={t('County or region')}>
                     <Input name="region" defaultValue={site.region ?? ''} maxLength={80} />
                   </Field>
-                  <Field label="Postcode">
+                  <Field label={t('Postcode')}>
                     <Input
                       name="postcode"
                       defaultValue={site.postcode ?? ''}
@@ -213,10 +222,10 @@ export default async function SiteSettingsPage({
                   </Field>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Telephone">
+                  <Field label={t('Telephone')}>
                     <Input name="phone" defaultValue={site.phone ?? ''} maxLength={40} />
                   </Field>
-                  <Field label="Opens at" hint="24-hour clock">
+                  <Field label={t('Opens at')} hint={t('24-hour clock')}>
                     <Input
                       name="opensAt"
                       defaultValue={formatClock(site.opensAtMinute)}
@@ -225,7 +234,7 @@ export default async function SiteSettingsPage({
                       placeholder="08:00"
                     />
                   </Field>
-                  <Field label="Closes at">
+                  <Field label={t('Closes at')}>
                     <Input
                       name="closesAt"
                       defaultValue={formatClock(site.closesAtMinute)}
@@ -236,8 +245,10 @@ export default async function SiteSettingsPage({
                   </Field>
                 </div>
                 <Field
-                  label="Daily capacity, technician hours"
-                  hint="What the site can absorb in a day across everybody. The capacity page compares bookings against it."
+                  label={t('Daily capacity, technician hours')}
+                  hint={t(
+                    'What the site can absorb in a day across everybody. The capacity page compares bookings against it.',
+                  )}
                 >
                   <Input
                     name="dailyCapacityHours"
@@ -253,7 +264,7 @@ export default async function SiteSettingsPage({
               </CardBody>
               <CardBody className="border-t border-(--border)">
                 <Button type="submit" variant="primary">
-                  Save site
+                  {t('Save site')}
                 </Button>
               </CardBody>
             </form>
@@ -262,22 +273,24 @@ export default async function SiteSettingsPage({
           <div className="grid gap-5 content-start">
             <Card className="overflow-hidden">
               <CardHeader
-                title="Bays"
-                description="Retired bays keep their history and take no new work"
+                title={t('Bays')}
+                description={t('Retired bays keep their history and take no new work')}
               />
               {site.bays.length === 0 ? (
                 <EmptyState
-                  title="No bays yet"
-                  description="Add the first bay below. The planner places work on bays, so a site with none cannot be planned."
+                  title={t('No bays yet')}
+                  description={t(
+                    'Add the first bay below. The planner places work on bays, so a site with none cannot be planned.',
+                  )}
                 />
               ) : (
                 <TableWrap className="rounded-none border-0">
                   <Table>
                     <thead>
                       <tr>
-                        <Th>Bay</Th>
-                        <Th>Code</Th>
-                        <Th>Can take</Th>
+                        <Th>{t('Bay')}</Th>
+                        <Th>{t('Code')}</Th>
+                        <Th>{t('Can take')}</Th>
                         <Th />
                       </tr>
                     </thead>
@@ -288,7 +301,7 @@ export default async function SiteSettingsPage({
                             {bay.name}
                             {!bay.isActive ? (
                               <Badge tone="neutral" size="sm" className="ml-2">
-                                retired
+                                {t('retired')}
                               </Badge>
                             ) : null}
                           </Td>
@@ -300,7 +313,7 @@ export default async function SiteSettingsPage({
                                 href={`/settings/site?edit=${bay.id}#bay`}
                                 className="mr-2 text-[13px] text-(--brand-text) hover:underline"
                               >
-                                Edit
+                                {t('Edit')}
                               </a>
                             ) : null}
                             <form action={toggleBay} className="inline">
@@ -311,7 +324,7 @@ export default async function SiteSettingsPage({
                                 value={bay.isActive ? 'no' : 'yes'}
                               />
                               <Button type="submit" variant="ghost" size="sm">
-                                {bay.isActive ? 'Retire' : 'Restore'}
+                                {bay.isActive ? t('Retire') : t('Restore')}
                               </Button>
                             </form>
                           </Td>
@@ -325,24 +338,24 @@ export default async function SiteSettingsPage({
 
             <Card id="bay">
               <CardHeader
-                title={editing ? `Edit ${editing.name}` : 'Add a bay'}
-                description={editing ? undefined : 'Name it what the floor calls it'}
+                title={editing ? t('Edit {name}', { name: editing.name }) : t('Add a bay')}
+                description={editing ? undefined : t('Name it what the floor calls it')}
               />
               <form action={saveBayAction}>
                 <input type="hidden" name="locationId" value={site.id} />
                 {editing ? <input type="hidden" name="bayId" value={editing.id} /> : null}
                 <CardBody className="grid gap-4">
                   <div className="grid gap-4 sm:grid-cols-[1fr_7rem]">
-                    <Field label="Name">
+                    <Field label={t('Name')}>
                       <Input
                         name="name"
                         defaultValue={editing?.name ?? ''}
                         required
                         maxLength={60}
-                        placeholder="Bay 5 — Ramp"
+                        placeholder={t('Bay 5 — Ramp')}
                       />
                     </Field>
-                    <Field label="Code">
+                    <Field label={t('Code')}>
                       <Input
                         name="code"
                         defaultValue={editing?.code ?? ''}
@@ -354,8 +367,10 @@ export default async function SiteSettingsPage({
                     </Field>
                   </div>
                   <Field
-                    label="Can take"
-                    hint="Optional. What the bay has that others do not: two-post lift, four-post lift, tyre machine, scan tool."
+                    label={t('Can take')}
+                    hint={t(
+                      'Optional. What the bay has that others do not: two-post lift, four-post lift, tyre machine, scan tool.',
+                    )}
                   >
                     <Input
                       name="capability"
@@ -366,14 +381,14 @@ export default async function SiteSettingsPage({
                 </CardBody>
                 <CardBody className="flex gap-2 border-t border-(--border)">
                   <Button type="submit" variant="primary">
-                    {editing ? 'Save bay' : 'Add bay'}
+                    {editing ? t('Save bay') : t('Add bay')}
                   </Button>
                   {editing ? (
                     <a
                       href="/settings/site"
                       className="self-center text-[13px] text-(--text-soft) hover:underline"
                     >
-                      Cancel
+                      {t('Cancel')}
                     </a>
                   ) : null}
                 </CardBody>
