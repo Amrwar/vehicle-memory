@@ -27,4 +27,13 @@ export async function pushNow(messageId: string): Promise<void> {
   } catch {
     // The row stays QUEUED and the sweep collects it, exactly as before.
   }
+
+  // Onto the customer's thread, whatever became of the send. Filing never
+  // decides whether a message goes; it only says where it is read. Phase 36.
+  try {
+    const { fileOutbound } = await import('./conversations');
+    await fileOutbound(messageId);
+  } catch {
+    // Unfiled is collected the next time a thread is opened.
+  }
 }

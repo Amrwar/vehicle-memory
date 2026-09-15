@@ -1348,6 +1348,45 @@ I have them **so that** nobody walks round the workshop asking.
 
 ---
 
+## Epic AI — Conversations (Phase 36)
+
+### AI1 — One thread
+
+**As** Ahmed **I want** everything said to and by a customer in one place,
+on the job it is about **so that** I answer knowing what was already said.
+**Size** 5 · **Satisfies** FR-6501, FR-6502, FR-6503
+
+- **Given** a quote sent by text and a reply on WhatsApp, **when** I open
+  the job, **then** both are on its conversation in order.
+- **Given** a reply, **when** I open the thread, **then** it is read; a
+  colleague sees it was.
+- **Given** a message from a number nobody has, **when** it arrives,
+  **then** it waits for a person and threads when filed.
+
+### AI2 — Answering from the job
+
+**As** Ahmed **I want** to reply from the job on whatever the customer
+uses **so that** I do not leave the job or guess the channel.
+**Size** 3 · **Satisfies** FR-6504, FR-6505, FR-6507
+
+- **Given** a customer with a mobile and no email, **when** I reply,
+  **then** only text and WhatsApp are offered.
+- **Given** a PDF chosen with the reply, **when** I send, **then** it is
+  on the thread and the message says it was attached.
+
+### AI3 — Sentences, not blanks
+
+**As** Fatima **I want** templates that read as messages **so that** I
+send them as they are.
+**Size** 2 · **Satisfies** FR-6506
+
+- **Given** "Car is ready" on a job with a vehicle, **when** I choose it,
+  **then** the composer holds the sentence with the car's name in it.
+- **Given** money owed, **when** I press Payment link, **then** the amount
+  and the link are in a sentence; with nothing owed, I am told so.
+
+---
+
 ## Story map
 
 ```

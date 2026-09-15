@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 35"
+AFTER_PHASE = "Phase 36"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-conversations": "a quote filed onto the job's thread, a WhatsApp reply landing on it unread, an answer with a file through the seam, templates filled and refused, a payment link, assignment, closing and reopening, and a stranger's message left for a person",
     "verify-arrival": "a car checked in with every refusal tried, the keys moved, a quote approved with a signature, the car refused unfinished and unpaid, handed back signed for, and a fleet car let go owing with the reason written down",
     "verify-workflow": "a job walked from a booking to a paid bill the way a front desk would, every hand-off counted in presses against the table in core, the three screens read for the one button each needs, and stock put back as it was",
 }
@@ -787,7 +788,21 @@ def build() -> None:
               "events, read by the job page, the technician's card and the portal. recordSignature writes a "
               "Signature for an approval given across the counter, which EstimateApproval.signatureId points at.")
 
-    doc.add_heading("6.14 Answers and the assistant", level=2)
+    doc.add_heading("6.14 Conversations", level=2)
+    para(doc, "A Conversation row is what the two message tables point at. When the product sends anything through "
+              "pushNow, fileOutbound resolves the customer and job from what the message says it relates to (a job, an "
+              "estimate, an invoice, a payment, a booking, or the address itself), finds or makes the thread (the job's "
+              "when there is a job, else the customer's) and writes conversationId and lastMessageAt. When a reply "
+              "arrives through /api/inbound or the mail provider's webhook, receiveInbound matches it as before and "
+              "fileInbound threads it and sets lastInboundAt, which is what unread is derived from against readAt; a "
+              "message nobody can match stays unthreaded in the inbox until a person files it. conversationsFor files "
+              "any unthreaded rows a bounded batch at a time, then orders unread first. sendReply writes a MessageLog "
+              "with the person who wrote it, stores any files through the same ticket the photographs use and records "
+              "them as MessageAttachments, marks the thread read, and pushes the message; WHATSAPP goes through the "
+              "transport seam like SMS, to the console or to Twilio's WhatsApp sender. Templates are rendered in core "
+              "from templateValues, which reads the customer, the job, the vehicle, the open invoice and the workshop.")
+
+    doc.add_heading("6.15 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

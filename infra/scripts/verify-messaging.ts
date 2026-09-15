@@ -72,7 +72,9 @@ async function main() {
   });
 
   console.info(`  Measuring ${org.name}.`);
-  console.info(`  Email via ${TRANSPORTS.EMAIL.name}, texts via ${TRANSPORTS.SMS.name}.\n`);
+  console.info(
+    `  Email via ${TRANSPORTS.EMAIL.name}, texts via ${TRANSPORTS.SMS.name}, WhatsApp via ${TRANSPORTS.WHATSAPP.name}.\n`,
+  );
 
   /* --- a message that should go --------------------------------------- */
 

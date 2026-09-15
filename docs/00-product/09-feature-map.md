@@ -409,7 +409,7 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Deposits and customer credit            | Built   | Taken on the customer, spent on the invoice, returned with a reason; a refund kept as credit (Phase 30)                           |
 | Receipts                                | Built   | Sent on every payment; printable at `/payments/[id]/receipt` (Phase 30)                                                           |
 | Card payment through a provider         | Built   | A seam with a stub and Stripe; "Pay now" in the portal; failed with a reason; reconciliation names differences (Phase 32)         |
-| Payment links                           | Partial | "Pay now" in the portal; a link sent in a message comes with conversations (Phase 36)                                             |
+| Payment links                           | Built   | "Pay now" in the portal, and a one-press sentence with the amount and the link from any conversation (Phase 36)                   |
 | Workshop directory and booking anywhere | Built   | Every workshop on Carnet, findable; booking at a new one makes the customer its customer (Phase 32.5)                             |
 | Subscription lifecycle, billed          | Built   | Card before a 14-day trial, charged when it ends unless cancelled, reminded, past due, cancel at period end (Phase 32.6)          |
 | Plan priced in the workshop's currency  | Built   | One price book, eleven currencies, read by the pricing page, sign-up, terms, reminder, billing page and the charge (Phase 32.7)   |
@@ -428,7 +428,14 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Check-out                               | Built   | What was done, what is owed, final mileage, what goes back, a signature; refused unfinished or unpaid without a reason (Phase 35) |
 | Signatures                              | Built   | A record of its own, strokes not pictures, with who, when, where; on check-in, check-out and counter approvals (Phase 35)         |
 | Key tags                                | Built   | Hung, taken, returned, handed back as events; where they are now on the job and the technician's card (Phase 35)                  |
-| Conversation threads and WhatsApp       | Missing | Outbound and inbound exist without a thread; Phase 36                                                                             |
+| Conversations                           | Built   | One thread per customer and per job over email, text, WhatsApp; unread first; reply from the job (Phase 36)                       |
+| WhatsApp                                | Built   | A channel through the transport seam: console by default, Twilio's WhatsApp sender as the adapter; inbound accepted (Phase 36)    |
+| Message templates                       | Built   | Sentences filled from the job, refused with a blank; five built in, any number a workshop's own (Phase 36)                        |
+| Attachments, assignment, read state     | Built   | Files kept on the message; a thread assigned, read, closed, reopened by the next reply (Phase 36)                                 |
+| Conversations                           | Built   | One thread per customer and per job over email, text, WhatsApp; unread first; reply from the job (Phase 36)                       |
+| WhatsApp                                | Built   | A channel through the transport seam: console by default, Twilio's WhatsApp sender as the adapter; inbound accepted (Phase 36)    |
+| Message templates                       | Built   | Sentences filled from the job, refused with a blank; five built in, any number a workshop's own (Phase 36)                        |
+| Attachments, assignment, read state     | Built   | Files kept on the message; a thread assigned, read, closed, reopened by the next reply (Phase 36)                                 |
 | Service packages                        | Missing | Job types and a catalogue exist; Phase 37                                                                                         |
 | Parts returns and cores                 | Missing | Phase 38                                                                                                                          |
 | Sublet work                             | Missing | Phase 38                                                                                                                          |
@@ -451,9 +458,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 179          |
-| Partial  | 3            |
-| Missing  | 13           |
+| Built    | 188          |
+| Partial  | 2            |
+| Missing  | 12           |
 | Deferred | 1            |
 
 <!-- counts:end -->

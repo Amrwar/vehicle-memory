@@ -26,9 +26,10 @@ import {
   Mileage,
   Money,
   PageHeader,
+  Select,
+  Textarea,
   ProgressTrail,
   Registration,
-  Select,
   SeverityBadge,
   SeveritySummary,
   Table,
@@ -52,6 +53,8 @@ import {
   signatureFromForm,
 } from '@/lib/arrival';
 import { coverWorthChecking } from '@/lib/condition';
+import { ConversationError, conversationForJob, sendReply } from '@/lib/conversations';
+import { type Channel, channelLabel } from '@carnet/core';
 import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
@@ -161,6 +164,27 @@ async function extra(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
+}
+
+/** A word to the customer, from the job, on the channel they can be reached on. Phase 36. */
+async function write(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const jobId = String(formData.get('jobId') ?? '');
+  try {
+    await sendReply({
+      orgId,
+      userId: user.userId,
+      conversationId: String(formData.get('conversationId') ?? ''),
+      channel: String(formData.get('channel') ?? 'SMS') as Channel,
+      body: String(formData.get('body') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof ConversationError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#conversation`);
+  }
+  redirect(`/jobs/${jobId}?wrote=1#conversation`);
 }
 
 /** The keys moved: hung on a hook, taken by somebody, put back. Phase 35. */
@@ -360,6 +384,7 @@ export default async function JobPage({
     approved?: string;
     quoted?: string;
     started?: string;
+    wrote?: string;
   }>;
 }) {
   const { id } = await params;
@@ -414,12 +439,13 @@ export default async function JobPage({
   // against it. The moment somebody needs to know is the moment the job is
   // open, not a month later when the invoice is written and the part has been
   // paid for twice.
-  const [cover, misfits, arrival] = await Promise.all([
+  const [cover, misfits, arrival, conversation] = await Promise.all([
     coverWorthChecking(orgId, job.vehicle.id),
     // Only the lines worth interrupting somebody for. A screen that confirmed
     // every correct part would train them to dismiss the one that matters.
     fitmentWarningsForJob(orgId, job.id),
     arrivalFor(orgId, job.id),
+    conversationForJob(orgId, job.id),
   ]);
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
@@ -679,6 +705,13 @@ export default async function JobPage({
       {notice.problem ? (
         <Alert tone="danger" className="mb-5">
           {notice.problem}
+        </Alert>
+      ) : null}
+
+      {notice.wrote ? (
+        <Alert tone="success" className="mb-5">
+          Sent to {job.customer.displayName}. It is on the conversation below with what became of
+          it.
         </Alert>
       ) : null}
 
@@ -1486,6 +1519,92 @@ export default async function JobPage({
                     </form>
                   ) : null}
                 </div>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          <Card id="conversation">
+            <CardHeader
+              title="Conversation"
+              description={
+                conversation
+                  ? `${conversation.entries.length} message${conversation.entries.length === 1 ? '' : 's'}${conversation.unread ? ', unread' : ''}`
+                  : undefined
+              }
+              action={
+                conversation ? (
+                  <Link href={`/inbox?c=${conversation.id}`} className="text-[12px] underline">
+                    Whole thread
+                  </Link>
+                ) : null
+              }
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              {conversation && conversation.entries.length > 0 ? (
+                <div className="grid gap-2">
+                  {conversation.entries.slice(-3).map((entry) => (
+                    <div
+                      key={entry.id}
+                      className={[
+                        'rounded-(--radius-md) px-3 py-2',
+                        entry.direction === 'out'
+                          ? 'ml-4 bg-(--brand-soft)'
+                          : 'mr-4 border border-(--border)',
+                      ].join(' ')}
+                    >
+                      <p className="line-clamp-3 whitespace-pre-wrap leading-relaxed">
+                        {entry.body}
+                      </p>
+                      <p className="mt-1 text-[11px] text-(--text-faint)">
+                        {entry.direction === 'out' ? 'Sent' : 'Received'} ·{' '}
+                        {channelLabel(entry.channel)} ·{' '}
+                        {entry.at.toLocaleString(region.locale, {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                        {entry.state === 'failed' ? ' · did not arrive' : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-(--text-faint)">Nothing said yet on this job.</p>
+              )}
+              {conversation &&
+              conversation.channels.length > 0 &&
+              can(user.role, 'customer:write') ? (
+                <form action={write} className="grid gap-2 border-t border-(--border) pt-3">
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <input type="hidden" name="conversationId" value={conversation.id} />
+                  <Textarea
+                    name="body"
+                    rows={2}
+                    required
+                    placeholder={`A word to ${job.customer.displayName}…`}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Select
+                      name="channel"
+                      defaultValue={conversation.preferred ?? conversation.channels[0]}
+                      className="h-8 w-32 text-[12px]"
+                    >
+                      {conversation.channels.map((c) => (
+                        <option key={c} value={c}>
+                          {channelLabel(c)}
+                        </option>
+                      ))}
+                    </Select>
+                    <Button type="submit" size="sm" variant="primary">
+                      Send
+                    </Button>
+                  </div>
+                </form>
+              ) : conversation && conversation.channels.length === 0 ? (
+                <p className="text-(--text-faint)">
+                  No email address or mobile number on file, so there is nowhere to write to.
+                </p>
               ) : null}
             </CardBody>
           </Card>

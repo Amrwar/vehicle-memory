@@ -286,6 +286,18 @@ signature has to be, where the keys are. The check-out is the one place
 the money and the car meet: it reads what is outstanding and refuses to
 let the car go without a reason written down.
 
+### 3.14 Conversations (Phase 36)
+
+A `Conversation` is a thread that the two message tables point at: one
+per customer, and one per job when a message is about a job. It is not a
+third message table; the outbound queue and the inbox keep their shapes
+and their rules, and the thread is a view over both (`mergeThread`) with
+its own state: read, assigned, open or closed. The rules about which
+channel a customer can be reached on, which to offer first, what a
+template turns into and what a payment link says are pure in
+`packages/core/src/messaging/conversations.ts`. WhatsApp is a channel in
+the same `Channel` union and goes through the same transport seam.
+
 ## 4. Cross-context communication
 
 Contexts communicate through domain events, not by reaching into each other's

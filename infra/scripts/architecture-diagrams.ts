@@ -229,6 +229,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     models: [
       'MessageLog',
       'InboundMessage',
+      'Conversation',
+      'MessageAttachment',
+      'MessageTemplate',
       'SuppressedAddress',
       'DeliveryEvent',
       'ReviewRequest',

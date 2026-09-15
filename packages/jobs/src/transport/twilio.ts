@@ -14,8 +14,8 @@ import { type Outbound, type SendResult, type Transport, TransportError } from '
  * passed through untouched.
  */
 export class TwilioTransport implements Transport {
-  readonly name = 'twilio';
-  readonly channels: readonly Channel[] = ['SMS'];
+  readonly name: string;
+  readonly channels: readonly Channel[];
 
   constructor(
     private readonly config: {
@@ -23,19 +23,29 @@ export class TwilioTransport implements Transport {
       authToken: string;
       /** A number you own, or a messaging service SID. */
       from: string;
+      /** Send on WhatsApp rather than as a text: both sides get the `whatsapp:` prefix. Phase 36. */
+      whatsapp?: boolean;
     },
-  ) {}
+  ) {
+    this.name = config.whatsapp ? 'twilio-whatsapp' : 'twilio';
+    this.channels = config.whatsapp ? ['WHATSAPP'] : ['SMS'];
+  }
 
   async send(message: Outbound): Promise<SendResult> {
     const url = `https://api.twilio.com/2010-04-01/Accounts/${this.config.accountSid}/Messages.json`;
 
+    const prefix = this.config.whatsapp ? 'whatsapp:' : '';
+    const from = this.config.from.startsWith('whatsapp:')
+      ? this.config.from
+      : `${prefix}${this.config.from}`;
+
     const form = new URLSearchParams({
-      To: message.to,
+      To: `${prefix}${message.to}`,
       Body: message.body,
       // A messaging service is addressed by SID; a plain number by number.
       ...(this.config.from.startsWith('MG')
         ? { MessagingServiceSid: this.config.from }
-        : { From: this.config.from }),
+        : { From: from }),
     });
 
     let response: Response;

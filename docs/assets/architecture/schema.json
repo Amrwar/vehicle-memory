@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 132,
-    "enums": 67,
-    "fields": 2063
+    "models": 135,
+    "enums": 68,
+    "fields": 2124
   },
   "enums": [
     "OrgPlan",
@@ -56,6 +56,7 @@
     "ReviewRouting",
     "TokenPurpose",
     "SuppressionReason",
+    "ConversationStatus",
     "VehicleClaimStatus",
     "CommissionBasis",
     "TransferStatus",
@@ -1375,20 +1376,57 @@
         {
           "name": "MessageLog",
           "comment": "",
-          "fields": 16,
+          "fields": 18,
           "relations": [
-            "Organization"
+            "Organization",
+            "Conversation",
+            "User"
           ],
           "scope": "organisation"
         },
         {
           "name": "InboundMessage",
           "comment": "Something a customer sent in. Matched to a customer and a job with a stated confidence rather than a silent assignment: a reply filed against the wrong job is worse than one filed against nothing, because somebody reads it about another car.",
-          "fields": 15,
+          "fields": 16,
           "relations": [
             "Organization",
             "Customer",
             "Job",
+            "User",
+            "Conversation"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Conversation",
+          "comment": "One thread per customer, and one per job when a message is about a job, whatever carried it. What went out and what came back are filed onto it. Phase 36.",
+          "fields": 13,
+          "relations": [
+            "Organization",
+            "Customer",
+            "Job",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "MessageAttachment",
+          "comment": "A file that travelled with a message, in either direction. Phase 36.",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Conversation",
+            "MessageLog",
+            "InboundMessage"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "MessageTemplate",
+          "comment": "A workshop's own sentences, filled from the job when sent. Phase 36.",
+          "fields": 9,
+          "relations": [
+            "Organization",
             "User"
           ],
           "scope": "organisation"

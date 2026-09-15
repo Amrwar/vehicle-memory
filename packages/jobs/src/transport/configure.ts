@@ -20,6 +20,7 @@ import { TwilioTransport } from './twilio';
 export interface Transports {
   EMAIL: Transport;
   SMS: Transport;
+  WHATSAPP: Transport;
 }
 
 function mail(env: NodeJS.ProcessEnv): Transport {
@@ -64,8 +65,32 @@ function sms(env: NodeJS.ProcessEnv): Transport {
   return new UnconfiguredTransport('SMS');
 }
 
+/**
+ * WhatsApp. Phase 36. The same seam as texts: the console by default, and
+ * Twilio's WhatsApp sender as the one real adapter, addressed with the
+ * `whatsapp:` prefix Twilio uses. A workshop that has not been told how to
+ * send on WhatsApp gets the console, and the start-up line says so.
+ */
+function whatsapp(env: NodeJS.ProcessEnv): Transport {
+  const choice = env.WHATSAPP_TRANSPORT ?? 'console';
+
+  if (choice === 'console') return new ConsoleTransport();
+
+  if (choice === 'twilio') {
+    const accountSid = env.TWILIO_ACCOUNT_SID;
+    const authToken = env.TWILIO_AUTH_TOKEN;
+    const from = env.TWILIO_WHATSAPP_FROM ?? env.TWILIO_FROM_NUMBER;
+
+    if (!accountSid || !authToken || !from) return new UnconfiguredTransport('WHATSAPP');
+
+    return new TwilioTransport({ accountSid, authToken, from, whatsapp: true });
+  }
+
+  return new UnconfiguredTransport('WHATSAPP');
+}
+
 export function configureTransports(env: NodeJS.ProcessEnv = process.env): Transports {
-  return { EMAIL: mail(env), SMS: sms(env) };
+  return { EMAIL: mail(env), SMS: sms(env), WHATSAPP: whatsapp(env) };
 }
 
 /** The transport for a channel, or one that fails with a useful sentence. */

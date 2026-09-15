@@ -70,7 +70,7 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/patterns', expectsGuidance: ['Nobody has working hours'] },
   { path: '/fleet', expectsGuidance: ['No fleets yet'] },
   { path: '/reputation', expectsGuidance: ['Nobody has answered yet'] },
-  { path: '/inbox', expectsGuidance: ['Nothing has come in'] },
+  { path: '/inbox', expectsGuidance: ['No conversations yet'] },
   { path: '/claims', expectsGuidance: ['Nobody has asked'] },
   { path: '/payables', expectsGuidance: ['Nothing is owed'] },
   { path: '/payroll', expectsGuidance: ['Nothing waiting'] },

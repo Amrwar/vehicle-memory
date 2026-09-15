@@ -70,6 +70,7 @@ async function main(): Promise<void> {
   log('worker.started', {
     pollMs: POLL_INTERVAL_MS,
     mail: TRANSPORTS.EMAIL.name,
+    whatsapp: TRANSPORTS.WHATSAPP.name,
     sms: TRANSPORTS.SMS.name,
   });
 

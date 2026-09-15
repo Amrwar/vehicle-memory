@@ -93,6 +93,9 @@ model Organization {
   taxRates            TaxRate[]
   sequences           DocumentSequence[]
   messages            MessageLog[]
+  conversations       Conversation[]
+  messageAttachments  MessageAttachment[]
+  messageTemplates    MessageTemplate[]
   auditLogs           AuditLog[]
   vehicleAccess       VehicleAccessGrant[]
   recordedEvents      VehicleEvent[]
@@ -263,6 +266,9 @@ model User {
   signaturesCaptured       Signature[]          @relation("SignatureCapturedBy")
   vehicleChecks            VehicleCheck[]       @relation("CheckPerformedBy")
   keyEvents                KeyEvent[]           @relation("KeyEventBy")
+  conversationsAssigned    Conversation[]       @relation("ConversationAssignee")
+  messagesSent             MessageLog[]         @relation("MessageSentBy")
+  messageTemplates         MessageTemplate[]
   preferredBy              Customer[]           @relation("PreferredTechnician")
   bookingTechnician        Booking[]
   // Passport
@@ -821,6 +827,7 @@ model Customer {
   giftCardsBought     GiftCard[]
   deposits            Deposit[]
   inboundMessages     InboundMessage[]
+  conversations       Conversation[]
   paymentAttempts     PaymentAttempt[]
 
   @@index([orgId, isActive])
@@ -1020,6 +1027,7 @@ model Job {
   checks           VehicleCheck[]
   keyEvents        KeyEvent[]
   signatures       Signature[]
+  conversation     Conversation?
 
   @@unique([orgId, number])
   @@index([orgId, status])
@@ -2132,14 +2140,22 @@ model MessageLog {
   relatedId   String?
   sentAt      DateTime?
   createdAt   DateTime       @default(now())
+  /// The thread this belongs to, once filed. Phase 36.
+  conversationId String?
+  /// A person who wrote it, when a person did; null for the product's own messages.
+  sentByUserId   String?
 
-  org            Organization?   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  org            Organization?       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  conversation   Conversation?       @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  sentBy         User?               @relation("MessageSentBy", fields: [sentByUserId], references: [id], onDelete: SetNull)
   deliveryEvents DeliveryEvent[]
+  attachments    MessageAttachment[]
 
   @@index([orgId, createdAt])
   @@index([relatedType, relatedId])
   /// The sweeper's query: what is due, oldest first.
   @@index([status, availableAt])
+  @@index([conversationId])
   @@map("message_logs")
 }
 
@@ -2147,6 +2163,7 @@ enum MessageChannel {
   EMAIL
   SMS
   PORTAL
+  WHATSAPP
 }
 
 enum MessageStatus {
@@ -3099,15 +3116,21 @@ model InboundMessage {
   handledAt       DateTime?
   handledByUserId String?
 
+  /// The thread it was filed onto. Phase 36.
+  conversationId String?
+
   createdAt DateTime @default(now())
 
-  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  customer  Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  job       Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  handledBy User?        @relation(fields: [handledByUserId], references: [id], onDelete: SetNull)
+  org          Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer     Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  job          Job?                @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  handledBy    User?               @relation(fields: [handledByUserId], references: [id], onDelete: SetNull)
+  conversation Conversation?       @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  attachments  MessageAttachment[]
 
   @@unique([orgId, providerRef])
   @@index([orgId, receivedAt])
+  @@index([conversationId])
   @@index([orgId, handledAt])
   @@index([jobId])
   @@map("inbound_messages")
@@ -3206,6 +3229,89 @@ model DeliveryEvent {
   @@index([messageLogId, occurredAt])
   @@index([orgId, event, occurredAt])
   @@map("delivery_events")
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+}
+
+/// One thread per customer, and one per job when a message is about a job,
+/// whatever carried it. What went out and what came back are filed onto it.
+/// Phase 36.
+model Conversation {
+  id               String             @id @default(cuid())
+  orgId            String
+  customerId       String?
+  jobId            String?            @unique
+  subject          String?
+  status           ConversationStatus @default(OPEN)
+  assignedToUserId String?
+  /// The channel the last message travelled by, so a reply goes back the same way.
+  lastChannel      String?
+  lastMessageAt    DateTime           @default(now())
+  lastInboundAt    DateTime?
+  /// When somebody at the workshop last looked. Unread is an inbound after this.
+  readAt           DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  org         Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer    Customer?           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  job         Job?                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  assignedTo  User?               @relation("ConversationAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  outbound    MessageLog[]
+  inbound     InboundMessage[]
+  attachments MessageAttachment[]
+
+  @@index([orgId, lastMessageAt])
+  @@index([customerId])
+  @@index([assignedToUserId])
+  @@map("conversations")
+}
+
+/// A file that travelled with a message, in either direction. Phase 36.
+model MessageAttachment {
+  id               String   @id @default(cuid())
+  orgId            String
+  conversationId   String
+  messageLogId     String?
+  inboundMessageId String?
+  url              String
+  filename         String
+  mimeType         String
+  sizeBytes        Int
+  createdAt        DateTime @default(now())
+
+  org          Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  conversation Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageLog   MessageLog?     @relation(fields: [messageLogId], references: [id], onDelete: SetNull)
+  inbound      InboundMessage? @relation(fields: [inboundMessageId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+  @@index([messageLogId])
+  @@index([inboundMessageId])
+  @@map("message_attachments")
+}
+
+/// A workshop's own sentences, filled from the job when sent. Phase 36.
+model MessageTemplate {
+  id              String          @id @default(cuid())
+  orgId           String
+  name            String
+  /// Null: any channel.
+  channel         MessageChannel?
+  subject         String?
+  body            String
+  createdByUserId String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, name])
+  @@map("message_templates")
 }
 
 enum VehicleClaimStatus {

@@ -19,7 +19,7 @@
  * out. That split is what makes the decisions testable without a network.
  */
 
-export type Channel = 'EMAIL' | 'SMS';
+export type Channel = 'EMAIL' | 'SMS' | 'WHATSAPP';
 
 /** Give up after this many attempts. Past it, somebody has to look. */
 export const MAX_SEND_ATTEMPTS = 6;

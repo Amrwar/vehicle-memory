@@ -202,6 +202,14 @@ JSON, belongings, what went back, the hook, why it left owing, and its
 signature), `KeyEvent` (hung, taken, returned, handed back, with the hook
 and who), `Job.collectedAt`, `JobAttachment.checkId` for photographs taken
 at a check, and `EstimateApproval.signatureId`.
+
+Phase 36 adds `Conversation` (customer, optional job, subject, status,
+assignee, the last channel, `lastMessageAt`, `lastInboundAt`, `readAt`),
+`MessageLog.conversationId` and `sentByUserId`,
+`InboundMessage.conversationId`, `MessageAttachment` (a file on a message
+in either direction), `MessageTemplate` (a workshop's own sentences), and
+`WHATSAPP` in `MessageChannel`. Unread is derived: an inbound after the
+last read, never a flag that can drift.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

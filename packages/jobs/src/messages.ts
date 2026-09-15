@@ -185,6 +185,8 @@ async function deliver(message: Queued, suppressed: Set<string>): Promise<boolea
         error: `Will not be retried: "${message.toAddress}" is not a usable ${
           channel === 'EMAIL' ? 'email address' : 'mobile number'
         }.`,
+        // A WhatsApp number and a text number are the same number; the
+        // channel decides only which transport carries it.
       },
     });
 

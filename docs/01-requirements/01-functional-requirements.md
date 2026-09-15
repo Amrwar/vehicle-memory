@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6500 — Conversations
+
+| Ref     | Requirement                                                                                                                                                                                              | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6501 | Every message sent to or received from a customer MUST be filed onto one thread, the job's when it is about a job and the customer's otherwise, whatever carried it; filing MUST be idempotent.          | 36    |
+| FR-6502 | Messages sent before threads existed MUST be filed a bounded batch at a time as the page is opened; a message nobody can match MUST stay in the inbox for a person, and filing by hand MUST thread it.   | 36    |
+| FR-6503 | A thread MUST read oldest to newest across both directions with what became of each message; the list MUST put unread first; opening a thread MUST mark it read; a reply MUST reopen a closed thread.    | 36    |
+| FR-6504 | A reply MUST be offered only on the channels the customer can be reached on, the one they last wrote on first, and MUST be refused on a channel with no address; it MUST be queued and pushed at once.   | 36    |
+| FR-6505 | WhatsApp MUST be a channel through the same transport seam as texts, with the console by default and one real adapter, and MUST be accepted inbound.                                                     | 36    |
+| FR-6506 | A template MUST be a sentence with facts filled from the job, refused rather than sent with a blank; a payment link MUST be one press giving the amount owed and the link, refused when nothing is owed. | 36    |
+| FR-6507 | A file sent with a reply MUST be kept on the message and shown on the thread; a thread MUST be assignable to a team member and closable, with both recorded.                                             | 36    |
+
 ## FR-6400 — Arrival and departure
 
 | Ref     | Requirement                                                                                                                                                                                              | Phase |

@@ -574,7 +574,7 @@ def build() -> Path:
     phases = [
         ('34', 'The workflow, as one thing', 'Built: a booking becomes a job in one press; an approval puts the work on the job and reserves the parts; extra work quoted mid-job; 37 presses down to 20.'),
         ('35', 'Arrival and departure', 'Built: the car checked in and handed back against a signed record of what it was like; keys as events; a car cannot leave owing money without a reason.'),
-        ('36', 'Conversations', 'One thread per customer across email, SMS and WhatsApp, on the job it is about; a payment link in a message.'),
+        ('36', 'Conversations', 'Built: one thread per customer and per job over email, text and WhatsApp, answered from the job; templates as sentences; a payment link in one press.'),
         ('37', 'Packages and templates', 'Service packages priced as one thing; job templates that put the right lines on from the start.'),
         ('38', 'Parts back, work out', 'Returns and cores to the supplier; sublet work on the job with its own cost.'),
         ('39', 'Finding anything', 'One search box for a plate, a name, a part, an invoice number.'),

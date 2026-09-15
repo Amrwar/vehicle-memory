@@ -1817,11 +1817,43 @@ reads the two screens for the one button each needs.
 
 ## Phase 36 — Conversations
 
-One Communication model with a channel, a direction, a thread, attachments,
-assignment and read status; the existing email and SMS moved onto it;
-inbound routed onto threads on the job and the customer; a WhatsApp seam
-with a stub and one real adapter; templates that are messages rather than
-placeholders.
+**Scope.** One Communication model with a channel, a direction, a thread,
+attachments, assignment and read status; the existing email and SMS moved
+onto it; inbound routed onto threads on the job and the customer; a
+WhatsApp seam with a stub and one real adapter; templates that are messages
+rather than placeholders.
+
+**Exit.** A customer's whole exchange with the workshop reads as one
+thread, on the job it is about, and the desk replies from there.
+
+**Status.** Built. A conversation is a thread: one per customer, and one
+per job when a message is about a job. Everything the product sends and
+everything that comes back is filed onto it, whichever table it lives in
+and whatever carried it; what was sent before threads existed is filed a
+batch at a time as the page is opened, so nothing is migrated in the dark
+and nothing is lost. A reply nobody can match to a customer stays in the
+inbox for a person to file, as before, and filing it by hand moves it onto
+the job's thread. The Inbox page became Conversations: the list unread
+first with the last line as a preview, the thread oldest to newest with
+what became of each message, and a composer that offers only the channels
+the customer can be reached on, WhatsApp first if that is what they wrote
+on. Templates are a workshop's own sentences with the few facts that
+change filled from the job, refused if a fact is missing rather than sent
+with a blank; five are built in and any number can be added on the page. A
+payment link is one press: the amount owed and the portal link as a
+sentence, refused when nothing is owed. Files travel with the record: kept
+on the message and shown on the thread; the email and text providers do
+not carry them yet and the message says what was attached. A thread is
+assigned to a team member, read when opened, closed, and reopened by the
+next reply. WhatsApp is a channel through the same transport seam as
+texts: the console by default, Twilio's WhatsApp sender as the one real
+adapter, and the inbound endpoint accepts it. The job page carries the
+conversation, last three messages and a reply box, so nobody leaves the
+job to answer the customer. The verification script files a quote, takes
+a WhatsApp reply onto the same thread, answers it with a file through the
+seam, fills and refuses templates, makes a payment link, assigns, closes
+and reopens, leaves a stranger's message for a person, and reads the two
+screens.
 
 ## Phase 37 — Packages and templates
 

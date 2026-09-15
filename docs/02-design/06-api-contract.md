@@ -189,6 +189,15 @@ prevent replay.
 Delivery is at-least-once with exponential backoff, so consumers must be
 idempotent. `X-Carnet-Delivery-Id` is stable across retries.
 
+### Inbound: replies (Phases 21, 36)
+
+`POST /api/inbound` takes `{ orgId, from, body, channel?, subject?, providerRef? }`
+behind the shared secret; `channel` is `SMS`, `EMAIL` or `WHATSAPP`. The
+message is matched to a customer and a job with a stated confidence and
+filed onto the job's or the customer's conversation; a duplicate
+`providerRef` is one row. `POST /api/inbound/resend` is the same for the
+mail provider's signed webhook.
+
 ### Inbound: the payment provider (Phase 32)
 
 `POST /api/payments/webhook` is where the payment provider reports what became

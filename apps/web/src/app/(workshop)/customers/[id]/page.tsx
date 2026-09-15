@@ -939,6 +939,11 @@ export default async function CustomerPage({
           <CardHeader
             title="What they were sent"
             description="Matched on the address on file, so it is a close record rather than a certain one."
+            action={
+              <Link href={`/inbox?customer=${customer.id}`} className="text-[12px] underline">
+                The conversation
+              </Link>
+            }
           />
           <ul className="divide-y divide-(--border-soft)">
             {messages.map((message) => (

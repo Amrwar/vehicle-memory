@@ -16,7 +16,7 @@ import type { Outbound, SendResult, Transport } from './index';
  */
 export class ConsoleTransport implements Transport {
   readonly name = 'console';
-  readonly channels: readonly Channel[] = ['EMAIL', 'SMS'];
+  readonly channels: readonly Channel[] = ['EMAIL', 'SMS', 'WHATSAPP'];
 
   async send(message: Outbound): Promise<SendResult> {
     const reference = `console-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

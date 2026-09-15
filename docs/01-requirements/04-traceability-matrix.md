@@ -431,12 +431,24 @@ where the work happens.
 | FR-6405 | AH1   | `Signature`, `EstimateApproval.signatureId`               | `signatureIsUsable()`, `recordSignature()`, `SignaturePad`, `approve` | `arrival.test.ts`, `verify-arrival.ts` | Done   |
 | FR-6406 | AH3   | `KeyEvent`                                                | `keyState()`, `moveKeys()`, the job page and `/shop` cards            | `arrival.test.ts`, `verify-arrival.ts` | Done   |
 | FR-6407 | AH2   | —                                                         | `vehicleHistory()` checks, `/portal/vehicles/[id]`                    | `verify-arrival.ts`                    | Done   |
-| FR-3907 | A1    | —                                                         | `assertNotFlooding()`                                                 | `verify-credentials.ts`                | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                                   | `digest()`                                                            | `verify-credentials.ts`                | Done   |
-| FR-3801 | —     | —                                                         | `/api/inbound/resend`                                                 | `smoke.ts`                             | Done   |
-| FR-3802 | —     | —                                                         | `verify()` tolerance                                                  | `smoke.ts`                             | Done   |
-| FR-3803 | —     | `Organization.slug`                                       | `organisationFor()`                                                   | `smoke.ts`                             | Done   |
-| FR-3804 | —     | —                                                         | `INBOUND_WEBHOOK_SECRET`                                              | `smoke.ts`                             | Done   |
+
+## Conversations
+
+| Req     | Story | Schema                                                                       | Implementation                                                                            | Test                                               | Status |
+| ------- | ----- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------- | ------ |
+| FR-6501 | AI1   | `Conversation`, `MessageLog.conversationId`, `InboundMessage.conversationId` | `threadFor()`, `fileOutbound()` from `pushNow()`, `fileInbound()` from `receiveInbound()` | `verify-conversations.ts`                          | Done   |
+| FR-6502 | AI1   | —                                                                            | `fileUnfiled()`, `handleInbound()` re-filing                                              | `verify-conversations.ts`                          | Done   |
+| FR-6503 | AI1   | `Conversation.readAt`, `lastInboundAt`, `status`                             | `mergeThread()`, `orderThreads()`, `isUnread()`, `markRead()`                             | `conversations.test.ts`, `verify-conversations.ts` | Done   |
+| FR-6504 | AI2   | `MessageLog.sentByUserId`                                                    | `reachableChannels()`, `preferredChannel()`, `sendReply()`                                | `conversations.test.ts`, `verify-conversations.ts` | Done   |
+| FR-6505 | AI2   | `MessageChannel.WHATSAPP`                                                    | `configureTransports()` WHATSAPP, `TwilioTransport` whatsapp, `/api/inbound`              | `verify-conversations.ts`, `verify-messaging.ts`   | Done   |
+| FR-6506 | AI3   | `MessageTemplate`                                                            | `DEFAULT_TEMPLATES`, `fillTemplate()`, `templateValues()`, `paymentLinkFor()`             | `conversations.test.ts`, `verify-conversations.ts` | Done   |
+| FR-6507 | AI2   | `MessageAttachment`, `Conversation.assignedToUserId`                         | `sendReply()` files, `assignConversation()`, `setConversationStatus()`                    | `verify-conversations.ts`                          | Done   |
+| FR-3907 | A1    | —                                                                            | `assertNotFlooding()`                                                                     | `verify-credentials.ts`                            | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                                                      | `digest()`                                                                                | `verify-credentials.ts`                            | Done   |
+| FR-3801 | —     | —                                                                            | `/api/inbound/resend`                                                                     | `smoke.ts`                                         | Done   |
+| FR-3802 | —     | —                                                                            | `verify()` tolerance                                                                      | `smoke.ts`                                         | Done   |
+| FR-3803 | —     | `Organization.slug`                                                          | `organisationFor()`                                                                       | `smoke.ts`                                         | Done   |
+| FR-3804 | —     | —                                                                            | `INBOUND_WEBHOOK_SECRET`                                                                  | `smoke.ts`                                         | Done   |
 
 ## What people say afterwards
 
@@ -735,9 +747,10 @@ details without a provider behind it would be worse than not having one.
 | The subscription, billed                           | 7                   | 7                      |
 | The workflow, as one thing                         | 6                   | 6                      |
 | Arrival and departure                              | 7                   | 7                      |
-| **Total**                                          | **443**             | **437 (99%)**          |
+| Conversations                                      | 7                   | 7                      |
+| **Total**                                          | **450**             | **444 (99%)**          |
 
-The requirements document lists 527 requirements. 84 of
+The requirements document lists 534 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

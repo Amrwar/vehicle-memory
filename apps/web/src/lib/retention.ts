@@ -665,7 +665,7 @@ export async function receiveInbound(input: {
 
   const match = matchInbound({ body, candidates, quotedJob });
 
-  return prisma.inboundMessage.create({
+  const row = await prisma.inboundMessage.create({
     data: {
       orgId: input.orgId,
       channel: input.channel,
@@ -683,6 +683,14 @@ export async function receiveInbound(input: {
     },
     select: { id: true },
   });
+
+  // Onto its thread, the job's or the customer's, and the thread is unread
+  // from this moment. A message nobody could match stays in the inbox for
+  // a person to file. Phase 36.
+  const { fileInbound } = await import('./conversations');
+  await fileInbound(row.id);
+
+  return row;
 }
 
 /** The inbox, ordered by what has to be dealt with rather than by arrival. */
@@ -741,8 +749,15 @@ export async function handleInbound(input: {
     data: {
       ...(job ? { jobId: job.id, customerId: job.customerId, confidence: 'CERTAIN' } : {}),
       ...(input.done ? { handledAt: new Date(), handledByUserId: input.userId } : {}),
+      // Filed by hand onto a job: it moves to that job's thread. Phase 36.
+      ...(job ? { conversationId: null } : {}),
     },
   });
+
+  if (job) {
+    const { fileInbound } = await import('./conversations');
+    await fileInbound(input.messageId);
+  }
 
   await audit({
     orgId: input.orgId,

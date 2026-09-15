@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 35.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 36.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -630,6 +630,23 @@ def build() -> None:
         works="A signature kept as strokes is a few hundred bytes, redraws at any size and cannot be a pasted picture. Refusing a car that is leaving owing money unless somebody writes down why turns a habit into a record.",
         shots=[("check-in", "Checking a car in.", 16.4)],
         source="docs/02-design/01-domain-model.md, section 3.13; 05-security-model.md, section 7.4",
+    )
+
+    design(
+        doc,
+        title="Conversations",
+        when="Phase 36, 15 September 2026.",
+        why="A customer does not think in channels. They asked a question; the workshop answered or did not. "
+            "Everything said to and by a customer belongs in one place, on the job it is about.",
+        meaning=[
+            "The list on the left is unread first, a dot and a bold name for what needs reading, the last line as a preview with an arrow for its direction, and the job it is about under the name.",
+            "The thread on the right reads oldest to newest, sent on the right in the brand tint and received on the left in a bordered card, each with a one-word state, the channel, the time and who wrote it.",
+            "The composer offers only the channels the customer can be reached on, the one they last wrote on first. Templates are chips that fill the box with a sentence; Payment link is a chip in the brand colour.",
+            "On the job, the same thread as a card: the last three messages and a reply box, so nobody leaves the job to answer.",
+        ],
+        works="A thread that is a view over the two message tables rather than a third one keeps the queue and the inbox honest; unread derived from dates rather than a flag cannot drift; refusing a template with a blank is the difference between a workshop's name under a good message and under an embarrassing one.",
+        shots=[("conversations", "Conversations, with a thread open.", 16.4)],
+        source="docs/02-design/01-domain-model.md, section 3.14; 06-api-contract.md, inbound",
     )
 
     # 11. Counter
