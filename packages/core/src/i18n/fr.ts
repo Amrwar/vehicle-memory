@@ -408,4 +408,6 @@ export const FR: Readonly<Record<string, string>> = {
   'entries on its passport': 'entrées sur son passeport',
   'Not recorded': 'Non enregistré',
   'entry on its passport': 'entrée sur son passeport',
+  'Plate, VIN, phone, job, invoice, part': 'Plaque, VIN, téléphone, travail, facture, pièce',
+  Notifications: 'Notifications',
 };

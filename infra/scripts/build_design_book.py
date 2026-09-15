@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 38.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 39.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -695,6 +695,22 @@ def build() -> None:
         works="Taking the cost off the shelf the moment the part leaves, and holding it as a credit due, means stock, the ledger and the supplier's account agree on every day between the part going and the credit arriving.",
         shots=[("returns", "Returns to suppliers.", 16.4)],
         source="docs/02-design/07-accounting-model.md, Returns, cores and sublet",
+    )
+
+    design(
+        doc,
+        title="Finding anything",
+        when="Phase 39, 15 September 2026.",
+        why="A caller reads out a plate, a number, an invoice. The person at the desk should be looking at the record "
+            "before they finish the sentence, from whatever page they are on.",
+        meaning=[
+            "The box sits at the top of the navigation, under the workshop's name, on every page, with the bell beside it carrying the unread count in red.",
+            "An exact identifier opens its record with no page between. A name gives a grid of cards by kind, vehicles and jobs first, with exact matches badged.",
+            "Notifications are a single list, unread rows tinted and bold, each with its kind as a small badge and one press to open what it is about.",
+        ],
+        works="Going straight to the one record saves the press that a list of one would cost, which is most searches at a counter. Telling only the people whose role acts on something keeps the bell worth looking at.",
+        shots=[("search", "Search results for a name.", 16.4), ("notifications", "Notifications.", 16.4)],
+        source="docs/02-design/05-security-model.md, section 7.5",
     )
 
     # 11. Counter

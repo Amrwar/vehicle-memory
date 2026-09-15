@@ -441,8 +441,8 @@ items a real workshop would ask for. Each is assigned a phase in the
 | Cores                                   | Built   | The old unit back without touching the shelf; its credit reduces the cost of parts (Phase 38)                                           |
 | Credit held on a supplier account       | Built   | Credit that cannot be set against a bill is held, shown, and taken by the next bill booked (Phase 38)                                   |
 | Sublet work                             | Built   | A vendor, a line on the job with its margin, the vendor's bill at the real cost, invoiced to the customer (Phase 38)                    |
-| Global search                           | Missing | Phase 39                                                                                                                                |
-| Staff notifications                     | Missing | Phase 39                                                                                                                                |
+| Global search                           | Built   | Plates however typed, VINs, phone digits, job, invoice and part numbers; an exact match goes straight to the record (Phase 39)          |
+| Staff notifications                     | Built   | Approvals, messages, online bookings, card payments, part requests, to whoever would act; each opens its record (Phase 39)              |
 | Tax by customer, site, or stacked       | Missing | One rate per line; Phase 41                                                                                                             |
 | Printing, PDF, labels                   | Partial | Three pages print; Phase 42                                                                                                             |
 | Onboarding checklist                    | Missing | Phase 45                                                                                                                                |
@@ -460,9 +460,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 193          |
+| Built    | 195          |
 | Partial  | 2            |
-| Missing  | 9            |
+| Missing  | 7            |
 | Deferred | 1            |
 
 <!-- counts:end -->

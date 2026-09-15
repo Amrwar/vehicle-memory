@@ -563,6 +563,28 @@ export async function recordDecision(input: {
     },
   });
 
+  // Whoever runs the job hears the answer the moment it is given. Phase 39.
+  const { notifyStaff } = await import('./search');
+  const decidedJob = await prisma.job.findUnique({
+    where: { id: estimate.jobId },
+    select: { number: true, customer: { select: { displayName: true } } },
+  });
+  await notifyStaff({
+    orgId: estimate.orgId,
+    kind: 'ESTIMATE_DECIDED',
+    title: `${decidedJob?.customer.displayName ?? 'The customer'} ${
+      outcome.status === 'DECLINED'
+        ? 'declined'
+        : outcome.status === 'PARTIALLY_APPROVED'
+          ? 'approved part of'
+          : 'approved'
+    } the quote on job #${decidedJob?.number ?? ''}`,
+    href: `/jobs/${estimate.jobId}`,
+    entityType: 'Estimate',
+    entityId: estimate.id,
+    exceptUserId: input.userId ?? null,
+  });
+
   return { outcome, confirmation: confirmationFor(outcome), parts };
 }
 

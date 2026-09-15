@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 142,
+    "models": 143,
     "enums": 71,
-    "fields": 2241
+    "fields": 2256
   },
   "enums": [
     "OrgPlan",
@@ -1505,6 +1505,16 @@
           "name": "MessageTemplate",
           "comment": "A workshop's own sentences, filled from the job when sent. Phase 36.",
           "fields": 9,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "StaffNotification",
+          "comment": "Something that happened that a member of staff may need to act on, for them in particular. Each opens the record it is about. Phase 39.",
+          "fields": 11,
           "relations": [
             "Organization",
             "User"

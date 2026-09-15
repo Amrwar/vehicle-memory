@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 38"
+AFTER_PHASE = "Phase 39"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-search": "a car by its plate typed two ways and its VIN, a customer by their number, a job, an invoice and a part exactly, a name as a list; a decision and a part request notifying the right people, and the screens",
     "verify-returns": "an order delivered and billed, faulty parts sent back and credited off the bill, a refusal written off, a core credited with the leftover held for the next bill, sublet work billed and invoiced, and the trial balance",
     "verify-languages": "every sentence passed to the translator checked for both translations, eight pages read in each language for the root element's direction and a known sentence, and the switcher's cookie, account and redirect",
     "verify-packages": "a package saved with every refusal tried, a job made from it in one press, added to a job under way, booked and arrived, completed with the vehicle's next one set, offered online with its price",
@@ -843,7 +844,20 @@ def build() -> None:
               "billSublet claims the sublet, writes a SupplierBill with no order, replaces the line's cost with the real "
               "cost, and posts postSubletBilled to Cost of sublet work.")
 
-    doc.add_heading("6.18 Answers and the assistant", level=2)
+    doc.add_heading("6.18 Finding anything", level=2)
+    para(doc, "The navigation's box is a GET form to /search. readQuery in core reads the text into its forms: letters and "
+              "digits only for a plate or VIN, digits for a telephone number, a job number when it is one. searchEverything "
+              "runs six scoped queries together: customers by name, email or telephone digits (a raw query with "
+              "regexp_replace), vehicles by compacted registration or VIN only where the workshop has a job or an unrevoked "
+              "grant (a raw query with EXISTS), jobs by number or description, invoices by number, parts by number or name, "
+              "suppliers by name; rankHits orders them and straightTo redirects when exactly one is an exact identifier. "
+              "notifyStaff reads the workshop's active memberships, keeps those whose role holds the permission that would "
+              "act on the event (NOTIFY_PERMISSION) less whoever caused it, and writes one StaffNotification each; it is "
+              "called after recordDecision, receiveInbound, requestBooking, a card payment recorded by settleAttempt, and "
+              "requestPart, and never throws. The workshop layout counts the person's unread rows for the bell; "
+              "/notifications/[id] marks one read and redirects to its path.")
+
+    doc.add_heading("6.19 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

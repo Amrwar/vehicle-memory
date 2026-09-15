@@ -259,6 +259,18 @@ export async function requestBooking(input: BookingRequest): Promise<BookingOutc
       after: { source: 'ONLINE', startAt: input.startAt.toISOString() } as never,
     });
 
+    // A booking taken online reaches the diary and whoever keeps it. Phase 39.
+    const { notifyStaff } = await import('./search');
+    await notifyStaff({
+      orgId: input.orgId,
+      kind: 'BOOKING_REQUESTED',
+      title: `Booked online: ${vehicle.make ?? ''} ${vehicle.model ?? ''}, ${input.startAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`,
+      body: input.description,
+      href: `/bookings/${bookingId}`,
+      entityType: 'Booking',
+      entityId: bookingId,
+    });
+
     return { ok: true, bookingId };
   } catch (error) {
     return {

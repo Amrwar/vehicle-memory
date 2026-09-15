@@ -578,7 +578,7 @@ def build() -> Path:
         ('37', 'Packages and templates', 'Built: a package with labour, parts, checklist, time, price and interval; a job from it in one press, at the counter, online or on a job already open.'),
         ('37.5', 'Languages', 'Built: English, French and Arabic, the person\'s choice kept on the account; Arabic right to left; the public site, the portal and the workshop shells.'),
         ('38', 'Parts back, work out', 'Built: returns and cores credited against what the supplier is owed, oldest bill first; sublet work on the job at its real cost.'),
-        ('39', 'Finding anything', 'One search box for a plate, a name, a part, an invoice number.'),
+        ('39', 'Finding anything', 'Built: one box for a plate however typed, a VIN, a phone number, a job, an invoice or a part, straight to the record; notifications for staff.'),
     ]
 
     for index, (number, title, note) in enumerate(phases):

@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6900 — Finding anything
+
+| Ref     | Requirement                                                                                                                                                                                           | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6901 | One search box MUST find customers, vehicles, jobs, invoices, parts and suppliers from a plate typed with or without spacing, a VIN, a telephone number by its digits, a job, invoice or part number. | 39    |
+| FR-6902 | A single exact identifier match MUST open its record directly; a name MUST never be treated as exact and MUST give a list grouped by kind, exact matches first.                                       | 39    |
+| FR-6903 | Search MUST be scoped to the workshop: a vehicle MUST be found only if the workshop has worked on it or holds an unrevoked grant to it.                                                               | 39    |
+| FR-6904 | A customer's decision, an inbound message, an online booking, a card payment and a part request MUST notify each member whose role would act on it, and never the person who caused it.               | 39    |
+| FR-6905 | Notifications MUST be each person's own: an unread count in the navigation, unread first, mark all read, and each opening its record and marking itself read; notifying MUST never fail the event.    | 39    |
+
 ## FR-6800 — Parts back, work out
 
 | Ref     | Requirement                                                                                                                                                                             | Phase |

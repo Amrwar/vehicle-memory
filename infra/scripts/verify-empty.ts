@@ -74,6 +74,8 @@ const PAGES: { path: string; expectsGuidance: string[] }[] = [
   { path: '/claims', expectsGuidance: ['Nobody has asked'] },
   { path: '/payables', expectsGuidance: ['Nothing is owed'] },
   { path: '/purchasing/returns', expectsGuidance: ['Nothing has gone back'] },
+  { path: '/search', expectsGuidance: ['Type at least two characters'] },
+  { path: '/notifications', expectsGuidance: ['Nothing to tell you yet'] },
   { path: '/payroll', expectsGuidance: ['Nothing waiting'] },
   { path: '/ask', expectsGuidance: ['What the records can answer'] },
   { path: '/ask?q=Who+owes+us+money%3F', expectsGuidance: ['owed to you'] },

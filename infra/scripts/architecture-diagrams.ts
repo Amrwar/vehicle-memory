@@ -239,6 +239,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'Conversation',
       'MessageAttachment',
       'MessageTemplate',
+      'StaffNotification',
       'SuppressedAddress',
       'DeliveryEvent',
       'ReviewRequest',

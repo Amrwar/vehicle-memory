@@ -403,4 +403,6 @@ export const AR: Readonly<Record<string, string>> = {
   'entries on its passport': 'قيود في جوازها',
   'Not recorded': 'غير مسجل',
   'entry on its passport': 'قيد في جوازها',
+  'Plate, VIN, phone, job, invoice, part': 'لوحة، رقم هيكل، هاتف، عمل، فاتورة، قطعة',
+  Notifications: 'الإشعارات',
 };

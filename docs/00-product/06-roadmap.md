@@ -1968,9 +1968,38 @@ invoices it, checks the trial balance balances, and reads the three screens.
 
 ## Phase 39 — Finding anything
 
-One search box for customers, registrations, VINs, telephone numbers, job
-numbers, invoice numbers and part numbers. A notifications list for staff,
-each entry opening the record it is about.
+**Scope.** One search box for customers, registrations, VINs, telephone
+numbers, job numbers, invoice numbers and part numbers. A notifications list
+for staff, each entry opening the record it is about.
+
+**Exit.** Whatever is on the piece of paper, the caller's screen or the
+windscreen, one box finds it; and nobody learns about an approval by
+walking over to ask.
+
+**Status.** Built. One box at the top of the workshop navigation reads what
+is typed the way somebody at the counter would: a plate is compared with
+its spacing and punctuation removed, so "bj21oyd" finds BJ21 OYD; a VIN is
+seventeen letters and digits however it was spaced; a telephone number is
+its digits, with or without the spaces and brackets; a job number with or
+without its hash or the word job; an invoice number and a part number as
+written. A single exact identifier goes straight to its record, because
+somebody who typed a plate wants the car and not a list with one car in
+it; a name is never exact and gives a list grouped by kind, exact matches
+first. Everything is scoped to the workshop: a vehicle is found only if
+this workshop has worked on it or holds a grant to it, so the box is never
+a way to read the network; the plate and telephone comparisons have
+indexes of their own. Notifications are one row per person: a customer's
+answer to a quote, a message from a customer, a booking taken online, a
+card payment, and a technician's part request each go to the members whose
+role would act on them and never to whoever caused them; the bell in the
+navigation carries the unread count; the list puts unread first, marks all
+read in one press, and each entry opens its record and marks itself read.
+Telling somebody never decides whether the thing happened. The verification
+script finds a car by its plate typed two ways and by its VIN, a customer
+by their number, a job by its number two ways, an invoice and a part, a
+list by a name, nothing from one character, and sends a decision and a part
+request, checks who was told and who was not, opens one, and reads the
+exact search going straight to the car and the notifications page.
 
 ## Phase 40 — The owner's day, sharpened
 

@@ -475,12 +475,22 @@ where the work happens.
 | FR-6805 | AL1   | `SupplierReturn.refusedReason`                 | `refuseReturn()`, `postReturnRefused()`, `/purchasing/returns`            | `returns.test.ts`, `verify-returns.ts` | Done   |
 | FR-6806 | AL3   | `JobSublet`, `JobPartLine`                     | `assertSubletSound()`, `addSublet()`, `subletMargin()`, the job page      | `returns.test.ts`, `verify-returns.ts` | Done   |
 | FR-6807 | AL3   | `JobSublet.billId`, account 5020               | `assertSubletBillable()`, `billSublet()`, `postSubletBilled()`            | `returns.test.ts`, `verify-returns.ts` | Done   |
-| FR-3907 | A1    | —                                              | `assertNotFlooding()`                                                     | `verify-credentials.ts`                | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                        | `digest()`                                                                | `verify-credentials.ts`                | Done   |
-| FR-3801 | —     | —                                              | `/api/inbound/resend`                                                     | `smoke.ts`                             | Done   |
-| FR-3802 | —     | —                                              | `verify()` tolerance                                                      | `smoke.ts`                             | Done   |
-| FR-3803 | —     | `Organization.slug`                            | `organisationFor()`                                                       | `smoke.ts`                             | Done   |
-| FR-3804 | —     | —                                              | `INBOUND_WEBHOOK_SECRET`                                                  | `smoke.ts`                             | Done   |
+
+## Finding anything
+
+| Req     | Story | Schema                     | Implementation                                                                                                                      | Test                                 | Status |
+| ------- | ----- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------ |
+| FR-6901 | AM1   | expression indexes         | `readQuery()`, `searchEverything()`, the navigation box, `/search`                                                                  | `search.test.ts`, `verify-search.ts` | Done   |
+| FR-6902 | AM1   | —                          | `rankHits()`, `straightTo()`                                                                                                        | `search.test.ts`, `verify-search.ts` | Done   |
+| FR-6903 | AM1   | `VehicleAccessGrant`       | the scoped queries in `searchEverything()`                                                                                          | `verify-search.ts`                   | Done   |
+| FR-6904 | AM2   | `StaffNotification`        | `recipients()`, `notifyStaff()` from `recordDecision()`, `receiveInbound()`, `requestBooking()`, `settleAttempt()`, `requestPart()` | `search.test.ts`, `verify-search.ts` | Done   |
+| FR-6905 | AM2   | `StaffNotification.readAt` | `notificationsFor()`, `openNotification()`, `markAllRead()`, `/notifications`                                                       | `verify-search.ts`                   | Done   |
+| FR-3907 | A1    | —                          | `assertNotFlooding()`                                                                                                               | `verify-credentials.ts`              | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`    | `digest()`                                                                                                                          | `verify-credentials.ts`              | Done   |
+| FR-3801 | —     | —                          | `/api/inbound/resend`                                                                                                               | `smoke.ts`                           | Done   |
+| FR-3802 | —     | —                          | `verify()` tolerance                                                                                                                | `smoke.ts`                           | Done   |
+| FR-3803 | —     | `Organization.slug`        | `organisationFor()`                                                                                                                 | `smoke.ts`                           | Done   |
+| FR-3804 | —     | —                          | `INBOUND_WEBHOOK_SECRET`                                                                                                            | `smoke.ts`                           | Done   |
 
 ## What people say afterwards
 
@@ -783,9 +793,10 @@ details without a provider behind it would be worse than not having one.
 | Packages and templates                             | 5                   | 5                      |
 | Languages                                          | 5                   | 5                      |
 | Parts back, work out                               | 7                   | 7                      |
-| **Total**                                          | **467**             | **461 (99%)**          |
+| Finding anything                                   | 5                   | 5                      |
+| **Total**                                          | **472**             | **466 (99%)**          |
 
-The requirements document lists 551 requirements. 84 of
+The requirements document lists 556 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

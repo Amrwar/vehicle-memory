@@ -157,7 +157,10 @@ export function WorkshopNav({
   userName,
   approvalsWaiting = 0,
   language = 'en',
+  unreadNotifications = 0,
 }: {
+  /** Unread notifications for this person. Phase 39. */
+  unreadNotifications?: number;
   role: Role;
   orgName: string;
   userName: string;
@@ -233,6 +236,42 @@ export function WorkshopNav({
             </p>
             <p className="truncate text-[11px] text-(--text-faint)">{t('Carnet Workshop')}</p>
           </div>
+        </div>
+
+        {/* One box for anything: a plate, a VIN, a phone number, a job,
+            an invoice, a part. Phase 39. */}
+        <div className="flex items-center gap-2 border-b border-(--border) px-3 py-3">
+          <form action="/search" method="get" role="search" className="min-w-0 flex-1">
+            <label htmlFor="nav-search" className="sr-only">
+              {t('Search')}
+            </label>
+            <input
+              id="nav-search"
+              name="q"
+              type="search"
+              placeholder={t('Plate, VIN, phone, job, invoice, part')}
+              className="h-9 w-full rounded-(--radius-md) border border-(--border-strong) bg-(--surface-sunk) px-3 text-[13px] placeholder:text-(--text-faint)"
+            />
+          </form>
+          <Link
+            href="/notifications"
+            aria-label={t('Notifications')}
+            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md) border border-(--border) hover:bg-(--surface-sunk)"
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden>
+              <path
+                d="M10 2.5a5 5 0 0 0-5 5v3.2L3.5 13.5h13L15 10.7V7.5a5 5 0 0 0-5-5ZM8 16a2 2 0 0 0 4 0"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {unreadNotifications > 0 ? (
+              <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-(--danger) px-1 text-[10px] font-semibold text-white">
+                {unreadNotifications > 99 ? '99+' : unreadNotifications}
+              </span>
+            ) : null}
+          </Link>
         </div>
 
         <div className="scroll-x flex-1 overflow-y-auto px-3 py-4">

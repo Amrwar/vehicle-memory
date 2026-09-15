@@ -1488,6 +1488,33 @@ parts **so that** the margin on the job that used the part is right.
 
 ---
 
+## Epic AM — Finding anything (Phase 39)
+
+### AM1 — Whatever is on the paper
+
+**As** Sara on the telephone **I want** to type what the caller reads out
+**so that** I am looking at their car before they finish the sentence.
+**Size** 3 · **Satisfies** FR-6901, FR-6902, FR-6903
+
+- **Given** "bj21oyd", **when** I search, **then** I am on BJ21 OYD.
+- **Given** "0161 496 5522", **when** I search, **then** the customer with
+  that number is found however it was written down.
+- **Given** a plate only another workshop has worked on, **when** I search,
+  **then** nothing is found.
+
+### AM2 — Being told
+
+**As** Ahmed **I want** to be told when a customer approves, writes in,
+books online or pays **so that** nobody has to walk over and ask.
+**Size** 3 · **Satisfies** FR-6904, FR-6905
+
+- **Given** a customer approves a quote, **when** I look at the bell,
+  **then** there is one unread, and it opens the job.
+- **Given** John asks for a part, **when** it is recorded, **then** I am
+  told and John is not.
+
+---
+
 ## Story map
 
 ```

@@ -176,6 +176,19 @@ export async function requestPart(input: {
     after: { jobNumber: job.number, notes: input.notes.trim() },
   });
 
+  // Whoever approves spending hears about it now, not at the end of the day. Phase 39.
+  const { notifyStaff } = await import('./search');
+  await notifyStaff({
+    orgId: input.orgId,
+    kind: 'PART_REQUESTED',
+    title: `A part is needed on job #${job.number}`,
+    body: input.notes.trim(),
+    href: '/purchasing',
+    entityType: 'PurchaseRequest',
+    entityId: request.id,
+    exceptUserId: input.userId,
+  });
+
   return request.id;
 }
 

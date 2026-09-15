@@ -688,7 +688,27 @@ export async function receiveInbound(input: {
   // from this moment. A message nobody could match stays in the inbox for
   // a person to file. Phase 36.
   const { fileInbound } = await import('./conversations');
-  await fileInbound(row.id);
+  const conversationId = await fileInbound(row.id);
+
+  // Somebody wrote in; whoever answers customers is told. Phase 39.
+  const { notifyStaff } = await import('./search');
+  const sender = match.customerId
+    ? (
+        await prisma.customer.findUnique({
+          where: { id: match.customerId },
+          select: { displayName: true },
+        })
+      )?.displayName
+    : null;
+  await notifyStaff({
+    orgId: input.orgId,
+    kind: 'MESSAGE_RECEIVED',
+    title: `${sender ?? from} wrote in`,
+    body: body.slice(0, 140),
+    href: conversationId ? `/inbox?c=${conversationId}` : '/inbox',
+    entityType: 'InboundMessage',
+    entityId: row.id,
+  });
 
   return row;
 }

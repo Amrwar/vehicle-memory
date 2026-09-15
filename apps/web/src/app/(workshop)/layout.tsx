@@ -8,6 +8,7 @@ import { AccessNotice } from '@/components/access-notice';
 import { WorkshopNav } from '@/components/workshop-nav';
 import { requireSession } from '@/lib/guard';
 import { currentLanguage } from '@/lib/i18n';
+import { unreadNotifications } from '@/lib/search';
 
 export default async function WorkshopLayout({ children }: { children: React.ReactNode }) {
   const { user, db } = await requireSession();
@@ -28,12 +29,13 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
   // Invited colleagues and seeded accounts arrive already confirmed, so the
   // only person who ever sees the holding page is the one who has just signed
   // up and has a link waiting in their inbox.
-  const [approvalsWaiting, account] = await Promise.all([
+  const [approvalsWaiting, account, unread] = await Promise.all([
     db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
     prisma.user.findUnique({
       where: { id: user.userId },
       select: { emailVerifiedAt: true },
     }),
+    user.orgId ? unreadNotifications(user.orgId, user.userId) : Promise.resolve(0),
   ]);
 
   if (!account?.emailVerifiedAt) redirect('/confirm-email');
@@ -46,6 +48,7 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
         userName={user.name}
         approvalsWaiting={approvalsWaiting}
         language={language}
+        unreadNotifications={unread}
       />
       <main id="main" tabIndex={-1} className="outline-none lg:pl-64">
         <div className="mx-auto max-w-[1500px] px-4 pb-16 pt-16 lg:px-8 lg:pt-8">

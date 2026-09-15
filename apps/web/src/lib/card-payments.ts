@@ -238,6 +238,20 @@ export async function settleAttempt(input: {
       entityId: attempt.id,
       after: { paymentId, amountMinor: input.record.amountMinor },
     });
+    // Money in by card, while nobody was at the counter. Phase 39.
+    const { notifyStaff } = await import('./search');
+    const paidInvoice = await prisma.invoice.findUnique({
+      where: { id: attempt.invoiceId },
+      select: { number: true, currency: true, customer: { select: { displayName: true } } },
+    });
+    await notifyStaff({
+      orgId: attempt.orgId,
+      kind: 'PAYMENT_RECEIVED',
+      title: `${paidInvoice?.customer.displayName ?? 'A customer'} paid ${(input.record.amountMinor / 100).toFixed(2)} ${paidInvoice?.currency ?? ''} by card on ${paidInvoice?.number ?? 'an invoice'}`,
+      href: `/invoices/${attempt.invoiceId}`,
+      entityType: 'Payment',
+      entityId: paymentId,
+    });
     return { outcome: 'recorded', status: 'SUCCEEDED', paymentId };
   } catch (error) {
     // The money could not be recorded (the invoice moved under us, say).

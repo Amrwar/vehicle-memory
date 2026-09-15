@@ -201,6 +201,16 @@ a short-lived ticket whose key names the organisation and the check, and
 the row is written only once the store confirms the bytes, so a record
 never points at a picture that is not there.
 
+### 7.5 Search and notifications (Phase 39)
+
+The search box is scoped to the workshop like every page: customers, jobs,
+invoices, parts and suppliers by `orgId`, and a vehicle, which is global,
+only when the workshop has a job on it or an unrevoked access grant, so a
+plate typed into the box cannot read a car another workshop serviced. The
+raw queries bind every value as a parameter. A notification is one person's
+row; opening another person's returns nothing, and its path is refused
+unless it is a path on this site.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

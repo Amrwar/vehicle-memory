@@ -98,6 +98,7 @@ model Organization {
   messageTemplates    MessageTemplate[]
   servicePackages     ServicePackage[]
   supplierReturns     SupplierReturn[]
+  staffNotifications  StaffNotification[]
   jobSublets          JobSublet[]
   auditLogs           AuditLog[]
   vehicleAccess       VehicleAccessGrant[]
@@ -274,6 +275,7 @@ model User {
   conversationsAssigned    Conversation[]       @relation("ConversationAssignee")
   messagesSent             MessageLog[]         @relation("MessageSentBy")
   messageTemplates         MessageTemplate[]
+  notifications            StaffNotification[]
   preferredBy              Customer[]           @relation("PreferredTechnician")
   bookingTechnician        Booking[]
   // Passport
@@ -3521,6 +3523,28 @@ model MessageTemplate {
 
   @@index([orgId, name])
   @@map("message_templates")
+}
+
+/// Something that happened that a member of staff may need to act on, for
+/// them in particular. Each opens the record it is about. Phase 39.
+model StaffNotification {
+  id         String    @id @default(cuid())
+  orgId      String
+  userId     String
+  kind       String
+  title      String
+  body       String?
+  href       String
+  entityType String?
+  entityId   String?
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, orgId, readAt, createdAt])
+  @@map("staff_notifications")
 }
 
 enum VehicleClaimStatus {

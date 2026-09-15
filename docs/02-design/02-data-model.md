@@ -229,6 +229,11 @@ store it came from, quantity and unit cost), `SupplierCreditApplication` (a
 credit set against a bill) and `JobSublet` (job, vendor, description, cost,
 charge, status, the job line the customer is charged on, and the vendor's
 bill).
+
+Phase 39 adds `StaffNotification` (one row per person: kind, title, body,
+the path it opens, what it is about, when it was read) and two expression
+indexes Prisma does not model: vehicles by their registration with spacing
+and punctuation removed, and customers by the digits of their mobile.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

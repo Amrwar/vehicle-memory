@@ -48,6 +48,8 @@ const PAGES = [
   '/suppliers',
   '/purchasing',
   '/purchasing/returns',
+  '/search',
+  '/notifications',
   '/transfers',
   '/people',
   '/reminders',

@@ -134,6 +134,8 @@ async function main() {
     { file: 'conversations', path: '/inbox', who: 'owner', fullPage: true },
     { file: 'packages', path: '/settings/packages', who: 'owner', fullPage: true },
     { file: 'returns', path: '/purchasing/returns', who: 'owner', fullPage: true },
+    { file: 'search', path: '/search?q=Pennine&all=1', who: 'owner', fullPage: true },
+    { file: 'notifications', path: '/notifications', who: 'owner', fullPage: true },
     { file: 'portal-ar', path: '/portal', who: 'driver', lang: 'ar' },
     { file: 'home-fr', path: '/', who: 'nobody', lang: 'fr', height: 900 },
     { file: 'shop', path: '/shop', who: 'owner', width: 1024, height: 768 },
