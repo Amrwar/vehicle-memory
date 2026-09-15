@@ -57,7 +57,7 @@ export async function MileageFindings({
         {[...serious, ...concerns].map((finding, index) => (
           <div
             key={`${finding.kind}-${index}`}
-            className="border-l-[3px] border-(--border) pl-3.5"
+            className="border-s-[3px] border-(--border) ps-3.5"
             style={
               finding.severity === 'SERIOUS'
                 ? { borderColor: 'var(--danger)' }

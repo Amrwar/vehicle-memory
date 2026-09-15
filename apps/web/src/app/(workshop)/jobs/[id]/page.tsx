@@ -695,7 +695,7 @@ export default async function JobPage({
                 </summary>
                 <form
                   action={approve}
-                  className="absolute right-0 z-20 mt-2 grid w-[22rem] max-w-[calc(100vw-2rem)] gap-3 rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 shadow-lg"
+                  className="absolute end-0 z-20 mt-2 grid w-[22rem] max-w-[calc(100vw-2rem)] gap-3 rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 shadow-lg"
                 >
                   <input type="hidden" name="jobId" value={job.id} />
                   <input type="hidden" name="estimateId" value={estimate.id} />
@@ -1044,7 +1044,7 @@ export default async function JobPage({
                           <Td className="max-w-[16rem] text-(--text-soft)">
                             {result.recommendedAction ?? result.note ?? '—'}
                             {result.photos.length > 0 ? (
-                              <span className="ml-1.5 text-[11px] text-(--text-faint)">
+                              <span className="ms-1.5 text-[11px] text-(--text-faint)">
                                 {result.photos.length === 1
                                   ? t('(1 photo)')
                                   : t('({count} photos)', { count: result.photos.length })}
@@ -1119,7 +1119,7 @@ export default async function JobPage({
                   {job.labourLines.map((line, index) => (
                     <Tr key={line.id}>
                       <Td>
-                        <span className="eyebrow mr-2">{t('Labour')}</span>
+                        <span className="eyebrow me-2">{t('Labour')}</span>
                         {line.description}
                       </Td>
                       <Td numeric>{Number(line.hours).toFixed(2)} h</Td>
@@ -1158,12 +1158,12 @@ export default async function JobPage({
                     return (
                       <Tr key={line.id}>
                         <Td>
-                          <span className="eyebrow mr-2">
+                          <span className="eyebrow me-2">
                             {subletLineIds.has(line.id) ? t('Sublet') : t('Part')}
                           </span>
                           {line.description}
                           {line.partNumber ? (
-                            <span className="datum ml-2 text-[11px] text-(--text-faint)">
+                            <span className="datum ms-2 text-[11px] text-(--text-faint)">
                               {line.partNumber}
                             </span>
                           ) : null}
@@ -1206,7 +1206,7 @@ export default async function JobPage({
                     return (
                       <Tr key={line.id}>
                         <Td>
-                          <span className="eyebrow mr-2">{t('Fee')}</span>
+                          <span className="eyebrow me-2">{t('Fee')}</span>
                           {line.description}
                         </Td>
                         <Td numeric>1</Td>
@@ -1295,7 +1295,7 @@ export default async function JobPage({
                         <div className="flex flex-wrap items-baseline justify-between gap-2">
                           <span className="font-medium">
                             {entry.description}
-                            <span className="ml-2 text-(--text-faint)">{entry.supplier.name}</span>
+                            <span className="ms-2 text-(--text-faint)">{entry.supplier.name}</span>
                           </span>
                           <Badge
                             tone={
@@ -1466,10 +1466,10 @@ export default async function JobPage({
                       {estimate.lines.map((line) => (
                         <li key={line.id} className="flex justify-between gap-3">
                           <span>
-                            <span className="eyebrow mr-2">{t(line.kind.toLowerCase())}</span>
+                            <span className="eyebrow me-2">{t(line.kind.toLowerCase())}</span>
                             {line.description}
                             {line.detail ? (
-                              <span className="ml-1 text-(--text-faint)">({line.detail})</span>
+                              <span className="ms-1 text-(--text-faint)">({line.detail})</span>
                             ) : null}
                           </span>
                           <Money
@@ -2007,8 +2007,8 @@ export default async function JobPage({
                       className={[
                         'rounded-(--radius-md) px-3 py-2',
                         entry.direction === 'out'
-                          ? 'ml-4 bg-(--brand-soft)'
-                          : 'mr-4 border border-(--border)',
+                          ? 'ms-4 bg-(--brand-soft)'
+                          : 'me-4 border border-(--border)',
                       ].join(' ')}
                     >
                       <p className="line-clamp-3 whitespace-pre-wrap leading-relaxed">
@@ -2209,7 +2209,7 @@ export default async function JobPage({
                 <div className="flex justify-between">
                   <span className="text-(--text-faint)">
                     {t('Labour at cost')}
-                    <span className="ml-1 text-[11px]">
+                    <span className="ms-1 text-[11px]">
                       {t('{hours}h clocked', { hours: (clockedMinutes / 60).toFixed(1) })}
                     </span>
                   </span>
@@ -2225,7 +2225,7 @@ export default async function JobPage({
 
                 <div className="mt-1 flex items-baseline justify-between border-t border-(--border) pt-2">
                   <span className="font-medium">{t('Gross profit')}</span>
-                  <span className="text-right">
+                  <span className="text-end">
                     <Money
                       currency={region.currency}
                       locale={region.locale}

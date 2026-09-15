@@ -331,7 +331,7 @@ export default async function BankingPage({
                     >
                       {account.name}
                       {account.last4 ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">
+                        <span className="ms-2 text-[11px] text-(--text-faint)">
                           ····{account.last4}
                         </span>
                       ) : null}

@@ -116,7 +116,7 @@ export default async function InvitePage({
           </p>
 
           {invitation.message ? (
-            <p className="mt-5 border-l-2 border-(--color-brass-400) pl-4 text-[14px] italic leading-relaxed text-(--color-petrol-100)">
+            <p className="mt-5 border-s-2 border-(--color-brass-400) ps-4 text-[14px] italic leading-relaxed text-(--color-petrol-100)">
               {invitation.message}
             </p>
           ) : null}

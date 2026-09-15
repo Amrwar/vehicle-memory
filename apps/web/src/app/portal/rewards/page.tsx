@@ -63,7 +63,7 @@ export default async function PortalRewardsPage() {
                     action={
                       <p className="font-display text-[26px] font-semibold tabular-nums leading-none">
                         {card.balance.toLocaleString(region.locale)}
-                        <span className="ml-1 text-[12px] font-normal text-(--text-faint)">
+                        <span className="ms-1 text-[12px] font-normal text-(--text-faint)">
                           {t('points')}
                         </span>
                       </p>

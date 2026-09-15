@@ -100,7 +100,7 @@ export default async function AuditPage({
                 variant={params.entity === row.entityType ? 'primary' : 'secondary'}
               >
                 {t(READABLE[row.entityType]?.label ?? row.entityType)}
-                <span className="ml-1.5 opacity-60">{row._count._all}</span>
+                <span className="ms-1.5 opacity-60">{row._count._all}</span>
               </Button>
             </Link>
           ))}
@@ -157,7 +157,7 @@ export default async function AuditPage({
                       ) : (
                         entry.entityType
                       )}
-                      <span className="datum ml-2 text-[11px] text-(--text-faint)">
+                      <span className="datum ms-2 text-[11px] text-(--text-faint)">
                         {entry.entityId.slice(-8)}
                       </span>
                     </Td>

@@ -300,7 +300,7 @@ export default async function SettingsPage({
                     <Td className="font-medium">
                       {membership.user.name}
                       {membership.userId === user.userId ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">{t('you')}</span>
+                        <span className="ms-2 text-[11px] text-(--text-faint)">{t('you')}</span>
                       ) : null}
                     </Td>
                     <Td className="datum text-(--text-soft)">{membership.user.email}</Td>
@@ -479,7 +479,7 @@ export default async function SettingsPage({
                         className="rounded-(--radius-xs) bg-(--surface-sunk) px-2 py-0.5 text-[12px] text-(--text-soft)"
                       >
                         {section.name}
-                        <span className="ml-1.5 text-(--text-faint)">{section.items.length}</span>
+                        <span className="ms-1.5 text-(--text-faint)">{section.items.length}</span>
                       </span>
                     ))}
                   </div>
@@ -594,7 +594,7 @@ export default async function SettingsPage({
                             <Badge tone="success">{t('Live')}</Badge>
                           )}
                         </Td>
-                        <Td className="text-right">
+                        <Td className="text-end">
                           {mayWrite && !key.revokedAt ? (
                             <form action={revoke}>
                               <input type="hidden" name="keyId" value={key.id} />

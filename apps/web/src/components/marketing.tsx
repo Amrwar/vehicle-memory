@@ -30,14 +30,14 @@ export async function MarketingHeader({
           <span className="font-display text-[17px] font-semibold tracking-tight">Carnet</span>
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label={t('Sections')}>
+        <nav className="ms-4 hidden items-center gap-1 md:flex" aria-label={t('Sections')}>
           <NavLink href="/#how">{t('How it works')}</NavLink>
           <NavLink href="/#passport">{t('The passport')}</NavLink>
           <NavLink href="/pricing">{t('Pricing')}</NavLink>
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
-          <LanguageSwitch current={language} back={back} compact className="mr-1" />
+        <div className="ms-auto flex items-center gap-2">
+          <LanguageSwitch current={language} back={back} compact className="me-1" />
           {signedIn ? (
             <Link
               href="/dashboard"

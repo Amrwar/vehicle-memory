@@ -1,6 +1,12 @@
 import { headers } from 'next/headers';
 import type { Metadata, Viewport } from 'next';
-import { Archivo, Fraunces, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
+import {
+  Archivo,
+  Fraunces,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans_Arabic,
+  Public_Sans,
+} from 'next/font/google';
 
 import { LanguageProvider } from '@/components/language-provider';
 import { THEME_SCRIPT } from '@/components/theme-toggle';
@@ -38,6 +44,17 @@ const document = Fraunces({
   weight: ['500', '600'],
   variable: '--font-fraunces',
   display: 'swap',
+});
+
+// Arabic. The Latin faces carry no Arabic glyphs, so without this the browser
+// chose one. Not preloaded: the unicode range means only a page with Arabic
+// on it downloads the files.
+const arabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex-arabic',
+  display: 'swap',
+  preload: false,
 });
 
 const mono = IBM_Plex_Mono({
@@ -90,7 +107,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={html.lang}
       dir={html.dir}
-      className={`${display.variable} ${sans.variable} ${mono.variable} ${document.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${document.variable} ${arabic.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -101,7 +118,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-(--surface) focus:px-3 focus:py-2 focus:text-[13px] focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-50 focus:rounded focus:bg-(--surface) focus:px-3 focus:py-2 focus:text-[13px] focus:shadow-lg"
         >
           {t('Skip to content')}
         </a>

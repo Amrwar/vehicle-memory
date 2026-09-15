@@ -215,7 +215,7 @@ export const Select = React.forwardRef<
 >(({ className, touch, ...props }, ref) => (
   <select
     ref={ref}
-    className={cn(control, touch ? 'min-h-(--touch) text-[15px]' : 'h-9', 'pr-8', className)}
+    className={cn(control, touch ? 'min-h-(--touch) text-[15px]' : 'h-9', 'pe-8', className)}
     {...props}
   />
 ));
@@ -243,7 +243,7 @@ export function Field({
       <label htmlFor={htmlFor} className="text-[12px] font-medium text-(--text-soft)">
         {label}
         {required ? (
-          <span className="text-(--danger) ml-0.5" aria-hidden>
+          <span className="text-(--danger) ms-0.5" aria-hidden>
             *
           </span>
         ) : null}
@@ -284,7 +284,7 @@ export function Alert({
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
       className={cn(
-        'border-l-[3px] rounded-r-(--radius-sm) px-3.5 py-2.5 text-[13px]',
+        'border-s-[3px] rounded-e-(--radius-sm) px-3.5 py-2.5 text-[13px]',
         tones[tone],
         className,
       )}

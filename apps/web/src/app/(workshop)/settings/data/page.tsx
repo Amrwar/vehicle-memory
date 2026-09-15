@@ -123,7 +123,7 @@ export default async function DataPage({
                     name="file"
                     accept=".csv,text/csv,text/plain"
                     required
-                    className="block w-full cursor-pointer rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 py-2 text-[13px] file:mr-3 file:cursor-pointer file:rounded-(--radius-sm) file:border-0 file:bg-(--surface-sunk) file:px-3 file:py-1.5 file:text-[13px] file:font-medium"
+                    className="block w-full cursor-pointer rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-3 py-2 text-[13px] file:me-3 file:cursor-pointer file:rounded-(--radius-sm) file:border-0 file:bg-(--surface-sunk) file:px-3 file:py-1.5 file:text-[13px] file:font-medium"
                   />
                 </Field>
                 <div>

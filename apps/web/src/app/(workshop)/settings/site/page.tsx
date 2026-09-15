@@ -300,18 +300,18 @@ export default async function SiteSettingsPage({
                           <Td>
                             {bay.name}
                             {!bay.isActive ? (
-                              <Badge tone="neutral" size="sm" className="ml-2">
+                              <Badge tone="neutral" size="sm" className="ms-2">
                                 {t('retired')}
                               </Badge>
                             ) : null}
                           </Td>
                           <Td className="font-mono text-[12px]">{bay.code}</Td>
                           <Td className="text-(--text-soft)">{bay.capability ?? '—'}</Td>
-                          <Td className="text-right whitespace-nowrap">
+                          <Td className="text-end whitespace-nowrap">
                             {bay.isActive ? (
                               <a
                                 href={`/settings/site?edit=${bay.id}#bay`}
-                                className="mr-2 text-[13px] text-(--brand-text) hover:underline"
+                                className="me-2 text-[13px] text-(--brand-text) hover:underline"
                               >
                                 {t('Edit')}
                               </a>

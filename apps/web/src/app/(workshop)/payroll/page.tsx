@@ -265,7 +265,7 @@ export default async function PayrollPage({
                         overtime: (sheet.overtimeMinutes / 60).toFixed(1),
                       })}
                     </span>
-                    <span className="ml-auto font-medium tabular-nums">
+                    <span className="ms-auto font-medium tabular-nums">
                       <Money
                         currency={region.currency}
                         locale={region.locale}
@@ -312,7 +312,7 @@ export default async function PayrollPage({
                           ? t('1 person')
                           : t('{count} people', { count: period.sheets.length })}
                       </span>
-                      <span className="ml-auto font-medium tabular-nums">
+                      <span className="ms-auto font-medium tabular-nums">
                         <Money
                           currency={region.currency}
                           locale={region.locale}
@@ -391,7 +391,7 @@ export default async function PayrollPage({
                         }),
                       )}
                     </span>
-                    <span className="ml-auto flex items-center gap-2">
+                    <span className="ms-auto flex items-center gap-2">
                       <a
                         href={`/api/reports/payroll?run=${entry.id}`}
                         className="text-(--brand-text) underline underline-offset-2"

@@ -369,7 +369,7 @@ export default async function PortalPage() {
               <p className="eyebrow">{t('Rewards')}</p>
               <p className="mt-1 font-display text-[22px] font-semibold leading-none">
                 {totalPoints.toLocaleString(region.locale)}
-                <span className="ml-1 text-[12px] font-normal text-(--text-faint)">
+                <span className="ms-1 text-[12px] font-normal text-(--text-faint)">
                   {t('points')}
                 </span>
               </p>

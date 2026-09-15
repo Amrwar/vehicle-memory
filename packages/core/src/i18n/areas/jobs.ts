@@ -726,7 +726,7 @@ export const ar: Readonly<Record<string, string>> = {
   'The car on arrival': 'السيارة عند الوصول',
   'Back to the job': 'العودة إلى العمل',
   'The record is on the job for whoever picks the car up, and on the customer’s side of Carnet so they can see it too.':
-    'السجل موجود على العمل لمن يتسلّم السيارة، وفي جهة العميل من كارنيه ليراه هو أيضاً.',
+    'السجل موجود على العمل لمن يتسلّم السيارة، وفي جهة العميل من Carnet ليراه هو أيضاً.',
   'Off the dash': 'من لوحة العدادات',
   'Mileage in (km)': 'العداد عند الاستلام (كم)',
   'Last recorded {km} km.': 'آخر قراءة مسجلة {km} كم.',

@@ -264,7 +264,7 @@ export default async function PayablesPage({
                           ? t('due {date}', { date: bill.dueAt.toLocaleDateString(region.locale) })
                           : t('no due date')}
                       </span>
-                      <span className="ml-auto tabular-nums">
+                      <span className="ms-auto tabular-nums">
                         <Money
                           currency={region.currency}
                           locale={region.locale}
@@ -362,7 +362,7 @@ export default async function PayablesPage({
                       <span className="datum"> · {payment.reference}</span>
                     ) : null}
                   </span>
-                  <span className="ml-auto font-medium tabular-nums">
+                  <span className="ms-auto font-medium tabular-nums">
                     <Money
                       currency={region.currency}
                       locale={region.locale}

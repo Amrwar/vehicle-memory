@@ -139,9 +139,9 @@ export default async function ReturnsPage({
               <li key={r.id} className="grid gap-3 px-4 py-3 text-[13px]">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="font-medium">
-                    <span className="datum mr-2">{r.number}</span>
+                    <span className="datum me-2">{r.number}</span>
                     {r.supplier.name}
-                    <Badge tone="warning" size="sm" className="ml-2">
+                    <Badge tone="warning" size="sm" className="ms-2">
                       {t(reasonLabel(r.reason))}
                     </Badge>
                   </span>
@@ -237,7 +237,7 @@ export default async function ReturnsPage({
                 className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5 text-[13px]"
               >
                 <span>
-                  <span className="datum mr-2">{r.number}</span>
+                  <span className="datum me-2">{r.number}</span>
                   {r.supplier.name} · {t(reasonLabel(r.reason))}
                 </span>
                 <span className="text-(--text-soft)">

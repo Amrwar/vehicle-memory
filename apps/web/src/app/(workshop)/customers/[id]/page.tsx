@@ -544,11 +544,11 @@ export default async function CustomerPage({
                         <span className="min-w-0 flex-1 truncate">
                           {row.kind === 'CREDIT' ? t('Credit') : t('Deposit')}
                           {row.job ? (
-                            <Link href={`/jobs/${row.job.id}`} className="ml-1 hover:underline">
+                            <Link href={`/jobs/${row.job.id}`} className="ms-1 hover:underline">
                               {t('for job #{number}', { number: row.job.number })}
                             </Link>
                           ) : null}
-                          <time className="datum ml-1.5 text-(--text-faint)">
+                          <time className="datum ms-1.5 text-(--text-faint)">
                             {row.receivedAt.toLocaleDateString(region.locale)}
                           </time>
                         </span>
@@ -709,7 +709,7 @@ export default async function CustomerPage({
                         ) : (
                           t(entry.reason)
                         )}
-                        <time className="datum ml-1.5 text-(--text-faint)">
+                        <time className="datum ms-1.5 text-(--text-faint)">
                           {entry.createdAt.toLocaleDateString(region.locale)}
                         </time>
                       </span>
@@ -835,7 +835,7 @@ export default async function CustomerPage({
                           t('A customer since removed')
                         )}
                         {entry.usedAt ? (
-                          <time className="datum ml-1.5 text-(--text-faint)">
+                          <time className="datum ms-1.5 text-(--text-faint)">
                             {entry.usedAt.toLocaleDateString(region.locale)}
                           </time>
                         ) : null}
@@ -958,7 +958,7 @@ export default async function CustomerPage({
                     t(entry.title)
                   )}
                   {entry.detail ? (
-                    <span className="ml-2 text-[11px] text-(--text-faint)">{t(entry.detail)}</span>
+                    <span className="ms-2 text-[11px] text-(--text-faint)">{t(entry.detail)}</span>
                   ) : null}
                 </span>
 

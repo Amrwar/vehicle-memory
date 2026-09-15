@@ -90,7 +90,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
               </p>
             ) : null}
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="eyebrow">{t('Receipt')}</p>
             <p className="datum text-[18px] font-semibold">{number}</p>
             <p className="text-[12px] text-(--text-soft)">{paidOn}</p>

@@ -47,7 +47,7 @@ export default async function PassportLinkNotFound() {
           )}
         </p>
 
-        <div className="mx-auto mt-7 max-w-md rounded-(--radius-lg) border border-(--border) bg-(--surface) p-5 text-left">
+        <div className="mx-auto mt-7 max-w-md rounded-(--radius-lg) border border-(--border) bg-(--surface) p-5 text-start">
           <p className="eyebrow mb-2">{t('Why links expire')}</p>
           <p className="text-[14px] leading-relaxed text-(--text-soft)">
             {t(
@@ -56,7 +56,7 @@ export default async function PassportLinkNotFound() {
           </p>
         </div>
 
-        <div className="mx-auto mt-4 max-w-md rounded-(--radius-lg) border border-(--brand) bg-(--brand-soft) p-5 text-left">
+        <div className="mx-auto mt-4 max-w-md rounded-(--radius-lg) border border-(--brand) bg-(--brand-soft) p-5 text-start">
           <p className="eyebrow mb-2 text-(--brand-text)">{t('What to do')}</p>
           <p className="text-[14px] leading-relaxed text-(--text-soft)">
             {t(

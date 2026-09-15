@@ -216,7 +216,7 @@ export default async function TeamPage({
                         <Td>
                           <span className="font-medium">{member.user.name}</span>
                           {isSelf ? (
-                            <span className="ml-1.5 text-[11px] text-(--text-faint)">
+                            <span className="ms-1.5 text-[11px] text-(--text-faint)">
                               {t('you')}
                             </span>
                           ) : null}

@@ -50,7 +50,7 @@ export async function PlanWall({ feature, plan }: { feature: FeatureKey; plan: P
             )}
           </p>
 
-          <Card className="mx-auto mt-6 max-w-md text-left">
+          <Card className="mx-auto mt-6 max-w-md text-start">
             <CardBody>
               <p className="eyebrow mb-2.5">{t('{plan} adds', { plan: target.name })}</p>
               <ul className="grid gap-1.5">

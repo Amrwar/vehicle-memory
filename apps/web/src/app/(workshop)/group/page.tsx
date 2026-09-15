@@ -224,7 +224,7 @@ export default async function GroupPage({
                     <Td className="font-medium">
                       {site.siteName}
                       {group.laggards.some((laggard) => laggard.locationId === site.locationId) ? (
-                        <Badge tone="warning" size="sm" className="ml-2">
+                        <Badge tone="warning" size="sm" className="ms-2">
                           {t('below group')}
                         </Badge>
                       ) : null}

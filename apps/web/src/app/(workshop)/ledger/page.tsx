@@ -328,7 +328,7 @@ export default async function LedgerPage({
                               <span className="text-(--text-faint)"> · {t(line.memo)}</span>
                             ) : null}
                           </span>
-                          <span className="tabular w-24 text-right">
+                          <span className="tabular w-24 text-end">
                             {Number(line.debit) === 0 ? (
                               <span className="text-(--text-faint)">—</span>
                             ) : (
@@ -339,7 +339,7 @@ export default async function LedgerPage({
                               />
                             )}
                           </span>
-                          <span className="tabular w-24 text-right">
+                          <span className="tabular w-24 text-end">
                             {Number(line.credit) === 0 ? (
                               <span className="text-(--text-faint)">—</span>
                             ) : (

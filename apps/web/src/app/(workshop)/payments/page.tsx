@@ -153,10 +153,10 @@ export default async function PaymentsPage({
                       style={{ width: `${Math.max(2, share)}%` }}
                     />
                   </div>
-                  <span className="tabular w-14 shrink-0 text-right text-[12px] text-(--text-faint)">
+                  <span className="tabular w-14 shrink-0 text-end text-[12px] text-(--text-faint)">
                     {share.toFixed(0)}%
                   </span>
-                  <span className="tabular w-24 shrink-0 text-right text-[13px] font-medium">
+                  <span className="tabular w-24 shrink-0 text-end text-[13px] font-medium">
                     <Money currency={region.currency} locale={region.locale} amount={stats.value} />
                   </span>
                 </li>

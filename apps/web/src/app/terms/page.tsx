@@ -84,11 +84,11 @@ export default async function TermsPage() {
           </p>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-[13px]">
-              <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+              <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                 <tr>
-                  <th className="py-1 pr-3">{t('Currency')}</th>
+                  <th className="py-1 pe-3">{t('Currency')}</th>
                   {PLAN_ORDER.map((id) => (
-                    <th key={id} className="py-1 pr-3 text-right">
+                    <th key={id} className="py-1 pe-3 text-end">
                       {t(PLANS[id].name)}
                     </th>
                   ))}
@@ -97,9 +97,9 @@ export default async function TermsPage() {
               <tbody>
                 {PRICED_CURRENCIES.map((currency) => (
                   <tr key={currency} className="border-t border-(--border)">
-                    <td className="py-1 pr-3">{currency}</td>
+                    <td className="py-1 pe-3">{currency}</td>
                     {PLAN_ORDER.map((id) => (
-                      <td key={id} className="py-1 pr-3 text-right tabular-nums">
+                      <td key={id} className="py-1 pe-3 text-end tabular-nums">
                         {formatMinor(planPrice(id, currency, 'monthly').minor, {
                           currency,
                           locale: 'en',

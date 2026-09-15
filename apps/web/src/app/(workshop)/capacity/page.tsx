@@ -122,7 +122,7 @@ export default async function CapacityPage() {
                     <span className="font-display text-[15px] font-semibold">
                       {t(DAY_NAMES[day.weekday] ?? '')}
                     </span>
-                    <span className="ml-2 text-[12px] text-(--text-faint)">
+                    <span className="ms-2 text-[12px] text-(--text-faint)">
                       {day.date.toLocaleDateString(region.locale, {
                         day: 'numeric',
                         month: 'short',

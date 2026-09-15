@@ -18,7 +18,14 @@ export function BackLink({ href, children }: { href: string; children: React.Rea
       href={href}
       className="inline-flex items-center gap-1.5 text-[13px] text-(--text-soft) transition-colors hover:text-(--brand-text)"
     >
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        fill="none"
+        aria-hidden
+        className="rtl:-scale-x-100"
+      >
         <path
           d="M10 3.5 5.5 8l4.5 4.5"
           stroke="currentColor"

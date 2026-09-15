@@ -203,7 +203,7 @@ export default async function CatalogueSettingsPage({
                 <thead>
                   <tr>
                     <Th>{t('Rate')}</Th>
-                    <Th className="text-right">%</Th>
+                    <Th className="text-end">%</Th>
                     <Th />
                   </tr>
                 </thead>
@@ -213,22 +213,22 @@ export default async function CatalogueSettingsPage({
                       <Td>
                         {row.name}
                         {row.isDefault ? (
-                          <Badge tone="brand" size="sm" className="ml-2">
+                          <Badge tone="brand" size="sm" className="ms-2">
                             {t('default')}
                           </Badge>
                         ) : null}
                         {!row.isActive ? (
-                          <Badge tone="neutral" size="sm" className="ml-2">
+                          <Badge tone="neutral" size="sm" className="ms-2">
                             {t('retired')}
                           </Badge>
                         ) : null}
                       </Td>
-                      <Td className="datum text-right">{Number(row.rate)}</Td>
-                      <Td className="text-right whitespace-nowrap">
+                      <Td className="datum text-end">{Number(row.rate)}</Td>
+                      <Td className="text-end whitespace-nowrap">
                         {row.isActive ? (
                           <a
                             href={`/settings/catalogue?rate=${row.id}#rate`}
-                            className="mr-2 text-[13px] text-(--brand-text) hover:underline"
+                            className="me-2 text-[13px] text-(--brand-text) hover:underline"
                           >
                             {t('Edit')}
                           </a>
@@ -325,7 +325,7 @@ export default async function CatalogueSettingsPage({
                 <thead>
                   <tr>
                     <Th>{t('Kind')}</Th>
-                    <Th className="text-right">{t('Hours')}</Th>
+                    <Th className="text-end">{t('Hours')}</Th>
                     <Th>{t('Checks')}</Th>
                     <Th />
                   </tr>
@@ -336,16 +336,16 @@ export default async function CatalogueSettingsPage({
                       <Td>
                         <span
                           aria-hidden
-                          className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
+                          className="me-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
                           style={{ backgroundColor: row.colour }}
                         />
                         {row.name}
                         {!row.isActive ? (
-                          <Badge tone="neutral" size="sm" className="ml-2">
+                          <Badge tone="neutral" size="sm" className="ms-2">
                             {t('retired')}
                           </Badge>
                         ) : null}
-                        <span className="ml-2 text-[12px] text-(--text-faint)">
+                        <span className="ms-2 text-[12px] text-(--text-faint)">
                           {row._count.jobs === 1
                             ? t('1 job')
                             : t('{count} jobs', { count: row._count.jobs })}
@@ -358,17 +358,17 @@ export default async function CatalogueSettingsPage({
                             : ''}
                         </span>
                       </Td>
-                      <Td className="datum text-right">
+                      <Td className="datum text-end">
                         {row.defaultHours === null ? '—' : Number(row.defaultHours)}
                       </Td>
                       <Td className="text-(--text-soft)">
                         {row.requiresQualityCheck ? t('Quality check') : '—'}
                       </Td>
-                      <Td className="text-right whitespace-nowrap">
+                      <Td className="text-end whitespace-nowrap">
                         {row.isActive ? (
                           <a
                             href={`/settings/catalogue?type=${row.id}#type`}
-                            className="mr-2 text-[13px] text-(--brand-text) hover:underline"
+                            className="me-2 text-[13px] text-(--brand-text) hover:underline"
                           >
                             {t('Edit')}
                           </a>

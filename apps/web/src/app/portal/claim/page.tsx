@@ -255,7 +255,7 @@ export default async function ClaimPage({
                             <input type="hidden" name="claimId" value={claim.id} />
                             <button
                               type="submit"
-                              className="text-left text-[13px] text-(--text-faint) underline underline-offset-2"
+                              className="text-start text-[13px] text-(--text-faint) underline underline-offset-2"
                             >
                               {t('Withdraw this request')}
                             </button>

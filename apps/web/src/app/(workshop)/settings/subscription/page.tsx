@@ -301,11 +301,11 @@ export default async function SubscriptionPage({
             {billing.invoices.length ? (
               <CardBody className="p-0">
                 <table className="w-full text-[13px]">
-                  <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+                  <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                     <tr>
                       <th className="px-4 py-2">{t('Date')}</th>
                       <th className="px-4 py-2">{t('Number')}</th>
-                      <th className="px-4 py-2 text-right">{t('Amount')}</th>
+                      <th className="px-4 py-2 text-end">{t('Amount')}</th>
                       <th className="px-4 py-2">{t('Status')}</th>
                       <th className="px-4 py-2"></th>
                     </tr>
@@ -315,7 +315,7 @@ export default async function SubscriptionPage({
                       <tr key={i.ref} className="border-t border-(--border)">
                         <td className="px-4 py-2 whitespace-nowrap">{date(i.issuedAt)}</td>
                         <td className="px-4 py-2">{i.number ?? i.ref}</td>
-                        <td className="px-4 py-2 text-right tabular-nums">
+                        <td className="px-4 py-2 text-end tabular-nums">
                           {money(i.amountMinor, i.currency)}
                         </td>
                         <td className="px-4 py-2">
@@ -332,7 +332,7 @@ export default async function SubscriptionPage({
                             {t(i.status.toLowerCase())}
                           </Badge>
                         </td>
-                        <td className="px-4 py-2 text-right">
+                        <td className="px-4 py-2 text-end">
                           {(i.pdfUrl ?? i.url) ? (
                             <a
                               href={i.pdfUrl ?? i.url ?? '#'}
@@ -401,11 +401,11 @@ export default async function SubscriptionPage({
                   <div>
                     <p className="text-[13px] font-medium">
                       {PLANS[id].name}
-                      <span className="ml-2 text-[12px] text-(--text-faint)">
+                      <span className="ms-2 text-[12px] text-(--text-faint)">
                         {money(planPrice(id, region.currency, 'monthly').minor, pricedIn)}
                       </span>
                       {id === subscription.plan && subscription.state !== 'AWAITING_CARD' ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">{t('current')}</span>
+                        <span className="ms-2 text-[11px] text-(--text-faint)">{t('current')}</span>
                       ) : null}
                     </p>
                     <p className="text-[12px] text-(--text-faint)">{t(PLANS[id].audience)}</p>

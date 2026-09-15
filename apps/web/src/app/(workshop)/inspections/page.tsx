@@ -143,7 +143,7 @@ export default async function InspectionsPage() {
                         {row.job.vehicle.make} {row.job.vehicle.model}
                       </Link>
                       {row.job.vehicle.registration ? (
-                        <span className="ml-2 inline-block align-middle">
+                        <span className="ms-2 inline-block align-middle">
                           <Registration value={row.job.vehicle.registration} />
                         </span>
                       ) : null}

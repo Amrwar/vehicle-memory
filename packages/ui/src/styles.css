@@ -397,6 +397,76 @@ h6 {
   color: var(--text-faint);
 }
 
+/* Arabic.
+   Arabic letters join, so any letter spacing pulls a word apart, and they
+   carry marks above and below, so the tight line heights set for Latin
+   headings make lines collide. The Latin faces have no Arabic glyphs either,
+   which left the browser to pick one. In a right-to-left page the text uses
+   IBM Plex Sans Arabic (loaded only when Arabic appears), no letter spacing,
+   no uppercase micro-labels in a monospace face, taller lines, and small
+   text a step larger, because Arabic reads smaller at the same size. Plates,
+   VINs and part numbers keep the monospace face. */
+[dir='rtl'] {
+  --font-sans:
+    var(--font-plex-arabic), 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma,
+    var(--font-public-sans), sans-serif;
+  --font-display:
+    var(--font-plex-arabic), 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma,
+    var(--font-archivo), sans-serif;
+}
+
+[dir='rtl'] body {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+[dir='rtl'] *,
+[dir='rtl'] *::before,
+[dir='rtl'] *::after {
+  letter-spacing: normal !important;
+}
+
+[dir='rtl'] .uppercase,
+[dir='rtl'] .eyebrow {
+  text-transform: none;
+}
+
+[dir='rtl'] .eyebrow,
+[dir='rtl'] .font-mono:not(.datum) {
+  font-family: var(--font-sans);
+}
+
+[dir='rtl'] .eyebrow {
+  font-size: 12px;
+}
+
+[dir='rtl'] .leading-tight,
+[dir='rtl'] .leading-snug {
+  line-height: 1.5 !important;
+}
+
+[dir='rtl'] .leading-none,
+[dir='rtl'] [class*='leading-['] {
+  line-height: 1.3 !important;
+}
+
+[dir='rtl'] .text-\[9px\],
+[dir='rtl'] .text-\[10px\] {
+  font-size: 11.5px;
+}
+
+[dir='rtl'] .text-\[11px\] {
+  font-size: 12.5px;
+}
+
+[dir='rtl'] .text-\[12px\] {
+  font-size: 13.5px;
+}
+
+[dir='rtl'] .text-\[13px\] {
+  font-size: 14.5px;
+}
+
 /* Scroll container for wide tables, so the page body never scrolls sideways. */
 .scroll-x {
   overflow-x: auto;

@@ -206,7 +206,7 @@ export default async function GiftCardPage({
                       t(entry.reason)
                     )}
                     {entry.createdBy ? (
-                      <span className="ml-2 text-[11px] text-(--text-faint)">
+                      <span className="ms-2 text-[11px] text-(--text-faint)">
                         {entry.createdBy.name}
                       </span>
                     ) : null}

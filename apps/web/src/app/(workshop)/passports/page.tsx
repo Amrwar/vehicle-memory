@@ -132,7 +132,7 @@ export default async function PassportsPage({
                         {row.year} {row.make} {row.model}
                       </Link>
                       {row.openRecalls > 0 ? (
-                        <Badge tone="danger" size="sm" className="ml-2">
+                        <Badge tone="danger" size="sm" className="ms-2">
                           {t('Recall')}
                         </Badge>
                       ) : null}
@@ -153,7 +153,7 @@ export default async function PassportsPage({
                     <Td numeric className="tabular-nums">
                       {row.workshops}
                       {row.fromElsewhere ? (
-                        <span className="ml-1 text-[11px] text-(--text-faint)">
+                        <span className="ms-1 text-[11px] text-(--text-faint)">
                           · {t('{count} from elsewhere', { count: row.fromElsewhere })}
                         </span>
                       ) : null}

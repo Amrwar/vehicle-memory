@@ -102,7 +102,7 @@ export default async function PublicPassportPage({
       <header className="border-b border-(--border) bg-(--surface)">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <BackToOrigin label={t('Back')} />
-          <span className="ml-auto flex items-center gap-2">
+          <span className="ms-auto flex items-center gap-2">
             <PassportEmblem size={20} className="text-(--accent)" />
             <span className="eyebrow">{t('Vehicle passport')}</span>
           </span>

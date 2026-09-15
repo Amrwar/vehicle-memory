@@ -240,7 +240,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Revenue')} />
                   {pl.revenue.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -259,7 +259,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Cost of sales')} />
                   {pl.costOfSales.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -280,7 +280,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Overheads')} />
                   {pl.overheads.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -332,7 +332,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Assets')} />
                   {sheet.assets.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -352,7 +352,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Liabilities')} />
                   {sheet.liabilities.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -371,7 +371,7 @@ export default async function FinancialsPage({
                   <SectionRow label={t('Equity')} />
                   {sheet.equity.map((line) => (
                     <Tr key={line.accountCode}>
-                      <Td className="pl-6 text-(--text-soft)">{t(line.accountName)}</Td>
+                      <Td className="ps-6 text-(--text-soft)">{t(line.accountName)}</Td>
                       <Td numeric>
                         <Money
                           currency={region.currency}
@@ -382,9 +382,9 @@ export default async function FinancialsPage({
                     </Tr>
                   ))}
                   <Tr>
-                    <Td className="pl-6 text-(--text-soft)">
+                    <Td className="ps-6 text-(--text-soft)">
                       {t('Profit this period')}
-                      <span className="ml-1.5 text-[11px] text-(--text-faint)">
+                      <span className="ms-1.5 text-[11px] text-(--text-faint)">
                         {t('not yet closed')}
                       </span>
                     </Td>
@@ -539,9 +539,9 @@ function TotalRow({
     <tr className="border-t border-(--border)">
       <td className={`px-4 py-2 ${emphasis ? 'font-semibold' : 'font-medium'}`}>
         {label}
-        {note ? <span className="ml-1.5 text-[11px] text-(--text-faint)">{note}</span> : null}
+        {note ? <span className="ms-1.5 text-[11px] text-(--text-faint)">{note}</span> : null}
       </td>
-      <td className="px-4 py-2 text-right">
+      <td className="px-4 py-2 text-end">
         <Money
           currency={region.currency}
           locale={region.locale}

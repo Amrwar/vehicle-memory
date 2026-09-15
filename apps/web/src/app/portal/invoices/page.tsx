@@ -186,7 +186,7 @@ export default async function PortalInvoicesPage({
                     <p className="text-(--text-soft)">
                       {invoice.job?.shortDescription ?? t('Counter sale')}
                       {invoice.job?.vehicle?.registration ? (
-                        <span className="ml-2 inline-block align-middle">
+                        <span className="ms-2 inline-block align-middle">
                           <Registration value={invoice.job.vehicle.registration} />
                         </span>
                       ) : null}

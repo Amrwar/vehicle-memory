@@ -198,7 +198,7 @@ export default async function SupplierPage({ params }: { params: Promise<{ id: s
                         {t('last on {date}', { date: date(price.lastAt, region.locale) })}
                       </span>
                     </span>
-                    <span className="text-right text-[13px] font-medium tabular-nums">
+                    <span className="text-end text-[13px] font-medium tabular-nums">
                       <Money
                         currency={region.currency}
                         locale={region.locale}

@@ -114,7 +114,7 @@ export default async function JobsPage({
           name="status"
           defaultValue={params.status ?? ''}
           aria-label={t('Filter by status')}
-          className="h-9 rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-2 pr-7 text-[13px]"
+          className="h-9 rounded-(--radius-md) border border-(--border-strong) bg-(--surface) px-2 pe-7 text-[13px]"
         >
           <option value="">{t('Any status')}</option>
           <option value="in-shop">{t('In the shop')}</option>

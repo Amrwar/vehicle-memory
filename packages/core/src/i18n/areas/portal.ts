@@ -244,7 +244,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Every time below is one {workshop} can actually do. Pick one and it is in the diary.':
     'كل موعد أدناه تستطيع {workshop} الالتزام به فعلاً. اختر واحداً وسيُسجَّل في الأجندة.',
   'Your workshop. Any other on Carnet can take the car too.':
-    'ورشتك. ويمكن لأي ورشة أخرى على كارنيه أن تستقبل السيارة أيضاً.',
+    'ورشتك. ويمكن لأي ورشة أخرى على Carnet أن تستقبل السيارة أيضاً.',
   'A workshop you have not used before. Booking makes you their customer.':
     'ورشة لم تتعامل معها من قبل. الحجز يجعلك عميلاً لديها.',
   '(yours)': '(ورشتك)',
@@ -265,7 +265,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Confirm your email address first. A garage is being asked to hand over a vehicle history, and they should at least know the address is real. The link is in your inbox.':
     'أكّد عنوان بريدك الإلكتروني أولاً. يُطلب من ورشة أن تسلّم سجل مركبة، وعليها على الأقل أن تعرف أن العنوان حقيقي. الرابط في بريدك الوارد.',
   'Sent. The garage will see it on their next visit to Carnet, and you will get an email either way.':
-    'أُرسل. سترى الورشة الطلب في زيارتها التالية لكارنيه، وستصلك رسالة بريد إلكتروني في كل الأحوال.',
+    'أُرسل. سترى الورشة الطلب في زيارتها التالية لCarnet، وستصلك رسالة بريد إلكتروني في كل الأحوال.',
   'You have {count} requests waiting. Wait for one to be answered before asking about another.':
     'لديك {count} طلبات قيد الانتظار. انتظر الرد على أحدها قبل أن تطلب مركبة أخرى.',
   'Or the 17-character VIN, if you have a private plate':
@@ -460,11 +460,11 @@ export const ar: Readonly<Record<string, string>> = {
     'هذا هو المستند الذي يراه المشتري عندما تشارك رابطاً، حرفياً. ولا يوجد فيه شيء عنك.',
   'Address not given': 'العنوان غير مذكور',
   'Every workshop on Carnet. Book at any of them; your car’s history goes with you.':
-    'كل الورش على كارنيه. احجز لدى أيٍّ منها؛ وسجل سيارتك يرافقك.',
+    'كل الورش على Carnet. احجز لدى أيٍّ منها؛ وسجل سيارتك يرافقك.',
   'No workshop matches that': 'لا توجد ورشة مطابقة',
   'No workshops yet': 'لا توجد ورش بعد',
   'Try the town or the first part of the postcode.':
     'جرّب اسم المدينة أو الجزء الأول من الرمز البريدي.',
-  'Workshops appear here as they join Carnet.': 'تظهر الورش هنا عند انضمامها إلى كارنيه.',
+  'Workshops appear here as they join Carnet.': 'تظهر الورش هنا عند انضمامها إلى Carnet.',
   'Other workshops': 'ورش أخرى',
 };

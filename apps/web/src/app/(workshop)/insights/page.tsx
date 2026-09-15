@@ -202,7 +202,7 @@ export default async function InsightsPage() {
                   <Tr key={entry.jobType}>
                     <Td className="font-medium">
                       {entry.jobType}
-                      <span className="ml-2 inline-block align-middle">
+                      <span className="ms-2 inline-block align-middle">
                         <Badge
                           tone={entry.verdict === 'UNDERQUOTED' ? 'danger' : 'neutral'}
                           size="sm"

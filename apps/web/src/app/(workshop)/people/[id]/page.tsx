@@ -459,7 +459,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                           : ''}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-end">
                       <Money
                         currency={region.currency}
                         locale={region.locale}

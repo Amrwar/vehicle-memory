@@ -323,7 +323,7 @@ export default async function ReputationPage({
                           {t('put right')}
                         </Badge>
                       ) : null}
-                      <span className="ml-auto text-[11px] text-(--text-faint)">
+                      <span className="ms-auto text-[11px] text-(--text-faint)">
                         {row.respondedAt?.toLocaleDateString(region.locale)}
                       </span>
                     </div>

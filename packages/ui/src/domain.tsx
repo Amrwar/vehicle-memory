@@ -240,7 +240,7 @@ export function ProgressTrail({
               <span
                 aria-hidden
                 className={cn(
-                  'absolute left-[7px] top-[18px] bottom-0 w-px',
+                  'absolute start-[7px] top-[18px] bottom-0 w-px',
                   stage.state === 'done' ? 'bg-(--success)' : 'bg-(--border)',
                 )}
               />
@@ -371,7 +371,7 @@ export function TimelineEntry({
         className,
       )}
     >
-      <span aria-hidden className="absolute left-[5px] top-4 bottom-0 w-px bg-(--border)" />
+      <span aria-hidden className="absolute start-[5px] top-4 bottom-0 w-px bg-(--border)" />
 
       <span
         aria-hidden

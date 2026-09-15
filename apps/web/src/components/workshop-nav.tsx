@@ -269,7 +269,7 @@ export function WorkshopNav({
         aria-controls="workshop-nav"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          'fixed left-3 top-3 z-40 grid h-11 w-11 place-items-center lg:hidden',
+          'fixed start-3 top-3 z-40 grid h-11 w-11 place-items-center lg:hidden',
           'rounded-(--radius-md) border border-(--border) bg-(--surface) shadow-sm',
           'transition-colors hover:bg-(--surface-sunk)',
         )}
@@ -288,15 +288,15 @@ export function WorkshopNav({
       <nav
         id="workshop-nav"
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-(--border)',
-          'bg-(--surface) transition-transform lg:translate-x-0',
-          open ? 'translate-x-0 shadow-lg' : '-translate-x-full',
+          'fixed inset-y-0 start-0 z-30 flex w-64 flex-col border-e border-(--border)',
+          'bg-(--surface) transition-transform lg:translate-x-0 lg:rtl:translate-x-0',
+          open ? 'translate-x-0 shadow-lg' : '-translate-x-full rtl:translate-x-full',
         )}
         aria-label={t('Workshop')}
       >
         {/* Identity. The mark is the workshop's initials rather than a stock
             glyph, so somebody with two tabs open knows which is which. */}
-        <div className="flex items-center gap-3 border-b border-(--border) px-4 py-4 pl-16 lg:pl-4">
+        <div className="flex items-center gap-3 border-b border-(--border) px-4 py-4 ps-16 lg:ps-4">
           <span
             aria-hidden
             className={cn(
@@ -344,7 +344,7 @@ export function WorkshopNav({
               />
             </svg>
             {unreadNotifications > 0 ? (
-              <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-(--danger) px-1 text-[10px] font-semibold text-white">
+              <span className="absolute -end-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-(--danger) px-1 text-[10px] font-semibold text-white">
                 {unreadNotifications > 99 ? '99+' : unreadNotifications}
               </span>
             ) : null}
@@ -380,7 +380,7 @@ export function WorkshopNav({
                         <span
                           aria-hidden
                           className={cn(
-                            'absolute -left-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full',
+                            'absolute -start-3 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full',
                             'transition-all duration-150',
                             active
                               ? 'bg-(--accent) opacity-100'

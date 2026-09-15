@@ -174,7 +174,7 @@ export default async function HomePage() {
                     ),
                   },
                 ].map((item) => (
-                  <div key={item.term} className="border-l-2 border-(--accent) pl-4">
+                  <div key={item.term} className="border-s-2 border-(--accent) ps-4">
                     <dt className="font-display text-[15px] font-semibold">{t(item.term)}</dt>
                     <dd className="mt-1.5 text-[13px] leading-relaxed text-(--text-soft)">
                       {t(item.detail)}

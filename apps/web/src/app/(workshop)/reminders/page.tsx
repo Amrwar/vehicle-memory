@@ -157,7 +157,7 @@ export default async function RemindersPage({
                         {entry.vehicle.make} {entry.vehicle.model}
                       </Link>
                       {entry.vehicle.registration ? (
-                        <span className="ml-2 inline-block align-middle">
+                        <span className="ms-2 inline-block align-middle">
                           <Registration value={entry.vehicle.registration} />
                         </span>
                       ) : null}
@@ -251,7 +251,7 @@ export default async function RemindersPage({
                     {row.customer.displayName}
                   </Link>
                 ) : null}
-                <span className="ml-auto text-[12px] text-(--text-soft)">
+                <span className="ms-auto text-[12px] text-(--text-soft)">
                   {expiryLabel(t, row.expiresAt, region.locale)}
                 </span>
               </li>

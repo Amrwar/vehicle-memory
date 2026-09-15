@@ -166,12 +166,12 @@ export default async function CardPaymentsPage({
           />
           <CardBody className="overflow-x-auto p-0">
             <table className="w-full text-[13px]">
-              <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+              <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                 <tr>
                   <th className="px-4 py-2">{t('When')}</th>
                   <th className="px-4 py-2">{t('Invoice')}</th>
                   <th className="px-4 py-2">{t('Customer')}</th>
-                  <th className="px-4 py-2 text-right">{t('Amount')}</th>
+                  <th className="px-4 py-2 text-end">{t('Amount')}</th>
                   <th className="px-4 py-2">{t('Outcome')}</th>
                   <th className="px-4 py-2"></th>
                 </tr>
@@ -195,7 +195,7 @@ export default async function CardPaymentsPage({
                         {a.customer.displayName}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">
+                    <td className="px-4 py-2 text-end tabular-nums">
                       <Money
                         amount={Number(a.amount)}
                         currency={a.currency}
@@ -207,17 +207,17 @@ export default async function CardPaymentsPage({
                         {t(a.status.toLowerCase())}
                       </Badge>
                       {a.failureReason ? (
-                        <span className="ml-2 text-(--text-soft)">{t(a.failureReason)}</span>
+                        <span className="ms-2 text-(--text-soft)">{t(a.failureReason)}</span>
                       ) : null}
                       {a.refunds.length ? (
-                        <span className="ml-2 text-(--text-faint)">
+                        <span className="ms-2 text-(--text-faint)">
                           {a.refunds.length === 1
                             ? t('1 refund sent back')
                             : t('{count} refunds sent back', { count: a.refunds.length })}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-2 text-right">
+                    <td className="px-4 py-2 text-end">
                       {mayAct && a.status === 'PENDING' ? (
                         <form action={check}>
                           <input type="hidden" name="attemptId" value={a.id} />

@@ -179,10 +179,10 @@ export default async function PackagesPage({
                 <li key={pkg.id} className="grid gap-1 px-4 py-3 text-[13px]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-medium">
-                      <span className="datum mr-2 text-[11px] text-(--text-faint)">{pkg.code}</span>
+                      <span className="datum me-2 text-[11px] text-(--text-faint)">{pkg.code}</span>
                       {pkg.name}
                       {!pkg.isActive ? (
-                        <Badge tone="neutral" size="sm" className="ml-2">
+                        <Badge tone="neutral" size="sm" className="ms-2">
                           {t('retired')}
                         </Badge>
                       ) : null}
@@ -190,7 +190,7 @@ export default async function PackagesPage({
                     <span className="font-display text-[15px] font-semibold">
                       {money(pkg.total.price)}
                       {pkg.total.fixed && pkg.total.saving > 0 ? (
-                        <span className="ml-1.5 text-[11px] font-normal text-(--success)">
+                        <span className="ms-1.5 text-[11px] font-normal text-(--success)">
                           {t('saves {amount}', { amount: money(pkg.total.saving) })}
                         </span>
                       ) : null}

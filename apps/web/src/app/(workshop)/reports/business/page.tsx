@@ -419,7 +419,7 @@ export default async function BusinessReportsPage({
                             {row.name}
                           </Link>
                           {row.lapsing ? (
-                            <Badge tone="warning" size="sm" className="ml-2">
+                            <Badge tone="warning" size="sm" className="ms-2">
                               {t('lapsing')}
                             </Badge>
                           ) : null}
@@ -536,7 +536,7 @@ function RateList({ title, rows, t }: { title: string; rows: GroupRate[]; t: Tra
               className="flex items-baseline justify-between gap-2 px-4 py-2.5 text-[13px]"
             >
               <span className="font-medium">{row.name}</span>
-              <span className="text-right tabular-nums text-(--text-soft)">
+              <span className="text-end tabular-nums text-(--text-soft)">
                 {row.rate.value === null ? '' : `${row.rate.value}% · `}
                 {t('{part} of {base}', { part: row.rate.part, base: row.rate.base })}
               </span>

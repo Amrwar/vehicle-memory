@@ -227,7 +227,7 @@ export default async function PartsPage({
                       <Link href={`/parts/${product.id}`} className="font-medium hover:underline">
                         {product.name}
                       </Link>
-                      <span className="datum ml-2 text-[11px] text-(--text-faint)">
+                      <span className="datum ms-2 text-[11px] text-(--text-faint)">
                         {product.partNumber}
                       </span>
                     </Td>

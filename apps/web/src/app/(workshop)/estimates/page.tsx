@@ -182,7 +182,7 @@ export default async function EstimatesPage({
                         >
                           {estimate.job?.number ?? '—'}
                         </Link>
-                        <span className="ml-2 text-[11px] text-(--text-faint)">
+                        <span className="ms-2 text-[11px] text-(--text-faint)">
                           v{estimate.version}
                         </span>
                       </Td>
@@ -194,7 +194,7 @@ export default async function EstimatesPage({
                           {estimate.job?.vehicle.make} {estimate.job?.vehicle.model}
                         </span>
                         {estimate.job?.vehicle.registration ? (
-                          <span className="ml-2 inline-block align-middle">
+                          <span className="ms-2 inline-block align-middle">
                             <Registration value={estimate.job.vehicle.registration} />
                           </span>
                         ) : null}

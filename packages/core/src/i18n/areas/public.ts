@@ -496,7 +496,7 @@ export const ar: Readonly<Record<string, string>> = {
 
   // The front page.
   'Carnet — workshop management with a service history that follows the car':
-    'كارنيه — إدارة ورش مع سجل صيانة يتبع السيارة',
+    'Carnet — إدارة ورش مع سجل صيانة يتبع السيارة',
   'Run the diary, jobs, inspections, parts and the books in one system. Every job writes to a service history the vehicle keeps for life, and takes with it when it is sold.':
     'أدِر الأجندة والأعمال والفحوصات وقطع الغيار والحسابات في نظام واحد. كل عمل يُكتب في سجل صيانة تحتفظ به المركبة مدى الحياة، وتأخذه معها عند بيعها.',
   'Three garages, two owners and eleven years later, the folder in the glovebox is a stack of receipts and a guess. The work was real. The evidence is gone.':
@@ -521,7 +521,7 @@ export const ar: Readonly<Record<string, string>> = {
   'It is worth money at resale': 'له قيمة مالية عند إعادة البيع',
   'A verifiable record is the difference between a buyer taking your word for it and a buyer checking. That difference has a price, and the seller has been paying it.':
     'السجل القابل للتحقق هو الفرق بين مشترٍ يصدّق كلامك ومشترٍ يتحقق بنفسه. ولهذا الفرق ثمن، والبائع هو من كان يدفعه.',
-  'It works even where Carnet does not': 'يعمل حتى حيث لا يوجد كارنيه',
+  'It works even where Carnet does not': 'يعمل حتى حيث لا يوجد Carnet',
   'A passport opens as a public link. The next garage needs no account, no login and no relationship with us to read what you wrote.':
     'يُفتح الجواز عبر رابط عام. لا تحتاج الورشة التالية إلى حساب ولا تسجيل دخول ولا أي علاقة بنا لتقرأ ما كتبته.',
   'One data model, so the estimate the customer approved is the job the technician worked, is the invoice they paid, is the entry in the accounts. Nothing is re-keyed.':
@@ -672,7 +672,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Sales tax 7%': 'ضريبة المبيعات 7%',
   Terms: 'الشروط',
   'The terms a workshop agrees to when it opens on Carnet: the trial, the charge, cancelling, and what happens to the data.':
-    'الشروط التي توافق عليها الورشة عند فتحها على كارنيه: التجربة، والخصم، والإلغاء، وما يحدث للبيانات.',
+    'الشروط التي توافق عليها الورشة عند فتحها على Carnet: التجربة، والخصم، والإلغاء، وما يحدث للبيانات.',
   'Version {version}.': 'الإصدار {version}.',
   'Opening a workshop starts a free trial of {days} days. To start it you add a payment card. Nothing is charged during the trial.':
     'فتح ورشة يبدأ تجربة مجانية مدتها {days} يوماً. لبدئها تضيف بطاقة دفع. لا يُخصم أي مبلغ خلال التجربة.',
@@ -685,14 +685,14 @@ export const ar: Readonly<Record<string, string>> = {
   'Everything you enter is yours. A read-only or cancelled workshop can still read all of it and export all of it. We do not delete a workshop’s data when it stops paying; we delete it when you ask us to, subject to the retention the law requires for invoices and tax records.':
     'كل ما تدخله ملك لك. الورشة التي أصبحت للقراءة فقط أو الملغاة تظل قادرة على قراءة كل بياناتها وتصديرها. لا نحذف بيانات الورشة عندما تتوقف عن الدفع؛ بل نحذفها عندما تطلب منا ذلك، مع مراعاة مدة الاحتفاظ التي يفرضها القانون للفواتير والسجلات الضريبية.',
   'The vehicle passport is different by design: an entry a workshop writes to a vehicle’s history belongs to the vehicle’s record and stays readable to the vehicle’s owner after the workshop leaves Carnet. Nothing in it identifies a workshop’s customers to anybody else.':
-    'جواز المركبة مختلف عن قصد: القيد الذي تكتبه الورشة في سجل مركبة يصبح جزءاً من سجل المركبة، ويظل مقروءاً لمالكها بعد مغادرة الورشة لكارنيه. ولا يوجد فيه ما يكشف هوية عملاء الورشة لأي أحد آخر.',
+    'جواز المركبة مختلف عن قصد: القيد الذي تكتبه الورشة في سجل مركبة يصبح جزءاً من سجل المركبة، ويظل مقروءاً لمالكها بعد مغادرة الورشة لCarnet. ولا يوجد فيه ما يكشف هوية عملاء الورشة لأي أحد آخر.',
   'When your customers pay an invoice by card through Carnet, the payment is processed by our payment provider. Card details never reach Carnet or you. The provider’s fees for those payments are shown on your billing page and on the provider’s statement.':
-    'عندما يدفع عملاؤك فاتورة بالبطاقة عبر كارنيه، يعالج مزوّد الدفع لدينا عملية الدفع. بيانات البطاقة لا تصل أبداً إلى كارنيه ولا إليك. رسوم المزوّد على هذه المدفوعات تظهر في صفحة الفوترة لديك وفي كشف حساب المزوّد.',
+    'عندما يدفع عملاؤك فاتورة بالبطاقة عبر Carnet، يعالج مزوّد الدفع لدينا عملية الدفع. بيانات البطاقة لا تصل أبداً إلى Carnet ولا إليك. رسوم المزوّد على هذه المدفوعات تظهر في صفحة الفوترة لديك وفي كشف حساب المزوّد.',
 
   // Sign-up, sign-in, passwords, the buyer check and confirming an address.
   'Start a workshop': 'افتح ورشة',
   'Open a Carnet workshop. {days} days free; the card is charged only when the trial ends, and only if you have not cancelled.':
-    'افتح ورشة على كارنيه. {days} يوماً مجاناً؛ لا يُخصم من البطاقة إلا عند انتهاء التجربة، وفقط إذا لم تكن قد ألغيت.',
+    'افتح ورشة على Carnet. {days} يوماً مجاناً؛ لا يُخصم من البطاقة إلا عند انتهاء التجربة، وفقط إذا لم تكن قد ألغيت.',
   '{days} days free. Your card is charged only when the trial ends, and only if you have not cancelled':
     '{days} يوماً مجاناً. لا يُخصم من بطاقتك إلا عند انتهاء التجربة، وفقط إذا لم تكن قد ألغيت',
   'Set up with bays, job types and VAT already configured':
@@ -735,7 +735,7 @@ export const ar: Readonly<Record<string, string>> = {
     'ظهرت كلمة المرور هذه في تسريبات بيانات {count} مرة. اختر كلمة لم يستخدمها أحد من قبل؛ فعبارة من أربع كلمات غير مترابطة سهلة التذكر وصعبة التخمين.',
   'Keep your car history': 'احتفظ بسجل سيارتك',
   'A free Carnet account for drivers. Every service, repair and MOT on your car, in one place, and it stays with the car when you sell it.':
-    'حساب كارنيه مجاني للسائقين. كل صيانة وإصلاح وفحص فني لسيارتك في مكان واحد، ويبقى مع السيارة عندما تبيعها.',
+    'حساب Carnet مجاني للسائقين. كل صيانة وإصلاح وفحص فني لسيارتك في مكان واحد، ويبقى مع السيارة عندما تبيعها.',
   'Every service, repair and part, with dates and mileages':
     'كل صيانة وإصلاح وقطعة، مع التواريخ وقراءات العداد',
   'What was recommended and declined, so nothing is a surprise later':
@@ -766,23 +766,23 @@ export const ar: Readonly<Record<string, string>> = {
   'Those two do not match.': 'الكلمتان غير متطابقتين.',
   'Check a vehicle': 'تحقق من مركبة',
   'Enter the code on a Carnet vehicle report to read the history it refers to, and see whether it has been altered.':
-    'أدخل الرمز الموجود في تقرير مركبة من كارنيه لقراءة السجل الذي يشير إليه، ومعرفة ما إذا كان قد عُدّل.',
+    'أدخل الرمز الموجود في تقرير مركبة من Carnet لقراءة السجل الذي يشير إليه، ومعرفة ما إذا كان قد عُدّل.',
   'Check a vehicle’s history': 'تحقق من سجل مركبة',
   'If a seller has given you a Carnet code, enter it here. You will see what workshops recorded about the vehicle, and whether any of it has been altered since it was written.':
-    'إذا أعطاك البائع رمز كارنيه، فأدخله هنا. سترى ما سجلته الورش عن المركبة، وما إذا كان أي منه قد عُدّل منذ كتابته.',
+    'إذا أعطاك البائع رمز Carnet، فأدخله هنا. سترى ما سجلته الورش عن المركبة، وما إذا كان أي منه قد عُدّل منذ كتابته.',
   'Code from the report': 'الرمز من التقرير',
   'Spaces do not matter.': 'المسافات لا تهم.',
   'Enter the code the seller gave you.': 'أدخل الرمز الذي أعطاك إياه البائع.',
   'Check this vehicle': 'تحقق من هذه المركبة',
   'What you will see.': 'ما ستراه.',
   'Services, repairs and inspections recorded by workshops using Carnet, the mileage at each, how many owners the vehicle has had and for how long, and anything outstanding on it.':
-    'أعمال الصيانة والإصلاح والفحص التي سجلتها الورش المستخدمة لكارنيه، وقراءة العداد في كل منها، وعدد مالكي المركبة ومدة ملكية كل منهم، وأي أمر معلّق عليها.',
+    'أعمال الصيانة والإصلاح والفحص التي سجلتها الورش المستخدمة لCarnet، وقراءة العداد في كل منها، وعدد مالكي المركبة ومدة ملكية كل منهم، وأي أمر معلّق عليها.',
   'What you will not see.': 'ما لن تراه.',
   'Nothing about any owner, past or present. Not their name, not where they live, not what they chose to spend.':
     'لا شيء عن أي مالك، سابق أو حالي. لا اسمه، ولا مكان سكنه، ولا ما اختار أن ينفقه.',
   'What it cannot tell you.': 'ما لا يستطيع إخبارك به.',
   'Work done outside Carnet does not appear. An empty record is not proof a car was neglected, and a full one is not a substitute for an inspection before you buy.':
-    'الأعمال المنجزة خارج كارنيه لا تظهر. السجل الفارغ ليس دليلاً على إهمال السيارة، والسجل الممتلئ لا يغني عن فحصها قبل الشراء.',
+    'الأعمال المنجزة خارج Carnet لا تظهر. السجل الفارغ ليس دليلاً على إهمال السيارة، والسجل الممتلئ لا يغني عن فحصها قبل الشراء.',
   'Confirming your address': 'تأكيد عنوانك',
   'That is confirmed.': 'تم التأكيد.',
   '{address} is now a proven address on your account.': 'أصبح {address} عنواناً مُثبتاً في حسابك.',
@@ -808,7 +808,7 @@ export const ar: Readonly<Record<string, string>> = {
 
   // Invitations, the review request, the shared passport and quote, and the test checkout.
   'Join a workshop': 'انضم إلى ورشة',
-  'About Carnet': 'عن كارنيه',
+  'About Carnet': 'عن Carnet',
   'You have been invited': 'لقد تمت دعوتك',
   '{name} has invited you to join as {role}.': 'دعاك {name} للانضمام بصفة {role}.',
   'You have been invited to join as {role}.': 'لقد دُعيت للانضمام بصفة {role}.',
@@ -819,7 +819,7 @@ export const ar: Readonly<Record<string, string>> = {
   'You are joining as {role}, using {email}.': 'أنت تنضم بصفة {role}، باستخدام {email}.',
   'Choose a password': 'اختر كلمة مرور',
   'Already have a Carnet account on this address? Use the same password and this invitation attaches the workshop to it.':
-    'لديك حساب كارنيه على هذا العنوان بالفعل؟ استخدم كلمة المرور نفسها وستُضاف الورشة إليه عبر هذه الدعوة.',
+    'لديك حساب Carnet على هذا العنوان بالفعل؟ استخدم كلمة المرور نفسها وستُضاف الورشة إليه عبر هذه الدعوة.',
   'This invitation has been used': 'استُخدمت هذه الدعوة',
   'This invitation was withdrawn': 'سُحبت هذه الدعوة',
   'This invitation has run out': 'انتهت صلاحية هذه الدعوة',
@@ -872,13 +872,13 @@ export const ar: Readonly<Record<string, string>> = {
   'Ask whoever sent it to share the vehicle again. It takes them a few seconds and produces a fresh link.':
     'اطلب ممن أرسله أن يشارك المركبة من جديد. يستغرق ذلك بضع ثوانٍ ويُنشئ رابطاً جديداً.',
   'Carnet keeps a permanent, append-only record of what has happened to a vehicle: services, repairs, parts, mileage and inspections, each attributed to the workshop that recorded it. The history follows the car, not the owner.':
-    'يحتفظ كارنيه بسجل دائم لا يقبل إلا الإضافة لما جرى للمركبة: الصيانة والإصلاحات والقطع وقراءات العداد والفحوصات، كلٌّ منسوب إلى الورشة التي سجّلته. السجل يتبع السيارة لا المالك.',
+    'يحتفظ Carnet بسجل دائم لا يقبل إلا الإضافة لما جرى للمركبة: الصيانة والإصلاحات والقطع وقراءات العداد والفحوصات، كلٌّ منسوب إلى الورشة التي سجّلته. السجل يتبع السيارة لا المالك.',
   'Vehicle passport': 'جواز المركبة',
   Back: 'رجوع',
   'Shared by the vehicle’s owner. This link expires on {date}, and the owner can revoke it at any time. Your visit has been recorded and is visible to them.':
     'شاركه مالك المركبة. تنتهي صلاحية هذا الرابط في {date}، ويمكن للمالك إلغاؤه في أي وقت. زيارتك مسجّلة ويستطيع رؤيتها.',
   'No personal details of any owner are shown. Carnet does not verify claims made outside this record.':
-    'لا تُعرض أي بيانات شخصية لأي مالك. ولا يتحقق كارنيه من الادعاءات الواردة خارج هذا السجل.',
+    'لا تُعرض أي بيانات شخصية لأي مالك. ولا يتحقق Carnet من الادعاءات الواردة خارج هذا السجل.',
   'Your quote': 'عرض السعر الخاص بك',
   'This link is no longer live': 'هذا الرابط لم يعد فعّالاً',
   'Quote links expire, and a workshop can withdraw one at any time. Ask them to send it again and it will work straight away.':
@@ -888,7 +888,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Test billing': 'فوترة تجريبية',
   'Test billing portal': 'بوابة فوترة تجريبية',
   'Test checkout': 'دفع تجريبي',
-  'Carnet, for {workshop}': 'كارنيه، لـ {workshop}',
+  'Carnet, for {workshop}': 'Carnet، لـ {workshop}',
   'This page stands in for the provider’s billing portal while none is connected.':
     'تحل هذه الصفحة محل بوابة الفوترة لدى مزوّد الدفع ما دام لم يُربط أي مزوّد.',
   '{brand} ending {last4}': '{brand} تنتهي بـ {last4}',
@@ -911,7 +911,7 @@ export const ar: Readonly<Record<string, string>> = {
   'None yet.': 'لا شيء بعد.',
   'Simulate the next charge succeeding ({amount})': 'محاكاة نجاح الخصم التالي ({amount})',
   'Simulate the next charge failing': 'محاكاة فشل الخصم التالي',
-  'Back to Carnet': 'العودة إلى كارنيه',
+  'Back to Carnet': 'العودة إلى Carnet',
   'No card is charged here: this page stands in for a payment provider while none is connected.':
     'لا يُخصم من أي بطاقة هنا: هذه الصفحة تحل محل مزوّد الدفع ما دام لم يُربط أي مزوّد.',
   'due today. {days} days free, then {amount} a month for 1 bay on {plan}, charged to the card unless cancelled before the trial ends.':

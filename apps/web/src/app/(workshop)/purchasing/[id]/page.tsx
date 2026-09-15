@@ -326,7 +326,7 @@ export default async function PurchaseOrderPage({
                               line.description
                             )}
                             {line.product ? (
-                              <span className="datum ml-2 text-[11px] text-(--text-faint)">
+                              <span className="datum ms-2 text-[11px] text-(--text-faint)">
                                 {line.product.partNumber}
                               </span>
                             ) : null}
@@ -364,7 +364,7 @@ export default async function PurchaseOrderPage({
                                 aria-label={t('Quantity received of {part}', {
                                   part: line.description,
                                 })}
-                                className="w-24 text-right"
+                                className="w-24 text-end"
                               />
                             </Td>
                           ) : null}
@@ -380,7 +380,7 @@ export default async function PurchaseOrderPage({
                                 aria-label={t('Actual unit cost of {part}', {
                                   part: line.description,
                                 })}
-                                className="w-24 text-right"
+                                className="w-24 text-end"
                               />
                             </Td>
                           ) : null}
@@ -487,7 +487,7 @@ export default async function PurchaseOrderPage({
                     {returns.map((r) => (
                       <li key={r.id} className="flex flex-wrap justify-between gap-2">
                         <span>
-                          <span className="datum mr-2">{r.number}</span>
+                          <span className="datum me-2">{r.number}</span>
                           {r.lines
                             .map((l) => `${Number(l.quantity)} × ${l.description}`)
                             .join(', ')}{' '}

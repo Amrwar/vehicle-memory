@@ -46,9 +46,9 @@ export function Th({
       scope="col"
       className={cn(
         'sticky top-0 z-10 whitespace-nowrap border-b border-(--border) bg-(--surface-sunk)',
-        'px-3 py-2 text-left font-mono text-[10px] font-semibold uppercase tracking-wider',
+        'px-3 py-2 text-start font-mono text-[10px] font-semibold uppercase tracking-wider',
         'text-(--text-faint)',
-        numeric && 'text-right',
+        numeric && 'text-end',
         className,
       )}
       {...props}
@@ -68,7 +68,7 @@ export function Td({
         // The wrapper scrolls horizontally, so wrapping buys nothing and costs
         // a consistent row height. Pages opt back in with `whitespace-normal`.
         'whitespace-nowrap',
-        numeric && 'text-right tabular',
+        numeric && 'text-end tabular',
         className,
       )}
       {...props}

@@ -166,11 +166,11 @@ export default async function NewOrderPage({
           <div className="scroll-x">
             <table className="w-full min-w-[44rem] text-[13px]">
               <thead>
-                <tr className="border-b border-(--border) text-left text-(--text-faint)">
+                <tr className="border-b border-(--border) text-start text-(--text-faint)">
                   <th className="px-4 py-2 font-medium">{t('Part')}</th>
                   <th className="px-2 py-2 font-medium">{t('Or a description')}</th>
                   <th className="w-24 px-2 py-2 font-medium">{t('Qty')}</th>
-                  <th className="w-32 px-2 py-2 pr-4 font-medium">{t('Unit cost')}</th>
+                  <th className="w-32 px-2 py-2 pe-4 font-medium">{t('Unit cost')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border)">
@@ -204,7 +204,7 @@ export default async function NewOrderPage({
                         placeholder="1"
                       />
                     </td>
-                    <td className="px-2 py-1.5 pr-4">
+                    <td className="px-2 py-1.5 pe-4">
                       <Input
                         name={`line.${index}.unitCost`}
                         defaultValue={index === 0 && prefill ? prefill.cost : undefined}

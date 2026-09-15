@@ -232,7 +232,7 @@ export default async function ClaimsPage({
                   </div>
 
                   {claim.note ? (
-                    <p className="mt-3 rounded-(--radius-sm) border-l-2 border-(--border-strong) bg-(--surface-sunk) px-3 py-2 text-[13px] leading-relaxed text-(--text-soft)">
+                    <p className="mt-3 rounded-(--radius-sm) border-s-2 border-(--border-strong) bg-(--surface-sunk) px-3 py-2 text-[13px] leading-relaxed text-(--text-soft)">
                       {claim.note}
                     </p>
                   ) : null}

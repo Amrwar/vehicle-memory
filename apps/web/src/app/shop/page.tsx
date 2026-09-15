@@ -187,7 +187,7 @@ export default async function ShopFloorPage({
             {/* Night shifts run the bay lights low. The tablet's own setting
                 is usually not the one the technician wants here. */}
             <ThemeToggle className="w-[6.5rem]" />
-            <div className="text-right">
+            <div className="text-end">
               <p className="text-[14px] font-medium">{user.name}</p>
               <form action="/api/sign-out" method="post">
                 <button
@@ -362,7 +362,7 @@ export default async function ShopFloorPage({
                     </dl>
 
                     {blocked ? (
-                      <p className="mt-3 rounded-(--radius-md) border-l-[3px] border-(--warning) bg-(--warning-soft) px-3 py-2.5 text-[14px] text-(--warning)">
+                      <p className="mt-3 rounded-(--radius-md) border-s-[3px] border-(--warning) bg-(--warning-soft) px-3 py-2.5 text-[14px] text-(--warning)">
                         {t(
                           'Waiting for the customer to approve the estimate. Do not start this work yet.',
                         )}

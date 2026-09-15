@@ -269,7 +269,7 @@ export function OutboxStatus() {
             type="button"
             onClick={send}
             disabled={busy}
-            className="ml-auto min-h-[44px] rounded-(--radius) border border-(--border) px-4 text-[15px] font-medium disabled:opacity-60"
+            className="ms-auto min-h-[44px] rounded-(--radius) border border-(--border) px-4 text-[15px] font-medium disabled:opacity-60"
           >
             {busy ? t('Sending…') : t('Send now')}
           </button>

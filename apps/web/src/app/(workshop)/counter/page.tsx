@@ -429,7 +429,7 @@ export default async function CounterPage({
                       </Td>
                       <Td>
                         {sale.tenders.map((tender) => (
-                          <Badge key={tender.id} tone="neutral" size="sm" className="mr-1">
+                          <Badge key={tender.id} tone="neutral" size="sm" className="me-1">
                             {t(tender.kind.toLowerCase().replace('_', ' '))}
                           </Badge>
                         ))}

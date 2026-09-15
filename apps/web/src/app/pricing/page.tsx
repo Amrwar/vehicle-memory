@@ -248,11 +248,11 @@ export default async function PricingPage({
             <table className="w-full border-collapse text-[13px]">
               <thead>
                 <tr className="border-b border-(--border)">
-                  <th scope="col" className="p-3.5 text-left font-medium">
+                  <th scope="col" className="p-3.5 text-start font-medium">
                     <span className="eyebrow">{t('Limits')}</span>
                   </th>
                   {PLAN_ORDER.map((id) => (
-                    <th key={id} scope="col" className="p-3.5 text-right font-semibold">
+                    <th key={id} scope="col" className="p-3.5 text-end font-semibold">
                       {t(PLANS[id].name)}
                     </th>
                   ))}
@@ -262,13 +262,13 @@ export default async function PricingPage({
               <tbody>
                 {LIMIT_ROWS.map((row) => (
                   <tr key={row.key} className="border-b border-(--border)">
-                    <th scope="row" className="p-3.5 text-left font-normal text-(--text-soft)">
+                    <th scope="row" className="p-3.5 text-start font-normal text-(--text-soft)">
                       {t(row.label)}
                     </th>
                     {PLAN_ORDER.map((id) => {
                       const value = PLANS[id].limits[row.key];
                       return (
-                        <td key={id} className="tabular p-3.5 text-right">
+                        <td key={id} className="tabular p-3.5 text-end">
                           {value >= NO_LIMIT ? (
                             <span className="text-(--text-faint)">{t('No limit')}</span>
                           ) : (
@@ -281,18 +281,18 @@ export default async function PricingPage({
                 ))}
 
                 <tr className="border-b border-(--border) bg-(--surface-sunk)">
-                  <th scope="row" colSpan={4} className="p-3.5 text-left">
+                  <th scope="row" colSpan={4} className="p-3.5 text-start">
                     <span className="eyebrow">{t('Features')}</span>
                   </th>
                 </tr>
 
                 {COMPARED.map((feature) => (
                   <tr key={feature} className="border-b border-(--border) last:border-0">
-                    <th scope="row" className="p-3.5 text-left font-normal text-(--text-soft)">
+                    <th scope="row" className="p-3.5 text-start font-normal text-(--text-soft)">
                       {t(capitalise(describeFeature(feature)))}
                     </th>
                     {PLAN_ORDER.map((id) => (
-                      <td key={id} className="p-3.5 text-right">
+                      <td key={id} className="p-3.5 text-end">
                         {PLANS[id].features[feature] ? (
                           <span className="inline-flex justify-end">
                             <Tick />

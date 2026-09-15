@@ -143,7 +143,7 @@ export default async function WarrantyPage() {
                       <Td className="text-[12px] text-(--text-soft)">
                         {claim.complaint}
                         {claim.outsideCover ? (
-                          <Badge tone="warning" size="sm" className="ml-2">
+                          <Badge tone="warning" size="sm" className="ms-2">
                             {t('goodwill')}
                           </Badge>
                         ) : null}
@@ -215,7 +215,7 @@ export default async function WarrantyPage() {
                         {entry.row.vehicle.make} {entry.row.vehicle.model}
                       </Link>
                       {entry.row.vehicle.registration ? (
-                        <span className="ml-2 inline-block align-middle">
+                        <span className="ms-2 inline-block align-middle">
                           <Registration value={entry.row.vehicle.registration} />
                         </span>
                       ) : null}

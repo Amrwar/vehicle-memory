@@ -1123,7 +1123,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Find a vehicle': 'ابحث عن مركبة',
   'All vehicles': 'كل المركبات',
   'By registration or VIN. If another Carnet workshop has seen it, its history is already here.':
-    'برقم اللوحة أو رقم الهيكل. إن رأتها ورشة أخرى على كارنيه، فسجلها موجود هنا بالفعل.',
+    'برقم اللوحة أو رقم الهيكل. إن رأتها ورشة أخرى على Carnet، فسجلها موجود هنا بالفعل.',
   'Registration or VIN': 'رقم اللوحة أو رقم الهيكل',
   'AB12 CDE or WVWZZZ1JZ3W386752': 'أ ب ج 1234 أو WVWZZZ1JZ3W386752',
   'Look it up': 'ابحث',
@@ -1137,7 +1137,7 @@ export const ar: Readonly<Record<string, string>> = {
     'يمكن لشخص لديه صلاحية المركبات تسلّم هذه السيارة.',
   'Not on the network': 'غير موجودة في الشبكة',
   'No Carnet workshop has recorded {identifier}. Its history starts with you.':
-    'لم تسجّل أي ورشة على كارنيه {identifier}. يبدأ سجلها معك.',
+    'لم تسجّل أي ورشة على Carnet {identifier}. يبدأ سجلها معك.',
   '17 characters, from the windscreen or the door frame':
     '17 خانة، من الزجاج الأمامي أو إطار الباب',
   Make: 'الصانع',
@@ -1448,7 +1448,7 @@ export const ar: Readonly<Record<string, string>> = {
   '{count} months, still': '{count} أشهر، ولا يزال مالكاً',
   '{count} years': '{count} سنوات',
   '{count} years, still': '{count} سنوات، ولا يزال مالكاً',
-  'Carnet vehicle report': 'تقرير مركبة من كارنيه',
+  'Carnet vehicle report': 'تقرير مركبة من Carnet',
   Verified: 'موثّق',
   'Does not check out': 'لا يمكن التحقق منه',
   Unverified: 'غير موثّق',

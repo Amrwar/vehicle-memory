@@ -123,7 +123,7 @@ export default async function LifePage({
                         {t('milestone')}
                       </Badge>
                     ) : null}
-                    <span className="ml-auto datum text-[12px] text-(--text-faint)">
+                    <span className="ms-auto datum text-[12px] text-(--text-faint)">
                       {when(event.at, region.locale)}
                     </span>
                   </div>

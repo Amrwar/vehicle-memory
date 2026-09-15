@@ -149,7 +149,7 @@ export default async function RecallsPage() {
                           .join(' ')}
                       </Link>
                       {row.vehicle.registration ? (
-                        <span className="ml-2 inline-block align-middle">
+                        <span className="ms-2 inline-block align-middle">
                           <Registration value={row.vehicle.registration} />
                         </span>
                       ) : null}

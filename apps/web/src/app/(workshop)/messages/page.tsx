@@ -274,7 +274,7 @@ export default async function MessagesPage({
                   <Badge tone={row.reason === 'COMPLAINT' ? 'danger' : 'warning'} size="sm">
                     {row.reason === 'COMPLAINT' ? t('marked as spam') : t('permanent bounce')}
                   </Badge>
-                  <span className="ml-auto text-[11px] text-(--text-faint)">
+                  <span className="ms-auto text-[11px] text-(--text-faint)">
                     {row.createdAt.toLocaleDateString(region.locale)}
                   </span>
                 </div>

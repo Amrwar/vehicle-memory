@@ -14,7 +14,7 @@ export const AR: Readonly<Record<string, string>> = {
   'Workshop management with a service history that belongs to the car, not to the garage that happened to write it.':
     'إدارة ورش مع سجل صيانة يخص السيارة نفسها، لا الورشة التي كتبته.',
   'Carnet is a working demonstration system. Figures shown are seeded data.':
-    'كارنيه نظام عرض تجريبي يعمل فعلياً. الأرقام المعروضة بيانات تجريبية.',
+    'Carnet نظام عرض تجريبي يعمل فعلياً. الأرقام المعروضة بيانات تجريبية.',
   Product: 'المنتج',
   'Try it': 'جرّبه',
   Contact: 'تواصل معنا',
@@ -22,7 +22,7 @@ export const AR: Readonly<Record<string, string>> = {
   'Your cars': 'سياراتك',
   Account: 'الحساب',
   'Your account': 'حسابك',
-  'Carnet Workshop': 'ورشة كارنيه',
+  'Carnet Workshop': 'ورشة Carnet',
   'Sign out': 'تسجيل الخروج',
   Workshop: 'الورشة',
   'Close navigation': 'إغلاق القائمة',
@@ -58,7 +58,7 @@ export const AR: Readonly<Record<string, string>> = {
   'Email address': 'عنوان البريد الإلكتروني',
   'Workshop management · Vehicle passport': 'إدارة الورش · جواز السيارة',
   'Carnet runs the diary, the job, the inspection, the parts and the books. Every completed job also writes to a permanent record the vehicle keeps, verifiable by whoever owns it next.':
-    'كارنيه يدير الأجندة وأمر العمل والفحص وقطع الغيار والحسابات. وكل عمل مكتمل يُكتب أيضاً في سجل دائم تحتفظ به السيارة، ويمكن لمالكها التالي التحقق منه.',
+    'Carnet يدير الأجندة وأمر العمل والفحص وقطع الغيار والحسابات. وكل عمل مكتمل يُكتب أيضاً في سجل دائم تحتفظ به السيارة، ويمكن لمالكها التالي التحقق منه.',
   'Start a 14-day trial': 'ابدأ تجربة 14 يوماً',
   'See a real passport': 'شاهد جوازاً حقيقياً',
   'Fourteen days free, then billed monthly per bay. Cancel before the trial ends and nothing is charged.':
@@ -160,7 +160,7 @@ export const AR: Readonly<Record<string, string>> = {
     'إذا غيّرنا سعراً أو هذه الشروط تغييراً مؤثراً، نبلغك بالبريد قبل 30 يوماً على الأقل من سريانه، ويمكنك الإلغاء قبل ذلك. النسخة التي وافقت عليها مسجلة في حسابك.',
   '7. Who we are': '7. من نحن',
   'Carnet is operated by Carnet Software. Questions about these terms or a charge go to the support address on the pricing page, and we answer them.':
-    'تُشغّل كارنيه شركة Carnet Software. الأسئلة عن هذه الشروط أو عن خصم تُرسل إلى عنوان الدعم في صفحة الأسعار، ونجيب عليها.',
+    'تُشغّل Carnet شركة Carnet Software. الأسئلة عن هذه الشروط أو عن خصم تُرسل إلى عنوان الدعم في صفحة الأسعار، ونجيب عليها.',
   'Add a car': 'أضف سيارة',
   'Book a visit': 'احجز زيارة',
   'Needs you': 'بانتظارك',
@@ -184,7 +184,7 @@ export const AR: Readonly<Record<string, string>> = {
     'السجل الكامل لكل سيارة، موثّقاً، في مكان واحد. شاركه مع المشتري عند البيع.',
   'See passports': 'عرض الجوازات',
   'Any workshop on Carnet can take your car, and its history goes with you.':
-    'أي ورشة على كارنيه تستطيع استلام سيارتك، وسجلها يذهب معك.',
+    'أي ورشة على Carnet تستطيع استلام سيارتك، وسجلها يذهب معك.',
   'Find a workshop': 'ابحث عن ورشة',
   'No cars yet': 'لا سيارات بعد',
   'Add your car by entering its registration. The garage that last worked on it confirms it is yours.':
@@ -290,7 +290,7 @@ export const AR: Readonly<Record<string, string>> = {
   'When?': 'متى؟',
   'Nothing free in the next fortnight': 'لا مواعيد متاحة في الأسبوعين القادمين',
   'Add your car first, then you can book online at any workshop on Carnet.':
-    'أضف سيارتك أولاً، ثم يمكنك الحجز عبر الإنترنت في أي ورشة على كارنيه.',
+    'أضف سيارتك أولاً، ثم يمكنك الحجز عبر الإنترنت في أي ورشة على Carnet.',
   Vehicle: 'السيارة',
   'Anything we should know?': 'شيء ينبغي أن نعرفه؟',
   'Noise from the front when braking.': 'صوت من الأمام عند الفرملة.',

@@ -314,7 +314,7 @@ export default async function ConversationsPage({
                     <span className="text-[13px] font-medium">
                       {tpl.own ? tpl.name : t(tpl.name)}
                       {!tpl.own ? (
-                        <span className="ml-2 text-[11px] text-(--text-faint)">
+                        <span className="ms-2 text-[11px] text-(--text-faint)">
                           {t('built in')}
                         </span>
                       ) : null}
@@ -447,7 +447,7 @@ export default async function ConversationsPage({
                         className={`truncate text-[13px] ${th.unread ? 'font-semibold' : 'font-medium'}`}
                       >
                         {th.unread ? (
-                          <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-(--brand)" />
+                          <span className="me-1.5 inline-block h-2 w-2 rounded-full bg-(--brand)" />
                         ) : null}
                         {th.customer?.displayName ?? t('Unknown')}
                       </span>
@@ -548,8 +548,8 @@ export default async function ConversationsPage({
                     className={[
                       'max-w-[85%] rounded-(--radius-lg) px-3.5 py-2.5 text-[13px]',
                       entry.direction === 'out'
-                        ? 'ml-auto bg-(--brand-soft)'
-                        : 'mr-auto border border-(--border) bg-(--surface)',
+                        ? 'ms-auto bg-(--brand-soft)'
+                        : 'me-auto border border-(--border) bg-(--surface)',
                     ].join(' ')}
                   >
                     {entry.subject ? <p className="mb-1 font-medium">{entry.subject}</p> : null}

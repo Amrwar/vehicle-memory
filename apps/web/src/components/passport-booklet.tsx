@@ -207,7 +207,7 @@ export function PassportBooklet() {
               }}
               aria-pressed={selected === entry.id}
               className={cn(
-                'w-full text-left transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--border-focus)',
+                'w-full text-start transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--border-focus)',
                 selected === entry.id ? 'scale-[1.02]' : 'opacity-85 hover:opacity-100',
               )}
             >

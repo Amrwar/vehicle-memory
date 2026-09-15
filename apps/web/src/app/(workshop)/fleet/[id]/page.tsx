@@ -260,7 +260,7 @@ export default async function FleetDetailPage({
                   )}
                 </div>
 
-                <div className="text-[13px] sm:text-right">
+                <div className="text-[13px] sm:text-end">
                   <span className="text-(--text-faint)">{t('Spent')} </span>
                   <Money currency={region.currency} locale={region.locale} amount={row.spend} />
                 </div>

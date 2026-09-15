@@ -211,7 +211,7 @@ export function DiaryBoard({
                       </div>
 
                       {menuFor === entry.id ? (
-                        <ul className="absolute left-0 right-0 top-full z-10 mt-1 grid max-h-56 gap-px overflow-auto rounded-(--radius-sm) border border-(--border) bg-(--surface) p-1 shadow-lg">
+                        <ul className="absolute start-0 end-0 top-full z-10 mt-1 grid max-h-56 gap-px overflow-auto rounded-(--radius-sm) border border-(--border) bg-(--surface) p-1 shadow-lg">
                           {board
                             .filter((target) => target.id !== lane.id)
                             .map((target) => (
@@ -219,7 +219,7 @@ export function DiaryBoard({
                                 <button
                                   type="button"
                                   onClick={() => void move(entry.id, target.id)}
-                                  className="w-full rounded-(--radius-sm) px-2.5 py-2 text-left text-[12px] hover:bg-(--surface-sunk)"
+                                  className="w-full rounded-(--radius-sm) px-2.5 py-2 text-start text-[12px] hover:bg-(--surface-sunk)"
                                 >
                                   {target.label}
                                 </button>

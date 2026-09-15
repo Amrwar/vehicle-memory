@@ -409,7 +409,7 @@ export default async function InvoicePage({
                   {invoice.lines.map((line) => (
                     <Tr key={line.id}>
                       <Td>
-                        <span className="eyebrow mr-2">{t(line.kind.toLowerCase())}</span>
+                        <span className="eyebrow me-2">{t(line.kind.toLowerCase())}</span>
                         {line.description}
                       </Td>
                       <Td numeric>{Number(line.quantity)}</Td>
@@ -509,7 +509,7 @@ export default async function InvoicePage({
                     {invoice.creditNotes.map((note) => (
                       <Tr key={note.id}>
                         <Td>
-                          <span className="eyebrow mr-2">{t('credit')}</span>
+                          <span className="eyebrow me-2">{t('credit')}</span>
                           {note.number}
                         </Td>
                         <Td>{note.reason}</Td>
@@ -524,7 +524,7 @@ export default async function InvoicePage({
                     {invoice.refunds.map((row) => (
                       <Tr key={row.id}>
                         <Td>
-                          <span className="eyebrow mr-2">{t('refund')}</span>
+                          <span className="eyebrow me-2">{t('refund')}</span>
                           {t('against {number}', { number: row.creditNote.number })}
                         </Td>
                         <Td>

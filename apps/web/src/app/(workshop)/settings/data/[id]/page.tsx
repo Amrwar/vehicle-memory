@@ -148,16 +148,16 @@ export default async function ImportPage({
             ) : null}
             {report.failed.length ? (
               <table className="w-full text-[13px]">
-                <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+                <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                   <tr>
-                    <th className="py-1 pr-3">{t('Row')}</th>
+                    <th className="py-1 pe-3">{t('Row')}</th>
                     <th className="py-1">{t('Why it did not go in')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.failed.slice(0, 200).map((f) => (
                     <tr key={f.row} className="border-t border-(--border)">
-                      <td className="py-1 pr-3 tabular-nums">{f.row}</td>
+                      <td className="py-1 pe-3 tabular-nums">{f.row}</td>
                       <td className="py-1">{t(f.message)}</td>
                     </tr>
                   ))}
@@ -180,20 +180,20 @@ export default async function ImportPage({
             <form action={map} className="grid gap-3">
               <input type="hidden" name="batchId" value={batch.id} />
               <table className="w-full text-[13px]">
-                <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+                <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                   <tr>
-                    <th className="py-1 pr-3">{t('Your column')}</th>
-                    <th className="py-1 pr-3">{t('First rows')}</th>
+                    <th className="py-1 pe-3">{t('Your column')}</th>
+                    <th className="py-1 pe-3">{t('First rows')}</th>
                     <th className="py-1">{t('Becomes')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {headers.map((header, index) => (
                     <tr key={index} className="border-t border-(--border) align-top">
-                      <td className="py-2 pr-3 font-medium">
+                      <td className="py-2 pe-3 font-medium">
                         {header || t('Column {number}', { number: index + 1 })}
                       </td>
-                      <td className="py-2 pr-3 text-(--text-faint)">
+                      <td className="py-2 pe-3 text-(--text-faint)">
                         {sample
                           .map((r) => r[index])
                           .filter(Boolean)
@@ -280,18 +280,18 @@ export default async function ImportPage({
               ) : null}
               {validation.problems.length ? (
                 <table className="w-full">
-                  <thead className="text-left text-[11px] uppercase tracking-wider text-(--text-faint)">
+                  <thead className="text-start text-[11px] uppercase tracking-wider text-(--text-faint)">
                     <tr>
-                      <th className="py-1 pr-3">{t('Row')}</th>
-                      <th className="py-1 pr-3">{t('Field')}</th>
+                      <th className="py-1 pe-3">{t('Row')}</th>
+                      <th className="py-1 pe-3">{t('Field')}</th>
                       <th className="py-1">{t('Problem')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {validation.problems.slice(0, 100).map((p, i) => (
                       <tr key={i} className="border-t border-(--border)">
-                        <td className="py-1 pr-3 tabular-nums">{p.row}</td>
-                        <td className="py-1 pr-3">{t(p.field)}</td>
+                        <td className="py-1 pe-3 tabular-nums">{p.row}</td>
+                        <td className="py-1 pe-3">{t(p.field)}</td>
                         <td className="py-1">{t(p.message)}</td>
                       </tr>
                     ))}
