@@ -202,9 +202,20 @@ export async function draftTimesheet(
   orgId: string,
   employeeId: string,
   range: PeriodRange,
-  overtimeMultiplier = 1.5,
+  multiplier?: number,
 ) {
   const region = await regionFor(orgId);
+  // The workshop's own overtime rate unless one is given. Phase 43.
+  const overtimeMultiplier =
+    multiplier ??
+    Number(
+      (
+        await prisma.organization.findUniqueOrThrow({
+          where: { id: orgId },
+          select: { overtimeMultiplier: true },
+        })
+      ).overtimeMultiplier,
+    );
   const [employee, records, absences] = await Promise.all([
     prisma.employee.findFirstOrThrow({
       where: { id: employeeId, orgId },

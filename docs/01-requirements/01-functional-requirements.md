@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7400 — Providers
+
+| Ref     | Requirement                                                                                                                                                      | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7401 | A VIN MUST be decodable behind a seam, and what a decoder says MUST only fill a form, never be saved by itself.                                                  | 43    |
+| FR-7402 | The decoder that needs nothing MUST name the maker from the VIN and MUST leave the year blank for a VIN that does not encode one.                                | 43    |
+| FR-7403 | A fitment feed MUST be behind a seam, and every row it writes MUST carry the feed's name and the date it was fetched.                                            | 43    |
+| FR-7404 | A feed MUST NOT replace a fitment recorded by the workshop, MUST NOT write a claim already held twice, and MUST take back a claim it no longer sends.            | 43    |
+| FR-7405 | A timesheet waiting for a run MUST take bonuses and deductions with a reason and an amount, and MUST refuse them once the run has taken it.                      | 43    |
+| FR-7406 | Overtime MUST be paid at the workshop's own multiplier, between plain and triple time.                                                                           | 43    |
+| FR-7407 | A run MUST be downloadable in named file shapes with the workshop's own as the default, any other name refused, bonuses counted in gross and deductions its own. | 43    |
+| FR-7408 | A five-star answer MUST be offered the workshop's public review page where one is named and the visit recorded; a lower answer MUST never be sent there.         | 43    |
+
 ## FR-7300 — Paper
 
 | Ref     | Requirement                                                                                                                                                                      | Phase |

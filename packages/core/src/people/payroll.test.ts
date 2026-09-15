@@ -4,10 +4,14 @@ import { toCsv } from '../pos/csv';
 import { money } from '../shared/money';
 
 import {
+  assertOvertimeMultiplier,
+  assertPayAdjustment,
   assertPayrollPayable,
   assertPayrollRunnable,
   describePayrollRun,
   PAYROLL_COLUMNS,
+  PAYROLL_EXPORT_IDS,
+  payrollExport,
   payrollGross,
   payrollRows,
   postPayroll,
@@ -134,5 +138,102 @@ describe('describePayrollRun', () => {
     expect(describePayrollRun({ ...base, employeeCount: 1, status: 'DRAFT' })).toContain(
       '1 person',
     );
+  });
+});
+
+describe('bonuses and deductions', () => {
+  const adjusted = sheet({
+    id: 'a',
+    adjustments: [
+      { kind: 'BONUS', label: 'Quarter target', amount: gbp(150) },
+      { kind: 'DEDUCTION', label: 'Advance repaid', amount: gbp(40) },
+      { kind: 'DEDUCTION', label: 'Uniform', amount: gbp(10) },
+    ],
+  });
+
+  it('puts bonuses in gross and shows deductions separately', () => {
+    const [row] = payrollRows([adjusted]);
+    expect(row?.bonuses.minor).toBe(15000);
+    expect(row?.gross.minor).toBe(94563);
+    expect(row?.deductions.minor).toBe(5000);
+    expect(row?.afterDeductions.minor).toBe(89563);
+    expect(payrollGross([adjusted]).minor).toBe(94563);
+  });
+
+  it('refuses an adjustment nobody could read or that arrives too late', () => {
+    const waiting = { status: 'APPROVED' as const, payrollRunId: null };
+    expect(() =>
+      assertPayAdjustment({ kind: 'BONUS', label: 'Target', amountMajor: 50 }, waiting),
+    ).not.toThrow();
+    expect(() =>
+      assertPayAdjustment({ kind: 'BONUS', label: ' ', amountMajor: 50 }, waiting),
+    ).toThrow(/what it is for/);
+    expect(() =>
+      assertPayAdjustment({ kind: 'DEDUCTION', label: 'Loan', amountMajor: -5 }, waiting),
+    ).toThrow(/more than nothing/);
+    expect(() =>
+      assertPayAdjustment({ kind: 'TIP', label: 'Loan', amountMajor: 5 }, waiting),
+    ).toThrow(/bonus or a deduction/);
+    expect(() =>
+      assertPayAdjustment(
+        { kind: 'BONUS', label: 'Target', amountMajor: 50 },
+        { status: 'APPROVED', payrollRunId: 'run-1' },
+      ),
+    ).toThrow(/next period/);
+    expect(() =>
+      assertPayAdjustment(
+        { kind: 'BONUS', label: 'Target', amountMajor: 50 },
+        { status: 'OPEN', payrollRunId: null },
+      ),
+    ).toThrow(/next period/);
+  });
+
+  it('pays overtime at plain to triple time', () => {
+    expect(() => assertOvertimeMultiplier(1.5)).not.toThrow();
+    expect(() => assertOvertimeMultiplier(1.15)).not.toThrow();
+    expect(() => assertOvertimeMultiplier(0.5)).toThrow(/between 1 and 3/);
+    expect(() => assertOvertimeMultiplier(1.125)).toThrow(/two decimal places/);
+  });
+});
+
+describe('named exports', () => {
+  const rows = payrollRows([
+    sheet({
+      id: 'a',
+      employeeReference: '007',
+      absenceMinutes: 480,
+      adjustments: [
+        { kind: 'BONUS', label: 'Target', amount: gbp(150) },
+        { kind: 'DEDUCTION', label: 'Advance repaid', amount: gbp(40) },
+      ],
+    }),
+  ]);
+
+  it('knows its formats and refuses others', () => {
+    expect(PAYROLL_EXPORT_IDS).toEqual(['standard', 'hours', 'elements']);
+    expect(() => payrollExport('sage')).toThrow(/no payroll file of that name/);
+  });
+
+  it('writes the pay summary with gross and pay after deductions', () => {
+    const [header, row] = payrollExport('standard').render(rows).trim().split(/\r?\n/);
+    expect(header).toContain('Pay after deductions, before tax');
+    expect(row).toContain('945.63');
+    expect(row).toContain('905.63');
+  });
+
+  it('writes hours without rates', () => {
+    const csv = payrollExport('hours').render(rows);
+    expect(csv).not.toContain('795.63');
+    expect(csv).toContain('Absence hours');
+  });
+
+  it('writes one line per element, deductions negative and never mistaken for a formula', () => {
+    const lines = payrollExport('elements').render(rows).trim().split(/\r?\n/);
+    expect(lines).toHaveLength(6);
+    expect(lines.some((line) => line.includes('ORD') && line.includes('760'))).toBe(true);
+    expect(lines.some((line) => line.includes('OT') && line.includes('35.63'))).toBe(true);
+    expect(lines.some((line) => line.includes('ABS') && line.includes(',8,'))).toBe(true);
+    expect(lines.some((line) => line.includes('DEDUCT') && line.endsWith(',-40'))).toBe(true);
+    expect(lines.join('\n')).not.toContain("'-40");
   });
 });

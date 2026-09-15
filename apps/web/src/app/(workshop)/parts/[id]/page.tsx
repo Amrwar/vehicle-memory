@@ -29,11 +29,12 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
-import { requireSession } from '@/lib/guard';
+import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
 import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
+import { fetchFeedFitments, fitmentFeed } from '@/lib/providers';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,6 +97,30 @@ async function addFitment(formData: FormData) {
   redirect(`/parts/${productId}`);
 }
 
+/**
+ * Asks the catalogue what this part fits. Phase 43.
+ *
+ * What somebody here recorded stays; what the catalogue already said is not
+ * written twice; what it said before and no longer says is taken back.
+ */
+async function fetchFitments(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+
+  let summary: string;
+  try {
+    const result = await fetchFeedFitments({ orgId, userId: user.userId, productId });
+    summary = [result.added, result.removed, result.unchanged, result.keptWorkshop].join('.');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'That could not be fetched.';
+    redirect(`/parts/${productId}?error=${encodeURIComponent(message)}#fits`);
+  }
+
+  redirect(`/parts/${productId}?feed=${summary}#fits`);
+}
+
 async function dropFitment(formData: FormData) {
   'use server';
 
@@ -117,10 +142,10 @@ export default async function PartPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; feed?: string }>;
 }) {
   const { id } = await params;
-  const { db, orgId, region } = await requireSession('inventory:read');
+  const { db, orgId, region, user } = await requireSession('inventory:read');
   const t = await tFor();
 
   const product = await db.product.findUnique({
@@ -144,8 +169,11 @@ export default async function PartPage({
 
   if (!product) notFound();
 
-  const { error } = await searchParams;
+  const { error, feed: fetched } = await searchParams;
   const fitments = await fitmentsFor(orgId, id);
+  const feed = fitmentFeed();
+  const mayFetch = feed !== null && can(user.role, 'inventory:write');
+  const [added, removed, unchanged, kept] = (fetched ?? '').split('.').map(Number);
 
   const level = product.stockLevels[0];
   const position = {
@@ -565,13 +593,50 @@ export default async function PartPage({
         </CardBody>
       </Card>
 
-      <Card className="mt-5 overflow-hidden">
+      <Card id="fits" className="mt-5 overflow-hidden">
         <CardHeader
           title={t('What it fits')}
           description={t(
             'Nothing recorded is not the same as fits anything. A part with no rows here raises no warning either way.',
           )}
+          action={
+            mayFetch ? (
+              <form action={fetchFitments}>
+                <input type="hidden" name="productId" value={id} />
+                <Button type="submit" size="sm" variant="secondary">
+                  {t('Fetch from {feed}', { feed: t(feed.name) })}
+                </Button>
+              </form>
+            ) : undefined
+          }
         />
+
+        {fetched && feed ? (
+          <CardBody className="border-b border-(--border) text-[13px]">
+            <span className="block font-medium">
+              {added === 0 && removed === 0
+                ? t('{feed} has nothing new for this part.', { feed: t(feed.name) })
+                : t('{feed}: {added} added, {removed} taken back.', {
+                    feed: t(feed.name),
+                    added: added ?? 0,
+                    removed: removed ?? 0,
+                  })}
+            </span>
+            <span className="block text-[12px] text-(--text-faint)">
+              {t(
+                '{unchanged} already recorded; {kept} left as somebody here recorded them. A fitment typed here is never replaced by a catalogue.',
+                { unchanged: unchanged ?? 0, kept: kept ?? 0 },
+              )}
+            </span>
+            {feed.sample ? (
+              <span className="block text-[12px] text-(--text-faint)">
+                {t(
+                  'The sample catalogue knows the demonstration parts only. A real feed is connected per installation.',
+                )}
+              </span>
+            ) : null}
+          </CardBody>
+        ) : null}
 
         {error ? (
           <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
@@ -604,7 +669,13 @@ export default async function PartPage({
                     {fitment.engineCode
                       ? `${t('Engine {code}', { code: fitment.engineCode })} · `
                       : ''}
-                    {t(fitment.source.toLowerCase())} · {fitment.createdBy?.name ?? t('unknown')}
+                    {t(fitment.source.toLowerCase())} ·{' '}
+                    {fitment.feedName && fitment.fetchedAt
+                      ? t('{feed}, fetched {date}', {
+                          feed: t(fitment.feedName),
+                          date: fitment.fetchedAt.toLocaleDateString(region.locale),
+                        })
+                      : (fitment.createdBy?.name ?? t('unknown'))}
                   </span>
                 </div>
 

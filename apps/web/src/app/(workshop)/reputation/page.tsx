@@ -12,13 +12,15 @@ import {
   StatRow,
   StatTile,
 } from '@carnet/ui';
+import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { requireSession } from '@/lib/guard';
+import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { reputationTrend } from '@/lib/owner';
+import { reviewLinkFor, reviewSite, ReviewSiteError, setGooglePlaceId } from '@/lib/providers';
 import { askable, askAbout, reputation, resolveReview } from '@/lib/retention';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -76,6 +78,26 @@ async function resolve(formData: FormData) {
   redirect('/reputation');
 }
 
+/** Names the workshop's Google listing. Phase 43. */
+async function saveListing(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await setGooglePlaceId({
+      orgId,
+      userId: user.userId,
+      value: String(formData.get('googlePlaceId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof ReviewSiteError)) throw error;
+    redirect(`/reputation?error=${encodeURIComponent(error.message)}#public`);
+  }
+
+  redirect('/reputation?listing=1#public');
+}
+
 function TrendRows({ rows, empty, t }: { rows: GroupTrend[]; empty: string; t: Translator }) {
   if (rows.length === 0) {
     return <CardBody className="text-[13px] text-(--text-soft)">{empty}</CardBody>;
@@ -119,17 +141,24 @@ function stars(rating: number): string {
 export default async function ReputationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ asked?: string; error?: string }>;
+  searchParams: Promise<{ asked?: string; error?: string; listing?: string }>;
 }) {
-  const { orgId, region } = await requireSession('customer:read');
-  const { asked, error } = await searchParams;
+  const { orgId, region, user } = await requireSession('customer:read');
+  const { asked, error, listing } = await searchParams;
   const t = await tFor();
 
-  const [picture, candidates, trend] = await Promise.all([
+  const [picture, candidates, trend, publicLink, org] = await Promise.all([
     reputation(orgId),
     askable(orgId),
     reputationTrend(orgId),
+    reviewLinkFor(orgId),
+    prisma.organization.findUniqueOrThrow({
+      where: { id: orgId },
+      select: { googlePlaceId: true },
+    }),
   ]);
+  const site = reviewSite();
+  const mayConfigure = can(user.role, 'settings:write');
 
   const toAsk = candidates.filter((entry) => entry.decision.ask);
   const skipped = candidates.filter((entry) => !entry.decision.ask);
@@ -343,6 +372,77 @@ export default async function ReputationPage({
         </div>
 
         <div className="grid gap-5">
+          <Card id="public">
+            <CardHeader
+              title={t('Public reviews')}
+              description={t(
+                'A customer who gives five is offered a button to say so on {site}. They write it themselves, under their own name.',
+                { site: site.name === 'None' ? 'Google' : site.name },
+              )}
+            />
+            <CardBody className="grid gap-3 text-[13px]">
+              {listing ? (
+                <p className="text-(--success)">
+                  {t('Saved. The next five-star answer is offered the link.')}
+                </p>
+              ) : null}
+              <p>
+                {publicLink
+                  ? t('{went} of {invited} invited went to write one.', {
+                      went: picture.wentPublic,
+                      invited: picture.invited,
+                    })
+                  : site.name === 'None'
+                    ? t('No review site is connected to this installation.')
+                    : t(
+                        'Not set up. Until the listing is named, a five-star customer is thanked and nothing more.',
+                      )}
+              </p>
+              {publicLink ? (
+                <a
+                  href={publicLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-fit text-(--brand-text) underline underline-offset-2"
+                >
+                  {t('Open the page customers are sent to')}
+                </a>
+              ) : null}
+              {mayConfigure && site.name !== 'None' ? (
+                <form action={saveListing} className="grid gap-2">
+                  <Field
+                    label={t('Google place ID')}
+                    hint={t(
+                      'From Google’s place ID finder, or paste a write-review link that carries it. Blank turns it off.',
+                    )}
+                  >
+                    <Input
+                      name="googlePlaceId"
+                      defaultValue={org.googlePlaceId ?? ''}
+                      spellCheck={false}
+                      className="font-mono"
+                      // i18n-ignore
+                      placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
+                    />
+                  </Field>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button type="submit" size="sm" variant="secondary">
+                      {t('Save')}
+                    </Button>
+                    <a
+                      href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[12px] text-(--brand-text) underline underline-offset-2"
+                    >
+                      {t('Find your place ID')}
+                    </a>
+                  </div>
+                </form>
+              ) : null}
+            </CardBody>
+          </Card>
+
           <Card className="overflow-hidden">
             <CardHeader
               title={t('Ready to ask')}

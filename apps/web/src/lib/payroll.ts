@@ -1,13 +1,18 @@
 import {
+  assertOvertimeMultiplier,
+  assertPayAdjustment,
   assertPayrollPayable,
   assertPayrollRunnable,
   assertTimesheetTransition,
   fromDecimal,
+  isPayrollExportId,
   PAYROLL_COLUMNS,
+  payrollExport,
   payrollGross,
   payrollRows,
   PayrollError,
   postPayroll,
+  type PayrollExportId,
   type RunnableTimesheet,
   toNumber,
 } from '@carnet/core';
@@ -41,6 +46,7 @@ const asRunnable = (row: {
   gross: unknown;
   payrollRunId: string | null;
   employee: { reference: string; displayName: string };
+  adjustments?: { kind: 'BONUS' | 'DEDUCTION'; label: string; amount: unknown }[];
 }): RunnableTimesheet => ({
   id: row.id,
   employeeReference: row.employee.reference,
@@ -55,6 +61,11 @@ const asRunnable = (row: {
   overtimePay: fromDecimal(String(row.overtimePay)),
   gross: fromDecimal(String(row.gross)),
   payrollRunId: row.payrollRunId,
+  adjustments: (row.adjustments ?? []).map((entry) => ({
+    kind: entry.kind,
+    label: entry.label,
+    amount: fromDecimal(String(entry.amount)),
+  })),
 });
 
 const SHEET_SELECT = {
@@ -70,6 +81,10 @@ const SHEET_SELECT = {
   gross: true,
   payrollRunId: true,
   employee: { select: { id: true, reference: true, displayName: true } },
+  adjustments: {
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, kind: true, label: true, amount: true },
+  },
 } as const;
 
 /* ---------------------------------------------------------------------------
@@ -195,6 +210,16 @@ export async function awaitingPayroll(orgId: string) {
   return [...periods.values()].map((entry) => ({ ...entry, gross: payrollGross(entry.sheets) }));
 }
 
+/** Sheets that can still carry a bonus or a deduction. Phase 43. */
+export async function waitingSheets(orgId: string) {
+  return prisma.timesheet.findMany({
+    where: { orgId, status: { in: ['SUBMITTED', 'APPROVED'] }, payrollRunId: null },
+    orderBy: [{ periodStart: 'desc' }, { employee: { reference: 'asc' } }],
+    take: 40,
+    select: SHEET_SELECT,
+  });
+}
+
 /** Sheets somebody still has to approve. */
 export async function awaitingApproval(orgId: string) {
   return prisma.timesheet.findMany({
@@ -273,16 +298,174 @@ export async function runPayroll(input: {
   return run.id;
 }
 
-/** The rows for the file, for one run. */
-export async function payrollFile(orgId: string, runId: string) {
-  const run = await prisma.payrollRun.findFirst({
-    where: { id: runId, orgId },
-    select: { id: true, periodStart: true, periodEnd: true, timesheets: { select: SHEET_SELECT } },
-  });
+/**
+ * The file for one run, in the format asked for or the workshop's own.
+ *
+ * The format is chosen at download rather than fixed on the run: the hours
+ * and amounts are what were handed over, and the shape is only how they are
+ * written down for whichever software reads them.
+ */
+export async function payrollFile(orgId: string, runId: string, format?: string | null) {
+  const [run, org] = await Promise.all([
+    prisma.payrollRun.findFirst({
+      where: { id: runId, orgId },
+      select: {
+        id: true,
+        periodStart: true,
+        periodEnd: true,
+        timesheets: { select: SHEET_SELECT },
+      },
+    }),
+    prisma.organization.findUniqueOrThrow({
+      where: { id: orgId },
+      select: { payrollExportFormat: true },
+    }),
+  ]);
 
   if (!run) return null;
 
-  return { run, rows: payrollRows(run.timesheets.map(asRunnable)) };
+  // An unknown format is refused rather than quietly swapped for another.
+  const shape = payrollExport(format ? format : org.payrollExportFormat);
+
+  const rows = payrollRows(run.timesheets.map(asRunnable));
+  return { run, rows, format: shape, csv: shape.render(rows) };
+}
+
+/* ---------------------------------------------------------------------------
+   Bonuses, deductions and settings. Phase 43.
+   --------------------------------------------------------------------------- */
+
+/** A bonus or a deduction on a waiting timesheet. */
+export async function addPayAdjustment(input: {
+  orgId: string;
+  userId: string;
+  timesheetId: string;
+  kind: string;
+  label: string;
+  amount: number;
+}): Promise<string> {
+  const sheet = await prisma.timesheet.findFirst({
+    where: { id: input.timesheetId, orgId: input.orgId },
+    select: {
+      id: true,
+      status: true,
+      payrollRunId: true,
+      employee: { select: { displayName: true } },
+    },
+  });
+
+  if (!sheet) throw new PayrollError('BAD_ADJUSTMENT', 'That timesheet is not in this workshop.');
+
+  assertPayAdjustment({ kind: input.kind, label: input.label, amountMajor: input.amount }, sheet);
+
+  const row = await prisma.payAdjustment.create({
+    data: {
+      orgId: input.orgId,
+      timesheetId: sheet.id,
+      kind: input.kind as 'BONUS' | 'DEDUCTION',
+      label: input.label.trim(),
+      amount: Math.round(input.amount * 100) / 100,
+      createdByUserId: input.userId,
+    },
+    select: { id: true },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: input.kind === 'BONUS' ? 'payroll.bonus_added' : 'payroll.deduction_added',
+    entityType: 'Timesheet',
+    entityId: sheet.id,
+    after: {
+      employee: sheet.employee.displayName,
+      label: input.label.trim(),
+      amount: Math.round(input.amount * 100) / 100,
+    },
+  });
+
+  return row.id;
+}
+
+/** Takes a bonus or deduction back off a sheet that has not gone yet. */
+export async function removePayAdjustment(input: {
+  orgId: string;
+  userId: string;
+  adjustmentId: string;
+}): Promise<void> {
+  const row = await prisma.payAdjustment.findFirst({
+    where: { id: input.adjustmentId, orgId: input.orgId },
+    select: {
+      id: true,
+      kind: true,
+      label: true,
+      amount: true,
+      timesheet: { select: { id: true, status: true, payrollRunId: true } },
+    },
+  });
+
+  if (!row) throw new PayrollError('BAD_ADJUSTMENT', 'That adjustment is not in this workshop.');
+
+  if (
+    row.timesheet.payrollRunId !== null ||
+    (row.timesheet.status !== 'SUBMITTED' && row.timesheet.status !== 'APPROVED')
+  ) {
+    throw new PayrollError(
+      'LOCKED',
+      'This timesheet has been handed to payroll. A bonus or deduction now goes on the next period.',
+    );
+  }
+
+  await prisma.payAdjustment.delete({ where: { id: row.id } });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'payroll.adjustment_removed',
+    entityType: 'Timesheet',
+    entityId: row.timesheet.id,
+    before: { kind: row.kind, label: row.label, amount: Number(row.amount) },
+  });
+}
+
+/** How overtime is paid, and which file a run is handed over as. */
+export async function payrollSettings(orgId: string) {
+  const org = await prisma.organization.findUniqueOrThrow({
+    where: { id: orgId },
+    select: { overtimeMultiplier: true, payrollExportFormat: true },
+  });
+
+  return {
+    overtimeMultiplier: Number(org.overtimeMultiplier),
+    exportFormat: (isPayrollExportId(org.payrollExportFormat)
+      ? org.payrollExportFormat
+      : 'standard') as PayrollExportId,
+  };
+}
+
+export async function savePayrollSettings(input: {
+  orgId: string;
+  userId: string;
+  overtimeMultiplier: number;
+  exportFormat: string;
+}): Promise<void> {
+  assertOvertimeMultiplier(input.overtimeMultiplier);
+  const format = payrollExport(input.exportFormat);
+  const before = await payrollSettings(input.orgId);
+
+  await prisma.organization.update({
+    where: { id: input.orgId },
+    data: { overtimeMultiplier: input.overtimeMultiplier, payrollExportFormat: format.id },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'settings.payroll_updated',
+    entityType: 'Organization',
+    entityId: input.orgId,
+    before,
+    after: { overtimeMultiplier: input.overtimeMultiplier, exportFormat: format.id },
+  });
 }
 
 /** The money has left the bank: the run and its sheets are paid, and wages post. */

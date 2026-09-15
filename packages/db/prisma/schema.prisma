@@ -71,6 +71,12 @@ model Organization {
   /// Model tokens the assistant may spend in a calendar month. Beyond it the
   /// assistant keeps working on the plain, composed text. FR-4904.
   assistantTokenBudget   Int       @default(1000000)
+  /// Overtime is paid at this multiple of the hourly cost rate. Phase 43.
+  overtimeMultiplier     Decimal   @default(1.5) @db.Decimal(4, 2)
+  /// The payroll file a run is handed over as, unless somebody picks another.
+  payrollExportFormat    String    @default("standard")
+  /// The workshop's Google listing, where a pleased customer is sent to say so.
+  googlePlaceId          String?
   isActive               Boolean   @default(true)
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
@@ -91,6 +97,7 @@ model Organization {
   refunds             Refund[]
   supplierPayments    SupplierPayment[]
   payrollRuns         PayrollRun[]
+  payAdjustments      PayAdjustment[]
   fleetAgreements     FleetAgreement[]
   taxRates            TaxRate[]
   taxEntries          TaxEntry[]
@@ -273,6 +280,7 @@ model User {
   depositMovements         DepositMovement[]
   supplierPaymentsRecorded SupplierPayment[]    @relation("SupplierPaymentRecorder")
   payrollRunsCreated       PayrollRun[]         @relation("PayrollRunCreator")
+  payAdjustmentsCreated    PayAdjustment[]      @relation("PayAdjustmentCreator")
   apiKeysCreated           ApiKey[]             @relation("ApiKeyCreator")
   assistantExchanges       AssistantExchange[]
   documentsUploaded        VehicleDocument[]    @relation("DocumentUploader")
@@ -2988,6 +2996,36 @@ enum TimesheetStatus {
   PAID
 }
 
+enum PayAdjustmentKind {
+  BONUS
+  DEDUCTION
+}
+
+/// A bonus or a deduction on one person's timesheet. Phase 43.
+///
+/// Added while the sheet waits for a run and fixed once the run has taken it,
+/// which the database enforces as well as the product. A deduction here is one
+/// the workshop agreed with the person; tax and pension are the payroll
+/// software's.
+model PayAdjustment {
+  id              String            @id @default(cuid())
+  orgId           String
+  timesheetId     String
+  kind            PayAdjustmentKind
+  label           String
+  amount          Decimal           @db.Decimal(12, 2)
+  createdByUserId String?
+  createdAt       DateTime          @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  timesheet Timesheet    @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  createdBy User?        @relation("PayAdjustmentCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([timesheetId])
+  @@index([orgId])
+  @@map("pay_adjustments")
+}
+
 /// A pay period for one person. Approved once, then it stops moving: payroll
 /// is the one place where "somebody edited it afterwards" is unrecoverable.
 model Timesheet {
@@ -3011,12 +3049,13 @@ model Timesheet {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  approvedBy   User?        @relation("TimesheetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  org          Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  employee     Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  approvedBy   User?           @relation("TimesheetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   /// The run that handed this sheet to payroll. Set once, when it is exported.
   payrollRunId String?
-  payrollRun   PayrollRun?  @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  payrollRun   PayrollRun?     @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  adjustments  PayAdjustment[]
 
   @@unique([employeeId, periodStart])
   @@index([orgId, status])
@@ -3207,6 +3246,10 @@ model PartFitment {
   engineCode String?
   source     FitmentSource @default(WORKSHOP)
   note       String?
+  /// The feed that wrote this row, so its next fetch can take back what it
+  /// no longer says. Null for a row somebody typed. Phase 43.
+  feedName   String?
+  fetchedAt  DateTime?
 
   createdByUserId String?
   createdAt       DateTime @default(now())
@@ -4604,4 +4647,23 @@ enum ImportStatus {
   UPLOADED
   MAPPED
   IMPORTED
+}
+
+/// What a decoder said about a VIN, kept so a VIN is asked about once. Phase 43.
+///
+/// Not a workshop's data: a VIN's maker and model are the same whoever asks,
+/// so the answer is shared, and nothing in it names a workshop or an owner.
+model VinDecode {
+  vin       String   @id
+  decoder   String
+  make      String?
+  model     String?
+  year      Int?
+  engine    String?
+  fuel      String?
+  body      String?
+  complete  Boolean  @default(false)
+  fetchedAt DateTime @default(now())
+
+  @@map("vin_decodes")
 }

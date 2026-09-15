@@ -70,6 +70,7 @@ says why.
 | -------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
 | Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`                                                     |
 | VIN, plate, make, model    | Built  |                                                                                                   |
+| Decoding a VIN             | Built  | Behind a seam: the maker and year built in, the model from the registry (Phase 43)                |
 | Mileage, engine, fuel      | Built  |                                                                                                   |
 | Service and repair history | Built  | Every visit, across workshops                                                                     |
 | Parts replaced             | Built  | Through job lines                                                                                 |
@@ -165,12 +166,13 @@ quantity, minimum stock, bin location, weighted average cost, reservations,
 stocktakes, and every movement traceable. Multi-location with transfers and
 in-transit stock counted in group value.
 
-| Item                   | Status  | Where                                            |
-| ---------------------- | ------- | ------------------------------------------------ |
-| Which vehicles it fits | Built   | On the part, with the source of each claim       |
-| Warning on a job       | Built   | Fires on a mismatch, silent on a match           |
-| No data recorded       | Built   | Reads as unknown, never as fitting               |
-| A fitment feed         | Missing | Needs a provider. Rows are typed by a person now |
+| Item                    | Status | Where                                             |
+| ----------------------- | ------ | ------------------------------------------------- |
+| Which vehicles it fits  | Built  | On the part, with the source of each claim        |
+| Warning on a job        | Built  | Fires on a mismatch, silent on a match            |
+| No data recorded        | Built  | Reads as unknown, never as fitting                |
+| A fitment feed          | Built  | Behind a seam, with a sample feed (Phase 43)      |
+| Where a claim came from | Built  | The feed and the date, or the person who typed it |
 
 The three states matter more than the feature. A screen that showed nothing
 when it had no data would teach somebody that no warning means the part is
@@ -206,14 +208,15 @@ provider.
 effective-dated pay rates, commission, certifications, jobs completed, hours,
 revenue and the utilisation, efficiency and productivity triple.
 
-| Item              | Status | Where                                               |
-| ----------------- | ------ | --------------------------------------------------- |
-| Skill matrix      | Built  | `/skills`, at three levels with the date signed off |
-| Skill gaps        | Built  | A skill only one person holds is named              |
-| Working hours     | Built  | `/patterns`, one row per person per weekday         |
-| Holiday deduction | Built  | Approved absence comes off capacity automatically   |
-
-Missing: payroll export, which waits on a named target format.
+| Item                   | Status | Where                                                 |
+| ---------------------- | ------ | ----------------------------------------------------- |
+| Skill matrix           | Built  | `/skills`, at three levels with the date signed off   |
+| Skill gaps             | Built  | A skill only one person holds is named                |
+| Working hours          | Built  | `/patterns`, one row per person per weekday           |
+| Holiday deduction      | Built  | Approved absence comes off capacity automatically     |
+| Bonuses and deductions | Built  | On a sheet until its period is handed over (Phase 43) |
+| Overtime multiplier    | Built  | The workshop's own, between plain and triple time     |
+| Payroll export         | Built  | Three named shapes, the workshop's own by default     |
 
 ## 12.5 Capacity and scheduling
 
@@ -314,15 +317,16 @@ endpoint that receives them exists and is authenticated.
 
 ## 18. Reviews and reputation
 
-| Item                   | Status  | Where                                             |
-| ---------------------- | ------- | ------------------------------------------------- |
-| Asking after a job     | Built   | `/reputation`, a day after the work, once per job |
-| Routing by the answer  | Built   | Five invited publicly, three or less opens a talk |
-| Who was not asked, why | Built   | The list that explains a low review count         |
-| Satisfaction           | Built   | Refused below five answers rather than swinging   |
-| Trend by site, person  | Built   | Ninety days against the ninety before (Phase 40)  |
-| Closing a complaint    | Built   | With a stated outcome, enforced by the database   |
-| Posting to Google      | Missing | Needs a place to send them. The invitation exists |
+| Item                   | Status | Where                                              |
+| ---------------------- | ------ | -------------------------------------------------- |
+| Asking after a job     | Built  | `/reputation`, a day after the work, once per job  |
+| Routing by the answer  | Built  | Five invited publicly, three or less opens a talk  |
+| Who was not asked, why | Built  | The list that explains a low review count          |
+| Satisfaction           | Built  | Refused below five answers rather than swinging    |
+| Trend by site, person  | Built  | Ninety days against the ninety before (Phase 40)   |
+| Closing a complaint    | Built  | With a stated outcome, enforced by the database    |
+| Posting to Google      | Built  | The listing is named, the five-star answer is sent |
+| Who went to say so     | Built  | Counted on `/reputation` (Phase 43)                |
 
 The routing is the feature and it is the thing businesses get backwards.
 Asking everybody for a public review collects the one-star ones you could have
@@ -469,9 +473,9 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 206          |
+| Built    | 214          |
 | Partial  | 1            |
-| Missing  | 6            |
+| Missing  | 4            |
 | Deferred | 1            |
 
 <!-- counts:end -->

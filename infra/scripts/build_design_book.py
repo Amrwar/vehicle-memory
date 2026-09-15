@@ -41,7 +41,7 @@ PETROL_DEEP = RGBColor(0x12, 0x32, 0x36)
 BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
-BUILT_ON = "14 September 2026"
+BUILT_ON = "15 September 2026"
 
 
 # ----------------------------------------------------------------- helpers
@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 42.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 43.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -777,6 +777,24 @@ def build() -> None:
         works="Rendering the PDF from the printed page means one layout to keep right, in every language, and a file that is always the paper.",
         shots=[("print-work-order", "A work order.", 16.4), ("print-inspection-ar", "An inspection report in Arabic.", 16.4)],
         source="docs/02-design/05-security-model.md, section 7.6",
+    )
+
+    design(
+        doc,
+        title="Providers behind seams",
+        when="Phase 43, 15 September 2026.",
+        why="A workshop should not type a make off a windscreen, nor every vehicle a part fits, nor "
+            "re-key a pay period into payroll software. What answers those questions comes from outside, "
+            "so what the screens show is the answer and who gave it.",
+        meaning=[
+            "Reading a VIN fills the form and says who read it; what it could not tell is left blank, with a line saying to type it from the car.",
+            "A fitment row says whether a catalogue or a person put it there, and a fetch reports what was added, held, taken back and left alone.",
+            "The payroll page carries the bonuses and deductions under the period they belong to, the overtime multiplier beside the file the workshop hands over, and each file shape described in a line.",
+            "The customer's thank-you page, after five out of five, becomes one button to write it on Google.",
+        ],
+        works="Every seam has an implementation that needs nobody else, so a fresh install answers the same questions with less detail rather than with an error.",
+        shots=[("vin-decode", "A VIN read into the form.", 16.4), ("payroll", "Bonuses, deductions and the file.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 43",
     )
 
     # 11. Counter

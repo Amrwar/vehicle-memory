@@ -917,7 +917,24 @@ def build() -> None:
               "dialog. The print stylesheet in packages/ui sets A4, receipt and tag page sizes and hides the workshop's "
               "navigation and controls for every page.")
 
-    doc.add_heading("6.23 Answers and the assistant", level=2)
+    doc.add_heading("6.23 Providers behind seams", level=2)
+    para(doc, "Three ports, each chosen by one environment variable and each with an implementation that needs nobody "
+              "else. VIN_DECODER picks the decoder: the built-in one reads the maker from the WMI table and the year from "
+              "the tenth character only where vinEncodesYear says the VIN carries one, and 'nhtsa' asks the registry's "
+              "DecodeVinValues for the model, engine, fuel and body, reads the record through readVpicDecoding and keeps a "
+              "complete answer in vin_decodes for six months; decodeVin in lib/providers.ts is what the page calls, and the "
+              "decode action on /vehicles/find only fills the form. FITMENT_FEED picks the feed; fetchFeedFitments reads the "
+              "part, asks the feed, and hands what came back with what is already held to planFeedImport in core, which "
+              "decides what to create, what to remove and what to leave alone before anything is written: a WORKSHOP row is "
+              "never replaced, a held claim is never written twice, and only rows carrying this feed's feedName are removed. "
+              "REVIEW_SITE picks the review site; googleReviewSite builds the write-review address from the organisation's "
+              "googlePlaceId, /r/[token]/public stamps publicOpenedAt through followReviewInvitation and redirects only to an "
+              "address isReviewSiteUrl recognises, and only for an answer routed PUBLIC_INVITE. Payroll gained the same kind "
+              "of seam on the way out: PAYROLL_EXPORTS in core holds three named shapes of the same PayrollRow set, "
+              "/api/reports/payroll?format= renders the one asked for and refuses any other name, and pay_adjustments rows "
+              "are locked by a trigger once their timesheet has a run.")
+
+    doc.add_heading("6.24 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

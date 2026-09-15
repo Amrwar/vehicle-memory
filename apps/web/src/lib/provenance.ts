@@ -183,6 +183,8 @@ export async function fitmentsFor(orgId: string, productId: string) {
       engineCode: true,
       source: true,
       note: true,
+      feedName: true,
+      fetchedAt: true,
       createdAt: true,
       createdBy: { select: { name: true } },
     },

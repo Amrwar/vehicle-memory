@@ -63,6 +63,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     title: 'The vehicle and its passport',
     models: [
       'Vehicle',
+      'VinDecode',
       'VehicleEvent',
       'VehicleEventAttachment',
       'VehicleOwnership',
@@ -227,6 +228,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'JobTypeSkill',
       'WorkingPattern',
       'PayrollRun',
+      'PayAdjustment',
       'CommissionScheme',
       'CommissionBand',
       'CommissionAward',

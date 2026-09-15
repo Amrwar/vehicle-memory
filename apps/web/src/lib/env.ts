@@ -76,6 +76,16 @@ const schema = z.object({
   STRIPE_PRICE_COMPLETE: z.string().min(1).optional(),
   STRIPE_PRICE_GROUP: z.string().min(1).optional(),
 
+  // Providers behind seams (Phase 43). The VIN decoder built in reads the
+  // maker and year from the VIN alone; 'nhtsa' asks the US registry's free
+  // public decoder for the model, engine and body too. The sample fitment
+  // feed knows the demonstration parts only and says nothing about any
+  // other; 'none' hides the fetch. The review site is where a customer who
+  // gave five stars is sent, once the workshop has named its listing.
+  VIN_DECODER: z.enum(['stub', 'nhtsa']).default('stub'),
+  FITMENT_FEED: z.enum(['none', 'sample']).default('sample'),
+  REVIEW_SITE: z.enum(['none', 'google']).default('google'),
+
   MAIL_TRANSPORT: z.enum(['console', 'smtp']).default('console'),
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
   MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),

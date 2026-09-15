@@ -174,6 +174,13 @@ async function main() {
     { file: 'passport', path: `/vehicles/${r.vehicle}/passport`, who: 'owner', fullPage: true },
     { file: 'vehicle', path: `/vehicles/${r.vehicle}`, who: 'owner' },
     { file: 'reputation', path: '/reputation', who: 'owner' },
+    { file: 'payroll', path: '/payroll', who: 'owner', fullPage: true },
+    {
+      file: 'vin-decode',
+      path: '/vehicles/find?q=WVWZZZ1JZ3W386752&vin=WVWZZZ1JZ3W386752&decode=1',
+      who: 'owner',
+      fullPage: true,
+    },
     { file: 'ask', path: '/ask?q=Who+owes+us+money%3F', who: 'owner' },
     { file: 'people', path: '/people', who: 'owner' },
     { file: 'business', path: '/reports/business', who: 'owner' },

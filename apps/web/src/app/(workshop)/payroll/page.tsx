@@ -1,4 +1,10 @@
-import { describePayrollRun, fromDecimal, PlanLimitError } from '@carnet/core';
+import {
+  describePayrollRun,
+  fromDecimal,
+  PAYROLL_EXPORT_IDS,
+  PAYROLL_EXPORTS,
+  PlanLimitError,
+} from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
   Alert,
@@ -23,14 +29,19 @@ import { redirect } from 'next/navigation';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import {
+  addPayAdjustment,
   approveTimesheet,
   awaitingApproval,
   awaitingPayroll,
   markPayrollPaid,
   PayrollError,
   payrollRuns,
+  payrollSettings,
+  removePayAdjustment,
   runPayroll,
+  savePayrollSettings,
   submitTimesheet,
+  waitingSheets,
 } from '@/lib/payroll';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -137,6 +148,70 @@ async function paid(formData: FormData) {
   redirect('/payroll?done=paid');
 }
 
+/** A bonus or a deduction on a sheet that has not gone yet. Phase 43. */
+async function adjust(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payroll:approve');
+
+  try {
+    await addPayAdjustment({
+      orgId,
+      userId: user.userId,
+      timesheetId: String(formData.get('timesheetId') ?? ''),
+      kind: String(formData.get('kind') ?? ''),
+      label: String(formData.get('label') ?? ''),
+      amount: Number(String(formData.get('amount') ?? '').replace(',', '.')),
+    });
+  } catch (error) {
+    if (!(error instanceof PayrollError)) throw error;
+    redirect(`/payroll?problem=${encodeURIComponent(error.message)}#adjustments`);
+  }
+
+  redirect('/payroll?done=adjusted#adjustments');
+}
+
+async function unadjust(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payroll:approve');
+
+  try {
+    await removePayAdjustment({
+      orgId,
+      userId: user.userId,
+      adjustmentId: String(formData.get('adjustmentId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof PayrollError)) throw error;
+    redirect(`/payroll?problem=${encodeURIComponent(error.message)}#adjustments`);
+  }
+
+  redirect('/payroll?done=adjusted#adjustments');
+}
+
+async function saveSettings(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payroll:approve');
+
+  try {
+    await savePayrollSettings({
+      orgId,
+      userId: user.userId,
+      overtimeMultiplier: Number(
+        String(formData.get('overtimeMultiplier') ?? '').replace(',', '.'),
+      ),
+      exportFormat: String(formData.get('exportFormat') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof PayrollError)) throw error;
+    redirect(`/payroll?problem=${encodeURIComponent(error.message)}#settings`);
+  }
+
+  redirect('/payroll?done=settings#settings');
+}
+
 export default async function PayrollPage({
   searchParams,
 }: {
@@ -146,7 +221,7 @@ export default async function PayrollPage({
   const notice = await searchParams;
   const t = await tFor();
 
-  const [toApprove, toRun, runs, employees] = await Promise.all([
+  const [toApprove, toRun, runs, employees, waiting, settings] = await Promise.all([
     awaitingApproval(orgId),
     awaitingPayroll(orgId),
     payrollRuns(orgId),
@@ -155,6 +230,8 @@ export default async function PayrollPage({
       orderBy: { reference: 'asc' },
       select: { id: true, reference: true, displayName: true },
     }),
+    waitingSheets(orgId),
+    payrollSettings(orgId),
   ]);
 
   const mayWrite = can(user.role, 'payroll:approve');
@@ -224,6 +301,10 @@ export default async function PayrollPage({
             t('Marked paid. Wages have been posted to the ledger.')
           ) : notice.done === 'approved' ? (
             t('Approved. The hours will not move again.')
+          ) : notice.done === 'adjusted' ? (
+            t('Saved. It goes into the file when the period is handed over.')
+          ) : notice.done === 'settings' ? (
+            t('Saved. Timesheets submitted from now on use it.')
           ) : (
             t('Submitted. A manager approves it next.')
           )}
@@ -346,6 +427,97 @@ export default async function PayrollPage({
             )}
           </Card>
 
+          <Card id="adjustments" className="overflow-hidden">
+            <CardHeader
+              title={t('Bonuses and deductions')}
+              description={t(
+                'Added to a sheet until its period is handed over. Tax and pension are not typed here; the payroll software works them out.',
+              )}
+            />
+            {waiting.length === 0 ? (
+              <EmptyState
+                title={t('No timesheet is waiting')}
+                description={t('Submit a period and it can carry a bonus or a deduction.')}
+              />
+            ) : (
+              <ul className="divide-y divide-(--border)">
+                {waiting.map((sheet) => (
+                  <li key={sheet.id} className="grid gap-2 px-4 py-3 text-[13px]">
+                    <div className="flex flex-wrap items-baseline gap-3">
+                      <span className="font-medium">{sheet.employee.displayName}</span>
+                      <span className="text-(--text-faint)">
+                        {t('{from} to {to}', {
+                          from: sheet.periodStart.toLocaleDateString(region.locale),
+                          to: sheet.periodEnd.toLocaleDateString(region.locale),
+                        })}
+                      </span>
+                      <Badge tone="neutral" size="sm">
+                        {t(sheet.status.toLowerCase())}
+                      </Badge>
+                    </div>
+                    {sheet.adjustments.length > 0 ? (
+                      <ul className="grid gap-1">
+                        {sheet.adjustments.map((entry) => (
+                          <li key={entry.id} className="flex flex-wrap items-center gap-2">
+                            <Badge tone={entry.kind === 'BONUS' ? 'success' : 'warning'} size="sm">
+                              {entry.kind === 'BONUS' ? t('Bonus') : t('Deduction')}
+                            </Badge>
+                            <bdi>{entry.label}</bdi>
+                            <span className="ms-auto tabular-nums">
+                              {entry.kind === 'DEDUCTION' ? '−' : '+'}
+                              <Money
+                                currency={region.currency}
+                                locale={region.locale}
+                                amount={Number(entry.amount)}
+                              />
+                            </span>
+                            {mayWrite ? (
+                              <form action={unadjust}>
+                                <input type="hidden" name="adjustmentId" value={entry.id} />
+                                <Button type="submit" size="sm" variant="ghost">
+                                  {t('Remove')}
+                                </Button>
+                              </form>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {mayWrite ? (
+                      <form
+                        action={adjust}
+                        className="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)_7rem_auto] sm:items-end"
+                      >
+                        <input type="hidden" name="timesheetId" value={sheet.id} />
+                        <Field label={t('Kind')}>
+                          <Select name="kind" defaultValue="BONUS">
+                            <option value="BONUS">{t('Bonus')}</option>
+                            <option value="DEDUCTION">{t('Deduction')}</option>
+                          </Select>
+                        </Field>
+                        <Field label={t('What for')}>
+                          <Input
+                            name="label"
+                            required
+                            minLength={2}
+                            maxLength={80}
+                            placeholder={t('Quarter target met')}
+                          />
+                        </Field>
+                        <Field label={t('Amount')}>
+                          <Input name="amount" required inputMode="decimal" placeholder="50.00" />
+                        </Field>
+                        <Button type="submit" size="sm" variant="secondary">
+                          {t('Add')}
+                        </Button>
+                      </form>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
           <Card className="overflow-hidden">
             <CardHeader
               title={t('Runs')}
@@ -391,13 +563,17 @@ export default async function PayrollPage({
                         }),
                       )}
                     </span>
-                    <span className="ms-auto flex items-center gap-2">
-                      <a
-                        href={`/api/reports/payroll?run=${entry.id}`}
-                        className="text-(--brand-text) underline underline-offset-2"
-                      >
-                        {t('File')}
-                      </a>
+                    <span className="ms-auto flex flex-wrap items-center gap-2">
+                      <span className="text-(--text-faint)">{t('File')}:</span>
+                      {PAYROLL_EXPORT_IDS.map((format) => (
+                        <a
+                          key={format}
+                          href={`/api/reports/payroll?run=${entry.id}&format=${format}`}
+                          className="text-(--brand-text) underline underline-offset-2"
+                        >
+                          {t(PAYROLL_EXPORTS[format].name)}
+                        </a>
+                      ))}
                       {mayWrite && entry.status === 'EXPORTED' ? (
                         <form action={paid}>
                           <input type="hidden" name="runId" value={entry.id} />
@@ -451,17 +627,70 @@ export default async function PayrollPage({
             </form>
           </Card>
 
+          <Card id="settings">
+            <CardHeader
+              title={t('How pay is worked out')}
+              description={t('Overtime is the hours past each person’s contracted week')}
+            />
+            <form action={saveSettings}>
+              <CardBody className="grid gap-3">
+                <Field
+                  label={t('Overtime multiplier')}
+                  hint={t('1.5 is time and a half. Applies to timesheets submitted from now on.')}
+                >
+                  <Input
+                    name="overtimeMultiplier"
+                    type="number"
+                    step="0.01"
+                    min={1}
+                    max={3}
+                    required
+                    defaultValue={settings.overtimeMultiplier}
+                    disabled={!mayWrite}
+                  />
+                </Field>
+                <Field label={t('The file payroll gets')}>
+                  <Select
+                    name="exportFormat"
+                    defaultValue={settings.exportFormat}
+                    disabled={!mayWrite}
+                  >
+                    {PAYROLL_EXPORT_IDS.map((format) => (
+                      <option key={format} value={format}>
+                        {t(PAYROLL_EXPORTS[format].name)}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <ul className="grid gap-1.5 text-[12px] leading-relaxed text-(--text-faint)">
+                  {PAYROLL_EXPORT_IDS.map((format) => (
+                    <li key={format}>
+                      <span className="font-medium text-(--text-soft)">
+                        {t(PAYROLL_EXPORTS[format].name)}
+                      </span>
+                      {' · '}
+                      {t(PAYROLL_EXPORTS[format].description)}
+                    </li>
+                  ))}
+                </ul>
+                <Button type="submit" variant="secondary" disabled={!mayWrite}>
+                  {t('Save')}
+                </Button>
+              </CardBody>
+            </form>
+          </Card>
+
           <Card>
             <CardBody className="grid gap-2 text-[13px] leading-relaxed text-(--text-soft)">
               <p className="font-medium text-(--text)">{t('What the file is')}</p>
               <p>
                 {t(
-                  'One row per person: reference, name, period, ordinary and overtime hours, and gross at the workshop’s own cost rate. Every payroll package imports a CSV shaped like this. Tax, pension and net pay are worked out there, not here.',
+                  'Hours split into ordinary and overtime, pay at the workshop’s own cost rate, and the bonuses and deductions added here, in the shape the payroll software imports. None of the three shapes is certified by a payroll vendor; each is mapped once on its import screen. Tax, pension and net pay are worked out there, not here.',
                 )}
               </p>
               <p>
                 {t(
-                  'Marking a run paid posts gross wages to the ledger and out of the bank. The deductions between gross and net come from the payroll software’s own report.',
+                  'Marking a run paid posts gross wages, bonuses included, to the ledger and out of the bank. The deductions between gross and net come from the payroll software’s own report.',
                 )}
               </p>
             </CardBody>

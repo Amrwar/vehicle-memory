@@ -1642,6 +1642,52 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AR — Providers (Phase 43)
+
+### AR1 — The car in front of me
+
+**As** Ahmed **I want** the VIN read for me **so that** I am not typing a make
+and a year off a windscreen and getting one of them wrong.
+**Size** 3 · **Satisfies** FR-7401, FR-7402
+
+- **Given** a VIN nobody has recorded, **when** I read it, **then** the form is
+  filled with what the VIN says and tells me who read it.
+- **Given** a VIN that does not encode a year, **when** I read it, **then** the
+  year is left blank rather than guessed.
+
+### AR2 — What the part fits, without typing it
+
+**As** Priya **I want** the catalogue's fitments fetched **so that** the
+warning on a job has something to work with.
+**Size** 5 · **Satisfies** FR-7403, FR-7404
+
+- **Given** a part with a row I typed, **when** I fetch from the feed, **then**
+  my row is left as it is and the page says so.
+- **Given** a claim the feed no longer sends, **when** I fetch again, **then**
+  it is taken back.
+
+### AR3 — The pay period as it really was
+
+**As** Ahmed **I want** a bonus and a deduction on a timesheet and a file
+payroll can import **so that** what leaves here is what somebody is owed.
+**Size** 5 · **Satisfies** FR-7405, FR-7406, FR-7407
+
+- **Given** a submitted timesheet, **when** I add a bonus, **then** it is in
+  gross and in the file.
+- **Given** a period already handed over, **when** I try to add one, **then**
+  it is refused and I am told it goes on the next period.
+
+### AR4 — Saying so where people look
+
+**As** Maria **I want** to write my review where I already have an account
+**so that** saying the workshop did well takes one tap.
+**Size** 3 · **Satisfies** FR-7408
+
+- **Given** I answered five, **when** the workshop has named its listing,
+  **then** I am offered the button and the visit is counted.
+- **Given** I answered three, **when** I open the public link, **then** I am
+  taken back to the thank-you page.
+
 ## Epic AQ — Paper (Phase 42)
 
 ### AQ1 — The work order on the bench

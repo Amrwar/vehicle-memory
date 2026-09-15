@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 import { tFor } from '@/lib/i18n';
+import { reviewLinkFor, reviewSite } from '@/lib/providers';
 import { recordRating, reviewByToken } from '@/lib/retention';
 
 export const dynamic = 'force-dynamic';
@@ -63,6 +64,12 @@ export default async function ReviewPage({
   // way: a customer who opens the link twice should not be asked twice.
   if (request.rating !== null || done) {
     const rating = request.rating ?? 0;
+    // Where to say it publicly, when the workshop has named its listing.
+    // Phase 43. The link goes through this site so the visit is counted.
+    const publicLink =
+      rating >= 5 && request.routing === 'PUBLIC_INVITE'
+        ? await reviewLinkFor(request.orgId)
+        : null;
 
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-5 py-12">
@@ -79,11 +86,29 @@ export default async function ReviewPage({
                 'If you have a moment, saying so publicly helps other people find a workshop they can trust.',
               )}
             </p>
-            <p className="text-[13px] text-(--text-faint)">
-              {t(
-                'Your workshop will send you the link to do that. There is nothing else to do here.',
-              )}
-            </p>
+            {publicLink ? (
+              <>
+                <a
+                  href={`/r/${encodeURIComponent(token)}/public`}
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-(--radius) bg-(--brand-solid) px-5 text-[15px] font-semibold text-(--on-brand-solid) hover:opacity-90"
+                >
+                  {t('Write a review on {site}', { site: reviewSite().name })}
+                </a>
+                <p className="text-[13px] text-(--text-faint)">
+                  {t(
+                    'It opens {site} in your own account. What you write there is yours; we only see that you went.',
+                    { site: reviewSite().name },
+                  )}
+                </p>
+              </>
+            ) : (
+              <p className="text-[13px] text-(--text-faint)">
+                {t(
+                  'Your workshop will send you the link to do that. There is nothing else to do here.',
+                )}
+              </p>
+            )}
           </>
         ) : rating >= 4 ? (
           <p className="text-[15px] leading-relaxed text-(--text-soft)">

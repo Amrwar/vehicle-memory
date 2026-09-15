@@ -7,7 +7,8 @@ import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { adoptVehicle, findOnNetwork, NetworkError, registerVehicle } from '@/lib/network';
-import { PlanLimitError } from '@carnet/core';
+import { decodeVin, VinDecodeError } from '@/lib/providers';
+import { PlanLimitError, type VinDecoding } from '@carnet/core';
 
 import { networkSentence } from '../statements';
 
@@ -77,10 +78,37 @@ async function register(formData: FormData) {
   );
 }
 
+/**
+ * Reads the VIN before the car is added. Phase 43.
+ *
+ * The answer fills the form and nothing else; the person saving it has the
+ * car in front of them and the decoder does not.
+ */
+async function decode(formData: FormData) {
+  'use server';
+
+  await requireSession('vehicle:write');
+  const text = (name: string) => String(formData.get(name) ?? '').trim();
+  const query = new URLSearchParams({
+    q: text('q'),
+    vin: text('vin'),
+    registration: text('registration'),
+    decode: '1',
+  });
+
+  redirect(`/vehicles/find?${query.toString()}`);
+}
+
 export default async function FindVehiclePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; problem?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    problem?: string;
+    vin?: string;
+    registration?: string;
+    decode?: string;
+  }>;
 }) {
   const { orgId, user, region } = await requireSession('vehicle:read');
   const params = await searchParams;
@@ -100,6 +128,17 @@ export default async function FindVehiclePage({
 
   const mayWrite = can(user.role, 'vehicle:write');
   const t = await tFor();
+
+  let decoded: VinDecoding | null = null;
+  let decodeProblem: string | null = null;
+  if (params.decode && params.vin && mayWrite) {
+    try {
+      decoded = await decodeVin(params.vin);
+    } catch (error) {
+      if (!(error instanceof VinDecodeError)) throw error;
+      decodeProblem = error.message;
+    }
+  }
 
   return (
     <>
@@ -204,7 +243,37 @@ export default async function FindVehiclePage({
             )}
           />
           <form action={register}>
+            <input type="hidden" name="q" value={q} />
             <CardBody className="grid gap-4">
+              {decoded ? (
+                <Alert tone={decoded.make ? 'info' : 'warning'}>
+                  <span className="block font-medium">
+                    {decoded.make
+                      ? t('Read from the VIN by {decoder}:', { decoder: t(decoded.decoder) })
+                      : t('{decoder} could not name the maker from this VIN.', {
+                          decoder: t(decoded.decoder),
+                        })}{' '}
+                    <bdi>
+                      {[decoded.year, decoded.make, decoded.model].filter(Boolean).join(' ')}
+                    </bdi>
+                  </span>
+                  {decoded.engine || decoded.fuel || decoded.body ? (
+                    <span className="block text-[12px]">
+                      <bdi>
+                        {[decoded.engine, decoded.fuel, decoded.body].filter(Boolean).join(' · ')}
+                      </bdi>
+                    </span>
+                  ) : null}
+                  <span className="block text-[12px]">
+                    {decoded.complete
+                      ? t('Check it against the car before adding it.')
+                      : t(
+                          'The VIN itself names only the maker and sometimes the year. Type the model from the car.',
+                        )}
+                  </span>
+                </Alert>
+              ) : null}
+              {decodeProblem ? <Alert tone="danger">{t(decodeProblem)}</Alert> : null}
               <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
                 <Field
                   label={t('VIN')}
@@ -212,7 +281,7 @@ export default async function FindVehiclePage({
                 >
                   <Input
                     name="vin"
-                    defaultValue={found.kind === 'VIN' ? found.identifier : ''}
+                    defaultValue={params.vin ?? (found.kind === 'VIN' ? found.identifier : '')}
                     required
                     minLength={17}
                     maxLength={17}
@@ -223,7 +292,9 @@ export default async function FindVehiclePage({
                 <Field label={t('Registration')}>
                   <Input
                     name="registration"
-                    defaultValue={found.kind === 'REGISTRATION' ? found.identifier : ''}
+                    defaultValue={
+                      params.registration ?? (found.kind === 'REGISTRATION' ? found.identifier : '')
+                    }
                     spellCheck={false}
                     className="font-mono uppercase"
                   />
@@ -232,14 +303,19 @@ export default async function FindVehiclePage({
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label={t('Make')}>
                   {/* i18n-ignore */}
-                  <Input name="make" placeholder="Volkswagen" />
+                  <Input name="make" placeholder="Volkswagen" defaultValue={decoded?.make ?? ''} />
                 </Field>
                 <Field label={t('Model')}>
                   {/* i18n-ignore */}
-                  <Input name="model" placeholder="Golf" />
+                  <Input name="model" placeholder="Golf" defaultValue={decoded?.model ?? ''} />
                 </Field>
                 <Field label={t('Year')}>
-                  <Input name="year" inputMode="numeric" placeholder="2019" />
+                  <Input
+                    name="year"
+                    inputMode="numeric"
+                    placeholder="2019"
+                    defaultValue={decoded?.year ?? ''}
+                  />
                 </Field>
               </div>
               <p className="text-[13px] leading-relaxed text-(--text-soft)">
@@ -248,9 +324,14 @@ export default async function FindVehiclePage({
                 )}
               </p>
               {mayWrite ? (
-                <Button type="submit" variant="primary">
-                  {t('Add the vehicle')}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" variant="primary">
+                    {t('Add the vehicle')}
+                  </Button>
+                  <Button type="submit" formAction={decode} formNoValidate variant="secondary">
+                    {t('Read the VIN')}
+                  </Button>
+                </div>
               ) : null}
             </CardBody>
           </form>

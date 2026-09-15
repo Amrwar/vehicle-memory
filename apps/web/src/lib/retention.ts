@@ -198,6 +198,7 @@ export async function reviewByToken(token: string, now = new Date()) {
     where: { tokenHash: digest(token) },
     select: {
       id: true,
+      orgId: true,
       rating: true,
       routing: true,
       expiresAt: true,
@@ -308,6 +309,7 @@ export async function reputation(orgId: string, now = new Date()) {
         comment: true,
         respondedAt: true,
         routing: true,
+        publicOpenedAt: true,
         resolvedAt: true,
         resolutionNote: true,
         customer: { select: { id: true, displayName: true } },
@@ -316,6 +318,10 @@ export async function reputation(orgId: string, now = new Date()) {
     }),
     prisma.reviewRequest.count({ where: { orgId } }),
   ]);
+
+  // Who was invited to say so publicly, and who went. Phase 43.
+  const invited = rows.filter((row) => row.routing === 'PUBLIC_INVITE').length;
+  const wentPublic = rows.filter((row) => row.publicOpenedAt !== null).length;
 
   const rated: Rated[] = rows.map((row) => ({
     rating: row.rating!,
@@ -326,6 +332,8 @@ export async function reputation(orgId: string, now = new Date()) {
 
   return {
     ...satisfactionOf(rated, sent, now),
+    invited,
+    wentPublic,
     rows,
     waiting: rows.filter((row) => row.routing === 'PRIVATE_CONVERSATION' && !row.resolvedAt),
   };

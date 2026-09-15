@@ -2198,9 +2198,73 @@ anything; refuses six hundred labels; and finds the links on the pages.
 
 ## Phase 43 — Providers
 
-A VIN decoding seam and a fitment feed seam, each with a stub; payroll with
-overtime, deductions, bonuses and a named export; reviews posted to Google
-behind a seam.
+**Scope.** A VIN decoding seam and a fitment feed seam, each with a stub;
+payroll with overtime, deductions, bonuses and a named export; reviews posted
+to Google behind a seam.
+
+**Exit.** A car is added from its VIN rather than typed from a windscreen, a
+part says what it fits without somebody typing every row, a pay period leaves
+with its bonuses and deductions in the shape the payroll software imports, and
+a customer who was pleased can say so where people look.
+
+**Status.** Built. Three seams, each with an answer that needs nobody else.
+The VIN decoder built in reads what the VIN itself encodes: the maker from the
+first three characters, against a table of identifiers that are not in doubt,
+and the year from the tenth character only for a VIN built to carry one, so a
+European VIN leaves the year blank rather than filling it in wrongly. Named as
+`nhtsa`, the deployment asks the US registry's free public decoder for the
+model, engine, fuel and body as well, keeps a complete answer for six months
+so a VIN is asked about once, and falls back to the local reading when the
+registry is slow. Nothing a decoder says is saved by itself: "Read the VIN"
+fills the form on `/vehicles/find`, says who read it, and the person with the
+car in front of them saves it.
+
+The fitment feed is the same shape: a part number and brand go out, the
+vehicles the catalogue says it fits come back, and the rules for taking them
+in are the feature. A row somebody here recorded is never replaced, because
+they had the car on the ramp; a claim already held is not written twice; a
+claim the feed sent before and no longer sends is taken back; a row that is
+not a row — no maker, a year that is not a year, years the wrong way round —
+is dropped rather than repaired; and a run is capped per part. Every imported
+row carries the feed's name and the date it was fetched, and the part page
+says so beside it. The sample feed knows the demonstration parts only and
+answers nothing for any other, so no workshop is ever handed an invented
+fitment.
+
+Payroll now carries what the hours do not. A timesheet waiting for a run takes
+bonuses and deductions with a reason and an amount; once the run has taken it,
+both the product and the database refuse another, because the file has left
+the building. Bonuses are pay, so they are in gross and in the wages that
+post; the deductions are the workshop's own, such as an advance being repaid,
+and are handed over for the payroll software to take. Overtime is paid at the
+workshop's own multiplier, between plain and triple time, rather than at a
+constant in the code. A run is downloadable in three named shapes — a pay
+summary, hours only, and one line per person per pay element — with the
+workshop's own as the default and any other name refused. None is certified by
+a payroll vendor, and the page says so.
+
+A customer who answers five out of five is now offered the button, not told to
+wait for a link: the workshop names its Google listing on `/reputation`, by
+place ID or by pasting a write-review link, and the thank-you page carries
+"Write a review on Google". The link goes through this site, which records
+that they went and sends them on; four stars and below are never sent there,
+and a link opened from a lower answer goes back to the thank-you page. Nobody
+posts a review on a customer's behalf, and the page says the words are theirs.
+
+The verification script decodes three VINs and refuses a fourth, fills the
+vehicle form from one in French, fetches a catalogue twice over and checks
+what was added, held, taken back and left alone, refuses a feed row with no
+fetch date in the database, adds a bonus and a deduction and checks the run
+posts gross with the bonus in, downloads all three files and is refused a
+fourth, is refused an adjustment after the hand-over by the product and by the
+database, names a listing from a pasted link, follows the invitation to
+Google's own write-review address and finds the visit counted, and checks a
+three-star answer is never sent there.
+
+A trigger from Phase 20 was found returning `NEW` on a delete, which is null,
+so every attempt to delete a timesheet was silently ignored rather than
+refused. It is corrected here: a paid timesheet still cannot be deleted, and
+an unpaid one now can.
 
 ## Phase 44 — Ownership, warranty and sites
 

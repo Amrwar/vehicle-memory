@@ -1,4 +1,4 @@
-import { csvFilename, csvHeaders, PAYROLL_COLUMNS, toCsv, type CsvColumn } from '@carnet/core';
+import { csvFilename, csvHeaders, isPayrollExportId, toCsv, type CsvColumn } from '@carnet/core';
 
 import { requireSession } from '@/lib/guard';
 import { payrollFile } from '@/lib/payroll';
@@ -88,15 +88,24 @@ export async function GET(request: Request, context: { params: Promise<{ report:
     }
 
     case 'payroll': {
-      const runId = new URL(request.url).searchParams.get('run') ?? '';
-      const file = await payrollFile(orgId, runId);
+      const search = new URL(request.url).searchParams;
+      const runId = search.get('run') ?? '';
+      const format = search.get('format');
+
+      // The file in a named shape (Phase 43). An unknown name is refused
+      // rather than answered with another shape somebody did not ask for.
+      if (format && !isPayrollExportId(format)) {
+        return new Response('There is no payroll file of that name.', { status: 400 });
+      }
+
+      const file = await payrollFile(orgId, runId, format);
 
       if (!file) return new Response('No such payroll run.', { status: 404 });
 
-      return new Response(toCsv(file.rows, PAYROLL_COLUMNS), {
+      return new Response(file.csv, {
         headers: csvHeaders(
           csvFilename(
-            `Payroll ${file.run.periodEnd.toISOString().slice(0, 10)}`,
+            `Payroll ${file.run.periodEnd.toISOString().slice(0, 10)}${file.format.suffix}`,
             file.run.periodEnd,
           ),
         ),

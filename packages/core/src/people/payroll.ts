@@ -1,7 +1,7 @@
 import { ACCOUNT } from '../accounting/accounts';
 import { type JournalEntryDraft } from '../accounting/posting';
-import { type CsvColumn } from '../pos/csv';
-import { type Money, sum, zero } from '../shared/money';
+import { type CsvColumn, toCsv } from '../pos/csv';
+import { add, type Money, subtract, sum, zero } from '../shared/money';
 
 /**
  * Handing the wages to whoever pays them.
@@ -13,16 +13,26 @@ import { type Money, sum, zero } from '../shared/money';
  * hours each person actually worked. So it hands that over, as a file, once
  * per period, and records that it did.
  *
- * The file format is deliberately plain: one row per person, hours split into
- * ordinary and overtime, gross at the workshop's own cost rate. Every payroll
- * package imports a CSV shaped like this, and none of them agree on anything
- * more elaborate.
+ * The files are deliberately plain: hours split into ordinary and overtime,
+ * pay at the workshop's own cost rate and overtime multiplier, and the
+ * bonuses and deductions a manager added. Every payroll package imports a
+ * CSV, none of them agree on its shape, so a run can be handed over in three
+ * named shapes and mapped once on the other side (Phase 43).
  */
 
 export class PayrollError extends Error {
   constructor(
     readonly code:
-      'EMPTY' | 'NOT_APPROVED' | 'ALREADY_RUN' | 'MIXED_PERIODS' | 'NOT_EXPORTED' | 'ALREADY_PAID',
+      | 'EMPTY'
+      | 'NOT_APPROVED'
+      | 'ALREADY_RUN'
+      | 'MIXED_PERIODS'
+      | 'NOT_EXPORTED'
+      | 'ALREADY_PAID'
+      | 'BAD_ADJUSTMENT'
+      | 'LOCKED'
+      | 'BAD_MULTIPLIER'
+      | 'UNKNOWN_FORMAT',
     message: string,
   ) {
     super(message);
@@ -42,9 +52,113 @@ export interface RunnableTimesheet {
   absenceMinutes: number;
   ordinaryPay: Money;
   overtimePay: Money;
+  /** Ordinary and overtime pay: what the hours came to. */
   gross: Money;
   /** Set once a run has taken it. */
   payrollRunId: string | null;
+  /** Bonuses and deductions a manager added to the sheet. Phase 43. */
+  adjustments?: readonly PayAdjustment[];
+}
+
+/* ---------------------------------------------------------------------------
+   Bonuses and deductions. Phase 43.
+   --------------------------------------------------------------------------- */
+
+export type PayAdjustmentKind = 'BONUS' | 'DEDUCTION';
+
+/**
+ * One amount added to or taken from a person's pay for a period.
+ *
+ * A bonus is pay, so it is part of gross and of the wages that post. A
+ * deduction here is one the workshop itself agreed with the person, such as
+ * an advance being paid back or a uniform, and is handed over for the payroll
+ * software to take. Tax, pension and other statutory deductions are not typed
+ * here: they are the payroll software's to work out.
+ */
+export interface PayAdjustment {
+  kind: PayAdjustmentKind;
+  label: string;
+  amount: Money;
+}
+
+/** The largest single adjustment, in major units: a typo guard, not a policy. */
+export const PAY_ADJUSTMENT_LIMIT = 100_000;
+
+/**
+ * Whether an adjustment can be added to a sheet in this state.
+ *
+ * Only while the sheet is waiting: submitted or approved, and not yet handed
+ * over. Once a run has taken it, the file has gone, and a change here would
+ * be a figure the payroll software never saw.
+ */
+export function assertPayAdjustment(
+  adjustment: { kind: string; label: string; amountMajor: number },
+  sheet: { status: RunnableTimesheet['status']; payrollRunId: string | null },
+): void {
+  if (
+    sheet.payrollRunId !== null ||
+    (sheet.status !== 'SUBMITTED' && sheet.status !== 'APPROVED')
+  ) {
+    throw new PayrollError(
+      'LOCKED',
+      'This timesheet has been handed to payroll. A bonus or deduction now goes on the next period.',
+    );
+  }
+
+  if (adjustment.kind !== 'BONUS' && adjustment.kind !== 'DEDUCTION') {
+    throw new PayrollError('BAD_ADJUSTMENT', 'An adjustment is a bonus or a deduction.');
+  }
+
+  const label = adjustment.label.trim();
+  if (label.length < 2 || label.length > 80) {
+    throw new PayrollError(
+      'BAD_ADJUSTMENT',
+      'Say what it is for, in a few words, so the payroll clerk can tell what they are paying.',
+    );
+  }
+
+  if (
+    !Number.isFinite(adjustment.amountMajor) ||
+    adjustment.amountMajor <= 0 ||
+    adjustment.amountMajor > PAY_ADJUSTMENT_LIMIT
+  ) {
+    throw new PayrollError(
+      'BAD_ADJUSTMENT',
+      'The amount is more than nothing and less than a hundred thousand. Whether it adds or takes away is the kind.',
+    );
+  }
+}
+
+/** Bonuses and deductions on a sheet, each added up. */
+export function adjustmentTotals(
+  adjustments: readonly PayAdjustment[],
+  currency: string,
+): { bonuses: Money; deductions: Money } {
+  return {
+    bonuses: sum(
+      adjustments.filter((entry) => entry.kind === 'BONUS').map((entry) => entry.amount),
+      currency,
+    ),
+    deductions: sum(
+      adjustments.filter((entry) => entry.kind === 'DEDUCTION').map((entry) => entry.amount),
+      currency,
+    ),
+  };
+}
+
+/** Overtime is paid at between plain time and triple time. */
+export function assertOvertimeMultiplier(value: number): void {
+  if (
+    !Number.isFinite(value) ||
+    value < 1 ||
+    value > 3 ||
+    Math.abs(Math.round(value * 100) - value * 100) > 1e-6
+  ) {
+    throw new PayrollError(
+      'BAD_MULTIPLIER',
+      'Overtime is paid at between 1 and 3 times the hourly rate, to two decimal places. Time and a half is 1.5.',
+    );
+  }
 }
 
 /**
@@ -99,26 +213,50 @@ export interface PayrollRow {
   absenceHours: number;
   ordinaryPay: Money;
   overtimePay: Money;
+  bonuses: Money;
+  /** Ordinary, overtime and bonuses. */
   gross: Money;
+  deductions: Money;
+  /** Gross less the workshop's own deductions, before tax. */
+  afterDeductions: Money;
+  adjustments: readonly PayAdjustment[];
+}
+
+/** What the hours came to plus the bonuses: the figure wages post at. */
+export function sheetGross(sheet: RunnableTimesheet): Money {
+  const { bonuses } = adjustmentTotals(sheet.adjustments ?? [], sheet.gross.currency);
+  return add(sheet.gross, bonuses);
 }
 
 /** One row per person, as the file will carry them. */
 export function payrollRows(sheets: readonly RunnableTimesheet[]): PayrollRow[] {
   return [...sheets]
     .sort((a, b) => a.employeeReference.localeCompare(b.employeeReference))
-    .map((sheet) => ({
-      employeeReference: sheet.employeeReference,
-      employeeName: sheet.employeeName,
-      periodStart: isoDate(sheet.periodStart),
-      periodEnd: isoDate(sheet.periodEnd),
-      ordinaryHours: round2(sheet.ordinaryMinutes / 60),
-      overtimeHours: round2(sheet.overtimeMinutes / 60),
-      absenceHours: round2(sheet.absenceMinutes / 60),
-      ordinaryPay: sheet.ordinaryPay,
-      overtimePay: sheet.overtimePay,
-      gross: sheet.gross,
-    }));
+    .map((sheet) => {
+      const adjustments = sheet.adjustments ?? [];
+      const { bonuses, deductions } = adjustmentTotals(adjustments, sheet.gross.currency);
+      const gross = add(sheet.gross, bonuses);
+
+      return {
+        employeeReference: sheet.employeeReference,
+        employeeName: sheet.employeeName,
+        periodStart: isoDate(sheet.periodStart),
+        periodEnd: isoDate(sheet.periodEnd),
+        ordinaryHours: round2(sheet.ordinaryMinutes / 60),
+        overtimeHours: round2(sheet.overtimeMinutes / 60),
+        absenceHours: round2(sheet.absenceMinutes / 60),
+        ordinaryPay: sheet.ordinaryPay,
+        overtimePay: sheet.overtimePay,
+        bonuses,
+        gross,
+        deductions,
+        afterDeductions: subtract(gross, deductions),
+        adjustments,
+      };
+    });
 }
+
+const major = (value: Money) => Number((value.minor / 100).toFixed(2));
 
 /**
  * The columns, named as a payroll clerk expects them.
@@ -136,14 +274,172 @@ export const PAYROLL_COLUMNS: CsvColumn<PayrollRow>[] = [
   { header: 'Absence hours', value: (row) => row.absenceHours },
   { header: 'Ordinary pay', value: (row) => (row.ordinaryPay.minor / 100).toFixed(2) },
   { header: 'Overtime pay', value: (row) => (row.overtimePay.minor / 100).toFixed(2) },
+  { header: 'Bonuses', value: (row) => (row.bonuses.minor / 100).toFixed(2) },
   { header: 'Gross pay', value: (row) => (row.gross.minor / 100).toFixed(2) },
+  { header: 'Deductions', value: (row) => (row.deductions.minor / 100).toFixed(2) },
+  {
+    header: 'Pay after deductions, before tax',
+    value: (row) => (row.afterDeductions.minor / 100).toFixed(2),
+  },
 ];
 
+/* ---------------------------------------------------------------------------
+   Named exports. Phase 43.
+   --------------------------------------------------------------------------- */
+
+interface PayElementRow {
+  employeeReference: string;
+  employeeName: string;
+  periodEnd: string;
+  code: string;
+  description: string;
+  hours: number | null;
+  amount: number | null;
+}
+
+/**
+ * One line per person per pay element.
+ *
+ * The shape payroll software built around pay elements imports: each line a
+ * code, the hours where it is time, and the amount where it is money, with
+ * deductions negative. The codes are this product's own and are mapped to
+ * the software's elements once, on its import screen.
+ */
+function payElements(rows: readonly PayrollRow[]): PayElementRow[] {
+  return rows.flatMap((row) => {
+    const base = {
+      employeeReference: row.employeeReference,
+      employeeName: row.employeeName,
+      periodEnd: row.periodEnd,
+    };
+
+    const lines: PayElementRow[] = [
+      {
+        ...base,
+        code: 'ORD',
+        description: 'Ordinary hours',
+        hours: row.ordinaryHours,
+        amount: major(row.ordinaryPay),
+      },
+    ];
+
+    if (row.overtimeHours > 0) {
+      lines.push({
+        ...base,
+        code: 'OT',
+        description: 'Overtime hours',
+        hours: row.overtimeHours,
+        amount: major(row.overtimePay),
+      });
+    }
+
+    if (row.absenceHours > 0) {
+      lines.push({
+        ...base,
+        code: 'ABS',
+        description: 'Absence hours',
+        hours: row.absenceHours,
+        amount: null,
+      });
+    }
+
+    for (const adjustment of row.adjustments) {
+      lines.push({
+        ...base,
+        code: adjustment.kind === 'BONUS' ? 'BONUS' : 'DEDUCT',
+        description: adjustment.label,
+        hours: null,
+        amount: adjustment.kind === 'BONUS' ? major(adjustment.amount) : -major(adjustment.amount),
+      });
+    }
+
+    return lines;
+  });
+}
+
+const PAY_ELEMENT_COLUMNS: CsvColumn<PayElementRow>[] = [
+  { header: 'Employee reference', value: (row) => row.employeeReference, literal: true },
+  { header: 'Employee name', value: (row) => row.employeeName },
+  { header: 'Period end', value: (row) => row.periodEnd },
+  { header: 'Element code', value: (row) => row.code },
+  { header: 'Description', value: (row) => row.description },
+  { header: 'Hours', value: (row) => row.hours },
+  { header: 'Amount', value: (row) => row.amount },
+];
+
+const HOURS_COLUMNS: CsvColumn<PayrollRow>[] = [
+  { header: 'Employee reference', value: (row) => row.employeeReference, literal: true },
+  { header: 'Employee name', value: (row) => row.employeeName },
+  { header: 'Period start', value: (row) => row.periodStart },
+  { header: 'Period end', value: (row) => row.periodEnd },
+  { header: 'Ordinary hours', value: (row) => row.ordinaryHours },
+  { header: 'Overtime hours', value: (row) => row.overtimeHours },
+  { header: 'Absence hours', value: (row) => row.absenceHours },
+  { header: 'Bonuses', value: (row) => major(row.bonuses) },
+  { header: 'Deductions', value: (row) => major(row.deductions) },
+];
+
+export const PAYROLL_EXPORT_IDS = ['standard', 'hours', 'elements'] as const;
+export type PayrollExportId = (typeof PAYROLL_EXPORT_IDS)[number];
+
+export interface PayrollExport {
+  id: PayrollExportId;
+  name: string;
+  description: string;
+  /** Added to the file name, so two formats of one run are told apart. */
+  suffix: string;
+  render(rows: readonly PayrollRow[]): string;
+}
+
+/**
+ * The files a run can be handed over as.
+ *
+ * Named for what they contain rather than for a payroll product, because no
+ * vendor has certified any of them and a file called after one would be a
+ * promise. Each is plain enough that any payroll package's CSV import can be
+ * mapped to it once.
+ */
+export const PAYROLL_EXPORTS: Readonly<Record<PayrollExportId, PayrollExport>> = {
+  standard: {
+    id: 'standard',
+    name: 'Pay summary',
+    description:
+      'One row per person: hours, pay for the hours, bonuses, gross, deductions and pay after deductions.',
+    suffix: '',
+    render: (rows) => toCsv(rows, PAYROLL_COLUMNS),
+  },
+  hours: {
+    id: 'hours',
+    name: 'Hours only',
+    description:
+      'One row per person with hours, bonuses and deductions but no rates, for payroll software that holds the rates itself.',
+    suffix: ' hours',
+    render: (rows) => toCsv(rows, HOURS_COLUMNS),
+  },
+  elements: {
+    id: 'elements',
+    name: 'Pay elements',
+    description:
+      'One line per person per element (ordinary, overtime, absence, each bonus and each deduction), for software that imports pay elements.',
+    suffix: ' elements',
+    render: (rows) => toCsv(payElements(rows), PAY_ELEMENT_COLUMNS),
+  },
+};
+
+export function isPayrollExportId(value: unknown): value is PayrollExportId {
+  return typeof value === 'string' && (PAYROLL_EXPORT_IDS as readonly string[]).includes(value);
+}
+
+export function payrollExport(id: string): PayrollExport {
+  if (!isPayrollExportId(id)) {
+    throw new PayrollError('UNKNOWN_FORMAT', 'There is no payroll file of that name.');
+  }
+  return PAYROLL_EXPORTS[id];
+}
+
+/** Everybody's gross, bonuses included: what the wages post at. */
 export function payrollGross(sheets: readonly RunnableTimesheet[], currency = 'GBP'): Money {
-  return sum(
-    sheets.map((sheet) => sheet.gross),
-    currency,
-  );
+  return sum(sheets.map(sheetGross), currency);
 }
 
 /**

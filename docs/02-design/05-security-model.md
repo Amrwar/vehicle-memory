@@ -224,6 +224,32 @@ cookies, on the site's own origin; a document the reader could not see as a
 page cannot be made into a file. QR codes carry links to pages that require
 their own sign-in; nothing is readable from the code alone.
 
+### 7.7 Providers outside the product (Phase 43)
+
+Three seams reach outside, and each is chosen by an environment variable with
+a default that reaches nowhere. The VIN decoder built in and the sample
+fitment feed answer from data inside the product. Named as `nhtsa`, the
+decoder sends one VIN, and nothing else, to the US registry's public decoder
+over TLS with a four-second timeout; a VIN is not personal data on its own,
+nothing about the workshop, the owner or the job goes with it, and the answer
+is cached against the VIN alone. What a decoder says fills a form and is
+saved only when a person saves it, so a wrong answer cannot become a car's
+history by itself.
+
+A feed writes rows against a part and can never overwrite what somebody here
+recorded; every row it writes is marked with the feed's name, so what a
+catalogue claimed is always distinguishable from what a person claimed, and
+the next fetch removes only its own. Rows that are not well formed are
+dropped, and a run is capped per part, so a hostile or broken feed costs a
+fetch rather than a catalogue.
+
+The review site is a link, not an integration: no key, no account, nothing
+sent. The workshop's Google place ID is checked against the shape of a place
+ID in the product and again in the database, and the redirect refuses any
+address that is not the review site's own, so a stored value cannot be turned
+into an open redirect. Only an answer routed to a public invitation is sent,
+and what the product learns is that the customer went, never what they wrote.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

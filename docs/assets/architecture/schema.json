@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-15",
   "counts": {
-    "models": 145,
-    "enums": 71,
-    "fields": 2297
+    "models": 147,
+    "enums": 72,
+    "fields": 2326
   },
   "enums": [
     "OrgPlan",
@@ -53,6 +53,7 @@
     "AccountType",
     "EmploymentType",
     "TimesheetStatus",
+    "PayAdjustmentKind",
     "AbsenceType",
     "SkillLevel",
     "FitmentSource",
@@ -86,7 +87,7 @@
         {
           "name": "Organization",
           "comment": "",
-          "fields": 36,
+          "fields": 39,
           "relations": [],
           "scope": "global"
         },
@@ -223,6 +224,13 @@
           "scope": "global"
         },
         {
+          "name": "VinDecode",
+          "comment": "What a decoder said about a VIN, kept so a VIN is asked about once. Phase 43. Not a workshop's data: a VIN's maker and model are the same whoever asks, so the answer is shared, and nothing in it names a workshop or an owner.",
+          "fields": 10,
+          "relations": [],
+          "scope": "global"
+        },
+        {
           "name": "VehicleEvent",
           "comment": "One immutable fact about a vehicle. APPEND ONLY. There is no update path in the application. Corrections append a superseding event. FR-401, FR-406.",
           "fields": 18,
@@ -336,7 +344,7 @@
         {
           "name": "PartFitment",
           "comment": "Which vehicles a part fits. Deliberately not inferred from anything. Guessing which pads fit a particular car puts the wrong pads on it, and the person who finds out is braking. Until a fitment provider is wired in these rows come from a person, and the absence of a row means nobody has said rather than that the part does not fit.",
-          "fields": 13,
+          "fields": 15,
           "relations": [
             "Organization",
             "Product",
@@ -1436,6 +1444,17 @@
           "fields": 11,
           "relations": [
             "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "PayAdjustment",
+          "comment": "A bonus or a deduction on one person's timesheet. Phase 43. Added while the sheet waits for a run and fixed once the run has taken it, which the database enforces as well as the product. A deduction here is one the workshop agreed with the person; tax and pension are the payroll software's.",
+          "fields": 8,
+          "relations": [
+            "Organization",
+            "Timesheet",
             "User"
           ],
           "scope": "organisation"
