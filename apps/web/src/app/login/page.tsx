@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { currentUser, signIn } from '@/lib/auth';
 import { Mark } from '@/components/marketing';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
@@ -33,6 +34,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  const t = await tFor();
   const user = await currentUser();
   if (user) redirect(landingPathFor(user.role));
 
@@ -50,7 +52,7 @@ export default async function LoginPage({
 
         <div className="max-w-md">
           <h1 className="font-display text-[38px] font-bold leading-[1.05] tracking-tight">
-            The history should belong to the car.
+            {t('The history should belong to the car.')}
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-(--color-petrol-200)">
             Every job you complete writes a verified, tamper-evident entry to the vehicle&rsquo;s
@@ -61,21 +63,27 @@ export default async function LoginPage({
         <dl className="grid grid-cols-3 gap-6 border-t border-(--color-petrol-700) pt-6">
           <div>
             <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
-              Append only
+              {t('Append only')}
             </dt>
-            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">Nothing is rewritten</dd>
+            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">
+              {t('Nothing is rewritten')}
+            </dd>
           </div>
           <div>
             <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
-              Owner consent
+              {t('Owner consent')}
             </dt>
-            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">Scoped and revocable</dd>
+            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">
+              {t('Scoped and revocable')}
+            </dd>
           </div>
           <div>
             <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
-              Portable
+              {t('Portable')}
             </dt>
-            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">Follows the vehicle</dd>
+            <dd className="mt-1 text-[13px] text-(--color-petrol-100)">
+              {t('Follows the vehicle')}
+            </dd>
           </div>
         </dl>
       </section>
@@ -87,9 +95,9 @@ export default async function LoginPage({
             <span className="font-display text-[17px] font-semibold">Carnet</span>
           </div>
 
-          <h2 className="font-display text-[24px] font-semibold tracking-tight">Sign in</h2>
+          <h2 className="font-display text-[24px] font-semibold tracking-tight">{t('Sign in')}</h2>
           <p className="mt-1 text-[13px] text-(--text-faint)">
-            Use the account your workshop set up for you.
+            {t('Use the account your workshop set up for you.')}
           </p>
 
           {error ? (
@@ -99,7 +107,7 @@ export default async function LoginPage({
           ) : null}
 
           <form action={attemptSignIn} className="mt-6 grid gap-4">
-            <Field label="Email" htmlFor="email" required>
+            <Field label={t('Email')} htmlFor="email" required>
               <Input
                 id="email"
                 name="email"
@@ -111,7 +119,7 @@ export default async function LoginPage({
               />
             </Field>
 
-            <Field label="Password" htmlFor="password" required>
+            <Field label={t('Password')} htmlFor="password" required>
               <Input
                 id="password"
                 name="password"
@@ -122,13 +130,13 @@ export default async function LoginPage({
             </Field>
 
             <Button type="submit" variant="primary" size="lg" block className="mt-1">
-              Sign in
+              {t('Sign in')}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-[13px]">
             <Link href="/forgot" className="font-medium text-(--brand-text) hover:underline">
-              Forgotten your password?
+              {t('Forgotten your password?')}
             </Link>
           </p>
 
@@ -142,29 +150,34 @@ export default async function LoginPage({
             </Link>{' '}
             as a driver, or{' '}
             <Link href="/signup" className="text-(--brand-text) hover:underline">
-              open a workshop
+              {t('open a workshop')}
             </Link>
             .
           </p>
 
           <div className="mt-8 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-3.5">
-            <p className="eyebrow mb-2">Demo accounts</p>
+            <p className="eyebrow mb-2">{t('Demo accounts')}</p>
             <ul className="grid gap-1.5 text-[12px] text-(--text-soft)">
               <li>
-                <span className="datum">ahmed@hillsidemotors.test</span> — owner
+                <span className="datum">ahmed@hillsidemotors.test</span>
+                {t('— owner')}
               </li>
               <li>
-                <span className="datum">sara@hillsidemotors.test</span> — service advisor
+                <span className="datum">sara@hillsidemotors.test</span>
+                {t('— service advisor')}
               </li>
               <li>
-                <span className="datum">john@hillsidemotors.test</span> — technician
+                <span className="datum">john@hillsidemotors.test</span>
+                {t('— technician')}
               </li>
               <li>
-                <span className="datum">maria@example.test</span> — customer portal
+                <span className="datum">maria@example.test</span>
+                {t('— customer portal')}
               </li>
             </ul>
             <p className="mt-2 text-[12px] text-(--text-faint)">
-              Password for all: <span className="datum">carnet-demo-2026</span>
+              {t('Password for all:')}
+              <span className="datum">carnet-demo-2026</span>
             </p>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { passportsForOwner } from '@/lib/passports';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Your passports' };
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,7 @@ export const dynamic = 'force-dynamic';
  * says those three things and nothing else.
  */
 export default async function PortalPassportsPage() {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const { rows, summary } = await passportsForOwner(user.userId);
@@ -28,7 +30,9 @@ export default async function PortalPassportsPage() {
 
   return (
     <PortalShell active="passports">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Your passports</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">
+        {t('Your passports')}
+      </h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {rows.length === 0
           ? 'Each car you own has a passport: its history, kept by every garage that worked on it.'
@@ -40,11 +44,13 @@ export default async function PortalPassportsPage() {
       {rows.length === 0 ? (
         <EmptyState
           className="mt-5 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-          title="No passports yet"
-          description="Add your car by its registration. The garage that last worked on it confirms it is yours, and its passport appears here."
+          title={t('No passports yet')}
+          description={t(
+            'Add your car by its registration. The garage that last worked on it confirms it is yours, and its passport appears here.',
+          )}
           action={
             <Link href="/portal/claim">
-              <Button variant="primary">Add your car</Button>
+              <Button variant="primary">{t('Add your car')}</Button>
             </Link>
           }
         />
@@ -72,29 +78,29 @@ export default async function PortalPassportsPage() {
                     </div>
                     {row.entries === 0 ? null : row.intact ? (
                       <Badge tone="success" dot>
-                        Record sound
+                        {t('Record sound')}
                       </Badge>
                     ) : (
                       <Badge tone="danger" dot>
-                        Does not verify
+                        {t('Does not verify')}
                       </Badge>
                     )}
                   </div>
 
                   {row.openRecalls > 0 ? (
                     <p className="mt-3 rounded-(--radius-sm) bg-(--danger-soft) px-2.5 py-1.5 text-[13px] text-(--danger)">
-                      This vehicle has an outstanding safety recall. Contact your workshop.
+                      {t('This vehicle has an outstanding safety recall. Contact your workshop.')}
                     </p>
                   ) : null}
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link href={`/portal/vehicles/${row.id}/passport`}>
                       <Button size="touch" variant="primary">
-                        Open the passport
+                        {t('Open the passport')}
                       </Button>
                     </Link>
                     <Link href={`/portal/vehicles/${row.id}#share`}>
-                      <Button size="touch">Show it to a buyer</Button>
+                      <Button size="touch">{t('Show it to a buyer')}</Button>
                     </Link>
                   </div>
                 </CardBody>
@@ -105,8 +111,9 @@ export default async function PortalPassportsPage() {
       )}
 
       <p className="mt-6 text-[12px] leading-relaxed text-(--text-faint)">
-        A passport belongs to the car, not to you or to any garage. When you sell the car, the
-        record goes with it and your name does not.
+        {t(
+          'A passport belongs to the car, not to you or to any garage. When you sell the car, the record goes with it and your name does not.',
+        )}
       </p>
     </PortalShell>
   );

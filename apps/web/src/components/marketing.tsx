@@ -1,6 +1,8 @@
 import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import * as React from 'react';
+import { currentLanguage, tFor } from '@/lib/i18n';
+import { LanguageSwitch } from './language-switch';
 
 /**
  * Marketing furniture.
@@ -11,7 +13,15 @@ import * as React from 'react';
  * headline is how a marketing site ends up slower than the app behind it.
  */
 
-export function MarketingHeader({ signedIn }: { signedIn: boolean }) {
+export async function MarketingHeader({
+  signedIn,
+  back = '/',
+}: {
+  signedIn: boolean;
+  back?: string;
+}) {
+  const t = await tFor();
+  const language = await currentLanguage();
   return (
     <header className="sticky top-0 z-30 border-b border-(--border) bg-(--surface)/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1180px] items-center gap-3 px-4 py-3 sm:px-6">
@@ -20,13 +30,14 @@ export function MarketingHeader({ signedIn }: { signedIn: boolean }) {
           <span className="font-display text-[17px] font-semibold tracking-tight">Carnet</span>
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label="Sections">
-          <NavLink href="/#how">How it works</NavLink>
-          <NavLink href="/#passport">The passport</NavLink>
-          <NavLink href="/pricing">Pricing</NavLink>
+        <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label={t('Sections')}>
+          <NavLink href="/#how">{t('How it works')}</NavLink>
+          <NavLink href="/#passport">{t('The passport')}</NavLink>
+          <NavLink href="/pricing">{t('Pricing')}</NavLink>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <LanguageSwitch current={language} back={back} compact className="mr-1" />
           {signedIn ? (
             <Link
               href="/dashboard"
@@ -35,7 +46,7 @@ export function MarketingHeader({ signedIn }: { signedIn: boolean }) {
                 'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
               )}
             >
-              Open workshop
+              {t('Open workshop')}
             </Link>
           ) : (
             <>
@@ -43,7 +54,7 @@ export function MarketingHeader({ signedIn }: { signedIn: boolean }) {
                 href="/login"
                 className="rounded-(--radius-md) px-3 py-2 text-[13px] text-(--text-soft) transition-colors hover:bg-(--surface-sunk) hover:text-(--text)"
               >
-                Sign in
+                {t('Sign in')}
               </Link>
               <Link
                 href="/signup"
@@ -52,7 +63,7 @@ export function MarketingHeader({ signedIn }: { signedIn: boolean }) {
                   'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
                 )}
               >
-                Start free
+                {t('Start your trial')}
               </Link>
             </>
           )}
@@ -107,7 +118,8 @@ export function Mark({
   );
 }
 
-export function MarketingFooter() {
+export async function MarketingFooter() {
+  const t = await tFor();
   return (
     <footer className="border-t border-(--border) bg-(--surface)">
       <div className="mx-auto grid max-w-[1180px] gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
@@ -117,30 +129,31 @@ export function MarketingFooter() {
             <span className="font-display text-[15px] font-semibold">Carnet</span>
           </div>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-(--text-soft)">
-            Workshop management with a service history that belongs to the car, not to the garage
-            that happened to write it.
+            {t(
+              'Workshop management with a service history that belongs to the car, not to the garage that happened to write it.',
+            )}
           </p>
         </div>
 
         <FooterColumn
-          title="Product"
+          title={t('Product')}
           links={[
-            { href: '/#how', label: 'How it works' },
-            { href: '/#passport', label: 'The passport' },
-            { href: '/#features', label: 'Features' },
-            { href: '/pricing', label: 'Pricing' },
+            { href: '/#how', label: t('How it works') },
+            { href: '/#passport', label: t('The passport') },
+            { href: '/#features', label: t('Features') },
+            { href: '/pricing', label: t('Pricing') },
           ]}
         />
         <FooterColumn
-          title="Try it"
+          title={t('Try it')}
           links={[
-            { href: '/signup', label: 'Start a free trial' },
-            { href: '/login', label: 'Sign in' },
-            { href: '/p/demo-share-token', label: 'See a real passport' },
+            { href: '/signup', label: t('Start your trial') },
+            { href: '/login', label: t('Sign in') },
+            { href: '/p/demo-share-token', label: t('See a real passport') },
           ]}
         />
         <FooterColumn
-          title="Contact"
+          title={t('Contact')}
           links={[
             { href: 'mailto:hefnyamr@rocketmail.com', label: 'hefnyamr@rocketmail.com' },
             { href: 'tel:+15145534360', label: '+1 514 553 4360' },
@@ -150,7 +163,7 @@ export function MarketingFooter() {
 
       <div className="border-t border-(--border)">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-2 px-4 py-4 text-[12px] text-(--text-faint) sm:px-6">
-          <p>Carnet is a working demonstration system. Figures shown are seeded data.</p>
+          <p>{t('Carnet is a working demonstration system. Figures shown are seeded data.')}</p>
           <p>Amr Hefny</p>
         </div>
       </div>

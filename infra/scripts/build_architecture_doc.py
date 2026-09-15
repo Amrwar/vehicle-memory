@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 37"
+AFTER_PHASE = "Phase 37.5"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -434,6 +434,7 @@ VERIFY_TEXT = {
     "verify-import": "five files in three delimiters uploaded, mapped from their headers, previewed with every problem named by row, imported through the pages' own rules, and every dataset exported and read back",
     "verify-billing": "a workshop opens, accepts the terms, adds a card, is reminded once, is charged through the signed webhook, fails and recovers, cancels on a plan and on a trial",
     "verify-payments": "a card payment from the portal: declined with a reason, paid once however often the provider says so, refunded through the provider, reconciled, and the webhook over HTTP",
+    "verify-languages": "every sentence passed to the translator checked for both translations, eight pages read in each language for the root element's direction and a known sentence, and the switcher's cookie, account and redirect",
     "verify-packages": "a package saved with every refusal tried, a job made from it in one press, added to a job under way, booked and arrived, completed with the vehicle's next one set, offered online with its price",
     "verify-conversations": "a quote filed onto the job's thread, a WhatsApp reply landing on it unread, an answer with a file through the seam, templates filled and refused, a payment link, assignment, closing and reopening, and a stranger's message left for a person",
     "verify-arrival": "a car checked in with every refusal tried, the keys moved, a quote approved with a signature, the car refused unfinished and unpaid, handed back signed for, and a fleet car let go owing with the reason written down",
@@ -817,7 +818,18 @@ def build() -> None:
               "due date and mileage in core (nextServiceFrom) and upserts the vehicle's ServiceSchedule named after "
               "the package, which the reminder job already reads.")
 
-    doc.add_heading("6.16 Answers and the assistant", level=2)
+    doc.add_heading("6.16 Languages", level=2)
+    para(doc, "The language of a request is decided once per request by pickLanguage in core: the carnet_lang cookie, "
+              "else the browser's Accept-Language, else English; at sign-in applySavedLanguage copies the account's "
+              "saved language to the cookie when the browser has none. The root layout reads htmlAttributes and "
+              "stamps lang and dir on the html element. Pages call tFor() once and pass t down; t looks the English "
+              "sentence up in the French or Arabic dictionary in core and falls back to the English. The switcher "
+              "posts to /api/language, which sets the cookie for a year, updates User.language when somebody is "
+              "signed in, and redirects to the page it was pressed on, refusing any destination off the site. The "
+              "workshop navigation is a client component and receives the language as a prop, translating its labels "
+              "with the same pure translate function.")
+
+    doc.add_heading("6.17 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

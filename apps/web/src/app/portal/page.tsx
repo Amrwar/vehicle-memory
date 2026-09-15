@@ -19,6 +19,7 @@ import { pointsForPortalUser } from '@/lib/loyalty';
 import { invoicesFor } from '@/lib/portal';
 import { referralsForPortalUser } from '@/lib/referrals';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Home' };
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,7 @@ export const dynamic = 'force-dynamic';
  * as an advertisement.
  */
 export default async function PortalPage() {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
 
@@ -98,20 +100,22 @@ export default async function PortalPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-[26px] font-semibold leading-tight">
-            Hello, {user.name.split(' ')[0]}
+            {t('Hello, {name}', { name: user.name.split(' ')[0] ?? '' })}
           </h1>
           <p className="mt-1 text-[14px] text-(--text-soft)">
             {attention === 0
-              ? 'Nothing needs your attention right now.'
-              : `${attention} ${attention === 1 ? 'thing needs' : 'things need'} your attention.`}
+              ? t('Nothing needs your attention right now.')
+              : attention === 1
+                ? t('One thing needs your attention.')
+                : t('{count} things need your attention.', { count: attention })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/portal/claim">
-            <Button variant="secondary">Add a car</Button>
+            <Button variant="secondary">{t('Add a car')}</Button>
           </Link>
           <Link href="/portal/book">
-            <Button variant="primary">Book a visit</Button>
+            <Button variant="primary">{t('Book a visit')}</Button>
           </Link>
         </div>
       </div>
@@ -121,7 +125,7 @@ export default async function PortalPage() {
           {attention > 0 ? (
             <section aria-labelledby="attention">
               <h2 id="attention" className="eyebrow mb-3">
-                Needs you
+                {t('Needs you')}
               </h2>
               <ul className="grid gap-3">
                 {awaiting.map(({ job, orgName }) => {
@@ -132,7 +136,7 @@ export default async function PortalPage() {
                         <CardBody className="flex flex-wrap items-center justify-between gap-4">
                           <div className="min-w-0">
                             <Badge tone="warning" size="sm" dot>
-                              Estimate to approve
+                              {t('Estimate to approve')}
                             </Badge>
                             <p className="mt-2 text-[15px] font-semibold">
                               {job.vehicle.make} {job.vehicle.model} · {job.shortDescription}
@@ -156,7 +160,7 @@ export default async function PortalPage() {
                           {estimate ? (
                             <Link href={`/portal/estimates/${estimate.id}`}>
                               <Button variant="primary" size="lg">
-                                Review and decide
+                                {t('Review and decide')}
                               </Button>
                             </Link>
                           ) : null}
@@ -173,21 +177,26 @@ export default async function PortalPage() {
                         <div className="min-w-0">
                           <Badge tone="warning" size="sm" dot>
                             {owing.length === 1
-                              ? 'Invoice to pay'
-                              : `${owing.length} invoices to pay`}
+                              ? t('Invoice to pay')
+                              : t('{count} invoices to pay', { count: owing.length })}
                           </Badge>
                           <p className="mt-2 font-display text-[24px] font-semibold leading-none">
                             <Money amount={owedTotal} currency={owing[0]!.currency} />
                           </p>
                           <p className="mt-1 text-[13px] text-(--text-soft)">
                             {owing.length === 1
-                              ? `${owing[0]!.number ?? 'Invoice'} from ${owing[0]!.org.name}`
-                              : `From ${[...new Set(owing.map((i) => i.org.name))].join(', ')}`}
+                              ? t('{invoice} from {workshop}', {
+                                  invoice: owing[0]!.number ?? t('Invoice'),
+                                  workshop: owing[0]!.org.name,
+                                })
+                              : t('From {workshops}', {
+                                  workshops: [...new Set(owing.map((i) => i.org.name))].join(', '),
+                                })}
                           </p>
                         </div>
                         <Link href="/portal/invoices">
                           <Button variant="primary" size="lg">
-                            Pay by card
+                            {t('Pay by card')}
                           </Button>
                         </Link>
                       </CardBody>
@@ -201,7 +210,7 @@ export default async function PortalPage() {
                       <CardBody className="flex flex-wrap items-center justify-between gap-4">
                         <div className="min-w-0">
                           <Badge tone="danger" size="sm" dot>
-                            Safety recall
+                            {t('Safety recall')}
                           </Badge>
                           <p className="mt-2 text-[15px] font-semibold">
                             {vehicle.year} {vehicle.make} {vehicle.model}
@@ -213,7 +222,7 @@ export default async function PortalPage() {
                         </div>
                         <Link href={`/portal/book?vehicle=${vehicle.id}`}>
                           <Button variant="secondary" size="lg">
-                            Book the recall
+                            {t('Book the recall')}
                           </Button>
                         </Link>
                       </CardBody>
@@ -226,16 +235,18 @@ export default async function PortalPage() {
 
           <section aria-labelledby="vehicles" className={attention > 0 ? 'mt-8' : ''}>
             <h2 id="vehicles" className="eyebrow mb-3">
-              My cars
+              {t('My cars')}
             </h2>
             {ownerships.length === 0 ? (
               <EmptyState
                 className="rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-                title="No cars yet"
-                description="Add your car by entering its registration. The garage that last worked on it confirms it is yours."
+                title={t('No cars yet')}
+                description={t(
+                  'Add your car by entering its registration. The garage that last worked on it confirms it is yours.',
+                )}
                 action={
                   <Link href="/portal/claim">
-                    <Button variant="primary">Add your car</Button>
+                    <Button variant="primary">{t('Add your car')}</Button>
                   </Link>
                 }
               />
@@ -264,7 +275,9 @@ export default async function PortalPage() {
                         </div>
                         <p className="mt-3 text-[13px] text-(--text-soft)">
                           <Mileage km={vehicle.lastOdometerKm} /> · {vehicle._count.events}{' '}
-                          {vehicle._count.events === 1 ? 'entry' : 'entries'} on its passport
+                          {vehicle._count.events === 1
+                            ? t('entry on its passport')
+                            : t('entries on its passport')}
                         </p>
                         <div className="mt-4 flex items-center justify-between gap-2">
                           {active ? (
@@ -273,15 +286,15 @@ export default async function PortalPage() {
                             </Badge>
                           ) : vehicle.recalls.length > 0 ? (
                             <Badge tone="danger" dot>
-                              Recall open
+                              {t('Recall open')}
                             </Badge>
                           ) : (
                             <Badge tone="success" dot>
-                              Nothing due
+                              {t('Nothing due')}
                             </Badge>
                           )}
                           <span className="text-[13px] font-medium text-(--brand-text)">
-                            Open →
+                            {t('Open →')}
                           </span>
                         </div>
                       </Link>
@@ -295,7 +308,7 @@ export default async function PortalPage() {
           {recent.length > 0 ? (
             <section aria-labelledby="recent" className="mt-8">
               <h2 id="recent" className="eyebrow mb-3">
-                Recent work
+                {t('Recent work')}
               </h2>
               <Card>
                 <ul className="divide-y divide-(--border)">
@@ -339,10 +352,12 @@ export default async function PortalPage() {
               href="/portal/rewards"
               className="block rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4 transition-[border-color,box-shadow] hover:border-(--brand) hover:shadow-(--shadow-md)"
             >
-              <p className="eyebrow">Rewards</p>
+              <p className="eyebrow">{t('Rewards')}</p>
               <p className="mt-1 font-display text-[22px] font-semibold leading-none">
                 {totalPoints.toLocaleString(region.locale)}
-                <span className="ml-1 text-[12px] font-normal text-(--text-faint)">points</span>
+                <span className="ml-1 text-[12px] font-normal text-(--text-faint)">
+                  {t('points')}
+                </span>
               </p>
               <p className="mt-2 text-[12px] text-(--text-soft)">
                 {referrals.length > 0
@@ -353,19 +368,21 @@ export default async function PortalPage() {
           ) : null}
 
           <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
-            <p className="eyebrow">Your passports</p>
+            <p className="eyebrow">{t('Your passports')}</p>
             <p className="mt-2 text-[13px] text-(--text-soft)">
-              Every car's full history, verified, in one place. Share it with a buyer when you sell.
+              {t(
+                "Every car's full history, verified, in one place. Share it with a buyer when you sell.",
+              )}
             </p>
             <Link href="/portal/passports" className="mt-3 inline-block">
               <Button variant="secondary" size="sm">
-                See passports
+                {t('See passports')}
               </Button>
             </Link>
           </div>
 
           <div className="rounded-(--radius-lg) border border-(--border) bg-(--surface) p-4">
-            <p className="eyebrow">{customers.length > 0 ? 'Your workshops' : 'Workshops'}</p>
+            <p className="eyebrow">{customers.length > 0 ? t('Your workshops') : t('Workshops')}</p>
             {customers.length > 0 ? (
               <ul className="mt-2 grid gap-2 text-[13px]">
                 {customers.map((customer) => (
@@ -384,12 +401,12 @@ export default async function PortalPage() {
               </ul>
             ) : (
               <p className="mt-2 text-[13px] text-(--text-soft)">
-                Any workshop on Carnet can take your car, and its history goes with you.
+                {t('Any workshop on Carnet can take your car, and its history goes with you.')}
               </p>
             )}
             <Link href="/portal/workshops" className="mt-3 inline-block">
               <Button variant="secondary" size="sm">
-                Find a workshop
+                {t('Find a workshop')}
               </Button>
             </Link>
           </div>

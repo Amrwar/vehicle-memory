@@ -217,6 +217,10 @@ kilometres, bookable, active), `ServicePackageLine` (labour, part or fee
 with quantity, unit price and an optional product) and
 `ServicePackageCheck`, with `Job.packageId` and `Booking.packageId` saying
 which package a job or a booking came from.
+
+Phase 37.5 adds `User.language`: the language a person chose, `en`, `fr`
+or `ar`, null until they choose; the cookie carries the same choice for
+a browser.
 The first is a decision and the other three follow it at sign-up from the
 country table in core, then stand on their own so an owner can differ. Every
 money column on a document carries its own `currency`, written from the

@@ -1426,6 +1426,31 @@ that** I know what I am paying before I arrive.
 
 ---
 
+## Epic AK — Languages (Phase 37.5)
+
+### AK1 — In my language
+
+**As** Maria in Cairo **I want** the portal in Arabic, read the right way
+round **so that** my car's history is something I can read.
+**Size** 5 · **Satisfies** FR-6701, FR-6702, FR-6705
+
+- **Given** the switcher, **when** I press العربية, **then** every page I
+  visit is in Arabic and reads right to left, on this phone and the next.
+- **Given** my browser asks for French, **when** I first arrive, **then**
+  the site is in French before I choose anything.
+
+### AK2 — Never half a page
+
+**As** the owner **I want** a sentence without a translation to show in
+English and be named **so that** nobody ever sees a key or a blank.
+**Size** 2 · **Satisfies** FR-6703, FR-6704
+
+- **Given** a sentence added to a page without its translations, **when**
+  the coverage script runs, **then** it fails and says which sentence, in
+  which file.
+
+---
+
 ## Story map
 
 ```

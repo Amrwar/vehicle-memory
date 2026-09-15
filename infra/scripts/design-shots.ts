@@ -32,6 +32,8 @@ type Shot = {
   height?: number;
   fullPage?: boolean;
   dark?: boolean;
+  /** The language cookie for the shot. Phase 37.5. */
+  lang?: 'en' | 'fr' | 'ar';
   settle?: number;
 };
 
@@ -131,6 +133,8 @@ async function main() {
     { file: 'check-in', path: `/jobs/${r.job}/check-in`, who: 'owner', fullPage: true },
     { file: 'conversations', path: '/inbox', who: 'owner', fullPage: true },
     { file: 'packages', path: '/settings/packages', who: 'owner', fullPage: true },
+    { file: 'portal-ar', path: '/portal', who: 'driver', lang: 'ar' },
+    { file: 'home-fr', path: '/', who: 'nobody', lang: 'fr', height: 900 },
     { file: 'shop', path: '/shop', who: 'owner', width: 1024, height: 768 },
     {
       file: 'inspection',
@@ -238,6 +242,8 @@ async function main() {
           value: shot.who === 'owner' ? owner : driver,
           url: BASE,
         },
+
+        ...(shot.lang ? [{ name: 'carnet_lang', value: shot.lang, url: BASE }] : []),
       ]);
     }
     const page = await context.newPage();

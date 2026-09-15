@@ -576,6 +576,7 @@ def build() -> Path:
         ('35', 'Arrival and departure', 'Built: the car checked in and handed back against a signed record of what it was like; keys as events; a car cannot leave owing money without a reason.'),
         ('36', 'Conversations', 'Built: one thread per customer and per job over email, text and WhatsApp, answered from the job; templates as sentences; a payment link in one press.'),
         ('37', 'Packages and templates', 'Built: a package with labour, parts, checklist, time, price and interval; a job from it in one press, at the counter, online or on a job already open.'),
+        ('37.5', 'Languages', 'Built: English, French and Arabic, the person\'s choice kept on the account; Arabic right to left; the public site, the portal and the workshop shells.'),
         ('38', 'Parts back, work out', 'Returns and cores to the supplier; sublet work on the job with its own cost.'),
         ('39', 'Finding anything', 'One search box for a plate, a name, a part, an invoice number.'),
     ]

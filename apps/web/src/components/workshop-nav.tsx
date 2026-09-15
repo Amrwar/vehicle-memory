@@ -1,6 +1,13 @@
 'use client';
 
-import { can, humaniseRole, type Permission, type Role } from '@carnet/core';
+import {
+  can,
+  humaniseRole,
+  type Language,
+  type Permission,
+  type Role,
+  translate,
+} from '@carnet/core';
 import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import { useLinkStatus } from 'next/link';
@@ -149,12 +156,16 @@ export function WorkshopNav({
   orgName,
   userName,
   approvalsWaiting = 0,
+  language = 'en',
 }: {
   role: Role;
   orgName: string;
   userName: string;
   approvalsWaiting?: number;
+  /** The person's language; labels are translated on the way out. Phase 37.5. */
+  language?: Language;
 }) {
+  const t = (text: string) => translate(language, text);
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
@@ -183,7 +194,7 @@ export function WorkshopNav({
           'transition-colors hover:bg-(--surface-sunk)',
         )}
       >
-        <span className="sr-only">{open ? 'Close navigation' : 'Open navigation'}</span>
+        <span className="sr-only">{open ? t('Close navigation') : t('Open navigation')}</span>
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
           <path
             d={open ? 'M4 4l10 10M14 4L4 14' : 'M2 5h14M2 9h14M2 13h14'}
@@ -220,14 +231,14 @@ export function WorkshopNav({
             <p className="truncate font-display text-[14px] font-semibold leading-tight">
               {orgName}
             </p>
-            <p className="truncate text-[11px] text-(--text-faint)">Carnet Workshop</p>
+            <p className="truncate text-[11px] text-(--text-faint)">{t('Carnet Workshop')}</p>
           </div>
         </div>
 
         <div className="scroll-x flex-1 overflow-y-auto px-3 py-4">
           {visible.map((group) => (
             <div key={group.label} className="mb-5 last:mb-0">
-              <p className="eyebrow px-2 pb-2">{group.label}</p>
+              <p className="eyebrow px-2 pb-2">{t(group.label)}</p>
               <ul className="grid gap-px">
                 {group.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -272,7 +283,7 @@ export function WorkshopNav({
                         />
 
                         <span className="relative flex-1 truncate">
-                          {item.label}
+                          {t(item.label)}
                           <PendingRule />
                         </span>
 
@@ -319,13 +330,13 @@ export function WorkshopNav({
             <form action="/api/sign-out" method="post">
               <button
                 type="submit"
-                title="Sign out"
+                title={t('Sign out')}
                 className={cn(
                   'grid h-7 w-7 place-items-center rounded-(--radius-sm)',
                   'text-(--text-faint) transition-colors hover:bg-(--surface) hover:text-(--danger)',
                 )}
               >
-                <span className="sr-only">Sign out</span>
+                <span className="sr-only">{t('Sign out')}</span>
                 <svg
                   width="15"
                   height="15"
@@ -351,7 +362,7 @@ export function WorkshopNav({
       {open ? (
         <button
           type="button"
-          aria-label="Close navigation"
+          aria-label={t('Close navigation')}
           onClick={() => setOpen(false)}
           className="fixed inset-0 z-20 bg-(--overlay) lg:hidden"
         />

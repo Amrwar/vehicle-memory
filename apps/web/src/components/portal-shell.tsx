@@ -4,6 +4,8 @@ import * as React from 'react';
 import { Mark } from '@/components/marketing';
 
 import { ThemeToggle } from './theme-toggle';
+import { currentLanguage, tFor } from '@/lib/i18n';
+import { LanguageSwitch } from './language-switch';
 
 /**
  * The frame every customer-facing page sits in. Redesigned in Phase 32.5.
@@ -150,12 +152,15 @@ function TabIcon({ children, className }: { children: React.ReactNode; className
   );
 }
 
-export function PortalShell({
+export async function PortalShell({
   children,
   signedIn = true,
   active,
   wide = false,
+  back = '/portal',
 }: {
+  /** Where the language switcher returns to. */
+  back?: string;
   children: React.ReactNode;
   signedIn?: boolean;
   active?: PortalTab;
@@ -163,6 +168,8 @@ export function PortalShell({
   wide?: boolean;
 }) {
   const current = active === 'vehicles' ? 'home' : active;
+  const t = await tFor();
+  const language = await currentLanguage();
   const width = wide ? 'max-w-5xl' : 'max-w-2xl';
 
   return (
@@ -174,31 +181,32 @@ export function PortalShell({
             <span className="leading-none">
               <span className="block font-display text-[15px] font-semibold">Carnet</span>
               <span className="block text-[10px] font-medium tracking-[0.14em] text-(--text-faint) uppercase">
-                Your cars
+                {t('Your cars')}
               </span>
             </span>
           </Link>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitch current={language} back={back} compact />
             <ThemeToggle className="w-[6.5rem]" />
             {signedIn ? (
               <Link
                 href="/portal/settings"
-                aria-label="Account"
+                aria-label={t('Account')}
                 className="flex items-center gap-1.5 text-[13px] font-medium text-(--text-soft) hover:text-(--text)"
               >
                 <TabIcon className="h-[18px] w-[18px]">
                   <circle cx="12" cy="8.5" r="3.5" />
                   <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
                 </TabIcon>
-                <span className="hidden sm:inline">Account</span>
+                <span className="hidden sm:inline">{t('Account')}</span>
               </Link>
             ) : null}
           </div>
         </div>
 
         {signedIn ? (
-          <nav aria-label="Your account" className={`mx-auto hidden ${width} px-4 sm:block`}>
+          <nav aria-label={t('Your account')} className={`mx-auto hidden ${width} px-4 sm:block`}>
             <ul className="flex gap-1">
               {TABS.map((tab) => {
                 const on = current === tab.key;
@@ -215,7 +223,7 @@ export function PortalShell({
                       }
                     >
                       <TabIcon className="h-4 w-4">{tab.icon}</TabIcon>
-                      {tab.label}
+                      {t(tab.label)}
                     </Link>
                   </li>
                 );
@@ -235,7 +243,7 @@ export function PortalShell({
 
       {signedIn ? (
         <nav
-          aria-label="Your account"
+          aria-label={t('Your account')}
           className="fixed inset-x-0 bottom-0 z-20 border-t border-(--border) bg-(--surface) pb-[env(safe-area-inset-bottom)] sm:hidden"
         >
           <ul className="grid grid-cols-5">
@@ -254,7 +262,7 @@ export function PortalShell({
                     <TabIcon className={`h-[22px] w-[22px] ${on ? 'stroke-[2]' : ''}`}>
                       {tab.icon}
                     </TabIcon>
-                    {tab.label}
+                    {t(tab.label)}
                   </Link>
                 </li>
               );

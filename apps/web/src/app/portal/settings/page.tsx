@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
+import { tFor } from '@/lib/i18n';
 import {
   AccountError,
   accountOverview,
@@ -92,30 +93,31 @@ export default async function PortalSettingsPage({
 }: {
   searchParams: Promise<{ saved?: string; problem?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const { saved, problem: failed } = await searchParams;
   const account = await accountOverview(user.userId);
 
   return (
     <PortalShell active="settings">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Account</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Account')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
-        Your details, how you sign in, and what each workshop may send you.
+        {t('Your details, how you sign in, and what each workshop may send you.')}
       </p>
 
       {saved === 'details' ? (
         <Alert tone="success" className="mt-4">
-          Saved. The workshops you use see the new details too.
+          {t('Saved. The workshops you use see the new details too.')}
         </Alert>
       ) : null}
       {saved === 'password' ? (
         <Alert tone="success" className="mt-4">
-          Password changed.
+          {t('Password changed.')}
         </Alert>
       ) : null}
       {saved === 'consent' ? (
         <Alert tone="success" className="mt-4">
-          Saved, and recorded with the date, so nobody has to take your word for it.
+          {t('Saved, and recorded with the date, so nobody has to take your word for it.')}
         </Alert>
       ) : null}
       {failed ? (
@@ -127,16 +129,16 @@ export default async function PortalSettingsPage({
       <div className="mt-6 grid gap-5">
         <Card>
           <CardHeader
-            title="Your details"
-            description="Your email is how you sign in and where receipts and updates go."
+            title={t('Your details')}
+            description={t('Your email is how you sign in and where receipts and updates go.')}
           />
           <CardBody>
             <form action={saveProfile} className="grid gap-4">
-              <Field label="Name">
+              <Field label={t('Name')}>
                 <Input name="name" defaultValue={account.name} required autoComplete="name" />
               </Field>
               <Field
-                label="Email"
+                label={t('Email')}
                 hint={
                   account.emailVerifiedAt
                     ? 'Confirmed. To change it, get in touch with a workshop you use.'
@@ -146,8 +148,8 @@ export default async function PortalSettingsPage({
                 <Input value={account.email} readOnly />
               </Field>
               <Field
-                label="Mobile"
-                hint="For text messages about your car, if you allow them below"
+                label={t('Mobile')}
+                hint={t('For text messages about your car, if you allow them below')}
               >
                 <Input
                   name="phone"
@@ -158,7 +160,7 @@ export default async function PortalSettingsPage({
               </Field>
               <div>
                 <Button type="submit" variant="primary">
-                  Save details
+                  {t('Save details')}
                 </Button>
               </div>
             </form>
@@ -167,15 +169,15 @@ export default async function PortalSettingsPage({
 
         <Card>
           <CardHeader
-            title="Password"
+            title={t('Password')}
             description={`At least ${MIN_PASSWORD_LENGTH} characters.`}
           />
           <CardBody>
             <form action={savePassword} className="grid gap-4">
-              <Field label="Current password">
+              <Field label={t('Current password')}>
                 <Input name="current" type="password" required autoComplete="current-password" />
               </Field>
-              <Field label="New password">
+              <Field label={t('New password')}>
                 <Input
                   name="next"
                   type="password"
@@ -186,14 +188,14 @@ export default async function PortalSettingsPage({
               </Field>
               <div>
                 <Button type="submit" variant="secondary">
-                  Change password
+                  {t('Change password')}
                 </Button>
               </div>
             </form>
             <p className="mt-3 text-[12px] text-(--text-faint)">
               Forgotten it?{' '}
               <Link href="/forgot" className="underline">
-                Reset it by email
+                {t('Reset it by email')}
               </Link>
               .
             </p>
@@ -202,13 +204,15 @@ export default async function PortalSettingsPage({
 
         <Card>
           <CardHeader
-            title="What each workshop may send you"
-            description="Messages about your own car and its bookings always come. This is about offers and reminders beyond that."
+            title={t('What each workshop may send you')}
+            description={t(
+              'Messages about your own car and its bookings always come. This is about offers and reminders beyond that.',
+            )}
           />
           <CardBody className="grid gap-4">
             {account.customers.length === 0 ? (
               <p className="text-[13px] text-(--text-soft)">
-                No workshop knows you yet. Once one does, its preferences appear here.
+                {t('No workshop knows you yet. Once one does, its preferences appear here.')}
               </p>
             ) : (
               account.customers.map((customer) => (
@@ -227,7 +231,7 @@ export default async function PortalSettingsPage({
                         defaultChecked={customer.marketingEmailConsent}
                         className="h-4 w-4 accent-(--brand)"
                       />
-                      Email offers and reminders
+                      {t('Email offers and reminders')}
                     </label>
                     <label className="flex items-center gap-2">
                       <input
@@ -236,10 +240,10 @@ export default async function PortalSettingsPage({
                         defaultChecked={customer.marketingSmsConsent}
                         className="h-4 w-4 accent-(--brand)"
                       />
-                      Text messages
+                      {t('Text messages')}
                     </label>
                     <Button type="submit" size="sm" variant="secondary">
-                      Save
+                      {t('Save')}
                     </Button>
                   </div>
                 </form>
@@ -249,26 +253,26 @@ export default async function PortalSettingsPage({
         </Card>
 
         <Card>
-          <CardHeader title="Money and rewards" />
+          <CardHeader title={t('Money and rewards')} />
           <CardBody className="flex flex-wrap gap-2">
             <Link href="/portal/invoices">
-              <Button variant="secondary">Invoices and payments</Button>
+              <Button variant="secondary">{t('Invoices and payments')}</Button>
             </Link>
             <Link href="/portal/rewards">
-              <Button variant="secondary">Points and referral code</Button>
+              <Button variant="secondary">{t('Points and referral code')}</Button>
             </Link>
           </CardBody>
         </Card>
 
         <Card>
           <CardHeader
-            title="Sign out"
-            description="On a shared phone or a garage's computer, sign out when you are done."
+            title={t('Sign out')}
+            description={t("On a shared phone or a garage's computer, sign out when you are done.")}
           />
           <CardBody>
             <form action="/api/sign-out" method="post">
               <Button type="submit" variant="secondary">
-                Sign out
+                {t('Sign out')}
               </Button>
             </form>
           </CardBody>

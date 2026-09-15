@@ -235,6 +235,8 @@ model User {
   phone           String?
   avatarUrl       String?
   locale          String    @default("en-GB")
+  /// The language they chose: en, fr or ar. Null until they choose. Phase 37.5.
+  language        String?
   isActive        Boolean   @default(true)
   emailVerifiedAt DateTime?
   lastLoginAt     DateTime?

@@ -21,6 +21,7 @@ import { currentUser, startSession } from '@/lib/auth';
 import { requestVerification } from '@/lib/credentials';
 import { createWorkshop } from '@/lib/onboarding';
 import { startTrialCheckout } from '@/lib/billing';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: 'Start a workshop',
@@ -121,6 +122,7 @@ export default async function SignupPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const t = await tFor();
   const user = await currentUser();
   if (user) redirect('/dashboard');
 
@@ -160,12 +162,12 @@ export default async function SignupPage({
 
         <div className="max-w-md">
           <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight">
-            You are opening a workshop, not an account.
+            {t('You are opening a workshop, not an account.')}
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-(--color-petrol-100)">
-            The first thing this creates is the business. Your diary, your bays, your tax rates and
-            your first employee record exist the moment you finish, so the next call can be booked
-            in.
+            {t(
+              'The first thing this creates is the business. Your diary, your bays, your tax rates and your first employee record exist the moment you finish, so the next call can be booked in.',
+            )}
           </p>
 
           <ul className="mt-7 grid gap-3">
@@ -185,7 +187,7 @@ export default async function SignupPage({
         <p className="text-[12px] text-(--color-petrol-200)">
           Already have an account?{' '}
           <Link href="/login" className="underline underline-offset-2">
-            Sign in
+            {t('Sign in')}
           </Link>
         </p>
       </section>
@@ -199,19 +201,19 @@ export default async function SignupPage({
           </Link>
 
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="eyebrow">Start free</p>
+            <p className="eyebrow">{t('Start your trial')}</p>
             <p className="text-[13px] text-(--text-soft)">
               Already have an account?{' '}
               <Link
                 href="/login"
                 className="font-medium text-(--brand-text) underline underline-offset-2"
               >
-                Sign in
+                {t('Sign in')}
               </Link>
             </p>
           </div>
           <h1 className="font-display text-[26px] font-semibold leading-tight tracking-tight">
-            Open your workshop
+            {t('Open your workshop')}
           </h1>
           <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
             {`${TRIAL_DAYS} days free on ${PLANS[plan].name}. You add a card on the next page; it is charged on the day the trial ends unless you cancel before, and nothing is ever deleted.`}
@@ -229,8 +231,8 @@ export default async function SignupPage({
             <input type="hidden" name="plan" value={plan} />
 
             <Field
-              label="Workshop name"
-              hint="As it appears on your invoices"
+              label={t('Workshop name')}
+              hint={t('As it appears on your invoices')}
               error={problemFor('workshopName')}
             >
               <Input
@@ -243,7 +245,7 @@ export default async function SignupPage({
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-[1fr_7.5rem]">
-              <Field label="Your name" error={problemFor('contactName')}>
+              <Field label={t('Your name')} error={problemFor('contactName')}>
                 <Input
                   name="contactName"
                   defaultValue={params.contactName ?? ''}
@@ -253,7 +255,7 @@ export default async function SignupPage({
                 />
               </Field>
 
-              <Field label="Sites" hint="Premises" error={problemFor('sites')}>
+              <Field label={t('Sites')} hint={t('Premises')} error={problemFor('sites')}>
                 <Input
                   name="sites"
                   type="number"
@@ -266,8 +268,8 @@ export default async function SignupPage({
             </div>
 
             <Field
-              label="Work email"
-              hint="This becomes the owner account"
+              label={t('Work email')}
+              hint={t('This becomes the owner account')}
               error={problemFor('email')}
             >
               <Input
@@ -289,13 +291,14 @@ export default async function SignupPage({
                   className="mt-0.5 h-4 w-4 shrink-0 accent-(--warning)"
                 />
                 <span>
-                  Use this address anyway. I understand the account will be tied to a personal
-                  inbox.
+                  {t(
+                    'Use this address anyway. I understand the account will be tied to a personal inbox.',
+                  )}
                 </span>
               </label>
             ) : null}
 
-            <Field label="Phone" hint="Optional">
+            <Field label={t('Phone')} hint={t('Optional')}>
               <Input
                 name="phone"
                 type="tel"
@@ -306,7 +309,11 @@ export default async function SignupPage({
               />
             </Field>
 
-            <Field label="Password" hint="At least 10 characters" error={problemFor('password')}>
+            <Field
+              label={t('Password')}
+              hint={t('At least 10 characters')}
+              error={problemFor('password')}
+            >
               <Input
                 name="password"
                 type="password"
@@ -341,19 +348,20 @@ export default async function SignupPage({
             />
 
             <Button type="submit" variant="primary" size="lg" block className="mt-1">
-              Create the workshop and add a card
+              {t('Create the workshop and add a card')}
             </Button>
 
             <p className="text-center text-[12px] leading-relaxed text-(--text-faint)">
-              Nothing is charged today. You will be reminded by email three days before the trial
-              ends, with the date and the amount.
+              {t(
+                'Nothing is charged today. You will be reminded by email three days before the trial ends, with the date and the amount.',
+              )}
             </p>
           </form>
 
           <p className="mt-6 text-center text-[13px] text-(--text-soft) lg:hidden">
             Already have an account?{' '}
             <Link href="/login" className="text-(--brand-text) underline underline-offset-2">
-              Sign in
+              {t('Sign in')}
             </Link>
           </p>
         </div>

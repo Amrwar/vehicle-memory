@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 37.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 37.5.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -663,6 +663,22 @@ def build() -> None:
         works="Saved whole, a package is never half of one. Recording which package a job came from is what lets completion say when the next one is due, which is the reminder that brings the customer back.",
         shots=[("packages", "Service packages.", 16.4)],
         source="docs/02-design/01-domain-model.md, section 3.15",
+    )
+
+    design(
+        doc,
+        title="Languages",
+        when="Phase 37.5, 15 September 2026.",
+        why="A customer in Cairo and a workshop in Lyon should each read Carnet in their own language, "
+            "chosen once and kept. Arabic reads right to left, and the page has to follow.",
+        meaning=[
+            "The switcher is three buttons, the current one filled in the brand colour: EN, FR, AR in the headers, the full names where there is room.",
+            "The whole page turns with the language: the root element carries the direction, and a layout built on flex and grid with logical order reads right to left without a second stylesheet.",
+            "English is the source of truth. A sentence without a translation is shown in English rather than as a key or a blank, and the coverage script names it.",
+        ],
+        works="Keeping the English sentence as the key means a page is translated by wrapping what is already there, and the dictionary reads as a list of sentences a person can check.",
+        shots=[("portal-ar", "The customer's portal in Arabic, right to left.", 16.4), ("home-fr", "The home page in French.", 16.4)],
+        source="docs/02-design/08-design-system.md, section 12.7",
     )
 
     # 11. Counter

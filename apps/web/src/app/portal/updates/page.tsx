@@ -16,6 +16,7 @@ import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { updatesFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Updates' };
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,7 @@ function when(value: Date, locale: string): string {
 }
 
 export default async function PortalUpdatesPage() {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const jobs = await updatesFor(user.userId);
@@ -63,7 +65,7 @@ export default async function PortalUpdatesPage() {
 
   return (
     <PortalShell active="updates">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Updates</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Updates')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {waiting.length > 0
           ? `${waiting.length} ${waiting.length === 1 ? 'quote needs' : 'quotes need'} your answer.`
@@ -75,14 +77,16 @@ export default async function PortalUpdatesPage() {
       {jobs.length === 0 ? (
         <EmptyState
           className="mt-5 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-          title="Nothing yet"
-          description="Once one of your vehicles is booked in, everything that happens to it appears here."
+          title={t('Nothing yet')}
+          description={t(
+            'Once one of your vehicles is booked in, everything that happens to it appears here.',
+          )}
         />
       ) : null}
 
       {waiting.length > 0 ? (
         <section className="mt-6 grid gap-3">
-          <h2 className="font-display text-[17px] font-semibold">Waiting on you</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Waiting on you')}</h2>
           {waiting.map((job) => {
             const estimate = job.estimates[0]!;
 
@@ -95,20 +99,20 @@ export default async function PortalUpdatesPage() {
                   description={`${job.org.name} · ${job.shortDescription}`}
                   action={
                     <Badge tone="warning" dot>
-                      Needs your answer
+                      {t('Needs your answer')}
                     </Badge>
                   }
                 />
                 <CardBody className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="eyebrow">Quoted</p>
+                    <p className="eyebrow">{t('Quoted')}</p>
                     <p className="font-display text-[22px] font-semibold">
                       <Money amount={Number(estimate.total)} currency={estimate.currency} />
                     </p>
                   </div>
                   <Link href={`/portal/estimates/${estimate.id}`}>
                     <Button variant="primary" size="lg">
-                      Review and decide
+                      {t('Review and decide')}
                     </Button>
                   </Link>
                 </CardBody>
@@ -120,7 +124,7 @@ export default async function PortalUpdatesPage() {
 
       {active.length > 0 ? (
         <section className="mt-7 grid gap-3">
-          <h2 className="font-display text-[17px] font-semibold">Under way</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Under way')}</h2>
           {active.map((job) => {
             const progress = customerProgressFor(job.status);
 
@@ -180,7 +184,7 @@ export default async function PortalUpdatesPage() {
 
       {finished.length > 0 ? (
         <section className="mt-7">
-          <h2 className="font-display text-[17px] font-semibold">Done</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Done')}</h2>
           <ul className="mt-3 grid gap-2">
             {finished.map((job) => {
               const progress = customerProgressFor(job.status);

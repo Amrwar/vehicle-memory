@@ -24,6 +24,7 @@ import { documentsFor, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Vehicle history' };
 export const dynamic = 'force-dynamic';
@@ -84,6 +85,7 @@ export default async function PortalVehiclePage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ link?: string; withdrawn?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const { id } = await params;
@@ -106,7 +108,7 @@ export default async function PortalVehiclePage({
 
   return (
     <PortalShell active="vehicles">
-      <p className="eyebrow">Your vehicle</p>
+      <p className="eyebrow">{t('Your vehicle')}</p>
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-[24px] font-semibold leading-tight">
           {name || 'Your vehicle'}
@@ -121,11 +123,11 @@ export default async function PortalVehiclePage({
       <Link
         href={`/portal/vehicles/${vehicle.id}/passport`}
         className="group mt-5 block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--border-focus)"
-        aria-label="Open the vehicle's passport"
+        aria-label={t("Open the vehicle's passport")}
       >
         <PassportCover
           className="min-h-[150px] rounded-(--radius-lg) transition-transform group-hover:-translate-y-0.5"
-          title="Vehicle Passport"
+          title={t('Vehicle Passport')}
           footer={
             <p className="passport-foil-text text-[10px] opacity-90">
               {vehicle.eventCount} entries · open the passport
@@ -135,9 +137,9 @@ export default async function PortalVehiclePage({
       </Link>
 
       {link ? (
-        <Alert tone="success" className="mt-4" title="Your link is ready">
+        <Alert tone="success" className="mt-4" title={t('Your link is ready')}>
           <span className="break-all">
-            Send this to whoever needs it. It is the only time it will be shown.
+            {t('Send this to whoever needs it. It is the only time it will be shown.')}
             <br />
             <code className="text-[12px]">/p/{link}</code>
           </span>
@@ -145,8 +147,8 @@ export default async function PortalVehiclePage({
       ) : null}
 
       {withdrawn ? (
-        <Alert tone="info" className="mt-4" title="Link withdrawn">
-          Anybody holding it now sees nothing.
+        <Alert tone="info" className="mt-4" title={t('Link withdrawn')}>
+          {t('Anybody holding it now sees nothing.')}
         </Alert>
       ) : null}
 
@@ -154,7 +156,7 @@ export default async function PortalVehiclePage({
         <Alert
           tone="danger"
           className="mt-4"
-          title="There is an open safety recall on this vehicle"
+          title={t('There is an open safety recall on this vehicle')}
         >
           {vehicle.recalls[0]?.recall.title}. Contact any workshop and the work is carried out free
           of charge by the manufacturer.
@@ -162,12 +164,12 @@ export default async function PortalVehiclePage({
       ) : null}
 
       <section className="mt-7">
-        <h2 className="font-display text-[17px] font-semibold">Coming up</h2>
+        <h2 className="font-display text-[17px] font-semibold">{t('Coming up')}</h2>
         {vehicle.serviceSchedules.length === 0 ? (
           <EmptyState
             className="mt-3 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-            title="Nothing scheduled"
-            description="Your workshop sets service intervals when they next see the car."
+            title={t('Nothing scheduled')}
+            description={t('Your workshop sets service intervals when they next see the car.')}
           />
         ) : (
           <ul className="mt-3 grid gap-2">
@@ -194,10 +196,10 @@ export default async function PortalVehiclePage({
 
       <section className="mt-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-[17px] font-semibold">Every visit</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Every visit')}</h2>
           <Link href="/portal/book">
             <Button size="sm" variant="primary">
-              Book a visit
+              {t('Book a visit')}
             </Button>
           </Link>
         </div>
@@ -205,8 +207,10 @@ export default async function PortalVehiclePage({
         {vehicle.jobs.length === 0 ? (
           <EmptyState
             className="mt-3 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-            title="No visits recorded yet"
-            description="Once this car has been in, every visit appears here and stays with the vehicle."
+            title={t('No visits recorded yet')}
+            description={t(
+              'Once this car has been in, every visit appears here and stays with the vehicle.',
+            )}
           />
         ) : (
           <ul className="mt-3 grid gap-3">
@@ -231,7 +235,8 @@ export default async function PortalVehiclePage({
                         <span>
                           {job.odometerInKm ? (
                             <>
-                              At <Mileage km={job.odometerInKm} />
+                              {t('At')}
+                              <Mileage km={job.odometerInKm} />
                             </>
                           ) : (
                             'Mileage not recorded'
@@ -278,7 +283,9 @@ export default async function PortalVehiclePage({
       </section>
 
       <section id="share" className="mt-7">
-        <h2 className="font-display text-[17px] font-semibold">Show this history to somebody</h2>
+        <h2 className="font-display text-[17px] font-semibold">
+          {t('Show this history to somebody')}
+        </h2>
         <p className="mt-1 text-[13px] leading-relaxed text-(--text-soft)">
           A buyer, an insurer, or the next garage. They see the vehicle&rsquo;s record and nothing
           about you. You can take the link back at any time.
@@ -288,7 +295,7 @@ export default async function PortalVehiclePage({
           <CardBody>
             <form action={share} className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="vehicleId" value={vehicle.id} />
-              <Field label="Let them see it for" htmlFor="days" className="min-w-40">
+              <Field label={t('Let them see it for')} htmlFor="days" className="min-w-40">
                 <Input
                   id="days"
                   name="days"
@@ -300,7 +307,7 @@ export default async function PortalVehiclePage({
                 />
               </Field>
               <Button type="submit" size="touch" variant="secondary">
-                Create a link
+                {t('Create a link')}
               </Button>
             </form>
           </CardBody>
@@ -323,7 +330,7 @@ export default async function PortalVehiclePage({
                   <input type="hidden" name="vehicleId" value={vehicle.id} />
                   <input type="hidden" name="shareId" value={entry.id} />
                   <Button type="submit" size="sm" variant="ghost">
-                    Take it back
+                    {t('Take it back')}
                   </Button>
                 </form>
               </li>
@@ -333,7 +340,7 @@ export default async function PortalVehiclePage({
       </section>
 
       <Card className="mt-5">
-        <CardHeader title="Paperwork" description={paperwork.statement} />
+        <CardHeader title={t('Paperwork')} description={paperwork.statement} />
         {documents.length === 0 ? (
           <CardBody className="text-[13px] text-(--text-soft)">
             Keep the registration certificate, the MOT and the insurance here and they go with the

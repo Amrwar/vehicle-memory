@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Archivo, Fraunces, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
 
 import { THEME_SCRIPT } from '@/components/theme-toggle';
+import { htmlAttributes, tFor } from '@/lib/i18n';
 
 import './globals.css';
 
@@ -77,10 +78,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The per-request nonce the proxy set, so the one inline script the product
   // writes itself is allowed by the policy the proxy sent.
   const nonce = (await headers()).get('x-nonce') ?? undefined;
+  const html = await htmlAttributes();
+  const t = await tFor();
 
   return (
     <html
-      lang="en-GB"
+      lang={html.lang}
+      dir={html.dir}
       className={`${display.variable} ${sans.variable} ${mono.variable} ${document.variable}`}
       suppressHydrationWarning
     >
@@ -94,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-(--surface) focus:px-3 focus:py-2 focus:text-[13px] focus:shadow-lg"
         >
-          Skip to content
+          {t('Skip to content')}
         </a>
         {children}
       </body>

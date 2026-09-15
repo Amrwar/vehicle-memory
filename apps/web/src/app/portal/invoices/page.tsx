@@ -19,6 +19,7 @@ import { requireUser } from '@/lib/guard';
 import { cardPaymentsOffered } from '@/lib/payments/provider';
 import { invoicesFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Invoices' };
 export const dynamic = 'force-dynamic';
@@ -66,6 +67,7 @@ export default async function PortalInvoicesPage({
 }: {
   searchParams: Promise<{ paid?: string; cancelled?: string; problem?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const { paid, cancelled, problem } = await searchParams;
   const region = await regionForUser(user.userId);
@@ -97,7 +99,7 @@ export default async function PortalInvoicesPage({
 
   return (
     <PortalShell active="invoices">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Invoices</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Invoices')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         {invoices.length === 0
           ? 'Nothing has been invoiced to you yet.'
@@ -114,7 +116,7 @@ export default async function PortalInvoicesPage({
         </Alert>
       ) : null}
       {outcome?.status === 'FAILED' ? (
-        <Alert tone="danger" title="That payment did not go through" className="mt-4">
+        <Alert tone="danger" title={t('That payment did not go through')} className="mt-4">
           {outcome.reason ?? 'The provider did not say why.'} Nothing has been taken. You can try
           again, or pay the workshop directly.
         </Alert>
@@ -127,7 +129,7 @@ export default async function PortalInvoicesPage({
       ) : null}
       {cancelled ? (
         <Alert tone="info" className="mt-4">
-          Cancelled. Nothing has been taken.
+          {t('Cancelled. Nothing has been taken.')}
         </Alert>
       ) : null}
       {problem ? (
@@ -139,15 +141,15 @@ export default async function PortalInvoicesPage({
       {invoices.length === 0 ? (
         <EmptyState
           className="mt-5 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-          title="No invoices"
-          description="When a workshop invoices you for work, it appears here and stays."
+          title={t('No invoices')}
+          description={t('When a workshop invoices you for work, it appears here and stays.')}
         />
       ) : null}
 
       {owing.length > 0 ? (
         <section className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-[17px] font-semibold">Outstanding</h2>
+            <h2 className="font-display text-[17px] font-semibold">{t('Outstanding')}</h2>
             <p className="font-display text-[20px] font-semibold">
               <Money amount={owedTotal} currency={currency} />
             </p>
@@ -177,19 +179,19 @@ export default async function PortalInvoicesPage({
                     </p>
 
                     <div className="flex justify-between text-(--text-soft)">
-                      <span>Invoiced</span>
+                      <span>{t('Invoiced')}</span>
                       <Money amount={invoice.totalNumber} currency={invoice.currency} />
                     </div>
 
                     {invoice.paidNumber > 0 ? (
                       <div className="flex justify-between text-(--text-soft)">
-                        <span>Paid so far</span>
+                        <span>{t('Paid so far')}</span>
                         <Money amount={invoice.paidNumber} currency={invoice.currency} />
                       </div>
                     ) : null}
 
                     <div className="flex justify-between border-t border-(--border) pt-1.5 font-medium">
-                      <span>Still to pay</span>
+                      <span>{t('Still to pay')}</span>
                       <Money amount={invoice.outstanding} currency={invoice.currency} />
                     </div>
 
@@ -211,8 +213,9 @@ export default async function PortalInvoicesPage({
                             <path d="M2.5 10h19M6.5 14.5h4" />
                           </svg>
                           <span>
-                            Pay <Money amount={invoice.outstanding} currency={invoice.currency} />{' '}
-                            by card
+                            {t('Pay')}
+                            <Money amount={invoice.outstanding} currency={invoice.currency} /> by
+                            card
                           </span>
                         </Button>
                         <p className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-(--text-faint)">
@@ -229,7 +232,7 @@ export default async function PortalInvoicesPage({
                             <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
                             <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
                           </svg>
-                          Secure checkout. Your card details never reach the workshop.
+                          {t('Secure checkout. Your card details never reach the workshop.')}
                         </p>
                       </form>
                     ) : null}
@@ -250,7 +253,7 @@ export default async function PortalInvoicesPage({
 
       {settled.length > 0 ? (
         <section className="mt-7">
-          <h2 className="font-display text-[17px] font-semibold">Settled</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Settled')}</h2>
           <ul className="mt-3 grid gap-2">
             {settled.map((invoice) => (
               <li

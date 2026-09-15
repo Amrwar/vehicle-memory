@@ -1892,6 +1892,43 @@ the online offer, and reads the three screens.
 Arabic and French as well as English, with a user-chosen language. That is
 planned as Phase 37.5, before Phase 38.
 
+## Phase 37.5 — Languages
+
+**Scope.** The website in English, French and Arabic, with the language
+the person's own choice: on the public site, at sign-in and sign-up, on
+the customer's portal and on the workshop's navigation, with Arabic read
+right to left. Asked for by the user on 15 September 2026.
+
+**Exit.** A customer in Cairo and a workshop in Lyon each read Carnet in
+their own language, chosen once and kept.
+
+**Status.** Built. English is the source of truth: every sentence is
+written in English where it is used and passed through one translator;
+a dictionary per language maps the English sentence to its translation,
+and a sentence with no translation is shown in English and named by the
+coverage script, never shown as a key or a blank. The language is the
+person's choice, on a cookie for a year and, once signed in, on their
+account so the next device follows; else the browser's preference, else
+English. The switcher is three buttons that post a plain form, on the
+public header, the portal header and the workshop navigation, and send
+the person back where they were. The root element carries the language
+tag and the reading direction, so Arabic pages read right to left. This
+phase translates the public site (home, pricing, sign-in, sign-up for a
+workshop and for a driver, forgotten password, the terms), the customer's
+whole portal (home, cars, passports, invoices, updates, rewards,
+workshops, booking, account) and the workshop's navigation and shells:
+around three hundred sentences in each language. The workshop's own pages
+remain in English for now; the coverage script lists every sentence
+without a translation and fails on any, so the remaining pages are
+finished screen by screen as later phases touch them. The verification
+script checks every sentence passed to the translator has both
+translations, reads eight pages in each language for the root element's
+language and direction and a known sentence translated, and checks the
+switcher sets the cookie, saves the choice on a signed-in account and
+never sends anybody off the site. Also this phase: the home page's claim
+that the trial needed no card, untrue since Phase 32.6, replaced with
+what is true; the call to action reads "Start your trial".
+
 ## Phase 38 — Parts back, work out
 
 Returns, defective returns and cores with supplier credits, from receipt to

@@ -178,6 +178,10 @@ export async function startSession(
     path: '/',
     expires: expiresAt,
   });
+
+  // The language they chose last time follows them to this browser. Phase 37.5.
+  const { applySavedLanguage } = await import('./i18n');
+  await applySavedLanguage(userId);
 }
 
 export async function signOut(): Promise<void> {

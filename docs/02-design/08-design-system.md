@@ -248,6 +248,17 @@ the public pricing page the currency of the country picked. Never a pound
 figure beside a dollar one, never a conversion. The sign-up form's country,
 plan and terms sentence are one component so they cannot disagree.
 
+### 12.7 Languages and direction (Phase 37.5)
+
+Every sentence on a translated page goes through `t()`, with the English
+sentence as the key. The root element carries `lang` and `dir`; Arabic is
+`dir="rtl"`, and the layout follows because it is built on flex and grid
+with logical order, not on absolute positions. The switcher is three small
+buttons, the current one filled in the brand colour, in the header of the
+public site and the portal and at the foot of the workshop navigation. A
+sentence without a translation is shown in English rather than as a key:
+half a page in another language is worse than a page in English.
+
 ## 13. Lists that lead with the fault
 
 The passports list (Phase 27) leads with how many chains are sound rather

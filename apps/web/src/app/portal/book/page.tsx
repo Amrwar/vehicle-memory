@@ -22,6 +22,7 @@ import { requireUser } from '@/lib/guard';
 import { requestBooking, servicesFor, slotsFor } from '@/lib/booking';
 import { regionForUser } from '@/lib/region';
 import { bookableWorkshop, customerAt, workshopDirectory, workshopsUsedBy } from '@/lib/workshops';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Book a visit' };
 export const dynamic = 'force-dynamic';
@@ -81,6 +82,7 @@ export default async function BookPage({
 }: {
   searchParams: Promise<{ service?: string; vehicle?: string; error?: string; workshop?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const params = await searchParams;
@@ -123,9 +125,9 @@ export default async function BookPage({
   return (
     <PortalShell active="book">
       <div>
-        <p className="eyebrow mb-2">Book a visit</p>
+        <p className="eyebrow mb-2">{t('Book a visit')}</p>
         <h1 className="font-display text-[24px] font-semibold leading-tight tracking-tight">
-          When suits you?
+          {t('When suits you?')}
         </h1>
         <p className="mt-2 text-[14px] leading-relaxed text-(--text-soft)">
           Every time below is one {customer.org.name} can actually do. Pick one and it is in the
@@ -143,7 +145,7 @@ export default async function BookPage({
             action={
               <form method="get" className="flex items-center gap-2">
                 <label htmlFor="workshop" className="sr-only">
-                  Workshop
+                  {t('Workshop')}
                 </label>
                 <Select id="workshop" name="workshop" defaultValue={org.id} className="w-56">
                   {directory.map((w) => (
@@ -154,7 +156,7 @@ export default async function BookPage({
                   ))}
                 </Select>
                 <Button type="submit" size="sm" variant="secondary">
-                  Change
+                  {t('Change')}
                 </Button>
               </form>
             }
@@ -170,15 +172,17 @@ export default async function BookPage({
         {vehicles.length === 0 ? (
           <Card className="mt-6">
             <EmptyState
-              title="No vehicle on your account yet"
-              description="Add your car first, then you can book online at any workshop on Carnet."
+              title={t('No vehicle on your account yet')}
+              description={t(
+                'Add your car first, then you can book online at any workshop on Carnet.',
+              )}
             />
           </Card>
         ) : (
           <>
             {/* What for. Changing this changes the times, so it reloads. */}
             <Card className="mt-6">
-              <CardHeader title="What needs doing?" />
+              <CardHeader title={t('What needs doing?')} />
               <CardBody className="grid gap-2">
                 {services.map((service) => (
                   <Link
@@ -206,13 +210,13 @@ export default async function BookPage({
                     </span>
                     {chosen?.id === service.id ? (
                       <Badge tone="brand" size="sm">
-                        chosen
+                        {t('chosen')}
                       </Badge>
                     ) : null}
                   </Link>
                 ))}
                 <p className="mt-1 text-[12px] leading-relaxed text-(--text-faint)">
-                  Not sure? Pick the closest and add a note. Nobody minds.
+                  {t('Not sure? Pick the closest and add a note. Nobody minds.')}
                 </p>
               </CardBody>
             </Card>
@@ -224,9 +228,9 @@ export default async function BookPage({
               <input type="hidden" name="description" value={chosen?.name ?? 'Visit'} />
 
               <Card>
-                <CardHeader title="Which vehicle?" />
+                <CardHeader title={t('Which vehicle?')} />
                 <CardBody className="grid gap-3.5">
-                  <Field label="Vehicle">
+                  <Field label={t('Vehicle')}>
                     {/* Preselected when the customer arrived from one
                         vehicle's card, so somebody with three cars does not
                         have to find the one they were just looking at. */}
@@ -240,10 +244,10 @@ export default async function BookPage({
                     </Select>
                   </Field>
 
-                  <Field label="Anything we should know?" hint="Optional">
+                  <Field label={t('Anything we should know?')} hint={t('Optional')}>
                     <Input
                       name="notes"
-                      placeholder="Noise from the front when braking."
+                      placeholder={t('Noise from the front when braking.')}
                       maxLength={280}
                     />
                   </Field>
@@ -252,14 +256,14 @@ export default async function BookPage({
 
               <Card>
                 <CardHeader
-                  title="When?"
+                  title={t('When?')}
                   description={
                     slots.length > 0 ? 'Times the workshop genuinely has free' : undefined
                   }
                 />
                 {slots.length === 0 ? (
                   <EmptyState
-                    title="Nothing free in the next fortnight"
+                    title={t('Nothing free in the next fortnight')}
                     description={
                       customer.org.phone
                         ? `The diary is full for this length of work. Ring ${customer.org.phone} and they will find something.`
@@ -299,13 +303,14 @@ export default async function BookPage({
 
               {slots.length > 0 ? (
                 <Button type="submit" variant="primary" size="touch" block>
-                  Book it
+                  {t('Book it')}
                 </Button>
               ) : null}
 
               <p className="text-center text-[12px] leading-relaxed text-(--text-faint)">
-                You will get a confirmation, and a message if the work needs a decision from you.
-                Nothing else, because a message about everything is a message about nothing.
+                {t(
+                  'You will get a confirmation, and a message if the work needs a decision from you. Nothing else, because a message about everything is a message about nothing.',
+                )}
               </p>
             </form>
           </>

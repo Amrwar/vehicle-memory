@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { workshopDirectory, workshopsUsedBy } from '@/lib/workshops';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Workshops' };
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ export default async function PortalWorkshopsPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const { q } = await searchParams;
   const [workshops, used] = await Promise.all([workshopDirectory(q), workshopsUsedBy(user.userId)]);
@@ -37,7 +39,7 @@ export default async function PortalWorkshopsPage({
               <h3 className="font-display text-[17px] font-semibold leading-tight">{w.name}</h3>
               {used.has(w.id) ? (
                 <Badge tone="brand" size="sm">
-                  You have been here
+                  {t('You have been here')}
                 </Badge>
               ) : null}
             </div>
@@ -64,13 +66,13 @@ export default async function PortalWorkshopsPage({
                   rel="noreferrer"
                   className="text-(--brand-text) underline"
                 >
-                  Website
+                  {t('Website')}
                 </a>
               ) : null}
             </p>
           </div>
           <Link href={`/portal/book?workshop=${w.id}`}>
-            <Button variant={used.has(w.id) ? 'secondary' : 'primary'}>Book here</Button>
+            <Button variant={used.has(w.id) ? 'secondary' : 'primary'}>{t('Book here')}</Button>
           </Link>
         </CardBody>
       </Card>
@@ -79,7 +81,7 @@ export default async function PortalWorkshopsPage({
 
   return (
     <PortalShell active="workshops">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Workshops</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Workshops')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
         Every workshop on Carnet. Book at any of them; your car&apos;s history goes with you.
       </p>
@@ -88,11 +90,11 @@ export default async function PortalWorkshopsPage({
         <Input
           name="q"
           defaultValue={q ?? ''}
-          placeholder="Search by name, town or postcode"
-          aria-label="Search workshops"
+          placeholder={t('Search by name, town or postcode')}
+          aria-label={t('Search workshops')}
         />
         <Button type="submit" variant="secondary">
-          Search
+          {t('Search')}
         </Button>
       </form>
 
@@ -110,7 +112,7 @@ export default async function PortalWorkshopsPage({
 
       {mine.length > 0 ? (
         <section className="mt-6">
-          <h2 className="eyebrow mb-3">Your workshops</h2>
+          <h2 className="eyebrow mb-3">{t('Your workshops')}</h2>
           <ul className="grid gap-3">{mine.map(card)}</ul>
         </section>
       ) : null}

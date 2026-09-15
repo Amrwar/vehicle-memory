@@ -3,7 +3,7 @@
   "counts": {
     "models": 138,
     "enums": 68,
-    "fields": 2168
+    "fields": 2169
   },
   "enums": [
     "OrgPlan",
@@ -108,7 +108,7 @@
         {
           "name": "User",
           "comment": "",
-          "fields": 12,
+          "fields": 13,
           "relations": [],
           "scope": "global"
         },

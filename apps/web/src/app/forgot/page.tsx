@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { canSendMail, requestReset, RESET_REQUESTED_MESSAGE } from '@/lib/credentials';
+import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,13 +43,16 @@ export default async function ForgotPage({
 }: {
   searchParams: Promise<{ sent?: string }>;
 }) {
+  const t = await tFor();
   const { sent } = await searchParams;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-5 py-12">
       <p className="text-[12px] font-medium tracking-wide text-(--brand-text) uppercase">Carnet</p>
 
-      <h1 className="font-display text-[24px] leading-tight font-semibold">Set a new password</h1>
+      <h1 className="font-display text-[24px] leading-tight font-semibold">
+        {t('Set a new password')}
+      </h1>
 
       {sent ? (
         <>
@@ -57,28 +61,30 @@ export default async function ForgotPage({
           </Card>
 
           <p className="text-[13px] leading-relaxed text-(--text-faint)">
-            Nothing has changed on your account yet. Your current password still works until you
-            open the link and set a new one.
+            {t(
+              'Nothing has changed on your account yet. Your current password still works until you open the link and set a new one.',
+            )}
           </p>
 
           <Link
             href="/login"
             className="text-[14px] font-medium text-(--brand-text) hover:underline"
           >
-            Back to signing in
+            {t('Back to signing in')}
           </Link>
         </>
       ) : (
         <>
           <p className="text-[15px] leading-relaxed text-(--text-soft)">
-            Give us the address you sign in with and we will send a link. It lasts an hour, and
-            asking again replaces whatever was sent before.
+            {t(
+              'Give us the address you sign in with and we will send a link. It lasts an hour, and asking again replaces whatever was sent before.',
+            )}
           </p>
 
           <Card>
             <form action={ask}>
               <CardBody className="grid gap-4">
-                <Field label="Email address">
+                <Field label={t('Email address')}>
                   <Input
                     type="email"
                     name="email"
@@ -90,7 +96,7 @@ export default async function ForgotPage({
                 </Field>
 
                 <Button type="submit" variant="primary">
-                  Send the link
+                  {t('Send the link')}
                 </Button>
               </CardBody>
             </form>
@@ -98,21 +104,23 @@ export default async function ForgotPage({
 
           {canSendMail() ? null : (
             <p className="text-[13px] leading-relaxed text-(--warning)">
-              This deployment has no mail transport configured, so the link will be written to the
-              server log rather than sent. Whoever runs it can read it there.
+              {t(
+                'This deployment has no mail transport configured, so the link will be written to the server log rather than sent. Whoever runs it can read it there.',
+              )}
             </p>
           )}
 
           <p className="text-[13px] leading-relaxed text-(--text-faint)">
-            We answer the same way whether or not that address has an account. Otherwise this form
-            would be a way for anybody to find out who does.
+            {t(
+              'We answer the same way whether or not that address has an account. Otherwise this form would be a way for anybody to find out who does.',
+            )}
           </p>
 
           <Link
             href="/login"
             className="text-[14px] font-medium text-(--brand-text) hover:underline"
           >
-            Back to signing in
+            {t('Back to signing in')}
           </Link>
         </>
       )}

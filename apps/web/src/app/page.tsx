@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MarketingFooter, MarketingHeader, Section, SectionHead } from '@/components/marketing';
 import { PassportBooklet } from '@/components/passport-booklet';
 import { currentUser } from '@/lib/auth';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: 'Carnet — workshop management with a service history that follows the car',
@@ -29,6 +30,7 @@ export const dynamic = 'force-dynamic';
  * proposition, and a full-viewport opener pushes the proposition off it.
  */
 export default async function HomePage() {
+  const t = await tFor();
   const user = await currentUser();
 
   return (
@@ -40,14 +42,14 @@ export default async function HomePage() {
         <section className="border-b border-(--border) bg-(--surface) px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto grid max-w-[1180px] items-center gap-10 lg:grid-cols-[1.05fr_1fr]">
             <div>
-              <p className="eyebrow mb-3">Workshop management · Vehicle passport</p>
+              <p className="eyebrow mb-3">{t('Workshop management · Vehicle passport')}</p>
               <h1 className="font-display text-[clamp(2rem,6vw,3.15rem)] font-bold leading-[1.05] tracking-[-0.02em]">
-                The history should belong to the car.
+                {t('The history should belong to the car.')}
               </h1>
               <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-(--text-soft)">
-                Carnet runs the diary, the job, the inspection, the parts and the books. Every
-                completed job also writes to a permanent record the vehicle keeps, verifiable by
-                whoever owns it next.
+                {t(
+                  'Carnet runs the diary, the job, the inspection, the parts and the books. Every completed job also writes to a permanent record the vehicle keeps, verifiable by whoever owns it next.',
+                )}
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -58,7 +60,7 @@ export default async function HomePage() {
                     'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
                   )}
                 >
-                  Start a 14-day trial
+                  {t('Start a 14-day trial')}
                 </Link>
                 <Link
                   href="/p/demo-share-token"
@@ -67,12 +69,14 @@ export default async function HomePage() {
                     'text-[15px] transition-colors hover:bg-(--surface-sunk)',
                   )}
                 >
-                  See a real passport
+                  {t('See a real passport')}
                 </Link>
               </div>
 
               <p className="mt-3.5 text-[13px] text-(--text-faint)">
-                No card. The trial creates a real workshop you keep.
+                {t(
+                  'Fourteen days free, then billed monthly per bay. Cancel before the trial ends and nothing is charged.',
+                )}
               </p>
             </div>
 
@@ -89,8 +93,8 @@ export default async function HomePage() {
         {/* --- the problem ------------------------------------------------ */}
         <Section id="how">
           <SectionHead
-            eyebrow="The problem"
-            title="A car outlives every system that ever recorded it"
+            eyebrow={t('The problem')}
+            title={t('A car outlives every system that ever recorded it')}
             lede="Three garages, two owners and eleven years later, the folder in the glovebox is a stack of receipts and a guess. The work was real. The evidence is gone."
           />
 
@@ -122,8 +126,8 @@ export default async function HomePage() {
           <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
             <div>
               <SectionHead
-                eyebrow="What makes this different"
-                title="A record the vehicle keeps"
+                eyebrow={t('What makes this different')}
+                title={t('A record the vehicle keeps')}
                 lede="Every completed job writes entries against the car itself: the work, the parts, the mileage, the photographs. Not against your customer record. Against the VIN."
               />
 
@@ -167,8 +171,8 @@ export default async function HomePage() {
         {/* --- what it does ----------------------------------------------- */}
         <Section id="features">
           <SectionHead
-            eyebrow="What it does"
-            title="The whole job, from the phone call to the ledger"
+            eyebrow={t('What it does')}
+            title={t('The whole job, from the phone call to the ledger')}
             lede="One data model, so the estimate the customer approved is the job the technician worked, is the invoice they paid, is the entry in the accounts. Nothing is re-keyed."
           />
 
@@ -210,8 +214,8 @@ export default async function HomePage() {
         {/* --- the day ---------------------------------------------------- */}
         <Section tone="surface">
           <SectionHead
-            eyebrow="A Tuesday"
-            title="What the flow actually looks like"
+            eyebrow={t('A Tuesday')}
+            title={t('What the flow actually looks like')}
             lede="Every step below writes to the same job. The passport entries at the end are produced by the work, not typed in afterwards."
           />
 
@@ -248,8 +252,8 @@ export default async function HomePage() {
         {/* --- pricing teaser --------------------------------------------- */}
         <Section>
           <SectionHead
-            eyebrow="Pricing"
-            title="Priced per bay, published in full"
+            eyebrow={t('Pricing')}
+            title={t('Priced per bay, published in full')}
             lede="Three plans, and unlimited staff accounts on every one. The vehicle passport is in all of them, because a network nobody can join is not a network."
             align="centre"
           />
@@ -270,7 +274,7 @@ export default async function HomePage() {
                     <h3 className="font-display text-[16px] font-semibold">{plan.name}</h3>
                     {plan.popular ? (
                       <span className="rounded-(--radius-xs) bg-(--brand-soft) px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
-                        Most chosen
+                        {t('Most chosen')}
                       </span>
                     ) : null}
                   </div>
@@ -281,7 +285,7 @@ export default async function HomePage() {
                     <span className="tabular font-display text-[26px] font-semibold">
                       £{plan.price.minor / 100}
                     </span>
-                    <span className="text-[12px] text-(--text-faint)"> /bay /month</span>
+                    <span className="text-[12px] text-(--text-faint)">{t('/bay /month')}</span>
                   </p>
                 </div>
               );
@@ -293,7 +297,7 @@ export default async function HomePage() {
               href="/pricing"
               className="text-[14px] text-(--brand-text) underline underline-offset-4 hover:opacity-80"
             >
-              See what each plan includes
+              {t('See what each plan includes')}
             </Link>
           </p>
         </Section>
@@ -302,24 +306,25 @@ export default async function HomePage() {
         <section className="bg-(--color-petrol-900) px-4 py-14 text-(--color-petrol-50) sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-[clamp(1.5rem,4vw,2.1rem)] font-semibold leading-tight tracking-tight">
-              Start with one car
+              {t('Start with one car')}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-(--color-petrol-100)">
-              Put the next job through it. At the end you will have an invoice, a set of accounts
-              that balance, and one vehicle with a history it keeps for the rest of its life.
+              {t(
+                'Put the next job through it. At the end you will have an invoice, a set of accounts that balance, and one vehicle with a history it keeps for the rest of its life.',
+              )}
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link
                 href="/signup"
                 className="rounded-(--radius-md) bg-(--color-brass-400) px-5 py-3 text-[15px] font-medium text-(--color-petrol-950) shadow-sm transition-opacity hover:opacity-90"
               >
-                Start a 14-day trial
+                {t('Start a 14-day trial')}
               </Link>
               <Link
                 href="/pricing"
                 className="rounded-(--radius-md) border border-(--color-petrol-700) px-5 py-3 text-[15px] transition-colors hover:bg-(--color-petrol-800)"
               >
-                See pricing
+                {t('See pricing')}
               </Link>
             </div>
 
@@ -351,10 +356,11 @@ export default async function HomePage() {
    --------------------------------------------------------------------------- */
 
 /** A fragment of a real passport entry, at the level of detail it carries. */
-function PassportSample() {
+async function PassportSample() {
+  const t = await tFor();
   return (
     <div className="rounded-(--radius-xl) border border-(--border) bg-(--ground) p-5 shadow-sm">
-      <p className="eyebrow mb-3">An entry, as the next owner sees it</p>
+      <p className="eyebrow mb-3">{t('An entry, as the next owner sees it')}</p>
 
       <div className="grid gap-3">
         {[
@@ -390,8 +396,9 @@ function PassportSample() {
       </div>
 
       <p className="mt-3.5 text-[12px] leading-relaxed text-(--text-faint)">
-        The declined advisory is in the record too. A history that only shows what was sold is a
-        sales document, not a history.
+        {t(
+          'The declined advisory is in the record too. A history that only shows what was sold is a sales document, not a history.',
+        )}
       </p>
     </div>
   );

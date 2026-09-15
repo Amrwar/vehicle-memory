@@ -17,6 +17,7 @@ import Link from 'next/link';
 
 import { MarketingFooter, MarketingHeader, Section, SectionHead } from '@/components/marketing';
 import { currentUser } from '@/lib/auth';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -64,6 +65,7 @@ export default async function PricingPage({
 }: {
   searchParams: Promise<{ billing?: string; country?: string }>;
 }) {
+  const t = await tFor();
   const user = await currentUser();
   const { billing, country: countryParam } = await searchParams;
   const annual = billing !== 'monthly';
@@ -79,9 +81,9 @@ export default async function PricingPage({
       <main id="main">
         <Section tone="surface">
           <SectionHead
-            eyebrow="Pricing"
+            eyebrow={t('Pricing')}
             primary
-            title="Per bay, per month, published in full"
+            title={t('Per bay, per month, published in full')}
             lede="Priced per bay, because bays are what a workshop earns from. Staff accounts are unlimited on every plan: charging per user would bill you for giving your own people access."
             align="centre"
           />
@@ -89,7 +91,7 @@ export default async function PricingPage({
           <div className="mt-7 flex justify-center">
             <div
               role="group"
-              aria-label="Billing period"
+              aria-label={t('Billing period')}
               className="inline-flex gap-0.5 rounded-(--radius-md) border border-(--border) bg-(--surface-sunk) p-0.5"
             >
               <Link
@@ -101,7 +103,7 @@ export default async function PricingPage({
                     : 'text-(--text-faint) hover:text-(--text)',
                 )}
               >
-                Annual
+                {t('Annual')}
               </Link>
               <Link
                 href={`/pricing?billing=monthly&country=${country.code}`}
@@ -112,7 +114,7 @@ export default async function PricingPage({
                     : 'text-(--text-faint) hover:text-(--text)',
                 )}
               >
-                Monthly
+                {t('Monthly')}
               </Link>
             </div>
           </div>
@@ -120,7 +122,7 @@ export default async function PricingPage({
           <form method="get" className="mt-4 flex items-center justify-center gap-2 text-[13px]">
             <input type="hidden" name="billing" value={annual ? 'annual' : 'monthly'} />
             <label htmlFor="pricing-country" className="text-(--text-faint)">
-              Prices in the currency of
+              {t('Prices in the currency of')}
             </label>
             <select
               id="pricing-country"
@@ -138,7 +140,7 @@ export default async function PricingPage({
               type="submit"
               className="cursor-pointer rounded-(--radius-sm) border border-(--border-strong) px-2.5 py-1 font-medium"
             >
-              Show
+              {t('Show')}
             </button>
           </form>
 
@@ -161,7 +163,7 @@ export default async function PricingPage({
                     <h2 className="font-display text-[19px] font-semibold">{plan.name}</h2>
                     {plan.popular ? (
                       <span className="rounded-(--radius-xs) bg-(--brand-soft) px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
-                        Most chosen
+                        {t('Most chosen')}
                       </span>
                     ) : null}
                   </div>
@@ -174,7 +176,9 @@ export default async function PricingPage({
                     <span className="tabular font-display text-[38px] font-bold leading-none">
                       {show(price.minor)}
                     </span>
-                    <span className="text-[13px] text-(--text-faint)">per bay, per month</span>
+                    <span className="text-[13px] text-(--text-faint)">
+                      {t('per bay, per month')}
+                    </span>
                   </p>
 
                   <p className="mt-1.5 text-[12px] text-(--text-faint)">
@@ -184,7 +188,7 @@ export default async function PricingPage({
                         {show(planPrice(id, currency, 'monthly').minor)} monthly.
                       </>
                     ) : (
-                      <>Billed monthly. Cancel any time.</>
+                      <>{t('Billed monthly. Cancel any time.')}</>
                     )}
                   </p>
 
@@ -224,8 +228,8 @@ export default async function PricingPage({
         {/* --- the table -------------------------------------------------- */}
         <Section id="compare">
           <SectionHead
-            eyebrow="Compare"
-            title="What each plan actually includes"
+            eyebrow={t('Compare')}
+            title={t('What each plan actually includes')}
             lede="Limits are counted and enforced. When a workshop reaches one, the system says so before it stops rather than after."
           />
 
@@ -234,7 +238,7 @@ export default async function PricingPage({
               <thead>
                 <tr className="border-b border-(--border)">
                   <th scope="col" className="p-3.5 text-left font-medium">
-                    <span className="eyebrow">Limits</span>
+                    <span className="eyebrow">{t('Limits')}</span>
                   </th>
                   {PLAN_ORDER.map((id) => (
                     <th key={id} scope="col" className="p-3.5 text-right font-semibold">
@@ -255,7 +259,7 @@ export default async function PricingPage({
                       return (
                         <td key={id} className="tabular p-3.5 text-right">
                           {value >= NO_LIMIT ? (
-                            <span className="text-(--text-faint)">No limit</span>
+                            <span className="text-(--text-faint)">{t('No limit')}</span>
                           ) : (
                             value.toLocaleString('en-GB')
                           )}
@@ -267,7 +271,7 @@ export default async function PricingPage({
 
                 <tr className="border-b border-(--border) bg-(--surface-sunk)">
                   <th scope="row" colSpan={4} className="p-3.5 text-left">
-                    <span className="eyebrow">Features</span>
+                    <span className="eyebrow">{t('Features')}</span>
                   </th>
                 </tr>
 
@@ -281,10 +285,10 @@ export default async function PricingPage({
                         {PLANS[id].features[feature] ? (
                           <span className="inline-flex justify-end">
                             <Tick />
-                            <span className="sr-only">Included</span>
+                            <span className="sr-only">{t('Included')}</span>
                           </span>
                         ) : (
-                          <span className="text-(--text-faint)" aria-label="Not included">
+                          <span className="text-(--text-faint)" aria-label={t('Not included')}>
                             —
                           </span>
                         )}
@@ -299,7 +303,10 @@ export default async function PricingPage({
 
         {/* --- questions --------------------------------------------------- */}
         <Section tone="surface">
-          <SectionHead eyebrow="Questions" title="The ones worth answering before you start" />
+          <SectionHead
+            eyebrow={t('Questions')}
+            title={t('The ones worth answering before you start')}
+          />
 
           <div className="mt-8 grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border) md:grid-cols-2">
             {[
@@ -343,16 +350,16 @@ export default async function PricingPage({
         <section className="bg-(--color-petrol-900) px-4 py-14 text-(--color-petrol-50) sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-[clamp(1.4rem,4vw,2rem)] font-semibold tracking-tight">
-              Still deciding?
+              {t('Still deciding?')}
             </h2>
             <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-(--color-petrol-100)">
-              Open a passport and see what a car carries. No account, no form.
+              {t('Open a passport and see what a car carries. No account, no form.')}
             </p>
             <Link
               href="/p/demo-share-token"
               className="mt-6 inline-block rounded-(--radius-md) bg-(--color-brass-400) px-5 py-3 text-[15px] font-medium text-(--color-petrol-950) transition-opacity hover:opacity-90"
             >
-              Open a passport
+              {t('Open a passport')}
             </Link>
           </div>
         </section>

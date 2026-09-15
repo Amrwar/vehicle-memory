@@ -7,9 +7,11 @@ import { Suspense } from 'react';
 import { AccessNotice } from '@/components/access-notice';
 import { WorkshopNav } from '@/components/workshop-nav';
 import { requireSession } from '@/lib/guard';
+import { currentLanguage } from '@/lib/i18n';
 
 export default async function WorkshopLayout({ children }: { children: React.ReactNode }) {
   const { user, db } = await requireSession();
+  const language = await currentLanguage();
 
   // A technician who reaches a workshop URL is sent to the shop floor rather
   // than shown an access-denied page. Their interface is different by design,
@@ -43,6 +45,7 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
         orgName={user.orgName ?? 'Workshop'}
         userName={user.name}
         approvalsWaiting={approvalsWaiting}
+        language={language}
       />
       <main id="main" tabIndex={-1} className="outline-none lg:pl-64">
         <div className="mx-auto max-w-[1500px] px-4 pb-16 pt-16 lg:px-8 lg:pt-8">

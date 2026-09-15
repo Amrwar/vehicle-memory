@@ -8,6 +8,7 @@ import { PortalShell } from '@/components/portal-shell';
 import { requireUser } from '@/lib/guard';
 import { decisionPreview, DecisionError, estimateForCustomer, recordDecision } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Your quote' };
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,7 @@ export default async function PortalEstimatePage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const { id } = await params;
@@ -81,7 +83,7 @@ export default async function PortalEstimatePage({
 
       {preview.blockedReason ? (
         <Alert tone="info" className="mt-4">
-          Your workshop can send a fresh quote whenever you are ready.
+          {t('Your workshop can send a fresh quote whenever you are ready.')}
         </Alert>
       ) : null}
     </PortalShell>

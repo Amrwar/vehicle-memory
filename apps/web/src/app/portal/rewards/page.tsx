@@ -6,6 +6,7 @@ import { requireUser } from '@/lib/guard';
 import { pointsForPortalUser } from '@/lib/loyalty';
 import { referralsForPortalUser } from '@/lib/referrals';
 import { regionForUser } from '@/lib/region';
+import { tFor } from '@/lib/i18n';
 
 export const metadata: Metadata = { title: 'Rewards' };
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,7 @@ export const dynamic = 'force-dynamic';
  * worth, when they lapse, and the code that brings a friend.
  */
 export default async function PortalRewardsPage() {
+  const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const [points, referrals] = await Promise.all([
@@ -28,34 +30,38 @@ export default async function PortalRewardsPage() {
 
   return (
     <PortalShell active="rewards">
-      <h1 className="font-display text-[24px] font-semibold leading-tight">Rewards</h1>
+      <h1 className="font-display text-[24px] font-semibold leading-tight">{t('Rewards')}</h1>
       <p className="mt-1 text-[14px] text-(--text-soft)">
-        Points from the workshops you use, and a code that brings a friend.
+        {t('Points from the workshops you use, and a code that brings a friend.')}
       </p>
 
       {points.length === 0 && referrals.length === 0 ? (
         <EmptyState
           className="mt-5 rounded-(--radius-lg) border border-(--border) bg-(--surface)"
-          title="Nothing here yet"
-          description="When a workshop you use runs a loyalty scheme, your points and your referral code appear here."
+          title={t('Nothing here yet')}
+          description={t(
+            'When a workshop you use runs a loyalty scheme, your points and your referral code appear here.',
+          )}
         />
       ) : null}
 
       {points.length > 0 ? (
         <section className="mt-6">
-          <h2 className="font-display text-[17px] font-semibold">Your points</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Your points')}</h2>
           <ul className="mt-3 grid gap-3">
             {points.map((card) => (
               <li key={card.customerId}>
                 <Card>
                   <CardHeader
                     title={card.workshop}
-                    description="Ask at the counter to use them, or they come off your next bill there."
+                    description={t(
+                      'Ask at the counter to use them, or they come off your next bill there.',
+                    )}
                     action={
                       <p className="font-display text-[26px] font-semibold tabular-nums leading-none">
                         {card.balance.toLocaleString(region.locale)}
                         <span className="ml-1 text-[12px] font-normal text-(--text-faint)">
-                          points
+                          {t('points')}
                         </span>
                       </p>
                     }
@@ -91,10 +97,11 @@ export default async function PortalRewardsPage() {
 
       {referrals.length > 0 ? (
         <section className="mt-8">
-          <h2 className="font-display text-[17px] font-semibold">Bring a friend</h2>
+          <h2 className="font-display text-[17px] font-semibold">{t('Bring a friend')}</h2>
           <p className="mt-1 text-[13px] text-(--text-soft)">
-            Give the code to somebody who has not been to that workshop. It pays once they have had
-            work done, not for signing up.
+            {t(
+              'Give the code to somebody who has not been to that workshop. It pays once they have had work done, not for signing up.',
+            )}
           </p>
           <ul className="mt-3 grid gap-3">
             {referrals.map((card) => (

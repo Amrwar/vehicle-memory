@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-6700 — Languages
+
+| Ref     | Requirement                                                                                                                                                                              | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-6701 | The product MUST be readable in English, French and Arabic, the language chosen by the person: a cookie for a year and, when signed in, saved on the account so the next device follows. | 37.5  |
+| FR-6702 | The root element MUST carry the language tag and the reading direction, and Arabic MUST read right to left.                                                                              | 37.5  |
+| FR-6703 | English MUST be the source of truth: a sentence with no translation MUST be shown in English, never as a key or a blank, and the coverage script MUST name it and fail.                  | 37.5  |
+| FR-6704 | The switcher MUST work without a script from any page, send the person back where they were, and never off the site.                                                                     | 37.5  |
+| FR-6705 | The public site, sign-in and sign-up, the customer's portal and the workshop's navigation MUST be translated in this phase; the remaining pages MUST be listed by the coverage script.   | 37.5  |
+
 ## FR-6600 — Packages and templates
 
 | Ref     | Requirement                                                                                                                                                                                         | Phase |
