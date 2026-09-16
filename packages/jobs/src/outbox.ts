@@ -1,5 +1,6 @@
 import { prisma } from '@carnet/db';
 
+import { claimOutbox } from './claim';
 import { log } from './log';
 
 /**
@@ -14,7 +15,9 @@ import { log } from './log';
  *
  * Every function here is safe to call concurrently and safe to call again. The
  * two drivers can overlap, a schedule can fire twice, and a deploy can land
- * mid-batch. Each one claims what it is working on before it works on it.
+ * mid-batch. Each one claims what it is working on before it works on it —
+ * see claim.ts, which is where that sentence became true rather than
+ * aspirational. Phase 46.
  */
 
 const BATCH_SIZE = Number(process.env.WORKER_BATCH ?? 25);
@@ -55,10 +58,16 @@ const HANDLERS: Record<string, Handler> = {
 };
 
 export async function dispatchOutbox(): Promise<number> {
+  // Claimed before it is read, so an overlapping worker steps over these
+  // rows rather than handling them a second time. The claim also counts the
+  // attempt: an event that takes the process down with it runs out of tries
+  // like any other, instead of being retried for ever by whoever restarts.
+  const claimed = await claimOutbox(BATCH_SIZE);
+  if (claimed.length === 0) return 0;
+
   const due = await prisma.outboxEvent.findMany({
-    where: { processedAt: null, availableAt: { lte: new Date() } },
+    where: { id: { in: claimed } },
     orderBy: { createdAt: 'asc' },
-    take: BATCH_SIZE,
   });
 
   let handled = 0;
@@ -84,11 +93,12 @@ export async function dispatchOutbox(): Promise<number> {
       await handler((event.payload ?? {}) as Record<string, unknown>);
       await prisma.outboxEvent.update({
         where: { id: event.id },
-        data: { processedAt: new Date(), attempts: event.attempts + 1 },
+        data: { processedAt: new Date() },
       });
       handled += 1;
     } catch (error) {
-      const attempts = event.attempts + 1;
+      // Already counted at the claim; this is what that attempt came to.
+      const attempts = event.attempts;
       const message = error instanceof Error ? error.message : String(error);
 
       // Exponential backoff, capped. A poison message eventually stops
@@ -98,7 +108,6 @@ export async function dispatchOutbox(): Promise<number> {
       await prisma.outboxEvent.update({
         where: { id: event.id },
         data: {
-          attempts,
           lastError: message,
           availableAt: new Date(Date.now() + backoffMs),
           ...(attempts >= MAX_ATTEMPTS ? { processedAt: new Date() } : {}),

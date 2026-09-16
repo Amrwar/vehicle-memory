@@ -89,6 +89,7 @@ model Organization {
 
   locations           Location[]
   memberships         Membership[]
+  onceRequests        OnceRequest[]
   customers           Customer[]
   bookings            Booking[]
   jobs                Job[]
@@ -437,6 +438,41 @@ model AuditLog {
 /// Transactional outbox. Domain events are written in the same transaction as
 /// the state change, then dispatched by the worker. At-least-once, so every
 /// handler must be idempotent. ADR-0007.
+/// One request, once. Phase 46.
+///
+/// A key written before the work and checked before it is repeated. The
+/// browser mints it when the form is drawn, so every press of that particular
+/// button carries the same key and a second press lands on the unique index
+/// rather than on a second payment. A deliberate second payment comes from a
+/// freshly drawn form, and therefore a different key, and goes through.
+///
+/// Rows are swept after a month: long enough to outlast any retry a provider
+/// or a person will send, short enough that this does not become a second
+/// copy of everything that ever happened.
+model OnceRequest {
+  id    String @id @default(cuid())
+  orgId String
+  /// What the request is the one-and-only of.
+  key   String
+
+  /// Null while the work is still going. A claim that never finished is
+  /// retaken once it is plainly not coming back, so a process that died
+  /// holding a key does not lock a workshop out of taking a payment.
+  doneAt    DateTime?
+  /// What the first attempt produced, so a repeat can be sent to the same
+  /// place rather than told nothing happened.
+  resultRef String?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, key])
+  @@index([expiresAt])
+  @@map("once_requests")
+}
+
 model OutboxEvent {
   id          String    @id @default(cuid())
   orgId       String?
@@ -2074,6 +2110,7 @@ enum SequenceKind {
   CREDIT_NOTE
   PURCHASE_ORDER
   COUNTER_SALE
+  EXPENSE
 }
 
 model Invoice {
@@ -2249,6 +2286,7 @@ model Refund {
   customer     Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
   recordedBy   User?           @relation("RefundRecorder", fields: [recordedByUserId], references: [id], onDelete: SetNull)
   keptAsCredit Deposit[]
+  ontoCard     GiftCardEntry[]
   attempt      PaymentAttempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
 
   @@index([orgId, refundedAt])
@@ -3070,6 +3108,13 @@ model JournalEntry {
 
   @@index([orgId, postedAt])
   @@index([sourceType, sourceId])
+  /// One posting per source document. The ledger is posted outside the
+  /// transaction that wrote the document it describes, deliberately, so that
+  /// a momentary ledger failure cannot undo money a customer has already
+  /// handed over — which means a retry must be free. Until Phase 46 that was
+  /// a sentence in a comment and a findFirst; this is what makes it true when
+  /// two retries arrive at once.
+  @@unique([orgId, sourceType, sourceId, reference], map: "journal_entries_one_per_document")
   @@map("journal_entries")
 }
 
@@ -3567,6 +3612,13 @@ model LoyaltyEntry {
   points Int
   reason String
 
+  /// What this entry is the one-and-only of, where there is such a thing:
+  /// "invoice:<id>:paid", "referral:<id>:referrer". Null for entries a
+  /// customer may legitimately have two of. The partial unique index below
+  /// is what makes a retry, a double-click or two workers land one row
+  /// rather than two. Phase 46.
+  once String?
+
   jobId     String?
   /// Awards lapse; spends never do.
   expiresAt DateTime?
@@ -3611,6 +3663,8 @@ model Referral {
 
   @@unique([orgId, code])
   @@index([orgId, creditedAt])
+  /// One code per customer per workshop. Phase 46.
+  @@unique([orgId, referrerCustomerId], map: "referrals_one_per_customer")
   @@map("referrals")
 }
 
@@ -4690,6 +4744,9 @@ model GiftCardEntry {
   paymentId     String?
   invoiceId     String?
   counterSaleId String?
+  /// The refund that put money back on the card. One entry per refund, which
+  /// is what stops a retried refund loading the card twice. Phase 46.
+  refundId      String?
 
   createdByUserId String?
   createdAt       DateTime @default(now())
@@ -4699,6 +4756,7 @@ model GiftCardEntry {
   payment     Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   invoice     Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   counterSale CounterSale? @relation(fields: [counterSaleId], references: [id], onDelete: SetNull)
+  refund      Refund?      @relation(fields: [refundId], references: [id], onDelete: SetNull)
   createdBy   User?        @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
 
   @@index([giftCardId, createdAt])

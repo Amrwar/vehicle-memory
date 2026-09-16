@@ -51,6 +51,14 @@ export interface RefundRequest {
   amountMinor: number;
   currency: string;
   reason: string;
+  /**
+   * What this refund is the one-and-only of, handed to the provider so that a
+   * retried request is the same refund rather than a second one. Built from
+   * the bill and the credit note, never from the clock: a key that changes
+   * between attempts makes two attempts at one refund look like two refunds,
+   * which is the failure it exists to prevent. Phase 46.
+   */
+  idempotencyKey?: string;
 }
 
 export interface RefundResult {

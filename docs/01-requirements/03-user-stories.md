@@ -1642,6 +1642,57 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AV — Doing it twice (Phase 46)
+
+### AV1 — The button that did not seem to do anything
+
+**As** Priya **I want** pressing twice not to charge twice **so that** a slow
+connection is not something a customer pays for.
+**Size** 8 · **Satisfies** FR-7801, FR-7802, FR-7803
+
+- **Given** a payment form, **when** I press the button twice, **then** one
+  payment is recorded and the second press is quietly absorbed.
+- **Given** the form, **when** it is in flight, **then** the button says it is
+  working and cannot be pressed again.
+- **Given** the same bill tomorrow, **when** I take another payment, **then**
+  it goes through, because that is a different decision.
+
+### AV2 — The points that never arrived
+
+**As** Ahmed **I want** what a bill earns to arrive even if something failed at
+that moment **so that** a customer is not quietly short-changed by an outage
+nobody saw.
+**Size** 5 · **Satisfies** FR-7806
+
+- **Given** a bill paid while the loyalty write fails, **when** the payment
+  finishes, **then** the payment still stands and nothing is shown as an error.
+- **Given** the next hour, **when** the sweep runs, **then** the points are
+  there, once.
+
+### AV3 — Two workers, one queue
+
+**As** Ahmed **I want** a deploy not to send my customers two of everything
+**so that** overlapping workers are an implementation detail rather than an
+apology.
+**Size** 5 · **Satisfies** FR-7804, FR-7805
+
+- **Given** two workers reaching for one queued message, **when** both claim,
+  **then** exactly one gets it.
+- **Given** a worker that died holding a claim, **when** the lease runs out,
+  **then** another worker picks the work up.
+
+### AV4 — Saying so, and proving it
+
+**As** a developer **I want** every write that moves money to say what a repeat
+does to it **so that** the next person to add one cannot quietly leave the
+question unanswered.
+**Size** 5 · **Satisfies** FR-7807, FR-7808
+
+- **Given** a new write in a money file, **when** it has no declaration,
+  **then** the build fails and names it.
+- **Given** a declaration claiming a guard, **when** it cannot name the guard,
+  **then** the build refuses it as a hope rather than a guard.
+
 ## Epic AU — Coupons (Phase 45.5)
 
 ### AU1 — The code on the postcard

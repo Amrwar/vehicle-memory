@@ -28,6 +28,7 @@ import { approveExpense, expensesFor, recordExpense } from '@/lib/banking';
 import { planIncludes, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { periodFor } from '@/lib/reports';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -67,19 +68,35 @@ async function record(formData: FormData) {
 
   const { orgId, user } = await requireSession('ledger:write');
 
-  const result = await recordExpense({
+  // One press, one claim. The same receipt entered twice on purpose is a new
+  // form and a new key, and goes through. Phase 46.
+  const done = await once({
     orgId,
-    userId: user.userId,
-    locationId: user.locationId,
-    category: String(formData.get('category') ?? 'OTHER') as ExpenseCategory,
-    supplier: String(formData.get('supplier') ?? ''),
-    description: String(formData.get('description') ?? ''),
-    net: Number(formData.get('net') ?? 0),
-    tax: Number(formData.get('tax') ?? 0),
-    incurredAt: new Date(String(formData.get('incurredAt') ?? new Date().toISOString())),
-    paidFrom: String(formData.get('paidFrom') ?? 'BANK') as 'BANK' | 'CASH' | 'PERSONAL' | 'CARD',
-    receiptUrl: formData.get('hasReceipt') === 'on' ? 'receipt-on-file' : null,
+    key: ['record-expense', String(formData.get('once') ?? '')],
+    work: () =>
+      recordExpense({
+        orgId,
+        userId: user.userId,
+        locationId: user.locationId,
+        category: String(formData.get('category') ?? 'OTHER') as ExpenseCategory,
+        supplier: String(formData.get('supplier') ?? ''),
+        description: String(formData.get('description') ?? ''),
+        net: Number(formData.get('net') ?? 0),
+        tax: Number(formData.get('tax') ?? 0),
+        incurredAt: new Date(String(formData.get('incurredAt') ?? new Date().toISOString())),
+        paidFrom: String(formData.get('paidFrom') ?? 'BANK') as
+          'BANK' | 'CASH' | 'PERSONAL' | 'CARD',
+        receiptUrl: formData.get('hasReceipt') === 'on' ? 'receipt-on-file' : null,
+      }),
+  }).catch((error: unknown) => {
+    if (error instanceof StillGoingError) {
+      redirect(`/expenses?error=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
   });
+
+  // A second press has no result of its own; the claim it repeats was taken.
+  const result = done.result ?? { ok: true };
 
   redirect(
     result.ok
@@ -119,6 +136,10 @@ export default async function ExpensesPage({
   }
 
   const params = await searchParams;
+
+  // A key for this drawing of the page; a receipt entered twice by one press
+  // of the button is one claim. Phase 46.
+  const token = onceToken();
   const period = periodFor(params.range ?? 'year', region.locale);
   const { rows, summary } = await expensesFor(orgId, period);
 
@@ -324,6 +345,7 @@ export default async function ExpensesPage({
             <CardHeader title={t('Record an expense')} description={t('Posted once approved')} />
             <CardBody>
               <form action={record} className="grid gap-3.5">
+                <input type="hidden" name="once" value={token} />
                 <Field label={t('Who was paid')}>
                   {/* i18n-ignore */}
                   <Input name="supplier" required placeholder="Hillside Estates" />

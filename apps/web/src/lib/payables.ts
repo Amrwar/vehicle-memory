@@ -61,6 +61,10 @@ const asBill = (row: {
  * debited at the moment goods arrive, and the receipt path does not yet post,
  * so for now the bill carries both sides: stock and input tax up, payable up.
  * When receipt-time posting lands, this becomes the variance between the two.
+ *
+ * @repeat GUARDED(CONSTRAINT: supplier_bills_orgId_reference_key) A
+ * supplier’s reference is booked once; the second attempt is refused with
+ * the reference named.
  */
 export async function bookBill(input: {
   orgId: string;
@@ -180,7 +184,10 @@ export async function bookBill(input: {
   return bill.id;
 }
 
-/** Somebody has checked the bill against the delivery and it may be paid. */
+/** Somebody has checked the bill against the delivery and it may be paid. *
+ * @repeat GUARDED(STATE: the bill is no longer awaiting or disputed) An
+ * approved bill is not approved again, so it is not posted twice.
+ */
 export async function approveBill(input: {
   orgId: string;
   userId: string;
@@ -206,7 +213,10 @@ export async function approveBill(input: {
   });
 }
 
-/** The bill does not match what arrived, and is parked until it does. */
+/** The bill does not match what arrived, and is parked until it does. *
+ * @repeat HARMLESS(OVERWRITE: the status set to disputed) Disputing a
+ * disputed bill leaves it exactly as it was.
+ */
 export async function disputeBill(input: {
   orgId: string;
   userId: string;
@@ -306,6 +316,10 @@ export async function payablesFor(orgId: string) {
  * them, every penny has to land on a bill of theirs and nothing may exceed
  * what a bill still owes. Only approved and part-paid bills are payable:
  * paying one nobody has checked is how a wrong delivery gets paid for.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) A second run
+ * would pay the same bills again and send a second remittance; paying a
+ * supplier twice in a day is legitimate, so the key is what separates them.
  */
 export async function paySupplier(input: {
   orgId: string;

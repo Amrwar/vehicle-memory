@@ -523,6 +523,14 @@ where the work happens.
 
 | Req     | Story | Schema                               | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | ------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-7801 | AV1   | —                                    | `SubmitOnce`, `useFormStatus`                                               | `verify-screens.ts`                         | Done   |
+| FR-7802 | AV1   | `once_requests`                      | `once()`, `onceToken()`, the money forms                                    | `verify-repeat.ts`                          | Done   |
+| FR-7803 | AV1   | `once_requests_orgId_key_key`        | the claim taken before the work in `once()`                                 | `verify-repeat.ts`                          | Done   |
+| FR-7804 | AV3   | —                                    | `claimOutbox()`, `claimMessages()`, FOR UPDATE SKIP LOCKED                  | `verify-repeat.ts`                          | Done   |
+| FR-7805 | AV3   | —                                    | `LEASE_MINUTES`, the retake in `once()`                                     | `verify-repeat.ts`                          | Done   |
+| FR-7806 | AV2   | `loyalty_entries_once_key`           | `consequencesOfPayment()`, `catchUpConsequences()`                          | `verify-repeat.ts`                          | Done   |
+| FR-7807 | AV4   | —                                    | `AbortSignal.timeout`, the `idempotency-key` header on Stripe writes        | `verify-repeat.ts`                          | Done   |
+| FR-7808 | AV4   | —                                    | the `@repeat` markers, `assertDeclared()`, `assertShippable()`              | `repeat.test.ts`, `verify-writes.ts`        | Done   |
 | FR-7701 | AU1   | `Coupon`                             | `assertCouponSaveable()`, `saveCoupon()`, `/coupons`                        | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
 | FR-7702 | AU1   | `coupons_orgId_code_key`             | `normaliseCouponCode()`, `retireCoupon()`, `coupons_worth_check`            | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
 | FR-7703 | AU3   | `PaymentMethod.COUPON`               | `redeemAgainstInvoice()`, the invoice page's coupon card                    | `verify-coupons.ts`                         | Done   |

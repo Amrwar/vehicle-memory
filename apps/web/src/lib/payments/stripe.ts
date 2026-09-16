@@ -55,7 +55,25 @@ function form(fields: Record<string, string | number | null | undefined>): strin
   return params.toString();
 }
 
-async function call<T>(method: 'GET' | 'POST', path: string, body?: string): Promise<T> {
+/**
+ * Long enough for a provider having a slow moment, short enough that a person
+ * is told something rather than watching a spinner until the platform kills
+ * the request underneath them. Phase 46.
+ */
+const TIMEOUT_MS = 15_000;
+
+async function call<T>(
+  method: 'GET' | 'POST',
+  path: string,
+  body?: string,
+  /**
+   * Stripe's own idempotency key. A write sent twice under one key is one
+   * write and the same answer, which is what makes a retry — ours or the
+   * platform's — safe rather than expensive. Derived from what the request is
+   * about, so the second attempt carries the same key as the first.
+   */
+  idempotencyKey?: string,
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API}${path}`, {
@@ -63,8 +81,13 @@ async function call<T>(method: 'GET' | 'POST', path: string, body?: string): Pro
       headers: {
         authorization: `Bearer ${key()}`,
         ...(body ? { 'content-type': 'application/x-www-form-urlencoded' } : {}),
+        ...(idempotencyKey ? { 'idempotency-key': idempotencyKey.slice(0, 255) } : {}),
       },
       body,
+      // A provider that never answers must not become a page that never
+      // answers. Timed out, this throws PROVIDER_UNAVAILABLE like any other
+      // failure to reach them, and the caller says so in a sentence.
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch (error) {
     throw new PaymentProviderError(
@@ -232,6 +255,10 @@ export const stripeProvider: PaymentProvider = {
         origin_context: 'web',
         'metadata[integration_identifier]': 'hosted_web_0001',
       }),
+      // Our own id for the attempt is the natural key: the same attempt sent
+      // twice opens one checkout rather than two, so a customer who reloads
+      // the page mid-redirect is not handed a second bill to pay. Phase 46.
+      `checkout:${request.attemptId}`,
     );
     if (!session.url)
       throw new PaymentProviderError(
@@ -286,6 +313,7 @@ export const stripeProvider: PaymentProvider = {
         amount: request.amountMinor,
         'metadata[reason]': request.reason.slice(0, 500),
       }),
+      request.idempotencyKey,
     );
     return {
       refundRef: refund.id,

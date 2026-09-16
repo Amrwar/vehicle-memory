@@ -22,6 +22,7 @@ import { redirect } from 'next/navigation';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { heldCreditBySupplier } from '@/lib/returns';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 import {
   approveBill,
   disputeBill,
@@ -93,16 +94,23 @@ async function pay(formData: FormData) {
   const method = String(formData.get('method') ?? 'BANK_TRANSFER');
 
   try {
-    await paySupplier({
+    await once({
       orgId,
-      userId: user.userId,
-      supplierId: String(formData.get('supplierId') ?? ''),
-      amount: fromDecimal((Number(raw) || 0).toFixed(2)),
-      method: (METHODS.some((m) => m.value === method) ? method : 'BANK_TRANSFER') as PaymentMethod,
-      reference: String(formData.get('reference') ?? ''),
+      key: ['pay-supplier', String(formData.get('once') ?? '')],
+      work: () =>
+        paySupplier({
+          orgId,
+          userId: user.userId,
+          supplierId: String(formData.get('supplierId') ?? ''),
+          amount: fromDecimal((Number(raw) || 0).toFixed(2)),
+          method: (METHODS.some((m) => m.value === method)
+            ? method
+            : 'BANK_TRANSFER') as PaymentMethod,
+          reference: String(formData.get('reference') ?? ''),
+        }),
     });
   } catch (error) {
-    if (!(error instanceof PayablesError)) throw error;
+    if (!(error instanceof PayablesError) && !(error instanceof StillGoingError)) throw error;
     redirect(`/payables?problem=${encodeURIComponent(error.message)}`);
   }
 
@@ -117,6 +125,10 @@ export default async function PayablesPage({
   const { orgId, user, region } = await requireSession('ledger:read');
   const t = await tFor();
   const notice = await searchParams;
+
+  // A key for this drawing of the page; every press of a pay button carries
+  // it, so a supplier is paid once. Phase 46.
+  const token = onceToken();
 
   const [suppliers, payments, held] = await Promise.all([
     payablesFor(orgId),
@@ -303,6 +315,7 @@ export default async function PayablesPage({
                 <form action={pay}>
                   <CardBody className="grid gap-3 border-t border-(--border) bg-(--surface-sunk) sm:grid-cols-[1fr_10rem_1fr_auto] sm:items-end">
                     <input type="hidden" name="supplierId" value={entry.supplier.id} />
+                    <input type="hidden" name="once" value={`${token}:${entry.supplier.id}`} />
                     <Field
                       label={t('Pay')}
                       hint={t('Up to {amount} on approved bills', {

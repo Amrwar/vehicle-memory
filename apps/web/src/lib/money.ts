@@ -45,8 +45,7 @@ import {
 import { refundThroughProvider } from './card-payments';
 import { keepAsCredit } from './deposit-credits';
 import { refundOntoCard } from './giftcard-refunds';
-import { settleReferralsFor } from './referrals';
-import { awardForInvoice } from './retention';
+import { consequencesOfPayment } from './afterwards';
 import { consumeForJob } from './inventory';
 import { refreshScheduleFor } from './packages';
 import { pushNow } from './outbound';
@@ -133,6 +132,10 @@ export function priceableLinesOf(job: LinedJob, context: TaxContext = NO_CONTEXT
  * goes into the outbox. All of it in one transaction with the status change,
  * because a job that reads as completed while its parts still sit in stock is
  * the kind of inconsistency that surfaces at the stocktake.
+ *
+ * @repeat GUARDED(STATE: the lifecycle has no self-edge) Moving a job to the
+ * status it is already in is refused, so a second move does nothing and says
+ * why.
  */
 export async function moveJob(input: {
   orgId: string;
@@ -293,6 +296,10 @@ export async function moveJob(input: {
  * told, with a link to the invoice on their portal, and the job moves to
  * INVOICED in the same transaction as the number is taken so a crash cannot
  * leave a numbered invoice against a job that still says completed.
+ *
+ * @repeat GUARDED(STATE: the job already has an invoice) The second attempt
+ * is refused with ALREADY_INVOICED rather than billing the customer twice
+ * for one job.
  */
 export async function issueInvoice(input: {
   orgId: string;
@@ -495,6 +502,12 @@ export async function issueInvoice(input: {
    Taking payment
    --------------------------------------------------------------------------- */
 
+/**
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Two cash
+ * payments of the same amount on one bill are two real payments, so nothing
+ * inside this can tell them apart. The form that sent it can: the same press
+ * carries the same key and is absorbed.
+ */
 export async function recordPayment(input: {
   orgId: string;
   userId: string;
@@ -631,15 +644,17 @@ export async function recordPayment(input: {
     await pushNow(queued.id);
   }
 
-  // A bill paid in full earns points, once. Points redeemed against it are
-  // not money in and earn nothing.
+  // A bill paid in full earns points, once, and pays whoever introduced the
+  // customer. Both are consequences of a payment that has already committed,
+  // so neither is allowed to fail the payment: a loyalty table that is
+  // briefly unavailable must not turn money the customer handed over into an
+  // error on their screen. What does not land here is swept up within the
+  // hour instead. Phase 46.
   if (next === 'PAID') {
-    await awardForInvoice({ orgId: input.orgId, userId: input.userId, invoiceId: invoice.id });
-    // And if somebody introduced this customer, the bill that crosses the
-    // line pays both sides.
-    await settleReferralsFor({
+    await consequencesOfPayment({
       orgId: input.orgId,
       userId: input.userId,
+      invoiceId: invoice.id,
       customerId: invoice.customerId,
     });
   }
@@ -690,6 +705,10 @@ async function refundedOn(invoiceId: string, currency: string): Promise<Money> {
  * The invoice is never edited. The credit reduces what is owed and reverses
  * revenue and tax in proportion to what the invoice was made of, so a credit
  * on a parts-heavy invoice comes mostly out of parts revenue.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) A second
+ * note takes a fresh number and would reverse the revenue again, so the key
+ * the form carries is what stops one press doing it twice.
  */
 export async function raiseCreditNote(input: {
   orgId: string;
@@ -847,7 +866,12 @@ export async function raiseCreditNote(input: {
   return note.id;
 }
 
-/** Sends money back, against a credit note. */
+/** Sends money back, against a credit note. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Held off
+ * locally by the form key; the money itself is held off at the provider too,
+ * which is sent an idempotency key built from the bill, the note and the
+ * amount.
+ */
 export async function recordRefund(input: {
   orgId: string;
   userId: string;
@@ -911,6 +935,7 @@ export async function recordRefund(input: {
       ? await refundThroughProvider({
           orgId: input.orgId,
           invoiceId: invoice.id,
+          creditNoteId: note.id,
           amountMinor: input.amount.minor,
           currency,
           reason: note.reason,
@@ -972,6 +997,7 @@ export async function recordRefund(input: {
       orgId: input.orgId,
       userId: input.userId,
       invoiceId: invoice.id,
+      refundId: refund.id,
       amountMinor: input.amount.minor,
       reason: note.reason,
     });

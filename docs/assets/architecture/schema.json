@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-16",
   "counts": {
-    "models": 152,
+    "models": 153,
     "enums": 74,
-    "fields": 2435
+    "fields": 2448
   },
   "enums": [
     "OrgPlan",
@@ -187,9 +187,18 @@
         },
         {
           "name": "OutboxEvent",
-          "comment": "Transactional outbox. Domain events are written in the same transaction as the state change, then dispatched by the worker. At-least-once, so every handler must be idempotent. ADR-0007.",
+          "comment": "",
           "fields": 9,
           "relations": [],
+          "scope": "organisation"
+        },
+        {
+          "name": "OnceRequest",
+          "comment": "Transactional outbox. Domain events are written in the same transaction as the state change, then dispatched by the worker. At-least-once, so every handler must be idempotent. ADR-0007. One request, once. Phase 46. A key written before the work and checked before it is repeated. The browser mints it when the form is drawn, so every press of that particular button carries the same key and a second press lands on the unique index rather than on a second payment. A deliberate second payment comes from a freshly drawn form, and therefore a different key, and goes through. Rows are swept after a month: long enough to outlast any retry a provider or a person will send, short enough that this does not become a second copy of everything that ever happened.",
+          "fields": 7,
+          "relations": [
+            "Organization"
+          ],
           "scope": "organisation"
         },
         {
@@ -976,13 +985,14 @@
         {
           "name": "GiftCardEntry",
           "comment": "One movement on a card. Positive when loaded, negative when spent.",
-          "fields": 11,
+          "fields": 12,
           "relations": [
             "Organization",
             "GiftCard",
             "Payment",
             "Invoice",
             "CounterSale",
+            "Refund",
             "User"
           ],
           "scope": "organisation"
@@ -1634,7 +1644,7 @@
         {
           "name": "LoyaltyEntry",
           "comment": "One movement of points, positive or negative. The balance is the sum of these rather than a figure somebody edits, so it can never drift from the history that produced it.",
-          "fields": 9,
+          "fields": 10,
           "relations": [
             "Organization",
             "Customer",

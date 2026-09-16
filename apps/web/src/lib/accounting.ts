@@ -10,6 +10,8 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { isAlreadyDone } from './repeat';
+
 /**
  * The ledger, against the database.
  *
@@ -19,7 +21,10 @@ import { prisma } from '@carnet/db';
  * posted twice for the same source document.
  */
 
-/** Creates the chart of accounts for an organisation if it has none. */
+/** Creates the chart of accounts for an organisation if it has none. *
+ * @repeat HARMLESS(OVERWRITE: only the accounts the workshop is missing) The
+ * second call finds nothing missing and writes nothing.
+ */
 export async function ensureChartOfAccounts(orgId: string): Promise<number> {
   // Fills in whatever the standard chart has that this organisation does not,
   // so an account added to the chart in a later phase (loyalty rewards, in
@@ -59,6 +64,11 @@ export class LedgerError extends Error {
  * Idempotent on (sourceType, sourceId, reference): an operational event that
  * is retried, or a worker that redelivers, must not double-count revenue. The
  * outbox is at-least-once, so this is not a theoretical concern.
+ *
+ * @repeat GUARDED(CONSTRAINT: journal_entries_one_per_document) One posting
+ * per source document. Every money function posts outside the transaction
+ * that wrote its document so a ledger failure cannot undo it; this is what
+ * makes that retry free.
  */
 export async function postEntry(
   orgId: string,
@@ -66,7 +76,38 @@ export async function postEntry(
 ): Promise<{ id: string; posted: boolean }> {
   assertBalanced(draft);
 
+  try {
+    return await posting(orgId, draft);
+  } catch (error) {
+    // The other retry got here first. A constraint violation aborts the
+    // transaction it happened in, so the entry that won has to be read
+    // outside it — which is why this sits here rather than around the create.
+    if (!isAlreadyDone(error, 'journal_entries_one_per_document')) throw error;
+
+    const posted = await prisma.journalEntry.findFirstOrThrow({
+      where: {
+        orgId,
+        sourceType: draft.sourceType,
+        sourceId: draft.sourceId,
+        reference: draft.reference,
+      },
+      select: { id: true },
+    });
+
+    return { id: posted.id, posted: false };
+  }
+}
+
+async function posting(
+  orgId: string,
+  draft: JournalEntryDraft,
+): Promise<{ id: string; posted: boolean }> {
   return prisma.$transaction(async (tx) => {
+    // Looked for first because that is the usual path and the cheap one. The
+    // unique index below is what decides it when two retries arrive at once,
+    // which is precisely the case this design creates: every money function
+    // posts outside the transaction that wrote its document, so that a ledger
+    // having a bad second cannot undo money already handed over. Phase 46.
     const existing = await tx.journalEntry.findFirst({
       where: {
         orgId,

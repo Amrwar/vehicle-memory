@@ -100,7 +100,14 @@ async function retire(formData: FormData) {
   const { orgId, user } = await requireSession('settings:write');
 
   try {
-    await retireCoupon({ orgId, userId: user.userId, id: String(formData.get('id') ?? '') });
+    await retireCoupon({
+      orgId,
+      userId: user.userId,
+      id: String(formData.get('id') ?? ''),
+      // What to land on, rather than "the other one": pressed twice, the
+      // code ends where the person meant it to. Phase 46.
+      active: String(formData.get('active') ?? '') === 'yes',
+    });
   } catch (error) {
     if (!(error instanceof CouponError)) throw error;
     back(error.message);
@@ -287,6 +294,7 @@ export default async function CouponsPage({
                       {mayWrite ? (
                         <form action={retire}>
                           <input type="hidden" name="id" value={row.id} />
+                          <input type="hidden" name="active" value={row.isActive ? 'no' : 'yes'} />
                           <Button type="submit" size="sm" variant="ghost">
                             {row.isActive ? t('Retire') : t('Restore')}
                           </Button>

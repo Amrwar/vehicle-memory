@@ -119,6 +119,7 @@ export const fr: Readonly<Record<string, string>> = {
   '{count} uses left': 'il reste {count} utilisations',
   'not used yet': 'pas encore utilisé',
   'This year so far': 'Cette année à ce jour',
+  'Working…': 'En cours…',
 
   // Refusals that carry a figure or a date with them
   '{v1} is already a code in this workshop. Two codes with one name is two offers nobody can tell apart.':
@@ -245,6 +246,7 @@ export const ar: Readonly<Record<string, string>> = {
   '{count} uses left': 'بقي {count} استخدامات',
   'not used yet': 'لم يُستخدم بعد',
   'This year so far': 'هذا العام حتى الآن',
+  'Working…': 'جارٍ التنفيذ…',
 
   // Refusals that carry a figure or a date with them
   '{v1} is already a code in this workshop. Two codes with one name is two offers nobody can tell apart.':

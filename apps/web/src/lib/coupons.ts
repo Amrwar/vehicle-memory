@@ -113,6 +113,13 @@ export async function couponResultsFor(orgId: string, period: { from: Date; to: 
   );
 }
 
+/**
+ * Writes a code down, or changes one.
+ *
+ * @repeat GUARDED(CONSTRAINT: coupons_orgId_code_key) Saving the same new
+ * code twice makes one code: the second lands on the index and is refused
+ * with the sentence about two offers nobody can tell apart.
+ */
 export async function saveCoupon(input: {
   orgId: string;
   userId: string;
@@ -199,11 +206,24 @@ export async function saveCoupon(input: {
   return id;
 }
 
-/** Stops a code being honoured. Codes already used keep their redemptions. */
+/**
+ * Stops a code being honoured, or starts it again. Codes already used keep
+ * their redemptions either way.
+ *
+ * Told which state to land in rather than asked to flip the one it is in.
+ * A toggle is the wrong shape for a button somebody might press twice: the
+ * second press undoes the first, and a code the workshop believes it has
+ * withdrawn goes on being honoured at the counter. Phase 46.
+ *
+ * @repeat HARMLESS(OVERWRITE: the state asked for, not the opposite of the
+ * state found) Retiring a retired code leaves it retired.
+ */
 export async function retireCoupon(input: {
   orgId: string;
   userId: string;
   id: string;
+  /** True to honour it, false to withdraw it. */
+  active: boolean;
 }): Promise<void> {
   const coupon = await prisma.coupon.findFirst({
     where: { id: input.id, orgId: input.orgId },
@@ -212,15 +232,17 @@ export async function retireCoupon(input: {
 
   if (!coupon) throw new CouponError('NOT_FOUND', 'That code is not in this workshop.');
 
+  if (coupon.isActive === input.active) return;
+
   await prisma.coupon.update({
     where: { id: coupon.id },
-    data: { isActive: !coupon.isActive },
+    data: { isActive: input.active },
   });
 
   await audit({
     orgId: input.orgId,
     actorUserId: input.userId,
-    action: coupon.isActive ? 'coupon.retired' : 'coupon.restored',
+    action: input.active ? 'coupon.restored' : 'coupon.retired',
     entityType: 'Coupon',
     entityId: coupon.id,
     after: { code: coupon.code },
@@ -280,6 +302,10 @@ export async function quoteCoupon(input: {
  * The invoice keeps the total it was issued at. What the code takes off is a
  * payment of its own kind, which posts to what the offers cost rather than to
  * the bank, and the customer's debt comes down by exactly that much.
+ *
+ * @repeat GUARDED(CONSTRAINT: coupon_redemptions_one_per_invoice) The second
+ * one is refused by the database before any money moves, so a double-click
+ * cannot take the discount twice off one bill.
  */
 export async function redeemAgainstInvoice(input: {
   orgId: string;
@@ -368,6 +394,10 @@ export async function redeemAgainstInvoice(input: {
  * the sale and the redemption stand or fall together. A sale that rolled back
  * leaving the code marked used would refuse the customer their discount the
  * second time they tried.
+ *
+ * @repeat GUARDED(CONSTRAINT: coupon_redemptions_one_per_sale) One code
+ * against one sale; the second is refused inside the transaction, which rolls
+ * the whole sale back rather than discounting it twice.
  */
 export async function recordCounterRedemption(
   tx: Pick<typeof prisma, 'couponRedemption' | 'coupon'>,

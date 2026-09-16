@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7800 — Doing it twice
+
+| Ref     | Requirement                                                                                                                                                                       | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7801 | A button that submits a form MUST stop being a button while that form is in flight, and MUST say that it is working.                                                              | 46    |
+| FR-7802 | A write that moves money or stock MUST NOT happen twice because one request arrived twice, whether from a double-click, a refresh, the back button or a retry.                    | 46    |
+| FR-7803 | Two requests for the same write arriving at the same instant MUST result in one write, and the loser MUST be absorbed or refused rather than duplicated.                          | 46    |
+| FR-7804 | A worker MUST claim a queued item before working on it, and two workers over one queue MUST NOT both handle the same item.                                                        | 46    |
+| FR-7805 | A claim MUST expire, so that work abandoned by a process that died is done by another rather than held for ever.                                                                  | 46    |
+| FR-7806 | A consequence of a payment that fails to land MUST NOT fail the payment, and MUST be caught up afterwards rather than lost.                                                       | 46    |
+| FR-7807 | A call to an external provider MUST time out, and a write sent to a provider MUST carry a key that makes a retry the same write rather than a second one.                         | 46    |
+| FR-7808 | Every write that moves money or stock MUST declare, beside the code, what a repeat does to it and what stops it; the build MUST fail for one that does not, or that would repeat. | 46    |
+
 ## FR-7700 — Coupons
 
 | Ref     | Requirement                                                                                                                                                                        | Phase |

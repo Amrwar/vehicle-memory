@@ -72,6 +72,10 @@ export interface SaleResult {
  * Stock is read with a row lock before it is decremented. Two people selling
  * the last bulb a millisecond apart would otherwise both see one in stock and
  * both succeed.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) A second
+ * press would take the parts off the shelf again and charge again. A counter
+ * is where second presses actually happen, so the key is on the button.
  */
 export async function completeSale(input: CompleteSaleInput): Promise<SaleResult> {
   const region = await regionFor(input.orgId);
@@ -414,7 +418,10 @@ export async function openTill(orgId: string, locationId: string | null) {
   };
 }
 
-/** Closes the till, recording the variance rather than absorbing it. */
+/** Closes the till, recording the variance rather than absorbing it. *
+ * @repeat GUARDED(STATE: the session already has a closedAt) A till closed
+ * twice is not found the second time and answers that it is already closed.
+ */
 export async function closeTill(input: {
   orgId: string;
   sessionId: string;

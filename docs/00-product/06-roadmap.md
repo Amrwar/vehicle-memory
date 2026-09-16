@@ -2442,6 +2442,77 @@ not.
 be retried safely, and a test that proves it. Where it cannot, the product
 refuses rather than repeating.
 
+**Status.** Built. The phase found more than it expected to, which is the
+point of looking rather than asking.
+
+The ledger was the worst of it. Every money function in the product posts its
+entry outside the transaction that wrote the document, deliberately and
+correctly: a ledger having a bad second must not undo money a customer has
+already handed over. Above every one of those calls is a comment saying the
+ledger is idempotent on the source document, so a retry cannot double-post. It
+was not. The check was a read followed by a write with a gap in the middle,
+and retries — a worker restarted, a schedule firing while the last run is
+still going, a deploy landing mid-batch — are exactly the thing that arrives
+twice at once. There is now a unique index, and a test that posts the same
+entry three times in the same instant and finds one entry in the books.
+
+The outbox said in its own header that each worker "claims what it is working
+on before it works on it". It read the queue and then worked on it, which is
+fine until there are two workers, and there are always two workers: a poll
+locally, a schedule in production, and both during a deploy. The same was true
+of the message sweeper, where the consequence is a customer receiving the same
+email twice. Both now claim in one statement, with a lease so that work
+abandoned by a process that died comes back by itself.
+
+Loyalty points and referral payouts were granted after a look that found
+nothing, with no constraint behind the look. Two payments a millisecond apart
+both looked, both found nothing, and both granted. Points now carry a key
+saying what they are the one-and-only of; a referral is claimed before it is
+paid. And the consequences of a payment — which are written after the payment
+has committed, so that a loyalty table having a bad second cannot turn money
+somebody handed over into an error on their screen — can no longer be lost to
+a crash in that gap: what does not land is swept up within the hour.
+
+Then the double-click. A form's button now stops being a button while the
+form is in flight, which is a courtesy rather than a guarantee, so every write
+that moves money also carries a key minted when the form was drawn. The same
+press sends the same key however many times it is pressed; a second payment
+somebody actually meant comes from a freshly drawn form and goes through.
+Paying, refunding, crediting, spending points, redeeming a card, using money
+held, selling a card, adjusting one, taking a deposit, returning one, paying a
+supplier, adding a bonus, recording a claim and taking a counter sale are all
+held this way.
+
+Smaller things, each of which would have cost somebody money: a refund sent to
+Stripe with no idempotency key and no timeout, so a retry refunded twice and a
+hung provider hung the page; a refund kept as credit or put back onto a gift
+card with nothing tying it to the refund, so a retry did it again; an expense
+numbered by counting the expenses already there, which collides outright when
+two people file at once and silently defeats its own unique index when one
+person files twice; a referral code made per customer by looking first, so two
+pages open at once made two codes; and a coupon whose Retire button was a
+toggle, so pressing it twice put the code back.
+
+One bug was in this phase's own work, found by its own test: the claim
+compared a timestamp written by the application against the database's `now()`.
+Two clocks that are only approximately the same, and a database a second
+behind hands out no work at all. It looks exactly like an empty queue.
+
+What the phase leaves behind is not the fixes but the rule. Every write that
+moves money or stock carries a line in its own docblock saying what a repeat
+does to it and what stops it, `verify-writes.ts` fails the build for one that
+does not — or for a guard that cannot be named, or for a write still honest
+enough to say it would repeat — and the register at
+[docs/04-engineering/09-repeating-a-write.md](../04-engineering/09-repeating-a-write.md)
+is written from those lines rather than maintained beside them. 59 writes: 50
+guarded, 9 harmless, none that would repeat.
+
+`verify-repeat.ts` proves it where it matters, against a real database: a
+button pressed twice, two presses in the same instant, four awards of the same
+points at once, two workers reaching for one queue, one ledger entry posted
+three times together, a sale taken twice, and a claim whose process died
+holding it. 29 checks.
+
 ## Phase 47 — Financial integrity
 
 **Scope.** An invariant suite over the whole ledger rather than over one

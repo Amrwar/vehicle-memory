@@ -68,6 +68,30 @@ function toDomain(row: {
   };
 }
 
+/**
+ * The next expense number, from the workshop's own counter.
+ *
+ * The upsert both takes the number and moves the counter in one statement, so
+ * two claims arriving together get two numbers rather than the same one.
+ */
+async function nextExpenseReference(orgId: string): Promise<string> {
+  const sequence = await prisma.documentSequence.upsert({
+    where: { orgId_kind: { orgId, kind: 'EXPENSE' } },
+    create: { orgId, kind: 'EXPENSE', prefix: 'EXP-', next: 2 },
+    update: { next: { increment: 1 } },
+  });
+
+  // The row comes back after the increment, so the number just taken is one
+  // below it on the update path and the seeded 1 on the create path.
+  return `${sequence.prefix}${String(sequence.next - 1).padStart(4, '0')}`;
+}
+
+/**
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Numbered
+ * from the workshop’s own counter rather than by counting what is already
+ * there, so two claims at once get two numbers; the same claim pressed twice
+ * is held off by the key.
+ */
 export async function recordExpense(input: {
   orgId: string;
   userId: string;
@@ -89,8 +113,14 @@ export async function recordExpense(input: {
     throw error;
   }
   const region = await regionFor(input.orgId);
-  const count = await prisma.expense.count({ where: { orgId: input.orgId } });
-  const reference = `EXP-${String(count + 1).padStart(4, '0')}`;
+
+  // Taken from a counter rather than worked out by counting what is already
+  // there. Counting is wrong twice over: two people recording a receipt at
+  // the same moment count the same number and one of them is refused for a
+  // reason they cannot see, and the same receipt recorded twice gets a
+  // different number the second time — because the count has moved — so the
+  // unique index meant to catch that never fires. Phase 46.
+  const reference = await nextExpenseReference(input.orgId);
 
   const draft: Expense = {
     id: 'pending',
@@ -150,6 +180,9 @@ export async function recordExpense(input: {
  * nobody has agreed to is not yet a cost. Posting first and reversing on
  * rejection would put every mistaken claim into the accounts and then take it
  * out again, which is noise in a place that has to stay legible.
+ *
+ * @repeat GUARDED(STATE: approved has no self-edge) An approved claim is not
+ * approved again, so the cost is posted once.
  */
 export async function approveExpense(input: {
   orgId: string;
@@ -319,7 +352,11 @@ export async function reconciliation(orgId: string, bankAccountId: string) {
   };
 }
 
-/** Accepts a match, recording why it was made. */
+/** Accepts a match, recording why it was made. *
+ * @repeat GUARDED(STATE: the line already names the entry it matched) A
+ * matched line refuses a second match, and an entry can only be claimed by
+ * one line.
+ */
 export async function acceptMatch(input: {
   orgId: string;
   statementLineId: string;
@@ -396,6 +433,10 @@ export async function periodReadiness(orgId: string, periodId: string) {
   return { period, checks };
 }
 
+/**
+ * @repeat HARMLESS(OVERWRITE: the period marked closed) Closing a closed
+ * period leaves it closed; nothing in the books moves either time.
+ */
 export async function closePeriod(input: {
   orgId: string;
   periodId: string;

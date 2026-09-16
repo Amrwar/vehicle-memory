@@ -28,6 +28,7 @@ import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 import {
   addPayAdjustment,
   approveTimesheet,
@@ -155,16 +156,21 @@ async function adjust(formData: FormData) {
   const { orgId, user } = await requireSession('payroll:approve');
 
   try {
-    await addPayAdjustment({
+    await once({
       orgId,
-      userId: user.userId,
-      timesheetId: String(formData.get('timesheetId') ?? ''),
-      kind: String(formData.get('kind') ?? ''),
-      label: String(formData.get('label') ?? ''),
-      amount: Number(String(formData.get('amount') ?? '').replace(',', '.')),
+      key: ['pay-adjustment', String(formData.get('once') ?? '')],
+      work: () =>
+        addPayAdjustment({
+          orgId,
+          userId: user.userId,
+          timesheetId: String(formData.get('timesheetId') ?? ''),
+          kind: String(formData.get('kind') ?? ''),
+          label: String(formData.get('label') ?? ''),
+          amount: Number(String(formData.get('amount') ?? '').replace(',', '.')),
+        }),
     });
   } catch (error) {
-    if (!(error instanceof PayrollError)) throw error;
+    if (!(error instanceof PayrollError) && !(error instanceof StillGoingError)) throw error;
     redirect(`/payroll?problem=${encodeURIComponent(error.message)}#adjustments`);
   }
 
@@ -219,6 +225,10 @@ export default async function PayrollPage({
 }) {
   const { orgId, user, region } = await requireSession('payroll:read');
   const notice = await searchParams;
+
+  // A key for this drawing of the page; a bonus added twice by a double-click
+  // is the same bonus. Phase 46.
+  const token = onceToken();
   const t = await tFor();
 
   const [toApprove, toRun, runs, employees, waiting, settings] = await Promise.all([
@@ -489,6 +499,7 @@ export default async function PayrollPage({
                         className="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)_7rem_auto] sm:items-end"
                       >
                         <input type="hidden" name="timesheetId" value={sheet.id} />
+                        <input type="hidden" name="once" value={`${token}:${sheet.id}`} />
                         <Field label={t('Kind')}>
                           <Select name="kind" defaultValue="BONUS">
                             <option value="BONUS">{t('Bonus')}</option>

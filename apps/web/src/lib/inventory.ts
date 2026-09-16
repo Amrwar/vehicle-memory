@@ -42,6 +42,10 @@ function toPosition(row: LevelRow): StockPosition {
 /**
  * Locks a stock level for update, creating it if this is the first movement
  * for that product and warehouse.
+ *
+ * @repeat GUARDED(CONSTRAINT: stock_levels_productId_warehouseId_key) A
+ * shelf row is made once per part and warehouse; the second call reads back
+ * the row the first one made.
  */
 export async function lockLevel(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
@@ -83,6 +87,10 @@ export interface ReserveResult extends ReservationOutcome {
  * The shortfall path is the point of the whole module: a technician adds a
  * part, the system takes what it has and starts the process for the rest,
  * without anyone walking to the office. FR-1003, FR-1102.
+ *
+ * @repeat GUARDED(STATE: the line is no longer waiting to be reserved)
+ * Reserving again is refused by the line having moved on, and no page offers
+ * a button that reserves a line twice.
  */
 export async function reserveForJobLine(input: {
   orgId: string;
@@ -161,7 +169,10 @@ export async function reserveForJobLine(input: {
   });
 }
 
-/** Releases reservations for a part line, when the line or job is cancelled. */
+/** Releases reservations for a part line, when the line or job is cancelled. *
+ * @repeat GUARDED(STATE: the reservations already have a releasedAt) The
+ * second call finds nothing still reserved and releases nothing.
+ */
 export async function releaseForJobLine(jobPartLineId: string): Promise<number> {
   return prisma.$transaction(async (tx) => {
     const reservations = await tx.stockReservation.findMany({
@@ -204,6 +215,10 @@ export async function releaseForJobLine(jobPartLineId: string): Promise<number> 
  * Consumes reserved stock when a job completes: the reservation ends and the
  * stock leaves the shelf in one transaction, and the actual cost is written
  * back to the job line so profitability is real. FR-1011.
+ *
+ * @repeat GUARDED(STATE: the part lines are already fitted) The second call
+ * matches no lines, so the stock leaves the shelf once however many times a
+ * job completion is retried.
  */
 export async function consumeForJob(jobId: string): Promise<{ lines: number; cost: number }> {
   return prisma.$transaction(async (tx) => {
@@ -267,6 +282,9 @@ export async function consumeForJob(jobId: string): Promise<{ lines: number; cos
  * The store a reservation goes against when nobody chose one: the default,
  * else the first by code. Phase 34 reserves from an approval, where there is
  * no page to ask on.
+ *
+ * @repeat HARMLESS(OVERWRITE: the workshop’s first warehouse, made only if
+ * it has none) Asking twice gives the same warehouse back.
  */
 export async function defaultWarehouseFor(orgId: string): Promise<string | null> {
   const warehouse = await prisma.warehouse.findFirst({
@@ -311,6 +329,10 @@ export interface ReceiveResult {
 /**
  * Books in a delivery: validates against the order, moves stock, recalculates
  * weighted average cost, and advances the order status. FR-1105, FR-1106.
+ *
+ * @repeat GUARDED(STATE: the order lines have already been received) A
+ * second receipt is refused as an over-receipt, naming the line, before
+ * anything is written.
  */
 export async function receiveGoods(input: {
   orgId: string;
@@ -410,7 +432,12 @@ export async function receiveGoods(input: {
    Adjustments
    --------------------------------------------------------------------------- */
 
-/** A manual correction. The reason is mandatory: FR-1008. */
+/** A manual correction. The reason is mandatory: FR-1008. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) The same
+ * adjustment made twice moves the shelf twice, and two identical adjustments
+ * are something somebody might genuinely do, so only the form can tell them
+ * apart.
+ */
 export async function adjustStock(input: {
   orgId: string;
   productId: string;
@@ -456,7 +483,11 @@ export async function adjustStock(input: {
   });
 }
 
-/** Records a stocktake count and posts the variance. FR-1009. */
+/** Records a stocktake count and posts the variance. FR-1009. *
+ * @repeat HARMLESS(OVERWRITE: onHand set to the number counted) A stocktake
+ * is a set rather than a change: counted again at the same number, the
+ * variance is nothing and no movement is written.
+ */
 export async function recordStocktake(input: {
   orgId: string;
   productId: string;

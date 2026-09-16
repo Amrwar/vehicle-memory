@@ -32,10 +32,12 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { SubmitOnce } from '@/components/submit-once';
 import { CouponError, redeemAgainstInvoice as redeemCouponOn } from '@/lib/coupons';
 import { applyHeld, DepositError, heldFor } from '@/lib/deposits';
 import { GiftCardError, redeemGiftCard } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 import {
   loyaltyCardFor,
   LoyaltyError,
@@ -115,6 +117,16 @@ function methodFrom(formData: FormData): PaymentMethod {
   return (METHODS.some((m) => m.value === raw) ? raw : 'CARD') as PaymentMethod;
 }
 
+/**
+ * Money against the bill. FR-7802.
+ *
+ * Wrapped in the key the form was drawn with, because two cash payments of
+ * fifty pounds against one bill on one afternoon are two real payments and
+ * nothing inside them says which is which. What separates them is that they
+ * came from two separately drawn forms. A double-click sends one form's key
+ * twice and the second press is absorbed; taking another fifty pounds
+ * tomorrow is a new form and goes through.
+ */
 async function pay(formData: FormData) {
   'use server';
 
@@ -122,15 +134,23 @@ async function pay(formData: FormData) {
   const invoiceId = String(formData.get('invoiceId') ?? '');
 
   try {
-    await recordPayment({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      amount: amountFrom(formData, 'amount'),
-      method: methodFrom(formData),
-      reference: String(formData.get('reference') ?? ''),
+      key: ['pay', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        recordPayment({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          amount: amountFrom(formData, 'amount'),
+          method: methodFrom(formData),
+          reference: String(formData.get('reference') ?? ''),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof MoneyCycleError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -150,13 +170,21 @@ async function redeem(formData: FormData) {
   const invoiceId = String(formData.get('invoiceId') ?? '');
 
   try {
-    await redeemAgainstInvoice({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      points: Number(String(formData.get('points') ?? '').trim()),
+      key: ['redeem', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        redeemAgainstInvoice({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          points: Number(String(formData.get('points') ?? '').trim()),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof LoyaltyError) && !(error instanceof MoneyCycleError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -206,13 +234,21 @@ async function useHeld(formData: FormData) {
   const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
 
   try {
-    await applyHeld({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+      key: ['useHeld', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        applyHeld({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof DepositError) && !(error instanceof MoneyCycleError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -233,14 +269,22 @@ async function redeemCard(formData: FormData) {
   const typed = String(formData.get('amount') ?? '').replace(/[£,\s]/g, '');
 
   try {
-    await redeemGiftCard({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      code: String(formData.get('code') ?? ''),
-      amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+      key: ['redeemCard', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        redeemGiftCard({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          code: String(formData.get('code') ?? ''),
+          amountMinor: typed === '' ? null : Math.round(Number(typed) * 100),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof GiftCardError) && !(error instanceof MoneyCycleError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -255,14 +299,22 @@ async function credit(formData: FormData) {
   const invoiceId = String(formData.get('invoiceId') ?? '');
 
   try {
-    await raiseCreditNote({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      amount: amountFrom(formData, 'amount'),
-      reason: String(formData.get('reason') ?? ''),
+      key: ['credit', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        raiseCreditNote({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          amount: amountFrom(formData, 'amount'),
+          reason: String(formData.get('reason') ?? ''),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof MoneyCycleError)) throw error;
     redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -277,16 +329,24 @@ async function refund(formData: FormData) {
   const invoiceId = String(formData.get('invoiceId') ?? '');
 
   try {
-    await recordRefund({
+    await once({
       orgId,
-      userId: user.userId,
-      invoiceId,
-      creditNoteId: String(formData.get('creditNoteId') ?? ''),
-      amount: amountFrom(formData, 'amount'),
-      method: methodFrom(formData),
-      reference: String(formData.get('reference') ?? ''),
+      key: ['refund', invoiceId, String(formData.get('once') ?? '')],
+      work: () =>
+        recordRefund({
+          orgId,
+          userId: user.userId,
+          invoiceId,
+          creditNoteId: String(formData.get('creditNoteId') ?? ''),
+          amount: amountFrom(formData, 'amount'),
+          method: methodFrom(formData),
+          reference: String(formData.get('reference') ?? ''),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (
       !(error instanceof MoneyCycleError) &&
       !(error instanceof GiftCardError) &&
@@ -330,6 +390,11 @@ export default async function InvoicePage({
 
   const mayPay =
     can(user.role, 'payment:write') && money.outstanding.minor > 0 && status !== 'VOID';
+
+  // A key for this drawing of the page, carried by the forms that move money.
+  // Every press of one of those buttons sends the same key, so the second
+  // press is absorbed rather than taking the money again. Phase 46.
+  const token = onceToken();
   const mayCredit =
     can(user.role, 'invoice:write') &&
     status !== 'DRAFT' &&
@@ -657,6 +722,7 @@ export default async function InvoicePage({
               <form action={pay}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field label={t('Amount')}>
                     <Input
                       name="amount"
@@ -681,9 +747,7 @@ export default async function InvoicePage({
                   >
                     <Input name="reference" placeholder={t('Optional')} />
                   </Field>
-                  <Button type="submit" variant="primary">
-                    {t('Record the payment')}
-                  </Button>
+                  <SubmitOnce>{t('Record the payment')}</SubmitOnce>
                 </CardBody>
               </form>
             </Card>
@@ -701,6 +765,7 @@ export default async function InvoicePage({
               <form action={redeem}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field
                     label={t('Points to use')}
                     hint={t('Up to {points}, which is {amount} off the bill', {
@@ -788,6 +853,7 @@ export default async function InvoicePage({
               <form action={useHeld}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field label={t('Amount')} hint={t('Optional')} htmlFor="held-amount">
                     <Input
                       id="held-amount"
@@ -818,6 +884,7 @@ export default async function InvoicePage({
               <form action={redeemCard}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field label={t('Card number')} htmlFor="card-code">
                     <Input
                       id="card-code"
@@ -856,6 +923,7 @@ export default async function InvoicePage({
               <form action={credit}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field
                     label={t('Amount')}
                     hint={t('Up to {amount}', {
@@ -897,6 +965,7 @@ export default async function InvoicePage({
               <form action={refund}>
                 <CardBody className="grid gap-3">
                   <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="once" value={token} />
                   <Field label={t('Against')}>
                     <Select name="creditNoteId" defaultValue={invoice.creditNotes[0]?.id ?? ''}>
                       {invoice.creditNotes.map((note) => (

@@ -8,6 +8,7 @@ import {
   runDueAutomationActions,
   sendQueuedMessages,
 } from '@carnet/jobs';
+import { catchUpConsequences } from '@/lib/afterwards';
 import { timingSafeEqual } from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -69,8 +70,11 @@ const JOBS: Record<Job, () => Promise<Record<string, number>>> = {
     await auditChains();
     const reminders = await queueServiceReminders();
     const trials = await remindTrialsEnding();
+    // Points and referral payouts that a crash or a timeout stopped landing
+    // when the bill was paid. Almost always nothing. Phase 46.
+    const caught = await catchUpConsequences();
 
-    return { shifts, reminders, trials };
+    return { shifts, reminders, trials, caught };
   },
 };
 

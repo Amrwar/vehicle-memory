@@ -23,6 +23,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { isAlreadyDone } from './repeat';
 
 /**
  * Asking how it went, points, referrals, and replies coming back.
@@ -124,6 +125,10 @@ export async function askable(orgId: string, now = new Date()) {
  * The token is random and only its digest is stored, the same shape every
  * capability in this product uses. A link that leaks cannot be read back out
  * of the database, and revoking it is one row.
+ *
+ * @repeat GUARDED(CONSTRAINT: review_requests_jobId_key) A job is asked
+ * about once. Asking again is refused by the database rather than sending
+ * the customer a second request about the same visit.
  */
 export async function askAbout(input: {
   orgId: string;
@@ -224,6 +229,10 @@ export async function reviewByToken(token: string, now = new Date()) {
  * The routing is the feature. A five is invited to say so publicly; anything
  * lower opens a conversation with somebody who can put it right, which is
  * worth more to the workshop than the review would have been.
+ *
+ * @repeat GUARDED(STATE: the request already carries a rating) Answering
+ * twice returns that it was already answered and leaves the first answer
+ * alone, which is the one the customer meant.
  */
 export async function recordRating(input: {
   token: string;
@@ -268,7 +277,11 @@ export async function recordRating(input: {
   return { alreadyAnswered: false, routing: routed };
 }
 
-/** Closes a conversation that a poor rating opened. */
+/** Closes a conversation that a poor rating opened. *
+ * @repeat HARMLESS(OVERWRITE: the note and the moment it was resolved)
+ * Resolving a resolved review writes the same words again and changes
+ * nothing anybody reads.
+ */
 export async function resolveReview(input: {
   orgId: string;
   userId: string;
@@ -368,7 +381,12 @@ export async function loyaltyFor(orgId: string, customerId: string, now = new Da
   };
 }
 
-/** Awards points for a spend. */
+/** Awards points for a spend. *
+ * @repeat GUARDED(CONSTRAINT: loyalty_entries_once_key) An award that says
+ * what it is the one-and-only of lands once however many times it is asked
+ * for. Points granted by hand carry no key, because a second grant is a
+ * second decision.
+ */
 export async function awardPoints(input: {
   orgId: string;
   userId: string;
@@ -376,6 +394,13 @@ export async function awardPoints(input: {
   amountMinor: number;
   jobId?: string | null;
   reason?: string;
+  /**
+   * What this award is the one-and-only of, where there is such a thing.
+   * With it, a repeat lands on the unique index and is absorbed; without it,
+   * a repeat is a second award, which is correct for points somebody is
+   * granting by hand. Phase 46.
+   */
+  once?: string | null;
   now?: Date;
 }) {
   const now = input.now ?? new Date();
@@ -385,22 +410,36 @@ export async function awardPoints(input: {
   // appears in somebody's history as though it did; the database refuses it.
   if (points === 0) return 0;
 
-  await prisma.loyaltyEntry.create({
-    data: {
-      orgId: input.orgId,
-      customerId: input.customerId,
-      points,
-      reason: input.reason ?? 'Work done',
-      jobId: input.jobId ?? null,
-      expiresAt: new Date(now.getTime() + POINTS_LAST_DAYS * DAY),
-      createdByUserId: input.userId,
-    },
-  });
+  try {
+    await prisma.loyaltyEntry.create({
+      data: {
+        orgId: input.orgId,
+        customerId: input.customerId,
+        points,
+        reason: input.reason ?? 'Work done',
+        once: input.once ?? null,
+        jobId: input.jobId ?? null,
+        expiresAt: new Date(now.getTime() + POINTS_LAST_DAYS * DAY),
+        createdByUserId: input.userId,
+      },
+    });
+  } catch (error) {
+    // The same award arriving twice — two workers, a retried request, a
+    // customer pressing pay again — lands on the index and is nothing at all.
+    // Told apart from a real failure by the code, because swallowing every
+    // error here would hide the ones worth knowing about.
+    if (isAlreadyDone(error)) return 0;
+    throw error;
+  }
 
   return points;
 }
 
-/** Spends points against a bill. */
+/** Spends points against a bill. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Spending the
+ * same points twice is stopped by the key; past that the balance refuses,
+ * but only once the first spend has already gone through.
+ */
 export async function redeemPoints(input: {
   orgId: string;
   userId: string;
@@ -441,7 +480,11 @@ export async function redeemPoints(input: {
   return value;
 }
 
-/** A code for a customer to hand out, made once and kept. */
+/** A code for a customer to hand out, made once and kept. *
+ * @repeat GUARDED(CONSTRAINT: referrals_one_per_customer) A customer has one
+ * code per workshop. Two pages asking at once no longer end with two codes,
+ * of which the one they hand out is the wrong one half the time.
+ */
 export async function referralFor(orgId: string, customerId: string, userId: string) {
   const existing = await prisma.referral.findFirst({
     where: { orgId, referrerCustomerId: customerId, referredCustomerId: null },
@@ -479,7 +522,11 @@ export async function referralFor(orgId: string, customerId: string, userId: str
   throw new Error('Could not find an unused code. Try again.');
 }
 
-/** Somebody arrived with a code. */
+/** Somebody arrived with a code. *
+ * @repeat GUARDED(STATE: the code already names who it brought in) A code
+ * used twice is refused with the sentence saying so, rather than paying out
+ * on the same introduction again.
+ */
 export async function useReferral(input: {
   orgId: string;
   userId: string;
@@ -526,7 +573,11 @@ export async function useReferral(input: {
 /** What a referral pays each side. */
 export const REFERRAL_POINTS = 500;
 
-/** Pays a referral, once the referred customer has actually spent something. */
+/** Pays a referral, once the referred customer has actually spent something. *
+ * @repeat GUARDED(KEY: the referral claimed while still uncredited) Two
+ * bills paid a millisecond apart both pass the check above; the claim
+ * decides between them, and the loser credits nobody.
+ */
 export async function creditReferral(input: { orgId: string; userId: string; referralId: string }) {
   const referral = await prisma.referral.findFirstOrThrow({
     where: { id: input.referralId, orgId: input.orgId },
@@ -553,30 +604,49 @@ export async function creditReferral(input: { orgId: string; userId: string; ref
 
   // Both sides in one transaction. Crediting one and failing on the other
   // leaves a customer owed points nobody can see they are owed.
-  await prisma.$transaction([
-    prisma.loyaltyEntry.create({
+  //
+  // The referral is claimed first, and only if it was still uncredited at
+  // that moment. Two bills paid a millisecond apart, or a request retried
+  // while the first is still running, both passed the check above; the claim
+  // is what decides between them, and the loser credits nobody. Each entry
+  // also carries the key it is the one-and-only of, so even a claim that
+  // somehow ran twice cannot put the points in twice. Phase 46.
+  const credited = await prisma.$transaction(async (tx) => {
+    const claim = await tx.referral.updateMany({
+      where: { id: referral.id, creditedAt: null },
+      data: { creditedAt: new Date(), points: REFERRAL_POINTS },
+    });
+
+    if (claim.count === 0) return false;
+
+    await tx.loyaltyEntry.create({
       data: {
         orgId: input.orgId,
         customerId: referral.referrerCustomerId,
         points: REFERRAL_POINTS,
         reason: 'Referral, for introducing somebody',
+        once: `referral:${referral.id}:referrer`,
         createdByUserId: input.userId,
       },
-    }),
-    prisma.loyaltyEntry.create({
+    });
+
+    await tx.loyaltyEntry.create({
       data: {
         orgId: input.orgId,
         customerId: referral.referredCustomerId!,
         points: REFERRAL_POINTS,
         reason: 'Referral, for being introduced',
+        once: `referral:${referral.id}:referred`,
         createdByUserId: input.userId,
       },
-    }),
-    prisma.referral.update({
-      where: { id: referral.id },
-      data: { creditedAt: new Date(), points: REFERRAL_POINTS },
-    }),
-  ]);
+    });
+
+    return true;
+  });
+
+  if (!credited) {
+    throw new LoyaltyError('ALREADY_CREDITED', 'That referral has already been paid.');
+  }
 
   await audit({
     orgId: input.orgId,
@@ -598,6 +668,10 @@ export async function creditReferral(input: { orgId: string; userId: string; ref
  * Matched with a stated confidence rather than assigned silently. A reply
  * filed against the wrong job is worse than one filed against nothing: a
  * person reads it in the context of another car.
+ *
+ * @repeat GUARDED(CONSTRAINT: inbound_messages_orgId_providerRef_key) A
+ * webhook retried by the provider is one message rather than a customer
+ * appearing to write in twice.
  */
 export async function receiveInbound(input: {
   orgId: string;
@@ -616,6 +690,10 @@ export async function receiveInbound(input: {
   // The provider's own id, so the same message delivered twice is one row.
   // Every webhook retries, and a duplicate reply reads as a customer
   // repeating themselves.
+  //
+  // Looked for first because that is the cheap path and the usual one; the
+  // unique index below is what actually decides it when two deliveries of the
+  // same message arrive together and both look and both find nothing.
   if (input.providerRef) {
     const seen = await prisma.inboundMessage.findFirst({
       where: { orgId: input.orgId, providerRef: input.providerRef },
@@ -673,24 +751,37 @@ export async function receiveInbound(input: {
 
   const match = matchInbound({ body, candidates, quotedJob });
 
-  const row = await prisma.inboundMessage.create({
-    data: {
-      orgId: input.orgId,
-      channel: input.channel,
-      fromAddress: from,
-      subject: input.subject?.trim() || null,
-      body,
-      providerRef: input.providerRef ?? null,
-      receivedAt: input.receivedAt ?? new Date(),
-      customerId: match.customerId,
-      // The database refuses a job with no customer beside it, so a certain
-      // match on a job carries its customer or neither is written.
-      jobId: match.customerId ? match.jobId : null,
-      confidence: match.confidence,
-      matchNote: match.why,
-    },
-    select: { id: true },
-  });
+  let row: { id: string };
+  try {
+    row = await prisma.inboundMessage.create({
+      data: {
+        orgId: input.orgId,
+        channel: input.channel,
+        fromAddress: from,
+        subject: input.subject?.trim() || null,
+        body,
+        providerRef: input.providerRef ?? null,
+        receivedAt: input.receivedAt ?? new Date(),
+        customerId: match.customerId,
+        // The database refuses a job with no customer beside it, so a certain
+        // match on a job carries its customer or neither is written.
+        jobId: match.customerId ? match.jobId : null,
+        confidence: match.confidence,
+        matchNote: match.why,
+      },
+      select: { id: true },
+    });
+  } catch (error) {
+    // The other delivery of the same message got here first. That is the
+    // guard working, so the answer is the row it wrote rather than an error
+    // the provider will read as a failure and retry again. Phase 46.
+    if (!isAlreadyDone(error, 'providerRef') || !input.providerRef) throw error;
+
+    return prisma.inboundMessage.findFirstOrThrow({
+      where: { orgId: input.orgId, providerRef: input.providerRef },
+      select: { id: true },
+    });
+  }
 
   // Onto its thread, the job's or the customer's, and the thread is unread
   // from this moment. A message nobody could match stays in the inbox for
@@ -757,7 +848,10 @@ export async function inbox(orgId: string, includeHandled = false) {
     );
 }
 
-/** Files a message against a job, or marks it dealt with. */
+/** Files a message against a job, or marks it dealt with. *
+ * @repeat HARMLESS(OVERWRITE: where the message is filed and who dealt with
+ * it) Filing it against the same job twice leaves it filed against that job.
+ */
 export async function handleInbound(input: {
   orgId: string;
   userId: string;
@@ -811,13 +905,13 @@ export async function awardForInvoice(input: {
 
   const reason = `Invoice ${invoice.number} paid`;
 
-  // Once. A second payment on the same invoice, a refund and repayment, or a
-  // retried request all reach here; the reason is the idempotency key.
-  const already = await prisma.loyaltyEntry.findFirst({
-    where: { orgId: input.orgId, customerId: invoice.customerId, reason },
-    select: { id: true },
-  });
-  if (already) return 0;
+  // Once. A second payment on the same invoice, a refund and repayment, a
+  // retried request or two workers reaching here together all end at the same
+  // key, and the database decides which of them is the one. Looking first and
+  // then writing — which is what this did until Phase 46 — leaves room
+  // between the two for the other request to look as well, and then both see
+  // nothing and both award.
+  const once = `invoice:${invoice.id}:paid`;
 
   // Points on money the customer actually paid: the total less what the
   // programme itself paid, so redeeming points does not earn points.
@@ -834,6 +928,7 @@ export async function awardForInvoice(input: {
     amountMinor: paidMinor,
     jobId: invoice.jobId,
     reason,
+    once,
   });
 
   if (points > 0) {

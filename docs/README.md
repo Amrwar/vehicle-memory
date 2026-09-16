@@ -76,6 +76,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 | [Observability](04-engineering/06-observability.md)       | Logs, metrics, traces, alerts, SLOs                                              |
 | [Runbook](04-engineering/07-runbook.md)                   | On-call procedures for the things that break                                     |
 | [Deployment](04-engineering/08-deployment.md)             | Hosting shape, Neon and Vercel setup, the worker, and what must never be rotated |
+| [Doing it twice](04-engineering/09-repeating-a-write.md)  | What a repeat does to every write that moves money or stock, and what stops it   |
 
 ### 5. Project management
 
@@ -150,4 +151,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 45 are now built, and Phase 45.5 closed the last missing capability.
+to 45 are now built, Phase 45.5 closed the last missing capability, and Phase 46 began the nine phases of proof that follow it: what happens when a write is asked for twice.

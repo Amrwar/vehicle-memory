@@ -97,6 +97,9 @@ const SHEET_SELECT = {
  * The figures are frozen here. Attendance records can be corrected afterwards,
  * but the sheet that was submitted is the sheet that was submitted, and any
  * difference is an adjustment on the next one.
+ *
+ * @repeat GUARDED(STATE: the sheet is no longer open) A sheet that has been
+ * submitted, approved or paid refuses to be submitted again.
  */
 export async function submitTimesheet(input: {
   orgId: string;
@@ -155,7 +158,10 @@ export async function submitTimesheet(input: {
   return sheet.id;
 }
 
-/** A manager signs the hours off. After this they do not move. */
+/** A manager signs the hours off. After this they do not move. *
+ * @repeat GUARDED(STATE: approved has no self-edge) Approving an approved
+ * sheet is refused rather than approved a second time.
+ */
 export async function approveTimesheet(input: {
   orgId: string;
   userId: string;
@@ -239,6 +245,9 @@ export async function awaitingApproval(orgId: string) {
  * The run is created already exported, because the file is generated from it
  * on demand and nothing else happens between creating the run and downloading
  * it. What the status records is that these sheets have left the building.
+ *
+ * @repeat GUARDED(CONSTRAINT: payroll_runs_orgId_periodStart_periodEnd_key)
+ * A period is run once. The same timesheets cannot be handed over twice.
  */
 export async function runPayroll(input: {
   orgId: string;
@@ -335,7 +344,11 @@ export async function payrollFile(orgId: string, runId: string, format?: string 
    Bonuses, deductions and settings. Phase 43.
    --------------------------------------------------------------------------- */
 
-/** A bonus or a deduction on a waiting timesheet. */
+/** A bonus or a deduction on a waiting timesheet. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) The same
+ * bonus is a legitimate thing to add twice, so nothing in the adjustment
+ * itself says which it is; the key the form carries does.
+ */
 export async function addPayAdjustment(input: {
   orgId: string;
   userId: string;
@@ -386,7 +399,10 @@ export async function addPayAdjustment(input: {
   return row.id;
 }
 
-/** Takes a bonus or deduction back off a sheet that has not gone yet. */
+/** Takes a bonus or deduction back off a sheet that has not gone yet. *
+ * @repeat GUARDED(STATE: the adjustment is already gone) Removing it again
+ * is refused with a sentence rather than silently doing nothing.
+ */
 export async function removePayAdjustment(input: {
   orgId: string;
   userId: string;
@@ -442,6 +458,10 @@ export async function payrollSettings(orgId: string) {
   };
 }
 
+/**
+ * @repeat HARMLESS(OVERWRITE: the two settings set to what was chosen) Saved
+ * twice, the overtime rate and the export format are what they were.
+ */
 export async function savePayrollSettings(input: {
   orgId: string;
   userId: string;
@@ -468,7 +488,10 @@ export async function savePayrollSettings(input: {
   });
 }
 
-/** The money has left the bank: the run and its sheets are paid, and wages post. */
+/** The money has left the bank: the run and its sheets are paid, and wages post. *
+ * @repeat GUARDED(STATE: the run is already paid) A paid run refuses to be
+ * paid again, and its sheets refuse the move as well.
+ */
 export async function markPayrollPaid(input: {
   orgId: string;
   userId: string;

@@ -412,6 +412,19 @@ windows, so they are one table and one set of rules. The windows differ
 because a reset is a key to an account and a verification is only proof of an
 address.
 
+## 21.9 Asked twice, done once
+
+| Item                              | Status | Where                                                                                       |
+| --------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| A button that goes quiet          | Built  | Disabled and saying so while its form is in flight (Phase 46)                               |
+| A double-click that costs nothing | Built  | A key minted with the form; the same press is absorbed (Phase 46)                           |
+| One posting per document          | Built  | `journal_entries_one_per_document`, so a retried post is free (Phase 46)                    |
+| A queue two workers share         | Built  | Claimed in one statement, with a lease that expires (Phase 46)                              |
+| Points that arrive once           | Built  | Keyed on what they are the one-and-only of (Phase 46)                                       |
+| Points that arrive at all         | Built  | What a crash loses between payment and award is swept up hourly (Phase 46)                  |
+| A provider asked twice            | Built  | An idempotency key and a timeout on every write to Stripe (Phase 46)                        |
+| Every money write declared        | Built  | 59 writes, each saying what a repeat does; the build fails for one that does not (Phase 46) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -490,7 +503,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 230          |
+| Built    | 238          |
 | Partial  | 1            |
 | Deferred | 1            |
 

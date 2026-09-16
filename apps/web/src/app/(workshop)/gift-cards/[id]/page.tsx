@@ -19,6 +19,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { adjustGiftCard, disableGiftCard, GiftCardError, giftCardDetail } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -76,14 +77,22 @@ async function adjust(formData: FormData) {
   const amountMinor = Number.isFinite(pounds) ? Math.round(Math.abs(pounds) * 100) : 0;
 
   try {
-    await adjustGiftCard({
+    await once({
       orgId,
-      userId: user.userId,
-      giftCardId: id,
-      amountMinor: direction === 'DOWN' ? -amountMinor : amountMinor,
-      reason: String(formData.get('reason') ?? ''),
+      key: ['adjust-card', id, String(formData.get('once') ?? '')],
+      work: () =>
+        adjustGiftCard({
+          orgId,
+          userId: user.userId,
+          giftCardId: id,
+          amountMinor: direction === 'DOWN' ? -amountMinor : amountMinor,
+          reason: String(formData.get('reason') ?? ''),
+        }),
     });
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/gift-cards/${id}?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof GiftCardError)) throw error;
     redirect(`/gift-cards/${id}?problem=${encodeURIComponent(error.message)}`);
   }
@@ -128,6 +137,10 @@ export default async function GiftCardPage({
   if (!card) notFound();
 
   const mayChange = can(user.role, 'payment:write') && card.status !== 'DISABLED';
+
+  // A key for this drawing of the page; every press of the adjust button
+  // carries it, so a correction is made once. Phase 46.
+  const token = onceToken();
 
   return (
     <>
@@ -239,6 +252,7 @@ export default async function GiftCardPage({
                 )}
               />
               <form action={adjust}>
+                <input type="hidden" name="once" value={token} />
                 <CardBody className="grid gap-3 sm:grid-cols-[8rem_9rem_minmax(0,1fr)_auto] sm:items-end">
                   <input type="hidden" name="id" value={card.id} />
                   <Field label={t('Which way')} htmlFor="adjust-direction">

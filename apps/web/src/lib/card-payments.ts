@@ -13,6 +13,7 @@ import {
   type ProviderRecord,
   type ProviderStatus,
   reconcileAttempts,
+  repeatKey,
   settlesMoney,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
@@ -34,7 +35,12 @@ import { paymentProvider } from './payments/provider';
  * and names each difference between its record and ours.
  */
 
-/** Opens an attempt and returns where to send the customer. */
+/** Opens an attempt and returns where to send the customer. *
+ * @repeat GUARDED(STATE: an open checkout for the same amount within the
+ * hour) The same request is handed the checkout it already opened. Two
+ * arriving in the same instant can open two, of which only one can be paid:
+ * the bill refuses the second as an overpayment.
+ */
 export async function startCardPayment(input: {
   userId: string;
   invoiceId: string;
@@ -163,6 +169,11 @@ export type SettleOutcome =
  * What the provider says, applied once. Called from the webhook, from the
  * stub checkout, and from "check with the provider"; whichever arrives
  * first records the money and the rest find nothing to do.
+ *
+ * @repeat GUARDED(KEY: the PENDING claim taken before the payment is
+ * recorded) A provider that sends the same answer twice, or sends it while a
+ * recheck is running, moves the attempt once; the loser is told nothing
+ * changed.
  */
 export async function settleAttempt(input: {
   providerRef: string;
@@ -269,7 +280,11 @@ export async function settleAttempt(input: {
   }
 }
 
-/** Asks the provider about one attempt and applies the answer. */
+/** Asks the provider about one attempt and applies the answer. *
+ * @repeat GUARDED(KEY: the same PENDING claim, taken inside settleAttempt)
+ * Asking the provider again is free; only the moment the answer changes
+ * writes anything, and that moment is claimed.
+ */
 export async function checkAttempt(input: {
   orgId: string;
   attemptId: string;
@@ -398,6 +413,8 @@ export async function refundThroughProvider(input: {
   amountMinor: number;
   currency: string;
   reason: string;
+  /** The note being refunded, which is what makes this refund unique. */
+  creditNoteId: string;
 }): Promise<{ attemptId: string; refundRef: string; status: 'SUCCEEDED' | 'PENDING' | 'FAILED' }> {
   const attempts = await prisma.paymentAttempt.findMany({
     where: {
@@ -426,11 +443,16 @@ export async function refundThroughProvider(input: {
     amountMinor: input.amountMinor,
   });
   const attempt = attempts.find((a) => a.providerRef === providerRef)!;
+  // The key is the bill, the credit note and the amount — the three things
+  // that make this refund the refund it is. A retry after a timeout carries
+  // the same key and the provider gives back the same refund rather than
+  // making a second one. Phase 46.
   const result = await paymentProvider().refund({
     providerRef,
     amountMinor: input.amountMinor,
     currency: input.currency,
     reason: input.reason,
+    idempotencyKey: repeatKey(['refund', input.invoiceId, input.creditNoteId, input.amountMinor]),
   });
   if (result.status === 'FAILED') {
     throw new PaymentProviderError(

@@ -8,6 +8,7 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { claimMessages } from './claim';
 import { log } from './log';
 import { configureTransports, transportFor } from './transport/configure';
 import { TransportError } from './transport/index';
@@ -31,10 +32,12 @@ export const TRANSPORTS = configureTransports();
 /**
  * Hands every message that is due to whichever provider carries its channel.
  *
- * The queue is claimed one row at a time and updated immediately, so a second
- * worker on the same database cannot pick up a message this one is already
- * sending. Sending twice is worse than sending late: the customer sees it,
- * and there is no way to take it back.
+ * The batch is claimed in one statement before any of it is read, so a second
+ * worker steps over these rows rather than sending the same message again.
+ * Sending twice is worse than sending late: the customer sees it, and there is
+ * no way to take it back. Reading first and claiming afterwards — which is
+ * what this did until Phase 46 — leaves exactly enough room between the two
+ * for an overlapping worker to read the same row.
  *
  * The address is normalised here rather than where it was written, because a
  * customer record can be edited between queueing and sending, and the address
@@ -54,10 +57,12 @@ export async function sendQueuedMessages(): Promise<number> {
     data: { status: 'SUPPRESSED', error: 'Demonstration workshop: nothing is sent.' },
   });
 
+  const claimed = await claimMessages(BATCH_SIZE);
+  if (claimed.length === 0) return 0;
+
   const due = await prisma.messageLog.findMany({
-    where: { status: 'QUEUED', availableAt: { lte: new Date() } },
+    where: { id: { in: claimed } },
     orderBy: { availableAt: 'asc' },
-    take: BATCH_SIZE,
     include: { org: { select: { slug: true } } },
   });
 
@@ -215,12 +220,14 @@ async function deliver(message: Queued, suppressed: Set<string>): Promise<boolea
     return false;
   }
 
-  // Claimed before the attempt, not after. A crash mid-send leaves a row that
-  // says it was tried, which is true, rather than one that looks untouched and
-  // gets sent again by the next worker.
+  // Counted before the attempt, not after. A crash mid-send leaves a row that
+  // says it was tried, which is true, rather than one that looks untouched.
+  // The row is already leased by the batch claim, so nothing else will reach
+  // it while this is in the provider's hands; the lease is what brings it
+  // back if this worker never returns.
   await prisma.messageLog.update({
     where: { id: message.id },
-    data: { attempts: message.attempts + 1, availableAt: new Date(now.getTime() + 60_000) },
+    data: { attempts: message.attempts + 1 },
   });
 
   const transport = transportFor(TRANSPORTS, channel);

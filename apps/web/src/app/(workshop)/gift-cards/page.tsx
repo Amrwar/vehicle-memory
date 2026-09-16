@@ -9,7 +9,6 @@ import {
 import {
   Alert,
   Badge,
-  Button,
   Card,
   CardBody,
   CardHeader,
@@ -32,6 +31,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { GiftCardError, giftCardsFor, sellGiftCard, sitesFor } from '@/lib/giftcards';
+import { once, onceToken, StillGoingError } from '@/lib/once';
+import { SubmitOnce } from '@/components/submit-once';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 
@@ -77,24 +78,38 @@ async function sell(formData: FormData) {
   const term = String(formData.get('term') ?? '');
   const site = String(formData.get('locationId') ?? '');
 
-  let sold: { id: string };
+  // One press, one card. Each sale mints a new code, so a second press does
+  // not collide with the first — it sells another card, takes the money
+  // again, and puts a second liability on the books. Phase 46.
+  let sold: { id?: string } = {};
   try {
-    sold = await sellGiftCard({
+    const taken = await once({
       orgId,
-      userId: user.userId,
-      amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
-      method: TENDERS.some((tender) => tender.value === method) ? method : 'CARD',
-      termMonths: term ? Number(term) : null,
-      locationId: site || null,
-      recipientName: String(formData.get('recipientName') ?? ''),
-      note: String(formData.get('note') ?? ''),
+      key: ['sell-card', String(formData.get('once') ?? '')],
+      resultOf: (card) => card.id,
+      work: () =>
+        sellGiftCard({
+          orgId,
+          userId: user.userId,
+          amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
+          method: TENDERS.some((tender) => tender.value === method) ? method : 'CARD',
+          termMonths: term ? Number(term) : null,
+          locationId: site || null,
+          recipientName: String(formData.get('recipientName') ?? ''),
+          note: String(formData.get('note') ?? ''),
+        }),
     });
+
+    sold = { id: taken.result?.id ?? taken.resultRef ?? undefined };
   } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/gift-cards?problem=${encodeURIComponent(error.message)}`);
+    }
     if (!(error instanceof GiftCardError)) throw error;
     redirect(`/gift-cards?problem=${encodeURIComponent(error.message)}`);
   }
 
-  redirect(`/gift-cards/${sold.id}?done=sold`);
+  redirect(sold.id ? `/gift-cards/${sold.id}?done=sold` : '/gift-cards?done=sold');
 }
 
 export default async function GiftCardsPage({
@@ -108,6 +123,9 @@ export default async function GiftCardsPage({
 
   const [cards, sites] = await Promise.all([giftCardsFor(orgId), sitesFor(orgId)]);
   const maySell = can(user.role, 'payment:write');
+
+  // A key for this drawing of the form; every press of the button carries it.
+  const token = onceToken();
 
   return (
     <>
@@ -270,6 +288,7 @@ export default async function GiftCardsPage({
             />
             <form action={sell}>
               <CardBody className="grid gap-3">
+                <input type="hidden" name="once" value={token} />
                 <Field label={t('Amount')} htmlFor="sell-amount">
                   <Input
                     id="sell-amount"
@@ -336,9 +355,7 @@ export default async function GiftCardsPage({
                 <Field label={t('Note')} hint={t('Optional')} htmlFor="sell-note">
                   <Input id="sell-note" name="note" maxLength={200} />
                 </Field>
-                <Button type="submit" variant="primary">
-                  {t('Sell the card')}
-                </Button>
+                <SubmitOnce>{t('Sell the card')}</SubmitOnce>
               </CardBody>
             </form>
           </Card>

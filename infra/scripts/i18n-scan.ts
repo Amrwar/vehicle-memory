@@ -373,7 +373,12 @@ export function thrownSentences(): Map<string, string> {
   ]
     .filter((file) => !file.includes(`${join('core', 'src', 'i18n')}`))
     // Read only by whoever deploys the product, never by a person using it.
-    .filter((file) => !/[\\/]lib[\\/]env\.ts$/.test(file));
+    .filter((file) => !/[\\/]lib[\\/]env\.ts$/.test(file))
+    // The same, for the rule that holds the build to declaring what a repeat
+    // does to a write: its refusals are addressed to whoever is adding the
+    // write, and are read by running the check rather than by using the
+    // product. Phase 46.
+    .filter((file) => !/[\\/]reliability[\\/]repeat\.ts$/.test(file));
 
   for (const file of files) {
     const text = readFileSync(file, 'utf8');

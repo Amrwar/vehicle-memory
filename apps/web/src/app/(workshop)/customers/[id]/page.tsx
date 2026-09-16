@@ -35,6 +35,7 @@ import {
 import { DepositError, heldFor, returnHeld, takeDeposit } from '@/lib/deposits';
 import { redeemCode, referralCardFor } from '@/lib/referrals';
 import { messagesFor, timelineFor } from '@/lib/timeline';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,18 +118,23 @@ async function deposit(formData: FormData) {
   const pounds = Number(typed);
 
   try {
-    await takeDeposit({
+    await once({
       orgId,
-      userId: user.userId,
-      customerId,
-      jobId: String(formData.get('jobId') ?? '') || null,
-      amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
-      method: String(formData.get('method') ?? 'CARD'),
-      reference: String(formData.get('reference') ?? ''),
-      note: String(formData.get('note') ?? ''),
+      key: ['take-deposit', customerId, String(formData.get('once') ?? '')],
+      work: () =>
+        takeDeposit({
+          orgId,
+          userId: user.userId,
+          customerId,
+          jobId: String(formData.get('jobId') ?? '') || null,
+          amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
+          method: String(formData.get('method') ?? 'CARD'),
+          reference: String(formData.get('reference') ?? ''),
+          note: String(formData.get('note') ?? ''),
+        }),
     });
   } catch (error) {
-    if (error instanceof DepositError) {
+    if (error instanceof DepositError || error instanceof StillGoingError) {
       redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
     }
     throw error;
@@ -147,16 +153,21 @@ async function giveBack(formData: FormData) {
   const pounds = Number(typed);
 
   try {
-    await returnHeld({
+    await once({
       orgId,
-      userId: user.userId,
-      depositId: String(formData.get('depositId') ?? ''),
-      amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
-      method: String(formData.get('method') ?? 'BANK_TRANSFER'),
-      reason: String(formData.get('reason') ?? ''),
+      key: ['return-held', customerId, String(formData.get('once') ?? '')],
+      work: () =>
+        returnHeld({
+          orgId,
+          userId: user.userId,
+          depositId: String(formData.get('depositId') ?? ''),
+          amountMinor: Number.isFinite(pounds) ? Math.round(pounds * 100) : 0,
+          method: String(formData.get('method') ?? 'BANK_TRANSFER'),
+          reason: String(formData.get('reason') ?? ''),
+        }),
     });
   } catch (error) {
-    if (error instanceof DepositError) {
+    if (error instanceof DepositError || error instanceof StillGoingError) {
       redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
     }
     throw error;
@@ -236,6 +247,10 @@ export default async function CustomerPage({
   const t = await tFor();
 
   const { id: customerId } = await params;
+
+  // A key for this drawing of the page, carried by the forms that move money
+  // held for the customer. A second press is the same deposit. Phase 46.
+  const token = onceToken();
 
   const [timeline, messages, points, referrals] = await Promise.all([
     timelineFor(orgId, customerId),
@@ -635,6 +650,7 @@ export default async function CustomerPage({
                         >
                           <input type="hidden" name="customerId" value={customer.id} />
                           <input type="hidden" name="depositId" value={row.id} />
+                          <input type="hidden" name="once" value={`${token}:${row.id}`} />
                           <input type="hidden" name="method" value="BANK_TRANSFER" />
                           <Input
                             name="amount"
@@ -666,6 +682,7 @@ export default async function CustomerPage({
               {mayEditCustomer ? (
                 <form action={deposit} className="grid gap-2 border-t border-(--border-soft) pt-3">
                   <input type="hidden" name="customerId" value={customer.id} />
+                  <input type="hidden" name="once" value={token} />
                   <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
                     <Field label={t('Deposit')} htmlFor="deposit-amount">
                       <Input

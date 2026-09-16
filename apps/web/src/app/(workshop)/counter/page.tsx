@@ -25,10 +25,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { PlanWall } from '@/components/plan-wall';
+import { SubmitOnce } from '@/components/submit-once';
 import { CouponError, quoteCoupon } from '@/lib/coupons';
 import { closeTill, completeSale, openTill, recentSales, sellableParts } from '@/lib/counter';
 import { findGiftCard, GiftCardError } from '@/lib/giftcards';
 import { planIncludes, requireSession } from '@/lib/guard';
+import { once, onceToken, StillGoingError } from '@/lib/once';
 import { tFor } from '@/lib/i18n';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -126,22 +128,42 @@ async function sell(formData: FormData) {
     });
   }
 
-  const result = await completeSale({
+  // One press, one sale. A counter is exactly where a second press happens:
+  // somebody on a slow connection, a queue behind them, and nothing on screen
+  // saying the first press worked. Without this the stock leaves the shelf
+  // twice and the customer is charged twice. Phase 46.
+  const sale = await once({
     orgId,
-    locationId: user.locationId,
-    userId: user.userId,
-    lines: [
-      {
-        productId: productId || null,
-        kind: productId ? 'PART' : 'FEE',
-        description,
-        quantity,
-        unitPrice: price,
-      },
-    ],
-    tenders,
-    couponId,
+    key: ['sell', String(formData.get('once') ?? '')],
+    resultOf: (taken) => taken.reference ?? null,
+    work: () =>
+      completeSale({
+        orgId,
+        locationId: user.locationId,
+        userId: user.userId,
+        lines: [
+          {
+            productId: productId || null,
+            kind: productId ? 'PART' : 'FEE',
+            description,
+            quantity,
+            unitPrice: price,
+          },
+        ],
+        tenders,
+        couponId,
+      }),
+  }).catch((error: unknown) => {
+    if (error instanceof StillGoingError) {
+      redirect(`/counter?error=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
   });
+
+  // A second press has no result of its own: the sale it is a repeat of was
+  // already taken, and the person is sent to the receipt rather than told
+  // something went wrong.
+  const result = sale.result ?? { ok: true, reference: sale.resultRef ?? '', changeMinor: 0 };
 
   redirect(
     result.ok
@@ -185,6 +207,10 @@ export default async function CounterPage({
     recentSales(orgId, 12),
     sellableParts(orgId, user.locationId),
   ]);
+
+  // A key for this drawing of the sale form. Every press of "Take the sale"
+  // carries it, so a second press is the same sale rather than another one.
+  const token = onceToken();
 
   const todaysTotal = sales
     .filter((sale) => sale.soldAt && isToday(sale.soldAt))
@@ -265,6 +291,10 @@ export default async function CounterPage({
             <CardHeader title={t('New sale')} description={t('One screen, one submit')} />
             <CardBody>
               <form action={sell} className="grid gap-3.5">
+                {/* Minted with this drawing of the form; every press of the
+                    button at the bottom carries it. Phase 46. */}
+                <input type="hidden" name="once" value={token} />
+
                 <Field label={t('Part')} hint={t('Or leave blank and describe it')}>
                   <Select name="productId" defaultValue="">
                     <option value="">{t('Something not in the catalogue')}</option>
@@ -345,9 +375,9 @@ export default async function CounterPage({
                   <Input name="given" type="number" min={0} step="0.01" placeholder="20.00" />
                 </Field>
 
-                <Button type="submit" variant="primary" size="touch" block>
+                <SubmitOnce size="touch" block>
                   {t('Take the sale')}
-                </Button>
+                </SubmitOnce>
 
                 <p className="text-[12px] leading-relaxed text-(--text-faint)">
                   {t(

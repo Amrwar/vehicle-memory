@@ -593,6 +593,11 @@ export const fr: Readonly<Record<string, string>> = {
     'Choisissez au moins une pièce pour laquelle imprimer une étiquette.',
   'That is {v1} labels. Print at most {v2} at a time.':
     'Cela fait {v1} étiquettes. Imprimez-en au plus {v2} à la fois.',
+
+  // Asked twice. Phase 46.
+  'That referral has already been paid.': 'Ce parrainage a déjà été payé.',
+  'That is already going through. Give it a moment rather than pressing again.':
+    'C’est déjà en cours. Laissez-lui un instant plutôt que d’appuyer à nouveau.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -1143,4 +1148,9 @@ export const ar: Readonly<Record<string, string>> = {
   'Choose at least one part to print a label for.': 'اختر قطعة واحدة على الأقل لطباعة ملصق لها.',
   'That is {v1} labels. Print at most {v2} at a time.':
     'هذه {v1} ملصقات. اطبع {v2} كحد أقصى في كل مرة.',
+
+  // Asked twice. Phase 46.
+  'That referral has already been paid.': 'تم دفع هذه الإحالة بالفعل.',
+  'That is already going through. Give it a moment rather than pressing again.':
+    'هذا قيد التنفيذ بالفعل. امهله لحظة بدلًا من الضغط مرة أخرى.',
 };

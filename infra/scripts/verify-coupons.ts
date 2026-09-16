@@ -211,7 +211,9 @@ async function main() {
     kind: 'PERCENT',
     percent: 5,
   });
-  await retireCoupon({ orgId: org.id, userId: staff.id, id: retiredId });
+  await retireCoupon({ orgId: org.id, userId: staff.id, id: retiredId, active: false });
+  // Pressed twice, it stays withdrawn rather than coming back. Phase 46.
+  await retireCoupon({ orgId: org.id, userId: staff.id, id: retiredId, active: false });
 
   /* --- what a code is worth against a bill -------------------------------- */
 

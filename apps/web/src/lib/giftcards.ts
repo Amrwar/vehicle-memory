@@ -41,7 +41,12 @@ const minor = (value: { toString(): string }) => Math.round(Number(value.toStrin
 
 type Tx = Prisma.TransactionClient;
 
-/** Sells a card: a row, a loading entry, a ledger posting, an audit line. */
+/** Sells a card: a row, a loading entry, a ledger posting, an audit line. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Each sale
+ * mints a new code, so a repeat does not collide with the first: it sells a
+ * second card and takes the money again. Only the form key can tell one
+ * press from two.
+ */
 export async function sellGiftCard(input: {
   orgId: string;
   userId: string;
@@ -184,6 +189,10 @@ export async function findGiftCard(orgId: string, code: string, db: Tx | typeof 
  * the card, then the payment, then the two are linked: a failure between the
  * first two leaves a spend against nothing, which is visible and undoable,
  * rather than a bill paid twice.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Spending the
+ * card twice against one bill is stopped by the key; past that the bill
+ * itself refuses, because there is nothing left owing to spend against.
  */
 export async function redeemGiftCard(input: {
   orgId: string;
@@ -275,6 +284,10 @@ export async function redeemGiftCard(input: {
  * sale and the spend stand or fall together. The counter has already
  * settled the tenders; this checks the card can cover its share and writes
  * the movement against the sale.
+ *
+ * @repeat GUARDED(KEY: the sale it runs inside) Called only from within a
+ * counter sale’s own transaction, so it repeats exactly when that sale
+ * repeats, and the sale is held off by the key its form carries.
  */
 export async function redeemAtCounter(
   tx: Tx,
@@ -314,6 +327,10 @@ export async function redeemAtCounter(
 /**
  * A person changes what a card holds, with a reason that stays on it.
  * Money added is booked as goodwill; money taken off as sundry income.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) A correction
+ * applied twice is a different balance and a second posting, so the form key
+ * decides how many corrections one press is.
  */
 export async function adjustGiftCard(input: {
   orgId: string;
@@ -379,6 +396,10 @@ export async function adjustGiftCard(input: {
  * Cancels a card. Whatever is on it is written off with the reason, so the
  * liability goes with it and the history says where the money went. There
  * is no way back: a cancelled card stays cancelled and a new one is sold.
+ *
+ * @repeat GUARDED(STATE: the card already has a disabledAt) Cancelling a
+ * cancelled card is refused rather than writing the balance off a second
+ * time.
  */
 export async function disableGiftCard(input: {
   orgId: string;

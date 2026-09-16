@@ -54,6 +54,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'ApiKey',
       'AuditLog',
       'OutboxEvent',
+      'OnceRequest',
       'SyncedAction',
       'ImportBatch',
     ],

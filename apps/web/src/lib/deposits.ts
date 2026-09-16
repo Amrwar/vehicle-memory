@@ -73,7 +73,11 @@ function shape<
   };
 }
 
-/** Takes a deposit: a row, a ledger posting, an audit line, and a word to the customer. */
+/** Takes a deposit: a row, a ledger posting, an audit line, and a word to the customer. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Two deposits
+ * of the same amount from one customer are legitimate, so the form the press
+ * came from is the only thing that can tell a repeat from a second deposit.
+ */
 export async function takeDeposit(input: {
   orgId: string;
   userId: string;
@@ -165,6 +169,10 @@ export async function heldFor(orgId: string, customerId: string) {
  * deposit is named, and never more than is held or owed. Each slice is a
  * payment of kind DEPOSIT and a movement on the deposit it came from, so
  * both the bill and the deposit can explain themselves.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Applied
+ * twice, the same held money would come off the bill twice; the key stops
+ * the press, and the bill refuses anything beyond what is owed.
  */
 export async function applyHeld(input: {
   orgId: string;
@@ -266,7 +274,11 @@ export async function applyHeld(input: {
   return { amountMinor, paymentIds };
 }
 
-/** Money held going back to the customer, the way money goes, with a reason. */
+/** Money held going back to the customer, the way money goes, with a reason. *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Returning
+ * money twice is the workshop paying it back twice, and a part-return is
+ * legitimate on its own, so the key is what separates the two.
+ */
 export async function returnHeld(input: {
   orgId: string;
   userId: string;
