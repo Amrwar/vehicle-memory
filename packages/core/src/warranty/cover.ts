@@ -145,6 +145,12 @@ export class WarrantyError extends Error {
     | 'NOT_COVERED'
     | 'ALREADY_CLAIMED'
     | 'NO_REASON'
+    /**
+     * A mileage allowance was asked for on a vehicle with no reading to count
+     * it from. The database refuses the row outright, so this catches it
+     * first and says what to do instead.
+     */
+    | 'NO_READING'
     // Settling a claim with what it cost and what came back. Phase 44.
     | 'BAD_SETTLEMENT'
     | 'ALREADY_SETTLED';

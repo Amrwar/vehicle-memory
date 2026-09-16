@@ -315,6 +315,11 @@ export default async function CustomerPage({
         }
         actions={
           <>
+            {mayEditCustomer ? (
+              <Link href={`/customers/${customer.id}/edit`}>
+                <Button variant="secondary">{t('Correct their details')}</Button>
+              </Link>
+            ) : null}
             <Link href={`/audit/Customer/${customer.id}`}>
               <Button variant="secondary">{t('How this came to be')}</Button>
             </Link>
@@ -333,17 +338,19 @@ export default async function CustomerPage({
               ? t(
                   'Deposit taken and booked as money held, not as revenue. It goes against the invoice when there is one.',
                 )
-              : saved === 'returned'
-                ? t('Money returned, with the reason kept.')
-                : saved === 'referral-paid'
-                  ? t(
-                      'Code used. They had already had enough work done here, so both sides have been paid.',
-                    )
-                  : saved === 'referral'
+              : saved === 'details'
+                ? t('Saved. The same record, with their history still on it.')
+                : saved === 'returned'
+                  ? t('Money returned, with the reason kept.')
+                  : saved === 'referral-paid'
                     ? t(
-                        'Code used. Both sides are paid once this customer has had enough work done.',
+                        'Code used. They had already had enough work done here, so both sides have been paid.',
                       )
-                    : t('Saved.')}
+                    : saved === 'referral'
+                      ? t(
+                          'Code used. Both sides are paid once this customer has had enough work done.',
+                        )
+                      : t('Saved.')}
         </Alert>
       ) : null}
       {problem ? (

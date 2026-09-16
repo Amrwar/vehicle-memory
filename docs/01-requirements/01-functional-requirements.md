@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7900 — Built, and reachable
+
+| Ref     | Requirement                                                                                                                                           | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7901 | A customer's details MUST be correctable on the same record, without creating a second one, using the same fields they were taken down with.          | 46.5  |
+| FR-7902 | A marketing consent MUST NOT be changeable from a form whose purpose is correcting details.                                                           | 46.5  |
+| FR-7903 | A stock transfer MUST be startable from the product's own suggestion, and MUST move nothing until it is sent.                                         | 46.5  |
+| FR-7904 | A transfer that has been sent MUST be receivable line by line; a short delivery MUST stay open until the rest arrives or somebody closes it short.    | 46.5  |
+| FR-7905 | Warranty cover MUST be recordable against the job that did the work, with the months and mileage it runs for and whose warranty backs the workshop's. | 46.5  |
+| FR-7906 | A mileage allowance MUST count from a reading, and MUST be refused with a sentence rather than a database error where there is none.                  | 46.5  |
+| FR-7907 | The page where a buyer checks a vehicle MUST be reachable from the public site without knowing its address.                                           | 46.5  |
+| FR-7908 | Whoever runs the product MUST be told by email when a workshop opens an account, and that message MUST NOT be able to fail the sign-up.               | 46.5  |
+
 ## FR-7800 — Doing it twice
 
 | Ref     | Requirement                                                                                                                                                                       | Phase |

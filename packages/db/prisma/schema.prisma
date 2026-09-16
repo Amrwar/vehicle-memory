@@ -2111,6 +2111,7 @@ enum SequenceKind {
   PURCHASE_ORDER
   COUNTER_SALE
   EXPENSE
+  TRANSFER
 }
 
 model Invoice {

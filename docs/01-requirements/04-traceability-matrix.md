@@ -523,6 +523,14 @@ where the work happens.
 
 | Req     | Story | Schema                               | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | ------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-7901 | AW1   | —                                    | `updateCustomer()`, `CustomerFields`, `/customers/[id]/edit`                | `verify-wiring.ts`                          | Done   |
+| FR-7902 | AW1   | `consent_changes`                    | `showConsent={false}`, the comment in `updateCustomer()`                    | `verify-wiring.ts`                          | Done   |
+| FR-7903 | AW2   | `SequenceKind.TRANSFER`              | `createTransfer()`, the suggestion form on `/transfers`                     | `verify-wiring.ts`                          | Done   |
+| FR-7904 | AW2   | `stock_transfer_lines.received`      | `receiveTransfer()`, `/transfers/[id]`, PART_RECEIVED                       | `transfer.test.ts`, `verify-wiring.ts`      | Done   |
+| FR-7905 | AW3   | `warranties`                         | `recordCover()`, the form on `/warranty`                                    | `verify-wiring.ts`                          | Done   |
+| FR-7906 | AW3   | `warranties_distance_needs_a_start`  | the reading taken from the vehicle in `recordCover()`                       | `verify-wiring.ts`                          | Done   |
+| FR-7907 | AW4   | —                                    | `/verify` in `marketing.tsx` navigation and footer                          | `verify-controls.ts`                        | Done   |
+| FR-7908 | —     | —                                    | `tellOperatorAboutSignup()`, `OPERATOR_EMAIL`                               | manual                                      | Done   |
 | FR-7801 | AV1   | —                                    | `SubmitOnce`, `useFormStatus`                                               | `verify-screens.ts`                         | Done   |
 | FR-7802 | AV1   | `once_requests`                      | `once()`, `onceToken()`, the money forms                                    | `verify-repeat.ts`                          | Done   |
 | FR-7803 | AV1   | `once_requests_orgId_key_key`        | the claim taken before the work in `once()`                                 | `verify-repeat.ts`                          | Done   |

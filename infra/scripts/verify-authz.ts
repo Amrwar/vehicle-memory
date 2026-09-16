@@ -152,6 +152,7 @@ async function main() {
   ]);
   const ids: Record<string, string | undefined> = {
     '/customers/[id]': customer?.id,
+    '/customers/[id]/edit': customer?.id,
     '/jobs/[id]': job?.id,
     '/invoices/[id]': invoice?.id,
     '/vehicles/[id]': vehicle?.id,

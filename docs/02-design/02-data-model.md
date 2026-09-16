@@ -82,18 +82,19 @@ in URLs, and they sort roughly by creation time, which helps index locality.
 
 Every index exists for a query someone actually runs.
 
-| Index                                         | Serves                                        |
-| --------------------------------------------- | --------------------------------------------- |
-| `jobs (orgId, status)`                        | Dashboard counts, job list filtered by status |
-| `jobs (orgId, createdAt desc)`                | Job list default order                        |
-| `bookings (locationId, startAt)`              | Diary week view                               |
-| `bookings (bayId, startAt)`                   | Bay lane rendering and clash detection        |
-| `vehicle_events (vehicleId, occurredAt desc)` | Passport timeline                             |
-| `odometer_readings (vehicleId, readAt desc)`  | Latest reading, anomaly assessment            |
-| `customers gin (displayName)` trigram         | Name search while a customer is on the phone  |
-| `vehicles gin (registration)`, `gin (vin)`    | Registration and VIN lookup                   |
-| `outbox_events (processedAt, availableAt)`    | Worker poll                                   |
-| `once_requests (expiresAt)`                   | Sweeping keys no retry will arrive for        |
+| Index                                         | Serves                                          |
+| --------------------------------------------- | ----------------------------------------------- |
+| `jobs (orgId, status)`                        | Dashboard counts, job list filtered by status   |
+| `jobs (orgId, createdAt desc)`                | Job list default order                          |
+| `bookings (locationId, startAt)`              | Diary week view                                 |
+| `bookings (bayId, startAt)`                   | Bay lane rendering and clash detection          |
+| `vehicle_events (vehicleId, occurredAt desc)` | Passport timeline                               |
+| `odometer_readings (vehicleId, readAt desc)`  | Latest reading, anomaly assessment              |
+| `customers gin (displayName)` trigram         | Name search while a customer is on the phone    |
+| `vehicles gin (registration)`, `gin (vin)`    | Registration and VIN lookup                     |
+| `outbox_events (processedAt, availableAt)`    | Worker poll                                     |
+| `once_requests (expiresAt)`                   | Sweeping keys no retry will arrive for          |
+| `document_sequences (orgId, kind)`            | The next number for a bill, a claim, a transfer |
 
 The trigram indexes are not decoration. NFR-102 gives a 400ms budget for a list
 view, and a service advisor searching "okon" while someone waits on the line is

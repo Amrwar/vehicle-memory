@@ -2513,6 +2513,63 @@ points at once, two workers reaching for one queue, one ledger entry posted
 three times together, a sale taken twice, and a claim whose process died
 holding it. 29 checks.
 
+## Phase 46.5 — Built, and reachable
+
+**Scope.** Everything the product had written, tested and never offered a way
+into.
+
+**Exit.** No capability exists in the code without a way to it from the
+screen, and the ones that were in that state are proved end to end.
+
+**Status.** Built. The owner could not find how to spend a gift card, which
+turned out to be true of more than gift cards: a sweep for anything in the
+same state found four capabilities that existed and could not be reached.
+
+Correcting a customer was the worst of them. A customer could be taken down
+and never corrected — a number written down wrong on the telephone stayed
+wrong, somebody who moved house kept their old address on every invoice, and
+the only way round it was a second record for the same person, which is how a
+customer's history ends up in two halves and neither of them is their history.
+The form is now shared with the page that takes them down, so the two cannot
+drift; the one thing it deliberately does not offer is consent, because
+consent is the customer's to give and is changed where a reason is recorded
+against it. A tick box that quietly did nothing would be worse than no tick
+box, since somebody would tick it and believe they had asked.
+
+Moving stock between sites was written end to end except for its beginning.
+The product could tell a workshop which parts one site was short of and
+another was holding spare, and had no way to move them — and worse, anything
+that had ever been sent could never be booked in. Stock booked out of one
+shelf and never onto the other is stock nobody can find, and at the next count
+it reads as theft. A suggestion is now one press, a transfer has a page of its
+own, and receiving is a form rather than a button because a van does not
+always arrive with what left: a short delivery stays open until the rest turns
+up, and closing it short is a separate decision with a difference written off
+against it.
+
+Standing behind a job was the same shape: every screen read a warranty book
+that nothing could write to. It can be recorded now against the job that did
+the work, which is what fixes the date and the mileage it counts from, and
+with whose warranty backs the workshop's — theirs often outlasts, which is the
+whole reason for recording it.
+
+And `/verify`, where somebody standing in a stranger's driveway with a printed
+report types the code on it, was linked from nowhere at all. It is now in the
+public navigation and the footer, which is where the argument the product
+makes about vehicle history actually lands.
+
+Two bugs were found by the tests written for the new screens rather than by
+reading: recording a mileage allowance hit a database constraint instead of a
+sentence, because nothing filled in the reading it counts from; and a transfer
+numbered from the workshop's own counter collided with transfers numbered
+before the counter existed. Both are fixed where any caller is safe rather
+than where they happened to surface.
+
+`verify-wiring.ts` proves all three end to end against a real database: a
+customer corrected and still one record, a transfer started, sent, part
+received and closed with nothing created or destroyed on the journey, and
+cover recorded against a real job. 20 checks.
+
 ## Phase 47 — Financial integrity
 
 **Scope.** An invariant suite over the whole ledger rather than over one

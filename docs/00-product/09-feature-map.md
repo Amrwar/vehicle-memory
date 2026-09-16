@@ -425,6 +425,19 @@ address.
 | A provider asked twice            | Built  | An idempotency key and a timeout on every write to Stripe (Phase 46)                        |
 | Every money write declared        | Built  | 59 writes, each saying what a repeat does; the build fails for one that does not (Phase 46) |
 
+## 21.10 Built, and now reachable
+
+A sweep for anything written, tested and impossible to find. These were.
+
+| Item                           | Status | Where                                                                               |
+| ------------------------------ | ------ | ----------------------------------------------------------------------------------- |
+| Correcting a customer          | Built  | `/customers/[id]/edit`, the same fields as taking them down (Phase 46.5)            |
+| Starting a stock transfer      | Built  | One press on a suggestion; nothing leaves a shelf until it is sent (Phase 46.5)     |
+| Sending, receiving, cancelling | Built  | `/transfers/[id]`; a short delivery stays open until the rest turns up (Phase 46.5) |
+| Recording warranty cover       | Built  | On `/warranty`, against a finished job, with whose warranty backs it (Phase 46.5)   |
+| Checking a vehicle, as a buyer | Built  | `/verify` is in the public navigation and the footer (Phase 46.5)                   |
+| An account opened is an email  | Built  | Whoever runs Carnet is told, before the address is verified (Phase 46.5)            |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -503,7 +516,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 238          |
+| Built    | 244          |
 | Partial  | 1            |
 | Deferred | 1            |
 

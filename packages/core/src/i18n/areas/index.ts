@@ -11,6 +11,7 @@ import * as providers from './providers';
 import * as ownership from './ownership';
 import * as start from './start';
 import * as coupons from './coupons';
+import * as wiring from './wiring';
 import * as components from './components';
 import * as jobs from './jobs';
 import * as settings from './settings';
@@ -38,4 +39,5 @@ export const AREAS = [
   ownership,
   start,
   coupons,
+  wiring,
 ] as const;

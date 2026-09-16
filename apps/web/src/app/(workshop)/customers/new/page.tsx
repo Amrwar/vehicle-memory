@@ -1,20 +1,10 @@
-import {
-  Alert,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Field,
-  Input,
-  PageHeader,
-  Select,
-  Textarea,
-} from '@carnet/ui';
+import { Alert, Button, Card, CardBody, PageHeader } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { CustomerFields } from '@/components/customer-fields';
 import { createCustomer, CustomerError, possibleDuplicate } from '@/lib/customers';
 import { requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
@@ -130,7 +120,6 @@ export default async function NewCustomerPage({
   const params = await searchParams;
   const t = await tFor();
 
-  const kind = params.kind === 'COMPANY' ? 'COMPANY' : 'INDIVIDUAL';
   const duplicate = params.code === 'DUPLICATE';
 
   // The record they are about to duplicate, so the warning can offer the way
@@ -172,224 +161,7 @@ export default async function NewCustomerPage({
       ) : null}
 
       <form action={save} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem]">
-        <div className="grid gap-5">
-          <Card>
-            <CardHeader title={t('Who they are')} description={t('What goes on the invoice')} />
-            <CardBody className="grid gap-4">
-              <Field label={t('Kind')} hint={t('Changes which name is asked for')}>
-                <Select name="kind" defaultValue={kind}>
-                  <option value="INDIVIDUAL">{t('A person')}</option>
-                  <option value="COMPANY">{t('A company')}</option>
-                </Select>
-              </Field>
-
-              {/* Both sets are rendered and the unused one is ignored on save.
-                  A form that needed JavaScript to show the right fields would
-                  be a form that does nothing on the counter tablet when the
-                  connection drops, which is when it is most needed. */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={t('First name')} hint={t('For a person')}>
-                  <Input
-                    name="firstName"
-                    defaultValue={params.firstName ?? ''}
-                    autoComplete="given-name"
-                    // i18n-ignore
-                    placeholder="Maria"
-                  />
-                </Field>
-                <Field label={t('Last name')} hint={t('For a person')}>
-                  <Input
-                    name="lastName"
-                    defaultValue={params.lastName ?? ''}
-                    autoComplete="family-name"
-                    // i18n-ignore
-                    placeholder="Okafor"
-                  />
-                </Field>
-              </div>
-
-              <Field label={t('Company name')} hint={t('For a company or a fleet')}>
-                <Input
-                  name="companyName"
-                  defaultValue={params.companyName ?? ''}
-                  autoComplete="organization"
-                  // i18n-ignore
-                  placeholder="Northgate Logistics Ltd"
-                />
-              </Field>
-
-              <Field label={t('VAT number')} hint={t('Optional. Goes on their invoices.')}>
-                <Input
-                  name="taxNumber"
-                  defaultValue={params.taxNumber ?? ''}
-                  // i18n-ignore
-                  placeholder="GB123456789"
-                />
-              </Field>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader
-              title={t('Where they are')}
-              description={t('Optional, and worth having before the first invoice')}
-            />
-            <CardBody className="grid gap-4">
-              <Field label={t('Address')}>
-                <Input
-                  name="addressLine1"
-                  defaultValue={params.addressLine1 ?? ''}
-                  autoComplete="address-line1"
-                  // i18n-ignore
-                  placeholder="14 Hillside Road"
-                />
-              </Field>
-              <Field label={t('Address, continued')}>
-                <Input
-                  name="addressLine2"
-                  defaultValue={params.addressLine2 ?? ''}
-                  autoComplete="address-line2"
-                />
-              </Field>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <Field label={t('Town')}>
-                  <Input
-                    name="locality"
-                    defaultValue={params.locality ?? ''}
-                    autoComplete="address-level2"
-                    // i18n-ignore
-                    placeholder="Stockport"
-                  />
-                </Field>
-                <Field label={t('County')}>
-                  <Input
-                    name="region"
-                    defaultValue={params.region ?? ''}
-                    autoComplete="address-level1"
-                  />
-                </Field>
-                <Field label={t('Postcode')}>
-                  <Input
-                    name="postcode"
-                    defaultValue={params.postcode ?? ''}
-                    autoComplete="postal-code"
-                    className="uppercase"
-                    // i18n-ignore
-                    placeholder="SK4 2HL"
-                  />
-                </Field>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-
-        <div className="grid content-start gap-5">
-          <Card>
-            <CardHeader
-              title={t('How to reach them')}
-              description={t('At least one. Everything the workshop sends goes here.')}
-            />
-            <CardBody className="grid gap-4">
-              <Field label={t('Email')} hint={t('Quotes, invoices and the portal link')}>
-                <Input
-                  name="email"
-                  type="email"
-                  inputMode="email"
-                  defaultValue={params.email ?? ''}
-                  autoComplete="email"
-                  // i18n-ignore
-                  placeholder="maria@example.com"
-                />
-              </Field>
-
-              <Field label={t('Mobile')} hint={t('Texts about the car')}>
-                <Input
-                  name="mobile"
-                  type="tel"
-                  inputMode="tel"
-                  defaultValue={params.mobile ?? ''}
-                  autoComplete="tel"
-                  placeholder="07700 900123"
-                />
-              </Field>
-
-              <Field label={t('Other telephone')} hint={t('Landline or work number')}>
-                <Input
-                  name="phone"
-                  type="tel"
-                  inputMode="tel"
-                  defaultValue={params.phone ?? ''}
-                  placeholder="0161 496 0114"
-                />
-              </Field>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader
-              title={t('Marketing')}
-              description={t('Separate from anything about their own car')}
-            />
-            <CardBody className="grid gap-3 text-[13px] leading-relaxed">
-              {/* Off unless somebody ticks it, and never inferred from the fact
-                  that an address was typed in. Reminders about their own
-                  vehicle are not marketing and are never gated on this. */}
-              <label className="flex items-start gap-2.5">
-                <input
-                  type="checkbox"
-                  name="marketingEmailConsent"
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
-                />
-                <span>{t('They agreed to marketing emails')}</span>
-              </label>
-              <label className="flex items-start gap-2.5">
-                <input
-                  type="checkbox"
-                  name="marketingSmsConsent"
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-(--brand-solid)"
-                />
-                <span>{t('They agreed to marketing texts')}</span>
-              </label>
-              <p className="text-(--text-faint)">
-                {t(
-                  'Service reminders and messages about a job in progress are not marketing and go out either way.',
-                )}
-              </p>
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader title={t('Anything else')} />
-            <CardBody className="grid gap-4">
-              <Field label={t('How they found you')} hint={t('Optional')}>
-                <Input
-                  name="sourceOfBusiness"
-                  defaultValue={params.sourceOfBusiness ?? ''}
-                  placeholder={t('Recommended by a neighbour')}
-                />
-              </Field>
-              <Field
-                label={t('Arrived with a code')}
-                hint={t(
-                  'Optional. Another customer’s referral code; both sides are paid once this one has had work done',
-                )}
-              >
-                <Input
-                  name="referralCode"
-                  defaultValue={params.referralCode ?? ''}
-                  maxLength={8}
-                  autoCapitalize="characters"
-                  className="datum uppercase tracking-[0.15em]"
-                  // i18n-ignore
-                  placeholder="XXXXXX"
-                />
-              </Field>
-              <Field label={t('Notes')} hint={t('Anything whoever serves them next should know')}>
-                <Textarea name="notes" rows={3} defaultValue={params.notes ?? ''} />
-              </Field>
-            </CardBody>
-          </Card>
-
+        <CustomerFields values={params} consent={{ email: false, sms: false }} showReferral>
           {duplicate ? (
             <Card className="border-(--warning)">
               <CardBody>
@@ -410,7 +182,7 @@ export default async function NewCustomerPage({
           <Button type="submit" variant="primary" size="lg" block>
             {t('Add the customer')}
           </Button>
-        </div>
+        </CustomerFields>
       </form>
     </>
   );

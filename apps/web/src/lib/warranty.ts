@@ -175,6 +175,28 @@ export async function recordCover(input: {
   supplierMonths?: number | null;
   startedOn?: Date;
 }) {
+  // A mileage allowance counts from a reading, and the reading it counts from
+  // is the one the vehicle was on when the work was done. Taken from the
+  // vehicle when the caller does not supply it, because a form that asks
+  // somebody to type a number the product already knows is a form that gets a
+  // guessed number.
+  const startedAtKm =
+    input.km && input.startedAtKm == null
+      ? ((
+          await prisma.vehicle.findUnique({
+            where: { id: input.vehicleId },
+            select: { lastOdometerKm: true },
+          })
+        )?.lastOdometerKm ?? null)
+      : (input.startedAtKm ?? null);
+
+  if (input.km && startedAtKm == null) {
+    throw new WarrantyError(
+      'NO_READING',
+      'A mileage allowance counts from a reading, and this vehicle has none. Record the mileage on the job first, or leave the allowance blank.',
+    );
+  }
+
   const warranty = await prisma.warranty.create({
     data: {
       orgId: input.orgId,
@@ -187,7 +209,7 @@ export async function recordCover(input: {
       km: input.km ?? null,
       // A mileage allowance with nothing to count from never expires on
       // distance, so the reading travels with it or the allowance does not.
-      startedAtKm: input.km ? (input.startedAtKm ?? null) : null,
+      startedAtKm: input.km ? startedAtKm : null,
       partsValue: input.partsValue ?? 0,
       labourValue: input.labourValue ?? 0,
       productId: input.productId ?? null,

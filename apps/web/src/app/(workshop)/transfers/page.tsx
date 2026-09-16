@@ -16,13 +16,17 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
+import { TransferError } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { PlanWall } from '@/components/plan-wall';
-import { planIncludes, requireSession } from '@/lib/guard';
+import { can, planIncludes, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
-import { inTransitNow, transferSuggestions } from '@/lib/transfers';
+import { createTransfer, inTransitNow, transferSuggestions } from '@/lib/transfers';
+import { once, onceToken, StillGoingError } from '@/lib/once';
+import { SubmitOnce } from '@/components/submit-once';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -37,13 +41,64 @@ export const dynamic = 'force-dynamic';
  * reached the other is real, it belongs to the business, and it is on nobody's
  * shelf. Every other view in the system would show it as missing.
  */
+/**
+ * Starts the transfer a suggestion is describing.
+ *
+ * One press, because the suggestion already knows the part, the two sites and
+ * how many: asking somebody to retype all four is asking them not to bother.
+ * It lands as a draft, so nothing leaves a shelf until a person looks at it
+ * and sends it.
+ */
+async function start(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+
+  let id: string | undefined;
+
+  try {
+    const made = await once({
+      orgId,
+      key: ['start-transfer', String(formData.get('once') ?? '')],
+      resultOf: (transferId) => transferId,
+      work: () =>
+        createTransfer({
+          orgId,
+          userId: user.userId,
+          fromWarehouseId: String(formData.get('fromWarehouseId') ?? ''),
+          toWarehouseId: String(formData.get('toWarehouseId') ?? ''),
+          lines: [
+            {
+              productId: String(formData.get('productId') ?? ''),
+              quantity: Number(formData.get('quantity') ?? 0),
+            },
+          ],
+          note: String(formData.get('note') ?? ''),
+        }),
+    });
+
+    id = made.result ?? made.resultRef ?? undefined;
+  } catch (error) {
+    if (!(error instanceof TransferError) && !(error instanceof StillGoingError)) throw error;
+    redirect(`/transfers?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(id ? `/transfers/${id}` : '/transfers');
+}
+
 export default async function TransfersPage() {
-  const { orgId, plan, region } = await requireSession('inventory:read');
+  const { orgId, plan, region, user } = await requireSession('inventory:read');
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'transfers')) {
     return <PlanWall feature="transfers" plan={plan} />;
   }
+
+  const mayMove = can(user.role, 'inventory:write');
+
+  // A key for this drawing of the page; every "start this transfer" button
+  // carries its own, so a double-press is one draft rather than two vans.
+  const token = onceToken();
 
   const [inFlight, suggestions, recent] = await Promise.all([
     inTransitNow(orgId),
@@ -117,7 +172,12 @@ export default async function TransfersPage() {
                     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                       <div className="min-w-0">
                         <p className="font-medium">
-                          <span className="tabular">{transfer.reference}</span>
+                          <Link
+                            href={`/transfers/${transfer.id}`}
+                            className="tabular text-(--brand-text) hover:underline"
+                          >
+                            {transfer.reference}
+                          </Link>
                           <span className="px-1.5 text-(--text-faint)">·</span>
                           <span className="text-(--text-soft)">
                             {transfer.fromWarehouse.name} → {transfer.toWarehouse.name}
@@ -216,7 +276,14 @@ export default async function TransfersPage() {
                   <tbody>
                     {recent.map((transfer) => (
                       <Tr key={transfer.id}>
-                        <Td className="tabular font-medium">{transfer.reference}</Td>
+                        <Td className="tabular font-medium">
+                          <Link
+                            href={`/transfers/${transfer.id}`}
+                            className="text-(--brand-text) hover:underline"
+                          >
+                            {transfer.reference}
+                          </Link>
+                        </Td>
                         <Td className="text-(--text-soft)">
                           {transfer.fromWarehouse.name} → {transfer.toWarehouse.name}
                         </Td>
@@ -280,6 +347,31 @@ export default async function TransfersPage() {
                     <p className="mt-1 text-[11px] leading-relaxed text-(--text-faint)">
                       {t(suggestion.reason)}
                     </p>
+                    {mayMove ? (
+                      <form action={start} className="mt-2">
+                        <input type="hidden" name="productId" value={suggestion.productId} />
+                        <input
+                          type="hidden"
+                          name="fromWarehouseId"
+                          value={suggestion.fromWarehouseId}
+                        />
+                        <input
+                          type="hidden"
+                          name="toWarehouseId"
+                          value={suggestion.toWarehouseId}
+                        />
+                        <input type="hidden" name="quantity" value={suggestion.quantity} />
+                        <input type="hidden" name="note" value={suggestion.reason} />
+                        <input
+                          type="hidden"
+                          name="once"
+                          value={`${token}:${suggestion.productId}:${index}`}
+                        />
+                        <SubmitOnce variant="secondary" size="sm">
+                          {t('Start this transfer')}
+                        </SubmitOnce>
+                      </form>
+                    ) : null}
                   </li>
                 ))}
               </ul>

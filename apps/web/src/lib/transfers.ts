@@ -28,6 +28,136 @@ import { assertPlanAllows } from './billing';
 
 const decimal = (value: unknown, currency = 'GBP') => fromDecimal(String(value ?? 0), currency);
 
+/**
+ * Starts a transfer, as a draft nobody has sent yet.
+ *
+ * The one piece of the cycle that was missing: a workshop could be told which
+ * parts to move between sites and had no way to move them. Everything after
+ * this — sending, receiving, cancelling — was written and unreachable.
+ *
+ * A draft moves no stock. It is a list of what somebody intends to put in the
+ * van, and the shelf is only touched when it is dispatched, because a part
+ * booked out of one site and never into the other is a part nobody can find.
+ *
+ * @repeat GUARDED(KEY: the form key its callers hand to once) Two drafts
+ * between the same sites are a legitimate thing to want, so the key the form
+ * carries is what separates a second press from a second van.
+ */
+/**
+ * The next transfer number.
+ *
+ * Taken in its own statement rather than inside the transaction that writes
+ * the transfer, because a transaction that rolls back also rolls back the
+ * counter, and then the next attempt takes the number that just collided and
+ * collides again. A gap in the numbering after a failure is the cheaper
+ * mistake: nobody has ever been harmed by a missing TRF-0042.
+ *
+ * The counter is seeded past whatever references already exist, because a
+ * workshop can arrive carrying transfers numbered by something else — the
+ * seed does, and so does anybody migrating from another system.
+ */
+async function nextTransferReference(orgId: string): Promise<string> {
+  const existing = await prisma.documentSequence.findUnique({
+    where: { orgId_kind: { orgId, kind: 'TRANSFER' } },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    const highest = await prisma.stockTransfer.findFirst({
+      where: { orgId },
+      orderBy: { reference: 'desc' },
+      select: { reference: true },
+    });
+
+    const already = Number(highest?.reference?.replace(/\D/g, '') ?? 0);
+
+    await prisma.documentSequence.create({
+      data: { orgId, kind: 'TRANSFER', prefix: 'TRF-', next: already + 1 },
+    });
+  }
+
+  const sequence = await prisma.documentSequence.update({
+    where: { orgId_kind: { orgId, kind: 'TRANSFER' } },
+    data: { next: { increment: 1 } },
+  });
+
+  // The row comes back after the increment, so the number just taken is the
+  // one below it.
+  return `${sequence.prefix}${String(sequence.next - 1).padStart(4, '0')}`;
+}
+
+export async function createTransfer(input: {
+  orgId: string;
+  userId: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  lines: readonly { productId: string; quantity: number }[];
+  note?: string | null;
+}): Promise<string> {
+  await assertPlanAllows(input.orgId, 'transfers');
+
+  if (input.fromWarehouseId === input.toWarehouseId) {
+    throw new TransferError('BAD_TRANSITION', 'A transfer goes between two different sites.');
+  }
+
+  const lines = input.lines.filter((line) => line.quantity > 0);
+
+  if (lines.length === 0) {
+    throw new TransferError('NOTHING_TO_SEND', 'There is nothing on this transfer to send.');
+  }
+
+  const [from, to] = await Promise.all([
+    prisma.warehouse.findFirst({
+      where: { id: input.fromWarehouseId, orgId: input.orgId },
+      select: { id: true },
+    }),
+    prisma.warehouse.findFirst({
+      where: { id: input.toWarehouseId, orgId: input.orgId },
+      select: { id: true },
+    }),
+  ]);
+
+  if (!from || !to) {
+    throw new TransferError('BAD_TRANSITION', 'One of those sites is not in this workshop.');
+  }
+
+  const reference = await nextTransferReference(input.orgId);
+
+  return prisma.$transaction(async (tx) => {
+    const transfer = await tx.stockTransfer.create({
+      data: {
+        orgId: input.orgId,
+        reference,
+        fromWarehouseId: input.fromWarehouseId,
+        toWarehouseId: input.toWarehouseId,
+        status: 'DRAFT',
+        note: input.note?.trim() || null,
+        lines: {
+          create: lines.map((line, index) => ({
+            productId: line.productId,
+            quantity: line.quantity,
+            sortOrder: index,
+          })),
+        },
+      },
+      select: { id: true },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        orgId: input.orgId,
+        actorUserId: input.userId,
+        action: 'transfer.started',
+        entityType: 'StockTransfer',
+        entityId: transfer.id,
+        after: { reference, lines: lines.length } as never,
+      },
+    });
+
+    return transfer.id;
+  });
+}
+
 export async function loadTransfer(orgId: string, id: string): Promise<StockTransfer> {
   const row = await prisma.stockTransfer.findFirstOrThrow({
     where: { id, orgId },

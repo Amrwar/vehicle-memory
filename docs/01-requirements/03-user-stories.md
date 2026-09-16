@@ -1642,6 +1642,50 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AW — Built, and reachable (Phase 46.5)
+
+### AW1 — The number I wrote down wrong
+
+**As** Priya **I want** to correct a customer **so that** one person is one
+record with one history, rather than two halves of one.
+**Size** 5 · **Satisfies** FR-7901, FR-7902
+
+- **Given** a customer whose mobile is wrong, **when** I correct it, **then**
+  it is the same record and everything they have ever had done is still on it.
+- **Given** that form, **when** I look for a marketing tick box, **then** there
+  is none, and it says where consent is changed and why not here.
+
+### AW2 — The parts that are in the van
+
+**As** Ahmed **I want** to move stock between my sites **so that** a part one
+branch is short of and another is sitting on actually gets there.
+**Size** 8 · **Satisfies** FR-7903, FR-7904
+
+- **Given** a suggestion, **when** I press start, **then** a draft exists and
+  nothing has left a shelf.
+- **Given** a transfer that arrived three of four, **when** I book in what came,
+  **then** it stays open and the fourth is still counted as in the van.
+
+### AW3 — What we stand behind
+
+**As** Ahmed **I want** to record a warranty **so that** when somebody comes
+back I know whether it is mine to fix and whether anybody is behind me.
+**Size** 5 · **Satisfies** FR-7905, FR-7906
+
+- **Given** a finished job, **when** I record two years and thirty thousand,
+  **then** it counts from that day and that reading.
+- **Given** a vehicle with no reading, **when** I ask for a mileage allowance,
+  **then** I am told what to do instead rather than shown an error.
+
+### AW4 — The person in the driveway
+
+**As** a buyer **I want** to check a car from the printed report **so that** I
+can tell whether the history is real before I hand over money.
+**Size** 2 · **Satisfies** FR-7907
+
+- **Given** the public site, **when** I look for where to check a vehicle,
+  **then** it is in the navigation and the footer.
+
 ## Epic AV — Doing it twice (Phase 46)
 
 ### AV1 — The button that did not seem to do anything

@@ -24,12 +24,18 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { msg } from '@carnet/core';
+import { prisma } from '@carnet/db';
+
 import { can, requireSession } from '@/lib/guard';
+import { once, onceToken, StillGoingError } from '@/lib/once';
+import { SubmitOnce } from '@/components/submit-once';
 import { tFor } from '@/lib/i18n';
 import { periodFor } from '@/lib/reports';
 import {
   attachRemedy,
   raiseClaim,
+  recordCover,
   remedyCost,
   settleClaim,
   warrantyBook,
@@ -73,6 +79,65 @@ const back = (problem: string): never =>
   redirect(`/warranty?problem=${encodeURIComponent(problem)}#claims`);
 
 /** Somebody brings the car back and the workshop stands behind the work. */
+/**
+ * Writing down what the workshop is standing behind. FR-3002.
+ *
+ * The beginning of the cycle, and the piece that was missing: every screen
+ * here read a warranty book that nothing could write to. A workshop could see
+ * what it was carrying, raise a claim against it and settle it, and had no way
+ * to say "we stand behind this gearbox for two years" in the first place.
+ *
+ * Recorded against the job that did the work, because that is what fixes the
+ * date it starts from and the mileage it counts from, and because a warranty
+ * with no job behind it cannot be costed when somebody comes back.
+ */
+async function cover(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  const job = await prisma.job.findFirst({
+    where: { id: jobId, orgId },
+    select: { vehicleId: true },
+  });
+
+  // `back` never returns, but TypeScript cannot see that through the
+  // redirect, so the narrowing is written out.
+  if (!job) {
+    back(msg('Choose the job the work was done on.'));
+    return;
+  }
+
+  try {
+    await once({
+      orgId,
+      key: ['warranty-cover', jobId, String(formData.get('once') ?? '')],
+      work: () =>
+        recordCover({
+          orgId,
+          userId: user.userId,
+          jobId,
+          vehicleId: job.vehicleId,
+          kind: String(formData.get('kind') ?? 'PART') === 'LABOUR' ? 'LABOUR' : 'PART',
+          description: String(formData.get('description') ?? ''),
+          months: Number(formData.get('months') ?? 12),
+          km: formData.get('km') ? Number(formData.get('km')) : null,
+          supplierId: String(formData.get('supplierId') ?? '') || null,
+          supplierMonths: formData.get('supplierMonths')
+            ? Number(formData.get('supplierMonths'))
+            : null,
+        }),
+    });
+  } catch (error) {
+    if (error instanceof StillGoingError) back(error.message);
+    if (!(error instanceof WarrantyError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/warranty?done=covered');
+}
+
 async function raise(formData: FormData) {
   'use server';
 
@@ -151,8 +216,31 @@ export default async function WarrantyPage({
   const { range, problem, done } = await searchParams;
 
   const period = periodFor(range ?? 'year', region.locale);
-  const [book, cost] = await Promise.all([warrantyBook(orgId), warrantyCostFor(orgId, period)]);
+  const [book, cost, coverable, suppliers] = await Promise.all([
+    warrantyBook(orgId),
+    warrantyCostFor(orgId, period),
+    // Jobs finished recently enough that somebody might still be writing down
+    // what the workshop stands behind on them.
+    prisma.job.findMany({
+      where: { orgId, status: { in: ['COMPLETED', 'INVOICED', 'PAID'] } },
+      orderBy: { updatedAt: 'desc' },
+      take: 40,
+      select: {
+        id: true,
+        number: true,
+        shortDescription: true,
+        vehicle: { select: { registration: true } },
+      },
+    }),
+    prisma.supplier.findMany({
+      where: { orgId, isActive: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
+      take: 60,
+    }),
+  ]);
   const mayWrite = can(user.role, 'job:write');
+  const token = onceToken();
 
   // What each open claim's remedy has cost so far, so settling is a
   // confirmation rather than an arithmetic exercise at the counter.
@@ -198,6 +286,81 @@ export default async function WarrantyPage({
         />
       </StatRow>
 
+      {mayWrite ? (
+        <Card className="mb-5">
+          <CardHeader
+            title={t('Stand behind a job')}
+            description={t(
+              'What the workshop is covering, for how long, and whether a supplier is behind it too',
+            )}
+          />
+          <form action={cover}>
+            <CardBody className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+              <input type="hidden" name="once" value={token} />
+
+              <Field
+                label={t('The job')}
+                hint={t('Fixes the date and the mileage it counts from')}
+                className="sm:col-span-2"
+              >
+                <Select name="jobId" required defaultValue="">
+                  <option value="" disabled>
+                    {t('Choose a finished job')}
+                  </option>
+                  {coverable.map((job) => (
+                    <option key={job.id} value={job.id}>
+                      {job.number} · {job.vehicle?.registration ?? ''} ·{' '}
+                      {job.shortDescription ?? ''}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field label={t('What is covered')} className="sm:col-span-2">
+                <Input name="description" required placeholder={t('Gearbox, reconditioned')} />
+              </Field>
+
+              <Field label={t('Part or labour')}>
+                <Select name="kind" defaultValue="PART">
+                  <option value="PART">{t('A part')}</option>
+                  <option value="LABOUR">{t('The work')}</option>
+                </Select>
+              </Field>
+
+              <Field label={t('Months')}>
+                <Input name="months" type="number" min={1} max={120} defaultValue={12} required />
+              </Field>
+
+              <Field label={t('Mileage allowance')} hint={t('Optional')}>
+                <Input name="km" type="number" min={0} placeholder="20000" />
+              </Field>
+
+              <Field label={t('Behind it')} hint={t('Optional. Whose warranty backs yours.')}>
+                <Select name="supplierId" defaultValue="">
+                  <option value="">{t('Nobody but us')}</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field
+                label={t('Their months')}
+                hint={t('Theirs often outlasts yours, which is the point of recording it.')}
+              >
+                <Input name="supplierMonths" type="number" min={0} max={240} placeholder="24" />
+              </Field>
+
+              <div className="sm:col-span-2 lg:col-span-4">
+                <SubmitOnce>{t('Record the cover')}</SubmitOnce>
+              </div>
+            </CardBody>
+          </form>
+        </Card>
+      ) : null}
+
       {book.expiring.length > 0 ? (
         <Card className="mb-5 border-(--warning)">
           <CardBody className="text-[13px] leading-relaxed text-(--warning)">
@@ -223,13 +386,17 @@ export default async function WarrantyPage({
 
       {done ? (
         <Alert tone="success" className="mb-5">
-          {done === 'raised'
+          {done === 'covered'
             ? t(
-                'Raised. Put the job that fixes it against the claim and settle it when the supplier answers.',
+                'Recorded. It is on the vehicle and in what the workshop is carrying, and a claim can be raised against it.',
               )
-            : done === 'attached'
-              ? t('Attached. What that job costs is now read from the job itself.')
-              : t('Settled. It counts towards what warranty costs this workshop.')}
+            : done === 'raised'
+              ? t(
+                  'Raised. Put the job that fixes it against the claim and settle it when the supplier answers.',
+                )
+              : done === 'attached'
+                ? t('Attached. What that job costs is now read from the job itself.')
+                : t('Settled. It counts towards what warranty costs this workshop.')}
         </Alert>
       ) : null}
 

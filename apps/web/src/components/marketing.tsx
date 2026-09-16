@@ -33,6 +33,7 @@ export async function MarketingHeader({
         <nav className="ms-4 hidden items-center gap-1 md:flex" aria-label={t('Sections')}>
           <NavLink href="/#how">{t('How it works')}</NavLink>
           <NavLink href="/#passport">{t('The passport')}</NavLink>
+          <NavLink href="/verify">{t('Check a vehicle')}</NavLink>
           <NavLink href="/pricing">{t('Pricing')}</NavLink>
         </nav>
 
@@ -152,6 +153,11 @@ export async function MarketingFooter() {
             { href: '/signup', label: t('Start your trial') },
             { href: '/login', label: t('Sign in') },
             { href: '/p/demo-share-token', label: t('See a real passport') },
+            // Where somebody standing in a stranger's driveway with a printed
+            // report actually goes. It existed and nothing linked to it, which
+            // made the whole passport argument unreachable by the one person
+            // it is aimed at.
+            { href: '/verify', label: t('Check a vehicle') },
           ]}
         />
         <FooterColumn
