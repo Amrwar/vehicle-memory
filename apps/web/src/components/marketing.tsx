@@ -37,12 +37,13 @@ export async function MarketingHeader({
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
-          <LanguageSwitch current={language} back={back} compact className="me-1" />
+          <LanguageSwitch current={language} back={back} compact menu className="me-1" />
           {signedIn ? (
             <Link
               href="/dashboard"
               className={cn(
-                'rounded-(--radius-md) bg-(--brand-solid) px-3.5 py-2 text-[13px] font-medium',
+                'inline-flex items-center rounded-(--radius-md) bg-(--brand-solid) px-3.5 py-2',
+                'text-[13px] font-medium pointer-coarse:min-h-10',
                 'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
               )}
             >
@@ -52,14 +53,15 @@ export async function MarketingHeader({
             <>
               <Link
                 href="/login"
-                className="rounded-(--radius-md) px-3 py-2 text-[13px] text-(--text-soft) transition-colors hover:bg-(--surface-sunk) hover:text-(--text)"
+                className="hidden rounded-(--radius-md) px-3 py-2 text-[13px] text-(--text-soft) transition-colors hover:bg-(--surface-sunk) hover:text-(--text) min-[380px]:inline-flex"
               >
                 {t('Sign in')}
               </Link>
               <Link
                 href="/signup"
                 className={cn(
-                  'rounded-(--radius-md) bg-(--brand-solid) px-3.5 py-2 text-[13px] font-medium',
+                  'inline-flex items-center rounded-(--radius-md) bg-(--brand-solid) px-3.5 py-2',
+                  'text-[13px] font-medium pointer-coarse:min-h-10',
                   'text-(--on-brand-solid) shadow-sm transition-colors hover:bg-(--brand-solid-hover)',
                 )}
               >

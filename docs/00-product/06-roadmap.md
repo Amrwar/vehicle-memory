@@ -2370,6 +2370,116 @@ checks its year of work, that nothing it wrote is waiting to be sent and that
 every screen says what it is, and removes it, leaving no workshop, no
 vehicles and no jobs behind.
 
+## After the features: nine phases of proof
+
+Phases 1 to 45 built the product. What follows is not more product. A feature
+map with 226 built capabilities and one missing is not evidence that a
+workshop can run on this; it is evidence that the screens exist. These nine
+phases are about depth, reliability and proof, and they are deliberately
+ordered by what would hurt most if it were wrong.
+
+Nothing here adds a feature. Anything that looks like a feature — an admin
+health page, feature flags, a release checklist — exists to make the phases
+above provable or reversible.
+
+## Phase 46 — Production reliability
+
+**Scope.** Every critical workflow under real-world failure: a double-click, a
+refresh mid-submit, the back button, two people editing the same record, a
+dropped network, a database timeout, a provider timeout, a provider that
+succeeded but whose answer was lost, a webhook that arrives twice or out of
+order, a worker that crashes halfway, mail that fails, a payment that
+succeeds while its webhook is late, an upload that lands while its row does
+not.
+
+**Exit.** For every operation that writes, one sentence saying whether it can
+be retried safely, and a test that proves it. Where it cannot, the product
+refuses rather than repeating.
+
+## Phase 47 — Financial integrity
+
+**Scope.** An invariant suite over the whole ledger rather than over one
+posting: debits equal credits on every entry; an invoice equals its lines plus
+tax less discounts; a balance equals the invoice less allocations and credits;
+stock equals opening plus receipts less issues plus adjustments; a gift card
+and a customer credit the same way. A closed period cannot be moved by
+anything, including an owner.
+
+**Exit.** The invariants run against the seeded workshop, the demonstration
+workshop and a generated month of chaos, and fail loudly.
+
+## Phase 48 — Security and tenancy
+
+**Scope.** Every route tried with another workshop's identifier: customers,
+vehicles, jobs, invoices, payments, parts, suppliers, employees, payroll,
+documents, photographs, passports, messages, attachments, reports, exports,
+audit logs, API keys, payment links. Then the same for a customer in the
+portal against another customer's vehicle, and for a public passport against
+anything private.
+
+**Exit.** Not found, every time, and a test that says so route by route.
+
+## Phase 49 — Backup and recovery
+
+**Scope.** Not "a backup exists" but "Carnet was restored": lose the database,
+restore it, run the migrations, restore object storage, start the workers,
+then verify the ledger, the passports, the attachments and tenant isolation.
+
+**Exit.** A measured recovery point and recovery time, and a written record of
+what was missing, orphaned or broken when it came back.
+
+## Phase 50 — Observability and system health
+
+**Scope.** An operator's view rather than an audit trail: errors by route,
+organisation and request; background jobs queued, running, failed, retrying;
+every integration marked healthy, degraded or failed. `/admin/health` for the
+operator, not the workshop: system, integrations, data integrity, security,
+backups, workers.
+
+**Exit.** "Why did this customer not get their message?" is answered on a
+screen rather than in a log.
+
+## Phase 51 — Performance and scale
+
+**Scope.** A hundred thousand customers, a hundred and fifty thousand
+vehicles, half a million jobs, millions of audit rows. Then search, the
+customer timeline, the passport, the dashboard, the reports, the diary and
+the audit history, watching for the query that runs once per row, the list
+with no bound and the report that loads a year into memory.
+
+**Exit.** A budget per screen, measured, with the slow ones named.
+
+## Phase 52 — The workshop's own clock
+
+**Scope.** Time and friction rather than features: seconds from a car arriving
+to a job being open; minutes from starting an inspection to finishing it; time
+from finding work to sending the quote, from quote to approval, from needing a
+part to having it on order, from finishing to the car leaving; and how long it
+takes an owner to answer what the week made.
+
+**Exit.** Those become the product's own numbers, measured before a pilot and
+again after.
+
+## Phase 53 — The awkward cases
+
+**Scope.** What real workshops do that tidy software does not expect: two
+customers sharing a car, a VIN missing or mistyped, a plate changed, a job
+cancelled after the parts arrived, a job reopened, a customer approving half a
+quote, a price that moved after approval, an overpayment, a duplicate payment,
+a refund after the period closed, negative stock, a stocktake during an open
+job, an ownership transfer while the car is on the ramp.
+
+**Exit.** Each one has a decided, tested behaviour rather than whatever the
+code happens to do.
+
+## Phase 54 — The pilot
+
+**Scope.** Four weeks in one workshop, which is what the MVP definition has
+asked for since the first page of it.
+
+**Exit.** A list of what broke, what was slow, what was missing and what
+nobody used.
+
 ---
 
 ## Running throughout — the four things that are not features
@@ -2381,11 +2491,12 @@ script run against a database. A phase is not finished when it works once.
 
 **Responsive, not merely narrow.** Every screen built in these phases is used
 on a phone by somebody holding a part in the other hand. Since 16 September
-2026 that is measured rather than claimed: `verify-mobile.ts` loads
-forty-seven screens at 390 by 844, in English and in Arabic, and fails on
-anything wider than the window, any control under forty pixels through the
-middle, any standalone link under the twenty-four WCAG 2.2 asks for, and any
-text under eleven pixels. What it found the first time was fixed in the design
+2026 that is measured rather than claimed: `verify-screens.ts` loads every
+screen at 390 by 844, and the screens a workshop lives in at seven sizes from
+a 320-pixel phone to a 1680-pixel monitor, in English and in Arabic. It fails
+on anything wider than the window, any control under forty pixels through the
+middle where a thumb is doing the pressing, any standalone link under the
+twenty-four WCAG 2.2 asks for, and any text under eleven pixels. What it found the first time was fixed in the design
 system rather than page by page: controls that grow where a thumb is doing the
 pressing, cards that cannot widen the page they sit on, labels at eleven
 pixels rather than ten, and a shadow at the edge of a table that has more

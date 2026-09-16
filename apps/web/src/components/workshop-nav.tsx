@@ -341,7 +341,7 @@ export function WorkshopNav({
           <Link
             href="/notifications"
             aria-label={t('Notifications')}
-            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md) border border-(--border) hover:bg-(--surface-sunk)"
+            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md) border border-(--border) hover:bg-(--surface-sunk) pointer-coarse:h-10 pointer-coarse:w-10"
           >
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden>
               <path
@@ -378,6 +378,7 @@ export function WorkshopNav({
                         className={cn(
                           'group relative flex items-center gap-2.5 rounded-(--radius-md)',
                           'px-2.5 py-2 text-[13px] transition-colors duration-150',
+                          'pointer-coarse:min-h-10',
                           active
                             ? 'bg-(--brand-soft) font-medium text-(--brand-text)'
                             : 'text-(--text-soft) hover:bg-(--surface-sunk) hover:text-(--text)',

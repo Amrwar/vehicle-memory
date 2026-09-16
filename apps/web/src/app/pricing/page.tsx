@@ -126,7 +126,10 @@ export default async function PricingPage({
             </div>
           </div>
 
-          <form method="get" className="mt-4 flex items-center justify-center gap-2 text-[13px]">
+          <form
+            method="get"
+            className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[13px]"
+          >
             <input type="hidden" name="billing" value={annual ? 'annual' : 'monthly'} />
             <label htmlFor="pricing-country" className="text-(--text-faint)">
               {t('Prices in the currency of')}
@@ -135,7 +138,7 @@ export default async function PricingPage({
               id="pricing-country"
               name="country"
               defaultValue={country.code}
-              className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1"
+              className="min-w-0 max-w-full rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1"
             >
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -145,7 +148,7 @@ export default async function PricingPage({
             </select>
             <button
               type="submit"
-              className="cursor-pointer rounded-(--radius-sm) border border-(--border-strong) px-2.5 py-1 font-medium"
+              className="shrink-0 cursor-pointer rounded-(--radius-sm) border border-(--border-strong) px-2.5 py-1 font-medium"
             >
               {t('Show')}
             </button>

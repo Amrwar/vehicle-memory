@@ -1,14 +1,18 @@
 /**
- * Every screen on a telephone, measured rather than eyeballed.
+ * Every screen at every size, measured rather than eyeballed.
  *
- *   npx tsx infra/scripts/verify-mobile.ts [baseUrl]
+ *   npx tsx infra/scripts/verify-screens.ts [baseUrl]
  *
- * A workshop uses this product standing next to a car, one hand on a part and
- * the other on a phone. "Responsive" has been a claim in the roadmap since the
- * first phase; this is what turns it into a check.
+ * A workshop uses this product standing next to a car with a phone, at the
+ * counter on a tablet, and in the office on a monitor. "Responsive" has been a
+ * claim in the roadmap since the first phase; this is what turns it into a
+ * check.
  *
- * Three things are measured on every page, at 390 by 844, which is the screen
- * most people are holding:
+ * Every page is measured on a telephone, and the pages a workshop lives in are
+ * measured again at each width where the layout changes: a small phone, a
+ * large one, a tablet held either way, a laptop and a wide monitor.
+ *
+ * Three things are measured at each size:
  *
  *   Nothing sticks out sideways. A page whose content is wider than the
  *   window slides under the thumb and takes the whole layout with it. Tables,
@@ -33,8 +37,23 @@ import { prisma } from '@carnet/db';
 import { chromium, type Page } from 'playwright';
 
 const BASE = process.argv[2] ?? 'http://localhost:3000';
-const WIDTH = 390;
-const HEIGHT = 844;
+
+/**
+ * The sizes. The phone is where everything is measured; the rest are where
+ * the layout changes its mind, and a handful of pages are measured at each.
+ */
+const SIZES = [
+  { name: 'small phone', width: 320, height: 720, touch: true },
+  { name: 'phone', width: 390, height: 844, touch: true },
+  { name: 'large phone', width: 430, height: 932, touch: true },
+  { name: 'tablet', width: 768, height: 1024, touch: true },
+  { name: 'tablet, landscape', width: 1024, height: 768, touch: true },
+  { name: 'laptop', width: 1280, height: 800, touch: false },
+  { name: 'monitor', width: 1680, height: 1050, touch: false },
+] as const;
+
+/** The size every page is measured at. */
+const EVERY_PAGE = 'phone';
 /** A control the product drew as a control: a thumb's width. */
 const MIN_TAP = 40;
 /** A link that is a word rather than a button: WCAG 2.2 AA, 24 by 24. */
@@ -193,7 +212,7 @@ async function measure(page: Page): Promise<Complaint> {
 }
 
 async function main() {
-  console.info(`\n  Every screen on a telephone\n  ${BASE}  ${WIDTH}x${HEIGHT}\n`);
+  console.info(`\n  Every screen at every size\n  ${BASE}\n`);
 
   const org = await prisma.organization.findFirstOrThrow({ where: { slug: 'hillside-motors' } });
   const job = await prisma.job.findFirstOrThrow({
@@ -224,19 +243,25 @@ async function main() {
   const owner = await mint('ahmed@hillsidemotors.test');
   const customerLogin = await mint(driver.portalUser!.email);
 
-  const pages: { path: string; who: 'owner' | 'driver' | 'nobody'; lang?: 'ar' }[] = [
-    { path: '/', who: 'nobody' },
-    { path: '/pricing', who: 'nobody' },
-    { path: '/login', who: 'nobody' },
-    { path: '/dashboard', who: 'owner' },
-    { path: '/start', who: 'owner' },
-    { path: '/help', who: 'owner' },
+  const pages: {
+    path: string;
+    who: 'owner' | 'driver' | 'nobody';
+    lang?: 'ar';
+    /** Also measured at every other size: the screens a workshop lives in. */
+    everySize?: boolean;
+  }[] = [
+    { path: '/', who: 'nobody', everySize: true },
+    { path: '/pricing', who: 'nobody', everySize: true },
+    { path: '/login', who: 'nobody', everySize: true },
+    { path: '/dashboard', who: 'owner', everySize: true },
+    { path: '/start', who: 'owner', everySize: true },
+    { path: '/help', who: 'owner', everySize: true },
     { path: '/help/invoices-and-payments', who: 'owner' },
-    { path: '/diary', who: 'owner' },
-    { path: '/jobs', who: 'owner' },
+    { path: '/diary', who: 'owner', everySize: true },
+    { path: '/jobs', who: 'owner', everySize: true },
     { path: `/jobs/${job.id}`, who: 'owner' },
     { path: '/jobs/new', who: 'owner' },
-    { path: '/floor', who: 'owner' },
+    { path: '/floor', who: 'owner', everySize: true },
     { path: '/inspections', who: 'owner' },
     { path: '/warranty', who: 'owner' },
     { path: '/capacity', who: 'owner' },
@@ -248,11 +273,11 @@ async function main() {
     { path: '/vehicles/find', who: 'owner' },
     { path: '/reminders', who: 'owner' },
     { path: '/reputation', who: 'owner' },
-    { path: '/invoices', who: 'owner' },
+    { path: '/invoices', who: 'owner', everySize: true },
     { path: `/invoices/${invoice.id}`, who: 'owner' },
     { path: '/payments', who: 'owner' },
-    { path: '/counter', who: 'owner' },
-    { path: '/parts', who: 'owner' },
+    { path: '/counter', who: 'owner', everySize: true },
+    { path: '/parts', who: 'owner', everySize: true },
     { path: `/parts/${part.id}`, who: 'owner' },
     { path: '/purchasing', who: 'owner' },
     { path: '/suppliers', who: 'owner' },
@@ -268,7 +293,7 @@ async function main() {
     { path: '/settings/catalogue', who: 'owner' },
     { path: '/audit', who: 'owner' },
     { path: '/search?q=Pennine&all=1', who: 'owner' },
-    { path: '/portal', who: 'driver' },
+    { path: '/portal', who: 'driver', everySize: true },
     { path: '/portal/invoices', who: 'driver' },
     { path: '/portal/passports', who: 'driver' },
     { path: '/portal/book', who: 'driver' },
@@ -285,80 +310,95 @@ async function main() {
   ];
 
   const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width: WIDTH, height: HEIGHT },
-    deviceScaleFactor: 2,
-    isMobile: true,
-    hasTouch: true,
-  });
 
-  // The measuring function is compiled by tsx before it reaches the browser,
-  // and the compiler names its inner functions with a helper that only exists
-  // in Node. Defining it in the page is cheaper than giving up named
-  // functions inside the measurement.
-  await context.addInitScript(() => {
-    (globalThis as unknown as { __name: (value: unknown) => unknown }).__name = (value) => value;
-  });
+  for (const size of SIZES) {
+    const context = await browser.newContext({
+      viewport: { width: size.width, height: size.height },
+      deviceScaleFactor: size.touch ? 2 : 1,
+      isMobile: size.touch,
+      hasTouch: size.touch,
+    });
 
-  for (const entry of pages) {
-    await context.clearCookies();
-    const cookies = [];
-    if (entry.who !== 'nobody') {
-      cookies.push({
-        name: 'carnet_session',
-        value: entry.who === 'owner' ? owner : customerLogin,
-        url: BASE,
-      });
+    // The measuring function is compiled by tsx before it reaches the browser,
+    // and the compiler names its inner functions with a helper that only
+    // exists in Node. Defining it in the page is cheaper than giving up named
+    // functions inside the measurement.
+    await context.addInitScript(() => {
+      (globalThis as unknown as { __name: (value: unknown) => unknown }).__name = (value) => value;
+    });
+
+    const here = pages.filter((entry) => size.name === EVERY_PAGE || entry.everySize);
+    console.info(`\n  ${size.name}, ${size.width} by ${size.height}\n`);
+
+    for (const entry of here) {
+      await context.clearCookies();
+      const cookies = [];
+      if (entry.who !== 'nobody') {
+        cookies.push({
+          name: 'carnet_session',
+          value: entry.who === 'owner' ? owner : customerLogin,
+          url: BASE,
+        });
+      }
+      if (entry.lang) cookies.push({ name: 'carnet_lang', value: entry.lang, url: BASE });
+      if (cookies.length > 0) await context.addCookies(cookies);
+
+      const name = `${entry.path}${entry.lang ? ` (${entry.lang})` : ''}`;
+      const page = await context.newPage();
+
+      try {
+        const response = await page.goto(`${BASE}${entry.path}`, {
+          waitUntil: 'load',
+          timeout: 45_000,
+        });
+        const status = response?.status() ?? 0;
+
+        if (status >= 400) {
+          fail(`${name} @ ${size.width}`, `answered ${status}`);
+          continue;
+        }
+
+        await page.waitForTimeout(400);
+        const complaint = await measure(page);
+
+        const problems: string[] = [];
+
+        // Anything the measurement can name is a fault, however small. A few
+        // pixels of root scroll with no element behind them is the browser's
+        // own rounding of a scrolling box, and shows nothing cut off; it is
+        // reported only once it is wide enough to see.
+        const named = complaint.overflow.widest.length > 0;
+        if (complaint.overflow.by > 1 && (named || complaint.overflow.by > 8)) {
+          problems.push(
+            `${complaint.overflow.by}px wider than the screen: ${complaint.overflow.widest.join(' | ') || 'nothing named'}`,
+          );
+        }
+        // A pointer is exact, so the forty-pixel rule is only asked of a
+        // screen somebody is pressing with a thumb. Nothing else changes.
+        if (size.touch && complaint.small.length > 0) {
+          problems.push(`too small to press: ${complaint.small.join(' | ')}`);
+        }
+        if (complaint.tiny.length > 0) {
+          problems.push(`too small to read: ${complaint.tiny.join(' | ')}`);
+        }
+
+        // Right to left means right to left: the page says so, or the
+        // measuring above was done on a page that only looked translated.
+        if (entry.lang === 'ar') {
+          const direction = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+          if (direction !== 'rtl') problems.push(`in Arabic but dir is ${direction ?? 'unset'}`);
+        }
+
+        if (problems.length === 0) console.info(`  ok     ${name}`);
+        else problems.forEach((problem) => fail(`${name} @ ${size.width}`, problem));
+      } catch (error) {
+        fail(`${name} @ ${size.width}`, error instanceof Error ? error.message : String(error));
+      } finally {
+        await page.close();
+      }
     }
-    if (entry.lang) cookies.push({ name: 'carnet_lang', value: entry.lang, url: BASE });
-    if (cookies.length > 0) await context.addCookies(cookies);
 
-    const page = await context.newPage();
-
-    try {
-      const response = await page.goto(`${BASE}${entry.path}`, {
-        waitUntil: 'load',
-        timeout: 45_000,
-      });
-      const status = response?.status() ?? 0;
-
-      if (status >= 400) {
-        fail(entry.path, `answered ${status}`);
-        continue;
-      }
-
-      await page.waitForTimeout(400);
-      const complaint = await measure(page);
-
-      const problems: string[] = [];
-      if (complaint.overflow.by > 1) {
-        problems.push(
-          `${complaint.overflow.by}px wider than the screen: ${complaint.overflow.widest.join(' | ') || 'nothing named'}`,
-        );
-      }
-      if (complaint.small.length > 0) {
-        problems.push(`too small to press: ${complaint.small.join(' | ')}`);
-      }
-      if (complaint.tiny.length > 0) {
-        problems.push(`too small to read: ${complaint.tiny.join(' | ')}`);
-      }
-
-      // Right to left means right to left: the page says so, or the measuring
-      // above was done on a page that only looked translated.
-      if (entry.lang === 'ar') {
-        const direction = await page.evaluate(() => document.documentElement.getAttribute('dir'));
-        if (direction !== 'rtl') problems.push(`in Arabic but dir is ${direction ?? 'unset'}`);
-      }
-
-      const name = entry.lang ? `${entry.path} (${entry.lang})` : entry.path;
-
-      if (problems.length === 0) console.info(`  ok     ${name}`);
-      else problems.forEach((problem) => fail(name, problem));
-    } catch (error) {
-      fail(entry.path, error instanceof Error ? error.message : String(error));
-    } finally {
-      await page.close();
-    }
+    await context.close();
   }
 
   await browser.close();

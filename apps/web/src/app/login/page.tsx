@@ -83,7 +83,7 @@ export default async function LoginPage({
 
         <dl className="grid grid-cols-3 gap-6 border-t border-(--color-petrol-700) pt-6">
           <div>
-            <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
+            <dt className="font-mono text-[11px] uppercase tracking-widest text-(--color-petrol-400)">
               {t('Append only')}
             </dt>
             <dd className="mt-1 text-[13px] text-(--color-petrol-100)">
@@ -91,7 +91,7 @@ export default async function LoginPage({
             </dd>
           </div>
           <div>
-            <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
+            <dt className="font-mono text-[11px] uppercase tracking-widest text-(--color-petrol-400)">
               {t('Owner consent')}
             </dt>
             <dd className="mt-1 text-[13px] text-(--color-petrol-100)">
@@ -99,7 +99,7 @@ export default async function LoginPage({
             </dd>
           </div>
           <div>
-            <dt className="font-mono text-[10px] uppercase tracking-widest text-(--color-petrol-400)">
+            <dt className="font-mono text-[11px] uppercase tracking-widest text-(--color-petrol-400)">
               {t('Portable')}
             </dt>
             <dd className="mt-1 text-[13px] text-(--color-petrol-100)">

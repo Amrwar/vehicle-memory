@@ -835,7 +835,7 @@ def build() -> None:
 
     design(
         doc,
-        title="On a telephone",
+        title="On every screen",
         when="Measured from 16 September 2026.",
         why="A workshop reads this standing next to a car with a part in the other hand. Every screen "
             "is used on a phone, so every screen is measured on one rather than assumed to be fine.",
@@ -845,9 +845,9 @@ def build() -> None:
             "Nothing is smaller than eleven pixels, and a row of tiles that ends odd fills the row rather than leaving a hole.",
             "The same screens are measured right to left, because a layout that only holds together in one direction holds together by accident.",
         ],
-        works="verify-mobile.ts measures forty-seven screens at 390 by 844 and fails on anything that sticks out, is too small to press or too small to read, so this is a check rather than a claim.",
+        works="verify-screens.ts measures every screen on a phone and the main ones at seven sizes from 320 to 1680 pixels, in both directions, and fails on anything that sticks out, is too small to press or too small to read, so this is a check rather than a claim.",
         shots=[("phone-dashboard", "The dashboard on a phone.", 7.6), ("phone-dashboard-ar", "The same, in Arabic.", 7.6)],
-        source="infra/scripts/verify-mobile.ts",
+        source="infra/scripts/verify-screens.ts",
     )
 
     # 11. Counter

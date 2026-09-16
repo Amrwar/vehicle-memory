@@ -299,6 +299,17 @@
 
 .passport-booklet {
   perspective: 1600px;
+
+  /* A drawing does not get to decide how wide a page is: without this the
+     stamps' own minimum width sets the column, and the text beside them is
+     pushed off a narrow screen. */
+  min-width: 0;
+
+  /* The stamps are printed at a slight angle, and a rotated box measures
+     wider than the space it was given. Clipped here so a drawing can never
+     push a narrow page sideways; the angle survives, because the page it sits
+     on has padding to lose. */
+  overflow-x: clip;
 }
 
 .passport-booklet-body {

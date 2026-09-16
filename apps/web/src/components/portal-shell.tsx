@@ -176,7 +176,9 @@ export async function PortalShell({
   return (
     <div className="min-h-dvh bg-(--ground)">
       <header className="border-b border-(--border) bg-(--surface)">
-        <div className={`mx-auto flex ${width} items-center justify-between gap-3 px-4 py-3`}>
+        <div
+          className={`mx-auto flex ${width} flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3`}
+        >
           <Link href={signedIn ? '/portal' : '/'} className="flex items-center gap-2.5">
             <Mark size={22} className="text-(--brand)" />
             <span className="leading-none">
@@ -188,7 +190,7 @@ export async function PortalShell({
           </Link>
 
           <div className="flex items-center gap-3">
-            <LanguageSwitch current={language} back={back} compact />
+            <LanguageSwitch current={language} back={back} compact menu />
             <ThemeToggle className="w-[6.5rem]" />
             {signedIn ? (
               <Link
@@ -208,7 +210,10 @@ export async function PortalShell({
 
         {signedIn ? (
           <nav aria-label={t('Your account')} className={`mx-auto hidden ${width} px-4 sm:block`}>
-            <ul className="flex gap-1">
+            {/* Six tabs and a long word in French or Arabic will not always
+                fit a tablet held upright; the row scrolls inside itself
+                rather than taking the page with it. */}
+            <ul className="scroll-x flex gap-1">
               {TABS.map((tab) => {
                 const on = current === tab.key;
                 return (
