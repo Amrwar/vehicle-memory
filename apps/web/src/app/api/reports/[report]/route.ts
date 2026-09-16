@@ -2,6 +2,7 @@ import { csvFilename, csvHeaders, isPayrollExportId, toCsv, type CsvColumn } fro
 
 import { requireSession } from '@/lib/guard';
 import { payrollFile } from '@/lib/payroll';
+import { warrantyCostFor } from '@/lib/warranty';
 import {
   bySource,
   partsProfitability,
@@ -110,6 +111,37 @@ export async function GET(request: Request, context: { params: Promise<{ report:
           ),
         ),
       });
+    }
+
+    case 'warranty': {
+      // What warranty cost, claim by claim, at cost rather than at what it
+      // would have been charged. Phase 44.
+      const result = await warrantyCostFor(orgId, period);
+
+      return csv('Warranty', result.rows, [
+        { header: 'Settled', value: (row) => row.settledAt },
+        { header: 'What failed', value: (row) => row.warranty.description },
+        { header: 'Part', value: (row) => row.warranty.product?.name ?? '' },
+        { header: 'Supplier', value: (row) => row.warranty.supplier?.name ?? '' },
+        {
+          header: 'Vehicle',
+          value: (row) =>
+            [row.warranty.vehicle.make, row.warranty.vehicle.model].filter(Boolean).join(' '),
+        },
+        {
+          header: 'Registration',
+          value: (row) => row.warranty.vehicle.registration ?? '',
+          literal: true,
+        },
+        { header: 'Complaint', value: (row) => row.complaint },
+        { header: 'Goodwill', value: (row) => (row.outsideCover ? 'yes' : 'no') },
+        { header: 'Parts at cost', value: (row) => Number(row.partsCost).toFixed(2) },
+        { header: 'Hours at cost', value: (row) => Number(row.labourCost).toFixed(2) },
+        { header: 'Cost', value: (row) => money(row.position.cost.minor) },
+        { header: 'Recovered', value: (row) => money(row.position.recovered.minor) },
+        { header: 'Carried', value: (row) => money(row.position.net.minor) },
+        { header: 'How it ended', value: (row) => row.outcome ?? '' },
+      ]);
     }
 
     case 'sources': {

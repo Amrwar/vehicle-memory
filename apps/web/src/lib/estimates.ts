@@ -18,6 +18,7 @@ import { siteUrl } from './credentials';
 import { audit } from './guard';
 import { pushNow } from './outbound';
 import { recordDecision } from './portal';
+import { labourRateAt, sellPriceAt } from './pricing';
 import { regionFor } from './region';
 import { defaultTaxRateId, linePricing, TAX_RATE, taxContextFor } from './tax';
 
@@ -338,12 +339,17 @@ export async function quoteExtraWork(input: {
     );
   }
 
+  // A blank price takes what this site charges (Phase 44): the part's own
+  // price, or this site's if it holds one, and for labour the site's hourly
+  // rate rather than nought, which is what a blank used to quote.
   const unitPrice =
     input.unitPrice !== null && input.unitPrice !== undefined
       ? input.unitPrice
       : product
-        ? Number(product.sellPrice)
-        : 0;
+        ? (await sellPriceAt(input.orgId, product.id, job.locationId)).price
+        : input.kind === 'LABOUR'
+          ? Number((await labourRateAt(input.orgId, job.locationId)).perHour.minor) / 100
+          : 0;
 
   const latest = job.estimates[0];
   const reuse = latest && latest.status === 'DRAFT' && latest.supplementary ? latest : null;

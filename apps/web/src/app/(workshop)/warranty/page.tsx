@@ -1,12 +1,17 @@
 import {
+  Alert,
   Badge,
+  Button,
   Card,
   CardBody,
   CardHeader,
   EmptyState,
+  Field,
+  Input,
   Money,
   PageHeader,
   Registration,
+  Select,
   StatRow,
   StatTile,
   Table,
@@ -17,10 +22,20 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { requireSession } from '@/lib/guard';
+import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
-import { warrantyBook } from '@/lib/warranty';
+import { periodFor } from '@/lib/reports';
+import {
+  attachRemedy,
+  raiseClaim,
+  remedyCost,
+  settleClaim,
+  warrantyBook,
+  warrantyCostFor,
+  WarrantyError,
+} from '@/lib/warranty';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -49,11 +64,105 @@ function date(value: Date, locale: string): string {
   });
 }
 
-export default async function WarrantyPage() {
-  const { orgId, region } = await requireSession('job:read');
-  const t = await tFor();
+const number = (value: FormDataEntryValue | null): number | null => {
+  const raw = String(value ?? '').trim();
+  return raw === '' ? null : Number(raw.replace(',', '.'));
+};
 
-  const book = await warrantyBook(orgId);
+const back = (problem: string): never =>
+  redirect(`/warranty?problem=${encodeURIComponent(problem)}#claims`);
+
+/** Somebody brings the car back and the workshop stands behind the work. */
+async function raise(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+
+  try {
+    await raiseClaim({
+      orgId,
+      userId: user.userId,
+      warrantyId: String(formData.get('warrantyId') ?? ''),
+      complaint: String(formData.get('complaint') ?? ''),
+      goodwillReason: String(formData.get('goodwillReason') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof WarrantyError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/warranty?done=raised#claims');
+}
+
+/** The job that put it right, so the cost can be read from it rather than typed. */
+async function attach(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+
+  try {
+    await attachRemedy({
+      orgId,
+      userId: user.userId,
+      claimId: String(formData.get('claimId') ?? ''),
+      jobId: String(formData.get('jobId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof WarrantyError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/warranty?done=attached#claims');
+}
+
+/** Closes it with what it cost and what came back. Phase 44. */
+async function settle(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+
+  try {
+    await settleClaim({
+      orgId,
+      userId: user.userId,
+      claimId: String(formData.get('claimId') ?? ''),
+      status: String(formData.get('status') ?? 'SETTLED') as 'SETTLED',
+      outcome: String(formData.get('outcome') ?? ''),
+      supplierRef: String(formData.get('supplierRef') ?? ''),
+      partsCost: number(formData.get('partsCost')),
+      labourCost: number(formData.get('labourCost')),
+      recovered: number(formData.get('recovered')),
+    });
+  } catch (error) {
+    if (!(error instanceof WarrantyError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/warranty?done=settled#claims');
+}
+
+export default async function WarrantyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string; problem?: string; done?: string }>;
+}) {
+  const { orgId, region, user } = await requireSession('job:read');
+  const t = await tFor();
+  const { range, problem, done } = await searchParams;
+
+  const period = periodFor(range ?? 'year', region.locale);
+  const [book, cost] = await Promise.all([warrantyBook(orgId), warrantyCostFor(orgId, period)]);
+  const mayWrite = can(user.role, 'job:write');
+
+  // What each open claim's remedy has cost so far, so settling is a
+  // confirmation rather than an arithmetic exercise at the counter.
+  const measured = new Map<string, { partsCost: number; labourCost: number }>();
+  for (const entry of book.openClaims) {
+    const claim = entry.row.claims.find((row) => row.status === 'OPEN');
+    if (claim?.remedyJobId) {
+      measured.set(claim.id, await remedyCost(orgId, claim.remedyJobId));
+    }
+  }
 
   return (
     <>
@@ -106,8 +215,178 @@ export default async function WarrantyPage() {
         </Card>
       ) : null}
 
+      {problem ? (
+        <Alert tone="danger" className="mb-5">
+          {t(problem)}
+        </Alert>
+      ) : null}
+
+      {done ? (
+        <Alert tone="success" className="mb-5">
+          {done === 'raised'
+            ? t(
+                'Raised. Put the job that fixes it against the claim and settle it when the supplier answers.',
+              )
+            : done === 'attached'
+              ? t('Attached. What that job costs is now read from the job itself.')
+              : t('Settled. It counts towards what warranty costs this workshop.')}
+        </Alert>
+      ) : null}
+
+      <Card id="cost" className="mb-5 overflow-hidden">
+        <CardHeader
+          title={t('What warranty costs')}
+          description={t(
+            'Settled claims only, at what the work cost rather than what it would have been charged.',
+          )}
+          action={
+            <span className="flex flex-wrap items-center gap-2 text-[12px]">
+              {['month', 'quarter', 'year'].map((key) => (
+                <Link
+                  key={key}
+                  href={`/warranty?range=${key}#cost`}
+                  className={
+                    (range ?? 'year') === key
+                      ? 'font-medium text-(--brand-text)'
+                      : 'text-(--text-faint) hover:text-(--text)'
+                  }
+                >
+                  {key === 'month'
+                    ? t('This month')
+                    : key === 'quarter'
+                      ? t('This quarter')
+                      : t('This year')}
+                </Link>
+              ))}
+              <a
+                href={`/api/reports/warranty?range=${range ?? 'year'}`}
+                className="text-(--brand-text) underline underline-offset-2"
+              >
+                {t('CSV')}
+              </a>
+            </span>
+          }
+        />
+        <CardBody className="grid gap-3">
+          <p className="text-[13px] leading-relaxed">{t(cost.summary)}</p>
+          <StatRow>
+            <StatTile
+              label={t('The work cost')}
+              value={
+                <Money
+                  currency={region.currency}
+                  locale={region.locale}
+                  amount={cost.cost.minor / 100}
+                />
+              }
+              note={period.label}
+            />
+            <StatTile
+              label={t('Came back')}
+              value={
+                <Money
+                  currency={region.currency}
+                  locale={region.locale}
+                  amount={cost.recovered.minor / 100}
+                />
+              }
+              note={
+                cost.recoveryPct === null
+                  ? t('Nothing spent')
+                  : t('{pct}% of what was spent', { pct: cost.recoveryPct })
+              }
+              tone={cost.recovered.minor > 0 ? 'success' : 'neutral'}
+            />
+            <StatTile
+              label={t('Carried')}
+              value={
+                <Money
+                  currency={region.currency}
+                  locale={region.locale}
+                  amount={cost.net.minor / 100}
+                />
+              }
+              note={
+                cost.ofRevenuePct === null
+                  ? t('No invoices in this period')
+                  : t('{pct}% of turnover', { pct: cost.ofRevenuePct })
+              }
+              tone={cost.net.minor > 0 ? 'warning' : 'neutral'}
+            />
+            <StatTile
+              label={t('Given as goodwill')}
+              value={
+                <Money
+                  currency={region.currency}
+                  locale={region.locale}
+                  amount={cost.goodwill.minor / 100}
+                />
+              }
+              note={t('Outside the cover, put right anyway')}
+            />
+          </StatRow>
+        </CardBody>
+        {cost.byProduct.length > 0 ? (
+          <div className="grid border-t border-(--border) lg:grid-cols-2 lg:divide-x lg:divide-(--border)">
+            <div>
+              <CardHeader title={t('By what failed')} />
+              <ul className="divide-y divide-(--border)">
+                {cost.byProduct.map((group) => (
+                  <li
+                    key={group.name}
+                    className="flex flex-wrap items-baseline gap-3 px-4 py-2 text-[13px]"
+                  >
+                    <bdi className="font-medium">{group.name}</bdi>
+                    <span className="text-(--text-faint)">
+                      {group.claims === 1
+                        ? t('1 claim')
+                        : t('{count} claims', { count: group.claims })}
+                    </span>
+                    <span className="ms-auto tabular-nums">
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={group.net.minor / 100}
+                      />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <CardHeader title={t('By who stood behind it')} />
+              <ul className="divide-y divide-(--border)">
+                {cost.bySupplier.map((group) => (
+                  <li
+                    key={group.name}
+                    className="flex flex-wrap items-baseline gap-3 px-4 py-2 text-[13px]"
+                  >
+                    <bdi className="font-medium">{group.name}</bdi>
+                    <span className="text-(--text-faint)">
+                      {t('{pct}% back', {
+                        pct:
+                          group.cost.minor > 0
+                            ? Math.round((group.recovered.minor / group.cost.minor) * 100)
+                            : 0,
+                      })}
+                    </span>
+                    <span className="ms-auto tabular-nums">
+                      <Money
+                        currency={region.currency}
+                        locale={region.locale}
+                        amount={group.net.minor / 100}
+                      />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : null}
+      </Card>
+
       {book.openClaims.length > 0 ? (
-        <Card className="mb-5 overflow-hidden">
+        <Card id="claims" className="mb-5 overflow-hidden">
           <CardHeader
             title={t('Claims nobody has settled')}
             description={t(
@@ -168,6 +447,91 @@ export default async function WarrantyPage() {
               </tbody>
             </Table>
           </TableWrap>
+
+          {mayWrite ? (
+            <CardBody className="grid gap-4 border-t border-(--border)">
+              {book.openClaims.map((entry) => {
+                const claim = entry.row.claims.find((row) => row.status === 'OPEN')!;
+                const seen = measured.get(claim.id);
+
+                return (
+                  <div key={claim.id} className="grid gap-2">
+                    <p className="text-[13px] font-medium">
+                      <bdi>{entry.row.description}</bdi>
+                      <span className="ms-2 text-[12px] font-normal text-(--text-faint)">
+                        {seen
+                          ? t(
+                              'The remedy job has cost {parts} in parts and {labour} in hours so far.',
+                              {
+                                parts: seen.partsCost.toFixed(2),
+                                labour: seen.labourCost.toFixed(2),
+                              },
+                            )
+                          : t('No job has been put against this claim yet.')}
+                      </span>
+                    </p>
+
+                    <form action={attach} className="flex flex-wrap items-end gap-2">
+                      <input type="hidden" name="claimId" value={claim.id} />
+                      <Field
+                        label={t('The job that put it right')}
+                        hint={t('Its cost is then read from the job, not typed.')}
+                        className="min-w-[14rem] flex-1"
+                      >
+                        <Input name="jobId" required placeholder={t('Job id')} />
+                      </Field>
+                      <Button type="submit" size="sm" variant="ghost">
+                        {t('Attach')}
+                      </Button>
+                    </form>
+
+                    <form
+                      action={settle}
+                      className="grid gap-2 sm:grid-cols-[8rem_7rem_7rem_7rem_minmax(0,1fr)_auto] sm:items-end"
+                    >
+                      <input type="hidden" name="claimId" value={claim.id} />
+                      <Field label={t('How it ended')}>
+                        <Select name="status" defaultValue="SETTLED">
+                          <option value="SETTLED">{t('Settled')}</option>
+                          <option value="ACCEPTED">{t('Accepted')}</option>
+                          <option value="REJECTED">{t('Rejected')}</option>
+                        </Select>
+                      </Field>
+                      <Field label={t('Parts at cost')}>
+                        <Input
+                          name="partsCost"
+                          inputMode="decimal"
+                          defaultValue={seen ? seen.partsCost.toFixed(2) : ''}
+                          placeholder="0.00"
+                        />
+                      </Field>
+                      <Field label={t('Hours at cost')}>
+                        <Input
+                          name="labourCost"
+                          inputMode="decimal"
+                          defaultValue={seen ? seen.labourCost.toFixed(2) : ''}
+                          placeholder="0.00"
+                        />
+                      </Field>
+                      <Field label={t('Recovered')}>
+                        <Input name="recovered" inputMode="decimal" placeholder="0.00" />
+                      </Field>
+                      <Field label={t('What happened')}>
+                        <Input
+                          name="outcome"
+                          required
+                          placeholder={t('Credited in full against the next invoice')}
+                        />
+                      </Field>
+                      <Button type="submit" size="sm" variant="secondary">
+                        {t('Close it')}
+                      </Button>
+                    </form>
+                  </div>
+                );
+              })}
+            </CardBody>
+          ) : null}
         </Card>
       ) : null}
 
@@ -195,6 +559,7 @@ export default async function WarrantyPage() {
                   <Th>{t('From')}</Th>
                   <Th>{t('State')}</Th>
                   <Th>{t('Behind it')}</Th>
+                  {mayWrite ? <Th>{t('It has failed')}</Th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -250,6 +615,37 @@ export default async function WarrantyPage() {
                           })
                         : t('Nobody. All of it falls on the workshop.')}
                     </Td>
+                    {mayWrite ? (
+                      <Td>
+                        {entry.row.claims.some((claim) => claim.status === 'OPEN') ? (
+                          <span className="text-[12px] text-(--text-faint)">
+                            {t('A claim is open on this.')}
+                          </span>
+                        ) : (
+                          <form action={raise} className="flex flex-wrap items-end gap-2">
+                            <input type="hidden" name="warrantyId" value={entry.row.id} />
+                            <Input
+                              name="complaint"
+                              required
+                              minLength={3}
+                              className="min-w-[10rem]"
+                              placeholder={t('What has gone wrong')}
+                            />
+                            {entry.status.active ? null : (
+                              <Input
+                                name="goodwillReason"
+                                required
+                                className="min-w-[10rem]"
+                                placeholder={t('Why entertain it, out of cover')}
+                              />
+                            )}
+                            <Button type="submit" size="sm" variant="ghost">
+                              {t('Raise a claim')}
+                            </Button>
+                          </form>
+                        )}
+                      </Td>
+                    ) : null}
                   </Tr>
                 ))}
               </tbody>

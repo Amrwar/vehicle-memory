@@ -20,7 +20,18 @@
 export class OwnershipError extends Error {
   constructor(
     readonly code:
-      'NO_OWNER' | 'SAME_OWNER' | 'BEFORE_PURCHASE' | 'IN_THE_FUTURE' | 'NO_NAME' | 'OPEN_WORK',
+      | 'NO_OWNER'
+      | 'SAME_OWNER'
+      | 'BEFORE_PURCHASE'
+      | 'IN_THE_FUTURE'
+      | 'NO_NAME'
+      | 'OPEN_WORK'
+      // Handover by invitation. Phase 44.
+      | 'ALREADY_INVITED'
+      | 'EXPIRED'
+      | 'NOT_PENDING'
+      | 'SELLER_ACCEPTING'
+      | 'NOT_FOUND',
     message: string,
   ) {
     super(message);

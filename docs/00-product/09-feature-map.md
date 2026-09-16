@@ -71,6 +71,9 @@ says why.
 | Its own profile            | Built  | `/vehicles/[id]`, and `/portal/vehicles/[id]`                                                     |
 | VIN, plate, make, model    | Built  |                                                                                                   |
 | Decoding a VIN             | Built  | Behind a seam: the maker and year built in, the model from the registry (Phase 43)                |
+| Handover by invitation     | Built  | The seller starts it, the buyer accepts, the seller's access ends (Phase 44)                      |
+| Labour rates per site      | Built  | A list per workshop, a site's own winning there (Phase 44)                                        |
+| Part prices per site       | Built  | A figure a site holds, which does not move with the list                                          |
 | Mileage, engine, fuel      | Built  |                                                                                                   |
 | Service and repair history | Built  | Every visit, across workshops                                                                     |
 | Parts replaced             | Built  | Through job lines                                                                                 |
@@ -326,6 +329,8 @@ endpoint that receives them exists and is authenticated.
 | Trend by site, person  | Built  | Ninety days against the ninety before (Phase 40)   |
 | Closing a complaint    | Built  | With a stated outcome, enforced by the database    |
 | Posting to Google      | Built  | The listing is named, the five-star answer is sent |
+| Warranty at cost       | Built  | Settled claims at parts and hours cost (Phase 44)  |
+| What warranty costs    | Built  | By period, by part and by supplier, with a CSV     |
 | Who went to say so     | Built  | Counted on `/reputation` (Phase 43)                |
 
 The routing is the feature and it is the thing businesses get backwards.
@@ -473,7 +478,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 214          |
+| Built    | 219          |
 | Partial  | 1            |
 | Missing  | 4            |
 | Deferred | 1            |

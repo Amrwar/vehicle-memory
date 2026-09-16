@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7500 — Ownership, warranty and sites
+
+| Ref     | Requirement                                                                                                                                             | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7501 | A sale MUST be offerable as an invitation, and nothing about the ownership MUST change until the buyer accepts it.                                      | 44    |
+| FR-7502 | The buyer MUST be shown the vehicle and what its history carries, and MUST NOT be shown who owned it before them.                                       | 44    |
+| FR-7503 | Accepting MUST close the seller's ownership, open the buyer's against their own login, end the seller's access and leave the history with the vehicle.  | 44    |
+| FR-7504 | A vehicle MUST NOT carry two open invitations, a seller MUST NOT accept their own, and an accepted invitation MUST NOT transfer a vehicle twice.        | 44    |
+| FR-7505 | An invitation MUST run out, and MUST be cancellable by the seller and refusable by the buyer.                                                           | 44    |
+| FR-7506 | A settled warranty claim MUST record what the remedy cost at parts cost and technicians' rates, and what was recovered, refusing a recovery above cost. | 44    |
+| FR-7507 | Warranty MUST be reportable for a period as spent, recovered and carried, as a share of turnover, and by the part and the supplier behind it.           | 44    |
+| FR-7508 | A labour rate and a part price MUST be settable per site, and a line MUST take the site's figure where it has one and the workshop's where it does not. | 44    |
+
 ## FR-7400 — Providers
 
 | Ref     | Requirement                                                                                                                                                      | Phase |

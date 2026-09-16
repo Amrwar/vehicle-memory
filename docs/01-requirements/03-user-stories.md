@@ -1642,6 +1642,55 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AS — Ownership, warranty and sites (Phase 44)
+
+### AS1 — The car I just sold
+
+**As** Maria **I want** to hand the history to whoever bought my car **so
+that** what I paid to have recorded is worth something to them and is no
+longer on my account.
+**Size** 5 · **Satisfies** FR-7501, FR-7503
+
+- **Given** I have invited the buyer, **when** I look at the vehicle, **then**
+  it is still mine and the invitation is waiting.
+- **Given** the buyer accepts, **when** I open the portal, **then** the car is
+  gone from it and its history went with the car.
+
+### AS2 — The car I just bought
+
+**As** a buyer **I want** to see what I am being given before I accept it
+**so that** I know what the history holds, without being handed somebody's
+personal details.
+**Size** 3 · **Satisfies** FR-7502, FR-7504, FR-7505
+
+- **Given** a handover link, **when** I open it, **then** I see the car, the
+  number of owners and the size of its history, and no name.
+- **Given** I am the seller, **when** I open the link, **then** I am told the
+  buyer accepts it themselves.
+
+### AS3 — What our own warranty costs
+
+**As** Ahmed **I want** the real cost of warranty work **so that** I can tell
+which parts and which suppliers are expensive rather than guessing.
+**Size** 5 · **Satisfies** FR-7506, FR-7507
+
+- **Given** a claim with the job that fixed it attached, **when** I settle it,
+  **then** its cost comes from that job's parts and hours, not from what they
+  would have been charged.
+- **Given** a period, **when** I read the warranty page, **then** it says what
+  was spent, what came back, what we carried and what that is of turnover.
+
+### AS4 — Two branches, two price lists
+
+**As** Ahmed **I want** each site to charge its own rate **so that** the city
+branch is not quoting the industrial estate's prices.
+**Size** 3 · **Satisfies** FR-7508
+
+- **Given** a rate against a site, **when** a line is added at that site,
+  **then** it takes that rate and the page says whose it is.
+- **Given** no rate for a site, **when** a line is added, **then** it takes the
+  workshop's.
+
 ## Epic AR — Providers (Phase 43)
 
 ### AR1 — The car in front of me

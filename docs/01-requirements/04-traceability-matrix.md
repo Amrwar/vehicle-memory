@@ -521,29 +521,37 @@ where the work happens.
 
 ## Paper
 
-| Req     | Story | Schema                  | Implementation                                                       | Test                                       | Status |
-| ------- | ----- | ----------------------- | -------------------------------------------------------------------- | ------------------------------------------ | ------ |
-| FR-7401 | AR1   | —                       | `decodeLocally()`, `vinDecoder()`, `/vehicles/find`                  | `providers.test.ts`, `verify-providers.ts` | Done   |
-| FR-7402 | AR1   | —                       | `makeFromWmi()`, `vinEncodesYear()`                                  | `providers.test.ts`, `verify-providers.ts` | Done   |
-| FR-7403 | AR2   | —                       | `FitmentFeed`, `fetchFeedFitments()`, `part_fitments.feedName`       | `verify-providers.ts`                      | Done   |
-| FR-7404 | AR2   | —                       | `planFeedImport()`                                                   | `providers.test.ts`, `verify-providers.ts` | Done   |
-| FR-7405 | AR3   | —                       | `assertPayAdjustment()`, `pay_adjustments_lock` trigger              | `payroll.test.ts`, `verify-providers.ts`   | Done   |
-| FR-7406 | AR3   | —                       | `assertOvertimeMultiplier()`, `draftTimesheet()`                     | `payroll.test.ts`, `verify-providers.ts`   | Done   |
-| FR-7407 | AR3   | —                       | `PAYROLL_EXPORTS`, `/api/reports/payroll?format=`                    | `payroll.test.ts`, `verify-providers.ts`   | Done   |
-| FR-7408 | AR4   | —                       | `googleReviewSite`, `/r/[token]/public`, `followReviewInvitation()`  | `providers.test.ts`, `verify-providers.ts` | Done   |
-| FR-7301 | AQ1   | —                       | `/print/[kind]/[id]`, `PrintSheet`, `components/print/documents.tsx` | `verify-paper.ts`                          | Done   |
-| FR-7302 | AQ2   | —                       | `/api/print/[kind]/[id]`, `renderPdf()`, `pdfFilename()`             | `print.test.ts`, `verify-paper.ts`         | Done   |
-| FR-7303 | AQ2   | —                       | `watermarkFor()`                                                     | `print.test.ts`, `verify-paper.ts`         | Done   |
-| FR-7304 | AQ2   | —                       | `tFor()`, `readingLocaleFor()`, `<bdi>` around data                  | `verify-paper.ts`                          | Done   |
-| FR-7305 | AQ1   | —                       | `readerFor()`, `PRINT_PERMISSION`, `CUSTOMER_PRINT_KINDS`            | `verify-paper.ts`                          | Done   |
-| FR-7306 | AQ3   | —                       | `labelSheets()`, `keyTagFor()`, `qrSvg()`                            | `print.test.ts`, `verify-paper.ts`         | Done   |
-| FR-7307 | AQ3   | —                       | the print stylesheet in `packages/ui/src/styles.css`                 | `verify-paper.ts`                          | Done   |
-| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                | `verify-credentials.ts`                    | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                           | `verify-credentials.ts`                    | Done   |
-| FR-3801 | —     | —                       | `/api/inbound/resend`                                                | `smoke.ts`                                 | Done   |
-| FR-3802 | —     | —                       | `verify()` tolerance                                                 | `smoke.ts`                                 | Done   |
-| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                  | `smoke.ts`                                 | Done   |
-| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                             | `smoke.ts`                                 | Done   |
+| Req     | Story | Schema                  | Implementation                                                              | Test                                        | Status |
+| ------- | ----- | ----------------------- | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-7501 | AS1   | —                       | `inviteHandover()`, `HandoverInvitation`, `/vehicles/[id]/transfer`         | `invitation.test.ts`, `verify-ownership.ts` | Done   |
+| FR-7502 | AS2   | —                       | `describeHandover()`, `/handover/[token]`                                   | `invitation.test.ts`, `verify-ownership.ts` | Done   |
+| FR-7503 | AS1   | —                       | `acceptHandover()`, `vehicleHistory()`                                      | `verify-ownership.ts`                       | Done   |
+| FR-7504 | AS2   | —                       | `assertHandoverInvitable()`, `handover_invitations_one_pending`             | `invitation.test.ts`, `verify-ownership.ts` | Done   |
+| FR-7505 | AS2   | —                       | `handoverState()`, `cancelHandover()`, `declineHandover()`                  | `invitation.test.ts`, `verify-ownership.ts` | Done   |
+| FR-7506 | AS3   | —                       | `assertSettlement()`, `remedyCost()`, `warranty_claims_recovery_check`      | `cost.test.ts`, `verify-ownership.ts`       | Done   |
+| FR-7507 | AS3   | —                       | `warrantyCost()`, `warrantyBy()`, `/warranty`, `/api/reports/warranty`      | `cost.test.ts`, `verify-ownership.ts`       | Done   |
+| FR-7508 | AS4   | —                       | `chooseLabourRate()`, `chooseSitePrice()`, `LabourRate`, `ProductSitePrice` | `site.test.ts`, `verify-ownership.ts`       | Done   |
+| FR-7401 | AR1   | —                       | `decodeLocally()`, `vinDecoder()`, `/vehicles/find`                         | `providers.test.ts`, `verify-providers.ts`  | Done   |
+| FR-7402 | AR1   | —                       | `makeFromWmi()`, `vinEncodesYear()`                                         | `providers.test.ts`, `verify-providers.ts`  | Done   |
+| FR-7403 | AR2   | —                       | `FitmentFeed`, `fetchFeedFitments()`, `part_fitments.feedName`              | `verify-providers.ts`                       | Done   |
+| FR-7404 | AR2   | —                       | `planFeedImport()`                                                          | `providers.test.ts`, `verify-providers.ts`  | Done   |
+| FR-7405 | AR3   | —                       | `assertPayAdjustment()`, `pay_adjustments_lock` trigger                     | `payroll.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7406 | AR3   | —                       | `assertOvertimeMultiplier()`, `draftTimesheet()`                            | `payroll.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7407 | AR3   | —                       | `PAYROLL_EXPORTS`, `/api/reports/payroll?format=`                           | `payroll.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7408 | AR4   | —                       | `googleReviewSite`, `/r/[token]/public`, `followReviewInvitation()`         | `providers.test.ts`, `verify-providers.ts`  | Done   |
+| FR-7301 | AQ1   | —                       | `/print/[kind]/[id]`, `PrintSheet`, `components/print/documents.tsx`        | `verify-paper.ts`                           | Done   |
+| FR-7302 | AQ2   | —                       | `/api/print/[kind]/[id]`, `renderPdf()`, `pdfFilename()`                    | `print.test.ts`, `verify-paper.ts`          | Done   |
+| FR-7303 | AQ2   | —                       | `watermarkFor()`                                                            | `print.test.ts`, `verify-paper.ts`          | Done   |
+| FR-7304 | AQ2   | —                       | `tFor()`, `readingLocaleFor()`, `<bdi>` around data                         | `verify-paper.ts`                           | Done   |
+| FR-7305 | AQ1   | —                       | `readerFor()`, `PRINT_PERMISSION`, `CUSTOMER_PRINT_KINDS`                   | `verify-paper.ts`                           | Done   |
+| FR-7306 | AQ3   | —                       | `labelSheets()`, `keyTagFor()`, `qrSvg()`                                   | `print.test.ts`, `verify-paper.ts`          | Done   |
+| FR-7307 | AQ3   | —                       | the print stylesheet in `packages/ui/src/styles.css`                        | `verify-paper.ts`                           | Done   |
+| FR-3907 | A1    | —                       | `assertNotFlooding()`                                                       | `verify-credentials.ts`                     | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash` | `digest()`                                                                  | `verify-credentials.ts`                     | Done   |
+| FR-3801 | —     | —                       | `/api/inbound/resend`                                                       | `smoke.ts`                                  | Done   |
+| FR-3802 | —     | —                       | `verify()` tolerance                                                        | `smoke.ts`                                  | Done   |
+| FR-3803 | —     | `Organization.slug`     | `organisationFor()`                                                         | `smoke.ts`                                  | Done   |
+| FR-3804 | —     | —                       | `INBOUND_WEBHOOK_SECRET`                                                    | `smoke.ts`                                  | Done   |
 
 ## What people say afterwards
 
@@ -852,7 +860,8 @@ details without a provider behind it would be worse than not having one.
 | Tax, configurable                                  | 7                   | 7                      |
 | Paper                                              | 7                   | 7                      |
 | Providers                                          | 8                   | 8                      |
-| **Total**                                          | **505**             | **499 (99%)**          |
+| Ownership, warranty and sites                      | 8                   | 8                      |
+| **Total**                                          | **513**             | **507 (99%)**          |
 
 The requirements document lists 581 requirements. 84 of
 them do not have a row of their own above.

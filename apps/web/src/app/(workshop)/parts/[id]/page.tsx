@@ -34,6 +34,7 @@ import { tFor } from '@/lib/i18n';
 import { quantityOnOrder, usageHistory } from '@/lib/inventory';
 import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
+import { PricingError, setSitePrice, sitePricesFor, sitesOf } from '@/lib/pricing';
 import { fetchFeedFitments, fitmentFeed } from '@/lib/providers';
 
 export const dynamic = 'force-dynamic';
@@ -121,6 +122,36 @@ async function fetchFitments(formData: FormData) {
   redirect(`/parts/${productId}?feed=${summary}#fits`);
 }
 
+/**
+ * What this part sells for at one site. Phase 44.
+ *
+ * An empty box clears the site's price rather than writing nought, because a
+ * part given away and a part priced like everywhere else are different things.
+ */
+async function priceAtSite(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+  const raw = String(formData.get('sellPrice') ?? '').trim();
+
+  try {
+    await setSitePrice({
+      orgId,
+      userId: user.userId,
+      productId,
+      locationId: String(formData.get('locationId') ?? ''),
+      sellPrice: raw === '' ? null : Number(raw.replace(',', '.')),
+    });
+  } catch (error) {
+    const message =
+      error instanceof PricingError ? error.message : 'That price could not be saved.';
+    redirect(`/parts/${productId}?error=${encodeURIComponent(message)}#prices`);
+  }
+
+  redirect(`/parts/${productId}#prices`);
+}
+
 async function dropFitment(formData: FormData) {
   'use server';
 
@@ -172,6 +203,7 @@ export default async function PartPage({
   const { error, feed: fetched } = await searchParams;
   const fitments = await fitmentsFor(orgId, id);
   const feed = fitmentFeed();
+  const [sites, sitePrices] = await Promise.all([sitesOf(orgId), sitePricesFor(orgId, id)]);
   const mayFetch = feed !== null && can(user.role, 'inventory:write');
   const [added, removed, unchanged, kept] = (fetched ?? '').split('.').map(Number);
 
@@ -592,6 +624,55 @@ export default async function PartPage({
           )}
         </CardBody>
       </Card>
+
+      {sites.length > 1 ? (
+        <Card id="prices" className="mt-5 overflow-hidden">
+          <CardHeader
+            title={t('Price at each site')}
+            description={t(
+              'Empty means the part’s own price. A figure here is what this site charges, and it does not move when the list does.',
+            )}
+          />
+          <ul className="divide-y divide-(--border)">
+            {sites.map((site) => {
+              const held = sitePrices.find((row) => row.locationId === site.id);
+
+              return (
+                <li key={site.id} className="px-4 py-2.5">
+                  <form action={priceAtSite} className="flex flex-wrap items-end gap-3 text-[13px]">
+                    <input type="hidden" name="productId" value={id} />
+                    <input type="hidden" name="locationId" value={site.id} />
+                    <span className="min-w-[10rem] font-medium">
+                      <bdi>{site.name}</bdi>
+                    </span>
+                    <Field label={t('Sells for')} className="w-[9rem]">
+                      <Input
+                        name="sellPrice"
+                        inputMode="decimal"
+                        defaultValue={held ? Number(held.sellPrice).toFixed(2) : ''}
+                        placeholder={Number(product.sellPrice).toFixed(2)}
+                        disabled={!can(user.role, 'inventory:write')}
+                      />
+                    </Field>
+                    <span className="text-[12px] text-(--text-faint)">
+                      {held
+                        ? t('This site’s own price. The list is {price}.', {
+                            price: Number(product.sellPrice).toFixed(2),
+                          })
+                        : t('The part’s own price.')}
+                    </span>
+                    {can(user.role, 'inventory:write') ? (
+                      <Button type="submit" size="sm" variant="ghost">
+                        {t('Save')}
+                      </Button>
+                    ) : null}
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      ) : null}
 
       <Card id="fits" className="mt-5 overflow-hidden">
         <CardHeader

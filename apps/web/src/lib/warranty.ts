@@ -1,14 +1,24 @@
 import {
   assertClaimable,
+  assertSettlement,
+  claimPosition,
   type Cover,
+  describeWarrantyCost,
   expiringWithin,
+  fromDecimal,
+  noWarrantyCost,
   positionFor,
   coverStatusOf,
+  type SettledClaim,
+  warrantyBy,
+  warrantyCost,
   WarrantyError,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { regionFor } from './region';
+import type { Period } from './reports';
 
 /**
  * Warranty, against the database.
@@ -75,6 +85,10 @@ const SELECT = {
       outsideCover: true,
       exposure: true,
       recoverable: true,
+      remedyJobId: true,
+      partsCost: true,
+      labourCost: true,
+      recovered: true,
     },
   },
 };
@@ -264,7 +278,14 @@ export async function raiseClaim(input: {
   return { id: claim.id, position, status };
 }
 
-/** Closes a claim with what actually happened. */
+/**
+ * Closes a claim with what actually happened, and what it actually cost.
+ *
+ * The figures written when the claim was raised are what the customer had
+ * been charged. These are what the workshop paid: the parts on the remedy at
+ * cost, the hours at the technicians' own rates, and what a supplier put
+ * back. Phase 44.
+ */
 export async function settleClaim(input: {
   orgId: string;
   userId: string;
@@ -272,17 +293,35 @@ export async function settleClaim(input: {
   status: 'ACCEPTED' | 'REJECTED' | 'SETTLED';
   outcome: string;
   supplierRef?: string | null;
+  partsCost?: number | null;
+  labourCost?: number | null;
+  recovered?: number | null;
 }) {
   const claim = await prisma.warrantyClaim.findFirstOrThrow({
     where: { id: input.claimId, warranty: { orgId: input.orgId } },
-    select: { id: true, status: true },
+    select: { id: true, status: true, remedyJobId: true },
   });
 
   if (claim.status !== 'OPEN') {
     throw new WarrantyError('ALREADY_CLAIMED', 'That claim has already been closed.');
   }
 
-  if (!input.outcome.trim()) {
+  const region = await regionFor(input.orgId);
+  const settling = input.status === 'SETTLED';
+
+  // What the remedy job cost, unless somebody typed the figures themselves.
+  const measured = claim.remedyJobId ? await remedyCost(input.orgId, claim.remedyJobId) : null;
+  const partsCost = input.partsCost ?? measured?.partsCost ?? 0;
+  const labourCost = input.labourCost ?? measured?.labourCost ?? 0;
+  const recovered = input.recovered ?? 0;
+
+  if (settling) {
+    assertSettlement({
+      cost: fromDecimal(String(partsCost + labourCost), region.currency),
+      recovered: fromDecimal(String(recovered), region.currency),
+      outcome: input.outcome,
+    });
+  } else if (!input.outcome.trim()) {
     throw new WarrantyError(
       'NO_REASON',
       'Say what happened. "Settled" with nothing against it means nothing to whoever reads it next.',
@@ -295,7 +334,11 @@ export async function settleClaim(input: {
       status: input.status,
       outcome: input.outcome.trim(),
       supplierRef: input.supplierRef?.trim() || null,
-      settledAt: input.status === 'SETTLED' ? new Date() : null,
+      settledAt: settling ? new Date() : null,
+      settledByUserId: settling ? input.userId : null,
+      partsCost: settling ? partsCost : 0,
+      labourCost: settling ? labourCost : 0,
+      recovered: settling ? recovered : 0,
       // ACCEPTED and REJECTED are decisions, not conclusions, so they do not
       // carry a settled time. The constraint only asks for one on SETTLED.
     },
@@ -307,6 +350,161 @@ export async function settleClaim(input: {
     action: `warranty.claim.${input.status.toLowerCase()}`,
     entityType: 'WarrantyClaim',
     entityId: claim.id,
-    after: { outcome: input.outcome.trim() },
+    after: settling
+      ? { outcome: input.outcome.trim(), partsCost, labourCost, recovered }
+      : { outcome: input.outcome.trim() },
   });
+}
+
+/**
+ * What a remedy job cost the workshop.
+ *
+ * Parts at what they were bought for and hours at the technician's cost rate,
+ * never at what either was charged: a job put right under warranty is not
+ * invoiced, so the charged figures on it are zero and the cost is not.
+ */
+export async function remedyCost(
+  orgId: string,
+  jobId: string,
+): Promise<{ partsCost: number; labourCost: number }> {
+  const job = await prisma.job.findFirst({
+    where: { id: jobId, orgId },
+    select: {
+      partLines: { select: { quantity: true, unitCost: true } },
+      timeEntries: { select: { minutes: true, costRate: true } },
+    },
+  });
+
+  if (!job) return { partsCost: 0, labourCost: 0 };
+
+  const partsCost = job.partLines.reduce(
+    (total, line) => total + Number(line.quantity) * Number(line.unitCost ?? 0),
+    0,
+  );
+
+  const labourCost = job.timeEntries.reduce(
+    (total, entry) => total + ((entry.minutes ?? 0) / 60) * Number(entry.costRate ?? 0),
+    0,
+  );
+
+  return {
+    partsCost: Math.round(partsCost * 100) / 100,
+    labourCost: Math.round(labourCost * 100) / 100,
+  };
+}
+
+/** Attaches the job that put it right, so the cost can be read from it. */
+export async function attachRemedy(input: {
+  orgId: string;
+  userId: string;
+  claimId: string;
+  jobId: string;
+}): Promise<void> {
+  const [claim, job] = await Promise.all([
+    prisma.warrantyClaim.findFirst({
+      where: { id: input.claimId, warranty: { orgId: input.orgId } },
+      select: { id: true, status: true },
+    }),
+    prisma.job.findFirst({
+      where: { id: input.jobId, orgId: input.orgId },
+      select: { id: true, number: true },
+    }),
+  ]);
+
+  if (!claim) throw new WarrantyError('NOT_COVERED', 'That claim is not in this workshop.');
+  if (!job) throw new WarrantyError('NOT_COVERED', 'That job is not in this workshop.');
+  if (claim.status !== 'OPEN') {
+    throw new WarrantyError('ALREADY_CLAIMED', 'That claim has already been closed.');
+  }
+
+  await prisma.warrantyClaim.update({
+    where: { id: claim.id },
+    data: { remedyJobId: job.id },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'warranty.claim.remedy_attached',
+    entityType: 'WarrantyClaim',
+    entityId: claim.id,
+    after: { job: job.number },
+  });
+}
+
+/**
+ * What warranty cost the workshop over a period, against what it turned over.
+ *
+ * Only settled claims count. An open claim is a figure nobody has agreed yet,
+ * and adding it to a cost report would make a bad month look worse and then
+ * quietly improve when the supplier paid.
+ */
+export async function warrantyCostFor(orgId: string, period: Period) {
+  const region = await regionFor(orgId);
+  const currency = region.currency;
+
+  const [claims, revenue] = await Promise.all([
+    prisma.warrantyClaim.findMany({
+      where: {
+        warranty: { orgId },
+        status: 'SETTLED',
+        settledAt: { gte: period.from, lte: period.to },
+      },
+      orderBy: { settledAt: 'desc' },
+      select: {
+        id: true,
+        partsCost: true,
+        labourCost: true,
+        recovered: true,
+        outsideCover: true,
+        settledAt: true,
+        complaint: true,
+        outcome: true,
+        warranty: {
+          select: {
+            description: true,
+            product: { select: { name: true } },
+            supplier: { select: { name: true } },
+            vehicle: { select: { id: true, registration: true, make: true, model: true } },
+          },
+        },
+      },
+    }),
+    prisma.invoice.aggregate({
+      where: { orgId, status: { not: 'DRAFT' }, issuedAt: { gte: period.from, lte: period.to } },
+      _sum: { total: true },
+    }),
+  ]);
+
+  const settled: SettledClaim[] = claims.map((claim) => {
+    const position = claimPosition({
+      partsCost: fromDecimal(String(claim.partsCost), currency),
+      labourCost: fromDecimal(String(claim.labourCost), currency),
+      recovered: fromDecimal(String(claim.recovered), currency),
+    });
+
+    return {
+      id: claim.id,
+      productName: claim.warranty.product?.name ?? null,
+      supplierName: claim.warranty.supplier?.name ?? null,
+      cost: position.cost,
+      recovered: position.recovered,
+      net: position.net,
+      goodwill: claim.outsideCover,
+      settledAt: claim.settledAt!,
+    };
+  });
+
+  const turnover = fromDecimal(String(revenue._sum.total ?? 0), currency);
+  const result =
+    settled.length > 0 ? warrantyCost(settled, turnover, currency) : noWarrantyCost(currency);
+
+  return {
+    ...result,
+    revenue: turnover,
+    summary: describeWarrantyCost(result, region.locale),
+    byProduct: warrantyBy(settled, 'product', currency).slice(0, 8),
+    bySupplier: warrantyBy(settled, 'supplier', currency).slice(0, 8),
+    rows: claims.map((claim, index) => ({ ...claim, position: settled[index]! })),
+  };
 }

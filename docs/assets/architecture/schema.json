@@ -1,9 +1,9 @@
 {
-  "builtOn": "2026-09-15",
+  "builtOn": "2026-09-16",
   "counts": {
-    "models": 147,
-    "enums": 72,
-    "fields": 2326
+    "models": 150,
+    "enums": 73,
+    "fields": 2389
   },
   "enums": [
     "OrgPlan",
@@ -13,6 +13,7 @@
     "VehicleEventType",
     "VerificationLevel",
     "AttachmentKind",
+    "HandoverStatus",
     "OwnerKind",
     "OdometerSource",
     "OdometerAnomaly",
@@ -231,6 +232,19 @@
           "scope": "global"
         },
         {
+          "name": "HandoverInvitation",
+          "comment": "A sale waiting for the buyer to accept it. Phase 44. The seller starts it, from the portal or at a workshop counter; the buyer opens a link and accepts; only then does the ownership move. A partial unique index in the migration keeps one vehicle to one pending handover, so a car cannot be promised to two people. Only the digest of the link's token is stored, as with every capability in this product.",
+          "fields": 21,
+          "relations": [
+            "Vehicle",
+            "Organization",
+            "VehicleOwnership",
+            "User",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
           "name": "VehicleEvent",
           "comment": "One immutable fact about a vehicle. APPEND ONLY. There is no update path in the application. Corrections append a superseding event. FR-401, FR-406.",
           "fields": 18,
@@ -349,6 +363,17 @@
             "Organization",
             "Product",
             "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "ProductSitePrice",
+          "comment": "What one part sells for at one site, where it differs. Phase 44. Absent means the product's own price, which is the answer nearly always. A price here is a figure somebody chose for this site, never a percentage of a list that may move under it.",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "Product",
+            "Location"
           ],
           "scope": "organisation"
         }
@@ -795,6 +820,16 @@
           "scope": "organisation"
         },
         {
+          "name": "LabourRate",
+          "comment": "What an hour is charged at, at this workshop or at one of its sites. Phase 44. A list rather than a number, because a workshop charges differently for diagnostics and for an MOT, and a group charges differently in a city centre than on an industrial estate. A rate with no site is the workshop's; one with a site belongs to that site and wins there.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
           "name": "TaxComponent",
           "comment": "One tax inside a rate: a rate can carry a federal and a provincial tax, and a compound one is charged on the price with the taxes before it. Phase 41.",
           "fields": 6,
@@ -1189,9 +1224,10 @@
         {
           "name": "WarrantyClaim",
           "comment": "Somebody saying the work did not hold. A claim can be raised against expired cover, because a workshop does settle those out of goodwill and that decision is worth recording rather than hiding. What the database insists on is that a goodwill claim says why.",
-          "fields": 14,
+          "fields": 18,
           "relations": [
             "Warranty",
+            "User",
             "User",
             "Job"
           ],

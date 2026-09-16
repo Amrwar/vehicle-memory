@@ -250,6 +250,31 @@ address that is not the review site's own, so a stored value cannot be turned
 into an open redirect. Only an answer routed to a public invitation is sent,
 and what the product learns is that the customer went, never what they wrote.
 
+### 7.8 A vehicle handed to somebody else (Phase 44)
+
+A handover is a capability with a digest: the link carries a token, only its
+SHA-256 is stored, and it expires after three weeks. Opening it shows the
+vehicle and the size of its history and never the seller's name, telephone
+number or address, and the seller is shown nothing about the buyer beyond the
+name they were given. Accepting requires a login, so the vehicle lands on an
+identity rather than on whoever holds a link, and the seller's own login is
+refused: a sale needs two people. A partial unique index keeps one vehicle to
+one open invitation, and acceptance is a conditional update inside the same
+transaction that moves the ownership, so a link opened twice moves nothing the
+second time.
+
+Access follows ownership rather than being revoked separately. The portal
+reads a vehicle through the owner's open ownership row, so the moment that row
+closes the seller's access ends, with no second list to keep in step. The
+history itself is untouched: the chain is append-only, carries no names, and
+the transfer adds one event saying the vehicle changed hands, marked as
+self-reported because no workshop saw it happen.
+
+Sign-in gained a `next` parameter so a buyer arriving on a handover link
+returns to it. It is honoured only for a path on this site — not a full
+address, not one beginning with two slashes — because "sign in and we will
+send you on" is how an open redirect is built.
+
 ## 8. Input and output
 
 | Control          | Implementation                                                                                                                                                                                                                          |

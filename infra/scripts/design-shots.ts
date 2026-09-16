@@ -99,9 +99,52 @@ async function ids() {
     orderBy: { createdAt: 'desc' },
     select: { id: true },
   });
+  // A handover to photograph, on a car of its own so no real invitation is
+  // disturbed. Taken down again at the end of the run. Phase 44.
+  const handoverToken = randomBytes(18).toString('base64url');
+  const shown = await prisma.vehicle.upsert({
+    where: { vin: 'SHOTHANDOVER00001' },
+    create: {
+      vin: 'SHOTHANDOVER00001',
+      registration: 'YD19 KPX',
+      make: 'Toyota',
+      model: 'Corolla',
+      year: 2019,
+      lastOdometerKm: 71_400,
+      eventCount: 14,
+    },
+    update: {},
+    select: { id: true },
+  });
+  await prisma.handoverInvitation.deleteMany({ where: { vehicleId: shown.id } });
+  await prisma.vehicleOwnership.deleteMany({ where: { vehicleId: shown.id } });
+  const sellerOwnership = await prisma.vehicleOwnership.create({
+    data: {
+      vehicleId: shown.id,
+      ownerName: 'The seller',
+      ownerKind: 'PRIVATE',
+      startedAt: new Date(Date.now() - 900 * 86_400_000),
+    },
+    select: { id: true },
+  });
+  await prisma.handoverInvitation.create({
+    data: {
+      vehicleId: shown.id,
+      orgId: org.id,
+      fromOwnershipId: sellerOwnership.id,
+      toName: 'Tom Hargreaves',
+      tokenHash: createHash('sha256').update(handoverToken).digest('hex'),
+      soldOn: new Date(Date.now() - 2 * 86_400_000),
+      odometerKm: 71_400,
+      expiresAt: new Date(Date.now() + 21 * 86_400_000),
+    },
+  });
+
   return {
     job: job.id,
     inspection: inspection.id,
+    handover: handoverToken,
+    handoverVehicle: shown.id,
     invoice: invoice.id,
     customer: customer.id,
     vehicle: vehicle.id,
@@ -175,6 +218,10 @@ async function main() {
     { file: 'vehicle', path: `/vehicles/${r.vehicle}`, who: 'owner' },
     { file: 'reputation', path: '/reputation', who: 'owner' },
     { file: 'payroll', path: '/payroll', who: 'owner', fullPage: true },
+    { file: 'warranty-cost', path: '/warranty?range=year#cost', who: 'owner', fullPage: true },
+    ...(r.handover
+      ? [{ file: 'handover', path: `/handover/${r.handover}`, who: 'nobody' as const, height: 900 }]
+      : []),
     {
       file: 'vin-decode',
       path: '/vehicles/find?q=WVWZZZ1JZ3W386752&vin=WVWZZZ1JZ3W386752&decode=1',
@@ -292,6 +339,10 @@ async function main() {
     console.info(`  ${shot.file}.png  ${shot.path}`);
     await context.close();
   }
+
+  // The car put up for the handover photograph goes away again.
+  await prisma.handoverInvitation.deleteMany({ where: { vehicleId: r.handoverVehicle } });
+  await prisma.vehicleOwnership.deleteMany({ where: { vehicleId: r.handoverVehicle } });
 
   // The mark, as the home screen sees it.
   const icon = await fetch(`${BASE}/apple-icon`);

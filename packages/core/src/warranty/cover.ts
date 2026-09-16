@@ -141,7 +141,13 @@ export function coverStatusOf(cover: Cover, now: Date, currentKm: number | null)
 }
 
 export class WarrantyError extends Error {
-  readonly code: 'NOT_COVERED' | 'ALREADY_CLAIMED' | 'NO_REASON';
+  readonly code:
+    | 'NOT_COVERED'
+    | 'ALREADY_CLAIMED'
+    | 'NO_REASON'
+    // Settling a claim with what it cost and what came back. Phase 44.
+    | 'BAD_SETTLEMENT'
+    | 'ALREADY_SETTLED';
 
   constructor(code: WarrantyError['code'], message: string) {
     super(message);

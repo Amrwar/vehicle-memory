@@ -934,7 +934,25 @@ def build() -> None:
               "/api/reports/payroll?format= renders the one asked for and refuses any other name, and pay_adjustments rows "
               "are locked by a trigger once their timesheet has a run.")
 
-    doc.add_heading("6.24 Answers and the assistant", level=2)
+    doc.add_heading("6.24 Ownership handed over, warranty at cost, prices per site", level=2)
+    para(doc, "A handover is a HandoverInvitation row holding the buyer's name, the day of the sale, the reading and the "
+              "digest of a link; inviteHandover in lib/handover.ts writes it after assertHandoverInvitable applies every "
+              "rule a recorded transfer applies plus one more, that no other invitation is standing, which a partial unique "
+              "index enforces as well. /handover/[token] reads it through handoverByToken, which returns the vehicle, the "
+              "count of owners and entries and describeHandover's sentence, and no name. acceptHandover runs one "
+              "transaction: a conditional update of the invitation to ACCEPTED, the seller's ownership closed at the sale "
+              "date, the buyer's opened against their user id; then the chain event is appended outside it, marked "
+              "SELF_REPORTED. The portal reads vehicles through the open ownership row, so the seller's access ends with "
+              "that same write. Warranty gained the cost side: settleClaim reads remedyCost from the remedy job's part "
+              "lines at unitCost and time entries at costRate, assertSettlement in core refuses a recovery above the cost "
+              "(and a check constraint refuses it again), and warrantyCostFor hands the settled claims and the period's "
+              "invoiced total to warrantyCost and warrantyBy for /warranty and /api/reports/warranty. Prices per site are "
+              "two small tables and one rule: LabourRate rows, each with or without a locationId, and ProductSitePrice "
+              "rows per part and site; chooseLabourRate and chooseSitePrice in core pick the site's figure over the "
+              "workshop's, labourRateAt and sellPriceAt in lib/pricing.ts read them, and quoteExtraWork uses them when a "
+              "price is left blank.")
+
+    doc.add_heading("6.25 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

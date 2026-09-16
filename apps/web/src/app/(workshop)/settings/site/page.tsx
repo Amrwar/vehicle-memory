@@ -24,6 +24,7 @@ import { redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
+import { labourRates, PricingError, retireLabourRate, saveLabourRate } from '@/lib/pricing';
 import { saveBay, setBayActive, SettingsError, siteSettings, updateSite } from '@/lib/settings';
 import { setSiteTaxRate, TaxError } from '@/lib/tax';
 
@@ -146,6 +147,51 @@ async function saveSiteTax(formData: FormData) {
   redirect('/settings/site?saved=1#tax');
 }
 
+/**
+ * What an hour is charged at here, or at the workshop as a whole. Phase 44.
+ *
+ * A rate with this site against it wins at this site; one without belongs to
+ * the workshop and is what every other site takes.
+ */
+async function saveRate(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await saveLabourRate({
+      orgId,
+      userId: user.userId,
+      id: String(formData.get('id') ?? '') || null,
+      locationId:
+        formData.get('scope') === 'site' ? String(formData.get('locationId') ?? '') : null,
+      name: String(formData.get('name') ?? ''),
+      perHour: Number(String(formData.get('perHour') ?? '').replace(',', '.')),
+      isDefault: formData.get('isDefault') === 'on',
+    });
+  } catch (error) {
+    if (!(error instanceof PricingError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/settings/site?saved=rates#rates');
+}
+
+async function retireRate(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('settings:write');
+
+  try {
+    await retireLabourRate({ orgId, userId: user.userId, id: String(formData.get('id') ?? '') });
+  } catch (error) {
+    if (!(error instanceof PricingError)) throw error;
+    back(error.message);
+  }
+
+  redirect('/settings/site?saved=rates#rates');
+}
+
 export default async function SiteSettingsPage({
   searchParams,
 }: {
@@ -153,13 +199,14 @@ export default async function SiteSettingsPage({
 }) {
   const { orgId, user } = await requireSession('settings:write');
   const { saved, problem, edit } = await searchParams;
-  const [site, rates] = await Promise.all([
+  const [site, rates, hourly] = await Promise.all([
     siteSettings(orgId, user.locationId),
     prisma.taxRate.findMany({
       where: { orgId, isActive: true },
       orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
       select: { id: true, name: true, isDefault: true },
     }),
+    labourRates(orgId),
   ]);
   const siteTax = site
     ? await prisma.location.findUnique({ where: { id: site.id }, select: { taxRateId: true } })
@@ -328,6 +375,78 @@ export default async function SiteSettingsPage({
                   <Button type="submit" variant="secondary" size="sm">
                     {t('Save')}
                   </Button>
+                </CardBody>
+              </form>
+            </Card>
+
+            <Card id="rates" className="overflow-hidden">
+              <CardHeader
+                title={t('Labour rates')}
+                description={t(
+                  'What an hour is charged at. A rate against this site is what new lines take here; the rest are the workshop’s.',
+                )}
+              />
+              {hourly.length === 0 ? (
+                <CardBody className="text-[13px] text-(--text-soft)">
+                  {t('No rate has been set, so a quote asks for a figure every time.')}
+                </CardBody>
+              ) : (
+                <ul className="divide-y divide-(--border)">
+                  {hourly.map((rate) => (
+                    <li
+                      key={rate.id}
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
+                    >
+                      <span className={rate.isActive ? 'font-medium' : 'text-(--text-faint)'}>
+                        <bdi>{rate.name}</bdi>
+                      </span>
+                      <Badge tone={rate.locationId ? 'brand' : 'neutral'} size="sm">
+                        {rate.location?.name ?? t('The whole workshop')}
+                      </Badge>
+                      {rate.isDefault ? (
+                        <Badge tone="success" size="sm">
+                          {t('what new lines take')}
+                        </Badge>
+                      ) : null}
+                      {rate.isActive ? null : (
+                        <Badge tone="neutral" size="sm">
+                          {t('retired')}
+                        </Badge>
+                      )}
+                      <span className="ms-auto tabular-nums">
+                        {rate.perHourNumber.toFixed(2)} {t('an hour')}
+                      </span>
+                      <form action={retireRate}>
+                        <input type="hidden" name="id" value={rate.id} />
+                        <Button type="submit" size="sm" variant="ghost">
+                          {rate.isActive ? t('Retire') : t('Restore')}
+                        </Button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <form action={saveRate} className="border-t border-(--border)">
+                <input type="hidden" name="locationId" value={site.id} />
+                <CardBody className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto] sm:items-end">
+                  <Field label={t('Name')} hint={t('What the quote will call it.')}>
+                    {/* i18n-ignore */}
+                    <Input name="name" required minLength={2} placeholder="Standard" />
+                  </Field>
+                  <Field label={t('An hour')}>
+                    <Input name="perHour" required inputMode="decimal" placeholder="95.00" />
+                  </Field>
+                  <Button type="submit" variant="secondary" size="sm">
+                    {t('Add the rate')}
+                  </Button>
+                  <label className="flex items-center gap-2 text-[13px] sm:col-span-3">
+                    <input type="checkbox" name="scope" value="site" />
+                    <span>{t('Only at this site ({name})', { name: site.name })}</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-[13px] sm:col-span-3">
+                    <input type="checkbox" name="isDefault" />
+                    <span>{t('New lines take this rate')}</span>
+                  </label>
                 </CardBody>
               </form>
             </Card>

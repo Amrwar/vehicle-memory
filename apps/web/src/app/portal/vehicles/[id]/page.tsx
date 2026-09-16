@@ -22,6 +22,7 @@ import { PortalShell } from '@/components/portal-shell';
 import { PassportCover } from '@carnet/ui';
 import { documentsFor, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
+import { cancelHandover, inviteHandover, OwnershipError, pendingHandover } from '@/lib/handover';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
@@ -75,6 +76,64 @@ async function withdraw(formData: FormData) {
   redirect(`/portal/vehicles/${vehicleId}?withdrawn=1`);
 }
 
+/**
+ * Selling it. Phase 44.
+ *
+ * The owner starts the handover and passes on the link; the buyer accepts it
+ * and the car, with its history, moves to them. Nothing here happens to the
+ * record until that happens, and the seller can call it off until it does.
+ */
+async function sell(formData: FormData) {
+  'use server';
+
+  const user = await requireUser();
+  const vehicleId = String(formData.get('vehicleId') ?? '');
+  const on = String(formData.get('on') ?? '');
+  const back = (message: string) =>
+    redirect(`/portal/vehicles/${vehicleId}?problem=${encodeURIComponent(message)}`);
+
+  let token: string;
+
+  try {
+    const result = await inviteHandover({
+      vehicleId,
+      orgId: null,
+      userId: user.userId,
+      toName: String(formData.get('toName') ?? ''),
+      toKind: 'PRIVATE',
+      toEmail: String(formData.get('toEmail') ?? ''),
+      on: on ? new Date(`${on}T09:00:00`) : new Date(),
+    });
+    token = result.token;
+  } catch (error) {
+    if (error instanceof OwnershipError) back(error.message);
+    throw error;
+  }
+
+  redirect(`/portal/vehicles/${vehicleId}?handover=${encodeURIComponent(token)}`);
+}
+
+async function callOffSale(formData: FormData) {
+  'use server';
+
+  const user = await requireUser();
+  const vehicleId = String(formData.get('vehicleId') ?? '');
+
+  try {
+    await cancelHandover({
+      invitationId: String(formData.get('invitationId') ?? ''),
+      userId: user.userId,
+    });
+  } catch (error) {
+    if (error instanceof OwnershipError) {
+      redirect(`/portal/vehicles/${vehicleId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/portal/vehicles/${vehicleId}?calledOff=1`);
+}
+
 function date(value: Date | null, locale: string): string {
   return value
     ? value.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -86,13 +145,19 @@ export default async function PortalVehiclePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ link?: string; withdrawn?: string }>;
+  searchParams: Promise<{
+    link?: string;
+    withdrawn?: string;
+    handover?: string;
+    problem?: string;
+    calledOff?: string;
+  }>;
 }) {
   const t = await tFor();
   const user = await requireUser();
   const region = await regionForUser(user.userId);
   const { id } = await params;
-  const { link, withdrawn } = await searchParams;
+  const { link, withdrawn, handover, problem, calledOff } = await searchParams;
 
   const vehicle = await vehicleHistory(user.userId, id);
 
@@ -102,6 +167,8 @@ export default async function PortalVehiclePage({
   if (!vehicle) notFound();
 
   const shares = await sharesFor(user.userId, vehicle.id);
+  const selling = await pendingHandover(vehicle.id);
+  const today = new Date().toISOString().slice(0, 10);
   const actor = { orgId: null, userId: user.userId, ownsVehicle: true };
   const [documents, paperwork] = await Promise.all([
     documentsFor(vehicle.id, actor),
@@ -375,6 +442,72 @@ export default async function PortalVehiclePage({
           </ul>
         ) : null}
       </section>
+
+      <Card className="mt-5">
+        <CardHeader
+          title={t('Selling it')}
+          description={t(
+            'The history goes with the car. Invite the buyer and it lands on their account the moment they accept.',
+          )}
+        />
+        {problem ? (
+          <CardBody className="border-b border-(--border) text-[13px] text-(--danger)">
+            {t(problem)}
+          </CardBody>
+        ) : null}
+        {calledOff ? (
+          <CardBody className="border-b border-(--border) text-[13px] text-(--text-soft)">
+            {t('Called off. The vehicle is still yours.')}
+          </CardBody>
+        ) : null}
+        {handover ? (
+          <CardBody className="border-b border-(--border) text-[13px]">
+            <p className="font-medium">{t('Send this to the buyer.')}</p>
+            <p className="mt-1 font-mono text-[12px] break-all">
+              {/* i18n-ignore: an address, not a sentence. */}
+              <bdi>{`/handover/${handover}`}</bdi>
+            </p>
+            <p className="mt-1 text-[12px] text-(--text-faint)">
+              {t('It is shown once. Nothing moves until they accept it.')}
+            </p>
+          </CardBody>
+        ) : null}
+        {selling ? (
+          <CardBody className="grid gap-2 text-[13px]">
+            <p>
+              {t('{name} has been invited and has until {expires} to accept.', {
+                name: selling.toName,
+                expires: selling.expiresAt.toLocaleDateString(region.locale),
+              })}
+            </p>
+            <form action={callOffSale}>
+              <input type="hidden" name="vehicleId" value={vehicle.id} />
+              <input type="hidden" name="invitationId" value={selling.id} />
+              <Button type="submit" size="sm" variant="secondary">
+                {t('Call it off')}
+              </Button>
+            </form>
+          </CardBody>
+        ) : (
+          <form action={sell}>
+            <input type="hidden" name="vehicleId" value={vehicle.id} />
+            <CardBody className="grid gap-3 sm:grid-cols-[1fr_1fr_10rem_auto] sm:items-end">
+              <Field label={t('Who is buying it')}>
+                <Input name="toName" required minLength={2} placeholder={t('Their name')} />
+              </Field>
+              <Field label={t('Their email')} hint={t('Optional. Blank means you send the link.')}>
+                <Input type="email" name="toEmail" spellCheck={false} />
+              </Field>
+              <Field label={t('Day of the sale')}>
+                <Input type="date" name="on" defaultValue={today} max={today} required />
+              </Field>
+              <Button type="submit" variant="secondary">
+                {t('Hand it over')}
+              </Button>
+            </CardBody>
+          </form>
+        )}
+      </Card>
 
       <Card className="mt-5">
         <CardHeader

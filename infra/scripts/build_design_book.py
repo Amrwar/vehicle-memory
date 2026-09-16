@@ -797,6 +797,24 @@ def build() -> None:
         source="docs/00-product/06-roadmap.md, Phase 43",
     )
 
+    design(
+        doc,
+        title="A car handed to the person who bought it",
+        when="Phase 44, 15 September 2026.",
+        why="A car is usually sold on a driveway, and the history is worth something only if it "
+            "survives that. So the sale is an invitation the buyer accepts rather than a line the "
+            "seller types, and what the buyer is shown is the car, never the seller.",
+        meaning=[
+            "One page, no navigation: the vehicle, its plate, a sentence saying how many owners and how much history, and two buttons.",
+            "The figures are counts, not names. Nothing on the page identifies the seller, and nothing the seller sees identifies the buyer beyond the name they typed.",
+            "Accepting asks for a login, because a vehicle handed to nobody in particular is a vehicle nobody can be shown to own.",
+            "At the workshop the same form does either: record the sale on the workshop's word, or invite the buyer and wait for theirs.",
+        ],
+        works="Nothing moves until the buyer accepts, so the worst case is an invitation that lapses rather than a car taken off somebody's account by a stranger.",
+        shots=[("handover", "What the buyer is shown.", 12.0), ("warranty-cost", "What warranty costs.", 16.4)],
+        source="docs/02-design/05-security-model.md, section 7.8",
+    )
+
     # 11. Counter
     doc.add_heading("11. The counter", level=1)
     design(

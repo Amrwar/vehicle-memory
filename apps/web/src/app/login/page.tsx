@@ -13,35 +13,52 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('Sign in') };
 }
 
+/**
+ * Where to go after signing in, when the link that sent somebody here said so.
+ *
+ * A path on this site and nothing else: a full address, or one beginning with
+ * two slashes, is another site, and "sign in and we will send you on" is how
+ * an open redirect is built. Phase 44, for a buyer arriving on a handover.
+ */
+function safeNext(value: string | undefined): string | null {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return null;
+  return value;
+}
+
 async function attemptSignIn(formData: FormData) {
   'use server';
 
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
+  const next = safeNext(String(formData.get('next') ?? '') || undefined);
+  const back = (query: string) =>
+    redirect(`/login?${query}${next ? `&next=${encodeURIComponent(next)}` : ''}`);
 
   if (!email || !password) {
-    redirect('/login?error=Enter+your+email+and+password');
+    back('error=Enter+your+email+and+password');
   }
 
   const result = await signIn(email, password);
 
   if (!result.ok) {
-    redirect(`/login?error=${encodeURIComponent(result.error)}`);
+    back(`error=${encodeURIComponent(result.error)}`);
+    return;
   }
 
-  redirect(landingPathFor(result.role));
+  redirect(next ?? landingPathFor(result.role));
 }
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const t = await tFor();
-  const user = await currentUser();
-  if (user) redirect(landingPathFor(user.role));
+  const { error, next } = await searchParams;
+  const onwards = safeNext(next);
 
-  const { error } = await searchParams;
+  const user = await currentUser();
+  if (user) redirect(onwards ?? landingPathFor(user.role));
 
   return (
     <main id="main" className="grid min-h-dvh lg:grid-cols-[1fr_minmax(26rem,32rem)]">
@@ -111,6 +128,7 @@ export default async function LoginPage({
           ) : null}
 
           <form action={attemptSignIn} className="mt-6 grid gap-4">
+            {onwards ? <input type="hidden" name="next" value={onwards} /> : null}
             <Field label={t('Email')} htmlFor="email" required>
               <Input
                 id="email"

@@ -2268,9 +2268,59 @@ an unpaid one now can.
 
 ## Phase 44 — Ownership, warranty and sites
 
-Transfer by invitation: the seller starts it, the buyer accepts, the seller's
-access ends and the history stays. Warranty cost and profitability. Prices
-and tax per site.
+**Scope.** Transfer by invitation: the seller starts it, the buyer accepts,
+the seller's access ends and the history stays. Warranty cost and
+profitability. Prices and tax per site.
+
+**Exit.** A car sold on a driveway carries its history to whoever bought it,
+with neither person learning anything about the other; a workshop can say what
+its own warranty work costs it and which parts and suppliers are behind it;
+and a group can charge what each of its sites charges.
+
+**Status.** Built. A handover is an invitation rather than an assertion. The
+seller starts it, from the portal or at a workshop counter, and nothing moves:
+the invitation holds the buyer's name, the day of the sale and the reading,
+and only the digest of a link. The buyer opens the link and is shown the car,
+how many people have owned it, how many entries its history carries and how
+long the seller has had it — never who the seller is, or any owner before
+them. They accept with their own login, and in one transaction the seller's
+ownership closes, the buyer's opens against their account, and the invitation
+is marked taken, so a link opened twice cannot transfer a vehicle twice. The
+seller's access ends the same moment and the history stays with the car. A
+seller cannot accept their own sale, a vehicle cannot be promised to two
+people (refused by the product and by a partial unique index), an invitation
+runs out after three weeks, and either side can end it: the seller calls it
+off, the buyer turns it down. Signing in to accept carries the buyer back to
+the link they came from, and only ever to a path on this site.
+
+Warranty now records what work actually cost rather than only what it would
+have been charged. A claim is raised from the cover it belongs to, the job
+that puts it right is attached to it, and settling reads that job's parts at
+cost and hours at the technicians' rates, with what a supplier put back typed
+beside them. Recovering more than the work cost is refused in the product and
+by the database, since it is a credit belonging to somewhere else. `/warranty`
+carries what warranty cost over a month, quarter or year: what was spent, what
+came back and as what share, what the workshop carried and what that was of
+turnover, how much was given as goodwill, and the same totals by the part that
+failed and by who stood behind it, with a CSV beside them.
+
+Prices now belong to a site as tax already did. A workshop keeps a list of
+labour rates, each either its own or a particular site's, with one in each
+scope marked as what new lines take; a part can hold its own price at a site,
+which does not move when the list does. The rule is the same everywhere: the
+site's figure where it has one, the workshop's where it does not, and the
+screen says which it used. A quote left blank now takes the site's hourly rate
+rather than nought, which is what it took before.
+
+`verify-ownership.ts` invites a buyer and checks nothing moved, refuses a
+second invitation in the product and in the database, reads the buyer's page
+in English and French and checks the seller is not named on it, refuses the
+seller's own acceptance, accepts as the buyer and checks the ownership moved,
+the seller lost access, the buyer gained it and the history stayed, refuses a
+second acceptance, calls one off and turns one down; settles a warranty claim
+at cost and checks the report, the CSV and the database's own refusal of an
+over-recovery; and checks a site's rate and price win where it has them and
+the workshop's apply where it does not.
 
 ## Phase 45 — The first day
 

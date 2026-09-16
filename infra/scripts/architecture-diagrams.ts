@@ -64,6 +64,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     models: [
       'Vehicle',
       'VinDecode',
+      'HandoverInvitation',
       'VehicleEvent',
       'VehicleEventAttachment',
       'VehicleOwnership',
@@ -76,6 +77,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'VehicleDocument',
       'VehicleClaim',
       'PartFitment',
+      'ProductSitePrice',
     ],
   },
   {
@@ -140,6 +142,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     title: 'Invoices, payments and refunds',
     models: [
       'TaxRate',
+      'LabourRate',
       'TaxComponent',
       'TaxEntry',
       'DocumentSequence',
