@@ -196,7 +196,8 @@ export type PaymentMethod =
   | 'OTHER'
   | 'LOYALTY'
   | 'GIFT_CARD'
-  | 'DEPOSIT';
+  | 'DEPOSIT'
+  | 'COUPON';
 
 /**
  * Cash goes to the cash account; everything else lands in the bank. Points
@@ -207,6 +208,8 @@ export type PaymentMethod =
  */
 export function accountForMethod(method: PaymentMethod): string {
   if (method === 'LOYALTY') return ACCOUNT.LOYALTY_REWARDS;
+  // A code redeemed is not money in either: it is what the offer gave away.
+  if (method === 'COUPON') return ACCOUNT.COUPONS;
   if (method === 'GIFT_CARD') return ACCOUNT.GIFT_CARDS;
   if (method === 'DEPOSIT') return ACCOUNT.DEPOSITS;
   return method === 'CASH' ? ACCOUNT.CASH : ACCOUNT.BANK;

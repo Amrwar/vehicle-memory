@@ -32,6 +32,7 @@
     "verify:signup": "tsx infra/scripts/verify-signup.ts",
     "verify:team": "tsx infra/scripts/verify-team.ts",
     "verify:counter": "tsx infra/scripts/verify-counter.ts",
+    "verify:coupons": "tsx infra/scripts/verify-coupons.ts",
     "verify:banking": "tsx infra/scripts/verify-banking.ts",
     "verify:automation": "tsx infra/scripts/verify-automation.ts",
     "verify:messaging": "tsx infra/scripts/verify-messaging.ts",

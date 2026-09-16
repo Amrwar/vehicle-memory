@@ -66,6 +66,7 @@ export type NavIconName =
   | 'plan'
   | 'skills'
   | 'reputation'
+  | 'coupons'
   | 'inbox'
   | 'claims'
   | 'payables'
@@ -124,6 +125,13 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
   reputation: (
     <>
       <path d="M10 2.8l2.3 4.7 5.2.75-3.75 3.65.9 5.15L10 14.6l-4.65 2.45.9-5.15L2.5 8.25l5.2-.75z" />
+    </>
+  ),
+  // A ticket with a notch either side and a torn line: a code to hand over.
+  coupons: (
+    <>
+      <path d="M2.6 6.2h14.8v2.4a1.4 1.4 0 000 2.8v2.4H2.6v-2.4a1.4 1.4 0 000-2.8z" />
+      <path d="M11.4 6.9v1.4M11.4 11.7v1.4" />
     </>
   ),
   // A tray with something landing in it.

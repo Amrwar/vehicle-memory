@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-16",
   "counts": {
-    "models": 150,
-    "enums": 73,
-    "fields": 2392
+    "models": 152,
+    "enums": 74,
+    "fields": 2435
   },
   "enums": [
     "OrgPlan",
@@ -13,6 +13,7 @@
     "VehicleEventType",
     "VerificationLevel",
     "AttachmentKind",
+    "CouponKind",
     "HandoverStatus",
     "OwnerKind",
     "OdometerSource",
@@ -1651,6 +1652,30 @@
             "Customer",
             "Customer",
             "Job"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "Coupon",
+          "comment": "A code a customer hands over. Phase 45.5. Every promise a coupon makes is a column: when it starts, when it ends, what the bill has to reach, how many times it may be used at all and how many times by one person. A redemption is a row of its own, so \"who used it and what did it give away\" is read rather than inferred.",
+          "fields": 17,
+          "relations": [
+            "Organization",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CouponRedemption",
+          "comment": "One use of a code, against one bill.",
+          "fields": 10,
+          "relations": [
+            "Organization",
+            "Coupon",
+            "Customer",
+            "Invoice",
+            "CounterSale",
+            "User"
           ],
           "scope": "organisation"
         },

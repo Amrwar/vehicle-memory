@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7700 — Coupons
+
+| Ref     | Requirement                                                                                                                                                                        | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7701 | A workshop MUST be able to issue a code worth a percentage or an amount, with a start, an end, a least bill, a limit on uses in total and a limit on uses by one customer.         | 45.5  |
+| FR-7702 | A code MUST be read the same however it is typed, MUST be unique within the workshop, and MUST be able to be withdrawn without losing what it has already given away.              | 45.5  |
+| FR-7703 | A code taken against an issued invoice MUST NOT alter that invoice's total, and MUST settle as a payment of its own kind.                                                          | 45.5  |
+| FR-7704 | What a code gives away MUST post to what the offers cost, and MUST NOT post to the bank or to the drawer.                                                                          | 45.5  |
+| FR-7705 | A code MUST never be worth more than is owed on the bill it is used against.                                                                                                       | 45.5  |
+| FR-7706 | A refusal MUST say which promise was not met — not started, ended, withdrawn, all used, already used by this customer, or the bill being too small — in the reader's own language. | 45.5  |
+| FR-7707 | A code MUST NOT be usable twice against one bill, and a sale that fails MUST NOT leave the code counted as used.                                                                   | 45.5  |
+| FR-7708 | A workshop MUST be able to read, per code, how many times it was used, what it gave away, and what was billed on the visits it was used on.                                        | 45.5  |
+
 ## FR-7600 — The first day
 
 | Ref     | Requirement                                                                                                                                                | Phase |

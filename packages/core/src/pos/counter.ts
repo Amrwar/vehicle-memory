@@ -153,12 +153,12 @@ export function revenueSplit(
    Taking the money
    --------------------------------------------------------------------------- */
 
-export type TenderKind = 'CASH' | 'CARD' | 'ACCOUNT' | 'GIFT_CARD';
+export type TenderKind = 'CASH' | 'CARD' | 'ACCOUNT' | 'GIFT_CARD' | 'COUPON';
 
 export interface Tender {
   kind: TenderKind;
   amount: Money;
-  /** The card's number, for a gift card. */
+  /** The card's number for a gift card, the code for a coupon. */
   code?: string;
 }
 
@@ -203,11 +203,16 @@ export function settle(
     currency,
   );
 
-  // A card and a gift card are alike here: nobody hands over more of either
-  // than the total, and neither can give change.
+  // A card, a gift card and a coupon are alike here: nobody hands over more
+  // of any of them than the total, and none of them gives change. A coupon
+  // that handed back the difference in cash would be a workshop robbed with
+  // its own marketing.
   const card = sum(
     tenders
-      .filter((tender) => tender.kind === 'CARD' || tender.kind === 'GIFT_CARD')
+      .filter(
+        (tender) =>
+          tender.kind === 'CARD' || tender.kind === 'GIFT_CARD' || tender.kind === 'COUPON',
+      )
       .map((tender) => tender.amount),
     currency,
   );
@@ -320,6 +325,8 @@ export function postCounterSale(input: {
   cashTaken: Money;
   /** Spent from gift cards: a liability released, not money in. */
   giftCardTaken?: Money;
+  /** Taken off by a coupon: what the offer cost, not money in. Phase 45.5. */
+  couponTaken?: Money;
   /** Split by kind, so labour is not posted as parts. */
   revenue: { labourNet: Money; partsNet: Money; feeNet: Money };
 }): JournalEntryDraft {
@@ -341,6 +348,12 @@ export function postCounterSale(input: {
   debit(ACCOUNT.BANK, input.cardTaken, 'Card, settling to the bank');
   if (input.giftCardTaken) {
     debit(ACCOUNT.GIFT_CARDS, input.giftCardTaken, 'Gift card, released');
+  }
+  // A coupon is not money that arrived. The sale was billed at its full
+  // total and the workshop paid the difference to win the work, so it sits
+  // with what the offers cost rather than with the takings.
+  if (input.couponTaken) {
+    debit(ACCOUNT.COUPONS, input.couponTaken, 'Coupon, what the offer cost');
   }
   debit(ACCOUNT.RECEIVABLE, input.settlement.onAccount, 'On account');
 

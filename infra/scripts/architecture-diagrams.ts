@@ -252,6 +252,8 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'ReviewRequest',
       'LoyaltyEntry',
       'Referral',
+      'Coupon',
+      'CouponRedemption',
       'AutomationRule',
       'AutomationRun',
       'AutomationAction',

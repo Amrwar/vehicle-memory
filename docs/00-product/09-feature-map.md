@@ -301,22 +301,25 @@ endpoint that receives them exists and is authenticated.
 
 ## 17. Marketing and retention
 
-| Item                               | Status  | Where                                                                                                                                |
-| ---------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Automated campaigns                | Built   | `/automation`, trigger and conditions                                                                                                |
-| Customer segments                  | Built   | `/crm`, with the reachable count                                                                                                     |
-| Campaigns                          | Built   | Consent rechecked at the moment of sending                                                                                           |
-| Loyalty programme                  | Built   | Points as a sum of entries, never a stored total                                                                                     |
-| Earning points                     | Built   | A point a pound on a bill paid in full, once (Phase 24)                                                                              |
-| Spending points                    | Built   | Off the bill on the invoice page, booked as the programme's cost (Phase 24)                                                          |
-| Points in the portal               | Built   | Per workshop, with what they are worth and when they lapse (Phase 24)                                                                |
-| Referrals                          | Built   | A code on the customer and in the portal; both sides paid, once, on a visit (Phase 25)                                               |
-| A code at the counter              | Built   | On a new customer or an existing one, refused with a sentence (Phase 25)                                                             |
-| Referral paid itself               | Built   | Both sides credited the moment the qualifying bill is paid (Phase 25)                                                                |
-| Coupons                            | Missing |                                                                                                                                      |
-| Gift cards                         | Built   | `/gift-cards`: sold as a liability, spent on the invoice as its own payment kind (Phase 26)                                          |
-| A card on a bill or at the counter | Built   | Amount optional; refused rather than clamped; the bank untouched (Phases 26, 28)                                                     |
-| A card explained                   | Built   | Typed movements, status read from the facts, expiry and site, refunds back onto it, changes and cancellation with reasons (Phase 28) |
+| Item                               | Status | Where                                                                                                                                |
+| ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Automated campaigns                | Built  | `/automation`, trigger and conditions                                                                                                |
+| Customer segments                  | Built  | `/crm`, with the reachable count                                                                                                     |
+| Campaigns                          | Built  | Consent rechecked at the moment of sending                                                                                           |
+| Loyalty programme                  | Built  | Points as a sum of entries, never a stored total                                                                                     |
+| Earning points                     | Built  | A point a pound on a bill paid in full, once (Phase 24)                                                                              |
+| Spending points                    | Built  | Off the bill on the invoice page, booked as the programme's cost (Phase 24)                                                          |
+| Points in the portal               | Built  | Per workshop, with what they are worth and when they lapse (Phase 24)                                                                |
+| Referrals                          | Built  | A code on the customer and in the portal; both sides paid, once, on a visit (Phase 25)                                               |
+| A code at the counter              | Built  | On a new customer or an existing one, refused with a sentence (Phase 25)                                                             |
+| Referral paid itself               | Built  | Both sides credited the moment the qualifying bill is paid (Phase 25)                                                                |
+| Coupons                            | Built  | `/coupons`: a percentage or an amount, with dates, a least bill and limits per code and per customer (Phase 45.5)                    |
+| A coupon on a bill                 | Built  | Settled like points: the invoice keeps its total, the discount posts to what the offers cost (Phase 45.5)                            |
+| A coupon at the counter            | Built  | A tender of its own kind, so the drawer only expects what was handed over (Phase 45.5)                                               |
+| What the offers cost               | Built  | What each code gave away beside what was billed on the visits it was used on (Phase 45.5)                                            |
+| Gift cards                         | Built  | `/gift-cards`: sold as a liability, spent on the invoice as its own payment kind (Phase 26)                                          |
+| A card on a bill or at the counter | Built  | Amount optional; refused rather than clamped; the bank untouched (Phases 26, 28)                                                     |
+| A card explained                   | Built  | Typed movements, status read from the facts, expiry and site, refunds back onto it, changes and cancellation with reasons (Phase 28) |
 
 ## 18. Reviews and reputation
 
@@ -487,16 +490,22 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 226          |
+| Built    | 230          |
 | Partial  | 1            |
-| Missing  | 1            |
 | Deferred | 1            |
 
 <!-- counts:end -->
 
-The missing work is grouped into phases 7 to 12 in the
-[roadmap](06-roadmap.md). They are ordered by what a workshop loses by not
-having them, which puts the inspection interface first: it is the one gap that
-costs a workshop money every day it is absent.
+Nothing on this map is missing any more. Coupons, the last of it, were built
+in Phase 45.5. What is left is one **Partial** — the sidebar grouping, which
+works and could be better — and one **Deferred**, fault suggestion, which is
+waiting on a corpus of symptoms against confirmed causes that does not exist
+(ADR-0013).
+
+A map with nothing missing on it is not the same as a product that is ready.
+It says the screens exist. The nine phases after Phase 45.5 in the
+[roadmap](06-roadmap.md) are about whether a workshop can actually run on
+them: reliability, financial integrity, tenancy, recovery, observability,
+performance, and then four weeks in a real workshop.
 
 _Next: [roadmap](06-roadmap.md)._

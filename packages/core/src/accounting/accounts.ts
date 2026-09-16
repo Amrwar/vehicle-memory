@@ -132,6 +132,12 @@ export const STANDARD_CHART: readonly AccountSpec[] = [
     purpose: 'Points redeemed against bills: the cost of the programme',
   },
   {
+    code: '6410',
+    name: 'Coupons',
+    type: 'EXPENSE',
+    purpose: 'Codes redeemed against bills: what the offers gave away',
+  },
+  {
     code: '6200',
     name: 'Stock adjustments',
     type: 'EXPENSE',
@@ -168,6 +174,7 @@ export const ACCOUNT = {
   WAGES: '6000',
   PREMISES: '6100',
   LOYALTY_REWARDS: '6400',
+  COUPONS: '6410',
   STOCK_ADJUSTMENT: '6200',
   OVERHEADS: '6300',
 } as const;

@@ -104,6 +104,7 @@ const GROUPS: Group[] = [
         icon: 'reputation',
         permission: 'customer:read',
       },
+      { href: '/coupons', label: msg('Coupons'), icon: 'coupons', permission: 'customer:read' },
       { href: '/inbox', label: msg('Conversations'), icon: 'inbox', permission: 'customer:read' },
       {
         href: '/claims',

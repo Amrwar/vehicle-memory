@@ -10,6 +10,7 @@ import * as print from './print';
 import * as providers from './providers';
 import * as ownership from './ownership';
 import * as start from './start';
+import * as coupons from './coupons';
 import * as components from './components';
 import * as jobs from './jobs';
 import * as settings from './settings';
@@ -36,4 +37,5 @@ export const AREAS = [
   providers,
   ownership,
   start,
+  coupons,
 ] as const;

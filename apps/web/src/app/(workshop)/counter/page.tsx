@@ -25,6 +25,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { PlanWall } from '@/components/plan-wall';
+import { CouponError, quoteCoupon } from '@/lib/coupons';
 import { closeTill, completeSale, openTill, recentSales, sellableParts } from '@/lib/counter';
 import { findGiftCard, GiftCardError } from '@/lib/giftcards';
 import { planIncludes, requireSession } from '@/lib/guard';
@@ -75,34 +76,54 @@ async function sell(formData: FormData) {
   // A gift card pays what it can; whatever is left is cash. Looked up here
   // so the person at the counter is told the card's state before the sale,
   // not after the stock has moved.
-  let tenders: {
-    kind: 'CASH' | 'CARD' | 'GIFT_CARD';
+  // A code comes off before anything is taken, because what the customer
+  // hands over is the reduced figure. Quoted here, so a refusal — out of
+  // date, all used, bill too small — arrives while they are still at the
+  // counter and before the stock has moved.
+  let couponId: string | null = null;
+  let couponOff = 0;
+  const couponCode = String(formData.get('couponCode') ?? '').trim();
+
+  if (couponCode) {
+    try {
+      const quote = await quoteCoupon({ orgId, code: couponCode, billMinor: totalMinor });
+      couponId = quote.coupon.id;
+      couponOff = quote.discountMinor;
+    } catch (error) {
+      if (!(error instanceof CouponError)) throw error;
+      redirect(`/counter?error=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  const owedMinor = totalMinor - couponOff;
+
+  const tenders: {
+    kind: 'CASH' | 'CARD' | 'GIFT_CARD' | 'COUPON';
     amount: ReturnType<typeof money>;
     code?: string;
-  }[];
+  }[] = couponOff > 0 ? [{ kind: 'COUPON', amount: money(couponOff), code: couponCode }] : [];
+
   if (tender === 'GIFT_CARD') {
     let fromCard = 0;
     try {
       const card = await findGiftCard(orgId, cardNumber);
-      fromCard = Math.min(card.balanceMinor, totalMinor);
+      fromCard = Math.min(card.balanceMinor, owedMinor);
       if (fromCard <= 0) throw new GiftCardError('EMPTY', 'There is nothing left on that card.');
     } catch (error) {
       if (!(error instanceof GiftCardError)) throw error;
       redirect(`/counter?error=${encodeURIComponent(error.message)}`);
     }
-    tenders = [{ kind: 'GIFT_CARD', amount: money(fromCard), code: cardNumber }];
-    if (fromCard < totalMinor) {
-      const rest = totalMinor - fromCard;
+    tenders.push({ kind: 'GIFT_CARD', amount: money(fromCard), code: cardNumber });
+    if (fromCard < owedMinor) {
+      const rest = owedMinor - fromCard;
       tenders.push({ kind: 'CASH', amount: money(Math.max(rest, Math.round(given * 100))) });
     }
   } else {
-    tenders = [
-      {
-        kind: tender,
-        // Cash can be over-tendered; a card is always the exact amount.
-        amount: money(Math.round((tender === 'CASH' ? given || total : total) * 100)),
-      },
-    ];
+    tenders.push({
+      kind: tender,
+      // Cash can be over-tendered; a card is always the exact amount.
+      amount: money(tender === 'CASH' ? Math.max(Math.round(given * 100), owedMinor) : owedMinor),
+    });
   }
 
   const result = await completeSale({
@@ -119,6 +140,7 @@ async function sell(formData: FormData) {
       },
     ],
     tenders,
+    couponId,
   });
 
   redirect(
@@ -302,6 +324,20 @@ export default async function CounterPage({
                     className="datum uppercase tracking-[0.12em]"
                     // i18n-ignore
                     placeholder="XXXX-XXXX-XXXX"
+                  />
+                </Field>
+
+                <Field
+                  label={t('Coupon')}
+                  hint={t('If they have a code. Spaces and dashes do not matter.')}
+                >
+                  <Input
+                    name="couponCode"
+                    maxLength={24}
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    className="datum uppercase"
+                    placeholder={t('Their code')}
                   />
                 </Field>
 

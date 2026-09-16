@@ -11,6 +11,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { postEntry } from './accounting';
+import { recordCounterRedemption } from './coupons';
 import { redeemAtCounter } from './giftcards';
 import { audit } from './guard';
 import { regionFor } from './region';
@@ -53,6 +54,8 @@ export interface CompleteSaleInput {
   lines: SaleDraftLine[];
   tenders: Tender[];
   note?: string | null;
+  /** The code behind a COUPON tender, already quoted against this sale. */
+  couponId?: string | null;
 }
 
 export interface SaleResult {
@@ -196,6 +199,26 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         });
       }
 
+      // A coupon is written down inside the sale for the same reason: the
+      // code is marked used only if the sale itself was taken.
+      if (input.couponId) {
+        const off = input.tenders
+          .filter((tender) => tender.kind === 'COUPON')
+          .reduce((total, tender) => total + tender.amount.minor, 0);
+
+        if (off > 0) {
+          await recordCounterRedemption(tx, {
+            orgId: input.orgId,
+            userId: input.userId,
+            couponId: input.couponId,
+            counterSaleId: sale.id,
+            customerId: input.customerId ?? null,
+            discountMinor: off,
+            billMinor: totals.total.minor,
+          });
+        }
+      }
+
       // What each tax came to on the sale, for the report per tax. Phase 41.
       await recordTaxEntries(tx, {
         orgId: input.orgId,
@@ -250,6 +273,9 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         giftCard: input.tenders
           .filter((tender) => tender.kind === 'GIFT_CARD')
           .reduce((total, tender) => total + tender.amount.minor, 0),
+        coupon: input.tenders
+          .filter((tender) => tender.kind === 'COUPON')
+          .reduce((total, tender) => total + tender.amount.minor, 0),
         revenue: revenueSplit(saleLines, totals),
       };
     });
@@ -269,6 +295,7 @@ export async function completeSale(input: CompleteSaleInput): Promise<SaleResult
         cashTaken: { minor: outcome.cash, currency: region.currency },
         cardTaken: { minor: outcome.card, currency: region.currency },
         giftCardTaken: { minor: outcome.giftCard, currency: region.currency },
+        couponTaken: { minor: outcome.coupon, currency: region.currency },
         revenue: outcome.revenue,
       }),
     );

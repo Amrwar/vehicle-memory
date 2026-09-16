@@ -1642,6 +1642,41 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AU — Coupons (Phase 45.5)
+
+### AU1 — The code on the postcard
+
+**As** Ahmed **I want** to write a code down with everything it promises **so
+that** nobody at the counter has to remember what the spring offer was.
+**Size** 5 · **Satisfies** FR-7701, FR-7702
+
+- **Given** a code worth a fifth off bills over £150 until the end of June,
+  **when** I save it, **then** it says so in one line on the list.
+- **Given** the offer is over, **when** I withdraw the code, **then** it is
+  refused at the counter and still shows what it gave away.
+
+### AU2 — The one standing in front of me
+
+**As** Priya **I want** to be told why a code will not work **so that** I can
+decide what to do about it while the customer is still here.
+**Size** 3 · **Satisfies** FR-7705, FR-7706
+
+- **Given** a code that ran out last week, **when** I try it, **then** I am
+  told the date it ran out rather than that it is invalid.
+- **Given** a code worth more than is left on the bill, **when** I take it,
+  **then** it takes what is owed and no more.
+
+### AU3 — What the offer actually cost
+
+**As** Ahmed **I want** the discount in the books as what it was **so that** my
+accounts do not say I took money I never saw.
+**Size** 5 · **Satisfies** FR-7703, FR-7704, FR-7707, FR-7708
+
+- **Given** a code taken on an invoice, **when** I read the invoice, **then**
+  it still shows the total it was issued at, and the bank shows nothing.
+- **Given** a month of codes, **when** I read the page, **then** each one says
+  what it gave away beside what was billed on the visits it was used on.
+
 ## Epic AT — The first day (Phase 45)
 
 ### AT1 — The Tuesday somebody signs up

@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
+import { CouponError, redeemAgainstInvoice as redeemCouponOn } from '@/lib/coupons';
 import { applyHeld, DepositError, heldFor } from '@/lib/deposits';
 import { GiftCardError, redeemGiftCard } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
@@ -161,6 +162,35 @@ async function redeem(formData: FormData) {
   }
 
   redirect(`/invoices/${invoiceId}?done=redeemed`);
+}
+
+/**
+ * A code off the bill. FR-7703.
+ *
+ * Settled the way points are: the invoice keeps the total it was issued at,
+ * and what the code took off posts to what the offers cost rather than to the
+ * bank. Refused with the reason — out of date, all used, already used by this
+ * customer, bill too small — so whoever is at the counter can decide.
+ */
+async function useCoupon(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+
+  try {
+    await redeemCouponOn({
+      orgId,
+      userId: user.userId,
+      invoiceId,
+      code: String(formData.get('code') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof CouponError) && !(error instanceof MoneyCycleError)) throw error;
+    redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/invoices/${invoiceId}?done=coupon`);
 }
 
 /**
@@ -365,19 +395,21 @@ export default async function InvoicePage({
               ? t(
                   'Points taken off the bill and booked as the cost of the programme, not as money in.',
                 )
-              : notice.done === 'card'
-                ? t(
-                    'Gift card redeemed. The money came in when the card was sold; this releases what was owed.',
-                  )
-                : notice.done === 'held'
+              : notice.done === 'coupon'
+                ? t('Code taken off the bill and booked as what the offer cost, not as money in.')
+                : notice.done === 'card'
                   ? t(
-                      'Money held for the customer put against the bill. The books release what was owed; the bank saw the money when it was taken.',
+                      'Gift card redeemed. The money came in when the card was sold; this releases what was owed.',
                     )
-                  : notice.done === 'credited'
+                  : notice.done === 'held'
                     ? t(
-                        'Credit note raised. The customer has been told, and revenue has been reversed in proportion.',
+                        'Money held for the customer put against the bill. The books release what was owed; the bank saw the money when it was taken.',
                       )
-                    : t('Refund recorded. The customer has been told it is on its way.')}
+                    : notice.done === 'credited'
+                      ? t(
+                          'Credit note raised. The customer has been told, and revenue has been reversed in proportion.',
+                        )
+                      : t('Refund recorded. The customer has been told it is on its way.')}
         </Alert>
       ) : null}
 
@@ -702,6 +734,35 @@ export default async function InvoicePage({
                   ) : null}
                   <Button type="submit" variant="secondary">
                     {t('Take the points off')}
+                  </Button>
+                </CardBody>
+              </form>
+            </Card>
+          ) : null}
+
+          {mayPay && money.outstanding.minor > 0 ? (
+            <Card>
+              <CardHeader
+                title={t('Use a coupon')}
+                description={t(
+                  'The code off the postcard or the email. Spaces and dashes do not matter.',
+                )}
+              />
+              <form action={useCoupon}>
+                <CardBody className="grid gap-3">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <Field label={t('Code')} htmlFor="coupon-code">
+                    <Input
+                      id="coupon-code"
+                      name="code"
+                      className="datum uppercase"
+                      autoComplete="off"
+                      placeholder={t('Their code')}
+                      required
+                    />
+                  </Field>
+                  <Button type="submit" variant="secondary">
+                    {t('Take the code off')}
                   </Button>
                 </CardBody>
               </form>

@@ -2370,11 +2370,57 @@ checks its year of work, that nothing it wrote is waiting to be sent and that
 every screen says what it is, and removes it, leaving no workshop, no
 vehicles and no jobs behind.
 
+## Phase 45.5 — Coupons
+
+**Scope.** The last capability on the feature map: a code a customer arrives
+holding, and what it costs the workshop to honour it.
+
+**Exit.** A code can be issued with every promise it makes written down, taken
+on a bill and at the counter, refused with the reason when it does not apply,
+and read back as what it gave away beside what it brought in.
+
+**Status.** Built. A coupon looks like a number and is really a set of
+promises: when it starts, when it ends, what the bill has to reach, how many
+times it may be used at all and how many times by one person. All of them are
+columns on the code rather than notes in somebody's head, and all of them are
+checked in front of whoever is standing at the counter.
+
+The refusals are the feature. "Invalid code" teaches a customer that the
+workshop is broken; "That code ran out on 30 June" teaches them what happened
+and lets the person serving them decide what to do about it. So every refusal
+is a sentence naming the promise that was not met — not started, ended,
+withdrawn, all used, one to a customer, bill too small — and every one of them
+is in French and Arabic as well.
+
+A coupon never rewrites an invoice. On a bill it settles the way loyalty
+points do: the invoice keeps the total it was issued at, and what the code
+took off is a payment of its own kind that posts to what the offers cost. At
+the counter it is a tender of its own kind, so the drawer only ever expects
+what was actually handed over and a till still reconciles at the end of the
+day. Either way the discount lands in expenses, never in revenue. A workshop
+that books what it gave away as money it received has a set of accounts that
+says it is doing better than it is.
+
+Two things the database refuses rather than trusts the application with: a
+code worth both a percentage and an amount, and a second redemption of one
+code against one bill. And a code is never worth more than is owed, because a
+coupon is a discount rather than a credit, and a workshop that hands back the
+difference in cash has been robbed with its own marketing.
+
+`verify-coupons.ts` walks the promises one at a time — the codes that cannot
+be written down, the seven ways a code is refused, the cap at what is owed —
+then takes one against a real invoice and one at the counter, and checks in
+both that the bill kept its total, the books balanced, the bank and the drawer
+saw nothing, and the offers account carries exactly what was given away. 56
+checks, and it clears up after itself.
+
+With this the feature map has nothing missing on it.
+
 ## After the features: nine phases of proof
 
-Phases 1 to 45 built the product. What follows is not more product. A feature
-map with 226 built capabilities and one missing is not evidence that a
-workshop can run on this; it is evidence that the screens exist. These nine
+Phases 1 to 45.5 built the product. What follows is not more product. A
+feature map with nothing missing on it is not evidence that a workshop can run
+on this; it is evidence that the screens exist. These nine
 phases are about depth, reliability and proof, and they are deliberately
 ordered by what would hurt most if it were wrong.
 

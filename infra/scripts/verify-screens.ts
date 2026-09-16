@@ -273,6 +273,7 @@ async function main() {
     { path: '/vehicles/find', who: 'owner' },
     { path: '/reminders', who: 'owner' },
     { path: '/reputation', who: 'owner' },
+    { path: '/coupons', who: 'owner' },
     { path: '/invoices', who: 'owner', everySize: true },
     { path: `/invoices/${invoice.id}`, who: 'owner' },
     { path: '/payments', who: 'owner' },
