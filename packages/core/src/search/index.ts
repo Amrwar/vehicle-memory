@@ -9,7 +9,16 @@
  * the one they meant.
  */
 
-export type SearchKind = 'customer' | 'vehicle' | 'job' | 'invoice' | 'part' | 'supplier';
+export type SearchKind =
+  | 'customer'
+  | 'vehicle'
+  | 'job'
+  | 'invoice'
+  | 'part'
+  | 'supplier'
+  // Not a record: an answer to "how do I". Somebody who does not know where a
+  // thing lives types it into the same box as everything else. Phase 45.
+  | 'help';
 
 export interface ReadQuery {
   raw: string;
@@ -67,6 +76,7 @@ const KIND_ORDER: Record<SearchKind, number> = {
   customer: 3,
   part: 4,
   supplier: 5,
+  help: 6,
 };
 
 /** Exact identifier matches first, then by kind, then by title. */
@@ -102,6 +112,8 @@ export function kindLabel(kind: SearchKind): string {
       return 'Parts';
     case 'supplier':
       return 'Suppliers';
+    case 'help':
+      return 'Help';
   }
 }
 

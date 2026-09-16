@@ -26,6 +26,8 @@ const base = {
 };
 
 export type NavIconName =
+  | 'start'
+  | 'help'
   | 'dashboard'
   | 'diary'
   | 'jobs'
@@ -402,6 +404,20 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <path d="M10 2.4 3.6 5v4.8c0 3.9 2.6 6.9 6.4 7.8 3.8-.9 6.4-3.9 6.4-7.8V5z" />
       <path d="m7.4 9.8 1.9 1.9 3.5-3.6" />
+    </>
+  ),
+  // A list with the first thing ticked, and a question mark. Phase 45.
+  start: (
+    <>
+      <path d="M4 5.5h12M4 10h12M4 14.5h8" />
+      <path d="m2.2 5.2 1 1 1.6-1.8" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="10" cy="10" r="7.4" />
+      <path d="M8 7.8a2.1 2.1 0 1 1 2.9 2c-.6.3-.9.8-.9 1.4v.5" />
+      <path d="M10 14.6h.01" />
     </>
   ),
 };

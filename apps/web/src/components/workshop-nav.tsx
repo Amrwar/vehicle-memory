@@ -61,6 +61,7 @@ const GROUPS: Group[] = [
     label: msg('Workshop'),
     items: [
       { href: '/dashboard', label: msg('Dashboard'), icon: 'dashboard', permission: 'job:read' },
+      { href: '/start', label: msg('Getting started'), icon: 'start', permission: 'job:read' },
       { href: '/ask', label: msg('Ask'), icon: 'ask', permission: 'report:operational' },
       { href: '/diary', label: msg('Diary'), icon: 'diary', permission: 'diary:read' },
       { href: '/floor', label: msg('The floor'), icon: 'floor', permission: 'diary:read' },
@@ -226,6 +227,7 @@ const GROUPS: Group[] = [
       },
       { href: '/messages', label: msg('Messages'), icon: 'messages', permission: 'settings:read' },
       { href: '/audit', label: msg('Audit log'), icon: 'audit', permission: 'audit:read' },
+      { href: '/help', label: msg('Help'), icon: 'help', permission: 'job:read' },
     ],
   },
 ];

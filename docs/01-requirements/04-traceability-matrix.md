@@ -523,6 +523,12 @@ where the work happens.
 
 | Req     | Story | Schema                  | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | ----------------------- | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-7601 | AT1   | —                       | `setupSteps()`, `setupFactsFor()`, `/start`                                 | `checklist.test.ts`, `verify-first-day.ts`  | Done   |
+| FR-7602 | AT1   | —                       | `setupProgress()`, `setSetupHidden()`, the dashboard card                   | `checklist.test.ts`, `verify-first-day.ts`  | Done   |
+| FR-7603 | AT3   | —                       | `HELP_ARTICLES`, `searchHelp()`, `/help`, `/search`                         | `help.test.ts`, `verify-first-day.ts`       | Done   |
+| FR-7604 | AT2   | —                       | `createDemonstration()`, `removeDemonstration()`                            | `verify-first-day.ts`                       | Done   |
+| FR-7605 | AT2   | —                       | the layout banner, `sendMessageNow()`'s demonstration guard                 | `verify-first-day.ts`                       | Done   |
+| FR-7606 | AT2   | —                       | `switchWorkshop()`, `workshopsFor()`                                        | `verify-first-day.ts`                       | Done   |
 | FR-7501 | AS1   | —                       | `inviteHandover()`, `HandoverInvitation`, `/vehicles/[id]/transfer`         | `invitation.test.ts`, `verify-ownership.ts` | Done   |
 | FR-7502 | AS2   | —                       | `describeHandover()`, `/handover/[token]`                                   | `invitation.test.ts`, `verify-ownership.ts` | Done   |
 | FR-7503 | AS1   | —                       | `acceptHandover()`, `vehicleHistory()`                                      | `verify-ownership.ts`                       | Done   |
@@ -861,7 +867,8 @@ details without a provider behind it would be worse than not having one.
 | Paper                                              | 7                   | 7                      |
 | Providers                                          | 8                   | 8                      |
 | Ownership, warranty and sites                      | 8                   | 8                      |
-| **Total**                                          | **513**             | **507 (99%)**          |
+| The first day                                      | 6                   | 6                      |
+| **Total**                                          | **519**             | **513 (99%)**          |
 
 The requirements document lists 581 requirements. 84 of
 them do not have a row of their own above.

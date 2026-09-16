@@ -1,4 +1,5 @@
 import {
+  describeSetup,
   type PlanId,
   planFor,
   type SignupInput,
@@ -8,11 +9,14 @@ import {
   validateSignup,
   countryFor,
   regionForCountry,
+  type SetupFacts,
+  setupProgress,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { ensureChartOfAccounts } from './accounting';
 import { hashPassword } from './auth';
+import { audit } from './guard';
 import { breachedPasswordProblem } from './breach';
 
 /**
@@ -234,4 +238,101 @@ export async function createWorkshop(
   await ensureChartOfAccounts(created.id);
 
   return { ok: true, problems: [], orgSlug: slug, userId };
+}
+
+/* ---------------------------------------------------------------------------
+   The setup list. Phase 45.
+   --------------------------------------------------------------------------- */
+
+/**
+ * What the workshop has, as the checklist reads it.
+ *
+ * Counts rather than rows: nine questions, one query each, and none of them
+ * loads anything it is only going to count. Everything is read from the
+ * workshop's own data, so a step cannot be ticked off without the thing
+ * being true.
+ */
+export async function setupFactsFor(orgId: string): Promise<SetupFacts> {
+  const [org, labourRates, taxRates, members, products, customers, jobs, invoices, reminders] =
+    await Promise.all([
+      prisma.organization.findUniqueOrThrow({
+        where: { id: orgId },
+        select: {
+          legalName: true,
+          taxNumber: true,
+          setupHiddenAt: true,
+          locations: {
+            where: { isDefault: true },
+            take: 1,
+            select: { addressLine1: true, postcode: true },
+          },
+        },
+      }),
+      prisma.labourRate.count({ where: { orgId, isActive: true } }),
+      prisma.taxRate.count({ where: { orgId, isActive: true } }),
+      prisma.membership.count({ where: { orgId, isActive: true } }),
+      prisma.product.count({ where: { orgId } }),
+      prisma.customer.count({ where: { orgId } }),
+      prisma.job.count({ where: { orgId } }),
+      prisma.invoice.count({ where: { orgId, status: { not: 'DRAFT' } } }),
+      prisma.serviceSchedule.count({ where: { orgId } }),
+    ]);
+
+  const site = org.locations[0];
+
+  return {
+    hasLetterhead: Boolean(
+      org.legalName?.trim() && org.taxNumber?.trim() && site?.addressLine1?.trim(),
+    ),
+    labourRates,
+    taxRates,
+    members,
+    products,
+    customers,
+    jobs,
+    invoicesIssued: invoices,
+    reminders,
+  };
+}
+
+/** The list, with whether the workshop has put it away. */
+export async function setupFor(orgId: string) {
+  const [facts, org] = await Promise.all([
+    setupFactsFor(orgId),
+    prisma.organization.findUniqueOrThrow({
+      where: { id: orgId },
+      select: { setupHiddenAt: true, isDemonstration: true, name: true },
+    }),
+  ]);
+
+  const progress = setupProgress(facts);
+
+  return {
+    ...progress,
+    hidden: org.setupHiddenAt !== null,
+    // A list that has nothing left on it stops asking for attention by itself.
+    showOnDashboard: org.setupHiddenAt === null && !progress.complete && !org.isDemonstration,
+    summary: describeSetup(progress),
+    workshop: org.name,
+  };
+}
+
+/** Puts the list away, or brings it back. */
+export async function setSetupHidden(input: {
+  orgId: string;
+  userId: string;
+  hidden: boolean;
+}): Promise<void> {
+  await prisma.organization.update({
+    where: { id: input.orgId },
+    data: { setupHiddenAt: input.hidden ? new Date() : null },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: input.hidden ? 'setup.hidden' : 'setup.shown',
+    entityType: 'Organization',
+    entityId: input.orgId,
+  });
 }

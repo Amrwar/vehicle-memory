@@ -30,13 +30,19 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
   // Invited colleagues and seeded accounts arrive already confirmed, so the
   // only person who ever sees the holding page is the one who has just signed
   // up and has a link waiting in their inbox.
-  const [approvalsWaiting, account, unread] = await Promise.all([
+  const [approvalsWaiting, account, unread, workshop] = await Promise.all([
     db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
     prisma.user.findUnique({
       where: { id: user.userId },
       select: { emailVerifiedAt: true },
     }),
     user.orgId ? unreadNotifications(user.orgId, user.userId) : Promise.resolve(0),
+    user.orgId
+      ? prisma.organization.findUnique({
+          where: { id: user.orgId },
+          select: { isDemonstration: true },
+        })
+      : Promise.resolve(null),
   ]);
 
   if (!account?.emailVerifiedAt) redirect('/confirm-email');
@@ -52,6 +58,17 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
         unreadNotifications={unread}
       />
       <main id="main" tabIndex={-1} className="outline-none lg:ps-64">
+        {/* A demonstration workshop says so on every screen, because somebody
+            who forgets which one they are in will believe what they read.
+            Phase 45. */}
+        {workshop?.isDemonstration ? (
+          <p className="border-b border-(--warning) bg-(--warning-soft) px-4 py-1.5 text-center text-[13px] font-medium text-(--warning)">
+            {t('Demonstration workshop: none of this is real work.')}{' '}
+            <a href="/start" className="underline underline-offset-2">
+              {t('Go back to your own')}
+            </a>
+          </p>
+        ) : null}
         <div className="mx-auto max-w-[1500px] px-4 pb-16 pt-16 lg:px-8 lg:pt-8">
           {/* Reads searchParams, so it needs its own boundary or it would
               opt the whole layout out of static rendering. */}

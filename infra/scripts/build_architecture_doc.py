@@ -952,7 +952,22 @@ def build() -> None:
               "workshop's, labourRateAt and sellPriceAt in lib/pricing.ts read them, and quoteExtraWork uses them when a "
               "price is left blank.")
 
-    doc.add_heading("6.25 Answers and the assistant", level=2)
+    doc.add_heading("6.25 The first day", level=2)
+    para(doc, "setupSteps in core turns nine counts — letterhead, labour rates, tax rates, members, products, customers, "
+              "jobs, issued invoices, service schedules — into a list with a reason against each, and setupFactsFor in "
+              "lib/onboarding.ts reads those counts in one round of queries; nothing is stored except organizations."
+              "setupHiddenAt, which only decides whether the list is shown. /start renders it and the dashboard shows the "
+              "next step until the list is finished. The help is twelve articles held as data in core with a title, a "
+              "summary, two paragraphs, a screen and some keywords; searchHelp scores a query against titles, keywords, "
+              "summaries and bodies, /help renders them and searchEverything adds up to three help hits, never exact, "
+              "under the records. createDemonstration in lib/demonstration.ts builds a second organisation marked "
+              "isDemonstration and drives the product's own createJob, issueInvoice, recordPayment and appendEvents to "
+              "write a year of work, then suppresses every message it queued; sendMessageNow and the sweep refuse a "
+              "demonstration's messages as well. switchWorkshop moves a session's orgId between the workshops a person "
+              "belongs to. removeDemonstration deletes the organisation and then its vehicles and their events, which the "
+              "append-only trigger permits only for vehicles marked as demonstration data.")
+
+    doc.add_heading("6.26 Answers and the assistant", level=2)
     para(doc, "Ask takes a question in words and answers from the workshop's own data through the same scoped client "
               "the pages use, so it cannot see more than the person asking. Every exchange is an AssistantExchange row "
               "with the data it was allowed to see. Generated text inside the workflow (a summary for the customer, a "

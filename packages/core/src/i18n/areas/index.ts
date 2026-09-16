@@ -9,6 +9,7 @@ import * as portal from './portal';
 import * as print from './print';
 import * as providers from './providers';
 import * as ownership from './ownership';
+import * as start from './start';
 import * as components from './components';
 import * as jobs from './jobs';
 import * as settings from './settings';
@@ -34,4 +35,5 @@ export const AREAS = [
   print,
   providers,
   ownership,
+  start,
 ] as const;

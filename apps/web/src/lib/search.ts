@@ -5,6 +5,7 @@ import {
   type NotificationKind,
   type Permission,
   rankHits,
+  searchHelp,
   readQuery,
   recipients,
   type Role,
@@ -197,6 +198,19 @@ export async function searchEverything(orgId: string, input: string): Promise<Se
       href: `/suppliers/${s.id}`,
       exact: false,
     })),
+    // Help is not a record, so it never counts as an exact match and never
+    // sends anybody straight anywhere: it sits under the records, for when
+    // what somebody wanted was an explanation. Phase 45.
+    ...searchHelp(input)
+      .slice(0, 3)
+      .map((hit) => ({
+        kind: 'help' as const,
+        id: hit.article.slug,
+        title: hit.article.title,
+        subtitle: hit.excerpt,
+        href: `/help/${hit.article.slug}`,
+        exact: false,
+      })),
   ];
 
   return rankHits(hits);

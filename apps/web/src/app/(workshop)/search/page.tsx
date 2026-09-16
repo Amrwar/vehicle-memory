@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic';
  * typed a plate wants the car and not a list with one car in it. Anything
  * else is a list grouped by kind, exact matches first.
  */
-const ORDER: SearchKind[] = ['vehicle', 'job', 'invoice', 'customer', 'part', 'supplier'];
+const ORDER: SearchKind[] = ['vehicle', 'job', 'invoice', 'customer', 'part', 'supplier', 'help'];
 
 export default async function SearchPage({
   searchParams,

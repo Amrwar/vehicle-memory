@@ -132,12 +132,14 @@ behind seams, payroll with bonuses, deductions, the workshop's own overtime
 rate and three named files, and a five-star answer taken straight to Google, and
 ownership, warranty and sites: a sale the buyer accepts rather than one a
 workshop asserts, warranty costed at what it actually cost, and labour rates
-and part prices that can belong to one site.
+and part prices that can belong to one site, and the first day: a setup list
+read from the workshop's own data, a demonstration workshop with a year of
+work in it, and help that is searched from the same box as everything else.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 219 capabilities
-built, 1 partial and 4 missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 513
+phase, the [feature map](00-product/09-feature-map.md) counts 222 capabilities
+built, 1 partial and 1 missing, and the
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 519
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -146,4 +148,4 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 44 are now built.
+to 45 are now built, which is the last of them.

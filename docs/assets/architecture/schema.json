@@ -3,7 +3,7 @@
   "counts": {
     "models": 150,
     "enums": 73,
-    "fields": 2389
+    "fields": 2392
   },
   "enums": [
     "OrgPlan",
@@ -88,7 +88,7 @@
         {
           "name": "Organization",
           "comment": "",
-          "fields": 39,
+          "fields": 41,
           "relations": [],
           "scope": "global"
         },
@@ -220,7 +220,7 @@
         {
           "name": "Vehicle",
           "comment": "A physical vehicle. Exists independently of any owner or workshop. Globally unique by VIN. ADR-0004.",
-          "fields": 25,
+          "fields": 26,
           "relations": [],
           "scope": "global"
         },

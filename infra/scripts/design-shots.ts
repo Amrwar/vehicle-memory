@@ -219,6 +219,8 @@ async function main() {
     { file: 'reputation', path: '/reputation', who: 'owner' },
     { file: 'payroll', path: '/payroll', who: 'owner', fullPage: true },
     { file: 'warranty-cost', path: '/warranty?range=year#cost', who: 'owner', fullPage: true },
+    { file: 'start', path: '/start', who: 'owner', fullPage: true },
+    { file: 'help', path: '/help', who: 'owner', fullPage: true },
     ...(r.handover
       ? [{ file: 'handover', path: `/handover/${r.handover}`, who: 'nobody' as const, height: 900 }]
       : []),

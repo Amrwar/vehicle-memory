@@ -77,6 +77,12 @@ model Organization {
   payrollExportFormat    String    @default("standard")
   /// The workshop's Google listing, where a pleased customer is sent to say so.
   googlePlaceId          String?
+  /// Set when somebody puts the setup list away. The list is read from the
+  /// workshop's own data; this only decides whether it is shown. Phase 45.
+  setupHiddenAt          DateTime?
+  /// A workshop full of made-up data, to look around. It can be removed
+  /// whole, and nothing in it is anybody's real work. Phase 45.
+  isDemonstration        Boolean   @default(false)
   isActive               Boolean   @default(true)
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
@@ -471,10 +477,14 @@ model Vehicle {
 
   /// Denormalised chain head: the hash of the most recent event. Lets us
   /// append without reading the whole chain. FR-403.
-  chainHead      String?
-  eventCount     Int       @default(0)
-  lastOdometerKm Int?
-  lastOdometerAt DateTime?
+  chainHead       String?
+  /// Part of a demonstration workshop: made up, kept out of the network, and
+  /// removable despite its events, which is the one exception to the
+  /// append-only rule and is why the flag exists. Phase 45.
+  isDemonstration Boolean   @default(false)
+  eventCount      Int       @default(0)
+  lastOdometerKm  Int?
+  lastOdometerAt  DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

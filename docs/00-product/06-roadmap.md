@@ -2324,9 +2324,51 @@ the workshop's apply where it does not.
 
 ## Phase 45 — The first day
 
-A setup checklist a new workshop works through; a demonstration workshop
-with a year of sample data; help that can be searched from inside the
-product.
+**Scope.** A setup checklist a new workshop works through; a demonstration
+workshop with a year of sample data; help that can be searched from inside
+the product.
+
+**Exit.** Somebody who signs up on a Tuesday knows what to do next, can see
+what a busy workshop looks like before they have one, and can find the answer
+to "how does this work" without leaving the product.
+
+**Status.** Built. `/start` is the answer to "what now": nine steps, each
+saying not only what to do but why it matters, each read from the workshop's
+own data. Nothing is ticked off by pressing "done", so a step cannot be
+claimed without being true, and a workshop that did something before being
+asked finds it already ticked. The three that block invoicing are marked as
+needed first. A card on the dashboard names the next one and disappears by
+itself when the list is finished; it can also be put away and brought back.
+
+The demonstration workshop is a second workshop the same person can move into
+and out of. It builds in about a quarter of a minute and holds a year of work:
+fifty jobs across twelve months, invoices numbered in sequence and mostly
+paid, payments posted to a real ledger, parts with cost and stock, service
+reminders due, jobs booked for this week and one waiting for approval, and a
+hundred and seventy passport entries on eight vehicles. All of it is written
+through the product's own functions rather than into the database, so what it
+shows is how the product actually behaves. Every screen inside it says it is a
+demonstration, nothing it writes is ever sent to anybody, and it can be
+removed whole — which is why its vehicles and their consent rows are the only
+exceptions to the append-only rules, written into the database rather than
+left to the application.
+
+Help is twelve short pages, two paragraphs each, one for each part of the
+product, each linking to the screen it is about. They are searched from `/help`
+and also turn up in the search box at the top of every screen, under the
+records, because somebody who does not know where a thing lives types it there
+rather than going looking for a manual. Like everything else, they are in
+French and Arabic, and the verification refuses any sentence that is not.
+
+`verify-first-day.ts` creates a brand-new workshop and reads its list: the tax
+rate ticked, the rate not, the first thing named, and the rate ticked off by
+adding one rather than by pressing anything; puts the list away and brings it
+back; reads every help article, finds one by a word from its middle, finds
+help in the search box beside the records, reads it in French, and refuses any
+help or setup sentence missing a translation; then builds the demonstration,
+checks its year of work, that nothing it wrote is waiting to be sent and that
+every screen says what it is, and removes it, leaving no workshop, no
+vehicles and no jobs behind.
 
 ---
 

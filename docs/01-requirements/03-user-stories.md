@@ -1642,6 +1642,41 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AT — The first day (Phase 45)
+
+### AT1 — The Tuesday somebody signs up
+
+**As** Ahmed **I want** to be told what to do next **so that** I am not
+guessing which of forty screens matters before I can invoice anybody.
+**Size** 5 · **Satisfies** FR-7601, FR-7602
+
+- **Given** a new workshop, **when** I open the dashboard, **then** the next
+  thing to set up is named, with the reason it matters.
+- **Given** I add an hourly rate, **when** I look at the list, **then** it is
+  ticked without my having pressed anything.
+
+### AT2 — Seeing what it looks like full
+
+**As** Ahmed **I want** a workshop with a year of work in it **so that** I can
+see what the screens do before my own has anything in them.
+**Size** 5 · **Satisfies** FR-7604, FR-7605, FR-7606
+
+- **Given** the demonstration, **when** I move into it, **then** every screen
+  says it is a demonstration and the way back is one press away.
+- **Given** I have finished with it, **when** I remove it, **then** the
+  workshop, its vehicles and its work are gone.
+
+### AT3 — Finding out how something works
+
+**As** Priya **I want** an answer inside the product **so that** I do not have
+to ring somebody to find out what a credit note does.
+**Size** 3 · **Satisfies** FR-7603
+
+- **Given** a question, **when** I type it into the search box, **then** the
+  help page about it appears under the records.
+- **Given** a help page, **when** I read it, **then** it is two paragraphs and
+  a link to the screen it is about.
+
 ## Epic AS — Ownership, warranty and sites (Phase 44)
 
 ### AS1 — The car I just sold

@@ -815,6 +815,24 @@ def build() -> None:
         source="docs/02-design/05-security-model.md, section 7.8",
     )
 
+    design(
+        doc,
+        title="The first day",
+        when="Phase 45, 15 September 2026.",
+        why="A workshop signs up and has forty screens with nothing in any of them. What it needs is "
+            "not a tour but three things: what to do next, somewhere to see the product full, and an "
+            "answer to a question without leaving the screen.",
+        meaning=[
+            "The setup list is read from the workshop's own data, so nothing can be ticked off without being true, and each step says why it matters rather than only what it is.",
+            "The three steps that block invoicing are marked; the rest are not urgent and say so.",
+            "The demonstration workshop sits beside the real one and is marked on every screen inside it, in the one colour the product uses for warnings.",
+            "The help is twelve cards, each a title, one line and a link to the screen it is about. Nothing is longer than two paragraphs.",
+        ],
+        works="Everything here disappears when it is no longer needed: the list when it is finished, the demonstration when it is removed, the help until somebody searches for it.",
+        shots=[("start", "What to do next.", 16.4), ("help", "Twelve short pages.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 45",
+    )
+
     # 11. Counter
     doc.add_heading("11. The counter", level=1)
     design(

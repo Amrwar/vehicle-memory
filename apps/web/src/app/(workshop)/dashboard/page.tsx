@@ -26,6 +26,7 @@ import { revenueObservations } from '@/lib/answers';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { ownerDay } from '@/lib/owner';
+import { setupFor } from '@/lib/onboarding';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -56,6 +57,11 @@ export default async function DashboardPage({
   const notice = await searchParams;
   const { db, user, orgId, region } = await requireSession('job:read');
   const t = await tFor();
+
+  // What is left to set up, read from the workshop's own data. It disappears
+  // by itself when there is nothing left, and can be put away before that.
+  // Phase 45.
+  const setup = await setupFor(orgId);
 
   const seesBusiness = can(user.role, 'report:operational');
   const seesInventory = can(user.role, 'inventory:read');
@@ -190,6 +196,31 @@ export default async function DashboardPage({
           </>
         }
       />
+
+      {setup.showOnDashboard ? (
+        <Card className="mb-5 border-(--brand)">
+          <CardHeader
+            title={t('Getting started')}
+            description={t(setup.summary)}
+            action={
+              <Link href="/start">
+                <Button size="sm" variant="secondary">
+                  {t('The setup list')}
+                </Button>
+              </Link>
+            }
+          />
+          {setup.next ? (
+            <CardBody className="flex flex-wrap items-center gap-3 text-[13px]">
+              <span className="font-medium">{t(setup.next.title)}</span>
+              <span className="text-(--text-soft)">{t(setup.next.why)}</span>
+              <Link href={setup.next.href} className="ms-auto">
+                <Button size="sm">{t('Do it')}</Button>
+              </Link>
+            </CardBody>
+          ) : null}
+        </Card>
+      ) : null}
 
       {/* ---------------- today ---------------- */}
       <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-(--text-faint)">

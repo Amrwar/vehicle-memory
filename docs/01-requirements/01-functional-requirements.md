@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-7600 — The first day
+
+| Ref     | Requirement                                                                                                                                                | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-7601 | A workshop MUST be shown what is left to set up, read from its own data, with each step saying why it matters; no step MAY be ticked off by pressing done. | 45    |
+| FR-7602 | The list MUST name the next thing to do on the dashboard, MUST be able to be put away and brought back, and MUST stop showing once it is finished.         | 45    |
+| FR-7603 | Help MUST be readable inside the product, one page per part of it, each linking to its screen, and MUST be found from the search box as well.              | 45    |
+| FR-7604 | A demonstration workshop MUST be creatable with a year of work written through the product's own functions, and MUST be removable whole.                   | 45    |
+| FR-7605 | A demonstration workshop MUST say so on every screen, and MUST NOT send any message to anybody.                                                            | 45    |
+| FR-7606 | A person MUST be able to move between the workshops they belong to, and MUST NOT be able to move into one they do not.                                     | 45    |
+
 ## FR-7500 — Ownership, warranty and sites
 
 | Ref     | Requirement                                                                                                                                             | Phase |

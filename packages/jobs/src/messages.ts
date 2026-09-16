@@ -44,6 +44,16 @@ export const TRANSPORTS = configureTransports();
  * later, and later for the last time. Nothing in this function decides that.
  */
 export async function sendQueuedMessages(): Promise<number> {
+  // A demonstration workshop's messages are never sent. Its customers are
+  // made up, its addresses are example ones, and a product that emails them
+  // is a product that emails whoever really owns those domains. They are
+  // marked suppressed rather than left queued, so the demonstration's own
+  // message list reads truthfully. Phase 45.
+  await prisma.messageLog.updateMany({
+    where: { status: 'QUEUED', org: { isDemonstration: true } },
+    data: { status: 'SUPPRESSED', error: 'Demonstration workshop: nothing is sent.' },
+  });
+
   const due = await prisma.messageLog.findMany({
     where: { status: 'QUEUED', availableAt: { lte: new Date() } },
     orderBy: { availableAt: 'asc' },
@@ -98,10 +108,21 @@ export async function sendMessageNow(messageId: string): Promise<boolean> {
   try {
     const message = await prisma.messageLog.findUnique({
       where: { id: messageId },
-      include: { org: { select: { slug: true } } },
+      include: { org: { select: { slug: true, isDemonstration: true } } },
     });
 
     if (!message || message.status !== 'QUEUED') return false;
+
+    // A demonstration workshop's customers are made up and their addresses
+    // belong to somebody else. Nothing it writes is ever sent, on this path
+    // or in the sweep. Phase 45.
+    if (message.org?.isDemonstration) {
+      await prisma.messageLog.update({
+        where: { id: message.id },
+        data: { status: 'SUPPRESSED', error: 'Demonstration workshop: nothing is sent.' },
+      });
+      return false;
+    }
 
     const suppressed = new Set(
       message.orgId
