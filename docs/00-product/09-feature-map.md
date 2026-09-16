@@ -367,6 +367,15 @@ can be asked. No model is involved.
 role. The grouping differs from the one proposed, mostly because several
 proposed sections do not exist yet.
 
+## 21.4 On a telephone
+
+| Item                          | Status | Where                                                               |
+| ----------------------------- | ------ | ------------------------------------------------------------------- |
+| Nothing wider than the screen | Built  | Measured on 47 screens at 390px; tables scroll inside their own box |
+| Targets a thumb can hit       | Built  | 40px for a control, 24px for a standalone link, on touch screens    |
+| Nothing under eleven pixels   | Built  | Labels raised from ten; measured with the rest                      |
+| Right to left on a phone      | Built  | The same screens measured again in Arabic                           |
+
 ## 21.5 The record's own history
 
 | Item                           | Status | Where                                          |
@@ -478,7 +487,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 222          |
+| Built    | 226          |
 | Partial  | 1            |
 | Missing  | 1            |
 | Deferred | 1            |

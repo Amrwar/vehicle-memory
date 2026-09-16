@@ -46,7 +46,7 @@ export function Th({
       scope="col"
       className={cn(
         'sticky top-0 z-10 whitespace-nowrap border-b border-(--border) bg-(--surface-sunk)',
-        'px-3 py-2 text-start font-mono text-[10px] font-semibold uppercase tracking-wider',
+        'px-3 py-2 text-start font-mono text-[11px] font-semibold uppercase tracking-wider',
         'text-(--text-faint)',
         numeric && 'text-end',
         className,
@@ -151,6 +151,7 @@ export function StatRow({
       className={cn(
         'grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--border) bg-(--border)',
         'grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))]',
+        'max-sm:[&>*:last-child:nth-child(odd)]:col-span-2',
         className,
       )}
     >

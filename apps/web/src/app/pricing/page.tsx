@@ -104,7 +104,7 @@ export default async function PricingPage({
               <Link
                 href={`/pricing?country=${country.code}`}
                 className={cn(
-                  'rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors',
+                  'inline-flex items-center rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-10',
                   annual
                     ? 'bg-(--surface) font-medium shadow-sm'
                     : 'text-(--text-faint) hover:text-(--text)',
@@ -115,7 +115,7 @@ export default async function PricingPage({
               <Link
                 href={`/pricing?billing=monthly&country=${country.code}`}
                 className={cn(
-                  'rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors',
+                  'inline-flex items-center rounded-(--radius-sm) px-3.5 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-10',
                   !annual
                     ? 'bg-(--surface) font-medium shadow-sm'
                     : 'text-(--text-faint) hover:text-(--text)',
@@ -169,7 +169,7 @@ export default async function PricingPage({
                   <div className="flex items-baseline justify-between gap-2">
                     <h2 className="font-display text-[19px] font-semibold">{t(plan.name)}</h2>
                     {plan.popular ? (
-                      <span className="rounded-(--radius-xs) bg-(--brand-soft) px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
+                      <span className="rounded-(--radius-xs) bg-(--brand-soft) px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
                         {t('Most chosen')}
                       </span>
                     ) : null}

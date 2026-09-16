@@ -220,6 +220,16 @@ async function main() {
     { file: 'payroll', path: '/payroll', who: 'owner', fullPage: true },
     { file: 'warranty-cost', path: '/warranty?range=year#cost', who: 'owner', fullPage: true },
     { file: 'start', path: '/start', who: 'owner', fullPage: true },
+    { file: 'phone-dashboard', path: '/dashboard', who: 'owner', width: 390, height: 844 },
+    { file: 'phone-job', path: `/jobs/${r.job}`, who: 'owner', width: 390, height: 844 },
+    {
+      file: 'phone-dashboard-ar',
+      path: '/dashboard',
+      who: 'owner',
+      width: 390,
+      height: 844,
+      lang: 'ar',
+    },
     { file: 'help', path: '/help', who: 'owner', fullPage: true },
     ...(r.handover
       ? [{ file: 'handover', path: `/handover/${r.handover}`, who: 'nobody' as const, height: 900 }]

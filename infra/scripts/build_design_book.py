@@ -833,6 +833,23 @@ def build() -> None:
         source="docs/00-product/06-roadmap.md, Phase 45",
     )
 
+    design(
+        doc,
+        title="On a telephone",
+        when="Measured from 16 September 2026.",
+        why="A workshop reads this standing next to a car with a part in the other hand. Every screen "
+            "is used on a phone, so every screen is measured on one rather than assumed to be fine.",
+        meaning=[
+            "Nothing is wider than the screen. A table may scroll inside its own box, and says so with a shadow at the edge that has more behind it, but the page itself never slides sideways.",
+            "Every control the product draws is at least forty pixels through the middle where a thumb is doing the pressing, and every link that stands on its own line at least twenty-four, which is what WCAG 2.2 asks of any target.",
+            "Nothing is smaller than eleven pixels, and a row of tiles that ends odd fills the row rather than leaving a hole.",
+            "The same screens are measured right to left, because a layout that only holds together in one direction holds together by accident.",
+        ],
+        works="verify-mobile.ts measures forty-seven screens at 390 by 844 and fails on anything that sticks out, is too small to press or too small to read, so this is a check rather than a claim.",
+        shots=[("phone-dashboard", "The dashboard on a phone.", 7.6), ("phone-dashboard-ar", "The same, in Arabic.", 7.6)],
+        source="infra/scripts/verify-mobile.ts",
+    )
+
     # 11. Counter
     doc.add_heading("11. The counter", level=1)
     design(

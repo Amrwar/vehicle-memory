@@ -338,7 +338,7 @@ export default async function PackagesPage({
                     type="checkbox"
                     name="bookable"
                     defaultChecked={editing?.bookable ?? true}
-                    className="h-4 w-4"
+                    className="h-4 w-4 pointer-coarse:h-6 pointer-coarse:w-6"
                   />
                   {t('Customers can book this online')}
                 </label>

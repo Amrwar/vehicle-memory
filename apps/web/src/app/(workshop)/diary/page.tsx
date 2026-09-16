@@ -191,7 +191,7 @@ export default async function DiaryPage({
               href={`/diary?view=${entry.id}${on ? `&on=${on}` : ''}`}
               aria-current={active ? 'page' : undefined}
               className={[
-                'rounded-full border px-3.5 py-1.5 text-[13px] transition-colors',
+                'inline-flex items-center rounded-full border px-3.5 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-10',
                 active
                   ? 'border-(--brand) bg-(--brand-soft) text-(--brand-text)'
                   : 'border-(--border) text-(--text-soft) hover:border-(--border-strong)',

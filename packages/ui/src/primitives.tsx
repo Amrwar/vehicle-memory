@@ -42,12 +42,16 @@ const button = cva(
         link: 'text-(--brand-text) underline underline-offset-2 hover:opacity-80',
       },
       size: {
-        sm: 'h-8 px-2.5 text-[13px] rounded-(--radius-sm)',
-        md: 'h-9 px-3.5 text-[13px] rounded-(--radius-md)',
+        // On a screen driven by a thumb every control grows to forty pixels,
+        // which is the smallest a thumb finds without looking. On a screen
+        // with a pointer they stay as they were: a mouse is exact, and a
+        // toolbar of forty-pixel buttons wastes a desk.
+        sm: 'h-8 pointer-coarse:h-10 px-2.5 text-[13px] rounded-(--radius-sm)',
+        md: 'h-9 pointer-coarse:h-10 px-3.5 text-[13px] rounded-(--radius-md)',
         lg: 'h-11 px-5 text-[15px] rounded-(--radius-md)',
         /* Shop floor: 48px minimum, gloves on. NFR-605. */
         touch: 'min-h-(--touch) px-5 text-[15px] rounded-(--radius-md)',
-        icon: 'h-9 w-9 rounded-(--radius-md)',
+        icon: 'h-9 w-9 pointer-coarse:h-10 pointer-coarse:w-10 rounded-(--radius-md)',
         'icon-touch': 'h-(--touch) w-(--touch) rounded-(--radius-md)',
       },
       block: { true: 'w-full', false: '' },
@@ -92,7 +96,7 @@ const badge = cva(
         info: 'bg-(--info-soft) text-(--info) border-(--info-soft)',
       },
       size: {
-        sm: 'px-1.5 py-0.5 text-[10px] tracking-wide uppercase font-mono',
+        sm: 'px-1.5 py-0.5 text-[11px] tracking-wide uppercase font-mono',
         md: 'px-2 py-0.5 text-[12px]',
       },
     },
@@ -122,10 +126,21 @@ export function Badge({ className, tone, size, dot, children, ...props }: BadgeP
    Not everything is a card.
    =========================================================================== */
 
+/**
+ * A card, which never widens the page it sits on.
+ *
+ * `min-width: 0` is the whole of that promise. A grid or flex child sizes
+ * itself to its widest content by default, so one table with eight columns
+ * inside a card pushes the entire page sideways on a telephone, and the
+ * scrolling box the table is already in never gets the chance to scroll.
+ */
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('bg-(--surface) border border-(--border) rounded-(--radius-lg)', className)}
+      className={cn(
+        'min-w-0 bg-(--surface) border border-(--border) rounded-(--radius-lg)',
+        className,
+      )}
       {...props}
     />
   );
@@ -186,7 +201,7 @@ export const Input = React.forwardRef<
     aria-invalid={invalid || undefined}
     className={cn(
       control,
-      touch ? 'min-h-(--touch) text-[15px]' : 'h-9',
+      touch ? 'min-h-(--touch) text-[15px]' : 'h-9 pointer-coarse:h-10',
       invalid && 'border-(--danger)',
       className,
     )}
@@ -215,7 +230,12 @@ export const Select = React.forwardRef<
 >(({ className, touch, ...props }, ref) => (
   <select
     ref={ref}
-    className={cn(control, touch ? 'min-h-(--touch) text-[15px]' : 'h-9', 'pe-8', className)}
+    className={cn(
+      control,
+      touch ? 'min-h-(--touch) text-[15px]' : 'h-9 pointer-coarse:h-10',
+      'pe-8',
+      className,
+    )}
     {...props}
   />
 ));

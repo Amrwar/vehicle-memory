@@ -352,7 +352,7 @@ export function WorkshopNav({
               />
             </svg>
             {unreadNotifications > 0 ? (
-              <span className="absolute -end-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-(--danger) px-1 text-[10px] font-semibold text-white">
+              <span className="absolute -end-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-(--danger) px-1 text-[11px] font-semibold text-white">
                 {unreadNotifications > 99 ? '99+' : unreadNotifications}
               </span>
             ) : null}

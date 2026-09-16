@@ -2380,7 +2380,16 @@ accessibility, every control doing something, and the phase's own verification
 script run against a database. A phase is not finished when it works once.
 
 **Responsive, not merely narrow.** Every screen built in these phases is used
-on a phone by somebody holding a part in the other hand.
+on a phone by somebody holding a part in the other hand. Since 16 September
+2026 that is measured rather than claimed: `verify-mobile.ts` loads
+forty-seven screens at 390 by 844, in English and in Arabic, and fails on
+anything wider than the window, any control under forty pixels through the
+middle, any standalone link under the twenty-four WCAG 2.2 asks for, and any
+text under eleven pixels. What it found the first time was fixed in the design
+system rather than page by page: controls that grow where a thumb is doing the
+pressing, cards that cannot widen the page they sit on, labels at eleven
+pixels rather than ten, and a shadow at the edge of a table that has more
+behind it.
 
 **Complexity that stays honest.** Every list gets a bound and every derived
 figure gets a cost. `timelineFor` merges five queries in memory deliberately,

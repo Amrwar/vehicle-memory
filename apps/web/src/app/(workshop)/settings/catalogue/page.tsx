@@ -513,7 +513,7 @@ export default async function CatalogueSettingsPage({
                     type="checkbox"
                     name="requiresQualityCheck"
                     defaultChecked={editingType?.requiresQualityCheck ?? false}
-                    className="h-4 w-4"
+                    className="h-4 w-4 pointer-coarse:h-6 pointer-coarse:w-6"
                   />
                   {t('Needs a quality check before the car goes back')}
                 </label>

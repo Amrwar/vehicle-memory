@@ -137,7 +137,7 @@ read from the workshop's own data, a demonstration workshop with a year of
 work in it, and help that is searched from the same box as everything else.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 222 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 226 capabilities
 built, 1 partial and 1 missing, and the
 [traceability matrix](01-requirements/04-traceability-matrix.md) traces 519
 requirements to code and tests. Every phase ends with the same checks, listed

@@ -410,7 +410,7 @@ export default async function CheckOutPage({
                           name="document"
                           value={doc}
                           defaultChecked={doc === 'Keys' || doc === 'Invoice'}
-                          className="h-4 w-4"
+                          className="h-4 w-4 pointer-coarse:h-6 pointer-coarse:w-6"
                         />
                         {t(doc)}
                       </label>

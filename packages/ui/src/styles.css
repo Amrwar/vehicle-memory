@@ -387,10 +387,48 @@ h6 {
   letter-spacing: 0.01em;
 }
 
-/* Uppercase micro-labels. */
+/* A screen driven by a thumb.
+ *
+ * Every control the product draws grows to forty pixels through the middle,
+ * whatever height the page asked for: a minimum always wins over a height, so
+ * one rule here reaches the hand-written boxes as well as the components. A
+ * link that is a word on its own line gets the twenty-four pixels WCAG 2.2
+ * asks of any target; a link inside a sentence is text and is left alone,
+ * because a minimum height does nothing to an inline box.
+ *
+ * In the base layer, and as min-height rather than min-block-size: both
+ * deliberate. Unlayered rules beat Tailwind's utilities whatever their
+ * specificity, and a logical property beats a physical one declared earlier,
+ * and either way a screen that asks for a taller control should get one. */
+@layer base {
+  @media (pointer: coarse) {
+    button,
+    select,
+    textarea,
+    input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']) {
+      min-height: 40px;
+    }
+
+    /* A tick box is pressed through its label as often as through itself, so
+       it is held to the twenty-four pixels rather than to a thumb's width. One
+       that is there only for a screen reader keeps its single pixel. */
+    input[type='checkbox']:not(.sr-only),
+    input[type='radio']:not(.sr-only) {
+      inline-size: 1.5rem;
+      block-size: 1.5rem;
+    }
+
+    a {
+      min-height: 24px;
+    }
+  }
+}
+
+/* Uppercase micro-labels. Eleven pixels rather than ten: these are read on a
+   telephone in a workshop, and ten is where uppercase stops being legible. */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -471,6 +509,20 @@ h6 {
 .scroll-x {
   overflow-x: auto;
   overscroll-behavior-x: contain;
+
+  /* A shadow at whichever edge has more table behind it, and none at the edge
+     that has run out. Two fixed backgrounds hold the shadows still while two
+     local ones cover them as the table reaches each end, so a phone shows
+     that a column is hiding rather than leaving somebody to guess. */
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left center / 24px 100% no-repeat
+      local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right center / 24px 100% no-repeat
+      local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 12%), transparent) left center / 12px 100%
+      no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 12%), transparent) right center / 12px
+      100% no-repeat scroll;
 }
 
 .scroll-x::-webkit-scrollbar {

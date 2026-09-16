@@ -68,6 +68,7 @@
     "verify:providers": "tsx infra/scripts/verify-providers.ts",
     "verify:ownership": "tsx infra/scripts/verify-ownership.ts",
     "verify:first-day": "tsx infra/scripts/verify-first-day.ts",
+    "verify:mobile": "tsx infra/scripts/verify-mobile.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

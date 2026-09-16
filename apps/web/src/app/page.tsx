@@ -323,7 +323,7 @@ export default async function HomePage() {
                   <div className="flex items-baseline justify-between gap-2">
                     <h3 className="font-display text-[16px] font-semibold">{t(plan.name)}</h3>
                     {plan.popular ? (
-                      <span className="rounded-(--radius-xs) bg-(--brand-soft) px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
+                      <span className="rounded-(--radius-xs) bg-(--brand-soft) px-1.5 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-wide text-(--brand-text)">
                         {t('Most chosen')}
                       </span>
                     ) : null}

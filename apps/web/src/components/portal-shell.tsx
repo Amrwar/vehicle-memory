@@ -181,7 +181,7 @@ export async function PortalShell({
             <Mark size={22} className="text-(--brand)" />
             <span className="leading-none">
               <span className="block font-display text-[15px] font-semibold">Carnet</span>
-              <span className="block text-[10px] font-medium tracking-[0.14em] text-(--text-faint) uppercase">
+              <span className="hidden text-[11px] font-medium tracking-[0.14em] text-(--text-faint) uppercase min-[420px]:block">
                 {t('Your cars')}
               </span>
             </span>
