@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 43.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 46.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -1013,6 +1013,25 @@ def build() -> None:
         source="docs/02-design/08-design-system.md, sections 8 and 9",
     )
 
+    design(
+        doc,
+        title="A code a customer arrives holding",
+        when="Phase 45.5, 16 September 2026.",
+        why="A coupon looks like a number and is really a set of promises: when it starts, when it "
+            "ends, what the bill has to reach, how many times it may be used at all and how many times "
+            "by one person. All of them are written down where the person at the counter can see them, "
+            "because a code whose rules live in somebody's head is a code that gets argued about.",
+        meaning=[
+            "The refusals are the feature: \"That code ran out on 30 June\" rather than \"invalid code\".",
+            "What each code gave away sits beside what was billed on the visits it was used on.",
+            "A coupon never rewrites a bill. It settles like points, and lands in what the offers cost.",
+        ],
+        works="A discount booked as revenue gives a workshop accounts that say it is doing better than it is. "
+              "Putting it in expenses is both truthful and the only way to know whether an offer paid for itself.",
+        shots=[("coupons", "Codes, what they promise, and what they have cost.", 16.4)],
+        source="docs/02-design/07-accounting-model.md, section 3.19",
+    )
+
     # 19. Refusals
     doc.add_heading("19. What the design refuses to do", level=1)
     para(doc, "Some of the strongest decisions are absences, and a reader of this book should know them.")
@@ -1023,6 +1042,7 @@ def build() -> None:
         "It never names an owner on a shared document, and never shows a price, a margin or a note to anybody the record is not for.",
         "It never lets colour carry meaning alone, and never depends on hover on the shop floor.",
         "It never leaves a button with nothing behind it. A crawl reads every page for every role and fails on one.",
+        "It never does a thing twice because it was asked twice. Every write that moves money or stock says what a repeat does to it, and the build fails for one that does not.",
     ]:
         p = doc.add_paragraph(style="List Bullet")
         run = p.add_run(line)

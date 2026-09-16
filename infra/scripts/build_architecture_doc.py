@@ -47,8 +47,8 @@ PETROL_DEEP = RGBColor(0x12, 0x32, 0x36)
 BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
-BUILT_ON = "14 September 2026"
-AFTER_PHASE = "Phase 42"
+BUILT_ON = "16 September 2026"
+AFTER_PHASE = "Phase 46"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -267,6 +267,14 @@ DOMAIN_TEXT: dict[str, list[str]] = {
         "OutboxEvent is the transactional outbox that carries side effects out of the commit that caused them; SyncedAction "
         "is the idempotency record for what a technician's device did while it was out of signal. ImportBatch is a file "
         "brought from another system, kept as it arrived with its mapping and its report.",
+        "OnceRequest is how a request that arrives twice does its work once (Phase 46). Some writes cannot recognise a "
+        "repeat from the inside — two cash payments of fifty pounds against one bill are two real payments — so the key "
+        "is minted when the form is drawn and sent with every press of that form's button: the second press lands on the "
+        "unique index and is absorbed, while a deliberate second payment comes from a freshly drawn form and goes through. "
+        "The queues are claimed rather than read: outbox_events and message_logs are both taken in one statement that "
+        "selects what is due FOR UPDATE SKIP LOCKED and leases it a few minutes into the future, so two workers over one "
+        "queue step over each other rather than sending the same customer the same email twice, and work abandoned by a "
+        "worker that died comes back when the lease expires.",
     ],
     "vehicle": [
         "The vehicle is global, not owned by a workshop (ADR-0004): one Vehicle row per VIN, whoever touches it. Its "

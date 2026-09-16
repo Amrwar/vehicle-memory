@@ -120,6 +120,14 @@ export const fr: Readonly<Record<string, string>> = {
   'not used yet': 'pas encore utilisé',
   'This year so far': 'Cette année à ce jour',
   'Working…': 'En cours…',
+  // Finding the way to spend a card
+  'Nothing left to pay': 'Plus rien à payer',
+  'This bill is settled, so there is nothing here to take a payment, a gift card, points, a coupon or money held against. Raising a credit note is below.':
+    'Cette facture est soldée : il n’y a donc rien ici pour encaisser un paiement, une carte cadeau, des points, un bon ou de l’argent conservé. L’avoir se fait plus bas.',
+  'Spent against a bill that still has something owing, or at the counter. A bill with nothing left to pay has nothing for a card to pay.':
+    'Utilisable sur une facture qui reste due, ou au comptoir. Une facture entièrement réglée n’a plus rien qu’une carte puisse payer.',
+  'Bills still owing': 'Factures encore dues',
+  'The counter': 'Le comptoir',
 
   // Refusals that carry a figure or a date with them
   '{v1} is already a code in this workshop. Two codes with one name is two offers nobody can tell apart.':
@@ -247,6 +255,14 @@ export const ar: Readonly<Record<string, string>> = {
   'not used yet': 'لم يُستخدم بعد',
   'This year so far': 'هذا العام حتى الآن',
   'Working…': 'جارٍ التنفيذ…',
+  // Finding the way to spend a card
+  'Nothing left to pay': 'لم يتبقَّ شيء للدفع',
+  'This bill is settled, so there is nothing here to take a payment, a gift card, points, a coupon or money held against. Raising a credit note is below.':
+    'هذه الفاتورة مسدّدة، فليس هنا ما يُحصَّل عليه دفعة أو بطاقة هدايا أو نقاط أو قسيمة أو مال محتفَظ به. وإصدار إشعار دائن موجود بالأسفل.',
+  'Spent against a bill that still has something owing, or at the counter. A bill with nothing left to pay has nothing for a card to pay.':
+    'تُستخدم على فاتورة ما زال عليها مستحق، أو عند المنضدة. والفاتورة التي لم يبقَ عليها شيء ليس فيها ما تدفعه البطاقة.',
+  'Bills still owing': 'فواتير ما زالت مستحقة',
+  'The counter': 'المنضدة',
 
   // Refusals that carry a figure or a date with them
   '{v1} is already a code in this workshop. Two codes with one name is two offers nobody can tell apart.':

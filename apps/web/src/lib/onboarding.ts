@@ -18,6 +18,7 @@ import { ensureChartOfAccounts } from './accounting';
 import { hashPassword } from './auth';
 import { audit } from './guard';
 import { breachedPasswordProblem } from './breach';
+import { tellOperatorAboutSignup } from './operator';
 
 /**
  * Opening a workshop.
@@ -236,6 +237,19 @@ export async function createWorkshop(
     select: { id: true },
   });
   await ensureChartOfAccounts(created.id);
+
+  // And whoever runs Carnet is told there is a new workshop, before the
+  // address is verified: a signup that never verifies is itself worth
+  // knowing. Never allowed to fail the signup.
+  await tellOperatorAboutSignup({
+    workshop: input.workshopName.trim(),
+    slug,
+    contactName: input.contactName.trim(),
+    email,
+    country: country.code,
+    plan,
+    sites: input.sites,
+  });
 
   return { ok: true, problems: [], orgSlug: slug, userId };
 }

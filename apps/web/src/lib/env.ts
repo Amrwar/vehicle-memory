@@ -90,6 +90,12 @@ const schema = z.object({
   SMS_TRANSPORT: z.enum(['console', 'twilio']).default('console'),
   MAIL_FROM: z.string().default('Carnet <no-reply@carnet.local>'),
 
+  // Where the product writes to whoever runs it: a new workshop signing up,
+  // and anything else the operator would want to know before a customer
+  // tells them. Unset means nobody is told, which is the right default for a
+  // developer's machine and for anybody else running this.
+  OPERATOR_EMAIL: z.string().email().optional(),
+
   // Where replies go. The product sends as one verified address for every
   // workshop, and a reply has to reach the workshop that sent it, so each
   // message carries a Reply-To of <workshop slug>@<this domain>. Absent means

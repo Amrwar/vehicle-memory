@@ -713,6 +713,23 @@ export default async function InvoicePage({
             </CardBody>
           </Card>
 
+          {/* When there is nothing owing there is nothing to settle, so every
+              way of settling disappears at once — and somebody who came here
+              looking for one of them is left wondering where it went. Saying
+              so is cheaper than the support call. */}
+          {!mayPay && can(user.role, 'payment:write') && status !== 'VOID' ? (
+            <Card>
+              <CardBody className="grid gap-1 text-[13px] text-(--text-soft)">
+                <p className="font-medium text-(--text)">{t('Nothing left to pay')}</p>
+                <p>
+                  {t(
+                    'This bill is settled, so there is nothing here to take a payment, a gift card, points, a coupon or money held against. Raising a credit note is below.',
+                  )}
+                </p>
+              </CardBody>
+            </Card>
+          ) : null}
+
           {mayPay ? (
             <Card className="border-(--brand)">
               <CardHeader

@@ -46,6 +46,7 @@ Seeded per organisation, editable.
 | 6100 | Premises                  | Expense   |
 | 6200 | Stock adjustments         | Expense   |
 | 6400 | Loyalty rewards           | Expense   |
+| 6410 | Coupons                   | Expense   |
 
 ## 3. Postings
 
@@ -324,6 +325,38 @@ invoice was for; the fee arrives on the provider's statement and is
 recorded as an expense when the bank feed is matched, the way a card
 terminal's fee is today. Netting the fee at the moment of payment would
 make the customer's receipt and the bank's figure disagree.
+
+### 3.19 A coupon taken off a bill (Phase 45.5)
+
+A coupon is not money in either, and for the same reason points are not: the
+bill was issued at its full total and the workshop paid the difference to win
+the work. So it settles as a payment of its own kind, the invoice keeps the
+total it was issued at, and what the code gave away lands in what the offers
+cost:
+
+```
+  Dr  6410 Coupons                          24.00
+      Cr  1100 Accounts receivable                    24.00
+
+  source: Payment pay_..., method COUPON
+```
+
+At the counter the same figure arrives as a tender of its own kind rather than
+as a payment, because a counter sale is settled in one posting. The sale is
+still recorded at the total it was billed at, the drawer is debited only with
+what was actually handed over, and the difference goes to 6410:
+
+```
+  Dr  1010 Cash in hand                     67.00
+  Dr  6410 Coupons                           5.00
+      Cr  4000 Parts revenue                          60.00
+      Cr  2200 Tax payable                            12.00
+
+  source: CounterSale cs_..., tender COUPON
+```
+
+Booking either of them as revenue would give a workshop a set of accounts
+saying it is doing better than it is, and a marketing spend of nothing.
 
 ## 4. Job profitability
 

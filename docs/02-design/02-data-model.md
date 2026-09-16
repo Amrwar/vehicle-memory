@@ -93,6 +93,7 @@ Every index exists for a query someone actually runs.
 | `customers gin (displayName)` trigram         | Name search while a customer is on the phone  |
 | `vehicles gin (registration)`, `gin (vin)`    | Registration and VIN lookup                   |
 | `outbox_events (processedAt, availableAt)`    | Worker poll                                   |
+| `once_requests (expiresAt)`                   | Sweeping keys no retry will arrive for        |
 
 The trigram indexes are not decoration. NFR-102 gives a 400ms budget for a list
 view, and a service advisor searching "okon" while someone waits on the line is
@@ -136,29 +137,35 @@ Never `float8`. See [ADR-0008](../03-adr/0008-money-as-integer-minor-units.md).
 Implemented in `20260909000100_invariants` and verified by
 `infra/scripts/verify-integrity.ts`, which actively tries to break each one:
 
-| Guarantee                                                                                        | Mechanism                                                                                                          |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Vehicle events are append-only                                                                   | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once                                          |
-| Audit log is immutable                                                                           | `BEFORE UPDATE OR DELETE` trigger                                                                                  |
-| One open ownership per vehicle                                                                   | Partial unique index `WHERE endedAt IS NULL`                                                                       |
-| One open time entry per technician                                                               | Partial unique index `WHERE endedAt IS NULL`                                                                       |
-| Payments never exceed the invoice                                                                | Deferred constraint trigger                                                                                        |
-| Journal entries balance                                                                          | Deferred constraint trigger, checked at commit                                                                     |
-| A journal line is a debit or a credit                                                            | `CHECK` constraint                                                                                                 |
-| Odometer readings are non-negative                                                               | `CHECK` constraint                                                                                                 |
-| Booking ends after it starts                                                                     | `CHECK` constraint                                                                                                 |
-| A paid timesheet is final                                                                        | `BEFORE UPDATE OR DELETE` trigger `timesheets_paid_are_final`                                                      |
-| A refund, a credit and a refusal carry a reason                                                  | `CHECK` constraints on `refunds`, `credit_notes` and `vehicle_claims`                                              |
-| One open claim per person per vehicle                                                            | Partial unique index `vehicle_claims_one_open_each`                                                                |
-| A key is named                                                                                   | `CHECK api_keys_are_named`                                                                                         |
-| A site opens before it closes                                                                    | `CHECK locations_open_before_close`                                                                                |
-| A document is named, has bytes, expires after issue, and is removed with a reason                | Four `CHECK` constraints on `vehicle_documents`                                                                    |
-| Consent history is append-only                                                                   | `BEFORE UPDATE OR DELETE` trigger                                                                                  |
-| A loyalty entry moves something and says why; only awards expire                                 | `CHECK` constraints `loyalty_entries_move_something`, `loyalty_entries_only_awards_expire`                         |
-| A referral pays once, to two different people                                                    | Partial unique index and `CHECK` on `referrals`                                                                    |
-| A gift card is sold for something; every entry on it moves something and says why                | `CHECK` constraints `gift_cards_sold_for_something`, `gift_card_entries_move_something`                            |
-| A gift card entry's kind agrees with its sign; a cancelled card names its reason                 | `CHECK` constraints `gift_card_entries_kind_matches_sign`, `gift_cards_cancelled_with_a_reason`                    |
-| A deposit is taken for something and is never overdrawn; a movement moves something and says why | `CHECK` constraints `deposits_taken_for_something`, `deposits_never_overdrawn`, `deposit_movements_move_something` |
+| Guarantee                                                                                           | Mechanism                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vehicle events are append-only                                                                      | `BEFORE UPDATE OR DELETE` trigger; only `supersededById` may be set, once                                                                            |
+| Audit log is immutable                                                                              | `BEFORE UPDATE OR DELETE` trigger                                                                                                                    |
+| One open ownership per vehicle                                                                      | Partial unique index `WHERE endedAt IS NULL`                                                                                                         |
+| One open time entry per technician                                                                  | Partial unique index `WHERE endedAt IS NULL`                                                                                                         |
+| Payments never exceed the invoice                                                                   | Deferred constraint trigger                                                                                                                          |
+| Journal entries balance                                                                             | Deferred constraint trigger, checked at commit                                                                                                       |
+| A journal line is a debit or a credit                                                               | `CHECK` constraint                                                                                                                                   |
+| Odometer readings are non-negative                                                                  | `CHECK` constraint                                                                                                                                   |
+| Booking ends after it starts                                                                        | `CHECK` constraint                                                                                                                                   |
+| A paid timesheet is final                                                                           | `BEFORE UPDATE OR DELETE` trigger `timesheets_paid_are_final`                                                                                        |
+| A refund, a credit and a refusal carry a reason                                                     | `CHECK` constraints on `refunds`, `credit_notes` and `vehicle_claims`                                                                                |
+| One open claim per person per vehicle                                                               | Partial unique index `vehicle_claims_one_open_each`                                                                                                  |
+| A key is named                                                                                      | `CHECK api_keys_are_named`                                                                                                                           |
+| A site opens before it closes                                                                       | `CHECK locations_open_before_close`                                                                                                                  |
+| A document is named, has bytes, expires after issue, and is removed with a reason                   | Four `CHECK` constraints on `vehicle_documents`                                                                                                      |
+| Consent history is append-only                                                                      | `BEFORE UPDATE OR DELETE` trigger                                                                                                                    |
+| A loyalty entry moves something and says why; only awards expire                                    | `CHECK` constraints `loyalty_entries_move_something`, `loyalty_entries_only_awards_expire`                                                           |
+| A referral pays once, to two different people                                                       | Partial unique index and `CHECK` on `referrals`                                                                                                      |
+| A gift card is sold for something; every entry on it moves something and says why                   | `CHECK` constraints `gift_cards_sold_for_something`, `gift_card_entries_move_something`                                                              |
+| A gift card entry's kind agrees with its sign; a cancelled card names its reason                    | `CHECK` constraints `gift_card_entries_kind_matches_sign`, `gift_cards_cancelled_with_a_reason`                                                      |
+| A deposit is taken for something and is never overdrawn; a movement moves something and says why    | `CHECK` constraints `deposits_taken_for_something`, `deposits_never_overdrawn`, `deposit_movements_move_something`                                   |
+| A code is worth one thing, within a window it can meet, and is used once per bill and once per sale | `CHECK` constraints `coupons_worth_check`, `coupons_window_check`, and partial unique indexes `coupon_redemptions_one_per_invoice` / `_one_per_sale` |
+| One ledger posting per source document                                                              | Unique index `journal_entries_one_per_document` on `(orgId, sourceType, sourceId, reference)`                                                        |
+| One request, once                                                                                   | Unique index `once_requests_orgId_key_key`, with the key minted when the form was drawn                                                              |
+| A loyalty entry that says what it is the one-and-only of is written once                            | Partial unique index `loyalty_entries_once_key` on `(orgId, once)`                                                                                   |
+| One refund becomes credit once, and loads a card once                                               | Partial unique indexes `deposits_one_credit_per_refund`, `gift_card_entries_one_per_refund`                                                          |
+| One referral code per customer per workshop                                                         | Unique index `referrals_one_per_customer`                                                                                                            |
 
 ## 6.5 Region (Phase 29)
 
@@ -256,6 +263,32 @@ money column on a document carries its own `currency`, written from the
 organisation's at the moment the document is raised, so a workshop that
 changes currency keeps its old bills honest. There is one currency per set
 of books; multi-currency inside a workshop is deliberately not modelled.
+
+## 6.9 Asked twice (Phase 46)
+
+Two tables exist only so that a second request does nothing.
+
+`once_requests` holds a key and the moment the work it stands for finished.
+The key is minted when a form is drawn and sent with every press of that
+form's button, so the second press lands on `once_requests_orgId_key_key` and
+is absorbed, while a deliberate second payment tomorrow comes from a freshly
+drawn form, carries a different key, and goes through. A claim whose process
+died is retaken once it is plainly not coming back, and rows are swept after a
+month — longer than any retry a provider or a person will send.
+
+The queues are claimed rather than read. `outbox_events` and `message_logs`
+are both taken in one statement that selects what is due `FOR UPDATE SKIP
+LOCKED` and pushes the rows a few minutes into the future, so two workers over
+one queue step over each other's work instead of doing it twice, and work
+abandoned by a worker that died comes back when the lease runs out. The
+comparison uses a timestamp passed in from the application rather than the
+database's own `now()`: everything that writes an `availableAt` writes
+application time, and comparing two clocks that are only approximately the
+same makes a database a second behind look like an empty queue.
+
+Everything else in this phase is an index rather than a table, and they are in
+the invariants above: one posting per source document, one credit and one card
+load per refund, one referral code per customer, one keyed loyalty entry.
 
 ## 7. Deletion
 

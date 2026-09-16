@@ -352,11 +352,28 @@ export default async function GiftCardPage({
                     : []),
                 ]}
               />
-              <p className="text-[12px] text-(--text-faint)">
-                {t('To spend it, open the invoice and use “{action}”, or take it at the counter.', {
-                  action: t('Redeem a gift card'),
-                })}
-              </p>
+              {/* The instruction used to name a screen without offering a way
+                  to it, which is how somebody ends up looking for a button on
+                  the wrong page. Both places it can be spent are one press
+                  away now, and the card only appears on a bill that still has
+                  something owing. */}
+              <div className="grid gap-2">
+                <p className="text-[12px] text-(--text-faint)">
+                  {t(
+                    'Spent against a bill that still has something owing, or at the counter. A bill with nothing left to pay has nothing for a card to pay.',
+                  )}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/invoices?status=unpaid">
+                    <Button size="sm">{t('Bills still owing')}</Button>
+                  </Link>
+                  <Link href="/counter">
+                    <Button size="sm" variant="ghost">
+                      {t('The counter')}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </CardBody>
           </Card>
 
