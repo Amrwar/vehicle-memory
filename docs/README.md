@@ -151,4 +151,9 @@ still asks for: four weeks in front of a real workshop. Everything above is
 evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
-to 45 are now built, Phase 45.5 closed the last missing capability, and Phase 46 began the nine phases of proof that follow it: what happens when a write is asked for twice.
+to 45 are now built, Phase 45.5 closed the last missing capability, and Phases
+46 to 46.7 asked what happens when a write is asked for twice and then swept
+three times for anything built that could not be reached. Phase 47 turns the
+question round: not whether an operation did the right thing, but whether the
+figures still agree with each other afterwards — an invariant suite over the
+whole ledger, and a page at `/books` that says so.

@@ -70,6 +70,37 @@ verify:<name>`.
 | backup         | The database is dumped, restored into a fresh one, and matches row for row and chain for chain                                       |
 | assistant      | Routed as the Ask page routes; drafts carry no absent figure; every exchange recorded; spent budget falls back; a draft is sent once |
 | storage        | Uploads land where the ticket says                                                                                                   |
+| passports      | Passports as a list, for the workshop and for the owner                                                                              |
+| loyalty        | Points earned, spent and expired, and never awarded twice                                                                            |
+| referrals      | A referral code belongs to one customer and pays out once                                                                            |
+| giftcards      | Sold, redeemed, expired, reversed, and never spent past its balance                                                                  |
+| region         | Country and currency chosen once, and every page formatting from it                                                                  |
+| deposits       | Money taken, applied to a bill, and returned with a reason                                                                           |
+| authz          | Authorisation tried rather than trusted, route by route                                                                              |
+| payments       | Card payment through a provider, end to end, against the stub                                                                        |
+| billing        | Trial, first charge, reminder, past due and cancel at period end                                                                     |
+| portal-account | The customer's own account page, exercised                                                                                           |
+| import         | Data in and data out, without losing or inventing a row                                                                              |
+| workflow       | A job walked from booking to pickup the way a front desk would                                                                       |
+| arrival        | Arrival and departure, including the keys and the paperwork                                                                          |
+| conversations  | A thread that reaches the customer and routes their reply back                                                                       |
+| packages       | Service packages priced and sold as one thing                                                                                        |
+| languages      | Every sentence and every refusal in French and Arabic                                                                                |
+| returns        | Parts back, cores held, and sublet work out                                                                                          |
+| search         | Finding anything, and being told plainly when there is nothing                                                                       |
+| owner          | The owner's day: what needs a decision, and what it is costing                                                                       |
+| tax            | Rates with up to three taxes, and a report that equals the ledger                                                                    |
+| paper          | The vehicle's paperwork: who sees it, who removes it, what lapses                                                                    |
+| providers      | Every outside service behind a seam, with a stub that behaves                                                                        |
+| ownership      | Ownership, warranty and sites, across a change of keeper                                                                             |
+| first-day      | A workshop's first day, from empty to taking a booking                                                                               |
+| coupons        | A coupon takes money off a bill without taking money out of the books                                                                |
+| repeat         | Doing it twice does not do it twice                                                                                                  |
+| writes         | Every write that moves money or stock declares what a repeat does                                                                    |
+| wiring         | Everything built has a way in, and works when you get there                                                                          |
+| triggers       | A rule a workshop writes actually runs, from its own moment                                                                          |
+| books          | The books still agree with themselves, and say so when they do not                                                                   |
+| screens        | Every screen at every size, measured rather than eyeballed                                                                           |
 | controls       | Every control on every page does something and every link goes somewhere                                                             |
 | empty          | Every page works with nothing in it, with a sentence saying what to do                                                               |
 | access         | The mechanical half of accessibility on every page                                                                                   |

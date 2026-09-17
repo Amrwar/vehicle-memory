@@ -2174,6 +2174,9 @@ model InvoiceLine {
   discountPct Decimal  @default(0) @db.Decimal(5, 2)
   taxRateId   String?
   taxAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  /// Tax-inclusive, and net of this line's own discount. The net figure is
+  /// lineTotal less taxAmount, which is how the revenue split reads it.
+  /// Writing the net here instead makes every report understate by the tax.
   lineTotal   Decimal  @default(0) @db.Decimal(12, 2)
   sortOrder   Int      @default(0)
 
@@ -3107,8 +3110,6 @@ model JournalEntry {
   reversedBy JournalEntry? @relation("EntryReversal")
   lines      JournalLine[]
 
-  @@index([orgId, postedAt])
-  @@index([sourceType, sourceId])
   /// One posting per source document. The ledger is posted outside the
   /// transaction that wrote the document it describes, deliberately, so that
   /// a momentary ledger failure cannot undo money a customer has already
@@ -3116,6 +3117,8 @@ model JournalEntry {
   /// a sentence in a comment and a findFirst; this is what makes it true when
   /// two retries arrive at once.
   @@unique([orgId, sourceType, sourceId, reference], map: "journal_entries_one_per_document")
+  @@index([orgId, postedAt])
+  @@index([sourceType, sourceId])
   @@map("journal_entries")
 }
 
@@ -3663,9 +3666,9 @@ model Referral {
   job      Job?         @relation(fields: [referredJobId], references: [id], onDelete: SetNull)
 
   @@unique([orgId, code])
-  @@index([orgId, creditedAt])
   /// One code per customer per workshop. Phase 46.
   @@unique([orgId, referrerCustomerId], map: "referrals_one_per_customer")
+  @@index([orgId, creditedAt])
   @@map("referrals")
 }
 
@@ -4209,6 +4212,9 @@ model CounterSaleLine {
   discountPct Decimal  @default(0) @db.Decimal(5, 2)
   taxRateId   String?
   taxAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  /// Tax-inclusive, and net of this line's own discount. The net figure is
+  /// lineTotal less taxAmount, which is how the revenue split reads it.
+  /// Writing the net here instead makes every report understate by the tax.
   lineTotal   Decimal  @default(0) @db.Decimal(12, 2)
   sortOrder   Int      @default(0)
 

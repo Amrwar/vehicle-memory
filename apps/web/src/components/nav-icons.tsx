@@ -45,6 +45,7 @@ export type NavIconName =
   | 'people'
   | 'sites'
   | 'ledger'
+  | 'books'
   | 'statements'
   | 'settings'
   | 'reminders'
@@ -347,6 +348,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <path d="M4.2 3.4h9.6a1.6 1.6 0 0 1 1.6 1.6v11.6H5.8a1.6 1.6 0 0 1-1.6-1.6z" />
       <path d="M7.2 3.4v13.2M9.8 7.2h3.4M9.8 10.4h3.4" />
+    </>
+  ),
+  books: (
+    <>
+      <path d="M3.4 5.4a1.6 1.6 0 0 1 1.6-1.6h3.4a1.6 1.6 0 0 1 1.6 1.6v9.2" />
+      <path d="M16.6 5.4a1.6 1.6 0 0 0-1.6-1.6h-3.4a1.6 1.6 0 0 0-1.6 1.6" />
+      <path d="M2.6 14.6h5.2l2.2 1.8 2.2-1.8h5.2" />
+      <path d="M13.2 9.2l1.4 1.4 2.4-2.6" />
     </>
   ),
   statements: (

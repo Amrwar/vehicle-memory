@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8200 - The books agree with themselves
+
+| Ref     | Requirement                                                                                                                                                                                                             | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8201 | Every figure the workshop reports MUST be checkable against the rows underneath it, recomputed rather than read from what was stored.                                                                                   | 47    |
+| FR-8202 | Every journal entry MUST balance on its own, not only in aggregate, so two entries wrong in opposite directions are both found.                                                                                         | 47    |
+| FR-8203 | An invoice MUST equal its lines plus tax less what was taken off, what it says is paid MUST equal the payments against it, and what is owed MUST equal the bill less what was paid and credited plus what was refunded. | 47    |
+| FR-8204 | A shelf MUST agree with the balance its last movement recorded, and stock MUST NOT be moved without a movement that explains it.                                                                                        | 47    |
+| FR-8205 | The ledger's receivable account MUST agree with the bills, and its liability accounts with the gift cards and the money held.                                                                                           | 47    |
+| FR-8206 | Nothing MUST be posted into a period that has been closed, checked by looking at the rows rather than by trusting the guard that refuses it.                                                                            | 47    |
+| FR-8207 | A difference MUST be named to the penny, with the document, both figures and the amount, and MUST NOT be forgiven by a tolerance.                                                                                       | 47    |
+| FR-8208 | An owner MUST be able to see the whole audit on a page, worst difference first, in their own language.                                                                                                                  | 47    |
+
 ## FR-8100 - What the customer could not see
 
 | Ref     | Requirement                                                                                                                                | Phase |

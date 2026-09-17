@@ -31,10 +31,39 @@ import {
   loadTransfer,
   receiveTransfer,
 } from '../../apps/web/src/lib/transfers';
+import { adjustStock } from '../../apps/web/src/lib/inventory';
 import { correctEvent } from '../../apps/web/src/lib/passport';
 import { recordCover, warrantyBook } from '../../apps/web/src/lib/warranty';
 
 let failures = 0;
+
+/**
+ * Every shelf this run touched by hand, so it can be put back.
+ *
+ * A check that leaves stock behind is not a check that cleaned up after
+ * itself, and the books audit will say so: a shelf whose figure no longer
+ * agrees with the movements underneath it is a real defect, and one planted by
+ * a test script looks exactly like one planted by a bug.
+ */
+const shelfWork: { productId: string; warehouseId: string; quantity: number }[] = [];
+
+/** Puts stock on a shelf the way the workshop would, with the movement to say why. */
+async function putOnShelf(
+  orgId: string,
+  productId: string,
+  warehouseId: string,
+  quantity: number,
+  reason: string,
+) {
+  await prisma.stockLevel.upsert({
+    where: { productId_warehouseId: { productId, warehouseId } },
+    create: { productId, warehouseId, onHand: 0, reserved: 0, avgCost: 12 },
+    update: {},
+  });
+
+  await adjustStock({ orgId, productId, warehouseId, quantity, reason });
+  shelfWork.push({ productId, warehouseId, quantity });
+}
 
 function check(label: string, passed: boolean, detail?: unknown) {
   console.info(
@@ -147,14 +176,10 @@ async function main() {
     select: { id: true },
   });
 
-  // Enough on the first shelf to send some of it.
-  await prisma.stockLevel.upsert({
-    where: { productId_warehouseId: { productId: product.id, warehouseId: from.id } },
-    create: { productId: product.id, warehouseId: from.id, onHand: 20, reserved: 0, avgCost: 12 },
-    // Generously, because some of this shelf is already promised to jobs and
-    // a transfer may only send what is genuinely spare.
-    update: { onHand: { increment: 20 } },
-  });
+  // Enough on the first shelf to send some of it. Generously, because some of
+  // this shelf is already promised to jobs and a transfer may only send what
+  // is genuinely spare.
+  await putOnShelf(org.id, product.id, from.id, 20, 'Stock put up for the wiring check');
 
   const before = await onHand(product.id, from.id);
   const beforeThere = await onHand(product.id, to.id);
@@ -382,12 +407,45 @@ async function forget(orgId: string) {
     where: { orgId, note: TAG },
     select: { id: true },
   });
+
+  // The stock a transfer moved has to be walked back before its movements are
+  // deleted, and walked back as an adjustment rather than by editing the
+  // figure: the last movement on a shelf is what the audit holds that shelf
+  // to, so the correction has to be the thing that writes it.
   for (const transfer of transfers) {
+    const moved = await prisma.stockMovement.findMany({
+      where: { orgId, referenceType: 'StockTransfer', referenceId: transfer.id },
+      select: { productId: true, warehouseId: true, quantity: true },
+    });
+
+    for (const movement of moved) {
+      await adjustStock({
+        orgId,
+        productId: movement.productId,
+        warehouseId: movement.warehouseId,
+        quantity: -Number(movement.quantity),
+        reason: 'Wiring check tidied up',
+      });
+    }
+
     await prisma.stockMovement.deleteMany({
       where: { orgId, referenceType: 'StockTransfer', referenceId: transfer.id },
     });
   }
   await prisma.stockTransfer.deleteMany({ where: { id: { in: transfers.map((row) => row.id) } } });
+
+  // And the stock this run put up in the first place comes back down, newest
+  // first so each shelf passes back through the figures it came up through.
+  for (const work of [...shelfWork].reverse()) {
+    await adjustStock({
+      orgId,
+      productId: work.productId,
+      warehouseId: work.warehouseId,
+      quantity: -work.quantity,
+      reason: 'Wiring check tidied up',
+    });
+  }
+  shelfWork.length = 0;
 
   const customers = await prisma.customer.findMany({
     where: { orgId, notes: TAG },

@@ -221,6 +221,8 @@ async function main() {
     { file: 'warranty-cost', path: '/warranty?range=year#cost', who: 'owner', fullPage: true },
     { file: 'start', path: '/start', who: 'owner', fullPage: true },
     { file: 'coupons', path: '/coupons', who: 'owner', fullPage: true },
+    { file: 'books', path: '/books', who: 'owner', fullPage: true },
+    { file: 'phone-books', path: '/books', who: 'owner', width: 390, height: 844, fullPage: true },
     { file: 'phone-dashboard', path: '/dashboard', who: 'owner', width: 390, height: 844 },
     { file: 'phone-job', path: `/jobs/${r.job}`, who: 'owner', width: 390, height: 844 },
     {

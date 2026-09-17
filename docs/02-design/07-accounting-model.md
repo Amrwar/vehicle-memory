@@ -404,7 +404,7 @@ Non-negotiable, because a ledger that does not balance destroys trust
 irrecoverably (risk R2):
 
 - [ ] Property tests: no sequence of operations produces an unbalanced entry
-- [ ] Trial balance reconciles against operational totals on seeded data
+- [x] Trial balance reconciles against operational totals on seeded data (Phase 47)
 - [ ] Stock value in the ledger equals the sum of stock movements
 - [ ] An external accountant reviews the postings in this document
 - [ ] Period close and reopen tested, including the retained-earnings posting
@@ -427,6 +427,49 @@ and 2110 and credits 2000. The operational side matches: a credit is set
 against the supplier's open bills oldest first, and credit held on their
 account is set against the next bill booked, so what the payables page says
 is owed is what 2000 says, less credit held.
+
+## Whether the books agree (Phase 47)
+
+Everything above says what a posting should be. This says what has to be true
+afterwards, whatever route the workshop took to get there, and it is checked by
+recomputing rather than by reading a stored figure back.
+
+Each journal entry balances **on its own**. A trial balance is the sum of them
+all, and a sum can come out to nought while two entries are wrong in opposite
+directions — which is exactly the shape a bad migration leaves.
+
+An invoice equals its lines plus tax less what was taken off. What it says is
+paid equals the payments against it, read from the payments rather than from
+the running total, because the running total is the thing that drifts: it is
+incremented by every path that settles a bill, and a path added later that
+forgets to increment it leaves a customer looking overdue on money they have
+paid.
+
+What a customer owes is the bill, less what was paid, less what was credited,
+**plus what was refunded**. The refund adds back because section 3.9 debits
+receivable: the credit note has already reduced what was owed, and the refund
+clears the credit balance that left behind. `Invoice.amountPaid` is not
+decremented by a refund, so a bill that was settled, credited and refunded
+still carries a balance — and the bridge from account 1100 therefore reads
+every issued bill, not only the ones whose status says unpaid. Getting this
+wrong in the checker rather than in the ledger was the first thing this suite
+found, and it is recorded here so it is not rediscovered.
+
+Account 1100 agrees with the bills; 2300 with what the gift cards come to;
+2200 with the money still held. These pairs are written by different code at
+different moments, and a disagreement between them is what an accountant finds
+first.
+
+A closed period is checked by looking at the rows — an entry created after the
+period's `closedAt` — rather than by trusting the guard that refuses one. A
+guard added after some rows were written says nothing about those rows.
+
+No tolerance is offered anywhere. Money is integer minor units end to end, so
+there is no rounding to forgive, and a check that forgives a penny will one day
+forgive a thousand of them. `infra/scripts/verify-books.ts` runs all of it
+against the seeded workshop, the demonstration workshop, a generated month of
+chaos, a deliberate breakage and the state after cleaning up; `/books` shows
+the same audit to the owner, worst difference first.
 
 ## Tax, configurable (Phase 41)
 

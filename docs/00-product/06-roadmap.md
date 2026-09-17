@@ -2698,6 +2698,66 @@ anything, including an owner.
 **Exit.** The invariants run against the seeded workshop, the demonstration
 workshop and a generated month of chaos, and fail loudly.
 
+**Status.** Built.
+
+Every other check in this product asks whether an operation did the right
+thing. This one asks the opposite question: given everything that has ever
+happened to a workshop, however it was arrived at, do the figures still agree
+with each other? The difference matters because a ledger can be posted
+correctly ten thousand times and still be wrong. The eleven-thousandth was a
+migration, a hand-written fix at two in the morning, a half-applied refund, or
+a feature somebody added without checking it against the accounts — and none of
+those go through the functions the other tests exercise.
+
+So nothing here trusts a stored total. An invoice's total is not believed
+because `issueInvoice` computed it correctly; it is believed because its lines
+still add up to it today. A tolerance is deliberately not offered: money in
+this product is integer minor units end to end, so there is no rounding to
+forgive, and a check that forgives a penny is a check that will one day forgive
+a thousand of them.
+
+It found four things on its first run, which is the entire argument for having
+written it.
+
+The first was in the seed, and had been shipping for months. An invoice line
+stores its total **after** tax — `issueInvoice` writes `taxOnLine(...).total`
+and the revenue split recovers the net by taking the tax back off — and the
+seed wrote the net figure into the same column. Nothing on the invoice looked
+wrong, because an invoice carries its own subtotal and total and both were
+right. It shows up only when the figures are recomputed from the rows
+underneath them, which is exactly what this suite does. Repaired in the seed,
+commented in the schema, and migrated for anything already written.
+
+The second was a period that closed before the entries inside it were written.
+The seed back-dated `closedAt` to the end of the quarter while creating the
+rows today, so the audit correctly reported somebody posting into books that
+had already been signed off. Periods are now created open and closed at the end
+of the run, which is the order it happens in a real workshop.
+
+The third was mine, from the phase before: `verify-wiring.ts` topped up a shelf
+by incrementing `onHand` directly, with no movement to explain the new figure.
+A shelf is held to the balance its last movement wrote down, so this left a
+part that no longer agreed with its own history — a defect planted by a test
+script looks exactly like one planted by a bug. Both probes now put stock back
+the way they took it out, through `adjustStock`, and the books check ends by
+asserting it left the books as it found them.
+
+The fourth was the invariant itself, and is the one worth recording. The
+ledger's receivable account and the unpaid bills disagreed by exactly one
+refund, and the ledger was right: `postRefund` debits receivable, because the
+credit note has already taken the sale out of revenue, and the refund clears
+the credit balance the customer was left holding. What is owed is the bill less
+what was paid, less what was credited, **plus** what was handed back — and a
+settled bill that was later credited and refunded still leaves a balance, so
+the bridge has to read every issued bill rather than only the ones marked
+unpaid. The check was wrong, not the product. Finding that out is worth as much
+as finding a bug.
+
+It is also a page. `/books` is the one screen in the product that can say
+something is wrong without offering a button to fix it: a difference here is
+not a setting to change, it is something that happened, and the owner sees it
+in the same words the script sees it in — worst first, named to the penny.
+
 ## Phase 48 — Security and tenancy
 
 **Scope.** Every route tried with another workshop's identifier: customers,

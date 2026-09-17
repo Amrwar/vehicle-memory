@@ -1642,6 +1642,43 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AZ - The books agree with themselves (Phase 47)
+
+### AZ1 - The figure I am about to sign
+
+**As** Fatima **I want** to know the books still agree with themselves **so
+that** I am not the one who finds out in front of an accountant.
+**Size** 13 - **Satisfies** FR-8201, FR-8202, FR-8203, FR-8205
+
+- **Given** the whole workshop, **when** I open the page, **then** every figure
+  has been recomputed from the rows underneath it rather than read back.
+- **Given** a total that has drifted from its lines, **when** I look, **then**
+  it is named with both figures and the difference, to the penny.
+- **Given** two entries wrong in opposite directions, **when** the trial
+  balance still comes to nought, **then** both are still found.
+
+### AZ2 - A quarter I have already reported on
+
+**As** Ahmed **I want** a closed period to stay closed **so that** a figure I
+gave somebody in April is still that figure in June.
+**Size** 5 - **Satisfies** FR-8206
+
+- **Given** a period that has been closed, **when** anything was posted into it
+  afterwards, **then** it is listed with both dates.
+- **Given** rows written before the guard existed, **when** the check runs,
+  **then** they are found too, because it looks rather than trusts.
+
+### AZ3 - A part that is not on the shelf
+
+**As** Ahmed **I want** a shelf to agree with its own history **so that** I do
+not promise a customer a part I do not have.
+**Size** 5 - **Satisfies** FR-8204
+
+- **Given** a shelf, **when** its figure differs from the balance its last
+  movement recorded, **then** the part is named with the difference in units.
+- **Given** stock moved by anything at all, **when** it moves, **then** a
+  movement explains it.
+
 ## Epic AY - What the customer could not see (Phase 46.7)
 
 ### AY1 - The deposit I already paid

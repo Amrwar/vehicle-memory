@@ -462,6 +462,19 @@ The second sweep: things connected at one end only.
 | Withdrawing a quote link    | Built  | Shown with where it went and whether it was opened (Phase 46.7)                  |
 | A way back from the floor   | Built  | For anybody who is not a technician (Phase 46.7)                                 |
 
+## 21.13 The books agree with themselves
+
+| Item                         | Status | Where                                                                           |
+| ---------------------------- | ------ | ------------------------------------------------------------------------------- |
+| Every entry balances alone   | Built  | One at a time, so two wrong in opposite directions are both found (Phase 47)    |
+| An invoice against its lines | Built  | Recomputed, never read back from the stored total (Phase 47)                    |
+| Paid, credited, refunded     | Built  | What is owed is the bill less both, plus what was handed back (Phase 47)        |
+| A shelf against its history  | Built  | Held to the balance its last movement recorded (Phase 47)                       |
+| The ledger against the bills | Built  | Receivable, gift cards outstanding and money held, all three bridged (Phase 47) |
+| A closed period stays closed | Built  | Read from the rows, not from the guard that refuses it (Phase 47)               |
+| Named to the penny           | Built  | No tolerance: integer minor units end to end (Phase 47)                         |
+| `/books`                     | Built  | The whole audit on a page, worst first, in three languages (Phase 47)           |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -540,7 +553,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 256          |
+| Built    | 264          |
 | Partial  | 1            |
 | Deferred | 1            |
 

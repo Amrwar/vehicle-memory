@@ -9,6 +9,7 @@ export * from './inventory/index';
 export * from './offline/index';
 export * from './retention/index';
 export * from './reliability/index';
+export * from './integrity/index';
 export * from './giftcards/index';
 export * from './region/index';
 export * from './deposits/index';

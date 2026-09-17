@@ -1158,7 +1158,7 @@ async function main() {
                 description: 'Interim service, 1.5h',
                 quantity: 1.5,
                 unitPrice: 95,
-                lineTotal: 142.5,
+                lineTotal: 171,
                 taxAmount: 28.5,
                 taxRateId: vat.id,
                 sortOrder: 1,
@@ -1168,7 +1168,7 @@ async function main() {
                 description: 'Engine oil 0W-20',
                 quantity: 1,
                 unitPrice: 52,
-                lineTotal: 52,
+                lineTotal: 62.4,
                 taxAmount: 10.4,
                 taxRateId: vat.id,
                 sortOrder: 2,
@@ -1178,7 +1178,7 @@ async function main() {
                 description: 'Oil filter',
                 quantity: 1,
                 unitPrice: 18,
-                lineTotal: 18,
+                lineTotal: 21.6,
                 taxAmount: 3.6,
                 taxRateId: vat.id,
                 sortOrder: 3,
@@ -1188,7 +1188,7 @@ async function main() {
                 description: 'Cabin filter',
                 quantity: 1,
                 unitPrice: 24,
-                lineTotal: 24,
+                lineTotal: 28.8,
                 taxAmount: 4.8,
                 taxRateId: vat.id,
                 sortOrder: 4,
@@ -1801,7 +1801,10 @@ async function main() {
               description: 'Labour',
               quantity: 1,
               unitPrice: invoice.labour,
-              lineTotal: invoice.labour,
+              // Tax-inclusive, like every line the application writes:
+              // issueInvoice stores the line’s total after tax, and the
+              // revenue split reads lineTotal less taxAmount to get the net.
+              lineTotal: Math.round(invoice.labour * 1.2 * 100) / 100,
               taxAmount: Math.round(invoice.labour * 0.2 * 100) / 100,
               taxRateId: vat.id,
               sortOrder: 1,
@@ -1811,7 +1814,10 @@ async function main() {
               description: 'Parts supplied',
               quantity: 1,
               unitPrice: invoice.parts,
-              lineTotal: invoice.parts,
+              // Tax-inclusive, like every line the application writes:
+              // issueInvoice stores the line’s total after tax, and the
+              // revenue split reads lineTotal less taxAmount to get the net.
+              lineTotal: Math.round(invoice.parts * 1.2 * 100) / 100,
               taxAmount: Math.round(invoice.parts * 0.2 * 100) / 100,
               taxRateId: vat.id,
               sortOrder: 2,
@@ -1834,7 +1840,7 @@ async function main() {
       where: { orgId: org.id, number: { in: ['INV-1036', 'INV-1039', 'INV-1041'] } },
       include: {
         customer: { select: { displayName: true } },
-        lines: { select: { kind: true, lineTotal: true } },
+        lines: { select: { kind: true, lineTotal: true, taxAmount: true } },
       },
     }),
   });
@@ -1987,7 +1993,7 @@ async function seedLedger(
       taxTotal: unknown;
       issuedAt: Date | null;
       customer: { displayName: string };
-      lines: { kind: string; lineTotal: unknown }[];
+      lines: { kind: string; lineTotal: unknown; taxAmount: unknown }[];
     }[];
   },
 ) {
@@ -2015,6 +2021,12 @@ async function seedLedger(
     endsAt: new Date(year, index * 3 + 3, 0, 23, 59, 59),
   }));
 
+  // Created open, every one of them. A quarter is closed at the end of this
+  // function, once its entries exist, because that is the order it happens in
+  // a real workshop: the books are written and then they are signed off. Doing
+  // it the other way round dates the close before rows that were seeded after
+  // it, and the audit rightly reads that as somebody posting into a period
+  // that had already been reported on.
   const cutoff = day(-60);
   await prisma.fiscalPeriod.createMany({
     data: quarters.map((quarter) => ({
@@ -2022,8 +2034,6 @@ async function seedLedger(
       name: quarter.name,
       startsAt: quarter.startsAt,
       endsAt: quarter.endsAt,
-      isClosed: quarter.endsAt < cutoff,
-      closedAt: quarter.endsAt < cutoff ? quarter.endsAt : null,
     })),
   });
 
@@ -2196,10 +2206,14 @@ async function seedLedger(
   });
 
   for (const invoice of refs.openInvoices) {
+    // A line's total carries its own tax, so the net has to be recovered by
+    // taking the tax back off. Passing the gross figure in as the net puts the
+    // tax on the invoice twice: once in the revenue accounts and once in the
+    // tax liability, and the receivable ends up larger than the bill itself.
     const netFor = (kind: string) =>
       invoice.lines
         .filter((line) => line.kind === kind)
-        .reduce((total, line) => total + Number(line.lineTotal), 0);
+        .reduce((total, line) => total + Number(line.lineTotal) - Number(line.taxAmount), 0);
 
     await post(
       postInvoiceIssued({
@@ -2224,6 +2238,13 @@ async function seedLedger(
       at: day(-3, 16, 0),
     }),
   );
+
+  // And now the quarters that are long past are signed off, after everything
+  // that belongs in them has been written.
+  await prisma.fiscalPeriod.updateMany({
+    where: { orgId, endsAt: { lt: cutoff } },
+    data: { isClosed: true, closedAt: new Date() },
+  });
 }
 
 /**

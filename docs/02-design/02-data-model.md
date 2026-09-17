@@ -292,6 +292,28 @@ Everything else in this phase is an index rather than a table, and they are in
 the invariants above: one posting per source document, one credit and one card
 load per refund, one referral code per customer, one keyed loyalty entry.
 
+## 6.10 A line's total includes its tax (Phase 47)
+
+`invoice_lines.lineTotal` is the line **after** tax and net of its own
+discount: `issueInvoice` stores `taxOnLine(...).total`, and anything wanting
+the net recovers it by subtracting `taxAmount`. Written down here because it is
+not guessable from the column name, and because reading it as a net figure and
+adding the tax again makes every invoice in the product appear wrong by exactly
+its VAT. The seed had it the other way round for months without anything
+noticing — an invoice carries its own subtotal and total, and both were right;
+only recomputing from the rows underneath them showed it. Repaired by
+`20260916230000_line_totals_include_tax`, which touches only rows still
+carrying the older spelling.
+
+A shelf has the same shape of rule. `stock_levels.onHand` is held to
+`balanceAfter` on the newest `stock_movements` row for that part and site, not
+to the sum of the movements: a shelf can be opened at a figure somebody
+counted rather than at zero, so the movements were never meant to add up to the
+balance. The consequence is that nothing may change `onHand` without writing a
+movement — `adjustStock()`, `recordStocktake()` and the transfer functions are
+the only ways stock moves, and a script that reaches past them plants a defect
+indistinguishable from a bug.
+
 ## 7. Deletion
 
 Operational records are hard-deleted; there are no `deletedAt` columns. A

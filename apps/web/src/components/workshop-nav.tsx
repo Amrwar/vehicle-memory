@@ -201,6 +201,12 @@ const GROUPS: Group[] = [
     items: [
       { href: '/ledger', label: msg('Ledger'), icon: 'ledger', permission: 'ledger:read' },
       {
+        href: '/books',
+        label: msg('Do the books agree?'),
+        icon: 'books',
+        permission: 'report:financial',
+      },
+      {
         href: '/expenses',
         label: msg('Expenses'),
         icon: 'expenses',
