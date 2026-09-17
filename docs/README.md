@@ -159,4 +159,7 @@ figures still agree with each other afterwards — an invariant suite over the
 whole ledger, and a page at `/books` that says so. Phase 48 asks the question
 a workshop asks before any of the rest of it matters — can the garage down the
 road see my customers — by creating a second workshop and trying, at every
-address the application answers on.
+address the application answers on. Phase 49 loses the database on purpose and
+measures what it costs: one second of work and five seconds of downtime on the
+seeded workshop, with a written record of everything that came back missing,
+orphaned or broken.

@@ -1642,6 +1642,45 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BB - Carnet came back (Phase 49)
+
+### BB1 - The morning the database went
+
+**As** Ahmed **I want** to know what a disaster would actually cost me **so
+that** "we have backups" is a number rather than a reassurance.
+**Size** 13 - **Satisfies** FR-8401, FR-8402, FR-8403
+
+- **Given** a backup, **when** it is restored into a fresh database, **then**
+  every table comes back with every row that was in it at the time.
+- **Given** the restore, **when** it finishes, **then** how much work was lost
+  and how long it took are both measured and compared with what was promised.
+- **Given** the copy, **when** it is opened, **then** it needs no migration and
+  its passports, triggers and books are all intact.
+
+### BB2 - The photograph that is not there
+
+**As** Maria **I want** the pictures in my report to still be there **so that**
+a record with holes in it is not what I am handed.
+**Size** 8 - **Satisfies** FR-8404, FR-8405
+
+- **Given** a row pointing at a file, **when** the drill runs, **then** the
+  file is confirmed to exist.
+- **Given** a file that did not come back, **when** the drill runs, **then** it
+  is named — proved by taking one away on purpose.
+- **Given** a file nothing points at, **when** the drill runs, **then** it is
+  recorded, and an operator can remove it deliberately.
+
+### BB3 - The message that was in the queue
+
+**As** Fatima **I want** work that was in flight to survive **so that** a
+customer who was promised a receipt still gets one.
+**Size** 5 - **Satisfies** FR-8406, FR-8407
+
+- **Given** messages waiting to be sent, **when** the system comes back,
+  **then** they are all still waiting.
+- **Given** the drill's report, **when** I read it, **then** it says what it
+  did not measure as plainly as what it did.
+
 ## Epic BA - One workshop cannot reach another (Phase 48)
 
 ### BA1 - The garage down the road

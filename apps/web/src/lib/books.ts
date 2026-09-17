@@ -15,9 +15,9 @@ import {
   stockAddsUp,
   type Violation,
 } from '@carnet/core';
-import { prisma } from '@carnet/db';
+import { prisma, type PrismaClient } from '@carnet/db';
 
-import { regionFor } from './region';
+import { regionOf } from './region';
 
 /**
  * Reading a workshop's whole books and asking whether they still agree.
@@ -41,10 +41,22 @@ import { regionFor } from './region';
  * believed because its lines still add up to it today.
  */
 
-/** Everything, for one workshop. */
-export async function auditBooks(orgId: string): Promise<Audit> {
-  const region = await regionFor(orgId);
-  const currency = region.currency;
+/**
+ * Everything, for one workshop.
+ *
+ * The database is a parameter rather than the module's own, because the same
+ * audit is run against a restored copy during the recovery drill: books that
+ * balanced before the backup and do not balance after it are the thing that
+ * drill exists to catch, and it would be a poor answer to say the audit only
+ * works on the database the application happens to be pointing at.
+ */
+export async function auditBooks(orgId: string, db: PrismaClient = prisma): Promise<Audit> {
+  const org = await db.organization.findUnique({
+    where: { id: orgId },
+    select: { country: true, baseCurrency: true, locale: true, timezone: true },
+  });
+
+  const currency = org ? regionOf(org).currency : 'GBP';
 
   const found: (Breach | Violation | null)[] = [];
   let checked = 0;
@@ -54,7 +66,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
   // The trial balance is the sum of them all, and a sum can come out to zero
   // while two entries are wrong in opposite directions. That is exactly the
   // shape a bad migration leaves, so each entry is asked by itself.
-  const entries = await prisma.journalEntry.findMany({
+  const entries = await db.journalEntry.findMany({
     where: { orgId },
     select: {
       id: true,
@@ -83,7 +95,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
 
   /* --- nothing posted into a period somebody has reported on --------------- */
 
-  const closed = await prisma.fiscalPeriod.findMany({
+  const closed = await db.fiscalPeriod.findMany({
     where: { orgId, isClosed: true },
     select: { name: true, startsAt: true, endsAt: true, closedAt: true },
   });
@@ -94,7 +106,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
     // Read rather than trusted. The guard that refuses a posting into a closed
     // period was added at a particular moment, and says nothing about rows
     // written before it existed.
-    const after = await prisma.journalEntry.findMany({
+    const after = await db.journalEntry.findMany({
       where: {
         orgId,
         postedAt: { gte: period.startsAt, lte: period.endsAt },
@@ -118,7 +130,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
 
   /* --- a bill against the things underneath it ----------------------------- */
 
-  const invoices = await prisma.invoice.findMany({
+  const invoices = await db.invoice.findMany({
     where: { orgId, status: { not: 'DRAFT' } },
     select: {
       id: true,
@@ -203,7 +215,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
 
   /* --- a shelf against its movements --------------------------------------- */
 
-  const levels = await prisma.stockLevel.findMany({
+  const levels = await db.stockLevel.findMany({
     where: { warehouse: { orgId } },
     select: {
       onHand: true,
@@ -219,7 +231,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
     // rather than at zero, so the movements do not add up to the balance and
     // were never meant to. What every movement does carry is the balance it
     // left behind, and that is the number to hold the shelf to.
-    const last = await prisma.stockMovement.findFirst({
+    const last = await db.stockMovement.findFirst({
       where: { orgId, productId: level.productId, warehouseId: level.warehouseId },
       orderBy: { createdAt: 'desc' },
       select: { balanceAfter: true },
@@ -240,7 +252,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
 
   /* --- no card is worth less than nothing ---------------------------------- */
 
-  const cards = await prisma.giftCard.findMany({
+  const cards = await db.giftCard.findMany({
     where: { orgId },
     select: { code: true, entries: { select: { amount: true } } },
   });
@@ -277,14 +289,14 @@ export async function auditBooks(orgId: string): Promise<Audit> {
   found.push(
     liabilityAgrees({
       what: 'Gift cards outstanding',
-      ledger: await balanceOf(orgId, '2300', currency),
+      ledger: await balanceOf(db, orgId, '2300', currency),
       outstanding: money(cardsOutstanding, currency),
     }),
   );
 
   /* --- money held against what was taken, used and returned ---------------- */
 
-  const deposits = await prisma.deposit.findMany({
+  const deposits = await db.deposit.findMany({
     where: { orgId },
     select: {
       id: true,
@@ -331,7 +343,7 @@ export async function auditBooks(orgId: string): Promise<Audit> {
   found.push(
     liabilityAgrees({
       what: 'Money held for customers',
-      ledger: await balanceOf(orgId, '2200', currency),
+      ledger: await balanceOf(db, orgId, '2200', currency),
       outstanding: money(heldOutstanding, currency),
     }),
   );
@@ -339,14 +351,14 @@ export async function auditBooks(orgId: string): Promise<Audit> {
   /* --- the ledger against the bills it describes --------------------------- */
 
   checked += 1;
-  found.push(await receivableBridge(orgId, currency));
+  found.push(await receivableBridge(db, orgId, currency));
 
   return auditOf(checked, found);
 }
 
 /** What an account's balance comes to, from its own lines. */
-async function balanceOf(orgId: string, code: string, currency: string) {
-  const lines = await prisma.journalLine.findMany({
+async function balanceOf(db: PrismaClient, orgId: string, code: string, currency: string) {
+  const lines = await db.journalLine.findMany({
     where: { entry: { orgId }, account: { code } },
     select: { debit: true, credit: true },
   });
@@ -369,16 +381,20 @@ async function balanceOf(orgId: string, code: string, currency: string) {
  * those two quietly disagree, and that disagreement is the first thing an
  * accountant finds.
  */
-async function receivableBridge(orgId: string, currency: string): Promise<Breach | null> {
+async function receivableBridge(
+  db: PrismaClient,
+  orgId: string,
+  currency: string,
+): Promise<Breach | null> {
   const [lines, invoices] = await Promise.all([
-    prisma.journalLine.findMany({
+    db.journalLine.findMany({
       where: { entry: { orgId }, account: { code: '1100' } },
       select: { debit: true, credit: true },
     }),
     // Every bill, not only the unpaid ones: a settled bill that was later
     // credited and refunded still leaves a balance on the account, and leaving
     // it out is how the two sides come to differ by exactly one refund.
-    prisma.invoice.findMany({
+    db.invoice.findMany({
       where: { orgId, status: { not: 'DRAFT' } },
       select: {
         total: true,

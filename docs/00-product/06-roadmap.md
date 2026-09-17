@@ -2836,6 +2836,72 @@ then verify the ledger, the passports, the attachments and tenant isolation.
 **Exit.** A measured recovery point and recovery time, and a written record of
 what was missing, orphaned or broken when it came back.
 
+**Status.** Built.
+
+`verify-backup.ts` already proved a dump restores with its rows and its chains.
+`verify-recovery.ts` asks the question that follows and is the only one that
+matters at three in the morning: if the database were lost right now, what
+would the workshop have lost, how long would it be shut, and what would come
+back wrong?
+
+So it does the whole thing. It writes a row and notes the time. It dumps. It
+writes a second row — the work that happens between a backup and a disaster,
+which nobody gets back. It restores into a fresh database, runs the migrations
+against the copy, and holds the copy against the original: every table, every
+file the rows point at, every file the store holds, every passport chain, the
+books, the queues and the tenant boundary. Sixteen checks, two measured
+numbers and a written record.
+
+Measured on the seeded workshop: **one second of work lost, back in five
+seconds**, against promises of five minutes and an hour. Those figures are
+small because the database is, and the point is not the size — it is that they
+are measured rather than asserted, and that the same script will say so when
+they stop being small.
+
+What it found, in order of how much it matters.
+
+**Files nobody will ever delete.** A photograph never passes through the
+server: the browser gets a signed URL and uploads straight to the store, and
+the server records only that it happened. The consequence nobody notices until
+somebody looks is that when the row goes, nothing takes the file with it. The
+drill found four, belonging to conversations that no longer exist. That is a
+bill that grows and, more seriously, a picture of somebody's car that nothing
+will ever remove — a workshop telling a customer their record has been erased
+should be telling the truth. There is now `npm run storage:orphans`, which
+lists by default and deletes only when asked and only for files older than a
+day, because a file reaches the store before its row is written and a sweep
+with no patience deletes exactly what somebody is in the middle of adding.
+
+**A probe that leaked.** `verify-conversations.ts` uploaded a document and
+deleted the row without the file, so every run left one behind. Fixed at the
+one moment the script knows which file is which.
+
+**A check over nothing.** The store check passed while running over zero
+references, which is the same trap the tenancy probe fell into a phase earlier.
+The drill now puts a real file in the store with a real row pointing at it,
+then takes the file away and confirms the check notices, then puts it back.
+
+**Three things about running the Prisma CLI from a script**, each of which cost
+a run: `npx` resolves to nothing from `execFileSync`, Prisma 7 reads the
+connection URL from a config file beside the schema rather than from the
+schema, and that config prefers `DIRECT_DATABASE_URL` — which on a pooled
+provider points at the live database. The migration check was quietly reporting
+on production instead of on the copy.
+
+And two places where the drill was wrong rather than the product. A file with
+nothing pointing at it is not a recovery failure: it was there before the drill
+and after it, the restore neither caused it nor can fix it, so it belongs in
+the record rather than in the failures. And `availableAt` carries the retry
+backoff and the quiet-hours hold in one value, deliberately, so a message
+waiting until nine in the morning looked like a lease held by a dead worker.
+The check became the one that can only mean something is wrong: held past any
+hold the product knows how to write, or out of attempts and still queued.
+
+Said plainly in the output rather than quietly assumed: the five-minute
+recovery point of NFR-304 is bought by continuous archiving of the
+write-ahead log, not by the dump this drill takes. What is measured here is
+that a dump restores completely and correctly, and how long that takes.
+
 ## Phase 50 — Observability and system health
 
 **Scope.** An operator's view rather than an audit trail: errors by route,

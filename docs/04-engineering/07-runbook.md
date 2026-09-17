@@ -78,10 +78,47 @@ Jobs still complete while the outbox is backed up. That is the design.
 
 ## Restoring a backup
 
-Tested on every push, not quarterly (NFR-306): `npm run verify:backup` dumps
-the seeded database, restores it into a fresh one and checks every row and
-every chain came back. Untested backups are not backups, and this one is
-tested more often than anybody would remember to.
+Tested on every push, not quarterly (NFR-306). Two scripts, and the difference
+between them is the difference between a backup and a recovery.
+
+`npm run verify:backup` dumps the seeded database, restores it into a fresh
+one and checks every row and every chain came back. Untested backups are not
+backups, and this one is tested more often than anybody would remember to.
+
+`npm run verify:recovery` asks what the disaster would cost. It writes a row,
+takes the backup, writes a second row — the work that happens between a backup
+and a disaster — restores, runs the migrations against the copy, and then holds
+the copy against the original: every table, every file the rows point at, every
+file the store holds, every passport chain, the books, the queues and the
+tenant boundary. It ends with two measured numbers and a written record of
+everything that came back missing, orphaned or broken.
+
+Last measured on the seeded workshop: **one second of work lost, back in five
+seconds**, against promises of five minutes and an hour. The figures are small
+because the database is; what matters is that they are measured and that the
+script will say so when they stop being small.
+
+**What the drill does not measure, and nobody should read it as having
+measured.** The five-minute recovery point in NFR-304 is bought by continuous
+archiving of the write-ahead log, not by the dump the drill takes. Archiving is
+a property of the managed database and is checked in the Neon console, not
+here. What the drill proves is that a dump restores completely and correctly,
+and how long that takes.
+
+### Files, which are not in the database
+
+The store is restored separately from the database and can drift from it in
+both directions, which are different problems:
+
+- A row pointing at a file that is not there is a customer opening a report
+  with a hole in it. The drill fails on this.
+- A file nothing points at is a bill that grows and a photograph of somebody's
+  car that nothing will ever delete. The drill records it rather than failing,
+  because the restore neither caused it nor can fix it. Clear it with
+  `npm run storage:orphans`, which lists by default and removes only when asked
+  and only for files older than a day — a file reaches the store before its row
+  is written, so a sweep with no patience deletes exactly what somebody is in
+  the middle of uploading.
 
 In production the database is Neon, which keeps a point-in-time history.
 
@@ -92,8 +129,13 @@ In production the database is Neon, which keeps a point-in-time history.
    `npx tsx infra/scripts/verify-integrity.ts`. **Chains must verify.**
 3. Compare row counts on the largest tables (`jobs`, `vehicle_events`,
    `journal_lines`, `message_logs`) against the original.
-4. Repoint `DATABASE_URL` in Vercel at the branch, redeploy, announce. Keep
+4. Run `npx tsx infra/scripts/verify-recovery.ts` against the branch to get the
+   two numbers and the list of what came back wrong. Write both in the incident
+   record: an RPO nobody wrote down is an RPO nobody can improve.
+5. Repoint `DATABASE_URL` in Vercel at the branch, redeploy, announce. Keep
    the original branch until the incident is closed.
+6. Restore the object store to the same moment, then run
+   `npm run storage:orphans` to see what the two now disagree about.
 
 RTO 1 hour, RPO 5 minutes. `LEDGER_CHAIN_SALT` is not in the database and is
 not restored with it; it must be the same value or step 2 fails everywhere.

@@ -489,6 +489,19 @@ The second sweep: things connected at one end only.
 | A real link from a made-up one | Built  | Identical, character for character (Phase 48)                           |
 | A passport a buyer may read    | Built  | The car, and nothing about who owns it (Phase 48)                       |
 
+## 21.15 Carnet came back
+
+| Item                       | Status | Where                                                                        |
+| -------------------------- | ------ | ---------------------------------------------------------------------------- |
+| A restore, not a backup    | Built  | Dumped, restored into a fresh database, held against the original (Phase 49) |
+| Two measured numbers       | Built  | Work lost and time taken, against NFR-303 and NFR-304 (Phase 49)             |
+| Migrations on the copy     | Built  | A restored copy needs none to be usable (Phase 49)                           |
+| Passports, triggers, books | Built  | All three checked in the copy, not only the row counts (Phase 49)            |
+| Files the rows point at    | Built  | Checked, and proved by taking one away (Phase 49)                            |
+| Files nothing points at    | Built  | Reported, and removable with `npm run storage:orphans` (Phase 49)            |
+| Work still in the queue    | Built  | Comes back, and none of it is stuck for ever (Phase 49)                      |
+| What it did not measure    | Built  | Said in the output rather than assumed (Phase 49)                            |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -567,7 +580,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 273          |
+| Built    | 281          |
 | Partial  | 1            |
 | Deferred | 1            |
 

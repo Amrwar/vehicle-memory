@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8400 - Carnet came back
+
+| Ref     | Requirement                                                                                                                                 | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8401 | A recovery drill MUST restore a backup into a fresh database and hold the copy against the original table by table.                         | 49    |
+| FR-8402 | The drill MUST measure how much work was lost and how long the recovery took, and MUST say when either missed what was promised.            | 49    |
+| FR-8403 | A restored copy MUST need no migration to be usable, and MUST come back with its triggers, its passport chains and its books intact.        | 49    |
+| FR-8404 | Every file a row points at MUST be in the store, and the drill MUST prove it would notice one that was not.                                 | 49    |
+| FR-8405 | A file in the store that no row points at MUST be reported, and MUST be removable by an operator with a grace period for uploads in flight. | 49    |
+| FR-8406 | Work still waiting to be sent MUST come back, and none of it MUST be left in a state where it will never be sent.                           | 49    |
+| FR-8407 | The drill MUST state what it did not measure, rather than leave it to be assumed.                                                           | 49    |
+
 ## FR-8300 - One workshop cannot reach another
 
 | Ref     | Requirement                                                                                                                                                              | Phase |

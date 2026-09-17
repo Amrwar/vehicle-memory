@@ -44,6 +44,7 @@ import {
 import { createJob } from '../../apps/web/src/lib/jobs';
 import { issueInvoice, moveJob } from '../../apps/web/src/lib/money';
 import { receiveInbound } from '../../apps/web/src/lib/retention';
+import { forgetOrphans } from '../../apps/web/src/lib/storage-sweep';
 
 const BASE = process.argv[2] ?? 'http://localhost:3000';
 const TAG = 'Verify conversations probe';
@@ -464,6 +465,18 @@ async function forget(orgId: string) {
   await prisma.outboxEvent.deleteMany({
     where: { orgId, type: { in: ['job.completed', 'invoice.issued'] }, processedAt: null },
   });
+  // The attachment rows go with the conversation; the files they point at do
+  // not, because a file reaches the store without passing through the server.
+  // Taking them now is the only moment this script knows which they are — the
+  // sweep that clears orphans deliberately waits a day before touching
+  // anything, so it would not clean up after this run for another day.
+  const attachments = await prisma.messageAttachment.findMany({
+    where: { conversation: { orgId, jobId: { in: jobIds } } },
+    select: { url: true },
+  });
+
+  await forgetOrphans(attachments.map((row) => ({ key: row.url, bytes: 0, since: new Date(0) })));
+
   await prisma.conversation.deleteMany({ where: { orgId, jobId: { in: jobIds } } });
   await prisma.job.deleteMany({ where: { id: { in: jobIds } } });
   await prisma.customer.deleteMany({ where: { orgId, displayName: { startsWith: TAG } } });
