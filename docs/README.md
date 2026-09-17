@@ -162,4 +162,6 @@ road see my customers — by creating a second workshop and trying, at every
 address the application answers on. Phase 49 loses the database on purpose and
 measures what it costs: one second of work and five seconds of downtime on the
 seeded workshop, with a written record of everything that came back missing,
-orphaned or broken.
+orphaned or broken. Phase 50 gives whoever runs Carnet a page of their own at
+`/admin/health`, and answers on a screen the question a workshop actually
+rings about: why did this customer not get their message?

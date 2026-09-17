@@ -27,7 +27,7 @@ const OUT = join(process.cwd(), 'docs', 'assets', 'design');
 type Shot = {
   file: string;
   path: string;
-  who: 'owner' | 'driver' | 'nobody';
+  who: 'owner' | 'driver' | 'operator' | 'nobody';
   width?: number;
   height?: number;
   fullPage?: boolean;
@@ -36,6 +36,42 @@ type Shot = {
   lang?: 'en' | 'fr' | 'ar';
   settle?: number;
 };
+
+/**
+ * A session for the operator, whose account may not exist on this machine.
+ *
+ * Unlike every other shot, this one is of a page that belongs to whoever runs
+ * Carnet rather than to anybody in the seeded workshop, so there may be no
+ * such user to sign in as. One is made if needed and left behind: it has a
+ * random password nobody knows, and deleting it would take a real operator's
+ * account with it on a machine where one exists.
+ */
+async function mintOperator(email: string): Promise<string> {
+  const user =
+    (await prisma.user.findUnique({ where: { email }, select: { id: true } })) ??
+    (await prisma.user.create({
+      data: {
+        email,
+        name: 'Carnet',
+        passwordHash: randomBytes(32).toString('hex'),
+        emailVerifiedAt: new Date(),
+      },
+      select: { id: true },
+    }));
+
+  const token = randomBytes(32).toString('base64url');
+
+  await prisma.session.create({
+    data: {
+      tokenHash: createHash('sha256').update(token).digest('hex'),
+      userId: user.id,
+      orgId: null,
+      expiresAt: new Date(Date.now() + 3600_000),
+    },
+  });
+
+  return token;
+}
 
 async function mint(email: string): Promise<string> {
   const user = await prisma.user.findUniqueOrThrow({
@@ -160,6 +196,13 @@ async function main() {
   const owner = await mint('ahmed@hillsidemotors.test');
   const driver = await mint(r.driverEmail);
 
+  // The operator is whoever OPERATOR_EMAIL says, and on a machine where it is
+  // unset nobody is: the shot is skipped rather than faked, because a picture
+  // of a page taken as somebody who could not really open it is a picture of
+  // something that does not exist.
+  const operatorEmail = process.env.OPERATOR_EMAIL?.trim().toLowerCase();
+  const operator = operatorEmail ? await mintOperator(operatorEmail) : null;
+
   const shots: Shot[] = [
     { file: 'home', path: '/', who: 'nobody', height: 900 },
     { file: 'login', path: '/login', who: 'nobody' },
@@ -222,6 +265,7 @@ async function main() {
     { file: 'start', path: '/start', who: 'owner', fullPage: true },
     { file: 'coupons', path: '/coupons', who: 'owner', fullPage: true },
     { file: 'books', path: '/books', who: 'owner', fullPage: true },
+    { file: 'health', path: '/admin/health', who: 'operator', fullPage: true },
     { file: 'phone-books', path: '/books', who: 'owner', width: 390, height: 844, fullPage: true },
     { file: 'phone-dashboard', path: '/dashboard', who: 'owner', width: 390, height: 844 },
     { file: 'phone-job', path: `/jobs/${r.job}`, who: 'owner', width: 390, height: 844 },
@@ -323,6 +367,11 @@ async function main() {
   const browser = await chromium.launch();
 
   for (const shot of shots) {
+    if (shot.who === 'operator' && !operator) {
+      console.info(`  skipped ${shot.file}.png  no OPERATOR_EMAIL, so nobody can open it`);
+      continue;
+    }
+
     const context = await browser.newContext({
       viewport: { width: shot.width ?? 1280, height: shot.height ?? 800 },
       colorScheme: shot.dark ? 'dark' : 'light',
@@ -332,7 +381,7 @@ async function main() {
       await context.addCookies([
         {
           name: 'carnet_session',
-          value: shot.who === 'owner' ? owner : driver,
+          value: shot.who === 'owner' ? owner : shot.who === 'operator' ? (operator ?? '') : driver,
           url: BASE,
         },
 

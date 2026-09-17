@@ -11,6 +11,7 @@ export * from './retention/index';
 export * from './reliability/index';
 export * from './integrity/index';
 export * from './recovery/index';
+export * from './health/index';
 export * from './giftcards/index';
 export * from './region/index';
 export * from './deposits/index';

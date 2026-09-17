@@ -48,6 +48,10 @@ bug, or somebody has written to `vehicle_events` outside the application.
 
 ## Outbox backing up
 
+Start at `/admin/health` rather than in a log: the Workers panel says how many
+events are waiting and how old the oldest is, and the message search at the
+bottom answers why any single one has not gone.
+
 Symptom: queue depth alert, or passport events arriving late.
 
 1. Is the worker running? `docker compose ps worker`

@@ -502,6 +502,18 @@ The second sweep: things connected at one end only.
 | Work still in the queue    | Built  | Comes back, and none of it is stuck for ever (Phase 49)                      |
 | What it did not measure    | Built  | Said in the output rather than assumed (Phase 49)                            |
 
+## 21.16 How Carnet itself is
+
+| Item                         | Status | Where                                                                |
+| ---------------------------- | ------ | -------------------------------------------------------------------- |
+| One page for the operator    | Built  | `/admin/health`, 22 things across six panels (Phase 50)              |
+| Four standings, not two      | Built  | Working, struggling, not working, never used (Phase 50)              |
+| As bad as its worst part     | Built  | Never an average, which is what gets a page ignored (Phase 50)       |
+| Why a message did not arrive | Built  | One search box, one sentence, and the next move (Phase 50)           |
+| A block beats a status       | Built  | And consent beats both, without reading as a failure (Phase 50)      |
+| Held, against stuck          | Built  | Told apart though they share one column (Phase 50)                   |
+| Not for a workshop           | Built  | Not found for an owner; nobody at all without an operator (Phase 50) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -580,7 +592,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 281          |
+| Built    | 288          |
 | Partial  | 1            |
 | Deferred | 1            |
 

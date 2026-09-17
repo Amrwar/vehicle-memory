@@ -25,6 +25,23 @@ function operatorAddress(): string | null {
   return address && address.includes('@') ? address : null;
 }
 
+/**
+ * Whether this is the person who runs Carnet, rather than somebody who runs a
+ * workshop on it.
+ *
+ * The same address that gets told when an account is opened, because there is
+ * exactly one operator and inventing a second notion of who they are would be
+ * two things to keep in step. A workshop owner is the most powerful role in
+ * their own workshop and has no business on the operator's pages: those carry
+ * every workshop's figures at once, which is the one view the product must
+ * never hand to one of them.
+ */
+export async function isOperator(email: string | null | undefined): Promise<boolean> {
+  const to = operatorAddress();
+  if (!to || !email) return false;
+  return email.trim().toLowerCase() === to.trim().toLowerCase();
+}
+
 export async function tellOperator(input: { subject: string; body: string }): Promise<boolean> {
   const to = operatorAddress();
   if (!to) return false;

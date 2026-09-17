@@ -16,6 +16,10 @@ env:
   AUTH_SECRET: ci-auth-secret-value-at-least-32-characters-long
   LEDGER_CHAIN_SALT: ci-ledger-chain-salt-value
   DATABASE_URL: postgresql://carnet:carnet@localhost:5432/carnet_test?schema=public
+  # Whoever runs Carnet. Without it /admin/health is unreachable by everybody,
+  # which is correct behaviour and would leave the health probe unable to prove
+  # that its refusals mean anything.
+  OPERATOR_EMAIL: operator@carnet.test
 
 jobs:
   # -------------------------------------------------------------------------
@@ -319,6 +323,36 @@ jobs:
       - name: Verify the assistant
         run: npx tsx infra/scripts/verify-assistant.ts
 
+      # A coupon is money off a bill that must not become money out of the
+      # books: the ways it goes wrong are a discount posted as revenue and a
+      # redemption counted twice.
+      - name: Verify coupons
+        run: npx tsx infra/scripts/verify-coupons.ts
+
+      # Doing it twice must not do it twice. Every guard is invisible when it
+      # works, which is why this asks for each write twice and compares.
+      - name: Verify a repeated write does nothing twice
+        run: npx tsx infra/scripts/verify-repeat.ts
+
+      # And that every write which moves money or stock has said what a repeat
+      # does to it. A write that has not declared is a write nobody checked.
+      - name: Every money and stock write declares its repeat behaviour
+        run: npx tsx infra/scripts/verify-writes.ts
+
+      # Whether the books still agree with themselves, which no amount of
+      # correct posting proves: the eleventh thousand posting was a migration.
+      - name: Verify the books agree with themselves
+        run: npx tsx infra/scripts/verify-books.ts
+
+      # Not "a backup exists" but "Carnet was restored", with how much work was
+      # lost and how long it took, measured rather than asserted.
+      - name: Verify the recovery, measured
+        env:
+          PG_DUMP: docker exec ${{ job.services.postgres.id }} pg_dump
+          PG_RESTORE: docker exec -i ${{ job.services.postgres.id }} pg_restore
+          PSQL: docker exec ${{ job.services.postgres.id }} psql
+        run: npx tsx infra/scripts/verify-recovery.ts
+
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
@@ -400,6 +434,25 @@ jobs:
       # a camera button comes to look like it works for a fortnight.
       - name: A photograph reaches the store and comes back
         run: npx tsx infra/scripts/verify-storage.ts http://localhost:3000
+
+      # Everything built has a way in, and works when you get there. A feature
+      # with no route to it is worse than one never written.
+      - name: Everything built is reachable
+        run: npx tsx infra/scripts/verify-wiring.ts
+
+      # A rule a workshop writes has to actually run, from its own moment.
+      - name: Automation rules fire from their moments
+        run: npx tsx infra/scripts/verify-triggers.ts
+
+      # The one failure a workshop would never forgive. Reads and writes, at
+      # every address carrying an identifier, as another workshop's owner.
+      - name: One workshop cannot reach another
+        run: npx tsx infra/scripts/verify-tenancy.ts http://localhost:3000
+
+      # "Why did this customer not get their message?" on a screen rather than
+      # in a log, and the operator's page refusing everybody else.
+      - name: How Carnet itself is, and why a message did not arrive
+        run: npx tsx infra/scripts/verify-health.ts http://localhost:3000
 
   # -------------------------------------------------------------------------
   # Supply chain. Critical findings block the merge (NFR-409).

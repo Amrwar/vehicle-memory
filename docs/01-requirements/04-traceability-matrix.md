@@ -523,6 +523,13 @@ where the work happens.
 
 | Req     | Story | Schema                                 | Implementation                                                                | Test                                        | Status |
 | ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-8501 | BC2   | -                                      | `systemHealth()`, `/admin/health`                                             | `verify-health.ts`                          | Done   |
+| FR-8502 | BC2   | -                                      | `Standing`, including `unknown`; `fromCount()`, `fromAge()`                   | `health.test.ts`, `verify-health.ts`        | Done   |
+| FR-8503 | BC2   | -                                      | `worstStanding()`, `needsAttention()`, `worstSignalsFirst()`                  | `health.test.ts`, `verify-health.ts`        | Done   |
+| FR-8504 | BC1   | `message_logs`, `delivery_events`      | `whyMessage()`, `traceMessagesTo()`, the search on `/admin/health`            | `health.test.ts`, `verify-health.ts`        | Done   |
+| FR-8505 | BC1   | `suppressed_addresses`                 | the order inside `whyMessage()`: consent, then suppression, then status       | `health.test.ts`, `verify-health.ts`        | Done   |
+| FR-8506 | BC3   | -                                      | `isOperator()`, `notFound()` on the page                                      | `verify-health.ts`                          | Done   |
+| FR-8507 | BC1   | `message_logs.availableAt`             | the two queued branches of `whyMessage()`                                     | `health.test.ts`, `verify-health.ts`        | Done   |
 | FR-8401 | BB1   | -                                      | `verify-recovery.ts`, dump and restore into a fresh database                  | `verify-recovery.ts`, `verify-backup.ts`    | Done   |
 | FR-8402 | BB1   | -                                      | `workLost()`, `timeTaken()`, `missedTargets()` against NFR-303 and NFR-304    | `restored.test.ts`, `verify-recovery.ts`    | Done   |
 | FR-8403 | BB1   | `_prisma_migrations`, the triggers     | `prisma migrate status` on the copy; `verifyChain()`; `auditBooks(org, copy)` | `verify-recovery.ts`                        | Done   |

@@ -2913,6 +2913,58 @@ backups, workers.
 **Exit.** "Why did this customer not get their message?" is answered on a
 screen rather than in a log.
 
+**Status.** Built.
+
+`/admin/health` — twenty-two things across six panels: the system, the work
+nobody is watching, the services outside this building, whether the records
+still mean anything, who can get in, and whether it could come back. Worst
+first, with what needs acting on separated from what is only worth reading.
+
+Four standings rather than two, because "up or down" is the distinction that
+makes a status page useless. Almost nothing is down: things are slow, or
+retrying, or configured and never yet exercised. The fourth one — never used —
+is the one people leave out and the one that lies least. A mail transport set
+to `console` is not broken and is not working; a green tick beside it is how a
+product ends up confidently broken, and this page says so on its own first run
+by reporting seven things as never used.
+
+Overall is as bad as its worst part. Averaging would be worse than saying
+nothing: nine healthy things and one failed one is a failure, and a page
+reporting ninety per cent gets ignored on the day it matters.
+
+The bottom of the page is what the phase is actually judged on. "Why did this
+customer not get their message?" is the question a workshop rings about, and
+the answer had always existed — spread across a status, an attempt count, a
+provider's error, a suppression list and a consent flag, in five places, none
+of which mean anything alone to the person asking. Now it is one search box and
+one sentence, and the sentence names the next move: "FAILED" is not an answer,
+and "the address was stopped on 12 September after a hard bounce, ask them for
+a different one" is.
+
+The order of that reasoning matters and is not the order the columns are in. A
+suppression beats a status, because a suppressed message was never attempted
+and its status has nothing to say about why. Consent beats suppression, because
+somebody who asked not to be written to has not got a delivery problem — they
+have exactly what they asked for, and an operator chasing a bounce there is
+chasing the wrong thing entirely. Two of the four cases the probe exercises are
+a queue that is held until the morning and a queue that is stuck, which share
+one column by design and are told apart here.
+
+It is the operator's page and nobody else's, because every figure on it spans
+every workshop at once — the one view the rest of the product spends its time
+making impossible. So it is not behind a permission, which a workshop owner has
+plenty of, but behind being the one person whose address is the operator's, and
+it answers not found rather than forbidden: an owner who finds it should not
+learn that it exists.
+
+Two things worth recording. The control at the end of the probe — that the
+operator can read the page everybody else is refused — caught a false green
+immediately, for the third phase running: the page 404s for everyone when
+`OPERATOR_EMAIL` is unset, which is correct behaviour and would have made every
+refusal above it meaningless. And it turned out that `next dev` reads
+`apps/web/.env` while the scripts read the root `.env`, so the variable was set
+for the probe and not for the server it was probing.
+
 ## Phase 51 — Performance and scale
 
 **Scope.** A hundred thousand customers, a hundred and fifty thousand

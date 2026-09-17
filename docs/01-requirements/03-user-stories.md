@@ -1642,6 +1642,47 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BC - How Carnet itself is (Phase 50)
+
+### BC1 - Where is my invoice?
+
+**As** Sara **I want** to know why a customer did not get their message **so
+that** I can tell them something other than "it says it was sent".
+**Size** 13 - **Satisfies** FR-8504, FR-8505, FR-8507
+
+- **Given** an address, **when** I look it up, **then** every message to it is
+  listed with a sentence saying what happened and what to do next.
+- **Given** a bounced address, **when** I look, **then** the block is the
+  reason given, not the message's status.
+- **Given** somebody who asked not to be written to, **when** I look, **then**
+  it is not reported as a failure.
+- **Given** a message held until the morning, **when** I look, **then** it
+  reads as held rather than as stuck.
+
+### BC2 - Is it me or is it them?
+
+**As** the operator **I want** one page showing how Carnet itself is **so
+that** an incident starts with a look rather than with a log.
+**Size** 8 - **Satisfies** FR-8501, FR-8502, FR-8503
+
+- **Given** the system, **when** I open the page, **then** I see the machine,
+  the background work, the outside services, the records, access and recovery.
+- **Given** something configured but never used, **when** I look, **then** it
+  says so rather than showing a green tick.
+- **Given** one thing failing among many working, **when** I look at the top,
+  **then** the whole reads as failing.
+
+### BC3 - Not for a workshop
+
+**As** Ahmed **I want** never to see another workshop's figures **so that**
+the promise the rest of the product makes is not undone by one page.
+**Size** 5 - **Satisfies** FR-8506
+
+- **Given** I own my workshop, **when** I open the operator's page, **then**
+  there is nothing at that address.
+- **Given** no operator is configured, **when** anybody opens it, **then**
+  nobody can.
+
 ## Epic BB - Carnet came back (Phase 49)
 
 ### BB1 - The morning the database went

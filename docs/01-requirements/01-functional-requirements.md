@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8500 - How Carnet itself is
+
+| Ref     | Requirement                                                                                                                                                  | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-8501 | There MUST be one page showing how Carnet itself is: the system, background work, outside services, records, access and recovery.                            | 50    |
+| FR-8502 | Each thing looked at MUST report working, struggling, not working or never used; a thing that is configured but never exercised MUST NOT report as working.  | 50    |
+| FR-8503 | The overall standing MUST be as bad as its worst part, never an average.                                                                                     | 50    |
+| FR-8504 | Why a message did not arrive MUST be answerable on a screen, naming the reason and the next move rather than repeating the status.                           | 50    |
+| FR-8505 | A blocked address MUST take precedence over the message's status, and withdrawn consent MUST take precedence over both and MUST NOT read as a failure.       | 50    |
+| FR-8506 | The page MUST be reachable only by the operator, MUST answer not found to anybody else, and MUST be unreachable by everybody when no operator is configured. | 50    |
+| FR-8507 | A message held until the hours a customer wants to hear from you MUST be distinguishable from one the sender has failed to send.                             | 50    |
+
 ## FR-8400 - Carnet came back
 
 | Ref     | Requirement                                                                                                                                 | Phase |
