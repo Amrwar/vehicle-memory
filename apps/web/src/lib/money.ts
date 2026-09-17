@@ -9,6 +9,7 @@ import {
   dueDateFor,
   fromDecimal,
   type InvoiceState,
+  type BookingStage,
   type JobStatus,
   type Money,
   money,
@@ -46,6 +47,8 @@ import { refundThroughProvider } from './card-payments';
 import { keepAsCredit } from './deposit-credits';
 import { refundOntoCard } from './giftcard-refunds';
 import { consequencesOfPayment } from './afterwards';
+import { notifyCustomer } from './booking';
+import { invoiceReached, jobReached } from './triggers';
 import { consumeForJob } from './inventory';
 import { refreshScheduleFor } from './packages';
 import { pushNow } from './outbound';
@@ -123,15 +126,42 @@ export function priceableLinesOf(job: LinedJob, context: TaxContext = NO_CONTEXT
 }
 
 /**
+ * What a job's status means to the person waiting for the car.
+ *
+ * A workshop's board has ten states because a workshop needs ten; a customer
+ * has four things they want to know. Anything with no stage of its own is
+ * deliberately silent.
+ */
+function stageOf(status: JobStatus): BookingStage {
+  switch (status) {
+    case 'IN_PROGRESS':
+      return 'IN_PROGRESS';
+    case 'AWAITING_APPROVAL':
+      return 'AWAITING_APPROVAL';
+    case 'COMPLETED':
+      return 'READY';
+    default:
+      // Arrived is real and deliberately does not notify: somebody standing at
+      // the desk does not need a text about having just been at the desk.
+      return 'ARRIVED';
+  }
+}
+
+/**
  * Moves a job to its next status, with everything that has to happen at the
  * same moment.
  *
  * The rules are the lifecycle's own. What is added here is the consequence of
  * completion: parts leave the shelf at what they actually cost, the passport
  * receives the events the job contributes, and the customer-facing follow-up
- * goes into the outbox. All of it in one transaction with the status change,
- * because a job that reads as completed while its parts still sit in stock is
- * the kind of inconsistency that surfaces at the stocktake.
+ * goes out. All of it in one transaction with the status change, because a job
+ * that reads as completed while its parts still sit in stock is the kind of
+ * inconsistency that surfaces at the stocktake.
+ *
+ * Two things hang off this that used to hang off nothing: the customer is told
+ * their car has reached a stage worth telling them about, and the workshop's
+ * own rules get their moment. Both were written, tested, and called from
+ * nowhere. Phase 46.6.
  *
  * @repeat GUARDED(STATE: the lifecycle has no self-edge) Moving a job to the
  * status it is already in is refused, so a second move does nothing and says
@@ -214,6 +244,27 @@ export async function moveJob(input: {
       });
     }
   });
+
+  // The customer is told their car has reached a stage worth telling them
+  // about: work started, a decision needed, ready to collect. Only those, and
+  // only once, because a product that sends every status change is a product
+  // whose messages get ignored — including the one that mattered.
+  //
+  // Until this call existed the messages were written, tested and never sent.
+  // Never allowed to fail the move: the board in front of somebody must not
+  // stop because a mailbox did.
+  await notifyCustomer({ orgId: input.orgId, jobId: job.id, stage: stageOf(input.to) });
+
+  // And the workshop's own rules get their moment. A rule written against a
+  // job completing, or against a job that is waiting on the customer, had no
+  // way to run before this: the engine was complete and nothing called it.
+  if (input.to === 'COMPLETED' || input.to === 'AWAITING_APPROVAL') {
+    await jobReached({
+      orgId: input.orgId,
+      jobId: job.id,
+      event: input.to === 'COMPLETED' ? 'job.completed' : 'job.awaiting_approval',
+    });
+  }
 
   if (input.to === 'COMPLETED') {
     // Parts leave the shelf at their weighted average cost, and that cost is
@@ -494,6 +545,8 @@ export async function issueInvoice(input: {
     entityId: invoice.id,
     after: { number: invoice.number, jobId: job.id, total: toNumber(totals.total) },
   });
+
+  await invoiceReached({ orgId: input.orgId, invoiceId: invoice.id, event: 'invoice.issued' });
 
   return invoice.id;
 }

@@ -51,10 +51,10 @@ async function attemptSignIn(formData: FormData) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; reset?: string }>;
 }) {
   const t = await tFor();
-  const { error, next } = await searchParams;
+  const { error, next, reset } = await searchParams;
   const onwards = safeNext(next);
 
   const user = await currentUser();
@@ -120,6 +120,12 @@ export default async function LoginPage({
           <p className="mt-1 text-[13px] text-(--text-faint)">
             {t('Use the account your workshop set up for you.')}
           </p>
+
+          {reset ? (
+            <Alert tone="success" className="mt-5">
+              {t('Your password is set. Sign in with the new one.')}
+            </Alert>
+          ) : null}
 
           {error ? (
             <Alert tone="danger" className="mt-5">

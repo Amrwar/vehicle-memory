@@ -60,6 +60,7 @@ import { type Channel, channelLabel } from '@carnet/core';
 import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
+import { setOrderNumber } from '@/lib/jobs';
 import { issueInvoice, MoneyCycleError, moveJob, priceableLinesOf } from '@/lib/money';
 import { TAX_RATE, taxContextFor } from '@/lib/tax';
 import { fitmentWarningsForJob } from '@/lib/provenance';
@@ -171,6 +172,29 @@ async function extra(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}?quoted=${send ? 'sent' : '1'}#extra`);
+}
+
+/**
+ * The number the customer's own system knows this job by. FR-8001.
+ *
+ * Small, and the difference between a fleet paying on time and a fleet not
+ * paying at all: their accounts payable matches the bill to a purchase order
+ * or it does not match it to anything.
+ */
+async function orderNumber(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  await setOrderNumber({
+    orgId,
+    userId: user.userId,
+    jobId,
+    orderNumber: String(formData.get('orderNumber') ?? ''),
+  });
+
+  redirect(`/jobs/${jobId}?saved=order`);
 }
 
 /** Work bought from another business, sold on this job. Phase 38. */
@@ -481,6 +505,7 @@ export default async function JobPage({
     started?: string;
     wrote?: string;
     packaged?: string;
+    saved?: string;
   }>;
 }) {
   const { id } = await params;
@@ -786,6 +811,14 @@ export default async function JobPage({
         }
       />
 
+      {notice.saved === 'order' ? (
+        <Alert tone="success" className="mb-5">
+          {t(
+            'Saved. It goes on the invoice, which is what their accounts department matches against.',
+          )}
+        </Alert>
+      ) : null}
+
       {notice.sent ? (
         <Alert tone="success" className="mb-5">
           {t(
@@ -954,7 +987,29 @@ export default async function JobPage({
                         })
                       : null,
                   },
-                  { label: t('Customer order number'), value: job.customerOrderNumber },
+                  {
+                    label: t('Customer order number'),
+                    value: mayWrite ? (
+                      // Typed here rather than only displayed. A fleet that
+                      // requires a purchase order cannot be invoiced without
+                      // one, and this is the only place it can be given.
+                      <form action={orderNumber} className="flex items-center gap-1.5">
+                        <input type="hidden" name="jobId" value={job.id} />
+                        <Input
+                          name="orderNumber"
+                          defaultValue={job.customerOrderNumber ?? ''}
+                          placeholder={t('Their PO number')}
+                          maxLength={60}
+                          className="datum h-8 w-40 text-[13px]"
+                        />
+                        <Button type="submit" size="sm" variant="ghost">
+                          {t('Save')}
+                        </Button>
+                      </form>
+                    ) : (
+                      job.customerOrderNumber
+                    ),
+                  },
                   {
                     label: t('Job types'),
                     value: job.jobTypes.map((entry) => entry.jobType.name).join(', ') || null,

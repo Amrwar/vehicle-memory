@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8000 - Wired at both ends
+
+| Ref     | Requirement                                                                                                                                         | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8001 | A job MUST carry the number the customer's own system knows it by, and it MUST be enterable wherever a fleet requires one before invoicing.         | 46.6  |
+| FR-8002 | A customer MUST be told when their vehicle reaches a stage worth telling them about, and MUST NOT be told about stages that are not.                | 46.6  |
+| FR-8003 | A booking taken online MUST send the customer a confirmation, composed in the same transaction as the booking.                                      | 46.6  |
+| FR-8004 | Every automation trigger the product offers MUST be fired by something; a trigger nothing can fire MUST NOT be offered.                             | 46.6  |
+| FR-8005 | Triggers that are conditions rather than events MUST be looked for on a schedule.                                                                   | 46.6  |
+| FR-8006 | An automation action MUST do what it says or fail with a reason; it MUST NOT be recorded as done without having happened.                           | 46.6  |
+| FR-8007 | A customer signing up to accept a vehicle MUST be offered a customer account, not a workshop one, and MUST be returned to what they were doing.     | 46.6  |
+| FR-8008 | Every write that redirects with a confirmation MUST land on a page that renders it; closing a till MUST report whether the drawer is over or short. | 46.6  |
+
 ## FR-7900 — Built, and reachable
 
 | Ref     | Requirement                                                                                                                                           | Phase |

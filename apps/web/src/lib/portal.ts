@@ -585,6 +585,13 @@ export async function recordDecision(input: {
     exceptUserId: input.userId ?? null,
   });
 
+  if (outcome.status === 'DECLINED') {
+    // A quote turned down is the moment a workshop most wants a rule on: ring
+    // them, or write the reason down while it is fresh.
+    const { estimateDeclined } = await import('./triggers');
+    await estimateDeclined({ orgId: estimate.orgId, estimateId: estimate.id });
+  }
+
   return { outcome, confirmation: confirmationFor(outcome), parts };
 }
 

@@ -80,7 +80,12 @@ export default async function VehiclePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ adopted?: string; registered?: string; warning?: string }>;
+  searchParams: Promise<{
+    adopted?: string;
+    registered?: string;
+    warning?: string;
+    transferred?: string;
+  }>;
 }) {
   const { id } = await params;
   const notice = await searchParams;
@@ -190,6 +195,14 @@ export default async function VehiclePage({
           </>
         }
       />
+
+      {notice.transferred ? (
+        <Alert tone="success" className="mb-5">
+          {t(
+            'Handed over. The vehicle is off your books, and its history went with it rather than staying here.',
+          )}
+        </Alert>
+      ) : null}
 
       {notice.adopted ? (
         <Alert tone="success" className="mb-5">

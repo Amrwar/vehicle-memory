@@ -27,7 +27,11 @@ export type TriggerEvent =
   | 'booking.created'
   | 'booking.missed'
   | 'service.due'
-  | 'vehicle.mot_due'
+  // An MOT falling due was offered here and could never fire: nothing in this
+  // product records an MOT expiry date, so there was no moment for it to
+  // happen at. Offering a trigger the data cannot supply means a workshop
+  // writes a rule, watches for it, and slowly stops trusting the rest. Phase
+  // 46.6. It comes back the day a vehicle carries its MOT date.
   | 'estimate.declined'
   | 'customer.lapsing';
 
@@ -111,7 +115,6 @@ const AVAILABLE: Record<TriggerEvent, ConditionField[]> = {
   'booking.created': ['customer.visits', 'customer.daysSinceLastVisit'],
   'booking.missed': ['customer.visits', 'customer.daysSinceLastVisit'],
   'service.due': ['vehicle.ageYears', 'vehicle.mileage', 'customer.daysSinceLastVisit'],
-  'vehicle.mot_due': ['vehicle.ageYears', 'vehicle.mileage'],
   'estimate.declined': ['estimate.total', 'customer.lifetimeValue'],
   'customer.lapsing': ['customer.lifetimeValue', 'customer.visits', 'customer.daysSinceLastVisit'],
 };
@@ -136,8 +139,6 @@ export function describeTrigger(trigger: TriggerEvent): string {
       return 'somebody does not turn up';
     case 'service.due':
       return 'a service falls due';
-    case 'vehicle.mot_due':
-      return 'an MOT falls due';
     case 'estimate.declined':
       return 'an estimate is declined';
     case 'customer.lapsing':

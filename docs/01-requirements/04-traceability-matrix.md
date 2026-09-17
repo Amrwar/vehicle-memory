@@ -523,6 +523,14 @@ where the work happens.
 
 | Req     | Story | Schema                               | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | ------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-8001 | AX3   | `Job.customerOrderNumber`            | `setOrderNumber()`, the field on the job page                               | `verify-wiring.ts`                          | Done   |
+| FR-8002 | AX1   | `message_logs`                       | `notifyCustomer()`, called from `moveJob()`                                 | `verify-triggers.ts`                        | Done   |
+| FR-8003 | AX1   | `message_logs`                       | the message queued inside `requestBooking()`'s transaction                  | `verify-messaging.ts`                       | Done   |
+| FR-8004 | AX2   | `automation_rules`                   | `lib/triggers.ts`, called from moveJob, issueInvoice, bookings, portal      | `verify-triggers.ts`                        | Done   |
+| FR-8005 | AX2   | -                                    | `lib/sweeps.ts`, run by the hourly cron job                                 | `verify-triggers.ts`                        | Done   |
+| FR-8006 | AX2   | `automation_actions`                 | `createTask()`, `addTag()`, the explicit failure for anything else          | `verify-triggers.ts`                        | Done   |
+| FR-8007 | AX4   | -                                    | `/signup/customer?next=`, the handover's link                               | `verify-controls.ts`                        | Done   |
+| FR-8008 | AX4   | -                                    | `countTill()` through `closeTill()`, and the markers each page now renders  | `verify-counter.ts`                         | Done   |
 | FR-7901 | AW1   | —                                    | `updateCustomer()`, `CustomerFields`, `/customers/[id]/edit`                | `verify-wiring.ts`                          | Done   |
 | FR-7902 | AW1   | `consent_changes`                    | `showConsent={false}`, the comment in `updateCustomer()`                    | `verify-wiring.ts`                          | Done   |
 | FR-7903 | AW2   | `SequenceKind.TRANSFER`              | `createTransfer()`, the suggestion form on `/transfers`                     | `verify-wiring.ts`                          | Done   |

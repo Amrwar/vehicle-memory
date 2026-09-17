@@ -1,5 +1,6 @@
 import {
   customerMessageFor,
+  shouldNotify,
   DEFAULT_OPENING,
   offerSlots,
   type BookingStage,
@@ -236,17 +237,43 @@ export async function requestBooking(input: BookingRequest): Promise<BookingOutc
       // The message the customer gets is queued here, in the same transaction
       // as the booking. A confirmation that goes out for a booking that then
       // failed to save is worse than one that is a minute late.
-      await tx.outboxEvent.create({
-        data: {
-          orgId: input.orgId,
-          type: 'booking.requested',
-          payload: {
-            bookingId: booking.id,
-            customerId: input.customerId,
-            message: customerMessageFor('REQUESTED', `${vehicle.make} ${vehicle.model}`),
-          } as never,
-        },
+      //
+      // Queued as a message rather than as an outbox event, which is what it
+      // used to be: nothing handled that event type, so the confirmation this
+      // code went to the trouble of composing was written into a row, parked
+      // with "no handler registered", and never sent. Phase 46.6.
+      const customer = await tx.customer.findUnique({
+        where: { id: input.customerId },
+        select: { displayName: true, email: true, mobile: true, org: { select: { name: true } } },
       });
+
+      const said = customerMessageFor('REQUESTED', `${vehicle.make} ${vehicle.model}`);
+      const channel = customer?.email ? 'EMAIL' : customer?.mobile ? 'SMS' : null;
+      const to = customer?.email ?? customer?.mobile;
+
+      if (customer && channel && to && said) {
+        await tx.messageLog.create({
+          data: {
+            orgId: input.orgId,
+            channel,
+            toAddress: to,
+            subject: `${customer.org?.name ?? 'Your workshop'}: booking request`,
+            body:
+              channel === 'EMAIL'
+                ? [
+                    `Hello ${customer.displayName.split(' ')[0]}.`,
+                    '',
+                    said,
+                    '',
+                    customer.org?.name ?? '',
+                  ].join('\n')
+                : said,
+            status: 'QUEUED',
+            relatedType: 'Booking',
+            relatedId: booking.id,
+          },
+        });
+      }
 
       return booking.id;
     });
@@ -285,37 +312,91 @@ export async function requestBooking(input: BookingRequest): Promise<BookingOutc
    --------------------------------------------------------------------------- */
 
 /**
- * Queues an update, but only for the stages a customer cares about.
+ * Tells the customer their car has reached a stage worth telling them about.
  *
- * Sending every status change trains people to ignore all of them, which costs
- * the one message that mattered: the car needs a decision.
+ * Only the stages a customer cares about, because sending every status change
+ * trains people to ignore all of them, which costs the one message that
+ * mattered: the car needs a decision.
+ *
+ * This wrote an outbox event that nothing handled. The copy existed, the rule
+ * about which stages are worth sending existed, both were tested — and the
+ * function had no callers, so in a year of running this product no customer
+ * was ever told their car was ready. It now queues a real message the way an
+ * invoice does, and is called from the one place a job changes state.
+ *
+ * Never throws. A message provider having a bad second must not stop a job
+ * moving on the board in front of somebody.
  */
 export async function notifyCustomer(input: {
   orgId: string;
   jobId: string;
   stage: BookingStage;
 }): Promise<boolean> {
-  const message = customerMessageFor(input.stage, await vehicleLabel(input.jobId));
-  if (!message) return false;
+  if (!shouldNotify(input.stage)) return false;
 
-  await prisma.outboxEvent.create({
-    data: {
-      orgId: input.orgId,
-      type: `job.${input.stage.toLowerCase()}`,
-      payload: { jobId: input.jobId, message } as never,
-    },
-  });
+  try {
+    const job = await prisma.job.findFirst({
+      where: { id: input.jobId, orgId: input.orgId },
+      select: {
+        id: true,
+        number: true,
+        customer: { select: { displayName: true, email: true, mobile: true } },
+        vehicle: { select: { make: true, model: true } },
+        org: { select: { name: true } },
+      },
+    });
 
-  return true;
-}
+    if (!job) return false;
 
-async function vehicleLabel(jobId: string): Promise<string> {
-  const job = await prisma.job.findUnique({
-    where: { id: jobId },
-    select: { vehicle: { select: { make: true, model: true } } },
-  });
+    const message = customerMessageFor(
+      input.stage,
+      `${job.vehicle.make} ${job.vehicle.model}`.trim(),
+    );
 
-  return job ? `${job.vehicle.make} ${job.vehicle.model}` : 'vehicle';
+    if (!message) return false;
+
+    // Email where there is one, a text where there is not. This is not
+    // marketing — it is about their own car — so it does not ask for consent,
+    // and the address is whichever one the workshop actually has.
+    const channel = job.customer.email ? 'EMAIL' : job.customer.mobile ? 'SMS' : null;
+    const to = job.customer.email ?? job.customer.mobile;
+
+    if (!channel || !to) return false;
+
+    const queued = await prisma.messageLog.create({
+      data: {
+        orgId: input.orgId,
+        channel,
+        toAddress: to,
+        subject: `${job.org.name}: job ${job.number}`,
+        body:
+          channel === 'EMAIL'
+            ? [
+                `Hello ${job.customer.displayName.split(' ')[0]}.`,
+                '',
+                message,
+                '',
+                'Ring or reply if you need anything.',
+                '',
+                job.org.name,
+              ].join('\n')
+            : `${job.org.name}: ${message}`,
+        status: 'QUEUED',
+        relatedType: 'Job',
+        relatedId: job.id,
+      },
+      select: { id: true },
+    });
+
+    const { pushNow } = await import('./outbound');
+    await pushNow(queued.id);
+
+    return true;
+  } catch {
+    // Deliberately silent, like every other message the product sends: the
+    // work in front of somebody must not stop because a mailbox did.
+    return false;
+  }
 }
 
 /* ---------------------------------------------------------------------------

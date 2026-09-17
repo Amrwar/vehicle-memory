@@ -177,7 +177,7 @@ async function close(formData: FormData) {
 
   const { orgId, user } = await requireSession('invoice:write');
 
-  await closeTill({
+  const counted = await closeTill({
     orgId,
     sessionId: String(formData.get('sessionId') ?? ''),
     countedMinor: Math.round(Number(formData.get('counted') ?? 0) * 100),
@@ -185,7 +185,11 @@ async function close(formData: FormData) {
     note: String(formData.get('note') ?? ''),
   });
 
-  redirect('/counter?closed=1');
+  redirect(
+    counted.ok
+      ? `/counter?closed=1&over=${counted.varianceMinor ?? 0}&big=${counted.significant ? '1' : ''}`
+      : `/counter?error=${encodeURIComponent(counted.error ?? msg('That till is already closed.'))}`,
+  );
 }
 
 export default async function CounterPage({
@@ -234,6 +238,20 @@ export default async function CounterPage({
       {params.error ? (
         <Alert tone="danger" className="mb-5">
           {t(params.error)}
+        </Alert>
+      ) : null}
+
+      {params.closed ? (
+        <Alert tone={params.big ? 'warning' : 'success'} className="mb-5">
+          {Number(params.over ?? 0) === 0
+            ? t('Till closed, and the drawer agreed to the penny.')
+            : Number(params.over ?? 0) > 0
+              ? t('Till closed. The drawer is {amount} over what it should hold.', {
+                  amount: formatMoney(Math.abs(Number(params.over)) / 100, region),
+                })
+              : t('Till closed. The drawer is {amount} short of what it should hold.', {
+                  amount: formatMoney(Math.abs(Number(params.over)) / 100, region),
+                })}
         </Alert>
       ) : null}
 

@@ -194,7 +194,11 @@ export default async function HandoverPage({
                   <Link href={`/login?next=${encodeURIComponent(`/handover/${token}`)}`}>
                     <Button variant="primary">{t('Sign in to accept')}</Button>
                   </Link>
-                  <Link href={`/signup?next=${encodeURIComponent(`/handover/${token}`)}`}>
+                  {/* A person being handed a car is a customer, not a
+                      garage. This pointed at the workshop sign-up, which would
+                      have asked a private buyer to open a business and put a
+                      card down before they could accept their own vehicle. */}
+                  <Link href={`/signup/customer?next=${encodeURIComponent(`/handover/${token}`)}`}>
                     <Button variant="secondary">{t('Make an account')}</Button>
                   </Link>
                 </div>

@@ -1642,6 +1642,52 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AX - Wired at both ends (Phase 46.6)
+
+### AX1 - Telling somebody their car is ready
+
+**As** Maria **I want** to hear when my car needs a decision or is ready
+**so that** I am not ringing the garage to find out.
+**Size** 5 - **Satisfies** FR-8002, FR-8003
+
+- **Given** my car is waiting on my say-so, **when** the workshop moves it to
+  awaiting approval, **then** I am told, once.
+- **Given** it moves between states I do not care about, **when** that happens,
+  **then** I hear nothing.
+
+### AX2 - A rule that actually runs
+
+**As** Ahmed **I want** the rules I write to run **so that** chasing an overdue
+bill is something the product does rather than something I remember.
+**Size** 8 - **Satisfies** FR-8004, FR-8005, FR-8006
+
+- **Given** a rule on a bill a fortnight overdue, **when** a bill reaches that,
+  **then** the rule runs and its action is carried out.
+- **Given** a rule whose condition is not met, **when** it is evaluated,
+  **then** the page shows it was blocked and why.
+- **Given** a rule asking for something the product cannot do, **when** it runs,
+  **then** it fails with a sentence rather than reporting success.
+
+### AX3 - A fleet I can invoice
+
+**As** Ahmed **I want** to record the purchase order a fleet gives me **so
+that** their accounts department can match my bill to something.
+**Size** 3 - **Satisfies** FR-8001
+
+- **Given** a fleet that requires a purchase order, **when** I put the number
+  on the job, **then** the month's invoice goes out.
+
+### AX4 - Knowing it worked
+
+**As** Priya **I want** the screen to say what happened **so that** I am not
+pressing a button twice to find out.
+**Size** 3 - **Satisfies** FR-8007, FR-8008
+
+- **Given** I cash up, **when** I enter what I counted, **then** I am told
+  whether the drawer is over or short.
+- **Given** I am handed a vehicle and have no account, **when** I make one,
+  **then** it is a customer account and I land back on the handover.
+
 ## Epic AW — Built, and reachable (Phase 46.5)
 
 ### AW1 — The number I wrote down wrong

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   Card,
   CardBody,
@@ -86,8 +87,13 @@ async function start(formData: FormData) {
   redirect(id ? `/transfers/${id}` : '/transfers');
 }
 
-export default async function TransfersPage() {
+export default async function TransfersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ problem?: string; done?: string }>;
+}) {
   const { orgId, plan, region, user } = await requireSession('inventory:read');
+  const { problem, done } = await searchParams;
 
   // Role says they may look; the plan says whether the workshop bought it.
   if (!planIncludes(plan, 'transfers')) {
@@ -152,6 +158,18 @@ export default async function TransfersPage() {
           note={t('Shortages another site could cover')}
         />
       </StatRow>
+
+      {problem ? (
+        <Alert tone="danger" className="mb-5">
+          {t(problem)}
+        </Alert>
+      ) : null}
+
+      {done ? (
+        <Alert tone="success" className="mb-5">
+          {t('Cancelled. Nothing had left a shelf, so nothing has to be put back.')}
+        </Alert>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="grid gap-5">

@@ -2,6 +2,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { createJob, JobError } from './jobs';
+import { bookingReached } from './triggers';
 
 /**
  * Bookings from the workshop's side of the counter.
@@ -148,6 +149,10 @@ export async function createBooking(input: {
     entityId: booking.id,
     after: { startAt: input.startAt.toISOString(), description: input.description.trim() },
   });
+
+  // A rule written against a booking being taken gets its moment here. It had
+  // none before: the trigger was on the screen and fired from nowhere.
+  await bookingReached({ orgId: input.orgId, bookingId: booking.id, event: 'booking.created' });
 
   return booking.id;
 }

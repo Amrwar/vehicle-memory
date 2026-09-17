@@ -1,6 +1,7 @@
 import { humanise, toneFor, type JobStatus } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -38,9 +39,14 @@ export const dynamic = 'force-dynamic';
  * because a referral code in the middle of somebody's service history read
  * as an advertisement.
  */
-export default async function PortalPage() {
+export default async function PortalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ answered?: string; handover?: string }>;
+}) {
   const t = await tFor();
   const user = await requireUser();
+  const { answered, handover } = await searchParams;
   const region = await regionForUser(user.userId);
 
   const customers = await prisma.customer.findMany({
@@ -100,6 +106,22 @@ export default async function PortalPage() {
 
   return (
     <PortalShell active="home" wide>
+      {/* The two things a customer does from an email and is then sent here
+          for. Landing on an unchanged dashboard after approving a quote reads
+          as the approval not having worked, and the next thing that happens is
+          a telephone call to the workshop asking whether it did. */}
+      {answered ? (
+        <Alert tone="success" className="mb-5">
+          {t('Thank you. The workshop has your answer and will carry on from there.')}
+        </Alert>
+      ) : null}
+
+      {handover ? (
+        <Alert tone="success" className="mb-5">
+          {t('The vehicle is yours. Its history came with it and is on your account now.')}
+        </Alert>
+      ) : null}
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-[26px] font-semibold leading-tight">

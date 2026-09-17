@@ -1,6 +1,7 @@
 import {
   describeConfidence,
   describeStockState,
+  msg,
   stockTone,
   suggestReorder,
   summariseStock,
@@ -31,7 +32,9 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
-import { quantityOnOrder, usageHistory } from '@/lib/inventory';
+import { adjustStock, quantityOnOrder, recordStocktake, usageHistory } from '@/lib/inventory';
+import { once, onceToken, StillGoingError } from '@/lib/once';
+import { SubmitOnce } from '@/components/submit-once';
 import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
 import { PricingError, setSitePrice, sitePricesFor, sitesOf } from '@/lib/pricing';
@@ -67,6 +70,85 @@ export async function generateMetadata({
  * is where its rows land too, distinguished by their source rather than by
  * being somewhere else.
  */
+/**
+ * What the shelf actually holds, after somebody has counted it.
+ *
+ * A count is a set rather than a change: whoever is standing at the rack with
+ * a clipboard knows what is there, not what the difference is. Working out the
+ * difference is the product's job, and it writes it as a movement so the
+ * balance can still be explained afterwards.
+ *
+ * This was the piece missing from stock. Every other movement — receiving,
+ * issuing, transferring — had a screen; the one a workshop does every quarter
+ * could only be done by importing a spreadsheet.
+ */
+async function count(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+  const warehouseId = String(formData.get('warehouseId') ?? '');
+  const counted = Number(String(formData.get('counted') ?? '').trim());
+
+  if (!Number.isFinite(counted) || counted < 0) {
+    redirect(
+      `/parts/${productId}?problem=${encodeURIComponent(msg('Count it again: that is not a number of parts.'))}`,
+    );
+  }
+
+  await once({
+    orgId,
+    key: ['stocktake', productId, warehouseId, String(formData.get('once') ?? '')],
+    work: () => recordStocktake({ orgId, productId, warehouseId, counted }),
+  }).catch((error: unknown) => {
+    if (error instanceof StillGoingError) {
+      redirect(`/parts/${productId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  });
+
+  void user;
+  redirect(`/parts/${productId}?done=counted`);
+}
+
+/**
+ * A known movement with a reason: two were damaged, one was taken for a
+ * courtesy car. Separate from a count, because "minus two, broken" and
+ * "there are four" are different claims and the second one hides the first.
+ */
+async function adjust(formData: FormData) {
+  'use server';
+
+  const { orgId } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+  const warehouseId = String(formData.get('warehouseId') ?? '');
+  const quantity = Number(String(formData.get('quantity') ?? '').trim());
+  const reason = String(formData.get('reason') ?? '').trim();
+
+  if (!Number.isFinite(quantity) || quantity === 0) {
+    redirect(`/parts/${productId}?problem=${encodeURIComponent(msg('Say how many, up or down.'))}`);
+  }
+
+  if (!reason) {
+    redirect(
+      `/parts/${productId}?problem=${encodeURIComponent(msg('An adjustment carries a reason, or the balance cannot be explained later.'))}`,
+    );
+  }
+
+  await once({
+    orgId,
+    key: ['adjust-stock', productId, warehouseId, String(formData.get('once') ?? '')],
+    work: () => adjustStock({ orgId, productId, warehouseId, quantity, reason }),
+  }).catch((error: unknown) => {
+    if (error instanceof StillGoingError) {
+      redirect(`/parts/${productId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  });
+
+  redirect(`/parts/${productId}?done=adjusted`);
+}
+
 async function addFitment(formData: FormData) {
   'use server';
 
@@ -173,7 +255,7 @@ export default async function PartPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; feed?: string }>;
+  searchParams: Promise<{ error?: string; feed?: string; problem?: string; done?: string }>;
 }) {
   const { id } = await params;
   const { db, orgId, region, user } = await requireSession('inventory:read');
@@ -200,7 +282,7 @@ export default async function PartPage({
 
   if (!product) notFound();
 
-  const { error, feed: fetched } = await searchParams;
+  const { error, feed: fetched, problem, done } = await searchParams;
   const fitments = await fitmentsFor(orgId, id);
   const feed = fitmentFeed();
   const [sites, sitePrices] = await Promise.all([sitesOf(orgId), sitePricesFor(orgId, id)]);
@@ -213,6 +295,9 @@ export default async function PartPage({
     reserved: Number(level?.reserved ?? 0),
     avgCost: String(level?.avgCost ?? 0),
   };
+
+  const mayCount = can(user.role, 'inventory:write') && Boolean(level);
+  const token = onceToken();
 
   const [usage, onOrder, suppliers] = await Promise.all([
     usageHistory(product.id),
@@ -293,6 +378,20 @@ export default async function PartPage({
         </Alert>
       ) : null}
 
+      {problem ? (
+        <Alert tone="danger" className="mb-5">
+          {t(problem)}
+        </Alert>
+      ) : null}
+
+      {done ? (
+        <Alert tone="success" className="mb-5">
+          {done === 'counted'
+            ? t('Counted. The shelf says what you counted, and the difference is a movement.')
+            : t('Adjusted, with the reason against it.')}
+        </Alert>
+      ) : null}
+
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="grid gap-5">
           <Card>
@@ -345,6 +444,59 @@ export default async function PartPage({
               />
             </CardBody>
           </Card>
+
+          {mayCount ? (
+            <Card>
+              <CardHeader
+                title={t('Put the shelf right')}
+                description={t(
+                  'A count says what is there; an adjustment says what moved and why. Both leave a movement behind.',
+                )}
+              />
+              <CardBody className="grid gap-5 sm:grid-cols-2">
+                <form action={count} className="grid content-start gap-3">
+                  <input type="hidden" name="productId" value={product.id} />
+                  <input type="hidden" name="warehouseId" value={level!.warehouseId} />
+                  <input type="hidden" name="once" value={`${token}:count`} />
+                  <Field
+                    label={t('Counted on the shelf')}
+                    hint={t('What is actually there, not the difference')}
+                  >
+                    <Input
+                      name="counted"
+                      type="number"
+                      min={0}
+                      step="1"
+                      defaultValue={position.onHand}
+                      className="tabular"
+                      required
+                    />
+                  </Field>
+                  <SubmitOnce variant="secondary">{t('Record the count')}</SubmitOnce>
+                </form>
+
+                <form action={adjust} className="grid content-start gap-3">
+                  <input type="hidden" name="productId" value={product.id} />
+                  <input type="hidden" name="warehouseId" value={level!.warehouseId} />
+                  <input type="hidden" name="once" value={`${token}:adjust`} />
+                  <Field label={t('Adjust by')} hint={t('Negative to take some off')}>
+                    <Input
+                      name="quantity"
+                      type="number"
+                      step="1"
+                      placeholder="-2"
+                      className="tabular"
+                      required
+                    />
+                  </Field>
+                  <Field label={t('Why')}>
+                    <Input name="reason" required placeholder={t('Two damaged in the rack')} />
+                  </Field>
+                  <SubmitOnce variant="secondary">{t('Record the adjustment')}</SubmitOnce>
+                </form>
+              </CardBody>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader

@@ -1,5 +1,7 @@
 import {
+  countTill,
   fromDecimal,
+  money,
   postCounterSale,
   revenueSplit,
   type SaleLine,
@@ -431,9 +433,35 @@ export async function closeTill(input: {
 }) {
   const session = await prisma.tillSession.findFirst({
     where: { id: input.sessionId, orgId: input.orgId, closedAt: null },
+    include: { sales: { include: { tenders: true } } },
   });
 
   if (!session) return { ok: false, error: 'That till is already closed.' };
+
+  // What the drawer should hold, worked out here rather than trusted from the
+  // screen, and handed back so the person who counted it learns whether they
+  // are over or short. A till that is counted and never answered is a
+  // formality; the whole point of counting is the variance.
+  const cashTaken = session.sales
+    .filter((sale) => sale.status === 'PAID')
+    .reduce(
+      (total, sale) =>
+        total +
+        sale.tenders
+          .filter((tender) => tender.kind === 'CASH')
+          .reduce((sum, tender) => sum + Math.round(Number(tender.amount) * 100), 0) -
+        Math.round(Number(sale.changeGiven) * 100),
+      0,
+    );
+
+  const region = await regionFor(input.orgId);
+  const count = countTill({
+    openingFloat: money(Math.round(Number(session.openingFloat) * 100), region.currency),
+    cashSales: money(cashTaken, region.currency),
+    cashRefunds: money(0, region.currency),
+    paidOut: money(Math.round(Number(session.paidOut) * 100), region.currency),
+    counted: money(input.countedMinor, region.currency),
+  });
 
   await prisma.tillSession.update({
     where: { id: session.id },
@@ -450,10 +478,20 @@ export async function closeTill(input: {
     action: 'till.closed',
     entityType: 'TillSession',
     entityId: session.id,
-    after: { counted: input.countedMinor / 100 } as never,
+    after: {
+      counted: input.countedMinor / 100,
+      expected: count.expected.minor / 100,
+      variance: count.variance.minor / 100,
+    } as never,
   });
 
-  return { ok: true };
+  return {
+    ok: true,
+    expectedMinor: count.expected.minor,
+    countedMinor: count.counted.minor,
+    varianceMinor: count.variance.minor,
+    significant: count.significant,
+  };
 }
 
 /* ---------------------------------------------------------------------------

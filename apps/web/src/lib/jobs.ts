@@ -181,6 +181,54 @@ export async function createJob(input: {
  * on yet: one just taken on from the network, or just registered. Offered
  * only if the organisation is entitled to read it.
  */
+/**
+ * The number the customer's own system knows this job by.
+ *
+ * A fleet gives its garage a purchase order number and expects it back on the
+ * invoice; without it their accounts payable cannot match the bill to
+ * anything and it sits unpaid.
+ *
+ * This had nowhere to be typed. The field existed, the job page displayed it,
+ * the monthly fleet invoice read it — and ticking "purchase order required"
+ * on a fleet agreement therefore made that fleet permanently un-invoiceable,
+ * with a refusal telling somebody to add a number the product gave them no
+ * way to add.
+ *
+ * @repeat HARMLESS(OVERWRITE: the number set to what was typed) Saving the
+ * same number twice leaves the job with that number.
+ */
+export async function setOrderNumber(input: {
+  orgId: string;
+  userId: string;
+  jobId: string;
+  orderNumber: string;
+}): Promise<void> {
+  const job = await prisma.job.findFirst({
+    where: { id: input.jobId, orgId: input.orgId },
+    select: { id: true, customerOrderNumber: true },
+  });
+
+  if (!job) throw new Error('That job is not in this workshop.');
+
+  const orderNumber = input.orderNumber.trim().slice(0, 60) || null;
+  if (orderNumber === job.customerOrderNumber) return;
+
+  await prisma.job.update({
+    where: { id: job.id },
+    data: { customerOrderNumber: orderNumber },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'job.order_number',
+    entityType: 'Job',
+    entityId: job.id,
+    before: { customerOrderNumber: job.customerOrderNumber },
+    after: { customerOrderNumber: orderNumber },
+  });
+}
+
 export async function vehicleOption(orgId: string, vehicleId: string) {
   if (!vehicleId) return null;
   if (!(await orgCanReadVehicle(orgId, vehicleId))) return null;

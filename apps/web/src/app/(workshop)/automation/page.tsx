@@ -62,7 +62,6 @@ const TRIGGERS: TriggerEvent[] = [
   'booking.created',
   'booking.missed',
   'service.due',
-  'vehicle.mot_due',
   'estimate.declined',
   'customer.lapsing',
 ];
@@ -71,8 +70,12 @@ const ACTION_KINDS: { kind: Action['kind']; label: string }[] = [
   { kind: 'send.email', label: msg('Email them') },
   { kind: 'send.sms', label: msg('Text them') },
   { kind: 'task.create', label: msg('Create a task') },
-  { kind: 'tag.add', label: msg('Tag the customer') },
-  { kind: 'booking.suggest', label: msg('Offer a booking') },
+  { kind: 'tag.add', label: msg('Tag the job') },
+  // "Offer a booking" is deliberately not here. Nothing implemented it, so a
+  // rule using it reported success and did nothing; and an email or a text
+  // with the booking link in its template already does the job, visibly.
+  // Rules saved with it before now fail with a sentence rather than lying.
+  // Phase 46.6.
 ];
 
 const COMPARISONS: Comparison[] = ['gte', 'gt', 'eq', 'ne', 'lt', 'lte'];

@@ -438,6 +438,20 @@ A sweep for anything written, tested and impossible to find. These were.
 | Checking a vehicle, as a buyer | Built  | `/verify` is in the public navigation and the footer (Phase 46.5)                   |
 | An account opened is an email  | Built  | Whoever runs Carnet is told, before the address is verified (Phase 46.5)            |
 
+## 21.11 Wired at both ends
+
+The second sweep: things connected at one end only.
+
+| Item                       | Status | Where                                                                       |
+| -------------------------- | ------ | --------------------------------------------------------------------------- |
+| "Your car is ready"        | Built  | Sent when a job moves, for the stages worth sending (Phase 46.6)            |
+| A booking confirmation     | Built  | Queued in the booking's own transaction, and actually sent (Phase 46.6)     |
+| Rules that run             | Built  | Eight triggers fired from their moments, three swept hourly (Phase 46.6)    |
+| Actions that happen        | Built  | Tasks created, jobs tagged; anything unimplemented fails aloud (Phase 46.6) |
+| A purchase order on a job  | Built  | Typed on the job, so a fleet that requires one can be invoiced (Phase 46.6) |
+| The right door for a buyer | Built  | Somebody accepting a vehicle signs up as a customer (Phase 46.6)            |
+| Cashing up answers         | Built  | Says whether the drawer is over or short (Phase 46.6)                       |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -516,7 +530,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 244          |
+| Built    | 251          |
 | Partial  | 1            |
 | Deferred | 1            |
 

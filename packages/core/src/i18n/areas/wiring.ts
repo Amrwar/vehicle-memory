@@ -79,6 +79,54 @@ export const fr: Readonly<Record<string, string>> = {
     'Choisissez l’intervention sur laquelle le travail a été fait.',
   'A mileage allowance counts from a reading, and this vehicle has none. Record the mileage on the job first, or leave the allowance blank.':
     'Un kilométrage couvert se compte à partir d’un relevé, et ce véhicule n’en a aucun. Notez d’abord le kilométrage sur l’intervention, ou laissez le champ vide.',
+  // Putting a shelf right
+  'Put the shelf right': 'Remettre le rayonnage d’aplomb',
+  'A count says what is there; an adjustment says what moved and why. Both leave a movement behind.':
+    'Un comptage dit ce qui est là ; un ajustement dit ce qui a bougé et pourquoi. Les deux laissent un mouvement.',
+  'Counted on the shelf': 'Compté en rayon',
+  'What is actually there, not the difference': 'Ce qui s’y trouve réellement, pas l’écart',
+  'Record the count': 'Enregistrer le comptage',
+  'Adjust by': 'Ajuster de',
+  'Negative to take some off': 'Négatif pour en retirer',
+  'Two damaged in the rack': 'Deux abîmées dans le rayonnage',
+  'Record the adjustment': 'Enregistrer l’ajustement',
+  'Count it again: that is not a number of parts.': 'Recomptez : ce n’est pas un nombre de pièces.',
+  'Say how many, up or down.': 'Indiquez combien, en plus ou en moins.',
+  'An adjustment carries a reason, or the balance cannot be explained later.':
+    'Un ajustement porte un motif, sans quoi le solde ne pourra pas être expliqué plus tard.',
+  'Counted. The shelf says what you counted, and the difference is a movement.':
+    'Compté. Le rayonnage indique ce que vous avez compté, et l’écart devient un mouvement.',
+  'Adjusted, with the reason against it.': 'Ajusté, avec le motif en regard.',
+
+  // The number their own system knows the job by
+  'Their PO number': 'Leur numéro de commande',
+  'Saved. It goes on the invoice, which is what their accounts department matches against.':
+    'Enregistré. Il figure sur la facture, ce sur quoi leur comptabilité fait le rapprochement.',
+
+  // Cashing up
+  'Till closed, and the drawer agreed to the penny.':
+    'Caisse clôturée, et le tiroir tombait au centime près.',
+  'Till closed. The drawer is {amount} over what it should hold.':
+    'Caisse clôturée. Le tiroir présente un excédent de {amount}.',
+  'Till closed. The drawer is {amount} short of what it should hold.':
+    'Caisse clôturée. Il manque {amount} dans le tiroir.',
+
+  // Elsewhere
+  'Cancelled. Nothing had left a shelf, so nothing has to be put back.':
+    'Annulé. Rien n’avait quitté un rayonnage, il n’y a donc rien à remettre.',
+  'Thank you. The workshop has your answer and will carry on from there.':
+    'Merci. L’atelier a votre réponse et poursuit à partir de là.',
+  'The vehicle is yours. Its history came with it and is on your account now.':
+    'Le véhicule est à vous. Son historique l’a suivi et se trouve désormais sur votre compte.',
+  'Your password is set. Sign in with the new one.':
+    'Votre mot de passe est défini. Connectez-vous avec le nouveau.',
+  'Handed over. The vehicle is off your books, and its history went with it rather than staying here.':
+    'Cédé. Le véhicule ne figure plus dans vos registres, et son historique l’a suivi plutôt que de rester ici.',
+  'Tag the job': 'Étiqueter l’intervention',
+  'They have agreed to marketing emails.': 'Ils ont accepté les e-mails marketing.',
+  'They have not agreed to marketing emails.': 'Ils n’ont pas accepté les e-mails marketing.',
+  'Consent is theirs to give and is changed where a reason is recorded against it, not on this form. It is not asked for here so that nobody can put somebody back on a list by correcting their postcode.':
+    'Le consentement leur appartient et se modifie là où un motif est consigné, pas sur ce formulaire. Il n’est pas demandé ici afin que personne ne puisse remettre quelqu’un sur une liste en corrigeant son code postal.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -148,4 +196,51 @@ export const ar: Readonly<Record<string, string>> = {
   'Choose the job the work was done on.': 'اختر العمل الذي نُفِّذ عليه.',
   'A mileage allowance counts from a reading, and this vehicle has none. Record the mileage on the job first, or leave the allowance blank.':
     'المسافة المشمولة تُحتسب من قراءة عدّاد، وهذه المركبة ليس لها أي قراءة. سجّل العدّاد على العمل أولًا، أو اترك الحقل فارغًا.',
+  // Putting a shelf right
+  'Put the shelf right': 'ضبط الرفّ',
+  'A count says what is there; an adjustment says what moved and why. Both leave a movement behind.':
+    'الجرد يقول ما هو موجود؛ والتسوية تقول ما تحرّك ولماذا. وكلاهما يترك حركة مسجَّلة.',
+  'Counted on the shelf': 'المعدود على الرفّ',
+  'What is actually there, not the difference': 'ما هو موجود فعلًا، لا الفرق',
+  'Record the count': 'تسجيل الجرد',
+  'Adjust by': 'التسوية بمقدار',
+  'Negative to take some off': 'بالسالب للخصم',
+  'Two damaged in the rack': 'قطعتان تلفتا على الرفّ',
+  'Record the adjustment': 'تسجيل التسوية',
+  'Count it again: that is not a number of parts.': 'أعِد العدّ: هذا ليس عددًا من القطع.',
+  'Say how many, up or down.': 'حدّد الكمية، زيادةً أو نقصًا.',
+  'An adjustment carries a reason, or the balance cannot be explained later.':
+    'التسوية تحمل سببًا، وإلا تعذّر تفسير الرصيد لاحقًا.',
+  'Counted. The shelf says what you counted, and the difference is a movement.':
+    'تم الجرد. الرفّ يقول ما عددته، والفرق صار حركة مسجَّلة.',
+  'Adjusted, with the reason against it.': 'تمت التسوية، ومعها سببها.',
+
+  // The number their own system knows the job by
+  'Their PO number': 'رقم أمر الشراء لديهم',
+  'Saved. It goes on the invoice, which is what their accounts department matches against.':
+    'تم الحفظ. يظهر على الفاتورة، وهو ما تطابق عليه إدارة حساباتهم.',
+
+  // Cashing up
+  'Till closed, and the drawer agreed to the penny.': 'أُغلقت الخزينة، وطابق الدرج إلى آخر قرش.',
+  'Till closed. The drawer is {amount} over what it should hold.':
+    'أُغلقت الخزينة. في الدرج زيادة قدرها {amount}.',
+  'Till closed. The drawer is {amount} short of what it should hold.':
+    'أُغلقت الخزينة. ينقص الدرج {amount}.',
+
+  // Elsewhere
+  'Cancelled. Nothing had left a shelf, so nothing has to be put back.':
+    'تم الإلغاء. لم يغادر شيء أي رفّ، فليس هناك ما يُعاد.',
+  'Thank you. The workshop has your answer and will carry on from there.':
+    'شكرًا لك. وصلت إجابتك إلى الورشة وستكمل على أساسها.',
+  'The vehicle is yours. Its history came with it and is on your account now.':
+    'المركبة لك. وقد جاء تاريخها معها وصار على حسابك.',
+  'Your password is set. Sign in with the new one.':
+    'تم تعيين كلمة المرور. سجّل الدخول بالكلمة الجديدة.',
+  'Handed over. The vehicle is off your books, and its history went with it rather than staying here.':
+    'تمت الحوالة. خرجت المركبة من سجلاتك، وذهب تاريخها معها بدل أن يبقى هنا.',
+  'Tag the job': 'وسم العمل',
+  'They have agreed to marketing emails.': 'وافقوا على رسائل التسويق بالبريد.',
+  'They have not agreed to marketing emails.': 'لم يوافقوا على رسائل التسويق بالبريد.',
+  'Consent is theirs to give and is changed where a reason is recorded against it, not on this form. It is not asked for here so that nobody can put somebody back on a list by correcting their postcode.':
+    'الموافقة حقّهم هم، وتُغيَّر حيث يُسجَّل سببها، لا في هذه الاستمارة. ولا تُطلب هنا كي لا يعيد أحدٌ شخصًا إلى قائمة بمجرد تصحيح رمزه البريدي.',
 };

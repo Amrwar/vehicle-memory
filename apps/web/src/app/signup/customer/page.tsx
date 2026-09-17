@@ -37,11 +37,24 @@ export const dynamic = 'force-dynamic';
  * car to be waiting.
  */
 
+/**
+ * Where to send them afterwards, when they arrived from somewhere.
+ *
+ * Only ever a path on this site: an address somebody can put in a link is an
+ * address somebody can point at another site, and "sign up and you will be
+ * taken straight there" is exactly the sentence that makes that work.
+ */
+function safeNext(value: string | undefined): string | null {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return null;
+  return value;
+}
+
 async function submit(formData: FormData) {
   'use server';
 
   const name = String(formData.get('name') ?? '');
   const email = String(formData.get('email') ?? '');
+  const next = safeNext(String(formData.get('next') ?? '') || undefined);
 
   try {
     const headerList = await headers();
@@ -59,12 +72,16 @@ async function submit(formData: FormData) {
     if (!(error instanceof ClaimError)) throw error;
 
     const params = new URLSearchParams({ name, email, problem: error.message });
+    if (next) params.set('next', next);
     redirect(`/signup/customer?${params.toString()}`);
   }
 
   // Outside the try. redirect() works by throwing, and catching it here would
   // turn a successful sign-up into a reported failure.
-  redirect('/portal/claim?welcome=1');
+  // Straight back to whatever sent them here — a vehicle waiting to be
+  // accepted, most often — rather than to a general "claim a car" page that
+  // makes them find it again.
+  redirect(next ?? '/portal/claim?welcome=1');
 }
 
 export default async function CustomerSignupPage({
@@ -73,10 +90,11 @@ export default async function CustomerSignupPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const t = await tFor();
-  const user = await currentUser();
-  if (user) redirect('/portal');
-
   const params = await searchParams;
+  const onwards = safeNext(params.next);
+
+  const user = await currentUser();
+  if (user) redirect(onwards ?? '/portal');
 
   return (
     <main id="main" className="grid min-h-dvh lg:grid-cols-[1fr_minmax(27rem,34rem)]">
@@ -148,6 +166,7 @@ export default async function CustomerSignupPage({
           ) : null}
 
           <form action={submit} className="mt-6 grid gap-4">
+            {onwards ? <input type="hidden" name="next" value={onwards} /> : null}
             <Field label={t('Your name')}>
               <Input
                 name="name"

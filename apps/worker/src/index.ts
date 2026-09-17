@@ -57,6 +57,14 @@ async function tick(iteration: number): Promise<void> {
   }
 
   // Every hour.
+  //
+  // Not the whole hourly job. Two pieces of it — catching up the consequences
+  // of a payment that a crash interrupted, and the automation triggers that
+  // are conditions rather than events — live in the web application, because
+  // they are written against its own libraries, and this process cannot
+  // import them. In production both run: the scheduler calls
+  // /api/cron/hourly, which runs everything. In development, reach that route
+  // to exercise them.
   if (iteration % 720 === 0) {
     await queueServiceReminders();
     await remindTrialsEnding();

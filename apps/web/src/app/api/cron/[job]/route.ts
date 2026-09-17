@@ -9,6 +9,7 @@ import {
   sendQueuedMessages,
 } from '@carnet/jobs';
 import { catchUpConsequences } from '@/lib/afterwards';
+import { sweepConditions } from '@/lib/sweeps';
 import { timingSafeEqual } from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -73,8 +74,13 @@ const JOBS: Record<Job, () => Promise<Record<string, number>>> = {
     // Points and referral payouts that a crash or a timeout stopped landing
     // when the bill was paid. Almost always nothing. Phase 46.
     const caught = await catchUpConsequences();
+    // The automation triggers that are conditions rather than events: a bill
+    // gone overdue, a booking nobody turned up for, a customer who has
+    // quietly stopped coming. Nothing happens at the moment those become
+    // true, so they have to be looked for. Phase 46.6.
+    const swept = await sweepConditions();
 
-    return { shifts, reminders, trials, caught };
+    return { shifts, reminders, trials, caught, ...swept };
   },
 };
 

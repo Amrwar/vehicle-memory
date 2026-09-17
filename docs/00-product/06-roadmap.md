@@ -2570,6 +2570,79 @@ customer corrected and still one record, a transfer started, sent, part
 received and closed with nothing created or destroyed on the journey, and
 cover recorded against a real job. 20 checks.
 
+## Phase 46.6 — The messages nobody got
+
+**Scope.** A second sweep, for things that are wired at one end only:
+capabilities written and never called, inputs nobody reads, effects nobody can
+see.
+
+**Exit.** Nothing in the product reports success it did not have, and nothing
+a workshop is offered is a promise the code cannot keep.
+
+**Status.** Built. The first sweep looked for pages and functions nothing
+reached. This one looked for the subtler shape — something wired at one end —
+and found more.
+
+The worst was the quietest. `notifyCustomer` composed the message telling a
+customer their car needs a decision, or is ready to collect, decided which
+stages were worth sending and which were noise, and was tested. It had no
+callers. In a year of running this product no customer would ever have been
+told their car was ready, and nothing anywhere would have looked wrong. It is
+now called from the one place a job changes state, and sends a real message
+rather than an event nothing handled.
+
+The booking confirmation had the same shape with an extra twist: it was
+composed inside the booking's own transaction, deliberately, so that a
+confirmation could never go out for a booking that failed to save — and then
+written to an outbox event type with no handler, parked with "no handler
+registered", and thrown away. It is a queued message now, still inside the
+transaction that makes it honest.
+
+Then the automation engine, which was complete and unreached. Ten triggers on
+the screen, conditions, cooldowns, a check that refuses a rule which could
+never match — and exactly one trigger was ever fired, from the reminder sweep.
+A workshop could write "when a bill goes a fortnight overdue, text them" and
+watch it never happen, with no way to tell whether the rule was wrong or the
+product was. Eight of the remaining nine now fire from the moments they name,
+and the three that are conditions rather than events — a bill going overdue,
+a booking nobody turned up for, a customer who has quietly stopped coming —
+are looked for hourly, because nothing happens at the moment they become true.
+
+The ninth is gone. An MOT falling due was offered as a trigger by a product
+that records no MOT date anywhere, so there was no moment for it to happen at.
+It comes back the day a vehicle carries that date; until then, offering it
+teaches a workshop not to trust the other nine.
+
+Two automation actions were worse than broken: "create a task" and "tag the
+customer" were marked done without being done. The rule reported success, the
+audit trail agreed, and no task existed. Tasks are created now; tags go on the
+job, because tags in this product belong to jobs and the action was written
+against a data model that has no customer tags at all. "Offer a booking" is
+withdrawn — nothing implemented it, and a message with the booking link in its
+template already does the job visibly. Anything a rule asks for that cannot be
+done now fails with a sentence instead of claiming to have run.
+
+A fleet with "purchase order required" ticked could never be invoiced. The
+field existed, the job page displayed it, the monthly consolidated invoice read
+it, and nothing could write it — so the refusal told somebody to add a number
+the product gave them no way to add. It is a field on the job now.
+
+A buyer accepting a vehicle with no account was sent to the workshop sign-up,
+which would have asked a private individual to open a garage business and put
+a card down before they could accept their own car. They go to the customer
+sign-up, which now carries them back to the handover afterwards.
+
+And the silences: approving a quote, accepting a handover, setting a new
+password, transferring a vehicle out, and cashing up all redirected with a
+marker the destination never rendered, so the screen came back unchanged and
+looked like nothing had happened. Cashing up now says whether the drawer is
+over or short, which is the entire point of counting it.
+
+`verify-triggers.ts` writes real rules, does the real thing that should fire
+them, and checks the run was recorded and the action carried out — including
+that a blocked rule is written down as blocked rather than silently skipped.
+11 checks.
+
 ## Phase 47 — Financial integrity
 
 **Scope.** An invariant suite over the whole ledger rather than over one
