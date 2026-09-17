@@ -96,6 +96,7 @@ way to find that out is to press the button rather than to read the schema.
 | Coupons                    | Built   | `/coupons`: a code worth a percentage or an amount, with a start, an end, a least bill and limits per code and per customer; taken on a bill or at the counter, refused with the promise it did not meet, and booked as what the offer cost (Phase 45.5).                                                  |
 | Asked twice                | Built   | Every write that moves money or stock says what a repeat does to it, and the build fails for one that does not. A double-click, a refresh, a retried webhook or two overlapping workers cost nothing (Phase 46).                                                                                           |
 | Rules that run             | Built   | Eight automation triggers fire from the moments they name, and the three that are conditions rather than events are looked for hourly. An action does what it says or fails with a reason; it is never recorded as done without having happened (Phase 46.6).                                              |
+| A record put right         | Built   | An entry a workshop recorded can be corrected by a new entry that supersedes it. Both stay on the chain, the chain still verifies, and only the workshop that recorded it may correct it (Phase 46.7).                                                                                                     |
 
 ---
 

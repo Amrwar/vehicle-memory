@@ -1642,6 +1642,32 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic AY - What the customer could not see (Phase 46.7)
+
+### AY1 - The deposit I already paid
+
+**As** Maria **I want** to see money the garage is holding for me **so that** a
+bill saying "still to pay" is not the only thing I have to go on.
+**Size** 5 - **Satisfies** FR-8103
+
+- **Given** I paid a deposit, **when** I open my invoices, **then** I can see
+  what they are holding and that it comes off my next bill.
+- **Given** a credit note was raised, **when** I look at that bill, **then** I
+  can see what was taken off and why.
+
+### AY2 - The mileage typed wrong
+
+**As** Ahmed **I want** to correct an entry **so that** a mistake is a
+correction rather than a permanent lie on somebody's car.
+**Size** 8 - **Satisfies** FR-8101, FR-8104
+
+- **Given** an entry my workshop recorded, **when** I correct it, **then** both
+  entries stay on the record and the old one reads as corrected.
+- **Given** another workshop's entry, **when** I try, **then** I am told to add
+  my own rather than rewrite theirs.
+- **Given** a correction, **when** the chain is verified, **then** it still
+  verifies.
+
 ## Epic AX - Wired at both ends (Phase 46.6)
 
 ### AX1 - Telling somebody their car is ready

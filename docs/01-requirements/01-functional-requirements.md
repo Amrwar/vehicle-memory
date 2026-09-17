@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8100 - What the customer could not see
+
+| Ref     | Requirement                                                                                                                                | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-8101 | An entry on a vehicle's record MUST be correctable by the workshop that recorded it, as a new entry superseding the old, never as an edit. | 46.7  |
+| FR-8102 | A quote link MUST be withdrawable, and MUST show where it was sent and whether it has been opened.                                         | 46.7  |
+| FR-8103 | A customer MUST be able to see money a workshop is holding for them, and any credit note raised against a bill.                            | 46.7  |
+| FR-8104 | A correction MUST leave the vehicle's hash chain verifiable, and an entry MUST NOT be corrected twice.                                     | 46.7  |
+
 ## FR-8000 - Wired at both ends
 
 | Ref     | Requirement                                                                                                                                         | Phase |

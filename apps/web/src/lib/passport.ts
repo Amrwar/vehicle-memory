@@ -9,6 +9,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { env } from './env';
+import { audit } from './guard';
 
 /**
  * Writing to the vehicle passport.
@@ -29,6 +30,111 @@ import { env } from './env';
  * Idempotent: an event whose key already exists is skipped, so retrying a
  * failed job completion cannot duplicate history (story C3).
  */
+/**
+ * Corrects an entry on a vehicle's record.
+ *
+ * The product's whole argument is that a passport cannot be edited. That is
+ * true and it is also a problem, because workshops make mistakes: a mileage
+ * typed with an extra digit, a service recorded against the wrong car. Without
+ * a way to correct one, the honest record of a mistake is a permanent lie.
+ *
+ * So a correction is a new event that supersedes the old one, never an edit.
+ * Both stay on the chain, the old one reads as corrected, and anybody looking
+ * can see that somebody put it right and when. The database permits exactly
+ * one mutation on an existing event — filling in which event superseded it —
+ * and refuses everything else, which is what makes this safe rather than a
+ * hole in the guarantee.
+ *
+ * The screens for this existed. `supersededById` was rendered on the vehicle
+ * page and in the passport component, with a whole visual treatment for a
+ * corrected entry, and nothing in the product could ever set it. Phase 46.7.
+ *
+ * @repeat GUARDED(CONSTRAINT: vehicle_events_supersedesId_key) One correction
+ * per entry. A second attempt lands on the index, and the trigger refuses to
+ * supersede an event that is already superseded.
+ */
+export async function correctEvent(input: {
+  orgId: string;
+  userId: string;
+  eventId: string;
+  title: string;
+  summary: string;
+  odometerKm?: number | null;
+}): Promise<string> {
+  const wrong = await prisma.vehicleEvent.findUnique({
+    where: { id: input.eventId },
+    select: {
+      id: true,
+      vehicleId: true,
+      type: true,
+      occurredAt: true,
+      recordedByOrgId: true,
+      supersededById: true,
+    },
+  });
+
+  if (!wrong) throw new Error('That entry is not on this vehicle.');
+
+  if (wrong.supersededById) {
+    throw new Error('That entry has already been corrected.');
+  }
+
+  // Only the workshop that recorded it may correct it. A garage rewriting
+  // another garage's entry is the thing a tamper-evident record exists to
+  // prevent, and a correction is still a claim about what happened.
+  if (wrong.recordedByOrgId !== input.orgId) {
+    throw new Error(
+      'Only the workshop that recorded an entry can correct it. Add your own entry instead.',
+    );
+  }
+
+  const title = input.title.trim();
+  const summary = input.summary.trim();
+
+  if (!title || !summary) {
+    throw new Error('A correction says what it should have said, and why it is being corrected.');
+  }
+
+  await appendEvents([
+    {
+      vehicleId: wrong.vehicleId,
+      type: wrong.type as DraftEvent['type'],
+      occurredAt: wrong.occurredAt,
+      title,
+      summary,
+      // A correction is the workshop's word, like the entry it replaces.
+      verification: 'WORKSHOP_RECORDED',
+      payload: { corrects: wrong.id, reason: summary },
+      odometerKm: input.odometerKm ?? null,
+      recordedByOrgId: input.orgId,
+      supersedesId: wrong.id,
+      idempotencyKey: `correction:${wrong.id}`,
+    },
+  ]);
+
+  const correction = await prisma.vehicleEvent.findFirstOrThrow({
+    where: { supersedesId: wrong.id },
+    select: { id: true },
+  });
+
+  // The one mutation the database allows on an event that already exists.
+  await prisma.vehicleEvent.update({
+    where: { id: wrong.id },
+    data: { supersededById: correction.id },
+  });
+
+  await audit({
+    orgId: input.orgId,
+    actorUserId: input.userId,
+    action: 'passport.corrected',
+    entityType: 'VehicleEvent',
+    entityId: wrong.id,
+    after: { correction: correction.id, title },
+  });
+
+  return correction.id;
+}
+
 export async function appendEvents(drafts: readonly DraftEvent[]): Promise<number> {
   if (drafts.length === 0) return 0;
 

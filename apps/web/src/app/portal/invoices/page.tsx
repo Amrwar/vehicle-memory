@@ -17,7 +17,7 @@ import { PortalShell } from '@/components/portal-shell';
 import { attemptForCustomer, checkAttempt, startCardPayment } from '@/lib/card-payments';
 import { requireUser } from '@/lib/guard';
 import { cardPaymentsOffered } from '@/lib/payments/provider';
-import { invoicesFor } from '@/lib/portal';
+import { invoicesFor, moneyHeldFor } from '@/lib/portal';
 import { regionForUser } from '@/lib/region';
 import { tFor } from '@/lib/i18n';
 
@@ -92,7 +92,7 @@ export default async function PortalInvoicesPage({
       };
   }
 
-  const invoices = await invoicesFor(user.userId);
+  const [invoices, held] = await Promise.all([invoicesFor(user.userId), moneyHeldFor(user.userId)]);
   const owing = invoices.filter((invoice) => invoice.outstanding > 0.005);
   const settled = invoices.filter((invoice) => invoice.outstanding <= 0.005);
 
@@ -157,6 +157,54 @@ export default async function PortalInvoicesPage({
         />
       ) : null}
 
+      {/* Money a workshop is already holding. The workshop could see this on
+          the customer's own page and the customer could not see it at all, so
+          a bill reading "still to pay" made no mention of the deposit they had
+          already handed over. Phase 46.7. */}
+      {held.length > 0 ? (
+        <section className="mt-6">
+          <h2 className="font-display text-[17px] font-semibold">{t('Money already with them')}</h2>
+          <ul className="mt-3 grid gap-3">
+            {held.map((workshop) => (
+              <li key={workshop.workshop}>
+                <Card>
+                  <CardBody className="grid gap-2">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <p className="font-medium">{workshop.workshop}</p>
+                      <p className="font-display text-[18px] font-semibold">
+                        <Money amount={workshop.heldMinor / 100} currency={workshop.currency} />
+                      </p>
+                    </div>
+                    <ul className="grid gap-1 text-[13px] text-(--text-soft)">
+                      {workshop.rows.map((row) => (
+                        <li key={row.id} className="flex flex-wrap items-baseline gap-2">
+                          <span>
+                            {row.kind === 'CREDIT' ? t('Credit kept back') : t('Deposit')}
+                          </span>
+                          <span className="text-(--text-faint)">
+                            {row.receivedAt.toLocaleDateString(region.locale, {
+                              dateStyle: 'medium',
+                            })}
+                          </span>
+                          <span className="ms-auto tabular-nums">
+                            <Money amount={Number(row.amount)} currency={row.currency} />
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-[12px] text-(--text-faint)">
+                      {t(
+                        'It comes off your next bill with them. It is not counted in what is shown as still to pay above.',
+                      )}
+                    </p>
+                  </CardBody>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {owing.length > 0 ? (
         <section className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -203,6 +251,23 @@ export default async function PortalInvoicesPage({
                         <Money amount={invoice.paidNumber} currency={invoice.currency} />
                       </div>
                     ) : null}
+
+                    {/* What the workshop took off after issuing it. Invisible
+                        until now, so a customer holding a credit note read the
+                        original total and concluded it had been forgotten. */}
+                    {invoice.creditNotes.map((note) => (
+                      <div key={note.id} className="flex justify-between gap-2 text-(--text-soft)">
+                        <span className="min-w-0">
+                          {t('Credited')}
+                          {note.reason ? (
+                            <span className="ms-1 text-(--text-faint)">{note.reason}</span>
+                          ) : null}
+                        </span>
+                        <span className="shrink-0">
+                          −<Money amount={Number(note.amount)} currency={invoice.currency} />
+                        </span>
+                      </div>
+                    ))}
 
                     <div className="flex justify-between border-t border-(--border) pt-1.5 font-medium">
                       <span>{t('Still to pay')}</span>

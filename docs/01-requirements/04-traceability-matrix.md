@@ -523,6 +523,10 @@ where the work happens.
 
 | Req     | Story | Schema                               | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | ------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-8101 | AY2   | `vehicle_events.supersedesId`        | `correctEvent()`, the form on the vehicle page                              | `verify-wiring.ts`                          | Done   |
+| FR-8102 | -     | `estimate_shares.revokedAt`          | `revokeEstimateShare()`, the card on the job page                           | `verify-controls.ts`                        | Done   |
+| FR-8103 | AY1   | `deposits`, `credit_notes`           | `moneyHeldFor()`, `invoicesFor()`, the portal's invoices page               | `verify-wiring.ts`                          | Done   |
+| FR-8104 | AY2   | `carnet_vehicle_events_append_only`  | the trigger's single permitted mutation, checked by `verifyChain()`         | `verify-wiring.ts`, `verify-integrity.ts`   | Done   |
 | FR-8001 | AX3   | `Job.customerOrderNumber`            | `setOrderNumber()`, the field on the job page                               | `verify-wiring.ts`                          | Done   |
 | FR-8002 | AX1   | `message_logs`                       | `notifyCustomer()`, called from `moveJob()`                                 | `verify-triggers.ts`                        | Done   |
 | FR-8003 | AX1   | `message_logs`                       | the message queued inside `requestBooking()`'s transaction                  | `verify-messaging.ts`                       | Done   |

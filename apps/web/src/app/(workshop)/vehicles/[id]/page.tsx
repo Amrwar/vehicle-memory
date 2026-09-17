@@ -1,4 +1,5 @@
 import {
+  msg,
   averageKmPerDay,
   humanise,
   documentKindLabel,
@@ -9,6 +10,9 @@ import {
   type VehicleEventType,
 } from '@carnet/core';
 import {
+  Select,
+  Input,
+  Field,
   Alert,
   Badge,
   Button,
@@ -26,7 +30,7 @@ import {
 } from '@carnet/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { prisma } from '@carnet/db';
 import { BackLink } from '@/components/back-link';
@@ -36,7 +40,8 @@ import { tFor } from '@/lib/i18n';
 import { DocumentUpload, DocumentRemove } from '@/components/document-upload';
 import { documentsFor, paperworkFor } from '@/lib/documents';
 import { networkStatementFor } from '@/lib/network';
-import { orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
+import { correctEvent, orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
+import { SubmitOnce } from '@/components/submit-once';
 import { conditionOf } from '@/lib/condition';
 import { coverForVehicle } from '@/lib/warranty';
 
@@ -75,6 +80,41 @@ export async function generateMetadata({
  * client, not the tenant-scoped one, because a vehicle is not owned by a
  * workshop (ADR-0004). Access is checked explicitly instead.
  */
+/**
+ * Putting an entry on a vehicle's record right. FR-8101.
+ *
+ * A correction is a new entry that supersedes the old one, never an edit: both
+ * stay on the chain, and anybody reading later can see that somebody noticed
+ * and put it right. The screens for a corrected entry already existed and
+ * nothing could ever set one.
+ */
+async function correct(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('vehicle:write');
+  const vehicleId = String(formData.get('vehicleId') ?? '');
+  const odometer = String(formData.get('odometerKm') ?? '').trim();
+
+  try {
+    await correctEvent({
+      orgId,
+      userId: user.userId,
+      eventId: String(formData.get('eventId') ?? ''),
+      title: String(formData.get('title') ?? ''),
+      summary: String(formData.get('summary') ?? ''),
+      odometerKm: odometer === '' ? null : Number(odometer),
+    });
+  } catch (error) {
+    redirect(
+      `/vehicles/${vehicleId}?warning=${encodeURIComponent(
+        error instanceof Error ? error.message : msg('That entry could not be corrected.'),
+      )}`,
+    );
+  }
+
+  redirect(`/vehicles/${vehicleId}?corrected=1`);
+}
+
 export default async function VehiclePage({
   params,
   searchParams,
@@ -85,6 +125,7 @@ export default async function VehiclePage({
     registered?: string;
     warning?: string;
     transferred?: string;
+    corrected?: string;
   }>;
 }) {
   const { id } = await params;
@@ -117,6 +158,15 @@ export default async function VehiclePage({
   });
 
   if (!vehicle) notFound();
+
+  // Entries this workshop recorded and has not already put right. Another
+  // garage's entry is not ours to correct: a correction is still a claim about
+  // what happened, and a record one party can rewrite is not a record.
+  const correctable = can(user.role, 'vehicle:write')
+    ? vehicle.events.filter(
+        (event) => event.recordedByOrgId === orgId && event.supersededById === null,
+      )
+    : [];
 
   const [jobs, verification, covers, condition] = await Promise.all([
     db.job.findMany({
@@ -195,6 +245,14 @@ export default async function VehiclePage({
           </>
         }
       />
+
+      {notice.corrected ? (
+        <Alert tone="success" className="mb-5">
+          {t(
+            'Corrected. The original stays on the record, marked as corrected, and the new entry says what it should have said.',
+          )}
+        </Alert>
+      ) : null}
 
       {notice.transferred ? (
         <Alert tone="success" className="mb-5">
@@ -363,6 +421,54 @@ export default async function VehiclePage({
               </CardBody>
             )}
           </Card>
+
+          {correctable.length > 0 ? (
+            <Card>
+              <CardHeader
+                title={t('Put an entry right')}
+                description={t(
+                  'A correction is a new entry that supersedes the old one. Both stay on the record, because a history that can be quietly edited is not a history.',
+                )}
+              />
+              <form action={correct}>
+                <CardBody className="grid gap-3.5">
+                  <input type="hidden" name="vehicleId" value={vehicle.id} />
+                  <Field
+                    label={t('Which entry')}
+                    hint={t('Only ones this workshop recorded, and has not already corrected')}
+                  >
+                    <Select name="eventId" required defaultValue="">
+                      <option value="" disabled>
+                        {t('Choose the entry that is wrong')}
+                      </option>
+                      {correctable.map((event) => (
+                        <option key={event.id} value={event.id}>
+                          {event.occurredAt.toLocaleDateString(region.locale, {
+                            dateStyle: 'medium',
+                          })}
+                          {' · '}
+                          {event.title}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label={t('What it should say')}>
+                    <Input name="title" required maxLength={120} />
+                  </Field>
+                  <Field
+                    label={t('Why it is being corrected')}
+                    hint={t('Read by whoever looks at this record later, including a buyer')}
+                  >
+                    <Input name="summary" required maxLength={300} />
+                  </Field>
+                  <Field label={t('Mileage')} hint={t('Optional, if that is what was wrong')}>
+                    <Input name="odometerKm" type="number" min={0} className="tabular" />
+                  </Field>
+                  <SubmitOnce variant="secondary">{t('Record the correction')}</SubmitOnce>
+                </CardBody>
+              </form>
+            </Card>
+          ) : null}
         </div>
 
         <aside className="grid content-start gap-5">

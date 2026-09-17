@@ -452,6 +452,16 @@ The second sweep: things connected at one end only.
 | The right door for a buyer | Built  | Somebody accepting a vehicle signs up as a customer (Phase 46.6)            |
 | Cashing up answers         | Built  | Says whether the drawer is over or short (Phase 46.6)                       |
 
+## 21.12 What the customer could not see
+
+| Item                        | Status | Where                                                                            |
+| --------------------------- | ------ | -------------------------------------------------------------------------------- |
+| Money held, in the portal   | Built  | Grouped by workshop, with what it comes off next (Phase 46.7)                    |
+| Credit notes, in the portal | Built  | On the bill they were raised against (Phase 46.7)                                |
+| Correcting a passport entry | Built  | A new entry supersedes the old; both stay, the chain still verifies (Phase 46.7) |
+| Withdrawing a quote link    | Built  | Shown with where it went and whether it was opened (Phase 46.7)                  |
+| A way back from the floor   | Built  | For anybody who is not a technician (Phase 46.7)                                 |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -530,7 +540,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 251          |
+| Built    | 256          |
 | Partial  | 1            |
 | Deferred | 1            |
 

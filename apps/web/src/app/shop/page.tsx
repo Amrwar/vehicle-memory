@@ -189,6 +189,18 @@ export default async function ShopFloorPage({
             <ThemeToggle className="w-[6.5rem]" />
             <div className="text-end">
               <p className="text-[14px] font-medium">{user.name}</p>
+              {/* A technician's whole surface is this page, so they need no way
+                  out. Anybody else who lands here — an owner looking at what
+                  the floor sees — had none either, and retyping a URL is not a
+                  way out. Phase 46.7. */}
+              {user.role !== 'TECHNICIAN' ? (
+                <a
+                  href="/dashboard"
+                  className="text-[13px] text-(--text-faint) underline underline-offset-2"
+                >
+                  {t('Back to the workshop')}
+                </a>
+              ) : null}
               <form action="/api/sign-out" method="post">
                 <button
                   type="submit"

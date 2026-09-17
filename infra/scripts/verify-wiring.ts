@@ -21,6 +21,7 @@
 
 import 'dotenv/config';
 
+import { verifyChain } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { updateCustomer } from '../../apps/web/src/lib/customers';
@@ -30,6 +31,7 @@ import {
   loadTransfer,
   receiveTransfer,
 } from '../../apps/web/src/lib/transfers';
+import { correctEvent } from '../../apps/web/src/lib/passport';
 import { recordCover, warrantyBook } from '../../apps/web/src/lib/warranty';
 
 let failures = 0;
@@ -260,6 +262,70 @@ async function main() {
   );
   check('the book grew by one', bookAfter.all.length === bookBefore.all.length + 1);
 
+  /* --- putting a record right ----------------------------------------------- */
+
+  console.info('\n  Putting an entry right');
+
+  const entry = await prisma.vehicleEvent.findFirst({
+    where: { recordedByOrgId: org.id, supersededById: null },
+    orderBy: { sequence: 'desc' },
+    select: { id: true, vehicleId: true },
+  });
+
+  if (entry) {
+    const correctionId = await correctEvent({
+      orgId: org.id,
+      userId: staff.id,
+      eventId: entry.id,
+      title: TAG,
+      summary: `${TAG}: a correction, to prove one can be made at all.`,
+    });
+
+    const chain = await prisma.vehicleEvent.findMany({
+      where: { vehicleId: entry.vehicleId },
+      orderBy: { sequence: 'asc' },
+    });
+
+    check(
+      'a correction leaves the chain verifiable',
+      verifyChain(chain as never, process.env.LEDGER_CHAIN_SALT ?? '').valid,
+    );
+
+    const corrected = await prisma.vehicleEvent.findUniqueOrThrow({
+      where: { id: entry.id },
+      select: { supersededById: true },
+    });
+
+    check('the old entry reads as corrected', corrected.supersededById === correctionId);
+
+    let refused = false;
+    try {
+      await correctEvent({
+        orgId: org.id,
+        userId: staff.id,
+        eventId: entry.id,
+        title: TAG,
+        summary: `${TAG}: should be refused.`,
+      });
+    } catch {
+      refused = true;
+    }
+
+    check('and cannot be corrected twice', refused);
+
+    await unwind(entry.vehicleId, entry.id, correctionId);
+
+    const restored = await prisma.vehicleEvent.findMany({
+      where: { vehicleId: entry.vehicleId },
+      orderBy: { sequence: 'asc' },
+    });
+
+    check(
+      'the probe left the chain as it found it',
+      verifyChain(restored as never, process.env.LEDGER_CHAIN_SALT ?? '').valid,
+    );
+  }
+
   await forget(org.id);
   check('the probe left nothing behind', (await probeRows(org.id)) === 0);
 
@@ -272,6 +338,32 @@ async function onHand(productId: string, warehouseId: string): Promise<number> {
     select: { onHand: true },
   });
   return Number(level?.onHand ?? 0);
+}
+
+/**
+ * Takes a probe correction back off a vehicle's chain.
+ *
+ * The triggers are disabled for exactly two statements, which is something no
+ * application code may do and this probe may, because the alternative is a
+ * seeded database that grows a correction every time the checks are run.
+ */
+async function unwind(vehicleId: string, entryId: string, correctionId: string): Promise<void> {
+  const chain = await prisma.vehicleEvent.findMany({
+    where: { vehicleId },
+    orderBy: { sequence: 'asc' },
+    select: { id: true, hash: true },
+  });
+
+  const previous = chain[chain.length - 2];
+
+  await prisma.$executeRaw`ALTER TABLE "vehicle_events" DISABLE TRIGGER USER`;
+  await prisma.vehicleEvent.update({ where: { id: entryId }, data: { supersededById: null } });
+  await prisma.vehicleEvent.delete({ where: { id: correctionId } });
+  await prisma.vehicle.update({
+    where: { id: vehicleId },
+    data: { eventCount: { decrement: 1 }, chainHead: previous?.hash ?? null },
+  });
+  await prisma.$executeRaw`ALTER TABLE "vehicle_events" ENABLE TRIGGER USER`;
 }
 
 async function probeRows(orgId: string): Promise<number> {

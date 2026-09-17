@@ -57,7 +57,13 @@ import {
 import { coverWorthChecking } from '@/lib/condition';
 import { ConversationError, conversationForJob, sendReply } from '@/lib/conversations';
 import { type Channel, channelLabel } from '@carnet/core';
-import { approveInPerson, QuoteError, quoteExtraWork, sendEstimate } from '@/lib/estimates';
+import {
+  approveInPerson,
+  QuoteError,
+  quoteExtraWork,
+  revokeEstimateShare,
+  sendEstimate,
+} from '@/lib/estimates';
 import { customerSummaryFor, sendCustomerSummary } from '@/lib/ai';
 import { AssistantError, draftFor, exchangesFor, explainFor, sendDraft } from '@/lib/assistant';
 import { setOrderNumber } from '@/lib/jobs';
@@ -195,6 +201,29 @@ async function orderNumber(formData: FormData) {
   });
 
   redirect(`/jobs/${jobId}?saved=order`);
+}
+
+/**
+ * Withdrawing the quote link. FR-8102.
+ *
+ * A link sent to a customer stays live until it expires on its own, which is
+ * fine until a quote is sent to the wrong address or a price was wrong. The
+ * function to withdraw one existed and nothing called it, and the link itself
+ * was never shown, so there was nothing to withdraw from.
+ */
+async function unshare(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('estimate:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  await revokeEstimateShare({
+    orgId,
+    userId: user.userId,
+    shareId: String(formData.get('shareId') ?? ''),
+  });
+
+  redirect(`/jobs/${jobId}?saved=unshared`);
 }
 
 /** Work bought from another business, sold on this job. Phase 38. */
@@ -595,6 +624,7 @@ export default async function JobPage({
   const inspection =
     job.inspections.find((entry) => entry.results.length > 0) ?? job.inspections[0];
   const estimate = job.estimates[0];
+  const share = estimate?.shares[0];
   const invoice = job.invoices[0];
 
   // Written for the customer once the work is done, from the job's own lines
@@ -811,6 +841,12 @@ export default async function JobPage({
         }
       />
 
+      {notice.saved === 'unshared' ? (
+        <Alert tone="success" className="mb-5">
+          {t('Withdrawn. That link no longer opens the quote for anybody holding it.')}
+        </Alert>
+      ) : null}
+
       {notice.saved === 'order' ? (
         <Alert tone="success" className="mb-5">
           {t(
@@ -937,6 +973,39 @@ export default async function JobPage({
               })
             : t('Work cannot proceed until the estimate is approved. Sent but not yet delivered.')}
         </Alert>
+      ) : null}
+
+      {/* The link the customer was sent. Shown because a link nobody can see
+          is a link nobody can withdraw, and a quote sent to the wrong address
+          stays live until it expires on its own. Phase 46.7. */}
+      {share && !share.revokedAt && can(user.role, 'estimate:write') ? (
+        <Card className="mb-5">
+          <CardBody className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium">
+                {t('The quote link sent to {to} is live', { to: share.sentTo })}
+              </p>
+              <p className="mt-0.5 text-[12px] text-(--text-faint)">
+                {share.openedAt
+                  ? t('Opened {when}, {count} times so far.', {
+                      when: share.openedAt.toLocaleString(region.locale, { dateStyle: 'medium' }),
+                      count: share.openCount,
+                    })
+                  : t('Not opened yet.')}{' '}
+                {t('It stops working on {date}.', {
+                  date: share.expiresAt.toLocaleDateString(region.locale, { dateStyle: 'medium' }),
+                })}
+              </p>
+            </div>
+            <form action={unshare}>
+              <input type="hidden" name="jobId" value={job.id} />
+              <input type="hidden" name="shareId" value={share.id} />
+              <Button type="submit" variant="ghost" size="sm">
+                {t('Withdraw the link')}
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">

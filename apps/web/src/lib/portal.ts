@@ -630,15 +630,91 @@ export async function invoicesFor(userId: string) {
         orderBy: { receivedAt: 'desc' },
         select: { id: true, amount: true, method: true, receivedAt: true },
       },
+      // What was taken off the bill after it was issued. A customer who has
+      // been given a credit note and cannot see it reads the original total
+      // and concludes the workshop has forgotten. Phase 46.7.
+      creditNotes: {
+        orderBy: { issuedAt: 'desc' },
+        select: { id: true, number: true, amount: true, reason: true, issuedAt: true },
+      },
     },
   });
 
-  return invoices.map((invoice) => ({
-    ...invoice,
-    totalNumber: Number(invoice.total),
-    paidNumber: Number(invoice.amountPaid),
-    outstanding: Number(invoice.total) - Number(invoice.amountPaid),
-  }));
+  return invoices.map((invoice) => {
+    const credited = invoice.creditNotes.reduce((total, note) => total + Number(note.amount), 0);
+
+    return {
+      ...invoice,
+      credited,
+      totalNumber: Number(invoice.total),
+      paidNumber: Number(invoice.amountPaid),
+      outstanding: Number(invoice.total) - Number(invoice.amountPaid) - credited,
+    };
+  });
+}
+
+/**
+ * Money a workshop is holding for this customer.
+ *
+ * A deposit paid in advance, or credit kept back from a refund. The workshop
+ * can see it on the customer's own page; the customer could not see it at all,
+ * so a bill reading "still to pay" made no mention of the two hundred pounds
+ * they had already handed over. That is a telephone call, and a reasonable one.
+ *
+ * Grouped by workshop, because money held by one garage is not money held by
+ * another and a single figure would invite exactly that mistake.
+ */
+export async function moneyHeldFor(userId: string) {
+  const deposits = await prisma.deposit.findMany({
+    where: { customer: { portalUserId: userId } },
+    orderBy: { receivedAt: 'desc' },
+    take: 100,
+    select: {
+      id: true,
+      kind: true,
+      amount: true,
+      appliedAmount: true,
+      refundedAmount: true,
+      currency: true,
+      reference: true,
+      note: true,
+      receivedAt: true,
+      org: { select: { id: true, name: true } },
+    },
+  });
+
+  const byWorkshop = new Map<
+    string,
+    { workshop: string; currency: string; heldMinor: number; rows: typeof deposits }
+  >();
+
+  for (const deposit of deposits) {
+    const heldMinor = Math.max(
+      0,
+      Math.round(
+        (Number(deposit.amount) - Number(deposit.appliedAmount) - Number(deposit.refundedAmount)) *
+          100,
+      ),
+    );
+
+    // Nothing left of it is history rather than news. The workshop's own page
+    // keeps the whole trail; this is the customer asking "what do you have of
+    // mine", and a spent deposit is not an answer to that.
+    if (heldMinor === 0) continue;
+
+    const held = byWorkshop.get(deposit.org.id) ?? {
+      workshop: deposit.org.name,
+      currency: deposit.currency,
+      heldMinor: 0,
+      rows: [] as typeof deposits,
+    };
+
+    held.heldMinor += heldMinor;
+    held.rows.push(deposit);
+    byWorkshop.set(deposit.org.id, held);
+  }
+
+  return [...byWorkshop.values()];
 }
 
 /**

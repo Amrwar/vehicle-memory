@@ -127,6 +127,46 @@ export const fr: Readonly<Record<string, string>> = {
   'They have not agreed to marketing emails.': 'Ils n’ont pas accepté les e-mails marketing.',
   'Consent is theirs to give and is changed where a reason is recorded against it, not on this form. It is not asked for here so that nobody can put somebody back on a list by correcting their postcode.':
     'Le consentement leur appartient et se modifie là où un motif est consigné, pas sur ce formulaire. Il n’est pas demandé ici afin que personne ne puisse remettre quelqu’un sur une liste en corrigeant son code postal.',
+  // The quote link
+  'Withdrawn. That link no longer opens the quote for anybody holding it.':
+    'Retiré. Ce lien n’ouvre plus le devis, pour personne.',
+  'The quote link sent to {to} is live': 'Le lien du devis envoyé à {to} est actif',
+  'Opened {when}, {count} times so far.': 'Ouvert le {when}, {count} fois à ce jour.',
+  'Not opened yet.': 'Pas encore ouvert.',
+  'It stops working on {date}.': 'Il cesse de fonctionner le {date}.',
+  'Withdraw the link': 'Retirer le lien',
+
+  // Putting an entry right
+  'That entry could not be corrected.': 'Cette entrée n’a pas pu être corrigée.',
+  'Corrected. The original stays on the record, marked as corrected, and the new entry says what it should have said.':
+    'Corrigé. L’original reste au dossier, marqué comme corrigé, et la nouvelle entrée dit ce qui aurait dû être écrit.',
+  'Put an entry right': 'Corriger une entrée',
+  'A correction is a new entry that supersedes the old one. Both stay on the record, because a history that can be quietly edited is not a history.':
+    'Une correction est une nouvelle entrée qui remplace l’ancienne. Les deux restent au dossier, car un historique que l’on peut modifier discrètement n’est pas un historique.',
+  'Which entry': 'Quelle entrée',
+  'Only ones this workshop recorded, and has not already corrected':
+    'Uniquement celles enregistrées par cet atelier et pas déjà corrigées',
+  'Choose the entry that is wrong': 'Choisissez l’entrée erronée',
+  'What it should say': 'Ce qu’elle devrait dire',
+  'Why it is being corrected': 'Pourquoi elle est corrigée',
+  'Read by whoever looks at this record later, including a buyer':
+    'Lu par quiconque consultera ce dossier plus tard, y compris un acheteur',
+  'Optional, if that is what was wrong': 'Facultatif, si c’est cela qui était faux',
+  'Record the correction': 'Enregistrer la correction',
+  'Back to the workshop': 'Retour à l’atelier',
+
+  // Money the workshop is holding, seen from the customer's side
+  'Money already with them': 'Argent déjà chez eux',
+  'Credit kept back': 'Avoir conservé',
+  'It comes off your next bill with them. It is not counted in what is shown as still to pay above.':
+    'Il sera déduit de votre prochaine facture chez eux. Il n’est pas compris dans le montant restant dû affiché ci-dessus.',
+  Credited: 'Avoir',
+  'That entry is not on this vehicle.': 'Cette entrée ne figure pas sur ce véhicule.',
+  'That entry has already been corrected.': 'Cette entrée a déjà été corrigée.',
+  'Only the workshop that recorded an entry can correct it. Add your own entry instead.':
+    'Seul l’atelier qui a enregistré une entrée peut la corriger. Ajoutez plutôt la vôtre.',
+  'A correction says what it should have said, and why it is being corrected.':
+    'Une correction dit ce qui aurait dû être écrit, et pourquoi elle est faite.',
 };
 
 export const ar: Readonly<Record<string, string>> = {
@@ -243,4 +283,44 @@ export const ar: Readonly<Record<string, string>> = {
   'They have not agreed to marketing emails.': 'لم يوافقوا على رسائل التسويق بالبريد.',
   'Consent is theirs to give and is changed where a reason is recorded against it, not on this form. It is not asked for here so that nobody can put somebody back on a list by correcting their postcode.':
     'الموافقة حقّهم هم، وتُغيَّر حيث يُسجَّل سببها، لا في هذه الاستمارة. ولا تُطلب هنا كي لا يعيد أحدٌ شخصًا إلى قائمة بمجرد تصحيح رمزه البريدي.',
+  // The quote link
+  'Withdrawn. That link no longer opens the quote for anybody holding it.':
+    'تم السحب. لم يعد ذلك الرابط يفتح عرض السعر لأحد.',
+  'The quote link sent to {to} is live': 'رابط عرض السعر المُرسل إلى {to} ما زال فعّالًا',
+  'Opened {when}, {count} times so far.': 'فُتح في {when}، و{count} مرة حتى الآن.',
+  'Not opened yet.': 'لم يُفتح بعد.',
+  'It stops working on {date}.': 'يتوقف عن العمل في {date}.',
+  'Withdraw the link': 'سحب الرابط',
+
+  // Putting an entry right
+  'That entry could not be corrected.': 'تعذّر تصحيح هذه المُدخلة.',
+  'Corrected. The original stays on the record, marked as corrected, and the new entry says what it should have said.':
+    'تم التصحيح. تبقى المُدخلة الأصلية في السجلّ مُعلّمة بأنها صُحّحت، والجديدة تقول ما كان ينبغي أنُيكتب.',
+  'Put an entry right': 'تصحيح مُدخلة',
+  'A correction is a new entry that supersedes the old one. Both stay on the record, because a history that can be quietly edited is not a history.':
+    'التصحيح مُدخلة جديدة تحلّ محلّ القديمة. وكلتاهما تبقى في السجلّ، لأن تاريخًا يمكن تعديله بهدوء ليس تاريخًا.',
+  'Which entry': 'أيّ مُدخلة',
+  'Only ones this workshop recorded, and has not already corrected':
+    'فقط ما سجّلته هذه الورشة ولم تُصحّحه بعد',
+  'Choose the entry that is wrong': 'اختر المُدخلة الخاطئة',
+  'What it should say': 'ما ينبغي أن تقوله',
+  'Why it is being corrected': 'سبب التصحيح',
+  'Read by whoever looks at this record later, including a buyer':
+    'يقرأه من يطّلع على هذا السجلّ لاحقًا، ومنهم المشتري',
+  'Optional, if that is what was wrong': 'اختياري، إن كان ذلك هو الخطأ',
+  'Record the correction': 'تسجيل التصحيح',
+  'Back to the workshop': 'العودة إلى الورشة',
+
+  // Money the workshop is holding, seen from the customer's side
+  'Money already with them': 'مبالغ لديهم بالفعل',
+  'Credit kept back': 'رصيد مُحتفظ به',
+  'It comes off your next bill with them. It is not counted in what is shown as still to pay above.':
+    'ُيخصم من فاتورتك التالية لديهم. وهو غير محتسب ضمن المبلغ المستحق المعروض أعلاه.',
+  Credited: 'إشعار دائن',
+  'That entry is not on this vehicle.': 'هذه المُدخلة ليست على هذه المركبة.',
+  'That entry has already been corrected.': 'سبق تصحيح هذه المُدخلة.',
+  'Only the workshop that recorded an entry can correct it. Add your own entry instead.':
+    'لا يصحّح المُدخلة إلا الورشة التي سجّلتها. أضِف مُدخلتك أنت بدلًا من ذلك.',
+  'A correction says what it should have said, and why it is being corrected.':
+    'التصحيح يقول ما كان ينبغي أن يُكتب، ولماذا يجري تصحيحه.',
 };

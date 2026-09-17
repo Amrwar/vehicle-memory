@@ -2643,6 +2643,49 @@ them, and checks the run was recorded and the action carried out — including
 that a blocked rule is written down as blocked rather than silently skipped.
 11 checks.
 
+## Phase 46.7 - What the customer could not see
+
+**Scope.** The third sweep: things a workshop can do that the person it was
+done to cannot see, and states the screens render that nothing could set.
+
+**Exit.** A customer can account for their own money, and a record can be put
+right without being rewritten.
+
+**Status.** Built.
+
+A customer who had paid a deposit saw a bill saying "still to pay" with no
+mention of the money already handed over. The workshop could see it on the
+customer's own page; the portal had no idea it existed. That is a telephone
+call, and a reasonable one. Money held now appears in the portal, grouped by
+workshop, because money held by one garage is not money held by another. Credit
+notes appear on the bill they were raised against, for the same reason: a
+customer holding one read the original total and concluded it had been
+forgotten.
+
+Then the correction that could not be made. The product's whole argument is
+that a passport cannot be edited, which is true and is also a problem, because
+workshops make mistakes: a mileage typed with an extra digit, a service against
+the wrong car. Without a way to correct one, the honest record of a mistake is
+a permanent lie. The machinery for this was all present and unused — a
+`supersedesId` on the draft, a database trigger permitting exactly one mutation
+on an existing event and refusing every other, unique indexes on both sides of
+the relation, and a whole visual treatment for a corrected entry on two
+screens. Nothing in the product could set it. A correction is now a new entry
+that supersedes the old one, both stay on the chain, only the workshop that
+recorded an entry may correct it, and an entry can be corrected once. The chain
+still verifies afterwards, which the check proves rather than assumes.
+
+Smaller: a quote link could be sent and never withdrawn, so a price sent to the
+wrong address stayed live until it expired on its own — the function to
+withdraw one existed, was called by nothing, and the link was never shown
+anyway. And anybody who was not a technician could reach the shop-floor view
+and had no way back out of it.
+
+Two things the sweep reported turned out to be wrong, and are worth recording
+as wrong: bounced addresses are suppressed (`recordDeliveryEvent` does it), and
+the suppression list is on the messages page. Checking beats believing a
+report, including a thorough one.
+
 ## Phase 47 — Financial integrity
 
 **Scope.** An invariant suite over the whole ledger rather than over one
