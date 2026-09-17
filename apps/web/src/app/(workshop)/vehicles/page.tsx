@@ -46,12 +46,11 @@ export default async function VehiclesPage({
   const vehicles = await prisma.vehicle.findMany({
     where: {
       AND: [
-        {
-          OR: [
-            { jobs: { some: { orgId } } },
-            { accessGrants: { some: { orgId, revokedAt: null } } },
-          ],
-        },
+        // One indexed path rather than an OR of two correlated subqueries: a
+        // job now records the grant it always implied, so "may this workshop
+        // see this car" has one answer and Postgres can use the index, which
+        // is the difference between a second and nothing. Phase 51.
+        { accessGrants: { some: { orgId, revokedAt: null } } },
         query
           ? {
               OR: [

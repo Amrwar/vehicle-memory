@@ -41,6 +41,8 @@
     "verify:tenancy": "tsx infra/scripts/verify-tenancy.ts",
     "verify:recovery": "tsx infra/scripts/verify-recovery.ts",
     "verify:health": "tsx infra/scripts/verify-health.ts",
+    "verify:performance": "tsx infra/scripts/verify-performance.ts",
+    "db:scale": "tsx infra/scripts/scale-seed.ts",
     "storage:orphans": "tsx infra/scripts/storage-orphans.ts",
     "verify:banking": "tsx infra/scripts/verify-banking.ts",
     "verify:automation": "tsx infra/scripts/verify-automation.ts",

@@ -256,13 +256,33 @@ export type AgeBucket = 'current' | '1-30' | '31-60' | '61-90' | '90+';
 
 export const AGE_BUCKETS: readonly AgeBucket[] = ['current', '1-30', '31-60', '61-90', '90+'];
 
+/**
+ * Where each bucket ends, in days overdue. The last one has no end.
+ *
+ * Exported because the same boundaries have to exist in SQL: a workshop with a
+ * hundred thousand unpaid bills cannot have them all fetched and bucketed in
+ * memory, so the sums are done in the database. Two copies of 30, 60 and 90
+ * would drift the first time somebody changed one of them, and the drift would
+ * be silent — the totals would still add up, against different definitions.
+ * Phase 51.
+ */
+export const AGE_BOUNDARIES: readonly { bucket: AgeBucket; upToDays: number | null }[] = [
+  { bucket: 'current', upToDays: 0 },
+  { bucket: '1-30', upToDays: 30 },
+  { bucket: '31-60', upToDays: 60 },
+  { bucket: '61-90', upToDays: 90 },
+  { bucket: '90+', upToDays: null },
+];
+
 export function bucketFor(dueAt: Date | null, asOf: Date): AgeBucket {
   if (!dueAt) return 'current';
+
   const days = Math.floor((asOf.getTime() - dueAt.getTime()) / 86_400_000);
-  if (days <= 0) return 'current';
-  if (days <= 30) return '1-30';
-  if (days <= 60) return '31-60';
-  if (days <= 90) return '61-90';
+
+  for (const { bucket, upToDays } of AGE_BOUNDARIES) {
+    if (upToDays === null || days <= upToDays) return bucket;
+  }
+
   return '90+';
 }
 

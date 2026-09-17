@@ -521,109 +521,116 @@ where the work happens.
 
 ## Paper
 
-| Req     | Story | Schema                                 | Implementation                                                                | Test                                        | Status |
-| ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- | ------ |
-| FR-8501 | BC2   | -                                      | `systemHealth()`, `/admin/health`                                             | `verify-health.ts`                          | Done   |
-| FR-8502 | BC2   | -                                      | `Standing`, including `unknown`; `fromCount()`, `fromAge()`                   | `health.test.ts`, `verify-health.ts`        | Done   |
-| FR-8503 | BC2   | -                                      | `worstStanding()`, `needsAttention()`, `worstSignalsFirst()`                  | `health.test.ts`, `verify-health.ts`        | Done   |
-| FR-8504 | BC1   | `message_logs`, `delivery_events`      | `whyMessage()`, `traceMessagesTo()`, the search on `/admin/health`            | `health.test.ts`, `verify-health.ts`        | Done   |
-| FR-8505 | BC1   | `suppressed_addresses`                 | the order inside `whyMessage()`: consent, then suppression, then status       | `health.test.ts`, `verify-health.ts`        | Done   |
-| FR-8506 | BC3   | -                                      | `isOperator()`, `notFound()` on the page                                      | `verify-health.ts`                          | Done   |
-| FR-8507 | BC1   | `message_logs.availableAt`             | the two queued branches of `whyMessage()`                                     | `health.test.ts`, `verify-health.ts`        | Done   |
-| FR-8401 | BB1   | -                                      | `verify-recovery.ts`, dump and restore into a fresh database                  | `verify-recovery.ts`, `verify-backup.ts`    | Done   |
-| FR-8402 | BB1   | -                                      | `workLost()`, `timeTaken()`, `missedTargets()` against NFR-303 and NFR-304    | `restored.test.ts`, `verify-recovery.ts`    | Done   |
-| FR-8403 | BB1   | `_prisma_migrations`, the triggers     | `prisma migrate status` on the copy; `verifyChain()`; `auditBooks(org, copy)` | `verify-recovery.ts`                        | Done   |
-| FR-8404 | BB2   | the five columns holding a file key    | `referencedFiles()`, and the file taken away on purpose                       | `verify-recovery.ts`                        | Done   |
-| FR-8405 | BB2   | -                                      | `orphanedFiles()`, `forgetOrphans()`, `npm run storage:orphans`               | `verify-recovery.ts`                        | Done   |
-| FR-8406 | BB3   | `outbox_events`, `message_logs`        | the queue counts held against the original                                    | `verify-recovery.ts`                        | Done   |
-| FR-8407 | BB3   | -                                      | the closing note on write-ahead archiving                                     | `verify-recovery.ts`                        | Done   |
-| FR-8301 | BA1   | -                                      | the route table in `verify-tenancy.ts`, read off the filesystem               | `verify-tenancy.ts`                         | Done   |
-| FR-8302 | BA1   | every `where` carrying `orgId`         | `requireSession()`, the org-scoped lookup on each page                        | `verify-tenancy.ts`, `verify-authz.ts`      | Done   |
-| FR-8303 | BA2   | `VehicleOwnership`, `PassportShare`    | the portal's own-vehicle lookup                                               | `verify-tenancy.ts`                         | Done   |
-| FR-8304 | BA1   | `products.orgId`, `warehouses.orgId`   | `lockLevel()`, which every stock movement goes through                        | `verify-tenancy.ts`                         | Done   |
-| FR-8305 | BA1   | -                                      | `/api/exports/[dataset]`, `/api/reports/[report]`                             | `verify-tenancy.ts`                         | Done   |
-| FR-8306 | BA3   | `password_reset_tokens.tokenHash`      | `redeemReset()` on submit rather than on load; the identical page             | `verify-tenancy.ts`                         | Done   |
-| FR-8307 | BA2   | `passport_shares`                      | `/p/[token]`, which carries the car and not the keeper                        | `verify-tenancy.ts`                         | Done   |
-| FR-8308 | BA1   | -                                      | the control at the top of the probe                                           | `verify-tenancy.ts`                         | Done   |
-| FR-8201 | AZ1   | -                                      | `auditBooks()`, `/books`                                                      | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8202 | AZ1   | `journal_lines`                        | `entryBalances()`, checked one entry at a time                                | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8203 | AZ1   | `invoice_lines`, `payments`, `refunds` | `invoiceAddsUp()`, `amountPaidAgrees()`, `owedAgrees()`                       | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8204 | AZ3   | `stock_movements.balanceAfter`         | `stockAddsUp()`, and `adjustStock()` as the only way stock moves              | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8205 | AZ1   | `accounts` 1100, 2200, 2300            | `receivableBridge()`, `liabilityAgrees()`, `cardBalanceAgrees()`              | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8206 | AZ2   | `fiscal_periods.closedAt`              | `closedPeriodUntouched()`, read from the rows rather than from the guard      | `books.test.ts`, `verify-books.ts`          | Done   |
-| FR-8207 | AZ1   | -                                      | `mustAgree()`, which offers no tolerance                                      | `books.test.ts`                             | Done   |
-| FR-8208 | AZ1   | -                                      | `/books`, `worstFirst()`, `unaccountedFor()`, the books dictionary            | `verify-books.ts`, `i18n-scan.ts`           | Done   |
-| FR-8101 | AY2   | `vehicle_events.supersedesId`          | `correctEvent()`, the form on the vehicle page                                | `verify-wiring.ts`                          | Done   |
-| FR-8102 | -     | `estimate_shares.revokedAt`            | `revokeEstimateShare()`, the card on the job page                             | `verify-controls.ts`                        | Done   |
-| FR-8103 | AY1   | `deposits`, `credit_notes`             | `moneyHeldFor()`, `invoicesFor()`, the portal's invoices page                 | `verify-wiring.ts`                          | Done   |
-| FR-8104 | AY2   | `carnet_vehicle_events_append_only`    | the trigger's single permitted mutation, checked by `verifyChain()`           | `verify-wiring.ts`, `verify-integrity.ts`   | Done   |
-| FR-8001 | AX3   | `Job.customerOrderNumber`              | `setOrderNumber()`, the field on the job page                                 | `verify-wiring.ts`                          | Done   |
-| FR-8002 | AX1   | `message_logs`                         | `notifyCustomer()`, called from `moveJob()`                                   | `verify-triggers.ts`                        | Done   |
-| FR-8003 | AX1   | `message_logs`                         | the message queued inside `requestBooking()`'s transaction                    | `verify-messaging.ts`                       | Done   |
-| FR-8004 | AX2   | `automation_rules`                     | `lib/triggers.ts`, called from moveJob, issueInvoice, bookings, portal        | `verify-triggers.ts`                        | Done   |
-| FR-8005 | AX2   | -                                      | `lib/sweeps.ts`, run by the hourly cron job                                   | `verify-triggers.ts`                        | Done   |
-| FR-8006 | AX2   | `automation_actions`                   | `createTask()`, `addTag()`, the explicit failure for anything else            | `verify-triggers.ts`                        | Done   |
-| FR-8007 | AX4   | -                                      | `/signup/customer?next=`, the handover's link                                 | `verify-controls.ts`                        | Done   |
-| FR-8008 | AX4   | -                                      | `countTill()` through `closeTill()`, and the markers each page now renders    | `verify-counter.ts`                         | Done   |
-| FR-7901 | AW1   | —                                      | `updateCustomer()`, `CustomerFields`, `/customers/[id]/edit`                  | `verify-wiring.ts`                          | Done   |
-| FR-7902 | AW1   | `consent_changes`                      | `showConsent={false}`, the comment in `updateCustomer()`                      | `verify-wiring.ts`                          | Done   |
-| FR-7903 | AW2   | `SequenceKind.TRANSFER`                | `createTransfer()`, the suggestion form on `/transfers`                       | `verify-wiring.ts`                          | Done   |
-| FR-7904 | AW2   | `stock_transfer_lines.received`        | `receiveTransfer()`, `/transfers/[id]`, PART_RECEIVED                         | `transfer.test.ts`, `verify-wiring.ts`      | Done   |
-| FR-7905 | AW3   | `warranties`                           | `recordCover()`, the form on `/warranty`                                      | `verify-wiring.ts`                          | Done   |
-| FR-7906 | AW3   | `warranties_distance_needs_a_start`    | the reading taken from the vehicle in `recordCover()`                         | `verify-wiring.ts`                          | Done   |
-| FR-7907 | AW4   | —                                      | `/verify` in `marketing.tsx` navigation and footer                            | `verify-controls.ts`                        | Done   |
-| FR-7908 | —     | —                                      | `tellOperatorAboutSignup()`, `OPERATOR_EMAIL`                                 | manual                                      | Done   |
-| FR-7801 | AV1   | —                                      | `SubmitOnce`, `useFormStatus`                                                 | `verify-screens.ts`                         | Done   |
-| FR-7802 | AV1   | `once_requests`                        | `once()`, `onceToken()`, the money forms                                      | `verify-repeat.ts`                          | Done   |
-| FR-7803 | AV1   | `once_requests_orgId_key_key`          | the claim taken before the work in `once()`                                   | `verify-repeat.ts`                          | Done   |
-| FR-7804 | AV3   | —                                      | `claimOutbox()`, `claimMessages()`, FOR UPDATE SKIP LOCKED                    | `verify-repeat.ts`                          | Done   |
-| FR-7805 | AV3   | —                                      | `LEASE_MINUTES`, the retake in `once()`                                       | `verify-repeat.ts`                          | Done   |
-| FR-7806 | AV2   | `loyalty_entries_once_key`             | `consequencesOfPayment()`, `catchUpConsequences()`                            | `verify-repeat.ts`                          | Done   |
-| FR-7807 | AV4   | —                                      | `AbortSignal.timeout`, the `idempotency-key` header on Stripe writes          | `verify-repeat.ts`                          | Done   |
-| FR-7808 | AV4   | —                                      | the `@repeat` markers, `assertDeclared()`, `assertShippable()`                | `repeat.test.ts`, `verify-writes.ts`        | Done   |
-| FR-7701 | AU1   | `Coupon`                               | `assertCouponSaveable()`, `saveCoupon()`, `/coupons`                          | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
-| FR-7702 | AU1   | `coupons_orgId_code_key`               | `normaliseCouponCode()`, `retireCoupon()`, `coupons_worth_check`              | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
-| FR-7703 | AU3   | `PaymentMethod.COUPON`                 | `redeemAgainstInvoice()`, the invoice page's coupon card                      | `verify-coupons.ts`                         | Done   |
-| FR-7704 | AU3   | account `6410`                         | `accountForMethod()`, `postCounterSale()`'s `couponTaken`                     | `posting.test.ts`, `verify-coupons.ts`      | Done   |
-| FR-7705 | AU2   | —                                      | `couponDiscount()`, capped at what is owed                                    | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
-| FR-7706 | AU2   | —                                      | `CouponError`, `couponState()`, the coupons dictionary                        | `coupons.test.ts`, `verify-languages.ts`    | Done   |
-| FR-7707 | AU3   | `coupon_redemptions_one_per_invoice`   | `recordCounterRedemption()` inside the sale's transaction                     | `verify-coupons.ts`                         | Done   |
-| FR-7708 | AU3   | `CouponRedemption`                     | `couponResults()`, `couponResultsFor()`, `couponHistory()`                    | `coupons.test.ts`, `verify-coupons.ts`      | Done   |
-| FR-7601 | AT1   | —                                      | `setupSteps()`, `setupFactsFor()`, `/start`                                   | `checklist.test.ts`, `verify-first-day.ts`  | Done   |
-| FR-7602 | AT1   | —                                      | `setupProgress()`, `setSetupHidden()`, the dashboard card                     | `checklist.test.ts`, `verify-first-day.ts`  | Done   |
-| FR-7603 | AT3   | —                                      | `HELP_ARTICLES`, `searchHelp()`, `/help`, `/search`                           | `help.test.ts`, `verify-first-day.ts`       | Done   |
-| FR-7604 | AT2   | —                                      | `createDemonstration()`, `removeDemonstration()`                              | `verify-first-day.ts`                       | Done   |
-| FR-7605 | AT2   | —                                      | the layout banner, `sendMessageNow()`'s demonstration guard                   | `verify-first-day.ts`                       | Done   |
-| FR-7606 | AT2   | —                                      | `switchWorkshop()`, `workshopsFor()`                                          | `verify-first-day.ts`                       | Done   |
-| FR-7501 | AS1   | —                                      | `inviteHandover()`, `HandoverInvitation`, `/vehicles/[id]/transfer`           | `invitation.test.ts`, `verify-ownership.ts` | Done   |
-| FR-7502 | AS2   | —                                      | `describeHandover()`, `/handover/[token]`                                     | `invitation.test.ts`, `verify-ownership.ts` | Done   |
-| FR-7503 | AS1   | —                                      | `acceptHandover()`, `vehicleHistory()`                                        | `verify-ownership.ts`                       | Done   |
-| FR-7504 | AS2   | —                                      | `assertHandoverInvitable()`, `handover_invitations_one_pending`               | `invitation.test.ts`, `verify-ownership.ts` | Done   |
-| FR-7505 | AS2   | —                                      | `handoverState()`, `cancelHandover()`, `declineHandover()`                    | `invitation.test.ts`, `verify-ownership.ts` | Done   |
-| FR-7506 | AS3   | —                                      | `assertSettlement()`, `remedyCost()`, `warranty_claims_recovery_check`        | `cost.test.ts`, `verify-ownership.ts`       | Done   |
-| FR-7507 | AS3   | —                                      | `warrantyCost()`, `warrantyBy()`, `/warranty`, `/api/reports/warranty`        | `cost.test.ts`, `verify-ownership.ts`       | Done   |
-| FR-7508 | AS4   | —                                      | `chooseLabourRate()`, `chooseSitePrice()`, `LabourRate`, `ProductSitePrice`   | `site.test.ts`, `verify-ownership.ts`       | Done   |
-| FR-7401 | AR1   | —                                      | `decodeLocally()`, `vinDecoder()`, `/vehicles/find`                           | `providers.test.ts`, `verify-providers.ts`  | Done   |
-| FR-7402 | AR1   | —                                      | `makeFromWmi()`, `vinEncodesYear()`                                           | `providers.test.ts`, `verify-providers.ts`  | Done   |
-| FR-7403 | AR2   | —                                      | `FitmentFeed`, `fetchFeedFitments()`, `part_fitments.feedName`                | `verify-providers.ts`                       | Done   |
-| FR-7404 | AR2   | —                                      | `planFeedImport()`                                                            | `providers.test.ts`, `verify-providers.ts`  | Done   |
-| FR-7405 | AR3   | —                                      | `assertPayAdjustment()`, `pay_adjustments_lock` trigger                       | `payroll.test.ts`, `verify-providers.ts`    | Done   |
-| FR-7406 | AR3   | —                                      | `assertOvertimeMultiplier()`, `draftTimesheet()`                              | `payroll.test.ts`, `verify-providers.ts`    | Done   |
-| FR-7407 | AR3   | —                                      | `PAYROLL_EXPORTS`, `/api/reports/payroll?format=`                             | `payroll.test.ts`, `verify-providers.ts`    | Done   |
-| FR-7408 | AR4   | —                                      | `googleReviewSite`, `/r/[token]/public`, `followReviewInvitation()`           | `providers.test.ts`, `verify-providers.ts`  | Done   |
-| FR-7301 | AQ1   | —                                      | `/print/[kind]/[id]`, `PrintSheet`, `components/print/documents.tsx`          | `verify-paper.ts`                           | Done   |
-| FR-7302 | AQ2   | —                                      | `/api/print/[kind]/[id]`, `renderPdf()`, `pdfFilename()`                      | `print.test.ts`, `verify-paper.ts`          | Done   |
-| FR-7303 | AQ2   | —                                      | `watermarkFor()`                                                              | `print.test.ts`, `verify-paper.ts`          | Done   |
-| FR-7304 | AQ2   | —                                      | `tFor()`, `readingLocaleFor()`, `<bdi>` around data                           | `verify-paper.ts`                           | Done   |
-| FR-7305 | AQ1   | —                                      | `readerFor()`, `PRINT_PERMISSION`, `CUSTOMER_PRINT_KINDS`                     | `verify-paper.ts`                           | Done   |
-| FR-7306 | AQ3   | —                                      | `labelSheets()`, `keyTagFor()`, `qrSvg()`                                     | `print.test.ts`, `verify-paper.ts`          | Done   |
-| FR-7307 | AQ3   | —                                      | the print stylesheet in `packages/ui/src/styles.css`                          | `verify-paper.ts`                           | Done   |
-| FR-3907 | A1    | —                                      | `assertNotFlooding()`                                                         | `verify-credentials.ts`                     | Done   |
-| FR-3908 | A1    | `auth_tokens.tokenHash`                | `digest()`                                                                    | `verify-credentials.ts`                     | Done   |
-| FR-3801 | —     | —                                      | `/api/inbound/resend`                                                         | `smoke.ts`                                  | Done   |
-| FR-3802 | —     | —                                      | `verify()` tolerance                                                          | `smoke.ts`                                  | Done   |
-| FR-3803 | —     | `Organization.slug`                    | `organisationFor()`                                                           | `smoke.ts`                                  | Done   |
-| FR-3804 | —     | —                                      | `INBOUND_WEBHOOK_SECRET`                                                      | `smoke.ts`                                  | Done   |
+| Req     | Story | Schema                                 | Implementation                                                                | Test                                          | Status |
+| ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-8601 | BD1   | -                                      | `agedReceivables()`, `retention()` in both modules, bounded lists             | `verify-performance.ts`                       | Done   |
+| FR-8602 | BD1   | -                                      | the aggregates in `accounting.ts`, `owner.ts`, `reports.ts`, `automation.ts`  | `verify-performance.ts`                       | Done   |
+| FR-8603 | BD2   | -                                      | `sweepConversations()` hourly; the job page no longer files                   | `verify-performance.ts`, `verify-triggers.ts` | Done   |
+| FR-8604 | BD1   | `vehicle_access_grants`                | the grant written by `createJob()`; `20260917200000_a_job_grants_access`      | `verify-performance.ts`, `verify-tenancy.ts`  | Done   |
+| FR-8605 | BD3   | -                                      | the budget table in `verify-performance.ts`; `p95Of()`, `overBudget()`        | `budget.test.ts`, `verify-performance.ts`     | Done   |
+| FR-8606 | BD3   | -                                      | the production-build note and the `BROKEN` guard                              | `verify-performance.ts`                       | Done   |
+| FR-8607 | BD3   | -                                      | `nearTheLine()`                                                               | `budget.test.ts`, `verify-performance.ts`     | Done   |
+| FR-8501 | BC2   | -                                      | `systemHealth()`, `/admin/health`                                             | `verify-health.ts`                            | Done   |
+| FR-8502 | BC2   | -                                      | `Standing`, including `unknown`; `fromCount()`, `fromAge()`                   | `health.test.ts`, `verify-health.ts`          | Done   |
+| FR-8503 | BC2   | -                                      | `worstStanding()`, `needsAttention()`, `worstSignalsFirst()`                  | `health.test.ts`, `verify-health.ts`          | Done   |
+| FR-8504 | BC1   | `message_logs`, `delivery_events`      | `whyMessage()`, `traceMessagesTo()`, the search on `/admin/health`            | `health.test.ts`, `verify-health.ts`          | Done   |
+| FR-8505 | BC1   | `suppressed_addresses`                 | the order inside `whyMessage()`: consent, then suppression, then status       | `health.test.ts`, `verify-health.ts`          | Done   |
+| FR-8506 | BC3   | -                                      | `isOperator()`, `notFound()` on the page                                      | `verify-health.ts`                            | Done   |
+| FR-8507 | BC1   | `message_logs.availableAt`             | the two queued branches of `whyMessage()`                                     | `health.test.ts`, `verify-health.ts`          | Done   |
+| FR-8401 | BB1   | -                                      | `verify-recovery.ts`, dump and restore into a fresh database                  | `verify-recovery.ts`, `verify-backup.ts`      | Done   |
+| FR-8402 | BB1   | -                                      | `workLost()`, `timeTaken()`, `missedTargets()` against NFR-303 and NFR-304    | `restored.test.ts`, `verify-recovery.ts`      | Done   |
+| FR-8403 | BB1   | `_prisma_migrations`, the triggers     | `prisma migrate status` on the copy; `verifyChain()`; `auditBooks(org, copy)` | `verify-recovery.ts`                          | Done   |
+| FR-8404 | BB2   | the five columns holding a file key    | `referencedFiles()`, and the file taken away on purpose                       | `verify-recovery.ts`                          | Done   |
+| FR-8405 | BB2   | -                                      | `orphanedFiles()`, `forgetOrphans()`, `npm run storage:orphans`               | `verify-recovery.ts`                          | Done   |
+| FR-8406 | BB3   | `outbox_events`, `message_logs`        | the queue counts held against the original                                    | `verify-recovery.ts`                          | Done   |
+| FR-8407 | BB3   | -                                      | the closing note on write-ahead archiving                                     | `verify-recovery.ts`                          | Done   |
+| FR-8301 | BA1   | -                                      | the route table in `verify-tenancy.ts`, read off the filesystem               | `verify-tenancy.ts`                           | Done   |
+| FR-8302 | BA1   | every `where` carrying `orgId`         | `requireSession()`, the org-scoped lookup on each page                        | `verify-tenancy.ts`, `verify-authz.ts`        | Done   |
+| FR-8303 | BA2   | `VehicleOwnership`, `PassportShare`    | the portal's own-vehicle lookup                                               | `verify-tenancy.ts`                           | Done   |
+| FR-8304 | BA1   | `products.orgId`, `warehouses.orgId`   | `lockLevel()`, which every stock movement goes through                        | `verify-tenancy.ts`                           | Done   |
+| FR-8305 | BA1   | -                                      | `/api/exports/[dataset]`, `/api/reports/[report]`                             | `verify-tenancy.ts`                           | Done   |
+| FR-8306 | BA3   | `password_reset_tokens.tokenHash`      | `redeemReset()` on submit rather than on load; the identical page             | `verify-tenancy.ts`                           | Done   |
+| FR-8307 | BA2   | `passport_shares`                      | `/p/[token]`, which carries the car and not the keeper                        | `verify-tenancy.ts`                           | Done   |
+| FR-8308 | BA1   | -                                      | the control at the top of the probe                                           | `verify-tenancy.ts`                           | Done   |
+| FR-8201 | AZ1   | -                                      | `auditBooks()`, `/books`                                                      | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8202 | AZ1   | `journal_lines`                        | `entryBalances()`, checked one entry at a time                                | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8203 | AZ1   | `invoice_lines`, `payments`, `refunds` | `invoiceAddsUp()`, `amountPaidAgrees()`, `owedAgrees()`                       | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8204 | AZ3   | `stock_movements.balanceAfter`         | `stockAddsUp()`, and `adjustStock()` as the only way stock moves              | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8205 | AZ1   | `accounts` 1100, 2200, 2300            | `receivableBridge()`, `liabilityAgrees()`, `cardBalanceAgrees()`              | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8206 | AZ2   | `fiscal_periods.closedAt`              | `closedPeriodUntouched()`, read from the rows rather than from the guard      | `books.test.ts`, `verify-books.ts`            | Done   |
+| FR-8207 | AZ1   | -                                      | `mustAgree()`, which offers no tolerance                                      | `books.test.ts`                               | Done   |
+| FR-8208 | AZ1   | -                                      | `/books`, `worstFirst()`, `unaccountedFor()`, the books dictionary            | `verify-books.ts`, `i18n-scan.ts`             | Done   |
+| FR-8101 | AY2   | `vehicle_events.supersedesId`          | `correctEvent()`, the form on the vehicle page                                | `verify-wiring.ts`                            | Done   |
+| FR-8102 | -     | `estimate_shares.revokedAt`            | `revokeEstimateShare()`, the card on the job page                             | `verify-controls.ts`                          | Done   |
+| FR-8103 | AY1   | `deposits`, `credit_notes`             | `moneyHeldFor()`, `invoicesFor()`, the portal's invoices page                 | `verify-wiring.ts`                            | Done   |
+| FR-8104 | AY2   | `carnet_vehicle_events_append_only`    | the trigger's single permitted mutation, checked by `verifyChain()`           | `verify-wiring.ts`, `verify-integrity.ts`     | Done   |
+| FR-8001 | AX3   | `Job.customerOrderNumber`              | `setOrderNumber()`, the field on the job page                                 | `verify-wiring.ts`                            | Done   |
+| FR-8002 | AX1   | `message_logs`                         | `notifyCustomer()`, called from `moveJob()`                                   | `verify-triggers.ts`                          | Done   |
+| FR-8003 | AX1   | `message_logs`                         | the message queued inside `requestBooking()`'s transaction                    | `verify-messaging.ts`                         | Done   |
+| FR-8004 | AX2   | `automation_rules`                     | `lib/triggers.ts`, called from moveJob, issueInvoice, bookings, portal        | `verify-triggers.ts`                          | Done   |
+| FR-8005 | AX2   | -                                      | `lib/sweeps.ts`, run by the hourly cron job                                   | `verify-triggers.ts`                          | Done   |
+| FR-8006 | AX2   | `automation_actions`                   | `createTask()`, `addTag()`, the explicit failure for anything else            | `verify-triggers.ts`                          | Done   |
+| FR-8007 | AX4   | -                                      | `/signup/customer?next=`, the handover's link                                 | `verify-controls.ts`                          | Done   |
+| FR-8008 | AX4   | -                                      | `countTill()` through `closeTill()`, and the markers each page now renders    | `verify-counter.ts`                           | Done   |
+| FR-7901 | AW1   | —                                      | `updateCustomer()`, `CustomerFields`, `/customers/[id]/edit`                  | `verify-wiring.ts`                            | Done   |
+| FR-7902 | AW1   | `consent_changes`                      | `showConsent={false}`, the comment in `updateCustomer()`                      | `verify-wiring.ts`                            | Done   |
+| FR-7903 | AW2   | `SequenceKind.TRANSFER`                | `createTransfer()`, the suggestion form on `/transfers`                       | `verify-wiring.ts`                            | Done   |
+| FR-7904 | AW2   | `stock_transfer_lines.received`        | `receiveTransfer()`, `/transfers/[id]`, PART_RECEIVED                         | `transfer.test.ts`, `verify-wiring.ts`        | Done   |
+| FR-7905 | AW3   | `warranties`                           | `recordCover()`, the form on `/warranty`                                      | `verify-wiring.ts`                            | Done   |
+| FR-7906 | AW3   | `warranties_distance_needs_a_start`    | the reading taken from the vehicle in `recordCover()`                         | `verify-wiring.ts`                            | Done   |
+| FR-7907 | AW4   | —                                      | `/verify` in `marketing.tsx` navigation and footer                            | `verify-controls.ts`                          | Done   |
+| FR-7908 | —     | —                                      | `tellOperatorAboutSignup()`, `OPERATOR_EMAIL`                                 | manual                                        | Done   |
+| FR-7801 | AV1   | —                                      | `SubmitOnce`, `useFormStatus`                                                 | `verify-screens.ts`                           | Done   |
+| FR-7802 | AV1   | `once_requests`                        | `once()`, `onceToken()`, the money forms                                      | `verify-repeat.ts`                            | Done   |
+| FR-7803 | AV1   | `once_requests_orgId_key_key`          | the claim taken before the work in `once()`                                   | `verify-repeat.ts`                            | Done   |
+| FR-7804 | AV3   | —                                      | `claimOutbox()`, `claimMessages()`, FOR UPDATE SKIP LOCKED                    | `verify-repeat.ts`                            | Done   |
+| FR-7805 | AV3   | —                                      | `LEASE_MINUTES`, the retake in `once()`                                       | `verify-repeat.ts`                            | Done   |
+| FR-7806 | AV2   | `loyalty_entries_once_key`             | `consequencesOfPayment()`, `catchUpConsequences()`                            | `verify-repeat.ts`                            | Done   |
+| FR-7807 | AV4   | —                                      | `AbortSignal.timeout`, the `idempotency-key` header on Stripe writes          | `verify-repeat.ts`                            | Done   |
+| FR-7808 | AV4   | —                                      | the `@repeat` markers, `assertDeclared()`, `assertShippable()`                | `repeat.test.ts`, `verify-writes.ts`          | Done   |
+| FR-7701 | AU1   | `Coupon`                               | `assertCouponSaveable()`, `saveCoupon()`, `/coupons`                          | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7702 | AU1   | `coupons_orgId_code_key`               | `normaliseCouponCode()`, `retireCoupon()`, `coupons_worth_check`              | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7703 | AU3   | `PaymentMethod.COUPON`                 | `redeemAgainstInvoice()`, the invoice page's coupon card                      | `verify-coupons.ts`                           | Done   |
+| FR-7704 | AU3   | account `6410`                         | `accountForMethod()`, `postCounterSale()`'s `couponTaken`                     | `posting.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7705 | AU2   | —                                      | `couponDiscount()`, capped at what is owed                                    | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7706 | AU2   | —                                      | `CouponError`, `couponState()`, the coupons dictionary                        | `coupons.test.ts`, `verify-languages.ts`      | Done   |
+| FR-7707 | AU3   | `coupon_redemptions_one_per_invoice`   | `recordCounterRedemption()` inside the sale's transaction                     | `verify-coupons.ts`                           | Done   |
+| FR-7708 | AU3   | `CouponRedemption`                     | `couponResults()`, `couponResultsFor()`, `couponHistory()`                    | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7601 | AT1   | —                                      | `setupSteps()`, `setupFactsFor()`, `/start`                                   | `checklist.test.ts`, `verify-first-day.ts`    | Done   |
+| FR-7602 | AT1   | —                                      | `setupProgress()`, `setSetupHidden()`, the dashboard card                     | `checklist.test.ts`, `verify-first-day.ts`    | Done   |
+| FR-7603 | AT3   | —                                      | `HELP_ARTICLES`, `searchHelp()`, `/help`, `/search`                           | `help.test.ts`, `verify-first-day.ts`         | Done   |
+| FR-7604 | AT2   | —                                      | `createDemonstration()`, `removeDemonstration()`                              | `verify-first-day.ts`                         | Done   |
+| FR-7605 | AT2   | —                                      | the layout banner, `sendMessageNow()`'s demonstration guard                   | `verify-first-day.ts`                         | Done   |
+| FR-7606 | AT2   | —                                      | `switchWorkshop()`, `workshopsFor()`                                          | `verify-first-day.ts`                         | Done   |
+| FR-7501 | AS1   | —                                      | `inviteHandover()`, `HandoverInvitation`, `/vehicles/[id]/transfer`           | `invitation.test.ts`, `verify-ownership.ts`   | Done   |
+| FR-7502 | AS2   | —                                      | `describeHandover()`, `/handover/[token]`                                     | `invitation.test.ts`, `verify-ownership.ts`   | Done   |
+| FR-7503 | AS1   | —                                      | `acceptHandover()`, `vehicleHistory()`                                        | `verify-ownership.ts`                         | Done   |
+| FR-7504 | AS2   | —                                      | `assertHandoverInvitable()`, `handover_invitations_one_pending`               | `invitation.test.ts`, `verify-ownership.ts`   | Done   |
+| FR-7505 | AS2   | —                                      | `handoverState()`, `cancelHandover()`, `declineHandover()`                    | `invitation.test.ts`, `verify-ownership.ts`   | Done   |
+| FR-7506 | AS3   | —                                      | `assertSettlement()`, `remedyCost()`, `warranty_claims_recovery_check`        | `cost.test.ts`, `verify-ownership.ts`         | Done   |
+| FR-7507 | AS3   | —                                      | `warrantyCost()`, `warrantyBy()`, `/warranty`, `/api/reports/warranty`        | `cost.test.ts`, `verify-ownership.ts`         | Done   |
+| FR-7508 | AS4   | —                                      | `chooseLabourRate()`, `chooseSitePrice()`, `LabourRate`, `ProductSitePrice`   | `site.test.ts`, `verify-ownership.ts`         | Done   |
+| FR-7401 | AR1   | —                                      | `decodeLocally()`, `vinDecoder()`, `/vehicles/find`                           | `providers.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7402 | AR1   | —                                      | `makeFromWmi()`, `vinEncodesYear()`                                           | `providers.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7403 | AR2   | —                                      | `FitmentFeed`, `fetchFeedFitments()`, `part_fitments.feedName`                | `verify-providers.ts`                         | Done   |
+| FR-7404 | AR2   | —                                      | `planFeedImport()`                                                            | `providers.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7405 | AR3   | —                                      | `assertPayAdjustment()`, `pay_adjustments_lock` trigger                       | `payroll.test.ts`, `verify-providers.ts`      | Done   |
+| FR-7406 | AR3   | —                                      | `assertOvertimeMultiplier()`, `draftTimesheet()`                              | `payroll.test.ts`, `verify-providers.ts`      | Done   |
+| FR-7407 | AR3   | —                                      | `PAYROLL_EXPORTS`, `/api/reports/payroll?format=`                             | `payroll.test.ts`, `verify-providers.ts`      | Done   |
+| FR-7408 | AR4   | —                                      | `googleReviewSite`, `/r/[token]/public`, `followReviewInvitation()`           | `providers.test.ts`, `verify-providers.ts`    | Done   |
+| FR-7301 | AQ1   | —                                      | `/print/[kind]/[id]`, `PrintSheet`, `components/print/documents.tsx`          | `verify-paper.ts`                             | Done   |
+| FR-7302 | AQ2   | —                                      | `/api/print/[kind]/[id]`, `renderPdf()`, `pdfFilename()`                      | `print.test.ts`, `verify-paper.ts`            | Done   |
+| FR-7303 | AQ2   | —                                      | `watermarkFor()`                                                              | `print.test.ts`, `verify-paper.ts`            | Done   |
+| FR-7304 | AQ2   | —                                      | `tFor()`, `readingLocaleFor()`, `<bdi>` around data                           | `verify-paper.ts`                             | Done   |
+| FR-7305 | AQ1   | —                                      | `readerFor()`, `PRINT_PERMISSION`, `CUSTOMER_PRINT_KINDS`                     | `verify-paper.ts`                             | Done   |
+| FR-7306 | AQ3   | —                                      | `labelSheets()`, `keyTagFor()`, `qrSvg()`                                     | `print.test.ts`, `verify-paper.ts`            | Done   |
+| FR-7307 | AQ3   | —                                      | the print stylesheet in `packages/ui/src/styles.css`                          | `verify-paper.ts`                             | Done   |
+| FR-3907 | A1    | —                                      | `assertNotFlooding()`                                                         | `verify-credentials.ts`                       | Done   |
+| FR-3908 | A1    | `auth_tokens.tokenHash`                | `digest()`                                                                    | `verify-credentials.ts`                       | Done   |
+| FR-3801 | —     | —                                      | `/api/inbound/resend`                                                         | `smoke.ts`                                    | Done   |
+| FR-3802 | —     | —                                      | `verify()` tolerance                                                          | `smoke.ts`                                    | Done   |
+| FR-3803 | —     | `Organization.slug`                    | `organisationFor()`                                                           | `smoke.ts`                                    | Done   |
+| FR-3804 | —     | —                                      | `INBOUND_WEBHOOK_SECRET`                                                      | `smoke.ts`                                    | Done   |
 
 ## What people say afterwards
 

@@ -291,54 +291,81 @@ export interface RetentionRow {
  * months; somebody who comes every six weeks is.
  */
 export async function retention(orgId: string, limit = 50): Promise<RetentionRow[]> {
-  const customers = await prisma.customer.findMany({
-    where: { orgId, isActive: true },
-    include: {
-      jobs: {
-        where: { status: { in: ['COMPLETED', 'INVOICED', 'PAID'] } },
-        select: { completedAt: true },
-        orderBy: { completedAt: 'asc' },
-      },
-      // VOID rather than CANCELLED: a voided invoice never counted as revenue.
-      invoices: { where: { status: { not: 'VOID' } }, select: { total: true } },
-    },
-  });
+  // Summed in the database, and only as many rows as the caller asked for.
+  //
+  // This function used to load every active customer with all of their jobs
+  // and all of their invoices attached, add it up in memory and return the top
+  // twenty-five. On a workshop with a hundred thousand customers that is six
+  // hundred thousand rows crossing the wire to produce twenty-five, and it was
+  // the slowest thing in the product when Phase 51 went looking.
+  //
+  // The arithmetic is the same arithmetic, written where the rows already are.
+  // The one thing worth reading twice is `lapsing`: it is each customer's own
+  // rhythm, not a fixed number of months — somebody who services twice a year
+  // is not lapsed at seven months, and somebody who comes every six weeks is.
+  const rows = await prisma.$queryRaw<
+    {
+      customerId: string;
+      name: string;
+      visits: bigint;
+      firstVisit: Date | null;
+      lastVisit: Date | null;
+      lifetime: string | null;
+    }[]
+  >`
+    SELECT
+      c."id"          AS "customerId",
+      c."displayName" AS name,
+      coalesce(v."visits", 0)  AS visits,
+      v."firstVisit",
+      v."lastVisit",
+      coalesce(i."lifetime", 0)::text AS lifetime
+    FROM "customers" c
+    LEFT JOIN (
+      SELECT "customerId",
+             count(*) AS visits,
+             min("completedAt") AS "firstVisit",
+             max("completedAt") AS "lastVisit"
+      FROM "jobs"
+      WHERE "orgId" = ${orgId}
+        AND "status" IN ('COMPLETED', 'INVOICED', 'PAID')
+        AND "completedAt" IS NOT NULL
+      GROUP BY "customerId"
+    ) v ON v."customerId" = c."id"
+    LEFT JOIN (
+      SELECT "customerId", sum("total") AS lifetime
+      FROM "invoices"
+      WHERE "orgId" = ${orgId} AND "status" <> 'VOID'
+      GROUP BY "customerId"
+    ) i ON i."customerId" = c."id"
+    WHERE c."orgId" = ${orgId} AND c."isActive" = true
+    ORDER BY coalesce(i."lifetime", 0) DESC
+    LIMIT ${limit}`;
 
   const now = Date.now();
 
-  return customers
-    .map((customer): RetentionRow => {
-      const visits = customer.jobs.filter((job) => job.completedAt !== null);
-      const first = visits[0]?.completedAt ?? null;
-      const last = visits[visits.length - 1]?.completedAt ?? null;
+  return rows.map((row): RetentionRow => {
+    const visits = Number(row.visits);
+    const lifetimeMinor = Math.round(Number(row.lifetime ?? 0) * 100);
+    const days = row.lastVisit ? Math.floor((now - row.lastVisit.getTime()) / 86_400_000) : null;
 
-      const lifetimeMinor = customer.invoices.reduce(
-        (total, invoice) => total + Math.round(Number(invoice.total) * 100),
-        0,
-      );
+    const gap =
+      visits > 1 && row.firstVisit && row.lastVisit
+        ? (row.lastVisit.getTime() - row.firstVisit.getTime()) / 86_400_000 / (visits - 1)
+        : null;
 
-      const days = last ? Math.floor((now - last.getTime()) / 86_400_000) : null;
-
-      // Their own average gap, from their own history.
-      const gap =
-        visits.length > 1 && first && last
-          ? (last.getTime() - first.getTime()) / 86_400_000 / (visits.length - 1)
-          : null;
-
-      return {
-        customerId: customer.id,
-        name: customer.displayName,
-        visits: visits.length,
-        firstVisit: first,
-        lastVisit: last,
-        lifetimeMinor,
-        averageMinor: visits.length > 0 ? Math.round(lifetimeMinor / visits.length) : 0,
-        daysSinceLastVisit: days,
-        lapsing: gap !== null && days !== null && days > gap * 2,
-      };
-    })
-    .sort((a, b) => b.lifetimeMinor - a.lifetimeMinor)
-    .slice(0, limit);
+    return {
+      customerId: row.customerId,
+      name: row.name,
+      visits,
+      firstVisit: row.firstVisit,
+      lastVisit: row.lastVisit,
+      lifetimeMinor,
+      averageMinor: visits > 0 ? Math.round(lifetimeMinor / visits) : 0,
+      daysSinceLastVisit: days,
+      lapsing: gap !== null && days !== null && days > gap * 2,
+    };
+  });
 }
 
 /* ---------------------------------------------------------------------------

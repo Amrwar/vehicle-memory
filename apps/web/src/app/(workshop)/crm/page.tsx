@@ -35,6 +35,7 @@ import {
   draftCampaign,
   listCampaigns,
   previewSegment,
+  segmentMembers,
   retention,
   sendCampaign,
 } from '@/lib/automation';
@@ -134,12 +135,18 @@ export default async function CrmPage({
   const { drafted, sent, held, error } = await searchParams;
   const t = await tFor();
 
+  // Read once, previewed six times. Each preview applies its rules to the same
+  // people in memory, so fetching them per segment was the same heavy read six
+  // times over — enough to exhaust the connection pool and take the rest of
+  // the page down with it. Phase 51.
+  const members = await segmentMembers(orgId);
+
   const [segments, campaigns, cohortRows] = await Promise.all([
     Promise.all(
       SEGMENTS.map(async (segment) => ({
         ...segment,
         label: segment.rules.map((rule) => t(describeSegment(rule))).join(', '),
-        ...(await previewSegment(orgId, segment.rules, 'EMAIL')),
+        ...(await previewSegment(orgId, segment.rules, 'EMAIL', new Date(), members)),
       })),
     ),
     listCampaigns(orgId),

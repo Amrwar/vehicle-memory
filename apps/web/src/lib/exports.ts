@@ -67,7 +67,7 @@ async function customersOf(orgId: string) {
 async function vehiclesOf(orgId: string) {
   return prisma.vehicle.findMany({
     where: {
-      OR: [{ jobs: { some: { orgId } } }, { accessGrants: { some: { orgId, revokedAt: null } } }],
+      accessGrants: { some: { orgId, revokedAt: null } },
     },
     orderBy: { createdAt: 'asc' },
     select: {

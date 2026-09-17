@@ -545,6 +545,8 @@ model Vehicle {
 
   @@index([registration])
   @@index([make, model, year])
+  /// A list of vehicles is read newest-first. Phase 51.
+  @@index([updatedAt(sort: Desc)])
   @@map("vehicles")
 }
 

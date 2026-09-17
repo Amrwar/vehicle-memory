@@ -108,9 +108,13 @@ export async function passportsForOrg(orgId: string, query = '') {
     where: {
       AND: [
         {
+          // The jobs arm is gone: a job now records the grant it always
+          // implied, so it is covered by the grant below. The events arm
+          // stays, because a workshop can record an entry on a vehicle it
+          // never had in — a recall notice, a correction — and that is still
+          // a reason to find it here. Phase 51.
           OR: [
             { events: { some: { recordedByOrgId: orgId } } },
-            { jobs: { some: { orgId } } },
             { accessGrants: { some: { orgId, revokedAt: null } } },
           ],
         },

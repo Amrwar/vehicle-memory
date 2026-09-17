@@ -1,6 +1,6 @@
 import {
+  type AgedAnalysis,
   AGE_BUCKETS,
-  ageAnalysis,
   balanceSheet,
   profitAndLoss,
   taxReturn,
@@ -32,7 +32,7 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { openPayables, openReceivables, postedLines } from '@/lib/accounting';
+import { agedPayables, agedReceivables, postedLines } from '@/lib/accounting';
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
@@ -108,10 +108,13 @@ export default async function FinancialsPage({
   const key: RangeKey = range === 'month' || range === 'quarter' ? range : 'year';
   const period = rangeFor(key, region.locale, t);
 
-  const [lines, receivables, payables] = await Promise.all([
+  // The aged figures are summed in the database rather than fetched and added
+  // up here. Every unpaid bill has to go into a total and none of them has to
+  // travel: at a hundred thousand the difference is twelve seconds. Phase 51.
+  const [lines, debtors, creditors] = await Promise.all([
     postedLines(orgId),
-    openReceivables(orgId),
-    openPayables(orgId),
+    agedReceivables(orgId, period.to, region.currency),
+    agedPayables(orgId, period.to, region.currency),
   ]);
 
   // The P&L covers a window; the balance sheet is a position at a moment.
@@ -124,9 +127,6 @@ export default async function FinancialsPage({
   const sheet = balanceSheet(asAt);
   const vat = taxReturn(forPeriod);
   const balance = trialBalance(asAt);
-
-  const debtors = ageAnalysis(receivables, period.to);
-  const creditors = ageAnalysis(payables, period.to);
 
   const profitable = pl.netProfit.minor >= 0;
   const [traceBefore, traceAfter] = t(
@@ -566,7 +566,7 @@ function Ageing({
 }: {
   t: Translator;
   region: Region;
-  analysis: ReturnType<typeof ageAnalysis>;
+  analysis: AgedAnalysis;
   emptyLabel: string;
   tone: 'danger' | 'warning';
 }) {

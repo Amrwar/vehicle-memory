@@ -131,6 +131,29 @@ export async function createJob(input: {
       select: { id: true, number: true },
     });
 
+    // Working on a car is a reason to be able to see it, and until Phase 51
+    // that access was inferred rather than recorded: every page listing
+    // vehicles asked "has this workshop a job on it OR a grant for it", which
+    // Postgres answers with a subquery per row and which cost a second on a
+    // hundred and fifty thousand vehicles.
+    //
+    // Recording it widens nothing — the workshop could already see the vehicle
+    // through the job — and it turns four correlated OR queries into one
+    // indexed lookup. The grant is the one place that answers "may this
+    // workshop see this car", which is where that answer belongs.
+    await tx.vehicleAccessGrant.upsert({
+      where: {
+        vehicleId_orgId: { vehicleId: input.vehicleId, orgId: input.orgId },
+      },
+      create: {
+        vehicleId: input.vehicleId,
+        orgId: input.orgId,
+        scope: 'READ',
+        reason: 'SERVICED',
+      },
+      update: { revokedAt: null },
+    });
+
     // From a package: the lines, the checklist, the kind of work and the
     // time to allow, in the same transaction as the job. Phase 37.
     if (input.packageId) {

@@ -479,7 +479,12 @@ export async function conversationDetail(orgId: string, conversationId: string) 
 
 /** The thread for a job, for the card on the job page; made if it does not exist. */
 export async function conversationForJob(orgId: string, jobId: string) {
-  await fileUnfiled(orgId, 50);
+  // Filing used to happen here, and it was four hundred milliseconds on the
+  // most-opened screen in the product: up to a hundred unfiled messages, one
+  // query each, in a loop, every time anybody opened any job. It is background
+  // work and it now happens in the background — `sweepConversations` runs
+  // hourly, and the inbox still files on sight so somebody looking at it never
+  // waits for the hour. Phase 51.
   const id = await threadFor({ orgId, jobId });
   if (!id) return null;
   return conversationDetail(orgId, id);

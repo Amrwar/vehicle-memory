@@ -1,14 +1,24 @@
 import {
   type AccountType,
+  add,
+  AGE_BOUNDARIES,
+  AGE_BUCKETS,
+  type AgeBucket,
+  type AgedAnalysis,
   assertBalanced,
+  bucketFor,
+  type Currency,
   fromDecimal,
   type JournalEntryDraft,
+  type Money,
   type PostedLine,
   STANDARD_CHART,
   subtract,
+  sum,
   toNumber,
+  zero,
 } from '@carnet/core';
-import { prisma } from '@carnet/db';
+import { Prisma, prisma } from '@carnet/db';
 
 import { isAlreadyDone } from './repeat';
 
@@ -216,6 +226,124 @@ export async function postedLines(
 }
 
 /** Outstanding customer invoices, for the aged debtors analysis. */
+/**
+ * Aged debt, summed in the database and listed only as far as anybody reads.
+ *
+ * The version before this one fetched every unpaid bill with its customer
+ * joined on, and bucketed them in memory. That is correct and it is fine at
+ * six bills. At a hundred and thirty thousand it is twelve seconds and most of
+ * a gigabyte, which is what Phase 51 found by putting the rows in and looking.
+ *
+ * Two queries instead. The totals per bucket come back as five rows whatever
+ * the size of the ledger, because a total is the one thing that has to include
+ * every bill and the one thing the database is best at. The documents come
+ * back worst-first and bounded, because nobody reads the hundred-thousandth
+ * row of an aged debt list.
+ *
+ * The bucket boundaries are `AGE_BOUNDARIES` from core rather than numbers
+ * written here: two copies of 30, 60 and 90 would drift the first time one was
+ * changed, and the drift would be silent — the totals would still add up,
+ * against different definitions.
+ */
+async function agedIn(
+  orgId: string,
+  asOf: Date,
+  currency: Currency,
+  what: 'receivable' | 'payable',
+  take: number,
+): Promise<AgedAnalysis> {
+  const owed =
+    what === 'receivable'
+      ? Prisma.sql`SELECT i."id", i."number" AS reference, c."displayName" AS party,
+                          i."dueAt", (i."total" - i."amountPaid")::text AS outstanding
+                   FROM "invoices" i
+                   JOIN "customers" c ON c."id" = i."customerId"
+                   WHERE i."orgId" = ${orgId}
+                     AND i."status" IN ('ISSUED', 'PART_PAID', 'OVERDUE')
+                     AND i."total" - i."amountPaid" > 0`
+      : Prisma.sql`SELECT b."id", b."reference" AS reference, s."name" AS party,
+                          b."dueAt", (b."total" - b."amountPaid")::text AS outstanding
+                   FROM "supplier_bills" b
+                   JOIN "suppliers" s ON s."id" = b."supplierId"
+                   WHERE b."orgId" = ${orgId}
+                     AND b."status" IN ('AWAITING', 'APPROVED', 'PART_PAID', 'DISPUTED')
+                     AND b."total" - b."amountPaid" > 0`;
+
+  // The CASE is built from the boundaries so there is one definition of a
+  // bucket in the product, not two.
+  const branches = AGE_BOUNDARIES.filter((one) => one.upToDays !== null).map(
+    (one) =>
+      Prisma.sql`WHEN floor(extract(epoch FROM (${asOf}::timestamp - coalesce(o."dueAt", ${asOf}::timestamp))) / 86400) <= ${one.upToDays} THEN ${one.bucket}`,
+  );
+
+  const bucketed = Prisma.sql`
+    SELECT CASE ${Prisma.join(branches, ' ')} ELSE ${'90+'} END AS bucket,
+           sum(o.outstanding::numeric)::text AS total
+    FROM (${owed}) AS o
+    GROUP BY 1`;
+
+  const [totals, worst] = await Promise.all([
+    prisma.$queryRaw<{ bucket: AgeBucket; total: string }[]>(bucketed),
+    prisma.$queryRaw<
+      { id: string; reference: string; party: string; dueAt: Date | null; outstanding: string }[]
+    >(Prisma.sql`
+      SELECT * FROM (${owed}) AS o
+      ORDER BY o."dueAt" ASC NULLS LAST
+      LIMIT ${take}`),
+  ]);
+
+  const buckets = Object.fromEntries(
+    AGE_BUCKETS.map((bucket) => [bucket, zero(currency)]),
+  ) as Record<AgeBucket, Money>;
+
+  for (const row of totals) {
+    buckets[row.bucket] = fromDecimal(row.total, currency);
+  }
+
+  const documents = worst.map((row) => {
+    const outstanding = fromDecimal(row.outstanding, currency);
+
+    return {
+      id: row.id,
+      reference: row.reference,
+      partyName: row.party,
+      dueAt: row.dueAt,
+      outstanding,
+      bucket: bucketFor(row.dueAt, asOf),
+      daysOverdue: row.dueAt
+        ? Math.max(0, Math.floor((asOf.getTime() - row.dueAt.getTime()) / 86_400_000))
+        : 0,
+    };
+  });
+
+  return {
+    buckets,
+    total: sum(Object.values(buckets), currency),
+    documents,
+    atRisk: add(buckets['61-90'], buckets['90+']),
+  };
+}
+
+/** What customers owe, aged. Bounded: FR-8601. */
+export async function agedReceivables(
+  orgId: string,
+  asOf: Date,
+  currency: Currency = 'GBP',
+  take = 100,
+): Promise<AgedAnalysis> {
+  return agedIn(orgId, asOf, currency, 'receivable', take);
+}
+
+/** What the workshop owes, aged. */
+export async function agedPayables(
+  orgId: string,
+  asOf: Date,
+  currency: Currency = 'GBP',
+  take = 100,
+): Promise<AgedAnalysis> {
+  return agedIn(orgId, asOf, currency, 'payable', take);
+}
+
 export async function openReceivables(orgId: string) {
   const invoices = await prisma.invoice.findMany({
     where: { orgId, status: { in: ['ISSUED', 'PART_PAID', 'OVERDUE'] } },

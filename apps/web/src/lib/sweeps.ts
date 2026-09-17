@@ -1,5 +1,6 @@
 import { prisma } from '@carnet/db';
 
+import { fileUnfiled } from './conversations';
 import { bookingReached, customerLapsing, invoiceReached } from './triggers';
 
 /**
@@ -121,15 +122,38 @@ export async function sweepLapsingCustomers(now = new Date()): Promise<number> {
   return fired;
 }
 
-/** All three, for the hourly job. */
+/**
+ * Files messages that arrived or left without a thread. FR-8603.
+ *
+ * Filing is cheap per message and expensive in a loop, so it belongs on a
+ * schedule rather than on a page: before Phase 51 the only thing that ever
+ * filed anything was somebody opening a job or the inbox, which meant a
+ * workshop that did neither accumulated unfiled messages for ever, and one
+ * that opened a job paid for the backlog.
+ */
+export async function sweepConversations(): Promise<number> {
+  const orgs = await prisma.organization.findMany({ select: { id: true } });
+
+  let filed = 0;
+
+  for (const org of orgs) {
+    filed += await fileUnfiled(org.id, 200);
+  }
+
+  return filed;
+}
+
+/** All of them, for the hourly job. */
 export async function sweepConditions(now = new Date()): Promise<{
   overdue: number;
   missed: number;
   lapsing: number;
+  filed: number;
 }> {
   return {
     overdue: await sweepOverdueInvoices(now),
     missed: await sweepMissedBookings(now),
     lapsing: await sweepLapsingCustomers(now),
+    filed: await sweepConversations(),
   };
 }

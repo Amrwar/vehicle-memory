@@ -85,7 +85,7 @@ export async function usageOf(orgId: string) {
     prisma.bay.count({ where: { location: { orgId }, isActive: true } }),
     prisma.vehicle.count({
       where: {
-        OR: [{ jobs: { some: { orgId } } }, { accessGrants: { some: { orgId, revokedAt: null } } }],
+        accessGrants: { some: { orgId, revokedAt: null } },
       },
     }),
   ]);

@@ -4,6 +4,10 @@ import { PrismaClient } from './generated/client/index';
 
 export * from './generated/client/index';
 export { PrismaClient };
+// The namespace, for the handful of places that build SQL rather than a query:
+// an aged-debt total over a hundred thousand bills is a sum the database does
+// and the application cannot afford to. Phase 51.
+export { Prisma } from './generated/client/index';
 
 /**
  * Prisma 7 takes a driver adapter rather than a connection string. The pool is

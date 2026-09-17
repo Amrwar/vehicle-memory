@@ -1,15 +1,14 @@
 import {
+  type CohortRow,
   type Action,
   type ArrivalContext,
   assertRuleSound,
   buildSegment,
   type Channel,
-  cohorts,
   type ConsentState,
   describeRule,
   evaluate,
   type Facts,
-  type FirstVisit,
   type Rule,
   mayMarket,
   planCampaign,
@@ -358,72 +357,87 @@ function consentOf(customer: {
  * not millions, and a comprehensible filter beats a clever one at this size.
  */
 export async function segmentMembers(orgId: string, now = new Date()): Promise<SegmentMember[]> {
-  const customers = await prisma.customer.findMany({
-    where: { orgId, isActive: true },
-    select: {
-      id: true,
-      displayName: true,
-      email: true,
-      mobile: true,
-      marketingEmailConsent: true,
-      marketingSmsConsent: true,
-      jobs: {
-        where: { status: { in: DONE_STATUSES } },
-        select: {
-          completedAt: true,
-          createdAt: true,
-          vehicle: { select: { firstRegisteredAt: true } },
-          // An estimate belongs to a job, not to a customer, so the last
-          // refusal has to be reached through the work it was quoted for.
-          estimates: {
-            where: { status: 'DECLINED' },
-            select: { decidedAt: true, updatedAt: true },
-          },
-        },
-      },
-      invoices: {
-        where: { status: { in: BILLED_STATUSES } },
-        select: { total: true },
-      },
-    },
-  });
+  // Six facts per customer, each of them an aggregate.
+  //
+  // This used to read every active customer with all of their jobs, each job's
+  // vehicle, each job's declined estimates and all of their invoices, and
+  // reduce the lot in memory. Twelve seconds at a hundred thousand customers —
+  // and the relationships page called it once per segment, in parallel, which
+  // is where the connection pool went.
+  //
+  // Nothing about the answer changed. Every field below is the same arithmetic
+  // written where the rows are, and the one thing that cannot move is consent,
+  // which is read from the customer's own columns by the same function as
+  // before so that there is one definition of who may be written to.
+  const rows = await prisma.$queryRaw<
+    {
+      id: string;
+      displayName: string;
+      email: string | null;
+      mobile: string | null;
+      marketingEmailConsent: boolean;
+      marketingSmsConsent: boolean;
+      visits: bigint;
+      lastVisit: Date | null;
+      lifetime: string | null;
+      oldestVehicle: Date | null;
+      declinedAt: Date | null;
+    }[]
+  >`
+    SELECT
+      c."id",
+      c."displayName",
+      c."email",
+      c."mobile",
+      c."marketingEmailConsent",
+      c."marketingSmsConsent",
+      coalesce(j.visits, 0) AS visits,
+      j."lastVisit",
+      coalesce(i.lifetime, 0)::text AS lifetime,
+      j."oldestVehicle",
+      e."declinedAt"
+    FROM "customers" c
+    LEFT JOIN (
+      SELECT
+        j."customerId",
+        count(*) AS visits,
+        max(coalesce(j."completedAt", j."createdAt")) AS "lastVisit",
+        min(v."firstRegisteredAt") AS "oldestVehicle"
+      FROM "jobs" j
+      LEFT JOIN "vehicles" v ON v."id" = j."vehicleId"
+      WHERE j."orgId" = ${orgId} AND j."status"::text = ANY(${DONE_STATUSES as unknown as string[]})
+      GROUP BY j."customerId"
+    ) j ON j."customerId" = c."id"
+    LEFT JOIN (
+      SELECT "customerId", sum("total") AS lifetime
+      FROM "invoices"
+      WHERE "orgId" = ${orgId} AND "status"::text = ANY(${BILLED_STATUSES as unknown as string[]})
+      GROUP BY "customerId"
+    ) i ON i."customerId" = c."id"
+    LEFT JOIN (
+      SELECT j."customerId", max(coalesce(e."decidedAt", e."updatedAt")) AS "declinedAt"
+      FROM "estimates" e
+      JOIN "jobs" j ON j."id" = e."jobId"
+      WHERE j."orgId" = ${orgId} AND e."status" = 'DECLINED'
+      GROUP BY j."customerId"
+    ) e ON e."customerId" = c."id"
+    WHERE c."orgId" = ${orgId} AND c."isActive" = true`;
 
-  return customers.map((customer) => {
-    const visits = customer.jobs
-      .map((job) => job.completedAt ?? job.createdAt)
-      .sort((a, b) => b.getTime() - a.getTime());
+  const days = (at: Date | null) =>
+    at ? Math.floor((now.getTime() - at.getTime()) / 86_400_000) : null;
 
-    const lifetimeMinor = customer.invoices.reduce(
-      (total, invoice) => total + Math.round(Number(invoice.total) * 100),
-      0,
-    );
-
-    const oldestVehicle = customer.jobs
-      .map((job) => job.vehicle?.firstRegisteredAt)
-      .filter((date): date is Date => Boolean(date))
-      .sort((a, b) => a.getTime() - b.getTime())[0];
-
-    const declinedAt = customer.jobs
-      .flatMap((job) => job.estimates.map((estimate) => estimate.decidedAt ?? estimate.updatedAt))
-      .sort((a, b) => b.getTime() - a.getTime())[0];
-
-    return {
-      customerId: customer.id,
-      name: customer.displayName,
-      visits: visits.length,
-      lifetimeMinor,
-      daysSinceLastVisit: visits[0]
-        ? Math.floor((now.getTime() - visits[0].getTime()) / 86_400_000)
-        : null,
-      oldestVehicleYears: oldestVehicle
-        ? Math.floor((now.getTime() - oldestVehicle.getTime()) / (365.25 * 86_400_000))
-        : null,
-      declinedSinceDays: declinedAt
-        ? Math.floor((now.getTime() - declinedAt.getTime()) / 86_400_000)
-        : null,
-      consent: consentOf(customer),
-    };
-  });
+  return rows.map((row) => ({
+    customerId: row.id,
+    name: row.displayName,
+    visits: Number(row.visits),
+    lifetimeMinor: Math.round(Number(row.lifetime ?? 0) * 100),
+    daysSinceLastVisit: days(row.lastVisit),
+    oldestVehicleYears: row.oldestVehicle
+      ? Math.floor((now.getTime() - row.oldestVehicle.getTime()) / (365.25 * 86_400_000))
+      : null,
+    declinedSinceDays: days(row.declinedAt),
+    consent: consentOf(row),
+  }));
 }
 
 /** The segment, split into who can be written to and who cannot, with reasons. */
@@ -432,9 +446,17 @@ export async function previewSegment(
   rules: SegmentRule[],
   channel: Channel,
   now = new Date(),
+  // Every caller that previews more than one segment should read the members
+  // once and hand them in. `segmentMembers` is the heaviest read in the
+  // product — every active customer with their jobs, those jobs' vehicles and
+  // estimates, and their invoices — and the relationships page previewed six
+  // segments in parallel, which meant six of those at once and a connection
+  // pool with nothing left in it. The rules are applied in memory, so the
+  // members are the same for all six. Phase 51.
+  members?: SegmentMember[],
 ) {
-  const members = await segmentMembers(orgId, now);
-  const segment = buildSegment(members, rules, channel);
+  const people = members ?? (await segmentMembers(orgId, now));
+  const segment = buildSegment(people, rules, channel);
 
   return { segment, plan: planCampaign(segment, channel) };
 }
@@ -667,40 +689,91 @@ export async function sendCampaign(input: {
 
 /** Retention by the month somebody first came in, which is the only honest cut. */
 export async function retention(orgId: string, months = 12, asOf = new Date()) {
-  const customers = await prisma.customer.findMany({
-    where: { orgId, jobs: { some: {} } },
-    select: {
-      id: true,
-      jobs: {
-        where: { status: { in: DONE_STATUSES } },
-        select: { completedAt: true, createdAt: true },
-      },
-      invoices: {
-        where: { status: { in: BILLED_STATUSES } },
-        select: { total: true },
-      },
-    },
-  });
+  // The cohort table, computed where the rows are.
+  //
+  // Three versions of this function now exist in the history and the reason is
+  // worth writing down. The first loaded every customer who had ever had a job
+  // with all their jobs and invoices attached: nine seconds at a hundred
+  // thousand customers. The second asked the database for one row per customer
+  // instead of one per job, which was better and still wrong — a hundred
+  // thousand rows, each carrying an array, held a connection long enough that
+  // the rest of the page could not get one, and the screen went from slow to
+  // broken.
+  //
+  // The question being asked is "for each month somebody first came, how many
+  // of them came back in each of the following months". That is a hundred or
+  // so numbers. Asking for a hundred thousand rows to compute a hundred
+  // numbers was the mistake, not how the hundred thousand were fetched.
+  const rows = await prisma.$queryRaw<
+    { cohort: Date; offset: number; returned: bigint; size: bigint; lifetime: string | null }[]
+  >`
+    WITH done AS (
+      SELECT "customerId", coalesce("completedAt", "createdAt") AS "at"
+      FROM "jobs"
+      WHERE "orgId" = ${orgId} AND "status"::text = ANY(${DONE_STATUSES as unknown as string[]})
+    ),
+    firsts AS (
+      SELECT "customerId", date_trunc('month', min("at")) AS cohort
+      FROM done GROUP BY "customerId"
+    ),
+    sizes AS (
+      SELECT f.cohort,
+             count(*) AS size,
+             coalesce(sum(i.lifetime), 0)::text AS lifetime
+      FROM firsts f
+      LEFT JOIN (
+        SELECT "customerId", sum("total") AS lifetime
+        FROM "invoices"
+        WHERE "orgId" = ${orgId} AND "status"::text = ANY(${BILLED_STATUSES as unknown as string[]})
+        GROUP BY "customerId"
+      ) i ON i."customerId" = f."customerId"
+      GROUP BY f.cohort
+    )
+    SELECT
+      f.cohort,
+      (extract(year FROM age(date_trunc('month', d."at"), f.cohort)) * 12
+        + extract(month FROM age(date_trunc('month', d."at"), f.cohort)))::int AS "offset",
+      count(DISTINCT d."customerId") AS returned,
+      s.size,
+      s.lifetime
+    FROM done d
+    JOIN firsts f ON f."customerId" = d."customerId"
+    JOIN sizes s ON s.cohort = f.cohort
+    WHERE date_trunc('month', d."at") <= date_trunc('month', ${asOf}::timestamp)
+    GROUP BY f.cohort, 2, s.size, s.lifetime
+    HAVING (extract(year FROM age(date_trunc('month', d."at"), f.cohort)) * 12
+        + extract(month FROM age(date_trunc('month', d."at"), f.cohort)))::int < ${months}
+    ORDER BY f.cohort DESC, 2 ASC`;
 
-  const facts: FirstVisit[] = customers
-    .map((customer) => {
-      const visits = customer.jobs
-        .map((job) => job.completedAt ?? job.createdAt)
-        .sort((a, b) => a.getTime() - b.getTime());
+  const byCohort = new Map<string, CohortRow>();
 
-      return {
-        customerId: customer.id,
-        firstVisit: visits[0] as Date,
-        visits,
-        lifetimeMinor: customer.invoices.reduce(
-          (total, invoice) => total + Math.round(Number(invoice.total) * 100),
-          0,
-        ),
-      };
-    })
-    .filter((fact) => Boolean(fact.firstVisit));
+  for (const row of rows) {
+    const key = row.cohort.toISOString().slice(0, 7);
 
-  return cohorts(facts, months, asOf);
+    const existing =
+      byCohort.get(key) ??
+      ({
+        cohort: key,
+        size: Number(row.size),
+        retention: [],
+        lifetimeMinor: Math.round(Number(row.lifetime ?? 0) * 100),
+      } satisfies CohortRow);
+
+    // The offsets come back in order and with gaps where nobody returned, so
+    // the gaps are filled rather than closed up: column three has to mean
+    // three months later whether or not column two had anybody in it.
+    while (existing.retention.length < row.offset) existing.retention.push(0);
+
+    existing.retention.push(
+      Number(row.size) === 0
+        ? 0
+        : Math.round((Number(row.returned) / Number(row.size)) * 1000) / 10,
+    );
+
+    byCohort.set(key, existing);
+  }
+
+  return [...byCohort.values()].sort((a, b) => b.cohort.localeCompare(a.cohort));
 }
 
 /* ---------------------------------------------------------------------------

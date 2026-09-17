@@ -2975,6 +2975,100 @@ with no bound and the report that loads a year into memory.
 
 **Exit.** A budget per screen, measured, with the slow ones named.
 
+**Status.** Built.
+
+`npm run db:scale` fills the seeded workshop to the size the roadmap asked
+for — a hundred thousand customers, a hundred and fifty thousand vehicles,
+half a million jobs, two hundred thousand invoices and two million audit rows —
+in about three minutes, as SQL rather than through the client, because half a
+million jobs through an ORM is an afternoon and several gigabytes of heap.
+`npm run verify:performance` then measures twenty-two screens against a budget
+each, twenty samples apiece, p95 rather than a mean.
+
+Every budget names where it comes from. Four are the non-functional
+requirements; the rest are judgements made in this phase and said to be
+judgements, because a number nobody can trace is a number the next person
+argues with instead of fixing the screen.
+
+**The first run, before anything was changed:**
+
+| Screen             | p95      | Budget  |
+| ------------------ | -------- | ------- |
+| Statements         | 11,981ms | 1,500ms |
+| Relationships      | 57,000ms | 5,000ms |
+| The week's figures | 1,653ms  | 1,500ms |
+| The dashboard      | 1,405ms  | 800ms   |
+| Vehicles           | 944ms    | 400ms   |
+| Passports          | 806ms    | 400ms   |
+| A job              | 505ms    | 200ms   |
+
+**And after:**
+
+| Screen             | p95     | Budget  |
+| ------------------ | ------- | ------- |
+| Statements         | 134ms   | 1,500ms |
+| Relationships      | 3,250ms | 5,000ms |
+| The week's figures | 262ms   | 1,500ms |
+| The dashboard      | 284ms   | 800ms   |
+| Vehicles           | 237ms   | 400ms   |
+| Passports          | 178ms   | 400ms   |
+| A job              | 185ms   | 200ms   |
+
+All twenty-three screens are inside their budgets. Two are close enough to the
+line to be named rather than passed over: a customer at 172ms of 200, and a
+job at 185ms of 200. A screen at eighty per cent of its budget is the screen
+that fails on the first workshop with twice the data, and both of those are
+now the next thing to look at.
+
+**What was actually wrong** was the same thing five times, and it is worth
+naming because it is not a slow query — it is a fast query asked for far too
+much:
+
+- **Statements** fetched every unpaid bill with its customer joined on, to
+  bucket them in memory and render eight rows. A hundred and thirty thousand
+  rows to produce eight. The buckets are now summed in the database and the
+  documents come back bounded, with the boundaries exported from core as
+  `AGE_BOUNDARIES` so that 30, 60 and 90 exist once rather than twice.
+- **The owner's day** fetched every unpaid bill to produce three numbers.
+- **The week's figures** fetched every active customer with all their jobs and
+  all their invoices to return twenty-five rows.
+- **Relationships** did the same to produce a cohort table of about a hundred
+  numbers — and this one got worse before it got better. Fetching one row per
+  customer instead of one per job was an improvement that still held a
+  connection long enough to starve the rest of the page, and the screen went
+  from slow to broken. The question being asked was always "for each month
+  somebody first came, how many came back in each month after" — which is a
+  hundred numbers, and is now computed as a hundred numbers.
+- **Relationships** also read every active customer with all their jobs, each
+  job's vehicle, each job's declined estimates and all their invoices — twelve
+  seconds — and did it **once per segment, in parallel**, six times over. That
+  is what took the screen to fifty-seven seconds and exhausted the connection
+  pool, which then took two neighbouring screens down with it. The members are
+  now read once and each segment's rules applied to them, and the read itself
+  is six aggregates.
+- **The job page** filed unfiled messages on every render: up to a hundred
+  messages, one query each, in a loop, on the most-opened screen in the
+  product. Filing is background work and now happens in the background;
+  `sweepConversations` runs hourly, and the inbox still files on sight.
+
+**Two more, of a different kind.** Listing vehicles asked "has this workshop a
+job on this vehicle OR a grant for it", which Postgres answers by scanning
+every vehicle and running both subqueries for each one. A job now records the
+grant it always implied — which widens nothing, since the workshop could
+already see the vehicle — so there is one indexed path and one answer to "may
+this workshop see this car". And a list read newest-first had nothing to read
+it from, so `vehicles.updatedAt` is now indexed.
+
+**Three things about measuring, learned the hard way.** A page that throws is
+not a slow page: a broken query made the statements page take eleven seconds
+to render an error, and the first reading of that was "the statements page is
+slow" — the harness now refuses to time a page that rendered an error. A
+measurement is worthless against a stale server: `npm start` will not bind a
+port that is already held, and two readings were taken from the previous
+build before that was noticed. And a budget list is only as good as what is on
+it: `/crm` was the second-slowest screen in the product and was missing from
+the list entirely, which is why six more screens were added.
+
 ## Phase 52 — The workshop's own clock
 
 **Scope.** Time and friction rather than features: seconds from a car arriving

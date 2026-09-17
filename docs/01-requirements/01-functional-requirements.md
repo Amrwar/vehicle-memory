@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8600 - Quick at the size of a real workshop
+
+| Ref     | Requirement                                                                                                                                  | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8601 | Every list and report MUST be bounded: a screen MUST NOT fetch more rows than it renders, beyond what a total requires.                      | 51    |
+| FR-8602 | A total over every row MUST be computed in the database rather than by fetching the rows and adding them up.                                 | 51    |
+| FR-8603 | A page render MUST NOT do background work; filing, sweeping and catching up MUST happen on a schedule.                                       | 51    |
+| FR-8604 | Whether a workshop may see a vehicle MUST have one answer in one indexed place, not two conditions combined with OR.                         | 51    |
+| FR-8605 | Every screen MUST have a measured budget naming the requirement or the judgement it comes from, and the measurement MUST be p95 not a mean.  | 51    |
+| FR-8606 | The measurement MUST be taken against a production build and a database at real size, and MUST refuse to time a page that rendered an error. | 51    |
+| FR-8607 | Screens within eighty per cent of their budget MUST be named, because those are the ones that fail at twice the data.                        | 51    |
+
 ## FR-8500 - How Carnet itself is
 
 | Ref     | Requirement                                                                                                                                                  | Phase |

@@ -389,10 +389,19 @@ export async function supplierOverTime(orgId: string, supplierId: string, now = 
  */
 export async function ownerDay(orgId: string, now = new Date()) {
   const [invoices, comebacks, trend, products, openOrders] = await Promise.all([
-    prisma.invoice.findMany({
-      where: { orgId, status: { in: ['ISSUED', 'PART_PAID', 'OVERDUE'] } },
-      select: { total: true, amountPaid: true, dueAt: true },
-    }),
+    // Three sums, done as three sums. Fetching every unpaid bill to add up
+    // its balance is correct and it is also a hundred and thirty thousand rows
+    // crossing the wire so that a loop can produce two numbers — half a second
+    // on the first screen of the morning, and growing. Phase 51.
+    prisma.$queryRaw<{ owed: string | null; overdue: string | null; overdueCount: bigint }[]>`
+      SELECT
+        coalesce(sum("total" - "amountPaid"), 0)::text AS owed,
+        coalesce(sum("total" - "amountPaid") FILTER (WHERE "dueAt" < ${now}), 0)::text AS overdue,
+        count(*) FILTER (WHERE "dueAt" < ${now}) AS "overdueCount"
+      FROM "invoices"
+      WHERE "orgId" = ${orgId}
+        AND "status" IN ('ISSUED', 'PART_PAID', 'OVERDUE')
+        AND "total" - "amountPaid" > 0`,
     comebackPicture(orgId, { days: 90, now }),
     reputationTrend(orgId, now),
     prisma.product.findMany({
@@ -414,18 +423,9 @@ export async function ownerDay(orgId: string, now = new Date()) {
     }),
   ]);
 
-  let owed = 0;
-  let overdue = 0;
-  let overdueCount = 0;
-  for (const invoice of invoices) {
-    const balance = Number(invoice.total) - Number(invoice.amountPaid);
-    if (balance <= 0) continue;
-    owed += balance;
-    if (invoice.dueAt && invoice.dueAt < now) {
-      overdue += balance;
-      overdueCount += 1;
-    }
-  }
+  const owed = Number(invoices[0]?.owed ?? 0);
+  const overdue = Number(invoices[0]?.overdue ?? 0);
+  const overdueCount = Number(invoices[0]?.overdueCount ?? 0);
 
   const onOrder = new Map<string, number>();
   for (const order of openOrders) {

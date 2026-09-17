@@ -514,6 +514,20 @@ The second sweep: things connected at one end only.
 | Held, against stuck          | Built  | Told apart though they share one column (Phase 50)                   |
 | Not for a workshop           | Built  | Not found for an owner; nobody at all without an operator (Phase 50) |
 
+## 21.17 Quick at the size of a real workshop
+
+| Item                      | Status | Where                                                                     |
+| ------------------------- | ------ | ------------------------------------------------------------------------- |
+| A workshop three years in | Built  | `npm run db:scale`: 100k customers, 500k jobs, 2M audit rows (Phase 51)   |
+| A budget per screen       | Built  | 22 screens, p95 over 20 samples, each budget naming its source (Phase 51) |
+| Statements                | Built  | 11,981ms to 136ms: the buckets are summed, not fetched (Phase 51)         |
+| Relationships             | Built  | 57s to 3.3s: read once, not once per segment, and summed (Phase 51)       |
+| The week's figures        | Built  | 1,653ms to 269ms (Phase 51)                                               |
+| The dashboard             | Built  | 1,405ms to 297ms (Phase 51)                                               |
+| The job page              | Built  | 505ms to 161ms: it no longer files messages on your time (Phase 51)       |
+| Vehicles and passports    | Built  | One indexed path instead of an OR of two subqueries (Phase 51)            |
+| Close to the line         | Built  | Named, because those fail first at twice the data (Phase 51)              |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -592,7 +606,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 288          |
+| Built    | 297          |
 | Partial  | 1            |
 | Deferred | 1            |
 

@@ -164,4 +164,7 @@ measures what it costs: one second of work and five seconds of downtime on the
 seeded workshop, with a written record of everything that came back missing,
 orphaned or broken. Phase 50 gives whoever runs Carnet a page of their own at
 `/admin/health`, and answers on a screen the question a workshop actually
-rings about: why did this customer not get their message?
+rings about: why did this customer not get their message? Phase 51 fills a
+workshop to the size of a real one — a hundred thousand customers, half a
+million jobs — and holds every screen to a measured budget; the slowest was
+twelve seconds and is now a tenth of one.

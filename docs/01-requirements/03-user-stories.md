@@ -1642,6 +1642,45 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BD - Quick at the size of a real workshop (Phase 51)
+
+### BD1 - Three years in
+
+**As** Ahmed **I want** the product to be as quick in year three as in week one
+**so that** growing my business does not make my software worse.
+**Size** 13 - **Satisfies** FR-8601, FR-8602, FR-8604
+
+- **Given** a hundred thousand customers, **when** I open any screen, **then**
+  it comes back inside its budget.
+- **Given** a screen that renders eight rows, **when** it loads, **then** it
+  did not fetch a hundred and thirty thousand.
+- **Given** a total over every bill, **when** it is shown, **then** it was
+  summed in the database.
+
+### BD2 - The screen I open fifty times a day
+
+**As** Sara **I want** the job page to be immediate **so that** the fiftieth
+one of the morning is as quick as the first.
+**Size** 8 - **Satisfies** FR-8603
+
+- **Given** a job, **when** I open it, **then** the page does no filing,
+  sweeping or catching up on my time.
+- **Given** messages that arrived unfiled, **when** an hour passes, **then**
+  they are filed without anybody opening anything.
+
+### BD3 - A number I can argue with
+
+**As** a developer **I want** each screen to have a budget with a reason **so
+that** a slow screen is a defect rather than an opinion.
+**Size** 8 - **Satisfies** FR-8605, FR-8606, FR-8607
+
+- **Given** a screen, **when** it is measured, **then** the budget names the
+  requirement or says it is a judgement.
+- **Given** a page that threw, **when** it is measured, **then** it is reported
+  as broken rather than as slow.
+- **Given** a screen at eighty per cent of its budget, **when** the run ends,
+  **then** it is named.
+
 ## Epic BC - How Carnet itself is (Phase 50)
 
 ### BC1 - Where is my invoice?
