@@ -87,11 +87,45 @@ mechanism. Summary:
   a review failure.
 - The authorisation probe asks for another organisation's customer, supplier
   and receipt by id as an owner, over HTTP, and expects not found.
+- The tenancy probe (Phase 48) does the same at every address the application
+  answers on, with the route list read off the filesystem so that a new one
+  cannot be forgotten, and then calls the write paths directly the way their
+  forms call them.
 
 **Known gap, stated rather than hidden:** `update` and `delete` by id are not
 narrowed by the extension, because their `where` must address a unique row. The
 convention is to load through the scoped client first. Row-level security in
 Postgres is the intended successor and closes this.
+
+Phase 48 found that gap is not theoretical. `lockLevel` — which every path that
+moves stock goes through — locked a shelf with raw SQL on a part and a site and
+nothing else, because that pair is what identifies a shelf. Two identifiers
+belonging to another workshop were therefore enough to move their stock, and
+the movement was written under the caller's own organisation. It was found by
+trying rather than by reading, which is the argument for the probe: the code
+reads correctly, and the convention had simply not been applied on a path that
+does not look like an `update` by id.
+
+The fix is where the rule can be enforced once rather than remembered seven
+times. `lockLevel` now takes the organisation and refuses a part or a site that
+is not its own, and the refusal says the part is not on any of your shelves
+rather than that you may not touch it — the second sentence confirms the shelf
+exists, which is the leak this section is about.
+
+### How a refusal is checked
+
+Not by status code. A page under a loading boundary has already flushed its
+shell by the time it looks a record up, so `notFound()` renders the not-found
+screen inside a response that has committed to 200. That is a fact about
+streaming rather than about tenancy: insisting on a 404 fails pages behaving
+perfectly, and would pass one quietly returning somebody else's invoice with a
+redirect stapled to it. The body is what is read.
+
+And a refusal only means something if the same address answers for the asker's
+own record. The probe reads one of its own first, at the same route, for
+exactly this reason: an unconfirmed email address sends a workshop to
+`/confirm-email` from every page, which made the whole probe green and vacuous
+the first time it ran.
 
 ## 5. The passport exception
 
@@ -323,6 +357,8 @@ keeps the chain intact and the fact preserved.
 
 ## 11. Before general availability
 
+- [x] Every address tried with another workshop's identifier, reads and writes
+      (Phase 48): `verify-tenancy.ts`
 - [ ] Penetration test, high findings resolved (NFR-413)
 - [x] Dependency scanning blocking on critical (NFR-409): `npm audit --audit-level=critical` in CI
 - [x] Secret scanning in CI: the committed-secrets check in the audit job

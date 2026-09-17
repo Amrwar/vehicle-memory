@@ -120,6 +120,8 @@ export const fr: Readonly<Record<string, string>> = {
   'This inspection has gone to the customer, so nothing more can be added to it.':
     'Cette inspection est partie chez le client : plus rien ne peut donc y être ajouté.',
   'A stock adjustment requires a reason': 'Un ajustement de stock exige un motif',
+  'That part is not on any of your shelves.':
+    'Cette pièce ne se trouve sur aucun de vos rayonnages.',
   'Say whose car it is.': 'Indiquez à qui appartient la voiture.',
   'Say which vehicle.': 'Indiquez quel véhicule.',
   'Say what it is in for. A job with no description is one nobody can pick up without asking.':
@@ -382,6 +384,7 @@ export const ar: Readonly<Record<string, string>> = {
   'This inspection has gone to the customer, so nothing more can be added to it.':
     'وصل هذا الفحص إلى العميل، لذا لا يمكن إضافة أي شيء إليه.',
   'A stock adjustment requires a reason': 'تعديل المخزون يتطلب سببًا',
+  'That part is not on any of your shelves.': 'هذه القطعة ليست على أيٍّ من رفوفك.',
   'Say whose car it is.': 'اذكر صاحب السيارة.',
   'Say which vehicle.': 'اذكر المركبة.',
   'Say what it is in for. A job with no description is one nobody can pick up without asking.':

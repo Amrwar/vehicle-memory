@@ -523,6 +523,14 @@ where the work happens.
 
 | Req     | Story | Schema                                 | Implementation                                                              | Test                                        | Status |
 | ------- | ----- | -------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- | ------ |
+| FR-8301 | BA1   | -                                      | the route table in `verify-tenancy.ts`, read off the filesystem             | `verify-tenancy.ts`                         | Done   |
+| FR-8302 | BA1   | every `where` carrying `orgId`         | `requireSession()`, the org-scoped lookup on each page                      | `verify-tenancy.ts`, `verify-authz.ts`      | Done   |
+| FR-8303 | BA2   | `VehicleOwnership`, `PassportShare`    | the portal's own-vehicle lookup                                             | `verify-tenancy.ts`                         | Done   |
+| FR-8304 | BA1   | `products.orgId`, `warehouses.orgId`   | `lockLevel()`, which every stock movement goes through                      | `verify-tenancy.ts`                         | Done   |
+| FR-8305 | BA1   | -                                      | `/api/exports/[dataset]`, `/api/reports/[report]`                           | `verify-tenancy.ts`                         | Done   |
+| FR-8306 | BA3   | `password_reset_tokens.tokenHash`      | `redeemReset()` on submit rather than on load; the identical page           | `verify-tenancy.ts`                         | Done   |
+| FR-8307 | BA2   | `passport_shares`                      | `/p/[token]`, which carries the car and not the keeper                      | `verify-tenancy.ts`                         | Done   |
+| FR-8308 | BA1   | -                                      | the control at the top of the probe                                         | `verify-tenancy.ts`                         | Done   |
 | FR-8201 | AZ1   | -                                      | `auditBooks()`, `/books`                                                    | `books.test.ts`, `verify-books.ts`          | Done   |
 | FR-8202 | AZ1   | `journal_lines`                        | `entryBalances()`, checked one entry at a time                              | `books.test.ts`, `verify-books.ts`          | Done   |
 | FR-8203 | AZ1   | `invoice_lines`, `payments`, `refunds` | `invoiceAddsUp()`, `amountPaidAgrees()`, `owedAgrees()`                     | `books.test.ts`, `verify-books.ts`          | Done   |

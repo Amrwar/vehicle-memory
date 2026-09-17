@@ -99,6 +99,7 @@ verify:<name>`.
 | writes         | Every write that moves money or stock declares what a repeat does                                                                    |
 | wiring         | Everything built has a way in, and works when you get there                                                                          |
 | triggers       | A rule a workshop writes actually runs, from its own moment                                                                          |
+| tenancy        | One workshop cannot read or change another's records, route by route                                                                 |
 | books          | The books still agree with themselves, and say so when they do not                                                                   |
 | screens        | Every screen at every size, measured rather than eyeballed                                                                           |
 | controls       | Every control on every page does something and every link goes somewhere                                                             |

@@ -1642,6 +1642,43 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BA - One workshop cannot reach another (Phase 48)
+
+### BA1 - The garage down the road
+
+**As** Ahmed **I want** to know no other workshop can see my customers **so
+that** putting my business on somebody else's software is not the end of it.
+**Size** 13 - **Satisfies** FR-8301, FR-8302, FR-8304, FR-8305
+
+- **Given** another workshop's identifier, **when** anybody asks for it at any
+  address, **then** they are told there is no such record.
+- **Given** a write path called by hand with my identifier, **when** somebody
+  else calls it, **then** nothing of mine changes.
+- **Given** a new page with an identifier in it, **when** nobody has said what
+  it is, **then** the check fails before it ships.
+
+### BA2 - Somebody else's car
+
+**As** Maria **I want** my car's record to be mine **so that** another
+customer cannot read it by changing the address in their browser.
+**Size** 5 - **Satisfies** FR-8303, FR-8307
+
+- **Given** a vehicle that is not mine, **when** I open it in the portal,
+  **then** it is not there.
+- **Given** a passport link I chose to share, **when** a buyer opens it,
+  **then** they see the car and nothing about me.
+
+### BA3 - A link that was never sent
+
+**As** Fatima **I want** a made-up link to give nothing away **so that**
+guessing is not a way in.
+**Size** 8 - **Satisfies** FR-8306, FR-8308
+
+- **Given** a token nobody issued, **when** it is opened, **then** nothing is
+  shown and no session is granted.
+- **Given** a page that cannot check its token until the form is sent, **when**
+  a real link and an invented one are compared, **then** they are identical.
+
 ## Epic AZ - The books agree with themselves (Phase 47)
 
 ### AZ1 - The figure I am about to sign

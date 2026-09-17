@@ -2769,6 +2769,64 @@ anything private.
 
 **Exit.** Not found, every time, and a test that says so route by route.
 
+**Status.** Built.
+
+`verify-tenancy.ts` creates a second workshop, confirms its address, signs in
+as its owner — the role that may do everything, so that nothing passes merely
+because a permission got in the way first — and then asks for the seeded
+workshop's real identifiers at every address the application answers on.
+Eighty-five checks: forty-four routes carrying an identifier, the same routes
+as somebody else's customer, the same routes with nobody signed in at all,
+tokens nobody issued, bulk exports, a VIN lookup, and five write paths called
+directly the way their forms call them.
+
+The route list is read off the filesystem rather than typed into the script. A
+route added next month with an identifier in it and no entry in the table fails
+this check on the day it is written, and it has to say which of three things it
+is: belonging to a workshop, a bearer link where the identifier is itself the
+credential, or genuinely not about one workshop's records — the last with a
+reason, so "open" is a decision somebody made rather than a route nobody
+thought about.
+
+Four things came out of it.
+
+The first is the reason the script has a control at the top. Every refusal read
+as a pass while proving nothing: a workshop that has not confirmed its email is
+sent to `/confirm-email` from every page, so the whole probe was green and
+vacuous. It now reads one of its own records first, at the same address, and
+will not believe a refusal until it has seen the same route succeed.
+
+The second is a real cross-tenant write, and the one finding of this phase that
+mattered. A shelf is identified by a part and a site and by nothing else, so
+`lockLevel` — which every path that moves stock goes through — never asked
+whose part it was. Anybody holding two identifiers could move stock on another
+workshop's shelf, and the movement would be written under their own
+organisation. Fixed where it belongs, in `lockLevel` itself, so none of the
+seven callers has to remember; the refusal says the part is not on any of your
+shelves rather than that you may not touch it, because the second sentence
+confirms the shelf exists.
+
+The third was the probe being wrong rather than the product, twice. A page
+under a loading boundary has already flushed its shell by the time it looks a
+record up, so `notFound()` renders the not-found screen inside a response that
+has committed to 200. Insisting on a 404 failed pages behaving perfectly while
+it would have passed one quietly returning somebody else's invoice with a
+redirect stapled on, so the body is what is read now. And `/reset/[token]`
+deliberately does not check the token until the form is sent — mail scanners
+follow every link in a message before a person sees it, and checking on load
+would leave somebody arriving to find their own link already spent. The check
+became the one that actually matters: a real link and an invented one must
+render identically, character for character, once the token, the CSP nonce and
+the router's per-request identifier are taken out. They do.
+
+The fourth is that a probe which finds a cross-tenant write leaves the database
+dirty — it cannot put back what it does not understand, and tearing down its
+own workshop takes the postings with it. It now says so in the failure.
+
+Everything else held: reads, the portal, the public passport, the exports, and
+the VIN lookup that tells a workshop nothing about an owner it has never worked
+for.
+
 ## Phase 49 — Backup and recovery
 
 **Scope.** Not "a backup exists" but "Carnet was restored": lose the database,

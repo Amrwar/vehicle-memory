@@ -38,6 +38,7 @@
     "verify:wiring": "tsx infra/scripts/verify-wiring.ts",
     "verify:triggers": "tsx infra/scripts/verify-triggers.ts",
     "verify:books": "tsx infra/scripts/verify-books.ts",
+    "verify:tenancy": "tsx infra/scripts/verify-tenancy.ts",
     "verify:banking": "tsx infra/scripts/verify-banking.ts",
     "verify:automation": "tsx infra/scripts/verify-automation.ts",
     "verify:messaging": "tsx infra/scripts/verify-messaging.ts",

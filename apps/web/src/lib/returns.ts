@@ -130,7 +130,7 @@ export async function sendReturn(input: {
         continue;
       }
 
-      const { position } = await lockLevel(tx, line.productId, warehouseId);
+      const { position } = await lockLevel(tx, input.orgId, line.productId, warehouseId);
       assertReturnable({
         reason: input.reason,
         description: line.description,

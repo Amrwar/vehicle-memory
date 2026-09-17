@@ -156,4 +156,7 @@ to 45 are now built, Phase 45.5 closed the last missing capability, and Phases
 three times for anything built that could not be reached. Phase 47 turns the
 question round: not whether an operation did the right thing, but whether the
 figures still agree with each other afterwards — an invariant suite over the
-whole ledger, and a page at `/books` that says so.
+whole ledger, and a page at `/books` that says so. Phase 48 asks the question
+a workshop asks before any of the rest of it matters — can the garage down the
+road see my customers — by creating a second workshop and trying, at every
+address the application answers on.

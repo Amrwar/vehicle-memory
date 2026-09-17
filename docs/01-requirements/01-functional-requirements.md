@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8300 - One workshop cannot reach another
+
+| Ref     | Requirement                                                                                                                                                              | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-8301 | Every address carrying an identifier MUST be declared as belonging to a workshop, as a bearer link, or as open with a reason, and an undeclared one MUST fail the build. | 48    |
+| FR-8302 | A workshop asking for another workshop's record MUST be told there is no such record, never that it may not see it.                                                      | 48    |
+| FR-8303 | A customer MUST NOT be able to read another customer's vehicle, passport or quote.                                                                                       | 48    |
+| FR-8304 | A workshop MUST NOT be able to change another workshop's records through any write path, including moving stock on their shelves.                                        | 48    |
+| FR-8305 | A bulk export or report MUST carry only the records of the workshop that asked for it.                                                                                   | 48    |
+| FR-8306 | A token nobody issued MUST show nothing and sign nobody in, and a page that cannot check its token on load MUST render identically for a real one and an invented one.   | 48    |
+| FR-8307 | A public passport link MUST open without an account and MUST say nothing about who owns the car or how to reach them.                                                    | 48    |
+| FR-8308 | The tenancy check MUST prove a refusal means something by reading the asker's own record at the same address first.                                                      | 48    |
+
 ## FR-8200 - The books agree with themselves
 
 | Ref     | Requirement                                                                                                                                                                                                             | Phase |

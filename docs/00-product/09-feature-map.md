@@ -475,6 +475,20 @@ The second sweep: things connected at one end only.
 | Named to the penny           | Built  | No tolerance: integer minor units end to end (Phase 47)                         |
 | `/books`                     | Built  | The whole audit on a page, worst first, in three languages (Phase 47)           |
 
+## 21.14 One workshop cannot reach another
+
+| Item                           | Status | Where                                                                   |
+| ------------------------------ | ------ | ----------------------------------------------------------------------- |
+| Every address declared         | Built  | Read off the filesystem; an undeclared one fails the check (Phase 48)   |
+| Not found, never forbidden     | Built  | A refusal that confirms nothing exists (Phase 48)                       |
+| The customer's side            | Built  | Another customer's vehicle, passport and quote are not there (Phase 48) |
+| Writes, not only reads         | Built  | Five write paths called the way their forms call them (Phase 48)        |
+| Stock on somebody else's shelf | Built  | Closed in `lockLevel`, where every movement goes through (Phase 48)     |
+| Exports and reports            | Built  | Carry only the workshop that asked (Phase 48)                           |
+| A token nobody issued          | Built  | Shows nothing, signs nobody in (Phase 48)                               |
+| A real link from a made-up one | Built  | Identical, character for character (Phase 48)                           |
+| A passport a buyer may read    | Built  | The car, and nothing about who owns it (Phase 48)                       |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -553,7 +567,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 264          |
+| Built    | 273          |
 | Partial  | 1            |
 | Deferred | 1            |
 

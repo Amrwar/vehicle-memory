@@ -43,15 +43,33 @@ function toPosition(row: LevelRow): StockPosition {
  * Locks a stock level for update, creating it if this is the first movement
  * for that product and warehouse.
  *
+ * The organisation is not decoration. A shelf is identified by a part and a
+ * site and by nothing else, so without this check any caller holding two
+ * identifiers could move stock on another workshop's shelf — and every path
+ * that moves stock comes through here, which is why the check lives here
+ * rather than in each of them. Phase 48 found it by trying.
+ *
  * @repeat GUARDED(CONSTRAINT: stock_levels_productId_warehouseId_key) A
  * shelf row is made once per part and warehouse; the second call reads back
  * the row the first one made.
  */
 export async function lockLevel(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  orgId: string,
   productId: string,
   warehouseId: string,
 ): Promise<{ id: string; position: StockPosition }> {
+  const [part, site] = await Promise.all([
+    tx.product.findFirst({ where: { id: productId, orgId }, select: { id: true } }),
+    tx.warehouse.findFirst({ where: { id: warehouseId, orgId }, select: { id: true } }),
+  ]);
+
+  // Not "you may not touch that shelf", which would confirm it exists. As far
+  // as this workshop is concerned there is no such part and no such site.
+  if (!part || !site) {
+    throw new Error('That part is not on any of your shelves.');
+  }
+
   const existing = await tx.$queryRaw<LevelRow[]>`
     SELECT "id", "onHand", "reserved", "avgCost"
     FROM "stock_levels"
@@ -101,7 +119,7 @@ export async function reserveForJobLine(input: {
   requestedByUserId?: string | null;
 }): Promise<ReserveResult> {
   return prisma.$transaction(async (tx) => {
-    const { position } = await lockLevel(tx, input.productId, input.warehouseId);
+    const { position } = await lockLevel(tx, input.orgId, input.productId, input.warehouseId);
     const outcome = reserve(position, input.quantity);
 
     const product = await tx.product.findUniqueOrThrow({
@@ -179,10 +197,23 @@ export async function releaseForJobLine(jobPartLineId: string): Promise<number> 
       where: { jobPartLineId, releasedAt: null },
     });
 
+    // Whose line this is, so the shelf can be checked against it.
+    const line = await tx.jobPartLine.findUnique({
+      where: { id: jobPartLineId },
+      select: { job: { select: { orgId: true } } },
+    });
+
+    if (!line) return 0;
+
     let released = 0;
 
     for (const reservation of reservations) {
-      const { position } = await lockLevel(tx, reservation.productId, reservation.warehouseId);
+      const { position } = await lockLevel(
+        tx,
+        line.job.orgId,
+        reservation.productId,
+        reservation.warehouseId,
+      );
       const quantity = Number(reservation.quantity);
 
       await tx.stockLevel.update({
@@ -222,6 +253,9 @@ export async function releaseForJobLine(jobPartLineId: string): Promise<number> 
  */
 export async function consumeForJob(jobId: string): Promise<{ lines: number; cost: number }> {
   return prisma.$transaction(async (tx) => {
+    const job = await tx.job.findUnique({ where: { id: jobId }, select: { orgId: true } });
+    if (!job) return { lines: 0, cost: 0 };
+
     const partLines = await tx.jobPartLine.findMany({
       where: { jobId, productId: { not: null }, status: { in: ['RESERVED', 'REQUESTED'] } },
       include: { reservations: { where: { releasedAt: null } } },
@@ -234,7 +268,7 @@ export async function consumeForJob(jobId: string): Promise<{ lines: number; cos
         line.reservations[0]?.warehouseId ?? (await defaultWarehouseId(tx, jobId));
       if (!line.productId || !warehouseId) continue;
 
-      const { position } = await lockLevel(tx, line.productId, warehouseId);
+      const { position } = await lockLevel(tx, job.orgId, line.productId, warehouseId);
       const quantity = Number(line.quantity);
       const result = consumeReservation(position, quantity);
 
@@ -390,7 +424,7 @@ export async function receiveGoods(input: {
 
       if (!orderLine.productId) continue;
 
-      const { position } = await lockLevel(tx, orderLine.productId, input.warehouseId);
+      const { position } = await lockLevel(tx, input.orgId, orderLine.productId, input.warehouseId);
       const result = applyReceipt(position, line.quantity, unitCost as string);
 
       await tx.stockLevel.update({
@@ -450,7 +484,7 @@ export async function adjustStock(input: {
   }
 
   return prisma.$transaction(async (tx) => {
-    const { position } = await lockLevel(tx, input.productId, input.warehouseId);
+    const { position } = await lockLevel(tx, input.orgId, input.productId, input.warehouseId);
 
     const result =
       input.quantity > 0
@@ -495,7 +529,7 @@ export async function recordStocktake(input: {
   counted: number;
 }): Promise<{ variance: number; direction: string }> {
   return prisma.$transaction(async (tx) => {
-    const { position } = await lockLevel(tx, input.productId, input.warehouseId);
+    const { position } = await lockLevel(tx, input.orgId, input.productId, input.warehouseId);
     const result = applyStocktake(position, input.counted);
 
     await tx.stockLevel.update({
