@@ -528,6 +528,18 @@ The second sweep: things connected at one end only.
 | Vehicles and passports    | Built  | One indexed path instead of an OR of two subqueries (Phase 51)            |
 | Close to the line         | Built  | Named, because those fail first at twice the data (Phase 51)              |
 
+## 21.18 The workshop's own clock
+
+| Item                              | Status | Where                                                                     |
+| --------------------------------- | ------ | ------------------------------------------------------------------------- |
+| Nine stretches of the work        | Built  | Car in to job open, through to invoiced to paid (Phase 52)                |
+| From records already kept         | Built  | Two timestamps each; nothing instrumented to be measured (Phase 52)       |
+| The middle, not the average       | Built  | With the slowest tenth beside it (Phase 52)                               |
+| Says when it does not know        | Built  | Coverage stated; no figure at all below five jobs (Phase 52)              |
+| Targets that argue for themselves | Built  | Each says it is a judgement and why (Phase 52)                            |
+| Before a pilot and after          | Built  | `--record` and `--against`, refusing thin comparisons (Phase 52)          |
+| A seeded clock that is real       | Built  | The seed settles every job's moments, so the demo is not a lie (Phase 52) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -606,7 +618,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 297          |
+| Built    | 304          |
 | Partial  | 1            |
 | Deferred | 1            |
 

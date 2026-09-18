@@ -344,6 +344,11 @@ jobs:
       - name: Verify the books agree with themselves
         run: npx tsx infra/scripts/verify-books.ts
 
+      # The workshop's own elapsed times, and that each is read from the two
+      # moments it claims to read rather than from a plausible-looking pair.
+      - name: The workshop's own clock
+        run: npx tsx infra/scripts/verify-clock.ts
+
       # Not "a backup exists" but "Carnet was restored", with how much work was
       # lost and how long it took, measured rather than asserted.
       - name: Verify the recovery, measured

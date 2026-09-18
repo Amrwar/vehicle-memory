@@ -3080,6 +3080,58 @@ takes an owner to answer what the week made.
 **Exit.** Those become the product's own numbers, measured before a pilot and
 again after.
 
+**Status.** Built.
+
+Phase 51 measured the software: a screen answers in a fifth of a second. This
+measures the thing the software is for, which is a different question and a
+harder one to be honest about. A garage does not care that the invoice page
+renders in 130ms. It cares that a car arrived at ten past eight and nobody
+wrote a job until twenty past nine.
+
+Nine stretches, each two timestamps the product already writes because it
+needed them for something else — when the car came in, when the estimate went
+out, when the part was ordered. Nothing is instrumented specially, and that is
+deliberate: a number that exists only to be measured is a number somebody
+eventually manages, and one taken from the records of the work itself cannot
+be. `/reports/clock` shows them; `npm run verify:clock` proves them and can
+write the figures down.
+
+Three decisions do most of the work of not lying.
+
+**The median, not the mean.** One car left over a bank holiday weekend adds
+three days to an average and tells nobody anything.
+
+**The slowest tenth beside it.** A median of twenty minutes with a ninetieth
+percentile of two days is a process that works and something that regularly
+escapes it — which is where the complaints come from, and what the median on
+its own hides completely.
+
+**Coverage, stated, and a refusal below five.** Most of these can only be
+measured where both moments were recorded, and for a lot of jobs one never
+was. A median over four jobs is an anecdote with a decimal point, so a stretch
+that saw fewer than five reports "too few" rather than a figure. On the seeded
+workshop eight of the nine say exactly that, which is the honest answer rather
+than a bad one.
+
+The exit asks for before and after. `--record` writes the figures to
+`docs/05-project/clock-baseline.json` and `--against` compares with them — and
+refuses to compare two medians that were not measured on enough work either
+side, because a pilot that moves a figure from twelve minutes to four on three
+jobs each way has moved nothing anybody can rely on.
+
+**What it found.** The first run reported "car in to job open: 4.4 days",
+which is not a workshop that takes four days to write a job — it is the seed.
+Every seeded job back-dated `receivedAt` and left `createdAt` to default to the
+moment of seeding, and nothing had ever subtracted those two columns before,
+so nothing had noticed. The same shape as the fiscal periods in Phase 47 and
+the invoice lines before them: a seed that is wrong in a way no screen shows
+until somebody computes from it. The seed now settles every job's clock — the
+job written a few minutes after the car arrived, work started when a bay was
+free, a finished car home the same afternoon — and the figure is nine minutes.
+
+A demonstration workshop with an implausible clock is worse than one with no
+clock, because somebody will read it.
+
 ## Phase 53 — The awkward cases
 
 **Scope.** What real workshops do that tidy software does not expect: two

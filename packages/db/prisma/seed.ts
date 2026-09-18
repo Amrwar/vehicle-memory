@@ -1931,6 +1931,62 @@ async function main() {
     },
   });
 
+  /* --- the clock the workshop would have kept ------------------------------ */
+
+  // Every job above says when the car arrived, and until Phase 52 none of them
+  // said when the job was written: `createdAt` defaults to now, so a car that
+  // arrived last Tuesday looked like a job somebody took four days to open.
+  // Nothing on any screen showed it, because nothing subtracted those two
+  // columns until there was a page that did.
+  //
+  // So the moments are settled here rather than one at a time above: the job
+  // was written a few minutes after the car came in, work started when the
+  // first technician had a bay, and a car that was finished went home the same
+  // afternoon. A demonstration workshop with an implausible clock is worse
+  // than one with no clock at all, because somebody will read it.
+  const settling = await prisma.job.findMany({
+    where: { orgId: org.id },
+    select: {
+      id: true,
+      status: true,
+      receivedAt: true,
+      startedAt: true,
+      completedAt: true,
+      collectedAt: true,
+      invoicedAt: true,
+    },
+  });
+
+  const minutes = (from: Date, count: number) => new Date(from.getTime() + count * 60_000);
+
+  for (const job of settling) {
+    const arrived = job.receivedAt ?? day(-1, 8, 30);
+
+    // Written up at the desk while the customer is still there.
+    const written = minutes(arrived, 6 + (settling.indexOf(job) % 4) * 3);
+
+    // On a ramp once somebody is free, and finished when it is finished.
+    const started = job.startedAt ?? (job.completedAt ? minutes(arrived, 55) : null);
+    const finished = job.completedAt;
+
+    // A finished car goes home the same afternoon, unless it is still here.
+    const collected =
+      job.collectedAt ??
+      (finished && ['INVOICED', 'PAID'].includes(job.status) ? minutes(finished, 95) : null);
+
+    const invoiced = job.invoicedAt ?? (finished ? minutes(finished, 25) : null);
+
+    await prisma.job.update({
+      where: { id: job.id },
+      data: {
+        createdAt: written,
+        ...(started ? { startedAt: started } : {}),
+        ...(collected ? { collectedAt: collected } : {}),
+        ...(invoiced && ['INVOICED', 'PAID'].includes(job.status) ? { invoicedAt: invoiced } : {}),
+      },
+    });
+  }
+
   console.info(`
   Seeded.
 

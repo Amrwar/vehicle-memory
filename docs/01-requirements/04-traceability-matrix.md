@@ -523,6 +523,13 @@ where the work happens.
 
 | Req     | Story | Schema                                 | Implementation                                                                | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-8701 | BE1   | -                                      | `workshopClock()`, `/reports/clock`                                           | `verify-clock.ts`                             | Done   |
+| FR-8702 | BE1   | the timestamps already on each model   | `STRETCHES`, each naming its two columns                                      | `verify-clock.ts`                             | Done   |
+| FR-8703 | BE1   | -                                      | `medianSeconds()`, `slowestTenth()`                                           | `stretches.test.ts`                           | Done   |
+| FR-8704 | BE2   | -                                      | `coverage()`, `ENOUGH`, `verdictOf()`                                         | `stretches.test.ts`, `verify-clock.ts`        | Done   |
+| FR-8705 | BE2   | -                                      | the null check in `gap()`                                                     | `verify-clock.ts`                             | Done   |
+| FR-8706 | BE2   | -                                      | `Stretch.because`, shown on the page                                          | `verify-clock.ts`                             | Done   |
+| FR-8707 | BE3   | `docs/05-project/clock-baseline.json`  | `record()`, `changed()`, `--record` and `--against`                           | `stretches.test.ts`, `verify-clock.ts`        | Done   |
 | FR-8601 | BD1   | -                                      | `agedReceivables()`, `retention()` in both modules, bounded lists             | `verify-performance.ts`                       | Done   |
 | FR-8602 | BD1   | -                                      | the aggregates in `accounting.ts`, `owner.ts`, `reports.ts`, `automation.ts`  | `verify-performance.ts`                       | Done   |
 | FR-8603 | BD2   | -                                      | `sweepConversations()` hourly; the job page no longer files                   | `verify-performance.ts`, `verify-triggers.ts` | Done   |

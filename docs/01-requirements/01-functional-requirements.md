@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8700 - The workshop's own clock
+
+| Ref     | Requirement                                                                                                                              | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8701 | A workshop MUST be able to see how long its own work takes, from one moment to the next, on a page of its own.                           | 52    |
+| FR-8702 | Every figure MUST come from timestamps the records already keep; nothing MUST be instrumented only to be measured.                       | 52    |
+| FR-8703 | The figure shown MUST be the median, with the slowest tenth beside it, never the mean.                                                   | 52    |
+| FR-8704 | Each stretch MUST state how many it could measure out of how many it looked at, and MUST report no figure at all below five.             | 52    |
+| FR-8705 | A moment that never happened MUST be left out rather than counted as nought.                                                             | 52    |
+| FR-8706 | Each target MUST say that it is a judgement and why, so a disagreement is about the reason rather than the number.                       | 52    |
+| FR-8707 | The figures MUST be recordable as a baseline and comparable against it, and a comparison MUST refuse two medians measured on too little. | 52    |
+
 ## FR-8600 - Quick at the size of a real workshop
 
 | Ref     | Requirement                                                                                                                                  | Phase |

@@ -167,4 +167,7 @@ orphaned or broken. Phase 50 gives whoever runs Carnet a page of their own at
 rings about: why did this customer not get their message? Phase 51 fills a
 workshop to the size of a real one — a hundred thousand customers, half a
 million jobs — and holds every screen to a measured budget; the slowest was
-twelve seconds and is now a tenth of one.
+twelve seconds and is now a tenth of one. Phase 52 turns the question round
+once more and measures the workshop rather than the software: nine stretches
+of the work, from the car arriving to the money arriving, taken from records
+the product already keeps and honest about how much it could see.

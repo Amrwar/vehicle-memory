@@ -1,0 +1,70 @@
+{
+  "takenAt": "2026-09-18T22:19:33.603Z",
+  "workshop": "Hillside Motors",
+  "windowDays": 400,
+  "stretches": [
+    {
+      "name": "Car in to job open",
+      "median": 540,
+      "slowestTenth": 900,
+      "seen": 5,
+      "candidates": 5
+    },
+    {
+      "name": "Inspection, start to finish",
+      "median": 2520,
+      "slowestTenth": 2520,
+      "seen": 1,
+      "candidates": 1
+    },
+    {
+      "name": "Findings to quote sent",
+      "median": 4800,
+      "slowestTenth": 4800,
+      "seen": 1,
+      "candidates": 1
+    },
+    {
+      "name": "Quote sent to answered",
+      "median": null,
+      "slowestTenth": null,
+      "seen": 0,
+      "candidates": 1
+    },
+    {
+      "name": "Part needed to part ordered",
+      "median": null,
+      "slowestTenth": null,
+      "seen": 0,
+      "candidates": 2
+    },
+    {
+      "name": "Work started to finished",
+      "median": 15300,
+      "slowestTenth": 20700,
+      "seen": 2,
+      "candidates": 5
+    },
+    {
+      "name": "Finished to collected",
+      "median": 5700,
+      "slowestTenth": 5700,
+      "seen": 2,
+      "candidates": 5
+    },
+    {
+      "name": "Finished to invoiced",
+      "median": 1350,
+      "slowestTenth": 1500,
+      "seen": 2,
+      "candidates": 5
+    },
+    {
+      "name": "Invoiced to paid",
+      "median": 2100,
+      "slowestTenth": 2100,
+      "seen": 1,
+      "candidates": 4
+    }
+  ]
+}

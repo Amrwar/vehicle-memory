@@ -1642,6 +1642,45 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BE - The workshop's own clock (Phase 52)
+
+### BE1 - Where the morning goes
+
+**As** Ahmed **I want** to know how long each part of the work takes **so
+that** I can fix the slow one instead of guessing which it is.
+**Size** 13 - **Satisfies** FR-8701, FR-8702, FR-8703
+
+- **Given** the last year, **when** I open the page, **then** I see each
+  stretch with what it usually takes and what the slowest tenth takes.
+- **Given** one car left over a bank holiday, **when** the figures are shown,
+  **then** it has not moved them.
+- **Given** any figure, **when** I ask where it came from, **then** it is two
+  moments already on the record.
+
+### BE2 - A number I can trust or ignore
+
+**As** Fatima **I want** the page to say when it does not know **so that** I do
+not act on four jobs' worth of coincidence.
+**Size** 8 - **Satisfies** FR-8704, FR-8705, FR-8706
+
+- **Given** a stretch measured on four jobs, **when** it is shown, **then** it
+  says too few rather than giving a number.
+- **Given** a car that was never collected, **when** collection is measured,
+  **then** it is left out rather than counted as no time at all.
+- **Given** a target, **when** I disagree with it, **then** the page says what
+  it is based on.
+
+### BE3 - Before and after
+
+**As** the operator **I want** the figures written down before a pilot **so
+that** afterwards there is something to compare against.
+**Size** 5 - **Satisfies** FR-8707
+
+- **Given** a measurement, **when** I record it, **then** it is kept with the
+  date and the window it covered.
+- **Given** a later measurement, **when** I compare, **then** each stretch says
+  what moved, or says it cannot be compared.
+
 ## Epic BD - Quick at the size of a real workshop (Phase 51)
 
 ### BD1 - Three years in
