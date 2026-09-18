@@ -6,6 +6,8 @@
  */
 
 export const fr: Readonly<Record<string, string>> = {
+  'Settle the bill and hold the rest': 'Solder la facture et conserver le reste',
+  'Paid more than the bill': 'A payé plus que la facture',
   Bank: 'Banque',
   'Cleared funds in the business account': 'Fonds disponibles sur le compte de l’entreprise',
   'Notes and coin held on the premises': 'Billets et pièces conservés dans les locaux',
@@ -805,6 +807,8 @@ export const fr: Readonly<Record<string, string>> = {
 };
 
 export const ar: Readonly<Record<string, string>> = {
+  'Settle the bill and hold the rest': 'سدِّد الفاتورة واحتفظ بالباقي',
+  'Paid more than the bill': 'دفع أكثر من الفاتورة',
   Bank: 'البنك',
   'Cleared funds in the business account': 'الأموال المقاصة في حساب الشركة',
   'Notes and coin held on the premises': 'الأوراق النقدية والعملات المحفوظة في المقر',

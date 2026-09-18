@@ -349,6 +349,11 @@ jobs:
       - name: The workshop's own clock
         run: npx tsx infra/scripts/verify-clock.ts
 
+      # The thirteen things a tidy flowchart does not expect, each held to the
+      # decision written down for it rather than to whatever the code does.
+      - name: The awkward cases
+        run: npx tsx infra/scripts/verify-awkward.ts
+
       # Not "a backup exists" but "Carnet was restored", with how much work was
       # lost and how long it took, measured rather than asserted.
       - name: Verify the recovery, measured

@@ -99,6 +99,7 @@ verify:<name>`.
 | writes         | Every write that moves money or stock declares what a repeat does                                                                    |
 | wiring         | Everything built has a way in, and works when you get there                                                                          |
 | triggers       | A rule a workshop writes actually runs, from its own moment                                                                          |
+| awkward        | Thirteen situations tidy software does not expect, each decided and held to it                                                       |
 | clock          | The workshop's own elapsed times, read from the right two moments                                                                    |
 | performance    | Every screen against a measured budget, at the size of a real workshop                                                               |
 | health         | How Carnet itself is, and why one message did not arrive, on a screen                                                                |

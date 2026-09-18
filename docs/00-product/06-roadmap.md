@@ -3144,6 +3144,58 @@ job, an ownership transfer while the car is on the ramp.
 **Exit.** Each one has a decided, tested behaviour rather than whatever the
 code happens to do.
 
+**Status.** Built.
+
+Thirteen situations, each written down in `packages/core/src/awkward/cases.ts`
+with what the product does and why, and each held to it by
+`npm run verify:awkward` — twenty-nine checks against a real database, through
+the same functions the pages call.
+
+The register lives in core rather than in a document because a decision that
+lives only in prose drifts from the code within a month. This way the reason
+and the test are the same artefact.
+
+**What was already decided, and decided well.** Most of them. A paid job
+cannot be moved anywhere, so it cannot be quietly reopened — a comeback is a
+new job linked to the old one. Stock is allowed to go negative rather than
+refusing to let a technician fit a part that is physically in their hand. A
+stocktake counts the shelf and does not disturb what is reserved. A VIN may be
+missing but may not be a duplicate. The history follows the VIN, so a private
+plate cannot be used to hide it. Two customers can share a car without the
+product inventing a second one.
+
+**What was not.** Cancelling a job left its parts reserved for ever. Nothing
+released them, so the shelf showed fewer parts available than it had, and the
+only cure was somebody noticing and counting. `moveJob` now gives back what
+was promised to a job that will never happen, and leaves anything already
+fitted where it is — a cancellation is an administrative act and cannot take a
+part back out of a car.
+
+**And one where the product was right and this phase was wrong.** The register
+was first written saying an overpayment should be taken and the excess held
+automatically. The product refuses it, with a sentence explaining what to do
+instead, and the reason in the code is better than the one in the register: an
+amount larger than the bill is as likely to be a mis-key as a customer paying
+ahead, and the product cannot tell which by looking at it. So it asks. The
+register was corrected to match the code rather than the other way round.
+
+What was genuinely wrong there was smaller and worse: the refusal named an
+action — "take the rest as a deposit" — that the invoice page did not offer.
+Doing what the product told you to do meant leaving the invoice, finding the
+customer, and working out the difference by hand with somebody waiting. There
+is now a second button on the same form that settles the bill exactly and
+holds the difference, in one press, with the decision still the person's.
+
+**Two things the probe itself got wrong**, both the Phase 47 lesson arriving
+again. It settled one of the seeded workshop's invoices and left it settled,
+so the second run found nothing to overpay — a probe that cannot be run twice
+is a probe that gets run once; it now makes its own bill. And its cleanup
+deleted rows without reversing their postings: a deposit removed while the
+ledger went on holding the money, and stock movements deleted while the shelf
+kept the figure they had written. The books audit from Phase 47 caught both
+within seconds of the probe finishing, which is the second time that audit has
+paid for itself on work that had nothing to do with it.
+
 ## Phase 54 — The pilot
 
 **Scope.** Four weeks in one workshop, which is what the MVP definition has

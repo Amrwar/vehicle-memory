@@ -540,6 +540,20 @@ The second sweep: things connected at one end only.
 | Before a pilot and after          | Built  | `--record` and `--against`, refusing thin comparisons (Phase 52)          |
 | A seeded clock that is real       | Built  | The seed settles every job's moments, so the demo is not a lie (Phase 52) |
 
+## 21.19 The awkward cases
+
+| Item                        | Status | Where                                                            |
+| --------------------------- | ------ | ---------------------------------------------------------------- |
+| Thirteen decisions, written | Built  | `AWKWARD` in core: situation, decision, reason (Phase 53)        |
+| Cancelling gives parts back | Built  | Fixed: they were reserved for ever (Phase 53)                    |
+| They paid too much          | Built  | Refused, then settled and held in one press (Phase 53)           |
+| No VIN, or a duplicate one  | Built  | Allowed, and refused, respectively (Phase 53)                    |
+| Negative stock              | Built  | Allowed, and visible, rather than blocking the work (Phase 53)   |
+| A stocktake mid-job         | Built  | Counts the shelf, leaves reservations alone (Phase 53)           |
+| The price moved after yes   | Built  | The agreed price is the price (Phase 53)                         |
+| A refund after the close    | Built  | Posted in the open period, dated today (Phase 53)                |
+| Sold off the ramp           | Built  | Asked first; the bill stays with whoever agreed to it (Phase 53) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -618,7 +632,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 304          |
+| Built    | 313          |
 | Partial  | 1            |
 | Deferred | 1            |
 

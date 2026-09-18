@@ -1642,6 +1642,48 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BF - The awkward cases (Phase 53)
+
+### BF1 - The Tuesday the flowchart did not expect
+
+**As** Sara **I want** the product to have an answer for the awkward things
+**so that** I am not stuck at the counter with a customer's keys in my hand.
+**Size** 13 - **Satisfies** FR-8801, FR-8803, FR-8805, FR-8806
+
+- **Given** a job cancelled after the parts came, **when** I cancel it,
+  **then** what was reserved goes back on the shelf and what was fitted stays
+  fitted.
+- **Given** a car with no VIN, **when** I book it in, **then** it is booked in.
+- **Given** a part in my hand and a shelf that says nought, **when** I fit it,
+  **then** the work is not blocked and the count shows as wrong.
+
+### BF2 - They paid too much
+
+**As** Sara **I want** one press for a customer who hands over more than the
+bill **so that** I am not doing arithmetic on another page while they wait.
+**Size** 8 - **Satisfies** FR-8802
+
+- **Given** a payment larger than the bill, **when** I record it, **then** I am
+  asked rather than guessed at.
+- **Given** that refusal, **when** I read it, **then** the thing it tells me to
+  do is a button underneath it.
+- **Given** that button, **when** I press it, **then** the bill is settled
+  exactly and the rest is on their account to the penny.
+
+### BF3 - Sold off the ramp
+
+**As** Ahmed **I want** a car that changes hands mid-job to leave the bill
+where it belongs **so that** I am not chasing a stranger for somebody else's
+work.
+**Size** 8 - **Satisfies** FR-8807, FR-8808, FR-8809
+
+- **Given** a car with work on it, **when** somebody transfers it, **then**
+  they are asked first and told what happens to the work.
+- **Given** the transfer goes ahead, **when** I look at the job, **then** it is
+  still the customer who agreed to it.
+- **Given** a refund against a month already reported on, **when** it is
+  posted, **then** it lands in the open period, dated today.
+
 ## Epic BE - The workshop's own clock (Phase 52)
 
 ### BE1 - Where the morning goes

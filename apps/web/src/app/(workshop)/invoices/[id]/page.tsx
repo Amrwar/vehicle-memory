@@ -1,4 +1,6 @@
 import {
+  money as moneyOf,
+  splitOverpayment,
   describeSettlement,
   fromDecimal,
   msg,
@@ -7,6 +9,7 @@ import {
   PaymentAttemptError,
   PaymentProviderError,
 } from '@carnet/core';
+import { prisma } from '@carnet/db';
 import {
   Alert,
   Badge,
@@ -34,7 +37,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackLink } from '@/components/back-link';
 import { SubmitOnce } from '@/components/submit-once';
 import { CouponError, redeemAgainstInvoice as redeemCouponOn } from '@/lib/coupons';
-import { applyHeld, DepositError, heldFor } from '@/lib/deposits';
+import { applyHeld, DepositError, heldFor, takeDeposit } from '@/lib/deposits';
 import { GiftCardError, redeemGiftCard } from '@/lib/giftcards';
 import { can, requireSession } from '@/lib/guard';
 import { once, onceToken, StillGoingError } from '@/lib/once';
@@ -156,6 +159,83 @@ async function pay(formData: FormData) {
   }
 
   redirect(`/invoices/${invoiceId}?done=paid`);
+}
+
+/**
+ * Settles the bill and holds the rest. FR-8802.
+ *
+ * A customer who hands over more than the bill is not a mistake to be refused
+ * at the counter. `recordPayment` still refuses an overpayment, deliberately —
+ * an amount larger than the bill is as likely to be a mis-key as a deliberate
+ * payment ahead, and which of the two it is should be a person's decision
+ * rather than a form's guess.
+ *
+ * What was missing until Phase 53 is that the refusal named an action the page
+ * did not offer: "take the rest as a deposit" meant leaving the invoice,
+ * finding the customer, and working out the difference by hand, with somebody
+ * waiting. Now the sentence has a button under it, the arithmetic is the
+ * product's, and the decision is still the person's.
+ */
+async function payAndHold(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('payment:write');
+  const invoiceId = String(formData.get('invoiceId') ?? '');
+
+  try {
+    await once({
+      orgId,
+      key: ['pay-and-hold', invoiceId, String(formData.get('once') ?? '')],
+      work: async () => {
+        const invoice = await prisma.invoice.findFirstOrThrow({
+          where: { id: invoiceId, orgId },
+          select: { customerId: true, total: true, amountPaid: true, currency: true },
+        });
+
+        const outstanding = Math.round((Number(invoice.total) - Number(invoice.amountPaid)) * 100);
+
+        const handed = amountFrom(formData, 'amount');
+        const split = splitOverpayment({ paid: handed.minor, outstanding });
+
+        if (split.settles > 0) {
+          await recordPayment({
+            orgId,
+            userId: user.userId,
+            invoiceId,
+            amount: moneyOf(split.settles, invoice.currency),
+            method: methodFrom(formData),
+            reference: String(formData.get('reference') ?? ''),
+          });
+        }
+
+        if (split.credit > 0) {
+          // Written in the language of whoever took it. The note is stored and
+          // read back later on the customer's page, so translating it at
+          // display time would mean guessing which language it was written in.
+          const t = await tFor();
+
+          await takeDeposit({
+            orgId,
+            userId: user.userId,
+            customerId: invoice.customerId,
+            amountMinor: split.credit,
+            method: methodFrom(formData),
+            note: t('Paid more than the bill'),
+          });
+        }
+      },
+    });
+  } catch (error) {
+    if (error instanceof StillGoingError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    if (error instanceof MoneyCycleError || error instanceof DepositError) {
+      redirect(`/invoices/${invoiceId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+
+  redirect(`/invoices/${invoiceId}?done=paid-and-held`);
 }
 
 /**
@@ -765,6 +845,19 @@ export default async function InvoicePage({
                     <Input name="reference" placeholder={t('Optional')} />
                   </Field>
                   <SubmitOnce>{t('Record the payment')}</SubmitOnce>
+
+                  {/*
+                    The second way out of the same form. A payment larger than
+                    the bill is refused, on purpose — whether it is a mis-key
+                    or a customer paying ahead is a person's call, not a
+                    form's. But until Phase 53 the refusal named an action this
+                    page did not offer, so making that call meant leaving the
+                    invoice and doing the arithmetic by hand with somebody
+                    waiting. It is one press now, and still their decision.
+                  */}
+                  <Button type="submit" formAction={payAndHold} variant="secondary">
+                    {t('Settle the bill and hold the rest')}
+                  </Button>
                 </CardBody>
               </form>
             </Card>

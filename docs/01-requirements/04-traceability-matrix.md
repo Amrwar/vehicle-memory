@@ -523,6 +523,15 @@ where the work happens.
 
 | Req     | Story | Schema                                 | Implementation                                                                | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-8801 | BF1   | -                                      | `AWKWARD` in core, thirteen cases with a decision and a reason                | `cases.test.ts`, `verify-awkward.ts`          | Done   |
+| FR-8802 | BF2   | `deposits`                             | `assertPaymentRecordable()`, and `payAndHold` on the invoice page             | `verify-awkward.ts`                           | Done   |
+| FR-8803 | BF1   | `stock_reservations.releasedAt`        | `releaseForJobLine()` called from `moveJob()` on cancel                       | `verify-awkward.ts`                           | Done   |
+| FR-8804 | BF1   | `jobs.comebackOfJobId`                 | `TERMINAL_STATUSES`, `allowedTransitions()`                                   | `lifecycle.test.ts`, `verify-awkward.ts`      | Done   |
+| FR-8805 | BF1   | `vehicles.vin` unique                  | `vinLooksReal()`, the unique index                                            | `cases.test.ts`, `verify-awkward.ts`          | Done   |
+| FR-8806 | BF1   | `stock_levels.onHand`                  | `adjustStock()`, `recordStocktake()`                                          | `verify-awkward.ts`                           | Done   |
+| FR-8807 | BF3   | `job_part_lines.unitPrice`             | the price held on the line rather than read from the product                  | `verify-awkward.ts`                           | Done   |
+| FR-8808 | BF3   | `fiscal_periods.isClosed`              | the closed-period guard in `postEntry()`                                      | `verify-awkward.ts`, `verify-books.ts`        | Done   |
+| FR-8809 | BF3   | `vehicle_ownerships`                   | `transferOwnership()`, which refuses without `force` and keeps the job        | `verify-awkward.ts`, `verify-ownership.ts`    | Done   |
 | FR-8701 | BE1   | -                                      | `workshopClock()`, `/reports/clock`                                           | `verify-clock.ts`                             | Done   |
 | FR-8702 | BE1   | the timestamps already on each model   | `STRETCHES`, each naming its two columns                                      | `verify-clock.ts`                             | Done   |
 | FR-8703 | BE1   | -                                      | `medianSeconds()`, `slowestTenth()`                                           | `stretches.test.ts`                           | Done   |

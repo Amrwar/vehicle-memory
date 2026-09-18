@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8800 - The awkward cases
+
+| Ref     | Requirement                                                                                                                     | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8801 | Every situation in the awkward register MUST have a decided behaviour and a stated reason, and MUST be held to it by a check.   | 53    |
+| FR-8802 | A payment larger than the bill MUST be refused, and the page MUST offer, in one press, the action the refusal names.            | 53    |
+| FR-8803 | Cancelling a job MUST release what was reserved for it and MUST NOT disturb what was already consumed.                          | 53    |
+| FR-8804 | A completed or cancelled job MUST NOT be reopened; a comeback MUST be a new job linked to the old one.                          | 53    |
+| FR-8805 | A vehicle MAY have no VIN, MUST NOT share one, and MUST keep its history against the VIN rather than the plate.                 | 53    |
+| FR-8806 | Stock MUST be allowed to go negative rather than blocking work, and a stocktake MUST NOT disturb a reservation.                 | 53    |
+| FR-8807 | The agreed price on a job MUST NOT move when a supplier's price does.                                                           | 53    |
+| FR-8808 | Nothing MUST be posted into a closed period; a refund against one MUST be posted in the open period, dated today.               | 53    |
+| FR-8809 | A vehicle with open work MUST NOT change keeper without being asked, and the work MUST stay with the account that agreed to it. | 53    |
+
 ## FR-8700 - The workshop's own clock
 
 | Ref     | Requirement                                                                                                                              | Phase |

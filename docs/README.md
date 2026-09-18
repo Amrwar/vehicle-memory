@@ -170,4 +170,8 @@ million jobs — and holds every screen to a measured budget; the slowest was
 twelve seconds and is now a tenth of one. Phase 52 turns the question round
 once more and measures the workshop rather than the software: nine stretches
 of the work, from the car arriving to the money arriving, taken from records
-the product already keeps and honest about how much it could see.
+the product already keeps and honest about how much it could see. Phase 53
+takes the thirteen things real workshops do that tidy software does not expect
+— two customers sharing a car, a job cancelled after the parts arrived, a
+customer who pays too much — and gives each one a decided behaviour with a
+reason, held to it by a check.

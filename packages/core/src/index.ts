@@ -14,6 +14,7 @@ export * from './recovery/index';
 export * from './health/index';
 export * from './performance/index';
 export * from './clock/index';
+export * from './awkward/index';
 export * from './giftcards/index';
 export * from './region/index';
 export * from './deposits/index';

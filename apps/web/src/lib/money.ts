@@ -49,7 +49,7 @@ import { refundOntoCard } from './giftcard-refunds';
 import { consequencesOfPayment } from './afterwards';
 import { notifyCustomer } from './booking';
 import { invoiceReached, jobReached } from './triggers';
-import { consumeForJob } from './inventory';
+import { consumeForJob, releaseForJobLine } from './inventory';
 import { refreshScheduleFor } from './packages';
 import { pushNow } from './outbound';
 import { writeJobCompletion } from './passport';
@@ -264,6 +264,25 @@ export async function moveJob(input: {
       jobId: job.id,
       event: input.to === 'COMPLETED' ? 'job.completed' : 'job.awaiting_approval',
     });
+  }
+
+  // A cancelled job gives back what was promised to it. Until Phase 53 nothing
+  // did: the reservation stayed against a job that would never happen, so the
+  // shelf showed fewer parts available than it had, for ever, and the only
+  // cure was somebody noticing and counting.
+  //
+  // What is released is what was reserved and never consumed. A part already
+  // fitted stays fitted — a cancellation is an administrative act and cannot
+  // take a part back out of a car.
+  if (input.to === 'CANCELLED') {
+    const promised = await prisma.jobPartLine.findMany({
+      where: { jobId: job.id, reservations: { some: { releasedAt: null } } },
+      select: { id: true },
+    });
+
+    for (const line of promised) {
+      await releaseForJobLine(line.id);
+    }
   }
 
   if (input.to === 'COMPLETED') {
