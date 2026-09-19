@@ -519,10 +519,21 @@ where the work happens.
 | FR-7206 | AP4   | `TaxEntry`                             | `taxReport()`, `taxReportFor()`, `/reports/tax`, `/api/reports/tax`                                | `tax.test.ts`, `verify-tax.ts` | Done   |
 | FR-7207 | AP1   | —                                      | `saveTaxRateWithParts()`                                                                           | `verify-tax.ts`                | Done   |
 
-## Paper
+## Later phases, newest first
+
+This table grew by prepending, one phase at a time, and holds everything from
+Phase 42 onwards. It was headed "Paper" for a while, which was true of its
+first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-8901 | BG1   | `audit_logs`                           | `uptakeFor()`, `CAPABILITIES`, `/reports/uptake`                              | `uptake.test.ts`, `verify-pilot.ts`           | Done   |
+| FR-8902 | BG1   | `audit_logs.action`, `actorUserId`     | the `groupBy` in `uptakeFor()`; nothing new instrumented                      | `verify-pilot.ts`                             | Done   |
+| FR-8903 | BG1   | -                                      | `Capability.name`, `.area` and `.expected`; the pilot dictionary              | `verify-pilot.ts`, `verify-languages.ts`      | Done   |
+| FR-8904 | BG2   | -                                      | `uptakeVerdictOf()`, `BARELY`, `worthAsking()`                                | `uptake.test.ts`, `verify-pilot.ts`           | Done   |
+| FR-8905 | BG4   | `audit_logs`                           | `unmapped()`, which fails the check rather than counting towards nothing      | `verify-pilot.ts`                             | Done   |
+| FR-8906 | BG3   | -                                      | the caveat on `/reports/uptake`; no read is audited anywhere                  | `verify-pilot.ts`                             | Done   |
+| FR-8907 | BG4   | -                                      | `canReport()`, the four named sources in `verify-pilot.ts`                    | `uptake.test.ts`, `verify-pilot.ts`           | Done   |
 | FR-8801 | BF1   | -                                      | `AWKWARD` in core, thirteen cases with a decision and a reason                | `cases.test.ts`, `verify-awkward.ts`          | Done   |
 | FR-8802 | BF2   | `deposits`                             | `assertPaymentRecordable()`, and `payAndHold` on the invoice page             | `verify-awkward.ts`                           | Done   |
 | FR-8803 | BF1   | `stock_reservations.releasedAt`        | `releaseForJobLine()` called from `moveJob()` on cancel                       | `verify-awkward.ts`                           | Done   |
@@ -892,74 +903,56 @@ details without a provider behind it would be worse than not having one.
 
 ## Coverage summary
 
-| Area                                               | Traced individually | With an automated test |
-| -------------------------------------------------- | ------------------- | ---------------------- |
-| Foundation                                         | 10                  | 9                      |
-| Customers and vehicles                             | 8                   | 8                      |
-| Vehicle passport                                   | 12                  | 11                     |
-| Booking, job, inspection, estimate                 | 11                  | 11                     |
-| Invoicing, portal, reporting                       | 4                   | 4                      |
-| Inventory and procurement (Phase 2)                | 19                  | 18                     |
-| Finance and ledger                                 | 12                  | 12                     |
-| People and multi-site                              | 13                  | 13                     |
-| What the record supports saying                    | 10                  | 10                     |
-| Scheduled work                                     | 6                   | 6                      |
-| Outbound messaging                                 | 9                   | 9                      |
-| After a message leaves                             | 8                   | 8                      |
-| Getting in, and mail coming back                   | 12                  | 12                     |
-| What people say afterwards                         | 14                  | 14                     |
-| The technician's own device                        | 9                   | 9                      |
-| Proof of everything, and parts that fit            | 8                   | 8                      |
-| The workshop plans itself                          | 10                  | 10                     |
-| The passport leaves the workshop                   | 8                   | 8                      |
-| The vehicle's own condition                        | 10                  | 10                     |
-| Warranty, fleets and the whole story               | 9                   | 9                      |
-| The diary and the floor                            | 6                   | 6                      |
-| Suppliers and counter bookings                     | 6                   | 6                      |
-| Carrying out an inspection                         | 10                  | 10                     |
-| The customer's own side                            | 9                   | 9                      |
-| Automation and customer relationships              | 11                  | 11                     |
-| Expenses, banking and period close                 | 6                   | 6                      |
-| Counter sales and business reporting               | 10                  | 10                     |
-| Administration and the customer's journey          | 7                   | 7                      |
-| Front door and billing                             | 6                   | 6                      |
-| Customers with accounts, and dead buttons          | 14                  | 14                     |
-| The money cycle                                    | 9                   | 9                      |
-| Suppliers, payroll and fleets                      | 10                  | 10                     |
-| Answers rather than pages                          | 8                   | 8                      |
-| The network                                        | 9                   | 9                      |
-| The workshop configures itself                     | 8                   | 8                      |
-| The vehicle's paperwork                            | 8                   | 8                      |
-| Before general availability                        | 6                   | 6                      |
-| The assistant inside the workflow                  | 7                   | 7                      |
-| The passport, designed                             | 6                   | 5                      |
-| Points, and the public face                        | 7                   | 7                      |
-| Referrals, in the product                          | 6                   | 6                      |
-| Gift cards                                         | 6                   | 6                      |
-| The passport, listed                               | 4                   | 3                      |
-| Gift cards, deepened                               | 7                   | 7                      |
-| Country and currency                               | 6                   | 5                      |
-| Money owed ahead                                   | 6                   | 6                      |
-| Permissions at the resource, and the plan enforced | 7                   | 7                      |
-| Card payment through a provider                    | 7                   | 7                      |
-| The subscription, billed                           | 7                   | 7                      |
-| The workflow, as one thing                         | 6                   | 6                      |
-| Arrival and departure                              | 7                   | 7                      |
-| Conversations                                      | 7                   | 7                      |
-| Packages and templates                             | 5                   | 5                      |
-| Languages                                          | 5                   | 5                      |
-| Parts back, work out                               | 7                   | 7                      |
-| Finding anything                                   | 5                   | 5                      |
-| The owner's day, sharpened                         | 6                   | 6                      |
-| Every word translated                              | 5                   | 5                      |
-| Tax, configurable                                  | 7                   | 7                      |
-| Paper                                              | 7                   | 7                      |
-| Providers                                          | 8                   | 8                      |
-| Ownership, warranty and sites                      | 8                   | 8                      |
-| The first day                                      | 6                   | 6                      |
-| **Total**                                          | **519**             | **513 (99%)**          |
+Counted from the table above rather than maintained by hand, because the
+previous version of this summary had drifted by more than a hundred rows and
+nobody noticed — a coverage figure that is not recounted is a coverage figure
+that is wrong.
 
-The requirements document lists 581 requirements. 84 of
+| Area                                      | Traced individually | With an automated test |
+| ----------------------------------------- | ------------------- | ---------------------- |
+| Foundation                                | 10                  | 9                      |
+| Customers and vehicles                    | 10                  | 10                     |
+| Vehicle passport                          | 13                  | 12                     |
+| Booking, job, inspection, estimate        | 19                  | 19                     |
+| Invoicing, portal, reporting              | 9                   | 9                      |
+| Inventory and procurement (Phase 2)       | 19                  | 18                     |
+| Finance and ledger                        | 12                  | 12                     |
+| People and multi-site                     | 13                  | 13                     |
+| What the record supports saying           | 10                  | 10                     |
+| Scheduled work                            | 6                   | 6                      |
+| Outbound messaging                        | 9                   | 9                      |
+| After a message leaves                    | 8                   | 8                      |
+| Getting in, and mail coming back          | 163                 | 163                    |
+| The workflow, as one thing                | 6                   | 6                      |
+| Arrival and departure                     | 7                   | 7                      |
+| Conversations                             | 7                   | 7                      |
+| Packages and templates                    | 5                   | 5                      |
+| Languages                                 | 5                   | 5                      |
+| Parts back, work out                      | 7                   | 7                      |
+| Finding anything                          | 5                   | 5                      |
+| The owner's day, sharpened                | 6                   | 6                      |
+| Every word translated                     | 5                   | 5                      |
+| Tax, configurable                         | 7                   | 7                      |
+| Later phases, newest first                | 131                 | 130                    |
+| What people say afterwards                | 14                  | 14                     |
+| The technician's own device               | 9                   | 9                      |
+| Proof of everything, and parts that fit   | 8                   | 8                      |
+| The workshop plans itself                 | 10                  | 10                     |
+| The passport leaves the workshop          | 8                   | 8                      |
+| The vehicle's own condition               | 10                  | 10                     |
+| Warranty, fleets and the whole story      | 9                   | 9                      |
+| The diary and the floor                   | 6                   | 6                      |
+| Suppliers and counter bookings            | 6                   | 6                      |
+| Carrying out an inspection                | 10                  | 10                     |
+| The customer's own side                   | 9                   | 9                      |
+| Automation and customer relationships     | 11                  | 11                     |
+| Expenses, banking and period close        | 6                   | 6                      |
+| Counter sales and business reporting      | 10                  | 10                     |
+| Administration and the customer's journey | 7                   | 7                      |
+| Front door and billing                    | 6                   | 6                      |
+| **Total**                                 | **631**             | **627 (99%)**          |
+
+The requirements document lists 699 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

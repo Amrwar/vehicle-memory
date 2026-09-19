@@ -9,6 +9,11 @@
 
 export const fr: Readonly<Record<string, string>> = {
   // The page
+  //
+  // The name does not change. It is here because every sentence handed to the
+  // translator must have an answer in every language, and "it stays as it is"
+  // is an answer — an absent one reads as an oversight and fails the check.
+  Carnet: 'Carnet',
   'System health': 'État du système',
   'For whoever runs Carnet, not for a workshop': 'Pour qui exploite Carnet, non pour un atelier',
   Overall: 'Ensemble',
@@ -146,6 +151,10 @@ export const fr: Readonly<Record<string, string>> = {
 
 export const ar: Readonly<Record<string, string>> = {
   // The page
+  //
+  // Left in Latin script. A marque is not transliterated, and the rest of the
+  // product already writes it this way inside Arabic sentences.
+  Carnet: 'Carnet',
   'System health': 'حالة النظام',
   'For whoever runs Carnet, not for a workshop': 'لمن يُشغّل كارني، لا للورشة',
   Overall: 'الإجمال',

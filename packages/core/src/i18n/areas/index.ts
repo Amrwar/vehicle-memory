@@ -15,6 +15,7 @@ import * as wiring from './wiring';
 import * as books from './books';
 import * as health from './health';
 import * as clock from './clock';
+import * as pilot from './pilot';
 import * as components from './components';
 import * as jobs from './jobs';
 import * as settings from './settings';
@@ -46,4 +47,5 @@ export const AREAS = [
   books,
   health,
   clock,
+  pilot,
 ] as const;

@@ -354,6 +354,13 @@ jobs:
       - name: The awkward cases
         run: npx tsx infra/scripts/verify-awkward.ts
 
+      # Whether a workshop could be handed this on Monday: each of the pilot's
+      # four findings has a source, and every audited action belongs to a
+      # capability somebody would name, so nothing goes uncounted at the
+      # debrief.
+      - name: Ready to hand over
+        run: npx tsx infra/scripts/verify-pilot.ts
+
       # Not "a backup exists" but "Carnet was restored", with how much work was
       # lost and how long it took, measured rather than asserted.
       - name: Verify the recovery, measured

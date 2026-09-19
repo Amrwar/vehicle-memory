@@ -156,6 +156,12 @@ const GROUPS: Group[] = [
         permission: 'report:operational',
       },
       {
+        href: '/reports/uptake',
+        label: msg('What you are using'),
+        icon: 'insights',
+        permission: 'report:operational',
+      },
+      {
         href: '/reports/tax',
         label: msg('Tax'),
         icon: 'reports',

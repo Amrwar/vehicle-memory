@@ -267,6 +267,7 @@ async function main() {
     { file: 'books', path: '/books', who: 'owner', fullPage: true },
     { file: 'clock', path: '/reports/clock', who: 'owner', fullPage: true },
     { file: 'health', path: '/admin/health', who: 'operator', fullPage: true },
+    { file: 'uptake', path: '/reports/uptake?days=365', who: 'owner', fullPage: true },
     { file: 'phone-books', path: '/books', who: 'owner', width: 390, height: 844, fullPage: true },
     { file: 'phone-dashboard', path: '/dashboard', who: 'owner', width: 390, height: 844 },
     { file: 'phone-job', path: `/jobs/${r.job}`, who: 'owner', width: 390, height: 844 },

@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-8900 - The pilot
+
+| Ref     | Requirement                                                                                                                             | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-8901 | A workshop MUST be able to see which of the product's capabilities it has used, and which it is paying for and has not touched.         | 54    |
+| FR-8902 | Uptake MUST be counted from the audit log the product already writes; nothing MUST be instrumented in order to measure the pilot.       | 54    |
+| FR-8903 | A capability MUST be named the way a workshop would name it, and MUST say whether it is the sort of thing every workshop uses.          | 54    |
+| FR-8904 | A capability MUST be reported as in use only where more than one person has used it more than barely.                                   | 54    |
+| FR-8905 | Every audited action MUST belong to a named capability, and a check MUST fail where any does not.                                       | 54    |
+| FR-8906 | The page MUST state that it counts what people did rather than what they looked at, and the product MUST NOT record who looked at what. | 54    |
+| FR-8907 | Each of the pilot's four findings MUST have a named source that exists before the pilot starts.                                         | 54    |
+
 ## FR-8800 - The awkward cases
 
 | Ref     | Requirement                                                                                                                     | Phase |

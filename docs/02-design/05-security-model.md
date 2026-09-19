@@ -355,6 +355,27 @@ The passport ledger is append-only, so erasure cannot delete events. It
 supersedes those carrying personal identifiers with redacted versions, which
 keeps the chain intact and the fact preserved.
 
+### 10.1 What the audit log does not record (Phase 54)
+
+The audit log records every write: who, what, which record, before and after.
+It records no reads at all, and that is a decision rather than an omission.
+
+A log of who looked at what is a surveillance log. In a workshop of four
+people it would answer questions nobody should be asking — which technician
+kept opening one customer's history, who looked at the payroll page on a
+Friday afternoon — and it would answer them for whoever holds the database,
+which includes us. The product declines to be able to.
+
+The cost is real and is paid where it shows. `/reports/uptake` (Phase 54)
+counts what a workshop used, and because it can only see writes, a capability
+that is read constantly and written rarely reads as untouched: a car's history
+opened forty times a week and added to never. That limit is printed on the
+page in all three languages rather than left for somebody to discover after
+acting on the figure.
+
+The trade was made in that direction deliberately. An incomplete usage figure
+is a nuisance. A complete one, here, would be a record of being watched.
+
 ## 11. Before general availability
 
 - [x] Every address tried with another workshop's identifier, reads and writes

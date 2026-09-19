@@ -554,6 +554,19 @@ The second sweep: things connected at one end only.
 | A refund after the close    | Built  | Posted in the open period, dated today (Phase 53)                |
 | Sold off the ramp           | Built  | Asked first; the bill stays with whoever agreed to it (Phase 53) |
 
+## 21.20 What you are using
+
+| Item                       | Status | Where                                                                                    |
+| -------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Uptake, per capability     | Built  | `/reports/uptake`: forty-one capabilities over 30, 90 or 365 days (Phase 54)             |
+| Counted from what is kept  | Built  | The audit log, read for the first time; nothing instrumented (Phase 54)                  |
+| Worth a conversation       | Built  | What nobody used, and what one pair of hands used (Phase 54)                             |
+| Expected of every workshop | Built  | Twelve marked so; a fleet page nobody opens is not a failing (Phase 54)                  |
+| The register is checked    | Built  | `unmapped()` fails on any audited action with no capability (Phase 54)                   |
+| What it does not see       | Built  | Said on the page: writing, not looking, and why (Phase 54)                               |
+| The pilot's four sources   | Built  | `verify:pilot`: what broke, what was slow, what was missing, what nobody used (Phase 54) |
+| The pilot plan             | Built  | Who, what is measured, what ends it early, what success is (Phase 54)                    |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -632,7 +645,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 313          |
+| Built    | 321          |
 | Partial  | 1            |
 | Deferred | 1            |
 
@@ -645,9 +658,12 @@ waiting on a corpus of symptoms against confirmed causes that does not exist
 (ADR-0013).
 
 A map with nothing missing on it is not the same as a product that is ready.
-It says the screens exist. The nine phases after Phase 45.5 in the
+It says the screens exist. The phases after Phase 45.5 in the
 [roadmap](06-roadmap.md) are about whether a workshop can actually run on
 them: reliability, financial integrity, tenancy, recovery, observability,
-performance, and then four weeks in a real workshop.
+performance, the workshop's own clock, the awkward cases — and then four weeks
+in a real workshop, which is the one phase none of this substitutes for. Every
+instrument that pilot needs is built and listed above; the pilot itself has
+not been run.
 
 _Next: [roadmap](06-roadmap.md)._

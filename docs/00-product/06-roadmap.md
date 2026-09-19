@@ -3204,6 +3204,73 @@ asked for since the first page of it.
 **Exit.** A list of what broke, what was slow, what was missing and what
 nobody used.
 
+**Status.** Ready, not run.
+
+This is the one phase a machine cannot finish. Four weeks in a real garage
+with real cars and real customers is the whole point of it, and writing
+"Built" here would be the single dishonest line in the project. What was built
+is everything that has to exist before the first morning, and the honest test
+of that is whether the product can produce the four lists the pilot exists to
+produce.
+
+Three of the four already had an answer. What broke is `/admin/health`, which
+since Phase 50 reads errors, queues and every integration and will say why one
+particular message did not arrive. What was slow is `verify-performance` for
+the screens and `/reports/clock` for the work itself, each with a budget per
+thing rather than an average. What was missing is the workshop, in their own
+words, at the weekly call — and the feature map, for what was never built at
+all.
+
+**The fourth had no source at all.** "I don't think they used the gift cards"
+is a recollection, not a finding, and it is exactly the kind of recollection
+that is wrong about the features somebody used twice in week one and then
+stopped. So uptake is now counted, at `/reports/uptake`, from the audit log —
+which has been recording every write since the first phase and had never once
+been read for it. Nothing new is instrumented: a product that adds a tracker
+in order to measure its own pilot is measuring the tracker.
+
+The counting is grouped into forty-one capabilities named the way somebody in
+a garage would name them — "Booking work in", "Taking payment", "Ordering
+parts" — rather than the way the code is organised, because the question at
+the end of four weeks is "did you use the gift cards", not "were there writes
+against `giftcard.sold`". Twelve of them are marked as the sort of thing every
+workshop does, so that a garage with no fleet customers is not marked down for
+never opening the fleet pages while a workshop that issued no invoice in four
+weeks is.
+
+**The register is checked rather than trusted.** A capability added next month
+with no place in the list would be invisible at the debrief, and invisible is
+the one thing the "what nobody used" list cannot afford to be. So
+`unmapped()` reads every distinct action in the audit log and fails the
+verification if any of them has no capability to belong to — which it did, the
+first time it ran: three job-state actions were being recorded and counting
+towards nothing.
+
+**And the probe is asked to prove it can move.** Three phases running, a
+verification went green against something that could not have gone red, so
+this one asks the count over a window ending in the year 2000 and requires
+every figure to be nought. If it is not, the dates are not being applied and
+every other figure on the page is the same figure. The same control found the
+thing worth saying out loud about the demonstration workshop: read against the
+seed, the capabilities every garage uses come out untouched, because the seed
+writes its year of work straight into the database rather than through the
+functions the pages call, and nothing it writes is audited. That is a fact
+about the seed, and the script says so rather than letting somebody read it as
+a fact about the product.
+
+**And the honest limit, written on the page rather than in a comment.** This
+counts what people did, not what they looked at. A workshop that opens a car's
+history forty times a week and never adds to it reads here as never having
+used the passport. That is a real hole in the figure and it is not going to be
+filled, because filling it means recording who looked at what, and a record of
+who looked at what is a surveillance log. The figure is allowed to be
+incomplete; the product is not allowed to become that.
+
+The rest is in [the pilot plan](../05-project/06-pilot-plan.md): who the
+workshop is, what is in place before the first morning, the shape of the four
+weeks, what would end it early, and what success means — all written before it
+starts, because a success criterion agreed afterwards is not a criterion.
+
 ---
 
 ## Running throughout — the four things that are not features

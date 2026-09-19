@@ -1642,6 +1642,65 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BG - What you are using (Phase 54)
+
+### BG1 - What nobody used
+
+**As** Ahmed **I want** to see which parts of the product my workshop has
+actually put to work **so that** I know what I am paying for and have not
+touched.
+**Size** 8 - **Satisfies** FR-8901, FR-8902, FR-8903
+
+- **Given** four weeks of ordinary work, **when** I open what I am using,
+  **then** each capability is named the way I would say it out loud.
+- **Given** that page, **when** I read a figure, **then** it came from the
+  record the product already keeps rather than from anything added to watch me.
+- **Given** a capability nobody here has touched, **when** it is the sort of
+  thing most workshops use, **then** it is called out rather than listed
+  quietly among the rest.
+
+### BG2 - One pair of hands
+
+**As** Ahmed **I want** to know where only one person has used something **so
+that** I find out now rather than the week they are off.
+**Size** 5 - **Satisfies** FR-8904
+
+- **Given** a capability one person has used, **when** I look at the top of
+  the page, **then** it is worth a conversation rather than marked as in use.
+- **Given** a capability two people have used twice, **when** I look, **then**
+  it is in use.
+- **Given** something my workshop has no need for, **when** nobody uses it,
+  **then** it says so plainly rather than reading as a failure.
+
+### BG3 - The figure is honest about itself
+
+**As** Sara **I want** to know what the count does not see **so that** I do
+not switch something off that we use every day.
+**Size** 3 - **Satisfies** FR-8906
+
+- **Given** the page, **when** I read it, **then** it says it counts what
+  people did rather than what they looked at.
+- **Given** a car's history we open constantly and never add to, **when** I
+  read the figure, **then** I can tell why it reads as untouched.
+- **Given** any page in the product, **when** I look at what is recorded,
+  **then** nothing anywhere records who looked at what.
+
+### BG4 - Ready to hand over
+
+**As** the operator **I want** every one of the pilot's four findings to have
+a source before the first morning **so that** the debrief is evidence rather
+than recollection.
+**Size** 5 - **Satisfies** FR-8905, FR-8907
+
+- **Given** the four lists the pilot must produce, **when** the check runs,
+  **then** each names where it comes from and the check fails if any does not.
+- **Given** an action the product records, **when** it belongs to no named
+  capability, **then** the check fails rather than counting it towards nothing.
+- **Given** a workshop's first morning, **when** it begins, **then** the
+  messages it will send are already written and the clock baseline is recorded.
+
+---
+
 ## Epic BF - The awkward cases (Phase 53)
 
 ### BF1 - The Tuesday the flowchart did not expect

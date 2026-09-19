@@ -80,19 +80,21 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ### 5. Project management
 
-| Doc                                                       | Contents                                 |
-| --------------------------------------------------------- | ---------------------------------------- |
-| [Ways of working](05-project/01-ways-of-working.md)       | Cadence, ceremonies, roles               |
-| [Definition of done](05-project/02-definition-of-done.md) | The checklist a story must pass          |
-| [Estimation & plan](05-project/03-estimation-and-plan.md) | Sizing, the sprint-by-sprint plan        |
-| [Risk register](05-project/04-risk-register.md)           | Ranked risks with owners and mitigations |
-| [Glossary](05-project/05-glossary.md)                     | The ubiquitous language, defined once    |
+| Doc                                                       | Contents                                                             |
+| --------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Ways of working](05-project/01-ways-of-working.md)       | Cadence, ceremonies, roles                                           |
+| [Definition of done](05-project/02-definition-of-done.md) | The checklist a story must pass                                      |
+| [Estimation & plan](05-project/03-estimation-and-plan.md) | Sizing, the sprint-by-sprint plan                                    |
+| [Risk register](05-project/04-risk-register.md)           | Ranked risks with owners and mitigations                             |
+| [Glossary](05-project/05-glossary.md)                     | The ubiquitous language, defined once                                |
+| [Pilot plan](05-project/06-pilot-plan.md)                 | Four weeks in one workshop: what is measured, and what would stop it |
 
 ---
 
 ## Status
 
-Thirty-three phases have shipped, the last on 14 September 2026: the workshop core,
+Fifty-three phases have shipped, the last on 19 September 2026, and the
+fifty-fourth — the pilot — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
@@ -140,15 +142,16 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 230 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 321 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 519
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 631
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
-What has not happened is the thing the [MVP definition](00-product/05-mvp-definition.md)
-still asks for: four weeks in front of a real workshop. Everything above is
-evidence of effort, not of fit. The [roadmap](00-product/06-roadmap.md) now
+What has still not happened is the thing the [MVP definition](00-product/05-mvp-definition.md)
+asks for: four weeks in front of a real workshop. Everything above is evidence
+of effort, not of fit — and Phase 54 is about making sure that when those four
+weeks do happen, what comes out of them is evidence rather than recollection. The [roadmap](00-product/06-roadmap.md) now
 carries an audited plan for Phases 27 onward, ordered by what that pilot
 would trip over first, with the pilot itself placed after Phase 34; Phases 34
 to 45 are now built, Phase 45.5 closed the last missing capability, and Phases
@@ -175,3 +178,19 @@ takes the thirteen things real workshops do that tidy software does not expect
 — two customers sharing a car, a job cancelled after the parts arrived, a
 customer who pays too much — and gives each one a decided behaviour with a
 reason, held to it by a check.
+
+Phase 54 is the pilot, and it is the one phase that is **ready rather than
+run**. Four weeks in a real garage cannot be done by a machine, and calling it
+built would be the only dishonest line in this documentation. What was built
+is everything that has to exist before the first morning, tested against the
+question the pilot ends on: can the product produce a list of what broke, what
+was slow, what was missing and what nobody used? Three of the four already had
+a source. The fourth did not, so uptake is now counted at `/reports/uptake`
+from the audit log the product has kept since the first phase — forty-one
+capabilities, named the way a garage would name them, honest on the page about
+the fact that it counts what people did and not what they looked at, because
+recording what people looked at would make it a surveillance log. The rest —
+who the workshop is, what is in place on day one, what would end it early and
+what success means — is in the [pilot plan](05-project/06-pilot-plan.md),
+written before it starts, because a success criterion agreed afterwards is not
+a criterion.

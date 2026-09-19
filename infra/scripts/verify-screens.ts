@@ -287,6 +287,11 @@ async function main() {
     { path: '/reports', who: 'owner' },
     { path: '/reports/business', who: 'owner' },
     { path: '/reports/tax?range=year', who: 'owner' },
+    // The three screens the last phases added, which were built and then not
+    // measured — the claim in the roadmap is every screen, not most of them.
+    { path: '/reports/clock', who: 'owner' },
+    { path: '/reports/uptake', who: 'owner' },
+    { path: '/books', who: 'owner' },
     { path: '/financials', who: 'owner' },
     { path: '/people', who: 'owner' },
     { path: '/payroll', who: 'owner' },

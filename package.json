@@ -44,6 +44,7 @@
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
     "verify:clock": "tsx infra/scripts/verify-clock.ts",
     "verify:awkward": "tsx infra/scripts/verify-awkward.ts",
+    "verify:pilot": "tsx infra/scripts/verify-pilot.ts",
     "db:scale": "tsx infra/scripts/scale-seed.ts",
     "storage:orphans": "tsx infra/scripts/storage-orphans.ts",
     "verify:banking": "tsx infra/scripts/verify-banking.ts",
