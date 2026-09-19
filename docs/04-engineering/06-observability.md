@@ -57,6 +57,26 @@ Every request carries a trace id, propagated into background jobs so a passport
 event can be traced back to the job completion that caused it. Spans cover the
 request, each database query, each external call, and each outbox dispatch.
 
+## 3.4 What a person waits through (Phase 60)
+
+Two halves, measured by two different things, and for a long time only the
+first existed.
+
+`verify-performance` (Phase 51) measures the server: how long the application
+takes to produce the bytes, at the size of a real workshop, with a budget per
+screen. `verify-paint` (Phase 60) measures what happens after they arrive —
+Largest Contentful Paint under two seconds and Cumulative Layout Shift under
+0.1, in a browser, over Slow 4G with the processor slowed four times.
+
+The connection is named in `packages/core/src/performance/paint.ts` rather than
+implied, so "on a 4G connection" is a claim somebody can disagree with. Three
+runs a screen and the middle counts.
+
+Neither is a field measurement, and NFR-106 — Interaction to Next Paint — is
+not attempted by either. It needs real fingers on real devices. It stays in the
+quality register as enforced by nothing, because a number from an emulator
+wearing a field metric's name is worse than no number.
+
 ## 3.5 One press, followed through (Phase 59)
 
 NFR-803 asks for a trace identifier carried from a request into the jobs it

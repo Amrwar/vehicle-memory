@@ -1642,6 +1642,45 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BM - What the screen does while somebody waits (Phase 60)
+
+### BM1 - I can see what I came for
+
+**As** Maria **I want** the quote I was sent to appear quickly on my telephone
+**so that** approving it is not a thing I put off.
+**Size** 8 - **Satisfies** FR-9501, FR-9502, FR-9503
+
+- **Given** a screen somebody waits on, **when** it is measured, **then** it is
+  measured in a browser over a connection whose speed is written down.
+- **Given** three runs, **when** the verdict is taken, **then** it is the
+  middle one, not the best.
+- **Given** a budget, **when** I ask where it came from, **then** it names the
+  requirement rather than a number somebody liked.
+
+### BM2 - The page does not jump
+
+**As** Sara **I want** the screen to hold still once it has drawn **so that**
+I do not press the wrong thing with a customer waiting.
+**Size** 5 - **Satisfies** FR-9505
+
+- **Given** any screen, **when** it has loaded, **then** what moves afterwards
+  is under the budget.
+- **Given** a reading of zero, **when** I ask whether anything was watching,
+  **then** a control has proved the measurement can see a shift.
+
+### BM3 - Not measured is not passed
+
+**As** an engineer **I want** an unmeasurable screen to fail **so that**
+silence is never mistaken for success.
+**Size** 3 - **Satisfies** FR-9504, FR-9506
+
+- **Given** a page that fell over, **when** it is loaded, **then** it is
+  reported as broken rather than timed.
+- **Given** a screen that reported no paint, **when** the run ends, **then** it
+  fails rather than passing quietly.
+
+---
+
 ## Epic BL - One press, followed through (Phase 59)
 
 ### BL1 - I pressed it and nothing happened

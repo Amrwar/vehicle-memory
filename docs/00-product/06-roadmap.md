@@ -3635,6 +3635,60 @@ to light. That is the Phase 51 lesson for the second time — a held port servin
 yesterday's code — and it is now the reason the trace probe asks the running
 application for a header rather than trusting that it restarted.
 
+## Phase 60 — What the screen does while somebody waits
+
+**Scope.** NFR-105 and NFR-107: how long after the bytes arrive the screen
+shows the thing, and whether it holds still once it does.
+
+**Exit.** Both measured in a browser, over a connection that is named, against
+budgets that come from the requirements.
+
+**Status.** Built.
+
+Phase 51 measured the server: how long the application took to produce the
+bytes, at the size of a real workshop. That is half of what a person
+experiences, and it was the half going wrong, so it was the right half to do
+first. It says nothing about the other half — the half a person actually sits
+through.
+
+Two numbers, both from the requirements rather than invented here. Largest
+Contentful Paint under two seconds, which is a fair proxy for _I can see what I
+came for_, and it is the biggest thing on the screen because on a job page that
+is the job. Cumulative Layout Shift under 0.1, which catches the failure
+everybody has met: reaching for a button and pressing something else because
+the page jumped.
+
+**The connection is named rather than implied.** Slow 4G — 1600 kbps down, 150
+milliseconds away — with the processor slowed four times, because a telephone
+is not a laptop and a page measured only over a slow network on a fast machine
+flatters itself. Those figures are in the code, so "on a 4G connection" is a
+claim somebody can disagree with.
+
+Three runs a screen and the middle one counts: the best of three is a number
+chosen for being flattering, and the worst is one bad garbage collection.
+Eleven screens — the first thing a workshop opens in the morning, the ones they
+live in, and the links a customer is sent. It costs about four minutes.
+
+**Everything came in.** Paint between 1.1 and 1.5 seconds against a budget of
+two, and layout shift of exactly zero on every screen.
+
+**And exactly zero is the sort of number to be suspicious of.** There are two
+ways a page reports no layout shift: it holds perfectly still, or nothing is
+watching. Those are indistinguishable in a report, and a probe in this project
+has now gone green against something that could not have gone red in four
+separate phases. So the measurement is made to prove it can: a real page of the
+product, a block pushed in after load, and an assertion that the shift was
+seen. It was. The zeroes mean what they say.
+
+**What this deliberately does not do.** It is not a field measurement — one
+machine, emulating a connection, against a local build. It catches a screen
+that is slow or that jumps; it cannot say what a customer in a car park
+experienced on a Tuesday. And it is not Interaction to Next Paint. NFR-106 asks
+for that across the application and it needs real fingers on real devices,
+which means the pilot; it stays written down as enforced by nothing rather than
+quietly folded in here, because a number from an emulator wearing a field
+metric's name is worse than no number at all.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

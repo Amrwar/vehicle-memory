@@ -563,6 +563,13 @@ jobs:
       - name: A budget per screen
         run: npx tsx infra/scripts/verify-performance.ts http://localhost:3000
 
+      # The other half of what a person waits for: not how long the server
+      # took, but how long after that the screen showed the thing, and whether
+      # it held still. Measured over a throttled connection on a slowed
+      # processor, three runs a screen, which costs about four minutes.
+      - name: What the screen does while somebody waits
+        run: npx tsx infra/scripts/verify-paint.ts http://localhost:3000
+
       # The four claims the roadmap makes about every phase rather than about
       # any one of them, which nothing had ever checked.
       - name: The four things that are not features

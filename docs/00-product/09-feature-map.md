@@ -625,6 +625,17 @@ The second sweep: things connected at one end only.
 | Followed on one screen          | Built  | `/admin/health` takes a trace and shows the chain in order (Phase 59)               |
 | The rule is enforced            | Built  | A write that does not stamp it fails a check, by file and line (Phase 59)           |
 
+## 21.26 What the screen does while somebody waits
+
+| Item                    | Status | Where                                                                      |
+| ----------------------- | ------ | -------------------------------------------------------------------------- |
+| Paint, measured         | Built  | LCP in the browser over Slow 4G, eleven screens, budget 2 s (Phase 60)     |
+| Layout shift, measured  | Built  | CLS on the same runs, budget 0.1, zero everywhere (Phase 60)               |
+| The connection is named | Built  | 1600 kbps, 150 ms, processor slowed 4× — written down (Phase 60)           |
+| The middle run counts   | Built  | Three runs; not the best, not one bad collection (Phase 60)                |
+| Zero means something    | Built  | A control shifts a real page and proves the measurement sees it (Phase 60) |
+| Broken is not slow      | Built  | A page that fell over is reported as broken, never timed (Phase 60)        |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -703,7 +714,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 354          |
+| Built    | 360          |
 | Partial  | 1            |
 | Deferred | 1            |
 

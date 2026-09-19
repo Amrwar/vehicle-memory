@@ -93,7 +93,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Fifty-nine phases have shipped, the last on 19 September 2026, and the pilot
+Sixty phases have shipped, the last on 19 September 2026, and the pilot
 itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 354 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 360 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 665
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 671
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -256,3 +256,13 @@ it happened, because where it stops is what went wrong. Nothing invents one: a
 reminder queued at four in the morning was nobody's press, and the column stays
 nullable so that "nobody pressed anything" and "we lost it" remain different
 answers.
+
+Phase 60 measures the other half of what a person waits through. Phase 51
+measured the server — how long the application took to produce the bytes — and
+said nothing about how long after that the screen showed the thing, or whether
+it held still once it did. Both are now measured in a browser over a connection
+that is named rather than implied: Slow 4G, with the processor slowed four
+times, three runs a screen and the middle one counting. Everything came in,
+paint between 1.1 and 1.5 seconds against a budget of two, and layout shift of
+exactly zero — which is the sort of number worth being suspicious of, so the
+measurement is made to prove it can see a shift before its zeroes are believed.

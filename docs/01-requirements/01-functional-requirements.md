@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9500 - What the screen does while somebody waits
+
+| Ref     | Requirement                                                                                                         | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9501 | Paint and layout shift MUST be measured in a browser over a throttled connection, not inferred from response times. | 60    |
+| FR-9502 | The emulated connection and processor MUST be stated in the code, so "on a 4G connection" is a checkable claim.     | 60    |
+| FR-9503 | A screen MUST be judged on the middle of several runs rather than on the best or the worst.                         | 60    |
+| FR-9504 | A page that fell over MUST NOT be measured, and MUST be reported as broken rather than as slow.                     | 60    |
+| FR-9505 | The layout-shift measurement MUST be proved able to see a shift, so that a reading of zero means something.         | 60    |
+| FR-9506 | A screen that reported no paint at all MUST fail rather than pass by not being measured.                            | 60    |
+
 ## FR-9400 - One press, followed through
 
 | Ref     | Requirement                                                                                                            | Phase |

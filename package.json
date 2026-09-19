@@ -44,6 +44,7 @@
     "verify:trace": "tsx infra/scripts/verify-trace.ts",
     "verify:alerts": "tsx infra/scripts/verify-alerts.ts",
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
+    "verify:paint": "tsx infra/scripts/verify-paint.ts",
     "verify:clock": "tsx infra/scripts/verify-clock.ts",
     "verify:awkward": "tsx infra/scripts/verify-awkward.ts",
     "verify:pilot": "tsx infra/scripts/verify-pilot.ts",

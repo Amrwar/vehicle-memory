@@ -25,7 +25,7 @@
  *   not yet   Not enforced by anything. What it would take is written down,
  *             because "not yet" without that is a wish.
  *
- * The last kind is the point of the exercise. Nineteen of the eighty-four need
+ * The last kind is the point of the exercise. Seventeen of the eighty-four need
  * a person, a production deployment, or a month of real traffic, and saying so
  * out loud is worth more than a green tick that means somebody once looked.
  */
@@ -111,16 +111,18 @@ const REGISTER: Record<string, Account> = {
     note: 'the passport with five hundred events, p95 under 800 ms',
   },
   'NFR-105': {
-    how: 'not yet',
-    note: 'Largest Contentful Paint on a 4G connection. Needs Lighthouse against a deployed build over a throttled network; the harness here measures the server, which is the half that was going wrong.',
+    how: 'checked',
+    by: 'infra/scripts/verify-paint.ts',
+    note: 'Largest Contentful Paint over an emulated Slow 4G connection on a slowed processor, three runs a screen, the middle one counting. Phase 60.',
   },
   'NFR-106': {
     how: 'not yet',
-    note: 'Interaction to Next Paint. Needs real user monitoring, which needs real users — the pilot.',
+    note: 'Interaction to Next Paint. A field measurement: it needs real fingers on real devices, which means the pilot. Deliberately not folded into verify-paint, because a number from an emulator wearing a field metric’s name is worse than no number.',
   },
   'NFR-107': {
-    how: 'not yet',
-    note: 'Cumulative Layout Shift. Needs Lighthouse, as NFR-105.',
+    how: 'checked',
+    by: 'infra/scripts/verify-paint.ts',
+    note: 'Cumulative Layout Shift on the same runs, with a control proving the measurement can see a shift. Phase 60.',
   },
   'NFR-108': {
     how: 'not yet',
