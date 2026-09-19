@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9200 - Before the workshop rings
+
+| Ref     | Requirement                                                                                                              | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-9201 | A signal that has gone wrong MUST reach the operator as a message, not only as a figure on a page.                       | 57    |
+| FR-9202 | Every alert MUST carry what it means, the first thing to do, and what it would mean to have fixed it.                    | 57    |
+| FR-9203 | A signal with no runbook entry MUST NOT become a message; it MUST be reported as needing one, and a check MUST fail.     | 57    |
+| FR-9204 | The same alert MUST NOT repeat within a quiet period, MUST send again immediately if it gets worse, and MUST clear once. | 57    |
+| FR-9205 | An alert MUST be recorded as sent only when a message actually left.                                                     | 57    |
+| FR-9206 | Every runbook action MUST be answered in French and in Arabic, and a check MUST fail where one is not.                   | 57    |
+| FR-9207 | The health page MUST show, beside each thing that is wrong, the first thing to do and whether anybody has been told.     | 57    |
+
 ## FR-9100 - The other half of the requirements
 
 | Ref     | Requirement                                                                                                                  | Phase |

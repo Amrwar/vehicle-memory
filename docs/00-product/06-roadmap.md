@@ -3451,6 +3451,69 @@ behaviours and one wrong conclusion. The probe now takes the directive out of
 the header on its way past, and refuses to measure any page whose stylesheet
 did not arrive, so it can never again report an unstyled page as a narrow one.
 
+## Phase 57 — Before the workshop rings
+
+**Scope.** The three alerting requirements that Phase 56 had to write down as
+enforced by nothing.
+
+**Exit.** Something goes wrong and a person is told, once, with the first thing
+to do in the message.
+
+**Status.** Built.
+
+Phase 50 put every signal on a page. A page is exactly the right thing to look
+at once you already know something is wrong, and it is no use at all at four in
+the morning — which is when the queue backs up, the card provider stops
+answering, and a workshop's Monday quietly stops working while the only person
+who could fix it is asleep. NFR-806 has asked for alerts since the first week
+and nothing had ever sent one.
+
+`sweepAlerts()` runs on the hourly job rather than on a schedule of its own,
+because a second schedule is a second thing that can stop without anybody
+noticing, and an alerting system that has quietly died is worse than none.
+
+**Every alert carries its own runbook entry.** Twenty-two signals, each with
+what it means, the one thing to do first, and what it would mean to have fixed
+it — written for somebody who has just woken up and did not build this. A
+message saying "queue depth degraded" is a message that makes a person open a
+laptop to find out whether it matters; this one says "the outbox is not being
+drained, so nothing that depends on it is happening", then "check that the
+dispatch cron is still firing", then "fixed when the oldest waiting event is
+under five minutes old". The same three lines are on `/admin/health` beside the
+signal, so the page and the mailbox never disagree.
+
+**NFR-807 is enforced rather than promised.** It says an alert with no action
+is deleted. The honest reading is that a signal nobody can act on must not
+become a message at all: it is reported as needing an entry, and
+`verify-alerts` fails until somebody writes one. That is deliberately
+uncomfortable, and it is the right discomfort — a message with nothing to do
+about it is how a person learns to ignore the mailbox, and an ignored alert is
+worse than none because it looks like cover.
+
+It found four signals with nothing written about them the first time it ran,
+including email failing, which is the one nobody would want to discover during
+an incident.
+
+**One message, not none and not six.** A raised alert stays quiet for six hours
+before repeating itself; a signal that gets _worse_ speaks up immediately,
+because degraded and failed are different news about the same thing; a recovery
+is announced once, and only if the alarm was. Six hours is a judgement rather
+than a measurement, and it is written down as one.
+
+**And the state is remembered honestly.** `sentAt` is when a message actually
+left, which is deliberately not the same as when the row was written. A signal
+seen and recorded but never sent — because the mailbox was unreachable, or
+because nobody is the operator on that deployment — must still send when it
+can. Writing "sent" for a message nobody received would start the quiet period
+on silence and leave the thing broken for six hours.
+
+**A translation nothing could have caught.** The runbook reaches the translator
+as `t(runbook.first)` — a variable, not a literal — and both i18n-scan and
+verify-languages collect literals. Twenty-two sentences would have been quietly
+English inside a French session with every existing check green. So
+`verify-alerts` asserts each one is answered in French and in Arabic, which is
+the only place that particular gap can be seen from.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

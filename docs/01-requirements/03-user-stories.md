@@ -1642,6 +1642,61 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BJ - Before the workshop rings (Phase 57)
+
+### BJ1 - Told, rather than finding out
+
+**As** the operator **I want** to be told when Carnet goes wrong **so that** I
+am not finding out from a workshop whose morning has already gone.
+**Size** 8 - **Satisfies** FR-9201, FR-9205
+
+- **Given** something goes wrong overnight, **when** the hourly job runs,
+  **then** a message reaches me.
+- **Given** that message, **when** it could not be sent, **then** nothing is
+  written down as sent, and it goes on trying.
+- **Given** I am not set as the operator on a deployment, **when** something
+  goes wrong there, **then** nothing is sent and nothing is claimed to be.
+
+### BJ2 - Something I can act on at four in the morning
+
+**As** the operator **I want** the message to tell me what to do **so that** I
+do not have to open a laptop to find out whether it matters.
+**Size** 8 - **Satisfies** FR-9202, FR-9203, FR-9207
+
+- **Given** an alert, **when** I read it on a telephone, **then** it says what
+  it means, the first thing to do, and what fixed looks like.
+- **Given** a signal nobody has written an action for, **when** it goes wrong,
+  **then** no message is sent and the gap is named instead.
+- **Given** the health page, **when** I open it, **then** each thing that is
+  wrong carries the same first action and says whether I have been told.
+
+### BJ3 - Once, not six times
+
+**As** the operator **I want** one message per problem **so that** I keep
+reading them.
+**Size** 5 - **Satisfies** FR-9204
+
+- **Given** the same fault an hour later, **when** nothing has changed,
+  **then** nothing is sent.
+- **Given** the same fault getting worse, **when** it does, **then** I am told
+  straight away.
+- **Given** the fault going away, **when** it does, **then** I am told once —
+  and never about the end of something I was never told about.
+
+### BJ4 - In my own language
+
+**As** an operator who reads French **I want** the instructions in French **so
+that** the one page written for me is not the one page in English.
+**Size** 3 - **Satisfies** FR-9206
+
+- **Given** every runbook action, **when** the check runs, **then** each is
+  answered in French and in Arabic.
+- **Given** an action added next month, **when** nobody translates it, **then**
+  the check fails, even though it reaches the translator as a variable that no
+  scanner can see.
+
+---
+
 ## Epic BI - The other half of the requirements (Phase 56)
 
 ### BI1 - A number with nothing behind it

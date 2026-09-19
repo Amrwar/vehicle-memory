@@ -250,6 +250,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'StaffNotification',
       'SuppressedAddress',
       'DeliveryEvent',
+      // The product speaking to its operator rather than a workshop speaking
+      // to a customer, but it is a message and it belongs beside the others.
+      'OperatorAlert',
       'ReviewRequest',
       'LoyaltyEntry',
       'Referral',

@@ -63,6 +63,30 @@ Every alert has a runbook entry. **An alert with no action is deleted**
 (NFR-807) — alert fatigue is caused by alerts nobody can act on, and the fix is
 removal, not tuning.
 
+That was the intention from the first week. Until Phase 57 nothing sent an
+alert at all, so the rule had nothing to bite on, and Phase 56 had to write it
+down as a requirement enforced by nothing.
+
+It now bites in the strongest available way: a signal with no entry in
+`packages/core/src/health/alerts.ts` **cannot** become a message. It is
+reported as needing one and `npm run verify:alerts` fails until somebody writes
+it. Deletion was never the useful half of NFR-807 — the useful half is that the
+thing cannot exist unsent-and-unexplained in the first place.
+
+**How it behaves.** `sweepAlerts()` runs on the hourly job rather than on a
+schedule of its own, because a second schedule is a second thing that can stop
+without being noticed. A raised alert repeats no more than every six hours; a
+signal that gets worse sends immediately, because degraded and failed are
+different news; a recovery is announced once, and only where the alarm was.
+An alert is recorded as sent only when a message actually left, so a mailbox
+that was unreachable does not start the quiet period on silence.
+
+**What the message carries.** What it means, the first thing to do, and what it
+would mean to have fixed it — in that order, so somebody reading on a telephone
+can act on the first three lines. The same three lines appear beside the signal
+on `/admin/health`, which is what keeps the page and the mailbox from telling
+two different stories.
+
 | Severity       | Response         | Examples                                                           |
 | -------------- | ---------------- | ------------------------------------------------------------------ |
 | Critical, page | Immediate        | Application down, database unreachable, chain verification failure |

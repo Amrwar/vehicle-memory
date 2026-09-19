@@ -157,15 +157,15 @@ Each is one of three things.
 
 | Kind        | Count | What it means                                                                                             |
 | ----------- | ----- | --------------------------------------------------------------------------------------------------------- |
-| **checked** | 47    | Something runs and would fail. The thing that runs is named, has to exist, and has to be in the workflow. |
+| **checked** | 49    | Something runs and would fail. The thing that runs is named, has to exist, and has to be in the workflow. |
 | **read**    | 15    | True of the repository as it stands, and asserted there and then rather than by a script somewhere else.  |
-| **not yet** | 22    | Enforced by nothing. What it would take is written down, because "not yet" without that is a wish.        |
+| **not yet** | 20    | Enforced by nothing. What it would take is written down, because "not yet" without that is a wish.        |
 
-The twenty-two are not an oversight and are not going to become checks by being
+The twenty are not an oversight and are not going to become checks by being
 looked at harder. They need a person, a production deployment, or a month of
 real traffic: a penetration test, a new service advisor taking a booking
 unaided, a month of uptime, two thousand tenants, a technician in nitrile
-gloves. `npm run verify:quality` lists all twenty-two with the reason each time
+gloves. `npm run verify:quality` lists all twenty with the reason each time
 it runs, so the number is visible rather than implied.
 
 Until Phase 56 exactly one of these eighty-four appeared in the

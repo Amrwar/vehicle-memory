@@ -41,6 +41,7 @@
     "verify:tenancy": "tsx infra/scripts/verify-tenancy.ts",
     "verify:recovery": "tsx infra/scripts/verify-recovery.ts",
     "verify:health": "tsx infra/scripts/verify-health.ts",
+    "verify:alerts": "tsx infra/scripts/verify-alerts.ts",
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
     "verify:clock": "tsx infra/scripts/verify-clock.ts",
     "verify:awkward": "tsx infra/scripts/verify-awkward.ts",

@@ -591,6 +591,18 @@ The second sweep: things connected at one end only.
 | Safari and Firefox             | Built  | `verify:engines`: sixty screens in three engines, Arabic included (Phase 56)           |
 | An unstyled page is not narrow | Built  | A page whose stylesheet did not arrive is refused, not measured (Phase 56)             |
 
+## 21.23 Before the workshop rings
+
+| Item                         | Status | Where                                                                               |
+| ---------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| The operator is told         | Built  | `sweepAlerts()` on the hourly job; one message to the one address (Phase 57)        |
+| A runbook per signal         | Built  | 22 entries: what it means, the first thing to do, what fixed looks like (Phase 57)  |
+| No action, no alert          | Built  | A signal with no entry is reported as needing one, and the check fails (Phase 57)   |
+| Once, not six times          | Built  | Six hours quiet; immediately if it gets worse; cleared once (Phase 57)              |
+| Sent means sent              | Built  | A message that did not leave is not written down as sent (Phase 57)                 |
+| The first action on the page | Built  | `/admin/health` shows it beside each fault, and whether you were told (Phase 57)    |
+| The runbook, translated      | Built  | Checked, because it reaches the translator as a variable no scanner sees (Phase 57) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -669,7 +681,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 335          |
+| Built    | 342          |
 | Partial  | 1            |
 | Deferred | 1            |
 

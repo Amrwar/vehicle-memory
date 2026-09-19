@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-19",
   "counts": {
-    "models": 153,
+    "models": 154,
     "enums": 74,
-    "fields": 2448
+    "fields": 2456
   },
   "enums": [
     "OrgPlan",
@@ -1554,7 +1554,7 @@
         },
         {
           "name": "InboundMessage",
-          "comment": "Something a customer sent in. Matched to a customer and a job with a stated confidence rather than a silent assignment: a reply filed against the wrong job is worse than one filed against nothing, because somebody reads it about another car.",
+          "comment": "",
           "fields": 16,
           "relations": [
             "Organization",
@@ -1628,6 +1628,13 @@
             "MessageLog"
           ],
           "scope": "organisation"
+        },
+        {
+          "name": "OperatorAlert",
+          "comment": "Something a customer sent in. Matched to a customer and a job with a stated confidence rather than a silent assignment: a reply filed against the wrong job is worse than one filed against nothing, because somebody reads it about another car. What the operator has already been told about a signal. Phase 57. One row per signal rather than one per message: the question is whether this still needs saying, and a log of every alert ever sent answers that slowly. `sentAt` is when a message actually went, which is not the same as when the row was written — a signal recorded but never sent must still send.",
+          "fields": 8,
+          "relations": [],
+          "scope": "global"
         },
         {
           "name": "ReviewRequest",

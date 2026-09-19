@@ -1,6 +1,7 @@
 import {
   describeStanding,
   needsAttention,
+  runbookFor,
   type Signal,
   standingCounts,
   type Standing,
@@ -23,6 +24,7 @@ import {
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { openAlerts } from '@/lib/alerts';
 import { currentUser } from '@/lib/auth';
 import { systemHealth, traceMessagesTo } from '@/lib/health';
 import { tFor } from '@/lib/i18n';
@@ -68,6 +70,11 @@ export default async function HealthPage({
   const attention = needsAttention(signals);
   const worst = worstStanding(signals);
   const traces = q ? await traceMessagesTo(q) : [];
+
+  // What has already been said about each of these, so the page and the
+  // mailbox agree. An operator reading this after a message wants to know
+  // whether the message they have is about the state they are looking at.
+  const told = new Map((await openAlerts()).map((one) => [one.key, one]));
 
   const areas = [...new Set(signals.map((one) => one.area))];
 
@@ -124,9 +131,50 @@ export default async function HealthPage({
         <Card className="mb-5 overflow-hidden border-(--danger)">
           <CardHeader
             title={t('What is wrong')}
-            description={t('Worst first, because that is where to start')}
+            description={t('Worst first, with the first thing to do')}
           />
-          <CardBody className="py-1">{worstSignalsFirst(attention).map(row)}</CardBody>
+          <CardBody className="py-1">
+            {worstSignalsFirst(attention).map((one) => {
+              const book = runbookFor(one.name);
+              const sent = told.get(one.name)?.sentAt ?? null;
+
+              return (
+                <div
+                  key={`wrong-${one.area}-${one.name}`}
+                  className="border-b border-(--line) py-3 last:border-0"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <span className="text-[13px] font-medium">{t(one.name)}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-[12px] text-(--text-soft)">
+                        {t(one.template, one.values)}
+                      </span>
+                      <Badge tone={tone(one.standing)}>{t(describeStanding(one.standing))}</Badge>
+                    </span>
+                  </div>
+
+                  {book ? (
+                    <p className="mt-1.5 text-[12px] leading-relaxed text-(--text-soft)">
+                      <span className="font-medium">{t('First thing')}: </span>
+                      {t(book.first)}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-[12px] leading-relaxed text-(--danger)">
+                      {t(
+                        'Nothing is written down about what to do here, so nobody was told. Add a runbook entry.',
+                      )}
+                    </p>
+                  )}
+
+                  <p className="mt-1 text-[11px] text-(--text-faint)">
+                    {sent
+                      ? t('You were told at {at}.', { at: sent.toISOString().slice(11, 16) })
+                      : t('Nobody has been told yet.')}
+                  </p>
+                </div>
+              );
+            })}
+          </CardBody>
         </Card>
       ) : null}
 

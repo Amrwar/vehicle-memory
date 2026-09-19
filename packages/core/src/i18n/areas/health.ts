@@ -8,6 +8,59 @@
  */
 
 export const fr: Readonly<Record<string, string>> = {
+  'Check the mail provider’s dashboard for the reason it is refusing.':
+    'Consultez le tableau de bord du fournisseur de messagerie pour connaître le motif du refus.',
+  'Check the sending provider’s balance and its dashboard.':
+    'Vérifiez le solde du prestataire d’envoi et son tableau de bord.',
+  'Nothing here. If you want the answer now, read the last run of verify-recovery.':
+    'Rien ici. Pour la réponse tout de suite, lisez la dernière exécution de verify-recovery.',
+  'Nothing here. It exists because an operator asked how much history there is.':
+    'Rien ici. Cela existe parce qu’un exploitant a demandé quelle profondeur a l’historique.',
+  // What to do about each thing that can go wrong, Phase 57. These reach the
+  // translator through t(runbook.first) rather than as a literal, which no
+  // scanner can see — so verify-alerts.ts asserts each one is answered here.
+  'First thing': 'Première chose',
+  'Worst first, with the first thing to do': 'Le pire d’abord, avec la première chose à faire',
+  'Nothing is written down about what to do here, so nobody was told. Add a runbook entry.':
+    'Rien n’est écrit sur ce qu’il faut faire ici, donc personne n’a été prévenu. Ajoutez une entrée au manuel d’intervention.',
+  'You were told at {at}.': 'Vous avez été prévenu à {at}.',
+  'Nobody has been told yet.': 'Personne n’a encore été prévenu.',
+  'Check the database provider’s status page, then the connection string in the deployment.':
+    'Consultez la page d’état du fournisseur de base de données, puis la chaîne de connexion du déploiement.',
+  'Run prisma migrate deploy against the production database and read what it says.':
+    'Exécutez prisma migrate deploy sur la base de production et lisez ce qui s’affiche.',
+  'Check the host’s time synchronisation. Nothing in the product can correct this.':
+    'Vérifiez la synchronisation horaire de l’hôte. Rien dans le produit ne peut corriger cela.',
+  'Confirm you are looking at the right database before touching anything.':
+    'Assurez-vous de regarder la bonne base de données avant de toucher à quoi que ce soit.',
+  'Check that the dispatch cron is still firing, then run it by hand and watch the count.':
+    'Vérifiez que la tâche planifiée d’envoi se déclenche encore, puis lancez-la à la main et observez le compteur.',
+  'Look at one of them on the health page: it will say why it has not gone.':
+    'Regardez l’un d’eux sur la page d’état : elle indiquera pourquoi il n’est pas parti.',
+  'Search one recipient on the health page; the reason is on the message.':
+    'Recherchez un destinataire sur la page d’état ; la raison figure sur le message.',
+  'Check the provider’s status, then look for attempts stuck at pending on the health page.':
+    'Vérifiez l’état du prestataire, puis cherchez les tentatives bloquées en attente sur la page d’état.',
+  'Check the store’s credentials and whether the bucket still exists.':
+    'Vérifiez les identifiants de l’espace de stockage et si le compartiment existe toujours.',
+  'Check the provider. Nothing needs doing in the product; it degrades on purpose.':
+    'Vérifiez le prestataire. Rien à faire dans le produit : la dégradation est voulue.',
+  'Check the provider key and quota. This can wait until morning.':
+    'Vérifiez la clé et le quota du prestataire. Cela peut attendre demain matin.',
+  'Do not write anything further. Run verify-integrity and find which vehicle and which event.':
+    'N’écrivez plus rien. Exécutez verify-integrity et trouvez quel véhicule et quel événement.',
+  'Run the books audit for the workshop concerned; it names the entry and the amount.':
+    'Lancez l’audit comptable de l’atelier concerné ; il nomme l’écriture et le montant.',
+  'Run the storage sweep to list what is referenced and missing.':
+    'Lancez le balayage du stockage pour lister ce qui est référencé et manquant.',
+  'Look at the sign-in rate and the addresses behind it before revoking anything.':
+    'Regardez le rythme des connexions et les adresses derrière avant de révoquer quoi que ce soit.',
+  'Check which keys are live and when each was last used.':
+    'Vérifiez quelles clés sont actives et quand chacune a servi pour la dernière fois.',
+  'Look at what was sent just before the bounces started.':
+    'Regardez ce qui a été envoyé juste avant le début des rejets.',
+  'Set CRON_SECRET in the deployment and redeploy. This is not something to leave until morning.':
+    'Définissez CRON_SECRET dans le déploiement et redéployez. À ne pas remettre à demain matin.',
   // The page
   //
   // The name does not change. It is here because every sentence handed to the
@@ -150,6 +203,59 @@ export const fr: Readonly<Record<string, string>> = {
 };
 
 export const ar: Readonly<Record<string, string>> = {
+  'Check the mail provider’s dashboard for the reason it is refusing.':
+    'راجع لوحة تحكّم مزوّد البريد لمعرفة سبب الرفض.',
+  'Check the sending provider’s balance and its dashboard.':
+    'تحقّق من رصيد مزوّد الإرسال ومن لوحة تحكّمه.',
+  'Nothing here. If you want the answer now, read the last run of verify-recovery.':
+    'لا شيء هنا. إن أردت الإجابة الآن، فاقرأ آخر تشغيل لـ verify-recovery.',
+  'Nothing here. It exists because an operator asked how much history there is.':
+    'لا شيء هنا. وُجد هذا لأن أحد المشغّلين سأل عن مدى عمق السجلّ.',
+  // What to do about each thing that can go wrong, Phase 57. These reach the
+  // translator through t(runbook.first) rather than as a literal, which no
+  // scanner can see — so verify-alerts.ts asserts each one is answered here.
+  'First thing': 'أول خطوة',
+  'Worst first, with the first thing to do': 'الأسوأ أولًا، مع أول خطوة ينبغي فعلها',
+  'Nothing is written down about what to do here, so nobody was told. Add a runbook entry.':
+    'لا يوجد ما هو مكتوب عمّا ينبغي فعله هنا، لذلك لم يُبلَّغ أحد. أضِف مدخلًا إلى دليل التشغيل.',
+  'You were told at {at}.': 'أُبلغتَ في {at}.',
+  'Nobody has been told yet.': 'لم يُبلَّغ أحد بعد.',
+  'Check the database provider’s status page, then the connection string in the deployment.':
+    'راجع صفحة حالة مزوّد قاعدة البيانات، ثم سلسلة الاتصال في بيئة النشر.',
+  'Run prisma migrate deploy against the production database and read what it says.':
+    'نفّذ prisma migrate deploy على قاعدة بيانات الإنتاج واقرأ ما تقوله.',
+  'Check the host’s time synchronisation. Nothing in the product can correct this.':
+    'تحقّق من مزامنة الوقت على الخادم. لا شيء في المنتج يمكنه تصحيح ذلك.',
+  'Confirm you are looking at the right database before touching anything.':
+    'تأكّد أنك تنظر إلى قاعدة البيانات الصحيحة قبل أن تمسّ أي شيء.',
+  'Check that the dispatch cron is still firing, then run it by hand and watch the count.':
+    'تأكّد أن المهمة المجدولة للإرسال ما زالت تعمل، ثم شغّلها يدويًا وراقب العدد.',
+  'Look at one of them on the health page: it will say why it has not gone.':
+    'انظر إلى إحداها في صفحة الحالة: ستخبرك لماذا لم تُرسل.',
+  'Search one recipient on the health page; the reason is on the message.':
+    'ابحث عن أحد المستلمين في صفحة الحالة؛ السبب مدوّن على الرسالة.',
+  'Check the provider’s status, then look for attempts stuck at pending on the health page.':
+    'راجع حالة المزوّد، ثم ابحث عن المحاولات العالقة قيد الانتظار في صفحة الحالة.',
+  'Check the store’s credentials and whether the bucket still exists.':
+    'تحقّق من بيانات اعتماد مخزن الملفات وممّا إذا كانت الحاوية لا تزال موجودة.',
+  'Check the provider. Nothing needs doing in the product; it degrades on purpose.':
+    'تحقّق من المزوّد. لا شيء يلزم فعله في المنتج؛ فالتراجع مقصود.',
+  'Check the provider key and quota. This can wait until morning.':
+    'تحقّق من مفتاح المزوّد وحصّته. يمكن لهذا أن ينتظر حتى الصباح.',
+  'Do not write anything further. Run verify-integrity and find which vehicle and which event.':
+    'لا تكتب أي شيء بعد. نفّذ verify-integrity وحدّد أي مركبة وأي حدث.',
+  'Run the books audit for the workshop concerned; it names the entry and the amount.':
+    'نفّذ تدقيق الدفاتر للورشة المعنية؛ فهو يحدّد القيد والمبلغ.',
+  'Run the storage sweep to list what is referenced and missing.':
+    'نفّذ مسح المخزن لسرد ما هو مُشار إليه ومفقود.',
+  'Look at the sign-in rate and the addresses behind it before revoking anything.':
+    'انظر إلى معدّل تسجيلات الدخول والعناوين وراءها قبل إلغاء أي شيء.',
+  'Check which keys are live and when each was last used.':
+    'تحقّق من المفاتيح الفعّالة ومتى استُخدم كل منها آخر مرة.',
+  'Look at what was sent just before the bounces started.':
+    'انظر إلى ما أُرسل قبيل بدء حالات الارتداد.',
+  'Set CRON_SECRET in the deployment and redeploy. This is not something to leave until morning.':
+    'اضبط CRON_SECRET في بيئة النشر وأعد النشر. هذا ليس مما يُترك حتى الصباح.',
   // The page
   //
   // Left in Latin script. A marque is not transliterated, and the rest of the

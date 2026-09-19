@@ -527,6 +527,13 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9201 | BJ1   | `operator_alerts`                      | `sweepAlerts()`, called from the hourly cron                                   | `verify-alerts.ts`                            | Done   |
+| FR-9202 | BJ2   | -                                      | `RUNBOOK`, `alertBody()`                                                       | `alerts.test.ts`, `verify-alerts.ts`          | Done   |
+| FR-9203 | BJ2   | -                                      | `decideAlerts()`'s `unexplained`; `withoutAnAction()`                          | `alerts.test.ts`, `verify-alerts.ts`          | Done   |
+| FR-9204 | BJ3   | `operator_alerts.sentAt`               | `QUIET_FOR_MS`, and the `worse` and `cleared` branches of `decideAlerts()`     | `alerts.test.ts`, `verify-alerts.ts`          | Done   |
+| FR-9205 | BJ1   | `operator_alerts.sentAt`               | `wentOut` in `sweepAlerts()`, written only for a message that left             | `verify-alerts.ts`                            | Done   |
+| FR-9206 | BJ4   | -                                      | the runbook lines in the health dictionary                                     | `verify-alerts.ts`                            | Done   |
+| FR-9207 | BJ2   | `operator_alerts`                      | the "What is wrong" card on `/admin/health`                                    | `verify-health.ts`, `verify-screens.ts`       | Done   |
 | FR-9101 | BI1   | -                                      | `REGISTER` in `verify-quality.ts`, checked against the requirements document   | `verify-quality.ts`                           | Done   |
 | FR-9102 | BI1   | -                                      | the exists check and the workflow check in `verify-quality.ts`                 | `verify-quality.ts`                           | Done   |
 | FR-9103 | BI2   | -                                      | `redaction` in `packages/jobs/src/log.ts`                                      | `log.test.ts`, `verify-quality.ts`            | Done   |
@@ -947,7 +954,7 @@ that is wrong.
 | The owner's day, sharpened                | 6                   | 6                      |
 | Every word translated                     | 5                   | 5                      |
 | Tax, configurable                         | 7                   | 7                      |
-| Later phases, newest first                | 145                 | 144                    |
+| Later phases, newest first                | 152                 | 151                    |
 | What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
 | Proof of everything, and parts that fit   | 8                   | 8                      |
@@ -964,9 +971,9 @@ that is wrong.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **645**             | **641 (99%)**          |
+| **Total**                                 | **652**             | **648 (99%)**          |
 
-The requirements document lists 713 requirements. 84 of
+The requirements document lists 720 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that
@@ -985,8 +992,8 @@ than being quietly implied by a percentage.
 ## And the eighty-four that are not in this table
 
 The quality requirements are accounted for in
-`infra/scripts/verify-quality.ts` rather than here: forty-seven checked by
-something that runs, fifteen read off the repository, twenty-two enforced by
+`infra/scripts/verify-quality.ts` rather than here: forty-nine checked by
+something that runs, fifteen read off the repository, twenty enforced by
 nothing with what each would take written down. They are not duplicated into
 this table on purpose — two registers of the same thing drift, and the first
 anybody learns of the drift is when they disagree. See

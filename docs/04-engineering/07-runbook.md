@@ -3,6 +3,40 @@
 Procedures for the things that actually break. Each entry is written to be
 followed at 3am by somebody who did not build the system.
 
+## Two runbooks, and which is which (Phase 57)
+
+This file is the long form: the queries to run, the commands to type, the
+order to do things in. It is read on a laptop, by somebody who has decided to
+sit down and fix something.
+
+The short form lives in `packages/core/src/health/alerts.ts`, one entry per
+signal, and it is what the alert message itself carries — what this means, the
+first thing to do, and what it would mean to have fixed it. It is read on a
+telephone, in the dark, by somebody deciding whether to get up.
+
+They are deliberately two things rather than one file read twice, because they
+are read in two different states of mind. What they must not become is two
+accounts that disagree: the short form's "first thing" for a signal is the
+first step of the section here that covers it, and where a section exists it is
+named in the entry. `npm run verify:alerts` will not let a signal exist with no
+short-form entry at all; nothing can check that the two stay in agreement about
+the detail, so that is a thing to look at whenever either changes.
+
+| Alert                        | Section here                    |
+| ---------------------------- | ------------------------------- |
+| Passport chains              | Chain verification failure      |
+| Database                     | Database unreachable            |
+| Events waiting               | Outbox backing up               |
+| Messages due and not gone    | Outbox backing up               |
+| Restore drill, Oldest record | Restoring a backup              |
+| Sessions, API keys           | Suspected credential compromise |
+| Migrations                   | Deployment gone wrong           |
+
+The alerts with no section here — email and text failing, card payments, the
+file store, the vehicle lookup, the assistant, the scheduled-work secret — are
+one-step problems whose first action is the whole procedure, and the short form
+carries it.
+
 ## Chain verification failure
 
 **Severity: critical.** This is the one that matters most. It means either a

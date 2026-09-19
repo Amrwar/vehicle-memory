@@ -3681,6 +3681,31 @@ model Referral {
 /// Matched to a customer and a job with a stated confidence rather than a
 /// silent assignment: a reply filed against the wrong job is worse than one
 /// filed against nothing, because somebody reads it about another car.
+/// What the operator has already been told about a signal. Phase 57.
+///
+/// One row per signal rather than one per message: the question is whether
+/// this still needs saying, and a log of every alert ever sent answers that
+/// slowly. `sentAt` is when a message actually went, which is not the same as
+/// when the row was written — a signal recorded but never sent must still send.
+model OperatorAlert {
+  id  String @id @default(cuid())
+  /// The signal's name as the health page reports it, and how its runbook
+  /// entry is found.
+  key String @unique
+
+  standing String
+
+  /// When it first went wrong, kept across repeats.
+  raisedAt  DateTime
+  sentAt    DateTime?
+  clearedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("operator_alerts")
+}
+
 model InboundMessage {
   id      String @id @default(cuid())
   orgId   String

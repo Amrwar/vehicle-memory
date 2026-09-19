@@ -9,6 +9,7 @@ import {
   sendQueuedMessages,
 } from '@carnet/jobs';
 import { catchUpConsequences } from '@/lib/afterwards';
+import { sweepAlerts } from '@/lib/alerts';
 import { sweepConditions } from '@/lib/sweeps';
 import { timingSafeEqual } from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -79,8 +80,13 @@ const JOBS: Record<Job, () => Promise<Record<string, number>>> = {
     // quietly stopped coming. Nothing happens at the moment those become
     // true, so they have to be looked for. Phase 46.6.
     const swept = await sweepConditions();
+    // Whether anybody needs waking. Here rather than on a schedule of its own,
+    // because a second schedule is a second thing that can stop without being
+    // noticed, and an alerting system that has quietly died is worse than
+    // none. Phase 57.
+    const told = await sweepAlerts();
 
-    return { shifts, reminders, trials, caught, ...swept };
+    return { shifts, reminders, trials, caught, ...swept, alerts: told.sent };
   },
 };
 

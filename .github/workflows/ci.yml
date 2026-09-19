@@ -566,6 +566,12 @@ jobs:
       - name: Every quality requirement is accounted for
         run: npx tsx infra/scripts/verify-quality.ts
 
+      # Whether anybody would actually be told. A page is the right thing to
+      # look at once you know something is wrong; this is the part that makes
+      # you know, and it had never existed.
+      - name: Somebody would be told
+        run: npx tsx infra/scripts/verify-alerts.ts
+
       # "Why did this customer not get their message?" on a screen rather than
       # in a log, and the operator's page refusing everybody else.
       - name: How Carnet itself is, and why a message did not arrive

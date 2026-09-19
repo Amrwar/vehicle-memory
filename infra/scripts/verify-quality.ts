@@ -25,10 +25,9 @@
  *   not yet   Not enforced by anything. What it would take is written down,
  *             because "not yet" without that is a wish.
  *
- * The last kind is the point of the exercise. Twenty-two of the eighty-four
- * need a person, a production deployment, or a month of real traffic, and
- * saying so out loud is worth more than a green tick that means somebody once
- * looked.
+ * The last kind is the point of the exercise. Twenty of the eighty-four need
+ * a person, a production deployment, or a month of real traffic, and saying so
+ * out loud is worth more than a green tick that means somebody once looked.
  */
 
 import 'dotenv/config';
@@ -443,16 +442,18 @@ const REGISTER: Record<string, Account> = {
   },
   'NFR-805': {
     how: 'checked',
-    by: 'infra/scripts/verify-health.ts',
-    note: 'errors are captured with context and shown on the operator page',
+    by: 'infra/scripts/verify-alerts.ts',
+    note: 'captured with context, shown on the operator page, and now sent to the operator. Phase 57.',
   },
   'NFR-806': {
-    how: 'not yet',
-    note: 'alerts on error rate, latency and queue depth, each with a runbook entry. /admin/health shows all three; nothing sends anybody a message about them.',
+    how: 'checked',
+    by: 'infra/scripts/verify-alerts.ts',
+    note: 'twenty-two signals, each with a runbook entry, alerted to the operator from the hourly sweep. Phase 57.',
   },
   'NFR-807': {
-    how: 'not yet',
-    note: 'every alert actionable. Follows NFR-806: there are no alerts yet to hold to it.',
+    how: 'checked',
+    by: 'infra/scripts/verify-alerts.ts',
+    note: 'a signal with no runbook entry cannot become a message: it is reported as needing one and the check fails. Phase 57.',
   },
 
   /* --- NFR-900, compliance and localisation ---------------------------------- */
