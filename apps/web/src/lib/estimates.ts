@@ -21,6 +21,7 @@ import { recordDecision } from './portal';
 import { labourRateAt, sellPriceAt } from './pricing';
 import { regionFor } from './region';
 import { defaultTaxRateId, linePricing, TAX_RATE, taxContextFor } from './tax';
+import { traceId } from './trace';
 
 /**
  * Sending a quote, against the database.
@@ -125,6 +126,7 @@ export async function sendEstimate(input: {
 
     const queued = await tx.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: channel!,
         toAddress: to,

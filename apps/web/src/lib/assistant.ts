@@ -20,6 +20,7 @@ import { answer } from './answers';
 import { audit } from './guard';
 import { pushNow } from './outbound';
 import { regionFor } from './region';
+import { traceId } from './trace';
 
 /**
  * The assistant, against the database. Phase 22.
@@ -378,6 +379,7 @@ export async function sendDraft(input: {
 
   const queued = await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       orgId: input.orgId,
       channel,
       toAddress: (channel === 'SMS' ? job.customer.mobile : job.customer.email)!,

@@ -23,6 +23,7 @@ import { JOB_LINES, priceableLinesOf } from './money';
 import { recordTaxEntries, taxContextFor } from './tax';
 import { pushNow } from './outbound';
 import { regionFor } from './region';
+import { traceId } from './trace';
 
 export { FleetError };
 
@@ -533,6 +534,7 @@ export async function consolidateMonth(input: {
 
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: customer.email,

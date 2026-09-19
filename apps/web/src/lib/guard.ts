@@ -20,6 +20,7 @@ import { redirect } from 'next/navigation';
 
 import { currentUser, type CurrentUser } from './auth';
 import { currentLanguage } from './i18n';
+import { TRACE_HEADER } from './trace';
 
 /**
  * Route guards.
@@ -163,6 +164,8 @@ export async function audit(input: {
       data: {
         orgId: input.orgId ?? null,
         actorUserId: input.actorUserId ?? null,
+        // The request this came from. Phase 59, NFR-803.
+        traceId: headerList?.get(TRACE_HEADER) ?? null,
         action: input.action,
         entityType: input.entityType,
         entityId: input.entityId,

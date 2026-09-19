@@ -54,6 +54,7 @@ import { refreshScheduleFor } from './packages';
 import { pushNow } from './outbound';
 import { writeJobCompletion } from './passport';
 import { regionFor } from './region';
+import { traceId } from './trace';
 
 /**
  * The money cycle, against the database.
@@ -237,6 +238,7 @@ export async function moveJob(input: {
     if (input.to === 'COMPLETED') {
       await tx.outboxEvent.create({
         data: {
+          traceId: await traceId(),
           orgId: input.orgId,
           type: 'job.completed',
           payload: { jobId: job.id, customerId: job.customerId } as never,
@@ -492,6 +494,7 @@ export async function issueInvoice(input: {
 
     await tx.outboxEvent.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         type: 'invoice.issued',
         payload: { invoiceId: created.id, jobId: job.id } as never,
@@ -531,6 +534,7 @@ export async function issueInvoice(input: {
 
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: job.customer.email,
@@ -661,6 +665,7 @@ export async function recordPayment(input: {
 
     await tx.outboxEvent.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         type: 'payment.received',
         payload: { paymentId: created.id, invoiceId: invoice.id } as never,
@@ -688,6 +693,7 @@ export async function recordPayment(input: {
     const stillOwed = view.total.minor - view.amountPaid.minor - input.amount.minor;
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: invoice.customer.email,
@@ -897,6 +903,7 @@ export async function raiseCreditNote(input: {
   if (invoice.customer.email) {
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: invoice.customer.email,
@@ -1079,6 +1086,7 @@ export async function recordRefund(input: {
   if (invoice.customer.email) {
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: invoice.customer.email,

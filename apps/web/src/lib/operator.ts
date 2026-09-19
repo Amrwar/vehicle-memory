@@ -2,6 +2,7 @@ import { prisma } from '@carnet/db';
 
 import { env } from './env';
 import { pushNow } from './outbound';
+import { traceId } from './trace';
 
 /**
  * Telling whoever runs Carnet that something happened to Carnet itself.
@@ -49,6 +50,7 @@ export async function tellOperator(input: { subject: string; body: string }): Pr
   try {
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         // No workshop behind it: this is the platform speaking for itself.
         orgId: null,
         channel: 'EMAIL',

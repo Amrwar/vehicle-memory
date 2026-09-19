@@ -2,6 +2,7 @@ import { formatMinor, planPrice, TRIAL_DAYS, trialReminderDue } from '@carnet/co
 import { prisma } from '@carnet/db';
 
 import { log } from './log';
+import { currentTrace } from './trace';
 
 /**
  * The trial reminder. Phase 32.6.
@@ -81,6 +82,7 @@ export async function remindTrialsEnding(now = new Date()): Promise<number> {
 
     await prisma.messageLog.create({
       data: {
+        traceId: currentTrace(),
         orgId: org.id,
         channel: 'EMAIL',
         toAddress: owner.email,

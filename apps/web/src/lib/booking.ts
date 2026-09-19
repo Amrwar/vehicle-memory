@@ -9,6 +9,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { traceId } from './trace';
 
 /**
  * Booking, from the customer's side.
@@ -254,6 +255,7 @@ export async function requestBooking(input: BookingRequest): Promise<BookingOutc
       if (customer && channel && to && said) {
         await tx.messageLog.create({
           data: {
+            traceId: await traceId(),
             orgId: input.orgId,
             channel,
             toAddress: to,
@@ -365,6 +367,7 @@ export async function notifyCustomer(input: {
 
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel,
         toAddress: to,

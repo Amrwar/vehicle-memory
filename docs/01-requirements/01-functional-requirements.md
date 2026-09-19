@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9400 - One press, followed through
+
+| Ref     | Requirement                                                                                                            | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9401 | Every request MUST carry one trace identifier, minted where none was offered.                                          | 59    |
+| FR-9402 | Every audit record, outbox event, message and staff notification a request causes MUST carry that identifier.          | 59    |
+| FR-9403 | A background job MUST inherit the trace of the event that woke it, and two jobs MUST NOT be able to read each other's. | 59    |
+| FR-9404 | Nothing MUST invent a trace: work nobody asked for MUST have none, and the column MUST stay nullable.                  | 59    |
+| FR-9405 | The operator MUST be able to follow one trace through every record it touched, in the order it happened.               | 59    |
+| FR-9406 | A trace offered by a caller MUST be kept only where it is the right shape, and replaced where it is not.               | 59    |
+| FR-9407 | A check MUST fail where any write that a request causes does not stamp the trace.                                      | 59    |
+
 ## FR-9300 - Configured to do anything
 
 | Ref     | Requirement                                                                                                                   | Phase |

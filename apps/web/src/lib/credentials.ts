@@ -16,6 +16,7 @@ import { breachedPasswordProblem } from './breach';
 import { audit } from './guard';
 import { env } from './env';
 import { pushNow } from './outbound';
+import { traceId } from './trace';
 
 /**
  * Proving an address, and getting back in when the password is gone.
@@ -127,6 +128,7 @@ export async function requestReset(email: string, ip?: string | null): Promise<v
 
   const queued = await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       // Null for a customer who has signed up and is not yet attached to any
       // workshop. Requiring an organisation here quietly broke password reset
       // for every portal account, because a customer never has a membership.
@@ -236,6 +238,7 @@ export async function requestVerification(userId: string, ip?: string | null): P
 
   const queued = await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       orgId: user.memberships[0]?.orgId ?? null,
       channel: 'EMAIL',
       toAddress: user.email,

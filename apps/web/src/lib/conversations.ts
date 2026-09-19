@@ -19,6 +19,7 @@ import { audit } from './guard';
 import { pushNow } from './outbound';
 import { regionFor } from './region';
 import { driver, readUrlFor, StorageError, ticketFor, writeLocal } from './storage';
+import { traceId } from './trace';
 
 /**
  * Conversations, against the database. Phase 36.
@@ -581,6 +582,7 @@ export async function sendReply(input: {
   const message = await prisma.$transaction(async (tx) => {
     const row = await tx.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: input.channel,
         toAddress: to,

@@ -57,6 +57,29 @@ Every request carries a trace id, propagated into background jobs so a passport
 event can be traced back to the job completion that caused it. Spans cover the
 request, each database query, each external call, and each outbox dispatch.
 
+## 3.5 One press, followed through (Phase 59)
+
+NFR-803 asks for a trace identifier carried from a request into the jobs it
+enqueues. Until Phase 59 there was none, and the consequence was a question
+nobody could answer: a workshop says _I pressed the button and nothing
+happened_, and the four tables that would know — the audit log, the outbox, the
+message log, the staff notifications — had nothing in common to join on.
+
+The proxy mints one per request, `t-` and twelve hex characters, and sets it on
+both the forwarded request and the response, so it can be read off a network
+tab or quoted down a telephone. Everything that request causes carries it.
+`/admin/health` takes one in the same search box that takes an address, and
+shows the chain in the order it happened: **where it stops is what went wrong.**
+
+A background job has no request headers, so the outbox event carries the trace
+and the worker restores it — each event handled inside an async-local context
+holding its own, which is what stops a batch of two attributing one workshop's
+message to another's press. Log lines written inside that context carry it too,
+which is what joins a worker's output to the button.
+
+Nothing invents one. Work nobody asked for has none, and the column is nullable
+so that "nobody pressed anything" and "we lost it" stay different answers.
+
 ## 4. Alerting
 
 Every alert has a runbook entry. **An alert with no action is deleted**

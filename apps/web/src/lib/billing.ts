@@ -21,6 +21,7 @@ import { cache } from 'react';
 
 import { env } from './env';
 import { audit } from './guard';
+import { traceId } from './trace';
 import { paymentProvider } from './payments/provider';
 
 /**
@@ -266,6 +267,7 @@ async function tellOwner(orgId: string, subject: string, lines: string[]): Promi
   if (!owner) return;
   await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       orgId,
       channel: 'EMAIL',
       toAddress: owner.user.email,

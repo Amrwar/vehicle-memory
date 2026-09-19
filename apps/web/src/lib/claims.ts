@@ -17,6 +17,7 @@ import { requestVerification } from './credentials';
 import { breachedPasswordProblem } from './breach';
 import { audit } from './guard';
 import { pushNow } from './outbound';
+import { traceId } from './trace';
 
 /**
  * Customers with accounts of their own, and how a vehicle gets onto one.
@@ -426,6 +427,7 @@ export async function decideClaim(input: {
 
     const queued = await tx.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: claim.user.email,

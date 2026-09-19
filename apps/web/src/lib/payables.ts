@@ -20,6 +20,7 @@ import { postEntry } from './accounting';
 import { audit } from './guard';
 import { pushNow } from './outbound';
 import { regionFor } from './region';
+import { traceId } from './trace';
 
 /**
  * Supplier bills and paying them, against the database.
@@ -450,6 +451,7 @@ export async function paySupplier(input: {
 
     const queued = await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: 'EMAIL',
         toAddress: supplier.email,

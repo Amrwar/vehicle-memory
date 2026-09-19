@@ -3,7 +3,7 @@
   "counts": {
     "models": 154,
     "enums": 74,
-    "fields": 2456
+    "fields": 2460
   },
   "enums": [
     "OrgPlan",
@@ -178,7 +178,7 @@
         {
           "name": "AuditLog",
           "comment": "Immutable record of every state-changing action. FR-109.",
-          "fields": 11,
+          "fields": 12,
           "relations": [
             "Organization",
             "User"
@@ -188,7 +188,7 @@
         {
           "name": "OutboxEvent",
           "comment": "",
-          "fields": 9,
+          "fields": 10,
           "relations": [],
           "scope": "organisation"
         },
@@ -1544,7 +1544,7 @@
         {
           "name": "MessageLog",
           "comment": "",
-          "fields": 18,
+          "fields": 19,
           "relations": [
             "Organization",
             "Conversation",
@@ -1602,7 +1602,7 @@
         {
           "name": "StaffNotification",
           "comment": "Something that happened that a member of staff may need to act on, for them in particular. Each opens the record it is about. Phase 39.",
-          "fields": 11,
+          "fields": 12,
           "relations": [
             "Organization",
             "User"

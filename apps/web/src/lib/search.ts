@@ -13,6 +13,8 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
+import { traceId } from './trace';
+
 /**
  * Finding anything, and being told, against the database. Phase 39.
  *
@@ -247,8 +249,11 @@ export async function notifyStaff(input: {
       exceptUserId: input.exceptUserId,
     });
     if (to.length === 0) return 0;
+    const trace = await traceId();
+
     await prisma.staffNotification.createMany({
       data: to.map((member) => ({
+        traceId: trace,
         orgId: input.orgId,
         userId: member.userId,
         kind: input.kind,

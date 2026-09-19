@@ -93,7 +93,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Fifty-eight phases have shipped, the last on 19 September 2026, and the pilot
+Fifty-nine phases have shipped, the last on 19 September 2026, and the pilot
 itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 348 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 354 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 658
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 665
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -245,3 +245,14 @@ first, and `npm run launch:handover` refuses while any of them is missing or
 only pretending. Writing it found fourteen settings that bypass the
 environment schema entirely — including the one whose absence writes every
 inspection photograph to a disk a serverless host throws away.
+
+Phase 59 answers the question a workshop asks more often than any other, and
+which nothing could answer: _I pressed the button and nothing happened._ Every
+request now carries one identifier, and every record it causes carries the same
+one — the audit row, the queued event, the message, the note on somebody's
+screen — including the background work, which inherits it from the event that
+woke it. `/admin/health` takes that identifier and shows the chain in the order
+it happened, because where it stops is what went wrong. Nothing invents one: a
+reminder queued at four in the morning was nobody's press, and the column stays
+nullable so that "nobody pressed anything" and "we lost it" remain different
+answers.

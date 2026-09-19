@@ -4,6 +4,7 @@ import { prisma } from '@carnet/db';
 import { fireEvent } from './automation';
 import { consentOf } from './consent';
 import { log } from './log';
+import { currentTrace } from './trace';
 
 /**
  * Turning a service falling due into a message somebody can act on.
@@ -77,6 +78,7 @@ export async function queueServiceReminders(): Promise<number> {
       if (decision.allowed) {
         await prisma.messageLog.create({
           data: {
+            traceId: currentTrace(),
             orgId: schedule.orgId,
             channel: 'EMAIL',
             toAddress: owner.email ?? '',

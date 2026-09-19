@@ -3,6 +3,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { pushNow } from './outbound';
+import { traceId } from './trace';
 
 /**
  * Generated text, kept on a short lead.
@@ -263,6 +264,7 @@ export async function sendCustomerSummary(input: {
 
   const queued = await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       orgId: input.orgId,
       channel,
       toAddress: (channel === 'EMAIL' ? job.customer.email : job.customer.mobile)!,

@@ -26,9 +26,11 @@ import { notFound } from 'next/navigation';
 
 import { openAlerts } from '@/lib/alerts';
 import { currentUser } from '@/lib/auth';
+import { follow } from '@/lib/followed';
 import { systemHealth, traceMessagesTo } from '@/lib/health';
 import { tFor } from '@/lib/i18n';
 import { isOperator } from '@/lib/operator';
+import { looksLikeTrace } from '@/lib/trace';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -69,7 +71,13 @@ export default async function HealthPage({
   const signals = await systemHealth();
   const attention = needsAttention(signals);
   const worst = worstStanding(signals);
-  const traces = q ? await traceMessagesTo(q) : [];
+  // The same box takes two questions. An address asks "why did this person
+  // not get their message"; a trace asks "I pressed the button and nothing
+  // happened" — the same question pointed the other way, needing the chain
+  // rather than the last link. Phase 59.
+  const asked = q?.trim() ?? '';
+  const chain = asked && looksLikeTrace(asked) ? await follow(asked) : null;
+  const traces = asked && !chain ? await traceMessagesTo(asked) : [];
 
   // What has already been said about each of these, so the page and the
   // mailbox agree. An operator reading this after a message wants to know
@@ -194,7 +202,9 @@ export default async function HealthPage({
       <Card className="overflow-hidden">
         <CardHeader
           title={t('Why did they not get their message?')}
-          description={t('An address, a telephone number, or a few words from the subject')}
+          description={t(
+            'An address, a telephone number, a few words from the subject — or a trace, to follow one press all the way through',
+          )}
         />
         <CardBody>
           <form method="get" className="flex flex-wrap items-end gap-3">
@@ -208,7 +218,40 @@ export default async function HealthPage({
           </form>
         </CardBody>
 
-        {q ? (
+        {chain ? (
+          chain.moments.length === 0 ? (
+            <EmptyState
+              title={t('Nothing came of that')}
+              description={t(
+                'No record carries that trace. Either nothing was written at all — which is itself the answer — or the identifier has been mistyped.',
+              )}
+            />
+          ) : (
+            <CardBody className="border-t border-(--line)">
+              <p className="mb-3 text-[12px] text-(--text-soft)">
+                {t('{count} things came of that press, oldest first.', {
+                  count: chain.moments.length,
+                })}
+              </p>
+
+              {chain.moments.map((moment, index) => (
+                <div
+                  key={`${moment.step}-${index}`}
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-(--line) py-2.5 last:border-0"
+                >
+                  <span className="flex items-baseline gap-2">
+                    <Badge tone="neutral">{t(moment.step)}</Badge>
+                    <span className="text-[13px]">{moment.what}</span>
+                  </span>
+                  <span className="text-[12px] text-(--text-faint)">
+                    {moment.outcome ? `${moment.outcome} · ` : ''}
+                    {moment.at.toISOString().slice(11, 19)}
+                  </span>
+                </div>
+              ))}
+            </CardBody>
+          )
+        ) : q ? (
           traces.length === 0 ? (
             <EmptyState
               title={t('Nothing sent to that')}

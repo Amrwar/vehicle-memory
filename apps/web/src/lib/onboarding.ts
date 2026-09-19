@@ -20,6 +20,7 @@ import { hashPassword } from './auth';
 import { audit } from './guard';
 import { breachedPasswordProblem } from './breach';
 import { tellOperatorAboutSignup } from './operator';
+import { traceId } from './trace';
 
 /**
  * Opening a workshop.
@@ -232,6 +233,7 @@ export async function createWorkshop(
 
     await tx.auditLog.create({
       data: {
+        traceId: await traceId(),
         orgId: org.id,
         actorUserId: user.id,
         action: 'org.created',

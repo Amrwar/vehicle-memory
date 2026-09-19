@@ -614,6 +614,17 @@ The second sweep: things connected at one end only.
 | One command before day one  | Built  | `npm run launch:handover` against the deployment itself (Phase 58)               |
 | No value ever printed       | Built  | Names and verdicts only, so it can be run against production (Phase 58)          |
 
+## 21.25 One press, followed through
+
+| Item                            | Status | Where                                                                               |
+| ------------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| One identifier per request      | Built  | Minted in the proxy, returned on the response, readable down a telephone (Phase 59) |
+| Carried by everything it causes | Built  | The audit row, the outbox event, the message, the notification (Phase 59)           |
+| Inherited by the job            | Built  | The event carries it; the worker puts it back, one context per event (Phase 59)     |
+| Never invented                  | Built  | A scheduled sweep has none, and the column stays nullable (Phase 59)                |
+| Followed on one screen          | Built  | `/admin/health` takes a trace and shows the chain in order (Phase 59)               |
+| The rule is enforced            | Built  | A write that does not stamp it fails a check, by file and line (Phase 59)           |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -692,7 +703,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 348          |
+| Built    | 354          |
 | Partial  | 1            |
 | Deferred | 1            |
 

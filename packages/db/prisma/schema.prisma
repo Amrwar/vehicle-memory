@@ -430,6 +430,12 @@ model AuditLog {
   org   Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
   actor User?         @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
 
+  /// The request this came from, where a person caused it. Phase 59, NFR-803.
+  /// Null for anything a schedule did, and for everything written before the
+  /// trace existed — which is why it stays nullable: "nobody pressed anything"
+  /// and "we lost it" have to remain different answers.
+  traceId String?
+
   @@index([orgId, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
@@ -483,6 +489,12 @@ model OutboxEvent {
   attempts    Int       @default(0)
   lastError   String?
   createdAt   DateTime  @default(now())
+
+  /// The request this came from, where a person caused it. Phase 59, NFR-803.
+  /// Null for anything a schedule did, and for everything written before the
+  /// trace existed — which is why it stays nullable: "nobody pressed anything"
+  /// and "we lost it" have to remain different answers.
+  traceId String?
 
   @@index([processedAt, availableAt])
   @@map("outbox_events")
@@ -2556,6 +2568,12 @@ model MessageLog {
   deliveryEvents DeliveryEvent[]
   attachments    MessageAttachment[]
 
+  /// The request this came from, where a person caused it. Phase 59, NFR-803.
+  /// Null for anything a schedule did, and for everything written before the
+  /// trace existed — which is why it stays nullable: "nobody pressed anything"
+  /// and "we lost it" have to remain different answers.
+  traceId String?
+
   @@index([orgId, createdAt])
   @@index([relatedType, relatedId])
   /// The sweeper's query: what is due, oldest first.
@@ -3943,6 +3961,12 @@ model StaffNotification {
 
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The request this came from, where a person caused it. Phase 59, NFR-803.
+  /// Null for anything a schedule did, and for everything written before the
+  /// trace existed — which is why it stays nullable: "nobody pressed anything"
+  /// and "we lost it" have to remain different answers.
+  traceId String?
 
   @@index([userId, orgId, readAt, createdAt])
   @@map("staff_notifications")

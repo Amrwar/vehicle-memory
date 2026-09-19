@@ -21,6 +21,7 @@ import { readerLocale } from './i18n';
 
 import { audit } from './guard';
 import { appendEvents, verifyVehicleChain } from './passport';
+import { traceId } from './trace';
 
 /**
  * A vehicle changing hands, and the report that makes the history worth
@@ -374,6 +375,7 @@ export async function inviteHandover(input: {
     const car = [vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'vehicle';
     await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: input.toEmail?.trim() ? 'EMAIL' : 'SMS',
         toAddress: to,

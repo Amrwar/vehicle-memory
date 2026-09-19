@@ -6,4 +6,5 @@ export { claimMessages, claimOutbox, LEASE_MINUTES } from './claim';
 export { queueServiceReminders } from './reminders';
 export { closeAbandonedTimeEntries } from './shifts';
 export { log } from './log';
+export { currentTrace, withTrace } from './trace';
 export { remindTrialsEnding } from './billing';

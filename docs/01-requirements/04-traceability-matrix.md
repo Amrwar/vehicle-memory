@@ -527,6 +527,13 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9401 | BL1   | -                                      | `mintTrace()`, and the proxy setting it on every request                       | `verify-trace.ts`                             | Done   |
+| FR-9402 | BL1   | `traceId` on four tables               | `traceId()` at thirty-one write sites; `audit()` from the header               | `verify-trace.ts`                             | Done   |
+| FR-9403 | BL2   | `outbox_events.traceId`                | `withTrace()` around each handler; `currentTrace()` in the jobs package        | `verify-trace.ts`                             | Done   |
+| FR-9404 | BL3   | the nullable column                    | nothing writes a trace outside a request; the schema says why                  | `verify-trace.ts`                             | Done   |
+| FR-9405 | BL1   | the partial indexes on `traceId`       | `follow()`, and the search box on `/admin/health`                              | `verify-trace.ts`, `verify-health.ts`         | Done   |
+| FR-9406 | BL4   | -                                      | `looksLikeTrace()`, applied to the offered header in the proxy                 | `verify-trace.ts`                             | Done   |
+| FR-9407 | BL4   | -                                      | the source scan in `verify-trace.ts`                                           | `verify-trace.ts`                             | Done   |
 | FR-9301 | BK1   | -                                      | `SETTINGS` in core: `felt` and `set` on each of thirty-three                   | `settings.test.ts`, `verify-launch.ts`        | Done   |
 | FR-9302 | BK2   | -                                      | `declared()`: the zod schema and every `process.env` read in the source        | `verify-launch.ts`                            | Done   |
 | FR-9303 | BK1   | -                                      | `pretendingIfEqual`, and the `pretending` verdict                              | `settings.test.ts`, `verify-launch.ts`        | Done   |
@@ -960,7 +967,7 @@ that is wrong.
 | The owner's day, sharpened                | 6                   | 6                      |
 | Every word translated                     | 5                   | 5                      |
 | Tax, configurable                         | 7                   | 7                      |
-| Later phases, newest first                | 158                 | 157                    |
+| Later phases, newest first                | 165                 | 164                    |
 | What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
 | Proof of everything, and parts that fit   | 8                   | 8                      |
@@ -977,9 +984,9 @@ that is wrong.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **658**             | **654 (99%)**          |
+| **Total**                                 | **665**             | **661 (99%)**          |
 
-The requirements document lists 726 requirements. 84 of
+The requirements document lists 733 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that
@@ -998,8 +1005,8 @@ than being quietly implied by a percentage.
 ## And the eighty-four that are not in this table
 
 The quality requirements are accounted for in
-`infra/scripts/verify-quality.ts` rather than here: forty-nine checked by
-something that runs, fifteen read off the repository, twenty enforced by
+`infra/scripts/verify-quality.ts` rather than here: fifty checked by
+something that runs, fifteen read off the repository, nineteen enforced by
 nothing with what each would take written down. They are not duplicated into
 this table on purpose — two registers of the same thing drift, and the first
 anybody learns of the drift is when they disagree. See

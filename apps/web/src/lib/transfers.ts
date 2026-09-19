@@ -16,6 +16,7 @@ import {
 import { prisma } from '@carnet/db';
 import { regionFor } from './region';
 import { assertPlanAllows } from './billing';
+import { traceId } from './trace';
 
 /**
  * Stock between sites, against the database.
@@ -145,6 +146,7 @@ export async function createTransfer(input: {
 
     await tx.auditLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         actorUserId: input.userId,
         action: 'transfer.started',

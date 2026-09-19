@@ -8,6 +8,20 @@
  */
 
 export const fr: Readonly<Record<string, string>> = {
+  // One press, followed through. Phase 59. The four step names reach the
+  // translator as t(moment.step) rather than as a literal, which no scanner
+  // can see — so verify-trace.ts asserts each is answered here.
+  'An address, a telephone number, a few words from the subject — or a trace, to follow one press all the way through':
+    'Une adresse, un numéro de téléphone, quelques mots de l’objet — ou une trace, pour suivre une action de bout en bout',
+  'Nothing came of that': 'Cela n’a rien produit',
+  'No record carries that trace. Either nothing was written at all — which is itself the answer — or the identifier has been mistyped.':
+    'Aucun enregistrement ne porte cette trace. Soit rien n’a été écrit du tout — ce qui est déjà la réponse — soit l’identifiant a été mal saisi.',
+  '{count} things came of that press, oldest first.':
+    '{count} éléments découlent de cette action, du plus ancien au plus récent.',
+  recorded: 'enregistré',
+  queued: 'mis en file',
+  told: 'notifié',
+  sent: 'envoyé',
   'Check the mail provider’s dashboard for the reason it is refusing.':
     'Consultez le tableau de bord du fournisseur de messagerie pour connaître le motif du refus.',
   'Check the sending provider’s balance and its dashboard.':
@@ -203,6 +217,20 @@ export const fr: Readonly<Record<string, string>> = {
 };
 
 export const ar: Readonly<Record<string, string>> = {
+  // One press, followed through. Phase 59. The four step names reach the
+  // translator as t(moment.step) rather than as a literal, which no scanner
+  // can see — so verify-trace.ts asserts each is answered here.
+  'An address, a telephone number, a few words from the subject — or a trace, to follow one press all the way through':
+    'عنوان، أو رقم هاتف، أو بضع كلمات من الموضوع — أو تتبّع، لمتابعة ضغطة واحدة حتى نهايتها',
+  'Nothing came of that': 'لم ينتج عن ذلك شيء',
+  'No record carries that trace. Either nothing was written at all — which is itself the answer — or the identifier has been mistyped.':
+    'لا يحمل أي سجلّ هذا التتبّع. فإمّا أنه لم يُكتب شيء أصلًا — وهذه هي الإجابة — أو أن المعرّف كُتب خطأً.',
+  '{count} things came of that press, oldest first.':
+    'نتج عن تلك الضغطة {count} من الأمور، من الأقدم إلى الأحدث.',
+  recorded: 'مسجَّل',
+  queued: 'في الطابور',
+  told: 'أُبلغ',
+  sent: 'أُرسل',
   'Check the mail provider’s dashboard for the reason it is refusing.':
     'راجع لوحة تحكّم مزوّد البريد لمعرفة سبب الرفض.',
   'Check the sending provider’s balance and its dashboard.':

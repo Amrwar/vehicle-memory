@@ -16,6 +16,7 @@ import { siteUrl } from './credentials';
 import { audit } from './guard';
 import { pushNow } from './outbound';
 import { assertWithinLimit } from './billing';
+import { traceId } from './trace';
 
 /**
  * The team, against the database.
@@ -117,6 +118,7 @@ export async function inviteColleague(input: {
 
   const queued = await prisma.messageLog.create({
     data: {
+      traceId: await traceId(),
       orgId: input.orgId,
       channel: 'EMAIL',
       toAddress: email,

@@ -25,7 +25,7 @@
  *   not yet   Not enforced by anything. What it would take is written down,
  *             because "not yet" without that is a wish.
  *
- * The last kind is the point of the exercise. Twenty of the eighty-four need
+ * The last kind is the point of the exercise. Nineteen of the eighty-four need
  * a person, a production deployment, or a month of real traffic, and saying so
  * out loud is worth more than a green tick that means somebody once looked.
  */
@@ -432,8 +432,9 @@ const REGISTER: Record<string, Account> = {
     note: 'credentials, tokens, card details and whole records are taken out by name before the line is written. Phase 56.',
   },
   'NFR-803': {
-    how: 'not yet',
-    note: 'a trace identifier carried from a request into the jobs it enqueues. The outbox carries the event but not the request it came from.',
+    how: 'checked',
+    by: 'infra/scripts/verify-trace.ts',
+    note: 'one identifier per request, on every audit row, outbox event, message and notification it causes, and inherited by the job the event wakes. Phase 59.',
   },
   'NFR-804': {
     how: 'checked',

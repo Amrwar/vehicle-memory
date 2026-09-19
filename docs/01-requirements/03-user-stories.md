@@ -1642,6 +1642,56 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BL - One press, followed through (Phase 59)
+
+### BL1 - I pressed it and nothing happened
+
+**As** Sara **I want** somebody to be able to find out what became of a press
+**so that** "it did not work" can be answered rather than argued about.
+**Size** 13 - **Satisfies** FR-9401, FR-9402, FR-9405
+
+- **Given** a press, **when** anything is recorded because of it, **then** every
+  record carries the same identifier.
+- **Given** that identifier, **when** the operator searches it, **then** every
+  record it touched is listed in the order it happened.
+- **Given** a chain that stops halfway, **when** I read it, **then** where it
+  stops is what went wrong.
+
+### BL2 - The part that happens later
+
+**As** the operator **I want** the work a press queues to carry the press
+**so that** a message sent an hour later can still be traced to the button.
+**Size** 8 - **Satisfies** FR-9403
+
+- **Given** an outbox event, **when** a worker handles it, **then** anything it
+  writes or logs carries the trace the event came in with.
+- **Given** two jobs running at once, **when** both write, **then** neither can
+  read the other's trace.
+
+### BL3 - Nothing invented
+
+**As** the operator **I want** work nobody asked for to have no trace **so
+that** "nobody pressed anything" stays different from "we lost it".
+**Size** 3 - **Satisfies** FR-9404
+
+- **Given** a reminder queued by a schedule, **when** it is written, **then** it
+  carries no trace.
+- **Given** the column, **when** I look at the schema, **then** it is nullable,
+  and says why.
+
+### BL4 - A rule no hand could keep
+
+**As** an engineer **I want** the stamping enforced **so that** the one somebody
+forgets is found the day it happens rather than a year later.
+**Size** 5 - **Satisfies** FR-9406, FR-9407
+
+- **Given** a write that a request causes, **when** it does not stamp the trace,
+  **then** a check fails and names the file and the line.
+- **Given** a trace offered by a caller, **when** it is the right shape, **then**
+  it is kept; **when** it is not, **then** it is replaced.
+
+---
+
 ## Epic BK - Configured to do anything (Phase 58)
 
 ### BK1 - The setting that looks fine and does nothing

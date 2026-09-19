@@ -37,6 +37,29 @@ file store, the vehicle lookup, the assistant, the scheduled-work secret — are
 one-step problems whose first action is the whole procedure, and the short form
 carries it.
 
+## Following one press (Phase 59)
+
+Somebody says they pressed something and nothing happened. Ask them for the
+trace if they can see it — it is on the response header `x-carnet-trace` — or
+find it from the audit log:
+
+```sql
+SELECT "traceId", "action", "createdAt" FROM "audit_logs"
+ WHERE "actorUserId" = '<user>' ORDER BY "createdAt" DESC LIMIT 10;
+```
+
+Then put it in the search box on `/admin/health`. It lists every record that
+trace touched, oldest first, across four tables. Read it as a chain:
+
+| It stops at            | What that means                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| nothing at all         | The action never ran. Look at the browser: a refusal, or a form that never submitted.      |
+| **recorded**           | The action ran and was recorded, and queued nothing. Often correct — not everything sends. |
+| **queued**             | The outbox has it and has not handled it. Go to _Outbox backing up_.                       |
+| **sent** with an error | The message exists and the provider refused it. The reason is on the row.                  |
+
+A trace of `null` is not a lost one. Scheduled work has none by design.
+
 ## Chain verification failure
 
 **Severity: critical.** This is the one that matters most. It means either a

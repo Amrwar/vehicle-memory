@@ -22,6 +22,7 @@ import {
 import { type InvoiceStatus, type JobStatus, prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { traceId } from './trace';
 
 /**
  * Automation and CRM, against the database.
@@ -643,8 +644,13 @@ export async function sendCampaign(input: {
       skipDuplicates: true,
     });
 
+    // One trace for the whole campaign: a person pressed send once, and every
+    // message it produced belongs to that press.
+    const trace = await traceId();
+
     await tx.messageLog.createMany({
       data: sent.map((customerId) => ({
+        traceId: trace,
         orgId: input.orgId,
         channel: campaign.channel,
         toAddress: addressOf.get(customerId)!,

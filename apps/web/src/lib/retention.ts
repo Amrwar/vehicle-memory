@@ -24,6 +24,7 @@ import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
 import { isAlreadyDone } from './repeat';
+import { traceId } from './trace';
 
 /**
  * Asking how it went, points, referrals, and replies coming back.
@@ -173,6 +174,7 @@ export async function askAbout(input: {
     // set of rules about when a customer may be disturbed.
     await prisma.messageLog.create({
       data: {
+        traceId: await traceId(),
         orgId: input.orgId,
         channel: request.channel === 'EMAIL' ? 'EMAIL' : 'SMS',
         toAddress: to,

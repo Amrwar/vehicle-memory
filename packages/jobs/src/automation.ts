@@ -9,6 +9,7 @@ import { prisma } from '@carnet/db';
 
 import { consentOf } from './consent';
 import { log } from './log';
+import { currentTrace } from './trace';
 
 /**
  * Carrying out the rules a workshop wrote.
@@ -218,6 +219,7 @@ export async function runDueAutomationActions(): Promise<number> {
 
       const message = await prisma.messageLog.create({
         data: {
+          traceId: currentTrace(),
           orgId: action.run.rule.orgId,
           channel,
           toAddress: (channel === 'EMAIL' ? customer.email : customer.mobile) ?? '',

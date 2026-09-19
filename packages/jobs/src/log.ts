@@ -1,3 +1,5 @@
+import { currentTrace } from './trace';
+
 /**
  * One line of JSON per event.
  *
@@ -70,10 +72,15 @@ function safe(value: unknown, depth = 0, seen = new WeakSet<object>()): unknown 
 }
 
 export function log(event: string, detail: Record<string, unknown> = {}): void {
+  // The trace of whatever caused this, where there is one. Phase 59: it is
+  // what joins a line written by a worker to the press that produced it.
+  const trace = currentTrace();
+
   console.info(
     JSON.stringify({
       time: new Date().toISOString(),
       event,
+      ...(trace ? { trace } : {}),
       ...(safe(detail) as Record<string, unknown>),
     }),
   );

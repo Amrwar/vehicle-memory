@@ -3576,6 +3576,65 @@ ignore it.
 Nothing it prints is a value. A settings check that logs what it is checking is
 a settings check nobody can run against production.
 
+## Phase 59 — One press, followed through
+
+**Scope.** NFR-803: a trace identifier carried from a request into the jobs it
+enqueues.
+
+**Exit.** A workshop says "I pressed the button and nothing happened", and the
+answer is on a screen in one search.
+
+**Status.** Built.
+
+Phase 50 answered the question a workshop rings about: _why did this customer
+not get their message?_ — consent, suppression, status, held or stuck. The
+question they ask more often is the same one pointed the other way, and nothing
+could answer it. Somebody pressed a button and nothing happened. Was the action
+recorded at all? Did it reach the outbox? Did the outbox turn into a message?
+Did anybody on the floor get told? Four tables, and no way to tell which of
+them the press had reached before it stopped.
+
+One identifier fixes it. The proxy mints one per request — `t-` and twelve hex
+characters, short enough to read down a telephone — and every record that
+request causes carries it: the audit row, the outbox event, the message, the
+staff notification. `/admin/health`'s existing search box takes it and shows
+the whole chain in the order it happened, because **where it stops is what went
+wrong**.
+
+**The half that had never existed is the background one.** A job has no request
+headers: by the time the outbox is drained the request is long gone, possibly
+on another machine and quite possibly a day earlier. So the event carries the
+trace and the worker puts it back, handling each one inside an async-local
+context holding its own. Async-local rather than a variable, and the check
+proves why: the worker handles a batch, and a module variable would work
+perfectly until two jobs overlapped — at which point it would attribute one
+workshop's message to another workshop's press.
+
+**Nothing invents one.** A reminder queued at four in the morning was nobody's
+press, and the column stays nullable so that "nobody pressed anything" and "we
+lost it" remain different answers. A trace on a scheduled sweep would say a
+person was there.
+
+**A rule no hand could keep.** Thirty-one places across twenty files write one
+of those four tables, and the one somebody forgets next month is invisible —
+the record still saves, the page still works, and one link of the chain is
+quietly missing for whoever comes looking a year later. So `verify-trace` reads
+the source and fails on any write that does not stamp it. It found two the
+first time it ran, both missed by the very change that was adding them.
+
+**And a header a stranger controls.** A trace already on the way in is kept, so
+a provider's webhook can be followed from their side to ours — but only if it
+is the right shape. This goes into a log line and a search box, and neither is
+a place to put a value somebody else chose without looking at it first.
+
+**One thing this phase nearly got wrong, found by the check.** The screens were
+being measured against a server that had failed to start: an earlier run was
+still holding the port, so `npm start` exited with EADDRINUSE and every request
+went to a stale build. The trace checks failed against it, which is how it came
+to light. That is the Phase 51 lesson for the second time — a held port serving
+yesterday's code — and it is now the reason the trace probe asks the running
+application for a header rather than trusting that it restarted.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

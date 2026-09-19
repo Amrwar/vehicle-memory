@@ -2,6 +2,7 @@ import { prisma } from '@carnet/db';
 
 import { claimOutbox } from './claim';
 import { log } from './log';
+import { withTrace } from './trace';
 
 /**
  * The work that happens without anybody asking for it.
@@ -90,7 +91,11 @@ export async function dispatchOutbox(): Promise<number> {
     }
 
     try {
-      await handler((event.payload ?? {}) as Record<string, unknown>);
+      // Inside the trace the event came in with, so anything this handler
+      // writes or logs belongs to the press that caused it. Phase 59.
+      await withTrace(event.traceId, () =>
+        handler((event.payload ?? {}) as Record<string, unknown>),
+      );
       await prisma.outboxEvent.update({
         where: { id: event.id },
         data: { processedAt: new Date() },

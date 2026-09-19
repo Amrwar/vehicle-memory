@@ -574,6 +574,12 @@ jobs:
       - name: Every quality requirement is accounted for
         run: npx tsx infra/scripts/verify-quality.ts
 
+      # One press, followed all the way through: the record, the queued event,
+      # the message, and the note on somebody's screen. NFR-803, which had
+      # never existed.
+      - name: A press can be followed to the inbox
+        run: npx tsx infra/scripts/verify-trace.ts http://localhost:3000
+
       # Whether anybody would actually be told. A page is the right thing to
       # look at once you know something is wrong; this is the part that makes
       # you know, and it had never existed.
