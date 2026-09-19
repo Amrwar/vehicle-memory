@@ -267,6 +267,35 @@ with what the workshop owes rather than what it has sold. The rule: when a
 page has one figure that means somebody must act today, it is the first tile
 that changes colour, and it changes colour only when it is non-zero.
 
+## 14. Two rules that only work as minimums (Phase 55)
+
+Both were written earlier, both did nothing, and both did nothing silently
+until every screen was measured for the first time.
+
+**A control's size is a minimum, never a size.** The stylesheet has held, since
+Phase 46.5, that on a screen driven by a thumb a tick box is twenty-four pixels
+through the middle. It set `block-size`, which is the same property as the
+`height` a utility class sets — and a utility wins over the base layer whatever
+its specificity, so every `h-4 w-4` in the product went on being sixteen pixels
+and the rule reached nothing. As `min-block-size` it reaches everything at
+once, because a minimum and a height are different properties and the minimum
+wins. The same reasoning already made the forty-pixel rule for buttons work;
+it was the tick boxes that were written the other way.
+
+**A box inside a grid or a flex row needs `min-w-0`, not only `w-full`.** They
+are different promises. A box's intrinsic width — twenty characters, whatever
+the browser decides that is — is its minimum content width, and a track sized
+by its content takes that minimum rather than the width asked for. So a
+full-width field inside a narrow column pushed the whole page sideways while
+claiming to be exactly as wide as its parent. `Input`, `Textarea`, `Select` and
+`Field` all carry it now, which fixed three of the four pages that overflowed
+on a telephone.
+
+The fourth was not a component but a layout: five fixed columns in the packages
+form came to 392 pixels, and because a grid track is as wide as its widest
+item, every other row of that form became 392 pixels too. On a phone it is two
+columns with the description across both.
+
 ---
 
 _Next: [Wireframes](09-wireframes.md)._

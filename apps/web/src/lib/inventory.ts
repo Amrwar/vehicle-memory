@@ -569,6 +569,7 @@ export async function usageHistory(
 ): Promise<{ quantity: number; at: Date }[]> {
   const since = new Date(Date.now() - days * 86_400_000);
 
+  // bounded: one part's issues within a window of days.
   const movements = await prisma.stockMovement.findMany({
     where: { productId, type: 'ISSUE', createdAt: { gte: since } },
     select: { quantity: true, createdAt: true },
@@ -583,6 +584,7 @@ export async function usageHistory(
 
 /** Quantity on outstanding purchase orders, so we do not order twice. */
 export async function quantityOnOrder(orgId: string, productId: string): Promise<number> {
+  // bounded: the lines for one part on orders still outstanding.
   const lines = await prisma.purchaseOrderLine.findMany({
     where: {
       productId,

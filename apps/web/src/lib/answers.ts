@@ -11,11 +11,10 @@ import {
   periodBounds,
   profitAndLoss,
   refusal,
-  withinPeriod,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { openPayables, openReceivables, postedLines } from './accounting';
+import { openPayables, openReceivables, postedTotals } from './accounting';
 import { revenueByServiceType, retention } from './reports';
 import { regionFor } from './region';
 
@@ -122,7 +121,7 @@ async function profit(orgId: string, period: Period, now: Date): Promise<Answer>
   const region = await regionFor(orgId);
   const GBP = region.currency;
   const bounds = periodBounds(period, now);
-  const lines = withinPeriod(await postedLines(orgId), bounds.from, bounds.to);
+  const lines = await postedTotals(orgId, { from: bounds.from, to: bounds.to });
   const pl = profitAndLoss(lines, GBP);
 
   const reasoning = [
@@ -223,22 +222,30 @@ async function cashTaken(orgId: string, period: Period, now: Date): Promise<Answ
   const region = await regionFor(orgId);
   const GBP = region.currency;
   const bounds = periodBounds(period, now);
-  const payments = await prisma.payment.findMany({
+  // Grouped in the database. One row per way of paying — five or six of them
+  // — rather than every receipt in the period carried here to be added up.
+  const payments = await prisma.payment.groupBy({
+    by: ['method'],
     where: { orgId, receivedAt: { gte: bounds.from, lte: bounds.to } },
-    select: { amount: true, method: true },
+    _sum: { amount: true },
+    _count: { _all: true },
   });
+
+  // How many receipts, not how many ways of paying. The first version of this
+  // grouping said "received in 4 payments" for four hundred of them.
+  const howMany = payments.reduce((sum, row) => sum + row._count._all, 0);
 
   const byMethod = new Map<string, number>();
   let total = 0;
   for (const payment of payments) {
-    const minor = Math.round(Number(payment.amount) * 100);
+    const minor = Math.round(Number(payment._sum.amount ?? 0) * 100);
     total += minor;
     byMethod.set(payment.method, (byMethod.get(payment.method) ?? 0) + minor);
   }
 
   return {
     figure: money(total, GBP),
-    headline: `${formatFigure(money(total, GBP))} received ${describePeriod(period, now)} in ${payments.length} payment${payments.length === 1 ? '' : 's'}.`,
+    headline: `${formatFigure(money(total, GBP))} received ${describePeriod(period, now)} in ${howMany} payment${howMany === 1 ? '' : 's'}.`,
     reasoning: [
       'Payments recorded against invoices, by how they were paid.',
       ...[...byMethod.entries()]
@@ -333,6 +340,7 @@ async function awaitingApproval(orgId: string): Promise<Answer> {
 async function stockValue(orgId: string): Promise<Answer> {
   const region = await regionFor(orgId);
   const GBP = region.currency;
+  // bounded: one row per part on the shelf. A workshop's catalogue is thousands.
   const levels = await prisma.stockLevel.findMany({
     where: { product: { orgId, isActive: true } },
     select: { onHand: true, avgCost: true, product: { select: { name: true } } },
@@ -369,21 +377,27 @@ async function topCustomers(orgId: string, period: Period, now: Date): Promise<A
   const region = await regionFor(orgId);
   const GBP = region.currency;
   const bounds = periodBounds(period, now);
-  const invoices = await prisma.invoice.findMany({
-    where: { orgId, status: { not: 'VOID' }, issuedAt: { gte: bounds.from, lte: bounds.to } },
-    select: { subtotal: true, customer: { select: { displayName: true } } },
-  });
+  // Five rows, ranked and cut off in the database. The answer is a top five,
+  // so the other ninety-five thousand invoices in a quarter never needed to
+  // leave it.
+  const rows = await prisma.$queryRaw<{ name: string; net: string }[]>`
+    SELECT c."displayName"          AS name,
+           SUM(i."subtotal")::text  AS net
+      FROM "invoices" i
+      JOIN "customers" c ON c."id" = i."customerId"
+     WHERE i."orgId" = ${orgId}
+       AND i."status" <> 'VOID'
+       AND i."issuedAt" >= ${bounds.from}
+       AND i."issuedAt" <= ${bounds.to}
+     GROUP BY c."displayName"
+     ORDER BY SUM(i."subtotal") DESC
+     LIMIT 5
+  `;
 
-  const byCustomer = new Map<string, number>();
-  for (const invoice of invoices) {
-    byCustomer.set(
-      invoice.customer.displayName,
-      (byCustomer.get(invoice.customer.displayName) ?? 0) +
-        Math.round(Number(invoice.subtotal) * 100),
-    );
-  }
-
-  const ranked = [...byCustomer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const ranked: [string, number][] = rows.map((row) => [
+    row.name,
+    Math.round(Number(row.net) * 100),
+  ]);
 
   return {
     figure: ranked.length,
@@ -461,6 +475,7 @@ async function wages(orgId: string, period: Period, now: Date): Promise<Answer> 
   const region = await regionFor(orgId);
   const GBP = region.currency;
   const bounds = periodBounds(period, now);
+  // bounded: one run a month, so a year is twelve rows.
   const runs = await prisma.payrollRun.findMany({
     where: { orgId, periodEnd: { gte: bounds.from, lte: bounds.to } },
     select: { gross: true, employeeCount: true, status: true, periodEnd: true },

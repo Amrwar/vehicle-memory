@@ -177,6 +177,7 @@ const PACKAGE_INCLUDE = {
 } as const;
 
 export async function packagesFor(orgId: string, options: { activeOnly?: boolean } = {}) {
+  // bounded: packages a workshop writes by hand.
   const rows = await prisma.servicePackage.findMany({
     where: { orgId, ...(options.activeOnly ? { isActive: true } : {}) },
     orderBy: [{ isActive: 'desc' }, { sortOrder: 'asc' }],

@@ -310,7 +310,7 @@ export default async function CheckInPage({
                     />
                     <label
                       htmlFor={`mark-${area}`}
-                      className="w-32 shrink-0 text-[13px] font-medium"
+                      className="w-24 shrink-0 text-[13px] font-medium sm:w-32"
                     >
                       {t(area)}
                     </label>

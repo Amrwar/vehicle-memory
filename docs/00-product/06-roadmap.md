@@ -3273,7 +3273,118 @@ starts, because a success criterion agreed afterwards is not a criterion.
 
 ---
 
+## Phase 55 — The four things that are not features
+
+**Scope.** The four promises the section below makes about every phase rather
+than about any one of them, none of which had ever been checked.
+
+**Exit.** Each of the four can fail, in one place, by name.
+
+**Status.** Built, and it found a great deal.
+
+A promise about everything is a promise about nothing. There is no single place
+it can fail, so it never does, and fifty-four phases of "every phase ends with
+the checks" turned out to mean something rather different once anything asked.
+`npm run verify:throughout` asks, in ten checks, and needs neither a browser
+nor a running application: it reads the repository, which is where all four are
+either kept or not.
+
+**Twenty-six of the seventy-four verification scripts were never run by
+anything.** Written, wired to an npm name, green the day they were written, and
+then executed only when somebody typed their name — which nobody had, in some
+cases for nine phases. Among them were the checks for payments, for tax, for
+permissions, for the first day, for every screen at every size, and for every
+sentence being translated. The last of those had been _failing_ since Phase 50
+and nothing said so. The scanner that enforces the language requirement was not
+in the workflow at all. All of it is now, and running the twenty-six for the
+first time is where most of what follows came from.
+
+**Three quarters of the screens had never been measured.** `verify-screens.ts`
+has said "every page is measured on a telephone" since Phase 46.5, over a list
+somebody typed by hand: fifty-two of a hundred and twenty-eight addresses. It
+now reads the app directory, and every address must either be measured or carry
+a written reason why not — so a page built next month fails the check on the
+day it is created, which is the one moment when deciding costs nothing. Two
+addresses have reasons: a printed document, which is drawn for paper and
+measured by `verify-paper` instead, and the operator's own page on a database
+where the operator account belongs to a real person, because this probe does
+not sign in as anybody real to measure a layout.
+
+Measuring the other seventy-six found **twenty faults**, on pages nobody had
+looked at sideways since the day they were written. Every tick box in the
+product was sixteen pixels rather than twenty-four: the design system had a
+rule for exactly that, written in Phase 46.5, and it did nothing at all,
+because it set `block-size` — which is the same property as the `height` a
+utility class sets, and a utility beats the base layer whatever its
+specificity. As a minimum instead, it works everywhere at once. Four pages
+pushed the screen sideways, each the same mistake: a grid or flex item is
+`min-width: auto` by default, so its widest word decides the track rather than
+the track deciding the word. The worst was a five-column row of price fields in
+the packages form, three hundred and ninety-two pixels wide, which made every
+other row of that form three hundred and ninety-two pixels wide too.
+
+**And the screens probe was measuring a page that had fallen over.** A page
+under a loading boundary sends its shell before it throws, so the status is
+200 and the error arrives inside it — short, tidy, and passing every
+measurement. This is the Phase 51 lesson arriving a second time, where a broken
+query made a page take eleven seconds to render an error and the first reading
+was "that page is slow". Here the first reading was "ok". It now refuses to
+measure a page with an error on it.
+
+**Fifty of the three hundred lists had neither a bound nor a stated reason.**
+Most had a real answer nobody had written down — a chart of accounts is fifty
+rows, a workshop has two bank accounts — and those are now written where they
+apply, in words, so they can be disagreed with. Six did not have an answer. The
+worst was the trial balance: `/ledger` and `/financials` read **every line the
+workshop had ever posted** in order to print forty figures. Both now sum in the
+database, and the statement functions in core are untouched, because the shape
+they are given is still one `PostedLine` per account. The books audit, the
+receivable bridge, the unread badge on every page, and two of the answers were
+the others.
+
+**The customer's entire side had no loading state at all.** "Nothing waits on a
+blank screen" was true of the workshop, where one boundary covers the whole
+route group, and false everywhere else: twelve portal pages, the technician's
+device, and every link a customer opens from a message showed nothing at all
+while they waited — on mobile data, outside a garage, which is exactly where a
+blank screen reads as a link that did not work. Seven boundaries now, each
+drawing the car rather than a spinner, and the pages that genuinely do not need
+one are named with the reason.
+
+One of those seven was taken away again, and the reason is worth keeping. A
+boundary on the card payment page turned an attempt that does not exist from a
+404 into a 200 with the not-found screen inside it, because the shell is sent
+before the lookup. That is a public address a link checker reads. A single-row
+lookup does not need a loading state badly enough to pay for it.
+
+**Two products bugs, both found by a check that had been asleep.**
+
+A customer who had successfully referred a friend could not open their referral
+card: it threw a constraint violation, every time, for ever. Phase 46 wanted to
+stop two pages issuing two codes at once and wrote a unique index on the
+customer — stronger than what it meant. A code in this product is one
+introduction, so a customer who has introduced anybody has a used row, and
+asking for their code tries to write a second. The index is now the one the
+intent describes: at most one code _waiting to be used_. The customer a
+workshop most wants to look at is the one who brings other people in.
+
+And the seeded workshop had no labour rate at all — not one, anywhere — so it
+could not price an hour of work, `/settings/site` listed nothing, and the check
+that says a site with no rate of its own takes the workshop's could only pass
+on a database somebody had edited by hand.
+
+**One probe that passed depending on the day of the week.** `verify-import`
+built a VIN out of a base-36 timestamp, and base 36 contains I, O and Q — the
+three letters a VIN may not have. Roughly one day in three it made a VIN the
+product rightly refuses, and read the refusal as a fault in the import.
+
+---
+
 ## Running throughout — the four things that are not features
+
+_Checked, since Phase 55, by `npm run verify:throughout`. Each of the four
+below can now fail by name, which is the difference between a promise and a
+description._
 
 **Every phase ends with the checks.** Format, lint, types, unit tests, the
 build, every route rendered for every role, every page with nothing in it,
@@ -3282,9 +3393,12 @@ script run against a database. A phase is not finished when it works once.
 
 **Responsive, not merely narrow.** Every screen built in these phases is used
 on a phone by somebody holding a part in the other hand. Since 16 September
-2026 that is measured rather than claimed: `verify-screens.ts` loads every
-screen at 390 by 844, and the screens a workshop lives in at seven sizes from
-a 320-pixel phone to a 1680-pixel monitor, in English and in Arabic. It fails
+2026 that is measured rather than claimed, and since 19 September it is
+measured over a list read off the app directory rather than one somebody
+typed — which is the difference between fifty-two screens and a hundred and
+twenty-eight. `verify-screens.ts` loads every screen at 390 by 844, and the
+screens a workshop lives in at seven sizes from a 320-pixel phone to a
+1680-pixel monitor, in English and in Arabic. It fails
 on anything wider than the window, any control under forty pixels through the
 middle where a thumb is doing the pressing, any standalone link under the
 twenty-four WCAG 2.2 asks for, and any text under eleven pixels. What it found the first time was fixed in the design
@@ -3294,14 +3408,16 @@ pixels rather than ten, and a shadow at the edge of a table that has more
 behind it.
 
 **Complexity that stays honest.** Every list gets a bound and every derived
-figure gets a cost. `timelineFor` merges five queries in memory deliberately,
+figure gets a cost — and since Phase 55, a list with neither a bound nor a
+written reason fails a check rather than sitting quietly in a file. `timelineFor` merges five queries in memory deliberately,
 because a customer has hundreds of events rather than millions, and that
 reasoning is written down where it applies. Where a figure does grow with the
 organisation, it gets an index or a cached column, not a comment hoping it
 will be fine.
 
 **Nothing waits on a blank screen.** Where a page cannot render immediately,
-it shows the vehicle rather than a spinner: a car being worked on, drawn in
+it shows the vehicle rather than a spinner — everywhere, since Phase 55, rather
+than only on the workshop's side: a car being worked on, drawn in
 the product's own terms, that makes a slow moment feel like part of the
 product rather than a fault in it.
 

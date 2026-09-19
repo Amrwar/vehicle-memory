@@ -365,12 +365,28 @@ export async function conversationsFor(
   );
 }
 
+/**
+ * How many open threads have something in them nobody has read.
+ *
+ * Counted in the database rather than fetched and filtered. This is a badge
+ * on the sidebar of every page a workshop opens, so it runs more often than
+ * anything else in the product, and it used to read every open conversation
+ * to produce one small number.
+ *
+ * The condition is the same one `isUnread` states, written twice — once in
+ * core for a thread in hand and once here for a count — which is a duplication
+ * worth naming: if either changes, the badge and the list disagree, and the
+ * test below the fold in conversations.test.ts is what would notice.
+ */
 export async function unreadCount(orgId: string): Promise<number> {
-  const rows = await prisma.conversation.findMany({
-    where: { orgId, status: 'OPEN', lastInboundAt: { not: null } },
-    select: { lastInboundAt: true, readAt: true },
+  return prisma.conversation.count({
+    where: {
+      orgId,
+      status: 'OPEN',
+      lastInboundAt: { not: null },
+      OR: [{ readAt: null }, { readAt: { lt: prisma.conversation.fields.lastInboundAt } }],
+    },
   });
-  return rows.filter(isUnread).length;
 }
 
 export async function conversationDetail(orgId: string, conversationId: string) {

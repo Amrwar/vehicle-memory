@@ -81,6 +81,10 @@ export async function revenueByServiceType(
   orgId: string,
   period: Period,
 ): Promise<ServiceTypeRow[]> {
+  // bounded: the jobs finished in one period. Measured at Phase 51's scale — a
+  // hundred thousand customers and half a million jobs — against the budget on
+  // /reports/business, which it met. The evidence is the measurement rather
+  // than an argument about how big a quarter is.
   const jobs = await prisma.job.findMany({
     where: {
       orgId,
@@ -181,6 +185,7 @@ export interface PartsRow {
  */
 export async function partsProfitability(orgId: string, period: Period): Promise<PartsRow[]> {
   const [jobLines, saleLines] = await Promise.all([
+    // bounded: the part lines of the jobs finished in one period, measured as above.
     prisma.jobPartLine.findMany({
       where: {
         job: {
@@ -191,6 +196,7 @@ export async function partsProfitability(orgId: string, period: Period): Promise
       },
       include: { product: { include: { category: { select: { name: true } } } } },
     }),
+    // bounded: the counter sales of one period, measured as above.
     prisma.counterSaleLine.findMany({
       where: {
         sale: { orgId, status: 'PAID', soldAt: { gte: period.from, lte: period.to } },

@@ -95,6 +95,7 @@ const SELECT = {
 
 /** Everything covered on one vehicle, with whether it still holds. */
 export async function coverForVehicle(orgId: string, vehicleId: string, now = new Date()) {
+  // bounded: one vehicle's cover.
   const rows = await prisma.warranty.findMany({
     where: { orgId, vehicleId },
     orderBy: { startedOn: 'desc' },

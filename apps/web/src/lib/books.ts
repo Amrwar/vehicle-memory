@@ -95,6 +95,7 @@ export async function auditBooks(orgId: string, db: PrismaClient = prisma): Prom
 
   /* --- nothing posted into a period somebody has reported on --------------- */
 
+  // bounded: one period a month.
   const closed = await db.fiscalPeriod.findMany({
     where: { orgId, isClosed: true },
     select: { name: true, startsAt: true, endsAt: true, closedAt: true },
@@ -106,6 +107,8 @@ export async function auditBooks(orgId: string, db: PrismaClient = prisma): Prom
     // Read rather than trusted. The guard that refuses a posting into a closed
     // period was added at a particular moment, and says nothing about rows
     // written before it existed.
+    // bounded: entries written into a period after it was closed, which should be
+    // none — finding any is the whole point of the check.
     const after = await db.journalEntry.findMany({
       where: {
         orgId,
@@ -252,6 +255,7 @@ export async function auditBooks(orgId: string, db: PrismaClient = prisma): Prom
 
   /* --- no card is worth less than nothing ---------------------------------- */
 
+  // bounded: cards the workshop has sold over the counter.
   const cards = await db.giftCard.findMany({
     where: { orgId },
     select: { code: true, entries: { select: { amount: true } } },
@@ -356,21 +360,26 @@ export async function auditBooks(orgId: string, db: PrismaClient = prisma): Prom
   return auditOf(checked, found);
 }
 
-/** What an account's balance comes to, from its own lines. */
+/**
+ * What an account's balance comes to, from its own lines.
+ *
+ * Summed in the database. An audit that has to read every posting a workshop
+ * has ever made in order to produce one figure is an audit that gets slower
+ * every month and is quietly switched off in the third year — which is the
+ * year it starts to matter.
+ */
 async function balanceOf(db: PrismaClient, orgId: string, code: string, currency: string) {
-  const lines = await db.journalLine.findMany({
-    where: { entry: { orgId }, account: { code } },
-    select: { debit: true, credit: true },
-  });
-
   // A liability is a credit balance, so it is read the way round a workshop
   // would say it: what we still owe, as a positive figure.
-  return money(
-    Math.round(
-      lines.reduce((sum, line) => sum + Number(line.credit) - Number(line.debit), 0) * 100,
-    ),
-    currency,
-  );
+  const [row] = await db.$queryRaw<{ balance: string }[]>`
+    SELECT coalesce(SUM(l."credit" - l."debit"), 0)::text AS balance
+      FROM "journal_lines" l
+      JOIN "journal_entries" e ON e."id" = l."entryId"
+      JOIN "accounts" a        ON a."id" = l."accountId"
+     WHERE e."orgId" = ${orgId} AND a."code" = ${code}
+  `;
+
+  return money(Math.round(Number(row?.balance ?? 0) * 100), currency);
 }
 
 /**
@@ -386,41 +395,34 @@ async function receivableBridge(
   orgId: string,
   currency: string,
 ): Promise<Breach | null> {
-  const [lines, invoices] = await Promise.all([
-    db.journalLine.findMany({
-      where: { entry: { orgId }, account: { code: '1100' } },
-      select: { debit: true, credit: true },
-    }),
+  // Both sides summed in the database. Two figures come back whatever a
+  // workshop's size, where before it was every posting and every bill it had
+  // ever written, carried here to be added up.
+  const [[posted], [billed]] = await Promise.all([
+    db.$queryRaw<{ balance: string }[]>`
+      SELECT coalesce(SUM(l."debit" - l."credit"), 0)::text AS balance
+        FROM "journal_lines" l
+        JOIN "journal_entries" e ON e."id" = l."entryId"
+        JOIN "accounts" a        ON a."id" = l."accountId"
+       WHERE e."orgId" = ${orgId} AND a."code" = ${'1100'}
+    `,
     // Every bill, not only the unpaid ones: a settled bill that was later
     // credited and refunded still leaves a balance on the account, and leaving
     // it out is how the two sides come to differ by exactly one refund.
-    db.invoice.findMany({
-      where: { orgId, status: { not: 'DRAFT' } },
-      select: {
-        total: true,
-        amountPaid: true,
-        creditNotes: { select: { amount: true } },
-        refunds: { select: { amount: true } },
-      },
-    }),
+    db.$queryRaw<{ owed: string }[]>`
+      SELECT coalesce(SUM(
+               i."total" - i."amountPaid"
+               - coalesce((SELECT SUM(n."amount") FROM "credit_notes" n WHERE n."invoiceId" = i."id"), 0)
+               + coalesce((SELECT SUM(r."amount") FROM "refunds" r WHERE r."invoiceId" = i."id"), 0)
+             ), 0)::text AS owed
+        FROM "invoices" i
+       WHERE i."orgId" = ${orgId} AND i."status" <> 'DRAFT'
+    `,
   ]);
 
-  const ledger = Math.round(
-    lines.reduce((sum, line) => sum + Number(line.debit) - Number(line.credit), 0) * 100,
-  );
+  const ledger = Math.round(Number(posted?.balance ?? 0) * 100);
 
-  const owed = invoices.reduce(
-    (sum, invoice) =>
-      sum +
-      Math.round(
-        (Number(invoice.total) -
-          Number(invoice.amountPaid) -
-          invoice.creditNotes.reduce((credited, note) => credited + Number(note.amount), 0) +
-          invoice.refunds.reduce((back, refund) => back + Number(refund.amount), 0)) *
-          100,
-      ),
-    0,
-  );
+  const owed = Math.round(Number(billed?.owed ?? 0) * 100);
 
   return receivableAgrees({
     ledger: money(ledger, currency),

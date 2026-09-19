@@ -93,8 +93,8 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Fifty-three phases have shipped, the last on 19 September 2026, and the
-fifty-fourth — the pilot — is ready to run: the workshop core,
+Fifty-four phases have shipped, the last on 19 September 2026, and the pilot
+itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
 words, the network between workshops with a read-only API, the workshop
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 321 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 330 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 631
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 640
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -194,3 +194,17 @@ who the workshop is, what is in place on day one, what would end it early and
 what success means — is in the [pilot plan](05-project/06-pilot-plan.md),
 written before it starts, because a success criterion agreed afterwards is not
 a criterion.
+
+Phase 55 is the last one, and it is about the roadmap's own footnotes: four
+promises made about every phase rather than about any one of them, which
+nothing had ever checked. A promise about everything is a promise about
+nothing — there is no single place it can fail, so it never does. Asking
+properly found twenty-six of the seventy-four verification scripts never run by
+anything (one of them failing since Phase 50), three quarters of the screens
+never measured, fifty lists with neither a bound nor a stated reason, a trial
+balance that read every posting a workshop had ever made, the customer's entire
+side with no loading state at all, and two real bugs behind checks that had
+been asleep — a referral card that threw for anybody who had ever brought a
+friend in, and a demonstration workshop with no labour rate. All of it is
+fixed, and `npm run verify:throughout` is the ten checks that would say so
+again.

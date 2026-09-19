@@ -67,7 +67,7 @@ const CAPABILITIES: Capability[] = [
     name: 'Warranty',
     area: 'Finding work',
     expected: false,
-    actions: ['warranty.recorded', 'warranty.claim.raised'],
+    actions: ['warranty.recorded', 'warranty.claim.raised', 'warranty.claim.settled'],
   },
   {
     name: 'Recalls and fitments',
@@ -170,7 +170,7 @@ const CAPABILITIES: Capability[] = [
     name: 'Customers',
     area: 'The customer',
     expected: true,
-    actions: ['customer.created', 'customer.updated', 'customer.registered'],
+    actions: ['customer.created', 'customer.updated', 'customer.registered', 'consent.withdrawn'],
   },
   {
     name: 'Talking to customers',
@@ -220,7 +220,14 @@ const CAPABILITIES: Capability[] = [
     name: 'Changing keeper',
     area: 'The passport',
     expected: false,
-    actions: ['vehicle.transferred', 'vehicle.claim.asked'],
+    actions: [
+      'vehicle.transferred',
+      'vehicle.claim.asked',
+      'vehicle.handover_invited',
+      'vehicle.handover_accepted',
+      'vehicle.handover_declined',
+      'vehicle.handover_cancelled',
+    ],
   },
 
   // --- the workshop itself -------------------------------------------------
@@ -248,6 +255,10 @@ const CAPABILITIES: Capability[] = [
       'settings.taxrate',
       'settings.taxrate.default',
       'settings.numbering',
+      'settings.labour_rate_added',
+      'settings.labour_rate_retired',
+      'settings.site_price_set',
+      'settings.site_price_cleared',
     ],
   },
   {

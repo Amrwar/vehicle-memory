@@ -245,6 +245,8 @@ export async function networkStatementFor(
   orgId: string,
   vehicleId: string,
 ): Promise<NetworkSummary> {
+  // bounded: one vehicle's passport. NFR-104 budgets five hundred events and the
+  // page that draws it is measured against that figure.
   const events = await prisma.vehicleEvent.findMany({ where: { vehicleId }, select: EVENT_SELECT });
   return summariseNetwork(events.map(asNetworkEvent), orgId);
 }
@@ -256,6 +258,7 @@ export async function networkHistory(
 ): Promise<NetworkEvent[] | null> {
   if (!(await orgCanReadVehicle(orgId, vehicleId))) return null;
 
+  // bounded: one vehicle's passport, as above.
   const events = await prisma.vehicleEvent.findMany({
     where: { vehicleId },
     orderBy: { sequence: 'asc' },

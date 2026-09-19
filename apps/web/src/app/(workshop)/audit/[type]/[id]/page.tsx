@@ -62,7 +62,7 @@ export default async function LifePage({
           life.href ? (
             <Link
               href={life.href}
-              className="rounded-(--radius) border border-(--border) px-3 py-1.5 text-[13px] hover:bg-(--surface-sunken)"
+              className="inline-flex min-h-10 items-center rounded-(--radius) border border-(--border) px-3 text-[13px] hover:bg-(--surface-sunken)"
             >
               {t('Open the {label}', { label: t(life.label).toLowerCase() })}
             </Link>

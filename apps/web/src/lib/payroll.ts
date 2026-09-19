@@ -228,6 +228,7 @@ export async function waitingSheets(orgId: string) {
 
 /** Sheets somebody still has to approve. */
 export async function awaitingApproval(orgId: string) {
+  // bounded: sheets waiting for somebody, which is one per person per period.
   return prisma.timesheet.findMany({
     where: { orgId, status: 'SUBMITTED' },
     orderBy: [{ periodStart: 'desc' }, { employee: { reference: 'asc' } }],

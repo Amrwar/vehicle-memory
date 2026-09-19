@@ -253,7 +253,7 @@ export default async function PackagesPage({
           <CardBody>
             <form action={save} className="grid gap-4">
               {editing ? <input type="hidden" name="packageId" value={editing.id} /> : null}
-              <div className="grid gap-4 sm:grid-cols-[7rem_minmax(0,1fr)]">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-[7rem_minmax(0,1fr)]">
                 <Field label={t('Code')}>
                   <Input
                     name="code"
@@ -352,12 +352,16 @@ export default async function PackagesPage({
                     return (
                       <div
                         key={i}
-                        className="grid grid-cols-[6rem_minmax(0,1fr)_4.5rem_5.5rem_7rem] gap-1.5"
+                        // Five fixed columns come to 392 pixels, which is wider
+                        // than a telephone and, being a grid track, made every
+                        // other row of this form 392 pixels as well. A phone
+                        // gets two columns with the description across both.
+                        className="grid grid-cols-2 gap-1.5 sm:grid-cols-[6rem_minmax(0,1fr)_4.5rem_5.5rem_7rem]"
                       >
                         <select
                           name={`line-${i}-kind`}
                           defaultValue={line?.kind ?? 'LABOUR'}
-                          className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 text-[12px]"
+                          className="min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 text-[12px]"
                         >
                           <option value="LABOUR">{t('Labour')}</option>
                           <option value="PART">{t('Part')}</option>
@@ -367,7 +371,7 @@ export default async function PackagesPage({
                           name={`line-${i}-description`}
                           defaultValue={line?.description ?? ''}
                           placeholder={i === 0 ? t('Service labour') : ''}
-                          className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
+                          className="col-span-2 min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px] sm:col-span-1"
                         />
                         <input
                           name={`line-${i}-quantity`}
@@ -376,7 +380,7 @@ export default async function PackagesPage({
                           min="0"
                           defaultValue={line?.quantity ?? ''}
                           placeholder={t('qty')}
-                          className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
+                          className="min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                         <input
                           name={`line-${i}-price`}
@@ -385,13 +389,13 @@ export default async function PackagesPage({
                           min="0"
                           defaultValue={line?.unitPrice ?? ''}
                           placeholder={t('each')}
-                          className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
+                          className="min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                         <input
                           name={`line-${i}-part`}
                           defaultValue={line?.partNumber ?? ''}
                           placeholder={t('part no.')}
-                          className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
+                          className="min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                         />
                       </div>
                     );
@@ -413,7 +417,7 @@ export default async function PackagesPage({
                       name={`check-${i}`}
                       defaultValue={editing?.checks[i]?.title ?? ''}
                       placeholder={i === 0 ? t('Reset the service indicator') : ''}
-                      className="rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
+                      className="min-w-0 rounded-(--radius-sm) border border-(--border-strong) bg-(--surface) px-2 py-1 text-[13px]"
                     />
                   ))}
                 </div>

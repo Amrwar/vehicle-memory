@@ -204,7 +204,7 @@ export default async function SignupPage({
       </section>
 
       {/* The form. */}
-      <section className="flex flex-col justify-center bg-(--surface) px-5 py-10 sm:px-10">
+      <section className="flex min-w-0 flex-col justify-center bg-(--surface) px-5 py-10 sm:px-10">
         <div className="mx-auto w-full max-w-md">
           <Link href="/" className="mb-7 flex items-center gap-2.5 lg:hidden">
             <Mark size={22} />

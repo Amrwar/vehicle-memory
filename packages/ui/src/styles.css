@@ -411,11 +411,19 @@ h6 {
 
     /* A tick box is pressed through its label as often as through itself, so
        it is held to the twenty-four pixels rather than to a thumb's width. One
-       that is there only for a screen reader keeps its single pixel. */
+       that is there only for a screen reader keeps its single pixel.
+
+       As a minimum, for the reason given above rather than as a size. Written
+       first as inline-size and block-size, which is the same property as the
+       width and height a utility class sets — and a utility wins over the base
+       layer whatever its specificity, so every h-4 w-4 in the product went on
+       being sixteen pixels and the rule did nothing at all. It said so for
+       three phases without anybody noticing, because nothing measured the
+       screens it was written for. */
     input[type='checkbox']:not(.sr-only),
     input[type='radio']:not(.sr-only) {
-      inline-size: 1.5rem;
-      block-size: 1.5rem;
+      min-inline-size: 1.5rem;
+      min-block-size: 1.5rem;
     }
 
     a {

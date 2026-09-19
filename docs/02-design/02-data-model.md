@@ -166,7 +166,7 @@ Implemented in `20260909000100_invariants` and verified by
 | One request, once                                                                                   | Unique index `once_requests_orgId_key_key`, with the key minted when the form was drawn                                                              |
 | A loyalty entry that says what it is the one-and-only of is written once                            | Partial unique index `loyalty_entries_once_key` on `(orgId, once)`                                                                                   |
 | One refund becomes credit once, and loads a card once                                               | Partial unique indexes `deposits_one_credit_per_refund`, `gift_card_entries_one_per_refund`                                                          |
-| One referral code per customer per workshop                                                         | Unique index `referrals_one_per_customer`                                                                                                            |
+| One _unused_ referral code per customer per workshop (Phase 55)                                     | Partial unique index `referrals_one_unused_per_customer`, `WHERE referredCustomerId IS NULL`. Used codes are the introductions already made.         |
 | An entry on a vehicle's record is corrected once, by a new entry, never edited                      | Trigger `carnet_vehicle_events_append_only` permits only `supersededById`; unique indexes on both sides                                              |
 
 ## 6.5 Region (Phase 29)

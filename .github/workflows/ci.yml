@@ -51,6 +51,16 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # Every sentence in the product goes through the translator, and every
+      # sentence the translator is given has an answer in French and in Arabic.
+      # The requirement has been in place since Phase 37.5 and this scanner
+      # since Phase 40.5; until Phase 55 nothing ran it but a person typing it.
+      - name: No text outside the translator
+        run: npx tsx infra/scripts/i18n-scan.ts
+
+      - name: Every refusal translated
+        run: npx tsx infra/scripts/i18n-scan.ts --messages
+
       # Colour is not a matter of taste here. This resolves the design tokens
       # through their var() chains and measures every pair a component puts
       # together, in both themes, against WCAG AA.
@@ -354,6 +364,28 @@ jobs:
       - name: The awkward cases
         run: npx tsx infra/scripts/verify-awkward.ts
 
+      # Seven phases' own checks that were written, wired to an npm script, and
+      # then never run by anything. Each was green the day it was written and
+      # nothing has asked since.
+      - name: Points, referrals and gift cards
+        run: |
+          npx tsx infra/scripts/verify-loyalty.ts
+          npx tsx infra/scripts/verify-referrals.ts
+          npx tsx infra/scripts/verify-giftcards.ts
+
+      - name: Country, currency and money held ahead
+        run: |
+          npx tsx infra/scripts/verify-region.ts
+          npx tsx infra/scripts/verify-deposits.ts
+
+      - name: The customer's own account, and data brought in
+        run: |
+          npx tsx infra/scripts/verify-portal-account.ts
+          npx tsx infra/scripts/verify-import.ts
+
+      - name: The passport, listed
+        run: npx tsx infra/scripts/verify-passports.ts
+
       # Whether a workshop could be handed this on Monday: each of the pilot's
       # four findings has a source, and every audited action belongs to a
       # capability somebody would name, so nothing goes uncounted at the
@@ -465,6 +497,59 @@ jobs:
       # every address carrying an identifier, as another workshop's owner.
       - name: One workshop cannot reach another
         run: npx tsx infra/scripts/verify-tenancy.ts http://localhost:3000
+
+      # Every screen at every size. Built in Phase 46.5, never run by anything
+      # until Phase 55, by which time it had twenty faults waiting on pages
+      # that had been measured by nobody since the day they were written.
+      - name: Every screen at every size
+        run: npx tsx infra/scripts/verify-screens.ts http://localhost:3000
+
+      # Every sentence in French and in Arabic, and the switch that changes
+      # them. This one had been failing since Phase 50 and nothing said so.
+      - name: Every word translated
+        run: npx tsx infra/scripts/verify-languages.ts http://localhost:3000
+
+      - name: Permissions at the resource, and the plan enforced
+        run: npx tsx infra/scripts/verify-authz.ts http://localhost:3000
+
+      - name: Card payments, and the subscription billed
+        run: |
+          npx tsx infra/scripts/verify-payments.ts http://localhost:3000
+          npx tsx infra/scripts/verify-billing.ts http://localhost:3000
+
+      - name: The workflow, arrival and departure, and conversations
+        run: |
+          npx tsx infra/scripts/verify-workflow.ts http://localhost:3000
+          npx tsx infra/scripts/verify-arrival.ts http://localhost:3000
+          npx tsx infra/scripts/verify-conversations.ts http://localhost:3000
+
+      - name: Packages, parts back, and finding anything
+        run: |
+          npx tsx infra/scripts/verify-packages.ts http://localhost:3000
+          npx tsx infra/scripts/verify-returns.ts http://localhost:3000
+          npx tsx infra/scripts/verify-search.ts http://localhost:3000
+
+      - name: The owner's day, tax, and paper
+        run: |
+          npx tsx infra/scripts/verify-owner.ts http://localhost:3000
+          npx tsx infra/scripts/verify-tax.ts http://localhost:3000
+          npx tsx infra/scripts/verify-paper.ts http://localhost:3000
+
+      - name: Providers, ownership, and the first day
+        run: |
+          npx tsx infra/scripts/verify-providers.ts http://localhost:3000
+          npx tsx infra/scripts/verify-ownership.ts http://localhost:3000
+          npx tsx infra/scripts/verify-first-day.ts http://localhost:3000
+
+      # A budget per screen. On a seeded workshop it says the harness works
+      # rather than that the product is quick, and it says so itself.
+      - name: A budget per screen
+        run: npx tsx infra/scripts/verify-performance.ts http://localhost:3000
+
+      # The four claims the roadmap makes about every phase rather than about
+      # any one of them, which nothing had ever checked.
+      - name: The four things that are not features
+        run: npx tsx infra/scripts/verify-throughout.ts
 
       # "Why did this customer not get their message?" on a screen rather than
       # in a log, and the operator's page refusing everybody else.

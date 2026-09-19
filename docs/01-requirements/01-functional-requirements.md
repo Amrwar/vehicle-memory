@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9000 - The four things that are not features
+
+| Ref     | Requirement                                                                                                                                   | Phase |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9001 | Every verification script MUST be run by the continuous-integration workflow, and a script that nothing runs MUST fail a check.               | 55    |
+| FR-9002 | Every gate the roadmap names — format, lint, types, tests, the build, the translator, the crawls — MUST appear in the workflow.               | 55    |
+| FR-9003 | The list of screens measured MUST be read off the application's own directory; a new screen MUST fail until it is measured or given a reason. | 55    |
+| FR-9004 | A screen that is not measured MUST carry a written reason, and a reason MUST NOT name a screen that no longer exists.                         | 55    |
+| FR-9005 | A page showing an error MUST NOT be measured or timed as though it had rendered.                                                              | 55    |
+| FR-9006 | Every list MUST have a bound, or a written reason above it saying what holds it.                                                              | 55    |
+| FR-9007 | A statement MUST be summed in the database rather than by reading every posting behind it.                                                    | 55    |
+| FR-9008 | Every page that reads the database MUST sit under a loading boundary that draws the vehicle, or be named with a reason why it needs none.     | 55    |
+| FR-9009 | A customer MUST have at most one referral code waiting to be used, and MUST be able to make more than one introduction.                       | 55    |
+
 ## FR-8900 - The pilot
 
 | Ref     | Requirement                                                                                                                             | Phase |

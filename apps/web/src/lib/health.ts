@@ -441,6 +441,7 @@ export async function traceMessagesTo(query: string, now = new Date()): Promise<
 
   const addresses = [...new Set(messages.map((message) => message.toAddress))];
 
+  // bounded: the addresses in the messages already fetched, which is one page.
   const suppressions = await prisma.suppressedAddress.findMany({
     where: { address: { in: addresses }, liftedAt: null },
     select: { address: true, reason: true, detail: true, createdAt: true },

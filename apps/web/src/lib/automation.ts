@@ -462,6 +462,7 @@ export async function previewSegment(
 }
 
 export async function listCampaigns(orgId: string) {
+  // bounded: campaigns a workshop has written, by hand, one at a time.
   const rows = await prisma.campaign.findMany({
     where: { orgId },
     orderBy: [{ createdAt: 'desc' }],

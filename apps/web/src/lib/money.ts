@@ -753,6 +753,7 @@ export async function recordPayment(input: {
    --------------------------------------------------------------------------- */
 
 async function creditedOn(invoiceId: string, currency: string): Promise<Money> {
+  // bounded: the credit notes against one invoice.
   const notes = await prisma.creditNote.findMany({
     where: { invoiceId },
     select: { amount: true },

@@ -19,7 +19,7 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines, postEntry } from './accounting';
+import { postedTotals, postEntry } from './accounting';
 import { audit } from './guard';
 import { regionFor } from './region';
 import { assertPlanAllows } from './billing';
@@ -288,6 +288,7 @@ export async function reconciliation(orgId: string, bankAccountId: string) {
       reference: line.reference,
     }));
 
+  // bounded: the statement's own window, which is a month of one bank account.
   const postings = await prisma.journalLine.findMany({
     where: {
       entry: {
@@ -399,7 +400,7 @@ export async function periodReadiness(orgId: string, periodId: string) {
 
   const [balance, unpostedJobs, draftInvoices, openTills, unapproved, unmatched] =
     await Promise.all([
-      postedLines(orgId).then(trialBalance),
+      postedTotals(orgId).then(trialBalance),
       prisma.job.count({
         where: {
           orgId,
@@ -473,6 +474,7 @@ export async function periodsFor(orgId: string) {
 }
 
 export async function bankAccountsFor(orgId: string) {
+  // bounded: a workshop has one or two bank accounts.
   return prisma.bankAccount.findMany({
     where: { orgId, isActive: true },
     orderBy: { name: 'asc' },

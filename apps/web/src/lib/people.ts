@@ -33,6 +33,7 @@ const decimal = (value: unknown, currency = 'GBP') => fromDecimal(String(value ?
    --------------------------------------------------------------------------- */
 
 export async function payHistory(employeeId: string): Promise<PayRate[]> {
+  // bounded: one employee's pay rates.
   const rates = await prisma.payRate.findMany({
     where: { employeeId },
     orderBy: { effectiveFrom: 'desc' },
@@ -81,6 +82,9 @@ export async function teamProductivity(
   const userIds = employees.map((employee) => employee.userId).filter((id): id is string => !!id);
 
   const [attendance, timeEntries, labourLines] = await Promise.all([
+    // bounded: one period of attendance for one workshop, optionally one site.
+    // A period is a fortnight and a workshop has single figures of people, so
+    // this is hundreds of rows rather than a number that grows with the years.
     prisma.attendanceRecord.findMany({
       where: {
         orgId,
@@ -221,9 +225,11 @@ export async function draftTimesheet(
       where: { id: employeeId, orgId },
       include: { payRates: { orderBy: { effectiveFrom: 'desc' } } },
     }),
+    // bounded: one employee, one period.
     prisma.attendanceRecord.findMany({
       where: { orgId, employeeId, startedAt: { gte: range.from, lte: range.to } },
     }),
+    // bounded: one employee, one period.
     prisma.absence.findMany({
       where: { orgId, employeeId, startsOn: { lte: range.to }, endsOn: { gte: range.from } },
     }),

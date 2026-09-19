@@ -157,6 +157,7 @@ export async function appendEvents(drafts: readonly DraftEvent[]): Promise<numbe
     if (!vehicle) throw new Error(`Vehicle ${vehicleId} does not exist`);
 
     const existingKeys = new Set(
+      // bounded: the keys of the drafts being written, so it is as long as the batch.
       (
         await tx.vehicleEvent.findMany({
           where: {

@@ -64,6 +64,12 @@ export const fr: Readonly<Record<string, string>> = {
   'Print the receipt': 'Imprimer le reçu',
   Loading: 'Chargement',
   'Getting this from the workshop': 'Récupération auprès de l’atelier',
+  // The other loading boundaries, Phase 55: the customer's own side, the
+  // shared links a person opens on a telephone, and the operator's pages.
+  'Getting your records': 'Récupération de vos documents',
+  'Opening this vehicle’s history': 'Ouverture de l’historique du véhicule',
+  'Opening your quote': 'Ouverture de votre devis',
+  'One moment': 'Un instant',
   'Working out the condition of this vehicle': 'Évaluation de l’état de ce véhicule',
   'Colour theme': 'Thème de couleur',
   Light: 'Clair',
@@ -555,6 +561,10 @@ export const ar: Readonly<Record<string, string>> = {
   'Print the receipt': 'اطبع الإيصال',
   Loading: 'جارٍ التحميل',
   'Getting this from the workshop': 'جارٍ جلب البيانات من الورشة',
+  'Getting your records': 'جارٍ جلب سجلّاتك',
+  'Opening this vehicle’s history': 'جارٍ فتح سجلّ المركبة',
+  'Opening your quote': 'جارٍ فتح عرض السعر',
+  'One moment': 'لحظة من فضلك',
   'Working out the condition of this vehicle': 'جارٍ تقييم حالة هذه السيارة',
   'Colour theme': 'سمة الألوان',
   Light: 'فاتح',

@@ -290,6 +290,7 @@ export async function recordResult(input: {
 
 /** Keeps the denormalised counts on the inspection true after every change. */
 async function refreshCounts(inspectionId: string) {
+  // bounded: the results of one inspection, which is one checklist.
   const results = await prisma.inspectionResult.findMany({
     where: { inspectionId },
     select: { severity: true },

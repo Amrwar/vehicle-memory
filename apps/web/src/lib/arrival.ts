@@ -219,6 +219,7 @@ export async function checkIn(input: {
 
 /** What is still owed across the job's live invoices, in minor units. */
 export async function outstandingOn(jobId: string): Promise<number> {
+  // bounded: the live invoices on one job, which is one and occasionally two.
   const invoices = await prisma.invoice.findMany({
     where: { jobId, status: { not: 'VOID' } },
     select: { total: true, amountPaid: true },

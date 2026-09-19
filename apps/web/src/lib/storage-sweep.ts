@@ -38,11 +38,16 @@ export interface Orphan {
 
 /** Every key the database says should exist. */
 export async function referencedKeys(): Promise<Set<string>> {
+  // bounded: not at all, on purpose. This is the sweep that decides what in the
+  // file store is an orphan, and a sweep that looks at part of the store deletes
+  // things it has not seen. It runs from a script, on a schedule, never from a
+  // page, and it fetches five columns of keys rather than any content.
   const [events, jobs, photos, documents, messages] = await Promise.all([
     prisma.vehicleEventAttachment.findMany({ select: { url: true } }),
     prisma.jobAttachment.findMany({ select: { url: true } }),
     prisma.inspectionPhoto.findMany({ select: { url: true } }),
     prisma.vehicleDocument.findMany({ select: { fileKey: true } }),
+    // bounded: as above — the whole store, on purpose.
     prisma.messageAttachment.findMany({ select: { url: true } }),
   ]);
 

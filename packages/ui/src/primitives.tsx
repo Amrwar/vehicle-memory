@@ -186,8 +186,18 @@ export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivEl
    Form controls
    =========================================================================== */
 
+/*
+ * A field a person types into.
+ *
+ * `min-w-0` as well as `w-full`, which are not the same promise. A box's
+ * intrinsic width — twenty characters, whatever the browser decides that is —
+ * is its minimum content width, and a grid or flex track sized by its content
+ * will take that minimum rather than the width asked for. So a full-width
+ * input inside a narrow column pushed the whole page sideways on a telephone
+ * while claiming to be exactly as wide as its parent.
+ */
 const control =
-  'w-full bg-(--surface) text-(--text) border border-(--border-strong) ' +
+  'w-full min-w-0 bg-(--surface) text-(--text) border border-(--border-strong) ' +
   'rounded-(--radius-md) px-3 text-[13px] placeholder:text-(--text-faint) ' +
   'transition-colors focus:border-(--brand) disabled:opacity-60 ' +
   'disabled:bg-(--surface-sunk)';
@@ -259,7 +269,7 @@ export function Field({
   className?: string;
 }) {
   return (
-    <div className={cn('grid gap-1.5', className)}>
+    <div className={cn('grid min-w-0 gap-1.5', className)}>
       <label htmlFor={htmlFor} className="text-[12px] font-medium text-(--text-soft)">
         {label}
         {required ? (

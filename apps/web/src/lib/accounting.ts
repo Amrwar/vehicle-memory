@@ -40,6 +40,7 @@ export async function ensureChartOfAccounts(orgId: string): Promise<number> {
   // so an account added to the chart in a later phase (loyalty rewards, in
   // Phase 24) reaches every existing workshop the first time it is needed.
   const existing = new Set(
+    // bounded: the standard chart is fifty accounts and a workshop adds a handful.
     (await prisma.account.findMany({ where: { orgId }, select: { code: true } })).map(
       (row) => row.code,
     ),
@@ -186,15 +187,77 @@ async function posting(
 }
 
 /**
+ * The same statement input, summed in the database: one row per account.
+ *
+ * `trialBalance()` adds the lines up per account and throws the individual
+ * lines away, so fetching them one by one was carrying a year of postings
+ * across the wire in order to produce forty rows. Correct, and fine at a
+ * thousand lines; at a million it is the whole ledger in memory behind a page
+ * somebody opens to look at forty figures.
+ *
+ * The shape is deliberately still `PostedLine[]`, so the statement functions
+ * in core stay pure, stay tested, and do not learn what a database is. Each
+ * row is one account's totals, and `postedAt` is the last posting in it —
+ * there is no single moment for a sum, and the statements do not read it.
+ *
+ * Found in Phase 55, by asking of every list in the product the question the
+ * roadmap had been answering for itself since Phase 1: what bounds this?
+ */
+export async function postedTotals(
+  orgId: string,
+  range?: { from?: Date; to?: Date },
+): Promise<PostedLine[]> {
+  // `Prisma.join` refuses an empty list, and a ledger read with no window is
+  // the ordinary case rather than a mistake, so the clauses are composed as
+  // one fragment that may be nothing at all.
+  const from = range?.from ? Prisma.sql`AND e."postedAt" >= ${range.from}` : Prisma.empty;
+  const to = range?.to ? Prisma.sql`AND e."postedAt" <= ${range.to}` : Prisma.empty;
+
+  const rows = await prisma.$queryRaw<
+    { code: string; name: string; type: string; debit: string; credit: string; last: Date }[]
+  >`
+    SELECT a."code"                  AS code,
+           a."name"                  AS name,
+           a."type"::text            AS type,
+           SUM(l."debit")::text      AS debit,
+           SUM(l."credit")::text     AS credit,
+           MAX(e."postedAt")         AS last
+      FROM "journal_lines" l
+      JOIN "journal_entries" e ON e."id" = l."entryId"
+      JOIN "accounts" a        ON a."id" = l."accountId"
+     WHERE e."orgId" = ${orgId}
+       ${from}
+       ${to}
+     GROUP BY a."code", a."name", a."type"
+     ORDER BY a."code"
+  `;
+
+  return rows.map((row) => ({
+    accountCode: row.code,
+    accountName: row.name,
+    accountType: row.type as AccountType,
+    debit: fromDecimal(row.debit),
+    credit: fromDecimal(row.credit),
+    postedAt: row.last,
+  }));
+}
+
+/**
  * Every posted line, shaped for the statement functions.
  *
  * Statements are computed from these rather than stored, so a report can never
  * drift from the entries behind it.
+ *
+ * The range is not optional. It was, and every caller left it out, which meant
+ * four pages read every line a workshop had ever posted. Anything that only
+ * wants the totals should call `postedTotals` instead.
  */
 export async function postedLines(
   orgId: string,
-  range?: { from?: Date; to?: Date },
+  range: { from?: Date; to?: Date },
 ): Promise<PostedLine[]> {
+  // bounded: by the range, which is no longer optional. Anything that wants only
+  // the totals calls postedTotals, which sums them in the database.
   const lines = await prisma.journalLine.findMany({
     where: {
       entry: {
@@ -345,6 +408,9 @@ export async function agedPayables(
 }
 
 export async function openReceivables(orgId: string) {
+  // bounded: bills nobody has paid yet. A workshop whose unpaid list grows without
+  // limit has a problem the software cannot fix. The aged report, which does have
+  // to count every one of them, sums in the database instead.
   const invoices = await prisma.invoice.findMany({
     where: { orgId, status: { in: ['ISSUED', 'PART_PAID', 'OVERDUE'] } },
     include: { customer: { select: { displayName: true } } },
@@ -366,6 +432,7 @@ export async function openReceivables(orgId: string) {
 
 /** Outstanding supplier bills, for aged creditors. */
 export async function openPayables(orgId: string) {
+  // bounded: bills the workshop has not settled yet, as above.
   const bills = await prisma.supplierBill.findMany({
     where: { orgId, status: { in: ['AWAITING', 'APPROVED', 'PART_PAID', 'DISPUTED'] } },
     include: { supplier: { select: { name: true } } },

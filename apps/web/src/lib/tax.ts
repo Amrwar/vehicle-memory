@@ -218,6 +218,7 @@ export function bandsOfLines(
 
 /** An invoice's taxes as declared, for its credit notes and its page. */
 export async function bandsFor(sourceType: TaxSource, sourceId: string): Promise<Band[]> {
+  // bounded: the tax lines of one document, which is at most three.
   const rows = await prisma.taxEntry.findMany({
     where: { sourceType, sourceId },
     orderBy: [{ ratePct: 'asc' }, { name: 'asc' }],

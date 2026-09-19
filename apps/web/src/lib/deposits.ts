@@ -344,6 +344,9 @@ export async function returnHeld(input: {
 
 /** What the workshop holds in all: the figure the money pages lead with. */
 export async function heldInAll(orgId: string) {
+  // bounded: every deposit the workshop has taken. A deposit is an unusual event
+  // rather than part of every job, so this is hundreds a year at worst. If that
+  // stops being true, this is the first figure to sum in the database.
   const rows = await prisma.deposit.findMany({
     where: { orgId },
     select: { amount: true, appliedAmount: true, refundedAmount: true, kind: true },

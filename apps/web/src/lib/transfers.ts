@@ -381,6 +381,7 @@ export async function cancelTransfer(orgId: string, transferId: string) {
 
 /** What is on the road right now, and how long it has been there. */
 export async function inTransitNow(orgId: string) {
+  // bounded: what is on the road right now between a workshop's own sites.
   const transfers = await prisma.stockTransfer.findMany({
     where: { orgId, status: { in: ['IN_TRANSIT', 'PART_RECEIVED'] } },
     include: {
@@ -464,6 +465,7 @@ export async function groupPerformance(
   range: { from: Date; to: Date },
 ): Promise<ReturnType<typeof consolidate>> {
   const region = await regionFor(orgId);
+  // bounded: a workshop's own sites.
   const locations = await prisma.location.findMany({
     where: { orgId, isActive: true },
     orderBy: { name: 'asc' },

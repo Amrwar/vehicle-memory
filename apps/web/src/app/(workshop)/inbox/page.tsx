@@ -618,7 +618,7 @@ export default async function ConversationsPage({
                           <Link
                             key={tpl.key}
                             href={`/inbox?c=${thread.id}&t=${encodeURIComponent(tpl.key)}`}
-                            className="rounded-(--radius-sm) border border-(--border) px-2 py-1 text-[12px] hover:bg-(--surface-sunk)"
+                            className="inline-flex min-h-10 items-center rounded-(--radius-sm) border border-(--border) px-2.5 text-[12px] hover:bg-(--surface-sunk)"
                           >
                             {tpl.own ? tpl.name : t(tpl.name)}
                           </Link>

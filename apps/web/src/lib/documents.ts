@@ -186,6 +186,7 @@ export async function documentsFor(
   vehicleId: string,
   actor: DocumentActor,
 ): Promise<DocumentView[]> {
+  // bounded: the paperwork on one car.
   const rows = await prisma.vehicleDocument.findMany({
     where: { vehicleId, removedAt: null },
     orderBy: [{ kind: 'asc' }, { createdAt: 'desc' }],
@@ -220,6 +221,7 @@ export async function documentsFor(
 
 /** The one line and the two dates for the top of a vehicle page. */
 export async function paperworkFor(vehicleId: string) {
+  // bounded: the paperwork on one car, including what has been taken off it.
   const rows = await prisma.vehicleDocument.findMany({
     where: { vehicleId },
     select: { kind: true, expiresAt: true, removedAt: true },

@@ -567,6 +567,20 @@ The second sweep: things connected at one end only.
 | The pilot's four sources   | Built  | `verify:pilot`: what broke, what was slow, what was missing, what nobody used (Phase 54) |
 | The pilot plan             | Built  | Who, what is measured, what ends it early, what success is (Phase 54)                    |
 
+## 21.21 The four things that are not features
+
+| Item                          | Status | Where                                                                          |
+| ----------------------------- | ------ | ------------------------------------------------------------------------------ |
+| Every check is run            | Built  | `verify:throughout`: twenty-six scripts that nothing ran, now in CI (Phase 55) |
+| Every gate is in the workflow | Built  | Including the translator scan, which was in none of it (Phase 55)              |
+| Every screen is measured      | Built  | 128 addresses read off the app directory, not 52 typed by hand (Phase 55)      |
+| A broken page is not measured | Built  | An error inside a 200 is refused rather than timed or sized (Phase 55)         |
+| Every list has a bound        | Built  | A `take`, an identifier, or a written reason — checked (Phase 55)              |
+| Statements summed in the DB   | Built  | `/ledger` and `/financials` no longer read every posting ever made (Phase 55)  |
+| Nothing waits on blank        | Built  | Seven loading boundaries, the customer's whole side included (Phase 55)        |
+| The referral card opens       | Built  | Fixed: it threw for anybody who had ever referred a friend (Phase 55)          |
+| The demonstration prices work | Built  | Fixed: the seeded workshop had no labour rate at all (Phase 55)                |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -645,7 +659,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 321          |
+| Built    | 330          |
 | Partial  | 1            |
 | Deferred | 1            |
 

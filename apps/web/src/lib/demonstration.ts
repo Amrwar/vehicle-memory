@@ -1,4 +1,6 @@
 import { eventsForCompletedJob, money, uniqueSlug } from '@carnet/core';
+
+import { slugsLike } from './onboarding';
 import { prisma } from '@carnet/db';
 
 import { ensureChartOfAccounts } from './accounting';
@@ -191,10 +193,10 @@ export async function createDemonstration(input: {
   if (existing) return { orgId: existing.id, created: false };
 
   const now = input.now ?? new Date();
-  const taken = new Set(
-    (await prisma.organization.findMany({ select: { slug: true } })).map((org) => org.slug),
+  const slug = uniqueSlug(
+    'ashford-vale-demonstration',
+    await slugsLike('ashford-vale-demonstration'),
   );
-  const slug = uniqueSlug('ashford-vale-demonstration', taken);
   const random = picker(20_260_915);
 
   const org = await prisma.organization.create({

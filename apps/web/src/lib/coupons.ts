@@ -68,6 +68,7 @@ const asCoupon = (
 export async function coupons(orgId: string, now = new Date()) {
   const region = await regionFor(orgId);
 
+  // bounded: offers a workshop writes by hand.
   const rows = await prisma.coupon.findMany({
     where: { orgId },
     orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
@@ -98,6 +99,8 @@ export async function coupons(orgId: string, now = new Date()) {
 export async function couponResultsFor(orgId: string, period: { from: Date; to: Date }) {
   const region = await regionFor(orgId);
 
+  // bounded: one row per coupon handed over in the period. A workshop writes a
+  // handful of offers and each is used at the counter, so this is hundreds.
   const rows = await prisma.couponRedemption.findMany({
     where: { orgId, redeemedAt: { gte: period.from, lte: period.to } },
     select: { amount: true, billed: true, coupon: { select: { code: true } } },

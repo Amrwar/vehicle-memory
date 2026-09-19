@@ -18,7 +18,7 @@ import 'dotenv/config';
 import { trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { postedTotals } from '../../apps/web/src/lib/accounting';
 import { exportDataset } from '../../apps/web/src/lib/exports';
 import { importDetail, runImport, saveMapping, uploadImport } from '../../apps/web/src/lib/imports';
 
@@ -93,8 +93,18 @@ async function main() {
 
   // A car another workshop put on the network, which this one has never
   // touched: importing its VIN adopts it rather than registering it again.
+  //
+  // The I, O and Q come out, the way they do for the new VIN below. Base 36
+  // includes all three, so this made a VIN the product rightly refuses on
+  // roughly one day in three — and the probe then read the refusal as a fault
+  // in the import. Nothing noticed for nine phases because nothing ran this.
   const existingVehicle = await prisma.vehicle.create({
-    data: { vin: `ELSE${Date.now().toString(36).toUpperCase()}`.padEnd(17, 'Z').slice(0, 17) },
+    data: {
+      vin: `ELSE${Date.now().toString(36).toUpperCase()}`
+        .padEnd(17, 'Z')
+        .slice(0, 17)
+        .replace(/[IOQ]/g, 'Z'),
+    },
     select: { id: true, vin: true },
   });
   const orgId = org.id;
@@ -292,7 +302,7 @@ async function main() {
     made.vehicles.push(registered!.id);
 
     console.info('\nOpening balances, as one entry');
-    const before = trialBalance(await postedLines(orgId));
+    const before = trialBalance(await postedTotals(orgId));
     check('the ledger balances before', before.balanced, true);
     const bal = await uploadImport({
       orgId,
@@ -336,7 +346,7 @@ async function main() {
       ],
       [3, 4, '1800'],
     );
-    check('the ledger still balances', trialBalance(await postedLines(orgId)).balanced, true);
+    check('the ledger still balances', trialBalance(await postedTotals(orgId)).balanced, true);
 
     console.info('\nData out');
     for (const id of [

@@ -5,6 +5,7 @@ import {
   type SignupInput,
   type SignupProblem,
   trialEndsOn,
+  slugify,
   uniqueSlug,
   validateSignup,
   countryFor,
@@ -62,6 +63,28 @@ const DEFAULT_JOB_TYPES = [
   { name: 'MOT preparation', colour: '#2c6e4b', defaultHours: 1, requiresQualityCheck: false },
 ];
 
+/**
+ * The slugs a new workshop's name could collide with.
+ *
+ * `uniqueSlug` only ever asks about the name itself and the same name with a
+ * number after it, so those are the only rows worth fetching. It used to be
+ * given every slug on the platform — which is nothing at four workshops and a
+ * table scan on every signup at forty thousand, in the one transaction a new
+ * customer is watching.
+ */
+export async function slugsLike(name: string): Promise<Set<string>> {
+  const base = slugify(name) || 'workshop';
+
+  const rows = await prisma.organization.findMany({
+    // bounded: every row starts with this one name, and a name a workshop
+    // would type has a handful of neighbours rather than a table's worth.
+    where: { slug: { startsWith: base } },
+    select: { slug: true },
+  });
+
+  return new Set(rows.map((row) => row.slug));
+}
+
 export async function createWorkshop(
   input: SignupInput,
   options: { plan?: PlanId; acceptConsumerEmail?: boolean; termsVersion?: string | null } = {},
@@ -92,11 +115,7 @@ export async function createWorkshop(
     };
   }
 
-  const taken = new Set(
-    (await prisma.organization.findMany({ select: { slug: true } })).map((org) => org.slug),
-  );
-
-  const slug = uniqueSlug(input.workshopName, taken);
+  const slug = uniqueSlug(input.workshopName, await slugsLike(input.workshopName));
   const plan = planFor(options.plan ?? 'CORE').id;
   const country = countryFor(input.country);
   const region = regionForCountry(country.code);

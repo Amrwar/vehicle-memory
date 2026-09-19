@@ -1369,6 +1369,16 @@ async function main() {
     },
   });
 
+  // What an hour of labour costs. Every real workshop has one of these and the
+  // seeded one had none at all, so `/settings/site` listed no rates, a job
+  // priced labour from nothing, and the check that says a site with no rate of
+  // its own takes the workshop's could only ever pass on a database somebody
+  // had edited by hand. Found in Phase 55 by running a probe that had never
+  // been run.
+  await prisma.labourRate.create({
+    data: { orgId: org.id, name: 'Standard', perHour: 95, isDefault: true },
+  });
+
   const bradfordStore = await prisma.warehouse.create({
     data: {
       orgId: org.id,

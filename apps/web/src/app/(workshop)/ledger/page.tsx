@@ -21,7 +21,7 @@ import Link from 'next/link';
 
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '@/lib/accounting';
+import { postedTotals } from '@/lib/accounting';
 import { PlanWall } from '@/components/plan-wall';
 import { planIncludes, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
@@ -56,8 +56,9 @@ export default async function LedgerPage({
   const { view, account } = await searchParams;
   const tab = view === 'journal' ? 'journal' : 'trial';
 
-  const lines = await postedLines(orgId);
-  const balance = trialBalance(lines);
+  // Summed in the database. A trial balance is forty rows whatever is behind
+  // it, and this page used to carry every one of those postings here first.
+  const balance = trialBalance(await postedTotals(orgId));
 
   const entries = await journalEntries(orgId, account);
   const accountsUsed = balance.rows.length;

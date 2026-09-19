@@ -3668,8 +3668,10 @@ model Referral {
   job      Job?         @relation(fields: [referredJobId], references: [id], onDelete: SetNull)
 
   @@unique([orgId, code])
-  /// One code per customer per workshop. Phase 46.
-  @@unique([orgId, referrerCustomerId], map: "referrals_one_per_customer")
+  /// One code *waiting to be used* per customer per workshop. Phase 55. The
+  /// index is partial and lives in the migration, because a used code is one
+  /// introduction the customer has already made and there may be many.
+  @@index([orgId, referrerCustomerId])
   @@index([orgId, creditedAt])
   @@map("referrals")
 }

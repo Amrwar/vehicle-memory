@@ -53,7 +53,7 @@ export default async function TermsPage() {
         {t('Version {version}.', { version: TERMS_VERSION })}
       </p>
 
-      <div className="prose-carnet mt-8 grid gap-6 text-[15px] leading-relaxed text-(--text-soft)">
+      <div className="prose-carnet mt-8 grid gap-6 text-[15px] leading-relaxed text-(--text-soft) [&>*]:min-w-0">
         <section>
           <h2 className="font-display text-[19px] font-semibold text-(--text)">
             {t('1. The trial, and the charge that follows it')}

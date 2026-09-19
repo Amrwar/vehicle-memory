@@ -184,7 +184,7 @@ export default async function SkillsPage({
                   {matrix.skills.map((skill) => (
                     <Th key={skill.skillId}>
                       {skill.name}
-                      <span className="block text-[10px] font-normal text-(--text-faint)">
+                      <span className="block text-[11px] font-normal text-(--text-faint)">
                         {skill.cover === 0
                           ? t('nobody')
                           : skill.cover === 1

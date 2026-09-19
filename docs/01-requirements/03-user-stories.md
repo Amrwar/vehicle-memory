@@ -1642,6 +1642,78 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BH - The four things that are not features (Phase 55)
+
+### BH1 - A check nobody runs
+
+**As** the operator **I want** every check the product has to be run by
+something other than me remembering **so that** a green repository means what
+it says.
+**Size** 8 - **Satisfies** FR-9001, FR-9002
+
+- **Given** a verification script with a name, **when** nothing in the workflow
+  runs it, **then** a check fails and says which.
+- **Given** the gates the roadmap names, **when** any is missing from the
+  workflow, **then** the same check fails and names it.
+- **Given** a script added next month, **when** nobody wires it up, **then**
+  the failure arrives that day rather than nine phases later.
+
+### BH2 - Every screen, not most of them
+
+**As** Sara **I want** every screen measured on the phone I actually hold **so
+that** the one I need at the counter is not the one nobody looked at.
+**Size** 13 - **Satisfies** FR-9003, FR-9004, FR-9005
+
+- **Given** the product's own directory of pages, **when** the screens are
+  measured, **then** the list comes from there rather than from a file somebody
+  types into.
+- **Given** a page nobody has decided about, **when** the check runs, **then**
+  it fails naming the address.
+- **Given** a page that fell over, **when** it answers 200 with an error on it,
+  **then** nothing is measured and the check says so.
+
+### BH3 - A figure that does not get slower every month
+
+**As** Ahmed **I want** the pages that add my money up to stay quick as the
+years go by **so that** the third year is not the year the software gives up.
+**Size** 8 - **Satisfies** FR-9006, FR-9007
+
+- **Given** the trial balance, **when** I open it, **then** the adding up
+  happened in the database and forty rows came back rather than every posting.
+- **Given** a list with no bound, **when** nobody has written what holds it,
+  **then** a check fails rather than nobody noticing.
+- **Given** a bound that is a judgement, **when** I read the code, **then** the
+  judgement is written where it applies, in words I can disagree with.
+
+### BH4 - Waiting, with something to look at
+
+**As** Maria **I want** something on the screen while my records load **so
+that** a slow moment outside a garage does not look like a broken link.
+**Size** 5 - **Satisfies** FR-9008
+
+- **Given** any page of my own, **when** it is still fetching, **then** I see
+  the car being worked on rather than nothing at all.
+- **Given** a link sent to me in a message, **when** I open it on mobile data,
+  **then** the same.
+- **Given** a page that needs no loading state, **when** it has none, **then**
+  the reason is written down rather than assumed.
+
+### BH5 - The customer who brings other people in
+
+**As** Ahmed **I want** a customer who has referred a friend to still have a
+referral card **so that** the customer I most want to look after is not the one
+the software breaks on.
+**Size** 5 - **Satisfies** FR-9009
+
+- **Given** a customer who has introduced somebody, **when** I open their card,
+  **then** it opens.
+- **Given** that customer, **when** they want to introduce somebody else,
+  **then** they have a fresh code to hand out.
+- **Given** two pages asking for their code at the same moment, **when** both
+  ask, **then** there is still only one code waiting to be used.
+
+---
+
 ## Epic BG - What you are using (Phase 54)
 
 ### BG1 - What nobody used
