@@ -99,6 +99,8 @@ verify:<name>`.
 | writes         | Every write that moves money or stock declares what a repeat does                                                                    |
 | wiring         | Everything built has a way in, and works when you get there                                                                          |
 | triggers       | A rule a workshop writes actually runs, from its own moment                                                                          |
+| quality        | Every non-functional requirement says what enforces it, or what it would take                                                        |
+| engines        | The lived-in screens and the customer's links in Chromium, WebKit and Firefox                                                        |
 | throughout     | The four promises the roadmap makes about every phase: the checks run, every screen is measured, every list has a bound              |
 | pilot          | The four lists the pilot must produce each have a source, and every audited action belongs to a capability                           |
 | awkward        | Thirteen situations tidy software does not expect, each decided and held to it                                                       |

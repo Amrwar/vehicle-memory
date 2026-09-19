@@ -504,6 +504,15 @@ jobs:
       - name: Every screen at every size
         run: npx tsx infra/scripts/verify-screens.ts http://localhost:3000
 
+      # Everything else here is measured in Chromium because that is what
+      # Playwright installs by default. A workshop's customers open a shared
+      # passport on their own telephone, and a great many of those telephones
+      # are iPhones, which is WebKit — a different engine, not a different skin.
+      - name: The same screens in Safari and Firefox
+        run: |
+          npx playwright install webkit firefox
+          npx tsx infra/scripts/verify-engines.ts http://localhost:3000
+
       # Every sentence in French and in Arabic, and the switch that changes
       # them. This one had been failing since Phase 50 and nothing said so.
       - name: Every word translated
@@ -550,6 +559,12 @@ jobs:
       # any one of them, which nothing had ever checked.
       - name: The four things that are not features
         run: npx tsx infra/scripts/verify-throughout.ts
+
+      # And the other half of the requirements: eighty-four quality budgets,
+      # each accounted for as checked, read off the repository, or not yet —
+      # with what it would take written down.
+      - name: Every quality requirement is accounted for
+        run: npx tsx infra/scripts/verify-quality.ts
 
       # "Why did this customer not get their message?" on a screen rather than
       # in a log, and the operator's page refusing everybody else.

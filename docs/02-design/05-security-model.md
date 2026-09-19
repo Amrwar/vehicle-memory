@@ -376,6 +376,30 @@ acting on the figure.
 The trade was made in that direction deliberately. An incomplete usage figure
 is a nuisance. A complete one, here, would be a record of being watched.
 
+### 10.2 What a log line may not carry (Phase 56)
+
+NFR-802 has said since the first week that logs must not contain passwords,
+session tokens, full payment details or complete personal records. Nothing
+enforced it: the log function spread whatever it was given into a line of JSON,
+and the only thing standing between a session token and the log search was
+somebody remembering.
+
+Anything named like a credential is now taken out before the line is written —
+by name rather than by value, because a password looks like any other string
+and a session token looks like any other identifier, and the name is the only
+signal available at the moment of writing. A field somebody called `password`
+is a field somebody knew was a password.
+
+The key is left and the value replaced, so the shape of the line still reads
+and somebody debugging can see that a credential was present without seeing it.
+The walk is depth-limited and cycle-safe: a log line is not the place to
+discover that a database model arrived with every relation attached, and an
+exception thrown while writing a log loses the event it was reporting.
+
+The list is deliberately about the four things NFR-802 names rather than about
+personal data in general. A log with no customer in it cannot answer "which
+one", and a log that cannot answer "which one" is a log nobody uses.
+
 ## 11. Before general availability
 
 - [x] Every address tried with another workshop's identifier, reads and writes

@@ -146,6 +146,35 @@ not seen the project and timing them.
 | NFR-906 | Dates, numbers and currency MUST render according to the user's locale.                             |
 | NFR-907 | The system MUST store all timestamps in UTC and render in the location's timezone.                  |
 
+## Where each of these is enforced
+
+Every one of the eighty-four above is accounted for in
+`infra/scripts/verify-quality.ts`, which runs on every build and checks its own
+register against this document: a requirement here with no account there fails,
+and an account there naming a requirement that is not here fails too.
+
+Each is one of three things.
+
+| Kind        | Count | What it means                                                                                             |
+| ----------- | ----- | --------------------------------------------------------------------------------------------------------- |
+| **checked** | 47    | Something runs and would fail. The thing that runs is named, has to exist, and has to be in the workflow. |
+| **read**    | 15    | True of the repository as it stands, and asserted there and then rather than by a script somewhere else.  |
+| **not yet** | 22    | Enforced by nothing. What it would take is written down, because "not yet" without that is a wish.        |
+
+The twenty-two are not an oversight and are not going to become checks by being
+looked at harder. They need a person, a production deployment, or a month of
+real traffic: a penetration test, a new service advisor taking a booking
+unaided, a month of uptime, two thousand tenants, a technician in nitrile
+gloves. `npm run verify:quality` lists all twenty-two with the reason each time
+it runs, so the number is visible rather than implied.
+
+Until Phase 56 exactly one of these eighty-four appeared in the
+[traceability matrix](04-traceability-matrix.md). Several were in fact enforced
+thoroughly — the recovery targets since Phase 49, the performance budgets since
+Phase 51, the translation rule since Phase 40.5 — but anonymously, which is the
+problem this closes: a requirement whose enforcement nobody can name is a
+requirement nobody can check has stopped being enforced.
+
 ---
 
 _Next: [User stories](03-user-stories.md)._

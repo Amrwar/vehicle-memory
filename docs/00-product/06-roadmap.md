@@ -3380,6 +3380,77 @@ product rightly refuses, and read the refusal as a fault in the import.
 
 ---
 
+## Phase 56 — The other half of the requirements
+
+**Scope.** The eighty-four non-functional requirements, of which exactly one
+appeared in the traceability matrix.
+
+**Exit.** Every one of them says what enforces it, or what it would take.
+
+**Status.** Built.
+
+The functional side has been traced requirement by requirement for fifty
+phases. The quality side — how fast, how safe, how private, how legible, how
+available — was a document with numbers in it and nothing pointing at the code.
+
+Several were in fact enforced, some of them thoroughly. The recovery targets
+have been measured since Phase 49, the performance budgets since Phase 51, the
+translation rule since Phase 40.5. They were enforced **anonymously**, which is
+the problem: a requirement whose enforcement nobody can name is a requirement
+nobody can check has stopped being enforced.
+
+`npm run verify:quality` accounts for all eighty-four, as one of three things,
+and checks its register against the document rather than trusting it:
+
+- **checked** — something runs and would fail. The thing that runs is named, has
+  to exist, and has to be in the workflow. Forty-seven.
+- **read** — true of the repository as it stands, and asserted there and then:
+  the domain layer imports neither the framework nor the ORM, every type
+  suppression says why, the thirteen architectural decisions are numbered
+  without a gap, no query is built by joining strings, no timestamp is stored
+  without its zone. Fifteen.
+- **not yet** — enforced by nothing, with what it would take written down.
+  Twenty-two.
+
+That last number is the point. A penetration test needs somebody whose job it
+is. A new service advisor taking a booking unaided in five minutes needs a new
+service advisor. Ninety-nine point nine per cent availability is measured by
+being up for a month. Saying so is worth more than a green tick meaning
+somebody once looked, and the document now says which twenty-two they are.
+
+**Two were closed rather than described.**
+
+_The logger carried whatever it was handed._ NFR-802 says logs must not contain
+passwords, session tokens, full payment details or complete personal records,
+and nothing enforced it: `log()` spread its argument into a line of JSON. It
+now takes out anything named like a credential before writing, by name rather
+than by value — because a password looks like any other string and a session
+token looks like any other identifier, and the name is the only signal
+available at the moment of writing. It leaves the key and takes the value, so
+the shape of the line still reads, and it stops rather than walking a database
+model with every relation attached.
+
+_Everything was measured in one browser._ NFR-610 asks for the last two
+versions of Chrome, Safari, Firefox and Edge; the honest account was Chromium,
+and only Chromium, because that is what Playwright installs by default and
+nobody chose otherwise. That matters here more than for most products: a
+workshop's customers open a shared passport, a quote and an invoice on their
+own telephones, and a great many of those telephones are iPhones — WebKit,
+which is a different engine rather than a different skin. `verify-engines` now
+loads the lived-in screens, the links a customer is sent, and the Arabic ones
+in all three. Sixty screens. They pass.
+
+**And the probe was wrong before the product was.** WebKit reported nine
+screens up to two hundred and fifty-eight pixels wider than the telephone, and
+the other two engines reported none. That is precisely what an unstyled page
+looks like at 390 pixels, and it was: the product's Content-Security-Policy
+carries `upgrade-insecure-requests`, which is correct, and WebKit applies it on
+loopback where Chromium exempts it — so the stylesheet was asked for over
+https, from a server that speaks no TLS, and never arrived. Two correct
+behaviours and one wrong conclusion. The probe now takes the directive out of
+the header on its way past, and refuses to measure any page whose stylesheet
+did not arrive, so it can never again report an unstyled page as a narrow one.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

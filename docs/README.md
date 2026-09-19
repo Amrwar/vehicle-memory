@@ -93,7 +93,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Fifty-four phases have shipped, the last on 19 September 2026, and the pilot
+Fifty-six phases have shipped, the last on 19 September 2026, and the pilot
 itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 330 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 335 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 640
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 645
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -208,3 +208,17 @@ been asleep — a referral card that threw for anybody who had ever brought a
 friend in, and a demonstration workshop with no labour rate. All of it is
 fixed, and `npm run verify:throughout` is the ten checks that would say so
 again.
+
+Phase 56 turns the same question on the other half of the requirements. There
+are eighty-four non-functional ones — how fast, how safe, how private, how
+legible, how available — and exactly one of them appeared in the traceability
+matrix. Several were in fact enforced thoroughly, but anonymously, which is the
+problem: a requirement whose enforcement nobody can name is a requirement
+nobody can check has stopped being enforced. All eighty-four are now accounted
+for by `npm run verify:quality` as checked, read off the repository, or not
+yet — and the twenty-two that are enforced by nothing say what each would take,
+because a penetration test needs somebody whose job it is and a month of uptime
+needs a month. Two were closed rather than described: the logger now takes
+credentials out by name before writing a line, and the screens a workshop lives
+in are verified in Safari and Firefox as well as Chrome, which matters when a
+customer opens their quote on an iPhone.

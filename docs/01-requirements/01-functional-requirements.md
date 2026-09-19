@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9100 - The other half of the requirements
+
+| Ref     | Requirement                                                                                                                  | Phase |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9101 | Every non-functional requirement MUST say what enforces it, or what it would take, and a check MUST fail where one does not. | 56    |
+| FR-9102 | Anything named as enforcing a requirement MUST exist, and anything named as checked MUST be run by the workflow.             | 56    |
+| FR-9103 | Logs MUST NOT carry a credential, a session token, card details or a whole record, whatever they are handed.                 | 56    |
+| FR-9104 | The screens a workshop lives in and the links a customer is sent MUST be verified in Chromium, WebKit and Firefox.           | 56    |
+| FR-9105 | A page whose stylesheet did not arrive MUST NOT be measured as though it had rendered.                                       | 56    |
+
 ## FR-9000 - The four things that are not features
 
 | Ref     | Requirement                                                                                                                                   | Phase |

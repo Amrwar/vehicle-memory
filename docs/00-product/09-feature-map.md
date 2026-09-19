@@ -581,6 +581,16 @@ The second sweep: things connected at one end only.
 | The referral card opens       | Built  | Fixed: it threw for anybody who had ever referred a friend (Phase 55)          |
 | The demonstration prices work | Built  | Fixed: the seeded workshop had no labour rate at all (Phase 55)                |
 
+## 21.22 The other half of the requirements
+
+| Item                           | Status | Where                                                                                  |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| Every quality budget accounted | Built  | `verify:quality`: 47 checked, 15 read off the repository, 22 not yet (Phase 56)        |
+| What it would take, written    | Built  | Each of the twenty-two says what it needs — a person, a month, a deployment (Phase 56) |
+| Nothing secret in a log        | Built  | Credentials, tokens and card details taken out by name before writing (Phase 56)       |
+| Safari and Firefox             | Built  | `verify:engines`: sixty screens in three engines, Arabic included (Phase 56)           |
+| An unstyled page is not narrow | Built  | A page whose stylesheet did not arrive is refused, not measured (Phase 56)             |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -659,7 +669,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 330          |
+| Built    | 335          |
 | Partial  | 1            |
 | Deferred | 1            |
 

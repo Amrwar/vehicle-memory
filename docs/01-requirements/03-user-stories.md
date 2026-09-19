@@ -1642,6 +1642,53 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BI - The other half of the requirements (Phase 56)
+
+### BI1 - A number with nothing behind it
+
+**As** the operator **I want** every quality budget to name what enforces it
+**so that** "fast enough" and "safe enough" are claims somebody can check
+rather than paragraphs somebody wrote.
+**Size** 13 - **Satisfies** FR-9101, FR-9102
+
+- **Given** the eighty-four quality requirements, **when** the check runs,
+  **then** each is either checked by something that runs, true of the
+  repository and asserted, or honestly marked as enforced by nothing.
+- **Given** one that names a script, **when** that script is missing or
+  nothing runs it, **then** the check fails rather than reading as covered.
+- **Given** one that nothing enforces, **when** I read it, **then** what it
+  would take is written down.
+
+### BI2 - Nothing secret in a log
+
+**As** Ahmed **I want** my staff's passwords and my customers' card details to
+stay out of the log files **so that** a log search is not a way into the
+business.
+**Size** 5 - **Satisfies** FR-9103
+
+- **Given** anything handed to the logger, **when** a field is named like a
+  credential, **then** the value is taken out and the key is left.
+- **Given** a secret nested inside something else, **when** it is written,
+  **then** it is taken out too.
+- **Given** a record with every relation attached, **when** somebody logs it by
+  accident, **then** the line stops rather than printing the database.
+
+### BI3 - The telephone in the customer's hand
+
+**As** Maria **I want** the quote I was sent to work on my iPhone **so that**
+approving it does not need a computer.
+**Size** 8 - **Satisfies** FR-9104, FR-9105
+
+- **Given** the screens a workshop lives in and the links a customer is sent,
+  **when** they are checked, **then** they are checked in Safari and Firefox as
+  well as Chrome.
+- **Given** the Arabic layout, **when** it is checked, **then** it is checked in
+  all three, because that is where engines disagree most.
+- **Given** a page whose stylesheet did not arrive, **when** it is measured,
+  **then** nothing is measured and the check says why.
+
+---
+
 ## Epic BH - The four things that are not features (Phase 55)
 
 ### BH1 - A check nobody runs
