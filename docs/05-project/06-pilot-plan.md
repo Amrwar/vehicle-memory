@@ -34,15 +34,22 @@ this exercise cannot use.
 
 ## 3. Before the first morning
 
-| What                            | Who      | Done when                                                    |
-| ------------------------------- | -------- | ------------------------------------------------------------ |
-| `npm run verify:pilot` passes   | Operator | Fifteen checks green: the four lists all have a source       |
-| Their data is in                | Operator | Customers and vehicles imported; they have seen it and agree |
-| Settings match the workshop     | Together | Sites, bays, hours, tax rates, job types, document numbering |
-| Everyone has an account         | Owner    | Each person signs in as themselves — not one shared login    |
-| `OPERATOR_EMAIL` is set         | Operator | An account opening sends mail; `/admin/health` is reachable  |
-| The clock baseline is recorded  | Operator | `npm run verify:clock --record` on their data, on day zero   |
-| They know how to reach a person | Together | A telephone number, not a form                               |
+| What                             | Who      | Done when                                                              |
+| -------------------------------- | -------- | ---------------------------------------------------------------------- |
+| `npm run launch:handover` passes | Operator | Nothing needed is missing or only pretending, on the deployment itself |
+| `npm run verify:pilot` passes    | Operator | Fifteen checks green: the four lists all have a source                 |
+| Their data is in                 | Operator | Customers and vehicles imported; they have seen it and agree           |
+| Settings match the workshop      | Together | Sites, bays, hours, tax rates, job types, document numbering           |
+| Everyone has an account          | Owner    | Each person signs in as themselves — not one shared login              |
+| `OPERATOR_EMAIL` is set          | Operator | An account opening sends mail; `/admin/health` is reachable            |
+| The clock baseline is recorded   | Operator | `npm run verify:clock --record` on their data, on day zero             |
+| They know how to reach a person  | Together | A telephone number, not a form                                         |
+
+The first one is new since Phase 58, and belongs at the top for a reason: a
+deployment can pass every other check in this repository and still be
+configured to do nothing at all. A mail transport left on `console` stops
+nothing — and the workshop finds out a fortnight later that no customer ever
+received a word.
 
 The last one matters more than the rest. A workshop that hits something at
 half past eight on a Monday and cannot reach anybody will go back to paper by

@@ -386,6 +386,14 @@ jobs:
       - name: The passport, listed
         run: npx tsx infra/scripts/verify-passports.ts
 
+      # Every setting the application reads says what a workshop would feel
+      # without it. The judgement about one deployment is npm run
+      # launch:handover, run against that deployment before a first morning —
+      # deliberately not here, where it would fail for ever and teach
+      # everybody to ignore it.
+      - name: Every setting is accounted for
+        run: npx tsx infra/scripts/verify-launch.ts
+
       # Whether a workshop could be handed this on Monday: each of the pilot's
       # four findings has a source, and every audited action belongs to a
       # capability somebody would name, so nothing goes uncounted at the

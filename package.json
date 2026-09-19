@@ -46,6 +46,8 @@
     "verify:clock": "tsx infra/scripts/verify-clock.ts",
     "verify:awkward": "tsx infra/scripts/verify-awkward.ts",
     "verify:pilot": "tsx infra/scripts/verify-pilot.ts",
+    "verify:launch": "tsx infra/scripts/verify-launch.ts",
+    "launch:handover": "tsx infra/scripts/verify-launch.ts --handover",
     "verify:throughout": "tsx infra/scripts/verify-throughout.ts",
     "db:scale": "tsx infra/scripts/scale-seed.ts",
     "storage:orphans": "tsx infra/scripts/storage-orphans.ts",

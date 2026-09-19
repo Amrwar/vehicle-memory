@@ -145,6 +145,22 @@ inspection photograph belongs to a vehicle whose owner controls disclosure.
 
 ## 4. What each environment variable actually does
 
+Since Phase 58 this table has a companion that fails rather than informs:
+
+```
+npm run launch:handover
+```
+
+Run against the deployment's own environment, it reads all forty-seven settings
+the application actually reads — the schema's and the fourteen that bypass it —
+and refuses while anything needed is missing or set to something that only
+pretends. It prints names and verdicts, never values, so it is safe to run
+against production. `npm run verify:launch` is the same register without the
+judgement, and runs on every build.
+
+The table below is the prose version. Where the two disagree, the register in
+`packages/core/src/launch/settings.ts` is the one that is checked.
+
 | Variable                                                                                   | Consequence of getting it wrong                                                                                                                                                                                                                              |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `DATABASE_URL`                                                                             | Nothing works                                                                                                                                                                                                                                                |

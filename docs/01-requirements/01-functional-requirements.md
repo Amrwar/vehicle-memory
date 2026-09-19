@@ -267,6 +267,17 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9300 - Configured to do anything
+
+| Ref     | Requirement                                                                                                                   | Phase |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9301 | Every setting the application reads MUST say what a workshop would feel without it, and what to set it to.                    | 58    |
+| FR-9302 | The register MUST be checked against every variable the application reads, not only its schema; an unaccounted one MUST fail. | 58    |
+| FR-9303 | A setting that is present and still means nothing is configured MUST be reported as pretending, not as set.                   | 58    |
+| FR-9304 | Settings MUST be ordered by what a workshop would feel, so a silent failure is reported before one that stops the product.    | 58    |
+| FR-9305 | One command MUST answer whether a real workshop could be put on a given deployment.                                           | 58    |
+| FR-9306 | No settings check MUST print the value of a setting.                                                                          | 58    |
+
 ## FR-9200 - Before the workshop rings
 
 | Ref     | Requirement                                                                                                              | Phase |

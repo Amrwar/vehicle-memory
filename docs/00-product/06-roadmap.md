@@ -3514,6 +3514,68 @@ English inside a French session with every existing check green. So
 `verify-alerts` asserts each one is answered in French and in Arabic, which is
 the only place that particular gap can be seen from.
 
+## Phase 58 — Configured to do anything
+
+**Scope.** Whether the copy of the product in front of you has been set up to
+do anything, as opposed to whether the product works.
+
+**Exit.** Every setting the application reads says what a workshop would feel
+without it, and one command answers whether a workshop could be put on a
+particular deployment.
+
+**Status.** Built.
+
+Fifty-seven phases asked whether the product works. None asked whether the
+deployment in front of you had been configured, which is a different question
+with a nastier failure.
+
+**The worst failure is not the one that stops the product.** A missing database
+stops the boot and somebody fixes it within the minute. A mail transport left
+on `console` stops nothing at all: every page works, every button responds,
+every message is written into `message_logs` and marked as queued, and not one
+customer hears a word. A workshop would run on that for a fortnight before
+somebody noticed that nobody ever replies — and what they would conclude is
+that the product is broken, because from where they sit it is.
+
+So the register ranks settings by what a workshop would _feel_ rather than by
+what an engineer would call severity, and `silent` sorts before `stops`. Seven
+of the forty-seven are in the silent class. The list is worth reading once:
+the application's own address, the mail and text transports, the scheduler's
+secret, the operator's address, and the card provider's webhook signature —
+that last one meaning cards are charged and the product never learns, so an
+invoice stays unpaid while the customer's statement says otherwise, which is
+the worst disagreement the product can hold.
+
+**The register is checked against the application rather than kept beside it.**
+`verify-launch` fails if a setting the application reads is unaccounted for, or
+if the register names one it does not read. A list of settings kept by hand is
+a list that falls behind the first time somebody adds one, and the first
+anybody would learn of that is a workshop wondering why nothing sends.
+
+**And the environment schema turned out not to be the whole truth.** The first
+draft of the register was written against `lib/env.ts`, which is the one place
+the application _declares_ what it needs and looked authoritative. Reading the
+source instead found fourteen more, read straight from `process.env` without
+passing through it — thirty-three became forty-seven.
+
+The one that matters is `STORAGE_DRIVER`. Unset, every photograph and every
+piece of paperwork is written to the machine's own disk, which a serverless
+host throws away between requests. An inspection is carried out, the evidence
+is taken, and it is gone — in the silent class, at its worst, and invisible to
+a register written against the file that looked like the list.
+
+**Two modes, deliberately.** `npm run verify:launch` checks the register and
+_reports_ the current environment; it passes on a laptop, where everything is
+quite properly a console and the money is pretend on purpose, and it runs on
+every build. `npm run launch:handover` is the judgement about one particular
+deployment: it fails unless a real workshop could be put on it, and it is run
+against production before a first morning. It is deliberately not in
+continuous integration, where it would fail for ever and teach everybody to
+ignore it.
+
+Nothing it prints is a value. A settings check that logs what it is checking is
+a settings check nobody can run against production.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

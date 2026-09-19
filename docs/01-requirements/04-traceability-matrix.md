@@ -527,6 +527,12 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9301 | BK1   | -                                      | `SETTINGS` in core: `felt` and `set` on each of thirty-three                   | `settings.test.ts`, `verify-launch.ts`        | Done   |
+| FR-9302 | BK2   | -                                      | `declared()`: the zod schema and every `process.env` read in the source        | `verify-launch.ts`                            | Done   |
+| FR-9303 | BK1   | -                                      | `pretendingIfEqual`, and the `pretending` verdict                              | `settings.test.ts`, `verify-launch.ts`        | Done   |
+| FR-9304 | BK1   | -                                      | `SEVERITY`, with `silent` before `stops`; the sort in `handover()`             | `settings.test.ts`, `verify-launch.ts`        | Done   |
+| FR-9305 | BK3   | -                                      | `npm run launch:handover`                                                      | `verify-launch.ts`                            | Done   |
+| FR-9306 | BK3   | -                                      | the report prints names and verdicts, never values                             | `verify-launch.ts`                            | Done   |
 | FR-9201 | BJ1   | `operator_alerts`                      | `sweepAlerts()`, called from the hourly cron                                   | `verify-alerts.ts`                            | Done   |
 | FR-9202 | BJ2   | -                                      | `RUNBOOK`, `alertBody()`                                                       | `alerts.test.ts`, `verify-alerts.ts`          | Done   |
 | FR-9203 | BJ2   | -                                      | `decideAlerts()`'s `unexplained`; `withoutAnAction()`                          | `alerts.test.ts`, `verify-alerts.ts`          | Done   |
@@ -954,7 +960,7 @@ that is wrong.
 | The owner's day, sharpened                | 6                   | 6                      |
 | Every word translated                     | 5                   | 5                      |
 | Tax, configurable                         | 7                   | 7                      |
-| Later phases, newest first                | 152                 | 151                    |
+| Later phases, newest first                | 158                 | 157                    |
 | What people say afterwards                | 14                  | 14                     |
 | The technician's own device               | 9                   | 9                      |
 | Proof of everything, and parts that fit   | 8                   | 8                      |
@@ -971,9 +977,9 @@ that is wrong.
 | Counter sales and business reporting      | 10                  | 10                     |
 | Administration and the customer's journey | 7                   | 7                      |
 | Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **652**             | **648 (99%)**          |
+| **Total**                                 | **658**             | **654 (99%)**          |
 
-The requirements document lists 720 requirements. 84 of
+The requirements document lists 726 requirements. 84 of
 them do not have a row of their own above.
 
 That gap is not a claim that they are untested. It is Phase 1 and 2 work that

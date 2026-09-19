@@ -1642,6 +1642,49 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BK - Configured to do anything (Phase 58)
+
+### BK1 - The setting that looks fine and does nothing
+
+**As** the operator **I want** to be told when a deployment is configured to do
+nothing **so that** a workshop does not spend a fortnight wondering why no
+customer ever replies.
+**Size** 8 - **Satisfies** FR-9301, FR-9303, FR-9304
+
+- **Given** a mail transport left on console, **when** the check runs, **then**
+  it is reported as pretending rather than as set.
+- **Given** several things wrong at once, **when** they are listed, **then**
+  the ones nobody would notice come before the ones that stop the product.
+- **Given** any setting, **when** I read its line, **then** it says what a
+  workshop would feel and what to set it to.
+
+### BK2 - A register that cannot fall behind
+
+**As** an engineer **I want** the register checked against the application
+**so that** a setting added next month is not missing from it for a year.
+**Size** 5 - **Satisfies** FR-9302
+
+- **Given** a setting the application reads anywhere — the schema or a bare
+  `process.env` — **when** it has no entry in the register, **then** the check
+  fails and names it.
+- **Given** an entry in the register, **when** the application does not read
+  it, **then** the check fails and names that too.
+
+### BK3 - One command before the first morning
+
+**As** the operator **I want** one command that says whether a workshop can be
+put on this **so that** handing it over is a decision rather than a hope.
+**Size** 5 - **Satisfies** FR-9305, FR-9306
+
+- **Given** a real deployment, **when** I run the handover check, **then** it
+  fails while anything needed is missing or pretending.
+- **Given** my laptop, **when** I run the ordinary check, **then** it passes,
+  because a console transport there is correct rather than wrong.
+- **Given** either, **when** it reports, **then** it prints no value of any
+  setting.
+
+---
+
 ## Epic BJ - Before the workshop rings (Phase 57)
 
 ### BJ1 - Told, rather than finding out

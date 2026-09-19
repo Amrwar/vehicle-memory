@@ -93,7 +93,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Fifty-seven phases have shipped, the last on 19 September 2026, and the pilot
+Fifty-eight phases have shipped, the last on 19 September 2026, and the pilot
 itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 342 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 348 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 652
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 658
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -232,3 +232,16 @@ one thing to do first, and what it would mean to have fixed it. A signal
 nobody has written an action for cannot become a message at all; it is
 reported as needing one and the check fails, which is the strongest available
 reading of "an alert with no action is deleted".
+
+Phase 58 asks the question none of the fifty-seven before it did: not whether
+the product works, but whether the copy of it in front of you has been
+configured to do anything. The worst setting is not the one that stops the
+product — a missing database stops the boot and somebody fixes it in a minute.
+A mail transport left on `console` stops nothing at all: every page works,
+every button responds, every message is written down as queued, and not one
+customer hears a word. All forty-seven settings the application reads now say
+what a workshop would feel without them, ranked so the silent failures come
+first, and `npm run launch:handover` refuses while any of them is missing or
+only pretending. Writing it found fourteen settings that bypass the
+environment schema entirely — including the one whose absence writes every
+inspection photograph to a disk a serverless host throws away.

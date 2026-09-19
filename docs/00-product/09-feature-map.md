@@ -603,6 +603,17 @@ The second sweep: things connected at one end only.
 | The first action on the page | Built  | `/admin/health` shows it beside each fault, and whether you were told (Phase 57)    |
 | The runbook, translated      | Built  | Checked, because it reaches the translator as a variable no scanner sees (Phase 57) |
 
+## 21.24 Configured to do anything
+
+| Item                        | Status | Where                                                                            |
+| --------------------------- | ------ | -------------------------------------------------------------------------------- |
+| Every setting accounted for | Built  | 47 settings, each saying what a workshop would feel without it (Phase 58)        |
+| Silent before loud          | Built  | A console mail transport is reported before a missing database (Phase 58)        |
+| Present and still not set   | Built  | `console`, `stub`, `localhost` are read as pretending, not as set (Phase 58)     |
+| Checked against the source  | Built  | Not only the schema: 14 settings bypass it, STORAGE_DRIVER among them (Phase 58) |
+| One command before day one  | Built  | `npm run launch:handover` against the deployment itself (Phase 58)               |
+| No value ever printed       | Built  | Names and verdicts only, so it can be run against production (Phase 58)          |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -681,7 +692,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 342          |
+| Built    | 348          |
 | Partial  | 1            |
 | Deferred | 1            |
 
