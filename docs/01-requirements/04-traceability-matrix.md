@@ -20,89 +20,73 @@ and the requirement is traced by code and test alone.
 
 ## Foundation
 
-| Req    | Story | Schema              | Implementation                      | Test                   | Status     |
-| ------ | ----- | ------------------- | ----------------------------------- | ---------------------- | ---------- |
-| FR-101 | A2    | `Organization`      | `packages/db/src/tenant.ts`         | `tenant-scope.test.ts` | Done       |
-| FR-102 | A2    | —                   | `forOrg()` scoped client            | `tenant-scope.test.ts` | Done       |
-| FR-103 | A1    | `User`, `Session`   | `apps/web/src/lib/auth/*`           | `password.test.ts`     | Done       |
-| FR-104 | A1    | `User.passwordHash` | `lib/auth/password.ts`              | `password.test.ts`     | Done       |
-| FR-105 | A1    | `Session.expiresAt` | `lib/auth/session.ts`               | `session.test.ts`      | Done       |
-| FR-106 | A3    | `Membership.role`   | `packages/core/src/access/roles.ts` | `roles.test.ts`        | Done       |
-| FR-107 | A3    | —                   | `can()` deny-by-default             | `roles.test.ts`        | Done       |
-| FR-109 | A4    | `AuditLog`          | `lib/audit.ts`                      | `audit.test.ts`        | Done       |
-| FR-110 | A1    | `LoginAttempt`      | `lib/auth/rate-limit.ts`            | `rate-limit.test.ts`   | Done       |
-| FR-111 | —     | `Location`          | schema only                         | —                      | Planned P4 |
+| Req    | Story | Schema              | Implementation                      | Test                | Status     |
+| ------ | ----- | ------------------- | ----------------------------------- | ------------------- | ---------- |
+| FR-101 | A2    | `Organization`      | `packages/db/src/tenant.ts`         | `roles.test.ts`     | Done       |
+| FR-102 | A2    | —                   | `forOrg()` scoped client            | `roles.test.ts`     | Done       |
+| FR-103 | A1    | `User`, `Session`   | `apps/web/src/lib/auth/*`           | `hardening.test.ts` | Done       |
+| FR-104 | A1    | `User.passwordHash` | `lib/auth/password.ts`              | `hardening.test.ts` | Done       |
+| FR-105 | A1    | `Session.expiresAt` | `lib/auth/session.ts`               | `tokens.test.ts`    | Done       |
+| FR-106 | A3    | `Membership.role`   | `packages/core/src/access/roles.ts` | `roles.test.ts`     | Done       |
+| FR-107 | A3    | —                   | `can()` deny-by-default             | `roles.test.ts`     | Done       |
+| FR-109 | A4    | `AuditLog`          | `lib/audit.ts`                      | `life.test.ts`      | Done       |
+| FR-110 | A1    | `LoginAttempt`      | `lib/auth/rate-limit.ts`            | `hardening.test.ts` | Done       |
+| FR-111 | —     | `Location`          | schema only                         | —                   | Planned P4 |
 
 ## Customers and vehicles
 
-| Req        | Story | Schema                    | Implementation                  | Test                   | Status                                      |
-| ---------- | ----- | ------------------------- | ------------------------------- | ---------------------- | ------------------------------------------- |
-| FR-201–203 | B1    | `Customer`                | `app/(workshop)/customers`      | `customer.test.ts`     | Done                                        |
-| FR-204     | B1    | `VehicleOwnership`        | `core/src/vehicle`              | `ownership.test.ts`    | Done                                        |
-| FR-205     | B2    | —                         | customer detail page            | e2e `customer.spec.ts` | Done                                        |
-| FR-206     | B1    | unique indexes            | `customer.ts` duplicate guard   | `customer.test.ts`     | Done                                        |
-| FR-301     | B3    | `Vehicle.vin @unique`     | global uniqueness               | `vin.test.ts`          | Done                                        |
-| FR-304     | B3    | —                         | `core/src/vehicle/vin.ts`       | `vin.test.ts`          | Done                                        |
-| FR-305     | B3    | —                         | `lib/vin-decode.ts`             | `vin-decode.test.ts`   | Partial — stub decoder, real provider in P2 |
-| FR-306–308 | B4    | `OdometerReading`         | `core/src/vehicle/mileage.ts`   | `mileage.test.ts`      | Done                                        |
-| FR-309     | B3    | `VehicleOwnership`        | `core/src/vehicle/ownership.ts` | `ownership.test.ts`    | Done                                        |
-| FR-311     | —     | `Recall`, `VehicleRecall` | schema + read model             | `recall.test.ts`       | Partial — no OEM feed yet                   |
+| Req    | Story | Schema                    | Implementation                  | Test                   | Status                                      |
+| ------ | ----- | ------------------------- | ------------------------------- | ---------------------- | ------------------------------------------- |
+| FR-204 | B1    | `VehicleOwnership`        | `core/src/vehicle`              | `handover.test.ts`     | Done                                        |
+| FR-205 | B2    | —                         | customer detail page            | e2e `customer.spec.ts` | Done                                        |
+| FR-206 | B1    | unique indexes            | `customer.ts` duplicate guard   | `customer.test.ts`     | Done                                        |
+| FR-301 | B3    | `Vehicle.vin @unique`     | global uniqueness               | `vehicle.test.ts`      | Done                                        |
+| FR-304 | B3    | —                         | `core/src/vehicle/vin.ts`       | `vehicle.test.ts`      | Done                                        |
+| FR-305 | B3    | —                         | `lib/vin-decode.ts`             | `vehicle.test.ts`      | Partial — stub decoder, real provider in P2 |
+| FR-309 | B3    | `VehicleOwnership`        | `core/src/vehicle/ownership.ts` | `handover.test.ts`     | Done                                        |
+| FR-311 | —     | `Recall`, `VehicleRecall` | schema + read model             | `verify-records.ts`    | Partial — no OEM feed yet                   |
 
 ## Vehicle passport
 
-| Req        | Story | Schema                             | Implementation                  | Test                     | Status     |
-| ---------- | ----- | ---------------------------------- | ------------------------------- | ------------------------ | ---------- |
-| FR-401     | C2    | `VehicleEvent`                     | append-only repository          | `ledger.test.ts`         | Done       |
-| FR-402     | C1    | `VehicleEvent.*`                   | `core/src/passport/event.ts`    | `ledger.test.ts`         | Done       |
-| FR-403     | C2    | `VehicleEvent.hash`, `.prevHash`   | `core/src/passport/chain.ts`    | `chain.test.ts`          | Done       |
-| FR-404     | C2    | —                                  | `verifyChain()`                 | `chain.test.ts`          | Done       |
-| FR-405     | C1    | `VehicleEventType`                 | enum                            | `ledger.test.ts`         | Done       |
-| FR-406     | C2    | `supersedesId`                     | `supersede()`                   | `chain.test.ts`          | Done       |
-| FR-407     | C1    | `VerificationLevel`                | enum                            | `ledger.test.ts`         | Done       |
-| FR-408     | C3    | —                                  | job completion writer           | `job-completion.test.ts` | Done       |
-| FR-409     | C4    | `PassportShare`                    | share issue and revoke          | `share.test.ts`          | Done       |
-| FR-410     | C4    | `PassportShareAccess`              | access logging                  | `share.test.ts`          | Done       |
-| FR-411–412 | C5    | `VehicleOwnership`, transfer event | `core/src/passport/transfer.ts` | `transfer.test.ts`       | Done       |
-| FR-413     | C1    | —                                  | timeline view                   | e2e `passport.spec.ts`   | Done       |
-| FR-414     | —     | —                                  | —                               | —                        | Planned P5 |
+| Req    | Story | Schema                           | Implementation               | Test                   | Status     |
+| ------ | ----- | -------------------------------- | ---------------------------- | ---------------------- | ---------- |
+| FR-401 | C2    | `VehicleEvent`                   | append-only repository       | `accounting.test.ts`   | Done       |
+| FR-402 | C1    | `VehicleEvent.*`                 | `core/src/passport/event.ts` | `accounting.test.ts`   | Done       |
+| FR-403 | C2    | `VehicleEvent.hash`, `.prevHash` | `core/src/passport/chain.ts` | `chain.test.ts`        | Done       |
+| FR-404 | C2    | —                                | `verifyChain()`              | `chain.test.ts`        | Done       |
+| FR-405 | C1    | `VehicleEventType`               | enum                         | `accounting.test.ts`   | Done       |
+| FR-406 | C2    | `supersedesId`                   | `supersede()`                | `chain.test.ts`        | Done       |
+| FR-407 | C1    | `VerificationLevel`              | enum                         | `accounting.test.ts`   | Done       |
+| FR-408 | C3    | —                                | job completion writer        | `events.test.ts`       | Done       |
+| FR-409 | C4    | `PassportShare`                  | share issue and revoke       | `tokens.test.ts`       | Done       |
+| FR-410 | C4    | `PassportShareAccess`            | access logging               | `tokens.test.ts`       | Done       |
+| FR-413 | C1    | —                                | timeline view                | e2e `passport.spec.ts` | Done       |
+| FR-414 | —     | —                                | —                            | —                      | Planned P5 |
 
 ## Booking, job, inspection, estimate
 
-| Req        | Story | Schema                         | Implementation                       | Test                     | Status |
-| ---------- | ----- | ------------------------------ | ------------------------------------ | ------------------------ | ------ |
-| FR-501–502 | D1    | `Booking`, `Bay`               | diary views                          | e2e `diary.spec.ts`      | Done   |
-| FR-504–505 | D2    | —                              | reschedule + capacity                | `capacity.test.ts`       | Done   |
-| FR-506     | D3    | `Booking.jobId`                | convert action                       | `booking.test.ts`        | Done   |
-| FR-601     | E1    | `Job` and relations            | job detail                           | e2e `job.spec.ts`        | Done   |
-| FR-602–603 | E2    | `JobStatus`                    | `core/src/job/lifecycle.ts`          | `lifecycle.test.ts`      | Done   |
-| FR-604     | E2    | `JobStatusEvent`               | transition recorder                  | `lifecycle.test.ts`      | Done   |
-| FR-605     | E1    | `Job.*`                        | job form                             | `job.test.ts`            | Done   |
-| FR-608–609 | E1    | `JobLabourLine`, `JobPartLine` | line editors                         | `totals.test.ts`         | Done   |
-| FR-610     | E3    | `TimeEntry`                    | clock on/off                         | `time-entry.test.ts`     | Done   |
-| FR-611     | E1    | —                              | `core/src/pricing/totals.ts`         | `totals.test.ts`         | Done   |
-| FR-612     | E2    | `QualityCheck`                 | gate in lifecycle                    | `lifecycle.test.ts`      | Done   |
-| FR-614     | C3    | —                              | completion writer                    | `job-completion.test.ts` | Done   |
-| FR-701–704 | F1    | `Inspection*`                  | inspection capture                   | `inspection.test.ts`     | Done   |
-| FR-705     | F3    | —                              | `core/src/inspection/to-estimate.ts` | `to-estimate.test.ts`    | Done   |
-| FR-709     | F2    | `InspectionResult.measurement` | structured fields                    | `inspection.test.ts`     | Done   |
-| FR-801–802 | G1    | `Estimate`, `EstimateLine`     | estimate builder                     | `totals.test.ts`         | Done   |
-| FR-803–804 | G1    | `EstimateShare`                | secure link                          | `share.test.ts`          | Done   |
-| FR-805–807 | G2    | `EstimateApproval`             | approval handler                     | `approval.test.ts`       | Done   |
-| FR-812     | G3    | —                              | threshold check                      | `approval.test.ts`       | Done   |
+| Req    | Story | Schema                         | Implementation                       | Test                  | Status |
+| ------ | ----- | ------------------------------ | ------------------------------------ | --------------------- | ------ |
+| FR-506 | D3    | `Booking.jobId`                | convert action                       | `accept.test.ts`      | Done   |
+| FR-601 | E1    | `Job` and relations            | job detail                           | e2e `job.spec.ts`     | Done   |
+| FR-604 | E2    | `JobStatusEvent`               | transition recorder                  | `lifecycle.test.ts`   | Done   |
+| FR-605 | E1    | `Job.*`                        | job form                             | `lifecycle.test.ts`   | Done   |
+| FR-610 | E3    | `TimeEntry`                    | clock on/off                         | `people.test.ts`      | Done   |
+| FR-611 | E1    | —                              | `core/src/pricing/totals.ts`         | `totals.test.ts`      | Done   |
+| FR-612 | E2    | `QualityCheck`                 | gate in lifecycle                    | `lifecycle.test.ts`   | Done   |
+| FR-614 | C3    | —                              | completion writer                    | `events.test.ts`      | Done   |
+| FR-705 | F3    | —                              | `core/src/inspection/to-estimate.ts` | `to-estimate.test.ts` | Done   |
+| FR-709 | F2    | `InspectionResult.measurement` | structured fields                    | `carry-out.test.ts`   | Done   |
+| FR-812 | G3    | —                              | threshold check                      | `decision.test.ts`    | Done   |
 
 ## Invoicing, portal, reporting
 
-| Req          | Story | Schema                   | Implementation       | Test                    | Status |
-| ------------ | ----- | ------------------------ | -------------------- | ----------------------- | ------ |
-| FR-901–903   | I1    | `Invoice`, `InvoiceLine` | invoice generation   | `invoice.test.ts`       | Done   |
-| FR-902       | I1    | `DocumentSequence`       | gapless numbering    | `sequence.test.ts`      | Done   |
-| FR-905–906   | I2    | `Payment`                | payment recording    | `invoice.test.ts`       | Done   |
-| FR-907       | I1    | —                        | immutability guard   | `invoice.test.ts`       | Done   |
-| FR-1301–1308 | J2    | —                        | portal routes        | e2e `portal.spec.ts`    | Done   |
-| FR-1401–1402 | J1    | —                        | dashboard            | e2e `dashboard.spec.ts` | Done   |
-| FR-1407      | —     | —                        | coverage report      | `coverage.test.ts`      | Done   |
-| FR-1501–1502 | G1    | `MessageLog`             | notification service | `notify.test.ts`        | Done   |
-| FR-1504      | —     | `ServiceSchedule`        | due calculation      | `service-due.test.ts`   | Done   |
+| Req     | Story | Schema             | Implementation     | Test                  | Status |
+| ------- | ----- | ------------------ | ------------------ | --------------------- | ------ |
+| FR-902  | I1    | `DocumentSequence` | gapless numbering  | `verify-integrity.ts` | Done   |
+| FR-907  | I1    | —                  | immutability guard | `invoicing.test.ts`   | Done   |
+| FR-1407 | —     | —                  | coverage report    | `verify-passports.ts` | Done   |
+| FR-1504 | —     | `ServiceSchedule`  | due calculation    | `arrival.test.ts`     | Done   |
 
 ## Inventory and procurement (Phase 2)
 
@@ -381,8 +365,8 @@ where the work happens.
 | FR-5801 | AB1   | —                                                               | `isWritePermission()`, the action scan in `verify-authz.ts`                                                            | `subscription.test.ts`, `verify-authz.ts`                        | Done   |
 | FR-5802 | AB1   | —                                                               | `can()`, `requireSession()`, the workshop layout                                                                       | `verify-authz.ts`                                                | Done   |
 | FR-5803 | AB1   | `forOrg()` scoping                                              | `notFound()` on every detail page, `authenticateApiKey()`, the cron secret                                             | `verify-authz.ts`                                                | Done   |
-| FR-5804 | AB2   | —                                                               | `assertWithinLimit()` in `saveBay()`, `registerVehicle()`, `inviteColleague()`                                         | `plans.test.ts`, `verify-authz.ts`                               | Done   |
-| FR-5805 | AB2   | —                                                               | `assertPlanAllows()` in `createApiKey()`, `runPayroll()`, `dispatchTransfer()`, `completeSale()`, `recordExpense()`    | `plans.test.ts`, `verify-authz.ts`                               | Done   |
+| FR-5804 | AB2   | —                                                               | `assertWithinLimit()` in `saveBay()`, `registerVehicle()`, `inviteColleague()`                                         | `prices.test.ts`, `verify-authz.ts`                              | Done   |
+| FR-5805 | AB2   | —                                                               | `assertPlanAllows()` in `createApiKey()`, `runPayroll()`, `dispatchTransfer()`, `completeSale()`, `recordExpense()`    | `prices.test.ts`, `verify-authz.ts`                              | Done   |
 | FR-5806 | AB3   | `Organization.trialEndsAt/subscribedAt/suspendedAt/cancelledAt` | `subscriptionStateOf()`, `planOf()`                                                                                    | `subscription.test.ts`, `verify-authz.ts`                        | Done   |
 | FR-5807 | AB3   | —                                                               | `requireSession()` read-only branch, `/settings/subscription`, `choosePlan()`                                          | `verify-authz.ts`, `verify-controls.ts`                          | Done   |
 | FR-5901 | AC1   | `PaymentAttempt`, `Refund.attemptId`                            | `PaymentProvider` in core, `stubProvider`, `stripeProvider`, `paymentProvider()`                                       | `attempts.test.ts`, `verify-payments.ts`                         | Done   |
@@ -527,6 +511,11 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9601 | BN1   | —                                      | the requirement list read off the document and compared with the rows          | `verify-traceability.ts`                      | Done   |
+| FR-9602 | BN1   | —                                      | the test and function checks in `verify-traceability.ts`                       | `verify-traceability.ts`                      | Done   |
+| FR-9603 | BN2   | —                                      | the Missing rows, and the check that none of them claims a test                | `verify-traceability.ts`                      | Done   |
+| FR-9604 | BN2   | —                                      | the kinds: Missing, Partial, Deferred, Superseded, Planned                     | `verify-traceability.ts`                      | Done   |
+| FR-9605 | BN3   | —                                      | the summary recounted from the table, and compared with it                     | `verify-traceability.ts`                      | Done   |
 | FR-9501 | BM1   | -                                      | `verify-paint.ts`: PerformanceObserver in the page, CDP throttling             | `paint.test.ts`, `verify-paint.ts`            | Done   |
 | FR-9502 | BM1   | -                                      | `FOUR_G` in core, named and asserted                                           | `paint.test.ts`                               | Done   |
 | FR-9503 | BM1   | -                                      | `middle()`, and `RUNS = 3`                                                     | `paint.test.ts`                               | Done   |
@@ -642,7 +631,7 @@ first six rows and of nothing since.
 | FR-7901 | AW1   | —                                      | `updateCustomer()`, `CustomerFields`, `/customers/[id]/edit`                   | `verify-wiring.ts`                            | Done   |
 | FR-7902 | AW1   | `consent_changes`                      | `showConsent={false}`, the comment in `updateCustomer()`                       | `verify-wiring.ts`                            | Done   |
 | FR-7903 | AW2   | `SequenceKind.TRANSFER`                | `createTransfer()`, the suggestion form on `/transfers`                        | `verify-wiring.ts`                            | Done   |
-| FR-7904 | AW2   | `stock_transfer_lines.received`        | `receiveTransfer()`, `/transfers/[id]`, PART_RECEIVED                          | `transfer.test.ts`, `verify-wiring.ts`        | Done   |
+| FR-7904 | AW2   | `stock_transfer_lines.received`        | `receiveTransfer()`, `/transfers/[id]`, PART_RECEIVED                          | `inventory.test.ts`, `verify-wiring.ts`       | Done   |
 | FR-7905 | AW3   | `warranties`                           | `recordCover()`, the form on `/warranty`                                       | `verify-wiring.ts`                            | Done   |
 | FR-7906 | AW3   | `warranties_distance_needs_a_start`    | the reading taken from the vehicle in `recordCover()`                          | `verify-wiring.ts`                            | Done   |
 | FR-7907 | AW4   | —                                      | `/verify` in `marketing.tsx` navigation and footer                             | `verify-controls.ts`                          | Done   |
@@ -658,7 +647,7 @@ first six rows and of nothing since.
 | FR-7701 | AU1   | `Coupon`                               | `assertCouponSaveable()`, `saveCoupon()`, `/coupons`                           | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
 | FR-7702 | AU1   | `coupons_orgId_code_key`               | `normaliseCouponCode()`, `retireCoupon()`, `coupons_worth_check`               | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
 | FR-7703 | AU3   | `PaymentMethod.COUPON`                 | `redeemAgainstInvoice()`, the invoice page's coupon card                       | `verify-coupons.ts`                           | Done   |
-| FR-7704 | AU3   | account `6410`                         | `accountForMethod()`, `postCounterSale()`'s `couponTaken`                      | `posting.test.ts`, `verify-coupons.ts`        | Done   |
+| FR-7704 | AU3   | account `6410`                         | `accountForMethod()`, `postCounterSale()`'s `couponTaken`                      | `accounting.test.ts`, `verify-coupons.ts`     | Done   |
 | FR-7705 | AU2   | —                                      | `couponDiscount()`, capped at what is owed                                     | `coupons.test.ts`, `verify-coupons.ts`        | Done   |
 | FR-7706 | AU2   | —                                      | `CouponError`, `couponState()`, the coupons dictionary                         | `coupons.test.ts`, `verify-languages.ts`      | Done   |
 | FR-7707 | AU3   | `coupon_redemptions_one_per_invoice`   | `recordCounterRedemption()` inside the sale's transaction                      | `verify-coupons.ts`                           | Done   |
@@ -941,79 +930,188 @@ details without a provider behind it would be worse than not having one.
 
 ---
 
+## The first two phases, traced one by one (Phase 61)
+
+Eighty-four requirements from Phases 1 and 2 were traced by section rather than
+by requirement, before this matrix settled into one row each. The gap was named
+at the foot of this page for months and never closed, and closing it was not
+paperwork: it turned up five things the requirements say the product does and
+the product does not do, and three claims elsewhere in this documentation that
+were simply wrong.
+
+Every cell below was checked against the source. Where nothing implements a
+requirement the row says so in bold, and where nothing tests it the test column
+is a dash. Both are more useful than a plausible entry — a matrix whose rows
+were written rather than verified is worse than a gap that is admitted.
+
+| Req     | Story | Schema                                   | Implementation                                                                                                                                     | Test                                               | Status     |
+| ------- | ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| FR-108  | —     | `Membership`                             | the schema allows it; **nothing switches between them** — `currentUser()` takes `memberships[0]`                                                   | —                                                  | Missing    |
+| FR-112  | —     | —                                        | single sign-on is not built. A SHOULD, and the decision is to wait for somebody who wants it                                                       | —                                                  | Deferred   |
+| FR-201  | B1    | `Customer.kind`                          | `createCustomer()`, `CustomerFields`                                                                                                               | `customer.test.ts`, `verify-wiring.ts`             | Done       |
+| FR-202  | B1    | `Customer` address columns               | `CustomerFields`, `createCustomer()`                                                                                                               | `verify-wiring.ts`, `verify-empty.ts`              | Done       |
+| FR-203  | B1    | `Customer.sourceOfBusiness`              | `CustomerFields`; `bySource()` reports on it                                                                                                       | `verify-owner.ts`                                  | Done       |
+| FR-207  | B1    | `Invoice.billToCustomerId`               | `issueInvoice()`, and the fleet agreement that sets it                                                                                             | `verify-erp.ts`, `verify-money.ts`                 | Done       |
+| FR-208  | B1    | `ConsentChange`                          | `setConsent()`, and the consent gate in `sendMessageNow()`                                                                                         | `messaging.test.ts`, `verify-messaging.ts`         | Done       |
+| FR-209  | —     | —                                        | **nothing exports or erases a customer's personal data.** The security model §10 specifies how it should behave; no code does it                   | —                                                  | Missing    |
+| FR-302  | C1    | `Vehicle` columns                        | the vehicle form and `registerVehicle()`                                                                                                           | `vehicle.test.ts`, `verify-records.ts`             | Done       |
+| FR-303  | —     | `Vehicle.registrationExpiresAt`          | the expiry is there; **`fleetNumber` is not a column and nothing records one**                                                                     | —                                                  | Partial    |
+| FR-306  | C2    | `OdometerReading`                        | `checkIn()` in `lib/arrival.ts`, and the same on a job and an import                                                                               | `arrival.test.ts`, `verify-arrival.ts`             | Done       |
+| FR-307  | C2    | `OdometerReading`                        | `assessReading()` in `core/vehicle/mileage.ts`, refusing a figure below the last                                                                   | `vehicle.test.ts`, `verify-awkward.ts`             | Done       |
+| FR-308  | C2    | `Vehicle.lastOdometerKm`                 | `averageKmPerDay()` and `projectServiceDue()` in `core/vehicle/mileage.ts`                                                                         | `vehicle.test.ts`, `condition.test.ts`             | Done       |
+| FR-310  | D1    | `VehicleEvent`, `VehicleAccessGrant`     | `networkHistory()`, `timelineFor()`, subject to the grant                                                                                          | `network.test.ts`, `verify-network.ts`             | Done       |
+| FR-411  | D2    | `HandoverInvitation`, `VehicleOwnership` | `inviteHandover()`, `acceptHandover()`; the chain is untouched                                                                                     | `handover.test.ts`, `verify-handover.ts`           | Done       |
+| FR-412  | D2    | `VehicleOwnership.endedAt`               | `vehicleHistory()` reads the owner's own period only                                                                                               | `handover.test.ts`, `verify-ownership.ts`          | Done       |
+| FR-415  | D1    | `VehicleEvent.odometerKm`                | the odometer written as its own passport event by `eventsForCompletedJob()`, so a reading that contradicts an earlier one is visible in the chain  | `observations.test.ts`, `verify-provenance.ts`     | Done       |
+| FR-501  | E1    | `Booking`                                | `diaryFor()` and the day, week and month views                                                                                                     | `views.test.ts`, `verify-planning.ts`              | Done       |
+| FR-502  | E1    | `Bay`, `Employee`                        | the diary's lanes by bay and by technician                                                                                                         | `views.test.ts`, `verify-planning.ts`              | Done       |
+| FR-503  | E1    | `Booking`                                | `createBooking()`                                                                                                                                  | `verify-planning.ts`, `verify-controls.ts`         | Done       |
+| FR-504  | E1    | `Booking.startAt`                        | `moveBooking()` from the diary                                                                                                                     | `verify-planning.ts`                               | Done       |
+| FR-505  | E2    | `Location.dailyCapacityHours`            | `capacityFor()`, which refuses a slot the day cannot take                                                                                          | `capacity.test.ts`, `verify-planning.ts`           | Done       |
+| FR-507  | E2    | `MessageLog`                             | the confirmation queued inside `requestBooking()`'s transaction                                                                                    | `verify-messaging.ts`, `verify-triggers.ts`        | Done       |
+| FR-508  | E2    | `BookingStatus.NO_SHOW`                  | `setBookingStatus()`, and the sweep that finds the ones nobody turned up for                                                                       | `verify-triggers.ts`                               | Done       |
+| FR-509  | E2    | `Location.dailyCapacityHours`            | set on `/settings/site`, read by `slotsFor()`                                                                                                      | `capacity.test.ts`, `verify-settings.ts`           | Done       |
+| FR-510  | —     | `BookingSource.ONLINE`                   | the product **books straight in** rather than holding a request for confirmation — a decision, written in `booking.ts`, and FR-511 is what it does | `verify-workflow.ts`                               | Superseded |
+| FR-511  | E3    | `Booking.source`                         | `slotsFor()` offers only genuine capacity; `requestBooking()` schedules it                                                                         | `accept.test.ts`, `verify-workflow.ts`             | Done       |
+| FR-512  | —     | `Booking.courtesyVehicleNote`            | a free-text note only. **Nothing allocates a courtesy vehicle or knows whether one is free**                                                       | —                                                  | Partial    |
+| FR-602  | F1    | `Job.status`                             | `allowedTransitions()`, `moveJob()`                                                                                                                | `lifecycle.test.ts`, `verify-workflow.ts`          | Done       |
+| FR-603  | F1    | `JobStatus`                              | the enum, and the board that draws it                                                                                                              | `lifecycle.test.ts`, `verify-workflow.ts`          | Done       |
+| FR-606  | F2    | `JobAttachment`                          | attachments from arrival and from the job page                                                                                                     | `verify-storage.ts`, `verify-arrival.ts`           | Done       |
+| FR-607  | F2    | `JobTask`                                | tasks written by `applyPackage()`; a technician ticks them off                                                                                     | `packages.test.ts`, `verify-packages.ts`           | Done       |
+| FR-608  | F2    | `JobLabourLine`                          | labour lines on the job page, priced by `labourRateAt()`                                                                                           | `totals.test.ts`, `verify-ownership.ts`            | Done       |
+| FR-609  | F2    | `JobPartLine`                            | part lines, with the price held on the line                                                                                                        | `totals.test.ts`, `verify-awkward.ts`              | Done       |
+| FR-615  | F3    | `ServicePackage`                         | `applyPackage()` fills tasks, labour and parts                                                                                                     | `packages.test.ts`, `verify-packages.ts`           | Done       |
+| FR-616  | F3    | `Invoice.billToCustomerId`               | the third party is billed; the vehicle keeps its owner                                                                                             | `verify-erp.ts`                                    | Done       |
+| FR-617  | —     | `JobFollowUp`                            | **the table exists and nothing writes to or reads from it.** No follow-up can be set                                                               | —                                                  | Missing    |
+| FR-701  | G1    | `InspectionTemplate`                     | `templatesFor()`, `startInspection()`                                                                                                              | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
+| FR-702  | G1    | `Severity`                               | `recordResult()`; four severities and no fifth                                                                                                     | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
+| FR-703  | G1    | `InspectionResult.measurementValue`      | note, photographs, a measured value with its type, and a wheel position                                                                            | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
+| FR-704  | G1    | `Inspection.criticalCount`               | `refreshCounts()`, kept true after every change                                                                                                    | `verify-inspection.ts`                             | Done       |
+| FR-706  | G2    | —                                        | `/shop`, the technician's own device, measured at seven sizes                                                                                      | `verify-screens.ts`, `verify-offline.ts`           | Done       |
+| FR-707  | G2    | `VehicleEvent`                           | `completeInspection()` writes to the passport in the same transaction                                                                              | `events.test.ts`, `verify-inspection.ts`           | Done       |
+| FR-708  | G3    | `InspectionPhoto`                        | the inspection report at `/print/inspection`, and the customer's own copy                                                                          | `verify-paper.ts`, `verify-portal-account.ts`      | Done       |
+| FR-710  | —     | —                                        | voice-to-text is not built. A SHOULD, and dictation on a telephone is the operating system's job rather than this product's                        | —                                                  | Deferred   |
+| FR-801  | H1    | `EstimateLine`                           | labour, part and fee lines, each with its own discount                                                                                             | `totals.test.ts`, `verify-workflow.ts`             | Done       |
+| FR-802  | H1    | —                                        | `calculateTotals()` in `core/pricing/totals.ts`: subtotal, discount, tax and total                                                                 | `totals.test.ts`, `tax.test.ts`                    | Done       |
+| FR-803  | H1    | `EstimateShare`                          | `sendEstimate()`, by email or by text, as a link                                                                                                   | `verify-workflow.ts`, `verify-messaging.ts`        | Done       |
+| FR-804  | H1    | `estimate_shares.tokenHash`              | 32 random bytes, stored as a digest, with an expiry                                                                                                | `tokens.test.ts`, `verify-tenancy.ts`              | Done       |
+| FR-805  | H2    | `EstimateApproval`                       | `recordDecision()` at `/e/[token]`, with no account                                                                                                | `decision.test.ts`, `verify-workflow.ts`           | Done       |
+| FR-806  | H2    | `LineDecision`                           | a decision per line, and `approvedPortion()` for what that comes to                                                                                | `decision.test.ts`, `verify-awkward.ts`            | Done       |
+| FR-807  | H2    | `EstimateApproval`                       | the moment, the address, the total agreed and who agreed it                                                                                        | `decision.test.ts`, `verify-workflow.ts`           | Done       |
+| FR-808  | H2    | `OutboxEvent`                            | `recordDecision()` moves the job and tells whoever is on it                                                                                        | `verify-triggers.ts`, `verify-workflow.ts`         | Done       |
+| FR-809  | H3    | `EstimateLine.inspectionResultId`        | `findingsToEstimateLines()` carries the finding and its photographs across                                                                         | `to-estimate.test.ts`, `verify-inspection.ts`      | Done       |
+| FR-810  | H3    | `Estimate.supersedesId`                  | a revision is a new version; both remain readable                                                                                                  | `verify-workflow.ts`                               | Done       |
+| FR-811  | H3    | `StockReservation`                       | `reserveForJobLine()` on approval; released on cancellation                                                                                        | `inventory.test.ts`, `verify-awkward.ts`           | Done       |
+| FR-901  | I1    | `Invoice`                                | `issueInvoice()`, in one action from a finished job                                                                                                | `invoicing.test.ts`, `verify-money.ts`             | Done       |
+| FR-903  | I1    | `TaxEntry`                               | `bandsFor()`: every line, and the tax by rate                                                                                                      | `tax.test.ts`, `verify-tax.ts`                     | Done       |
+| FR-904  | I1    | —                                        | `/print/invoice/[id]`, and the message that carries it                                                                                             | `print.test.ts`, `verify-paper.ts`                 | Done       |
+| FR-905  | I2    | `Payment`                                | `recordPayment()`, including part payments                                                                                                         | `verify-money.ts`, `verify-ledger.ts`              | Done       |
+| FR-906  | I2    | `Invoice.amountPaid`                     | `agedReceivables()`, summed in the database                                                                                                        | `accounting.test.ts`, `verify-performance.ts`      | Done       |
+| FR-908  | I2    | `Deposit`                                | `takeDeposit()`, `applyHeld()`, `returnHeld()`                                                                                                     | `deposits.test.ts`, `verify-deposits.ts`           | Done       |
+| FR-909  | I3    | `PaymentAttempt`                         | `/portal/invoices`, and the card page behind it                                                                                                    | `attempts.test.ts`, `verify-payments.ts`           | Done       |
+| FR-910  | I3    | `JournalEntry`                           | `postInvoiceIssued()`, outside the transaction that wrote the bill                                                                                 | `accounting.test.ts`, `verify-ledger.ts`           | Done       |
+| FR-1301 | J1    | `VehicleOwnership`                       | `/portal`, each vehicle with where its work has got to                                                                                             | `verify-portal-account.ts`, `verify-screens.ts`    | Done       |
+| FR-1302 | J1    | `EstimateApproval`                       | `/portal/estimates/[id]`                                                                                                                           | `decision.test.ts`, `verify-portal-account.ts`     | Done       |
+| FR-1303 | J1    | `Invoice`                                | `invoicesFor()`, `/portal/invoices`                                                                                                                | `verify-portal-account.ts`                         | Done       |
+| FR-1304 | J2    | `VehicleEvent`                           | `/portal/vehicles/[id]/passport`                                                                                                                   | `verify-passports.ts`, `verify-tenancy.ts`         | Done       |
+| FR-1305 | J2    | `Booking`                                | `/portal/book`, into genuine capacity                                                                                                              | `accept.test.ts`, `verify-workflow.ts`             | Done       |
+| FR-1306 | J2    | `Conversation`                           | `conversationForJob()`, the thread against one car                                                                                                 | `conversations.test.ts`, `verify-conversations.ts` | Done       |
+| FR-1307 | J3    | `PassportShare`                          | `shareVehicle()`, `revokeShare()`                                                                                                                  | `verify-passports.ts`, `verify-tenancy.ts`         | Done       |
+| FR-1308 | J3    | —                                        | every portal page measured at 390 by 844, and in three engines                                                                                     | `verify-screens.ts`, `verify-engines.ts`           | Done       |
+| FR-1309 | J3    | `PaymentAttempt`                         | `/pay/[id]` through the provider seam                                                                                                              | `attempts.test.ts`, `verify-payments.ts`           | Done       |
+| FR-1310 | J3    | `VehicleDocument`                        | `addDocument()`, against the car rather than the job                                                                                               | `documents.test.ts`, `verify-documents.ts`         | Done       |
+| FR-1401 | K1    | —                                        | `/dashboard`: today, in the shop, waiting on approval, taken today                                                                                 | `verify-owner.ts`, `verify-empty.ts`               | Done       |
+| FR-1402 | K1    | —                                        | every tile a link; `verify-controls` follows all of them                                                                                           | `verify-controls.ts`                               | Done       |
+| FR-1403 | K2    | `TimeEntry`                              | `/people`, hours clocked against hours charged                                                                                                     | `people.test.ts`, `verify-team.ts`                 | Done       |
+| FR-1404 | K2    | `JournalEntry`                           | `/financials`, summed in the database                                                                                                              | `accounting.test.ts`, `verify-owner.ts`            | Done       |
+| FR-1405 | K2    | `JobPartLine`                            | `partsProfitability()`, and what is being sold below cost                                                                                          | `verify-owner.ts`                                  | Done       |
+| FR-1501 | L1    | `MessageLog`                             | `sendMessageNow()` and the queue behind it                                                                                                         | `messaging.test.ts`, `verify-messaging.ts`         | Done       |
+| FR-1502 | L1    | `MessageLog`                             | channel, recipient, body and status on every one                                                                                                   | `verify-messaging.ts`, `verify-health.ts`          | Done       |
+| FR-1503 | L1    | `ConsentChange`                          | the consent check before anything leaves                                                                                                           | `messaging.test.ts`, `verify-deliverability.ts`    | Done       |
+| FR-1505 | L2    | `AutomationRule`                         | trigger, condition and action, in `lib/triggers.ts`                                                                                                | `automation.test.ts`, `verify-triggers.ts`         | Done       |
+| FR-1506 | L2    | `Vehicle.lastServiceAt`                  | `arrivalSuggestions()` from the history and the interval                                                                                           | `arrival.test.ts`, `verify-arrival.ts`             | Done       |
+
 ## Coverage summary
 
-Counted from the table above rather than maintained by hand, because the
-previous version of this summary had drifted by more than a hundred rows and
-nobody noticed — a coverage figure that is not recounted is a coverage figure
-that is wrong.
+Counted from the table above rather than maintained by hand, and checked by
+`npm run verify:traceability`, which also asks whether the rows are true: that
+every requirement has one, that every test a row names exists, and that every
+function a row names exists in the source. A matrix is the easiest document in
+a project to write falsely, because a row naming a function renamed two years
+ago reads exactly like a row naming one that is there.
 
-| Area                                      | Traced individually | With an automated test |
-| ----------------------------------------- | ------------------- | ---------------------- |
-| Foundation                                | 10                  | 9                      |
-| Customers and vehicles                    | 10                  | 10                     |
-| Vehicle passport                          | 13                  | 12                     |
-| Booking, job, inspection, estimate        | 19                  | 19                     |
-| Invoicing, portal, reporting              | 9                   | 9                      |
-| Inventory and procurement (Phase 2)       | 19                  | 18                     |
-| Finance and ledger                        | 12                  | 12                     |
-| People and multi-site                     | 13                  | 13                     |
-| What the record supports saying           | 10                  | 10                     |
-| Scheduled work                            | 6                   | 6                      |
-| Outbound messaging                        | 9                   | 9                      |
-| After a message leaves                    | 8                   | 8                      |
-| Getting in, and mail coming back          | 163                 | 163                    |
-| The workflow, as one thing                | 6                   | 6                      |
-| Arrival and departure                     | 7                   | 7                      |
-| Conversations                             | 7                   | 7                      |
-| Packages and templates                    | 5                   | 5                      |
-| Languages                                 | 5                   | 5                      |
-| Parts back, work out                      | 7                   | 7                      |
-| Finding anything                          | 5                   | 5                      |
-| The owner's day, sharpened                | 6                   | 6                      |
-| Every word translated                     | 5                   | 5                      |
-| Tax, configurable                         | 7                   | 7                      |
-| Later phases, newest first                | 171                 | 170                    |
-| What people say afterwards                | 14                  | 14                     |
-| The technician's own device               | 9                   | 9                      |
-| Proof of everything, and parts that fit   | 8                   | 8                      |
-| The workshop plans itself                 | 10                  | 10                     |
-| The passport leaves the workshop          | 8                   | 8                      |
-| The vehicle's own condition               | 10                  | 10                     |
-| Warranty, fleets and the whole story      | 9                   | 9                      |
-| The diary and the floor                   | 6                   | 6                      |
-| Suppliers and counter bookings            | 6                   | 6                      |
-| Carrying out an inspection                | 10                  | 10                     |
-| The customer's own side                   | 9                   | 9                      |
-| Automation and customer relationships     | 11                  | 11                     |
-| Expenses, banking and period close        | 6                   | 6                      |
-| Counter sales and business reporting      | 10                  | 10                     |
-| Administration and the customer's journey | 7                   | 7                      |
-| Front door and billing                    | 6                   | 6                      |
-| **Total**                                 | **671**             | **667 (99%)**          |
+| Area                                               | Traced individually | With an automated test |
+| -------------------------------------------------- | ------------------- | ---------------------- |
+| Foundation                                         | 10                  | 9                      |
+| Customers and vehicles                             | 8                   | 8                      |
+| Vehicle passport                                   | 12                  | 11                     |
+| Booking, job, inspection, estimate                 | 11                  | 11                     |
+| Invoicing, portal, reporting                       | 4                   | 4                      |
+| Inventory and procurement (Phase 2)                | 19                  | 18                     |
+| Finance and ledger                                 | 12                  | 12                     |
+| People and multi-site                              | 13                  | 13                     |
+| What the record supports saying                    | 10                  | 10                     |
+| Scheduled work                                     | 6                   | 6                      |
+| Outbound messaging                                 | 9                   | 9                      |
+| After a message leaves                             | 8                   | 8                      |
+| Getting in, and mail coming back                   | 163                 | 163                    |
+| The workflow, as one thing                         | 6                   | 6                      |
+| Arrival and departure                              | 7                   | 7                      |
+| Conversations                                      | 7                   | 7                      |
+| Packages and templates                             | 5                   | 5                      |
+| Languages                                          | 5                   | 5                      |
+| Parts back, work out                               | 7                   | 7                      |
+| Finding anything                                   | 5                   | 5                      |
+| The owner's day, sharpened                         | 6                   | 6                      |
+| Every word translated                              | 5                   | 5                      |
+| Tax, configurable                                  | 7                   | 7                      |
+| Later phases, newest first                         | 176                 | 175                    |
+| What people say afterwards                         | 14                  | 14                     |
+| The technician's own device                        | 9                   | 9                      |
+| Proof of everything, and parts that fit            | 8                   | 8                      |
+| The workshop plans itself                          | 10                  | 10                     |
+| The passport leaves the workshop                   | 8                   | 8                      |
+| The vehicle's own condition                        | 10                  | 10                     |
+| Warranty, fleets and the whole story               | 9                   | 9                      |
+| The diary and the floor                            | 6                   | 6                      |
+| Suppliers and counter bookings                     | 6                   | 6                      |
+| Carrying out an inspection                         | 10                  | 10                     |
+| The customer's own side                            | 9                   | 9                      |
+| Automation and customer relationships              | 11                  | 11                     |
+| Expenses, banking and period close                 | 6                   | 6                      |
+| Counter sales and business reporting               | 10                  | 10                     |
+| Administration and the customer's journey          | 7                   | 7                      |
+| Front door and billing                             | 6                   | 6                      |
+| The first two phases, traced one by one (Phase 61) | 84                  | 77                     |
+| **Total**                                          | **744**             | **733 (99%)**          |
 
-The requirements document lists 739 requirements. 84 of
-them do not have a row of their own above.
+Every one of the 744 requirements now has a row of its own. Until Phase 61,
+84 did not — Phase 1 and 2 work traced by section rather than by requirement,
+named at the foot of this page for months as a gap somebody would close one
+day. Closing it was not paperwork. It found five requirements the product does
+not meet, and thirty-four rows naming test files that had been renamed or
+consolidated years earlier and never corrected here.
 
-That gap is not a claim that they are untested. It is Phase 1 and 2 work that
-was traced by section rather than by requirement, before this matrix settled
-into one row per requirement, and the earlier phases' acceptance tests cover
-it. What it does mean is that this table cannot be read as a coverage figure
-for the product, only for the requirements traced individually, and an earlier
-version of this page did read it that way: it claimed 149 of 149 traced at
-97% automated, against a matrix that held 130 rows. The claim was arithmetic
-about a table that no longer existed.
+Nine rows are something other than Done, and they say which kind:
 
-Closing the gap means one row per requirement for the earlier phases, which is
-a piece of work in its own right and is named here so it stays visible rather
-than being quietly implied by a percentage.
+| Kind           | What it means                                                                |
+| -------------- | ---------------------------------------------------------------------------- |
+| **Missing**    | Nothing implements it. Three: FR-108, FR-209, FR-617.                        |
+| **Partial**    | Some of it is there. FR-303, FR-305, FR-311, FR-512.                         |
+| **Deferred**   | A SHOULD, decided against for now, with the reason. FR-112, FR-710.          |
+| **Superseded** | The product deliberately does something else, and the row says what. FR-510. |
+| **Planned**    | Named for a later phase. FR-111, FR-414, FR-1010.                            |
 
-## And the eighty-four that are not in this table
+A row that says Missing is this table working. What would not be working is a
+requirement nothing implements beside a row that says Done, and that is the one
+thing `verify-traceability` cannot check for you — which is why the rows were
+read against the source one at a time rather than generated.
 
-The quality requirements are accounted for in
-`infra/scripts/verify-quality.ts` rather than here: fifty-two checked by
-something that runs, fifteen read off the repository, seventeen enforced by
-nothing with what each would take written down. They are not duplicated into
-this table on purpose — two registers of the same thing drift, and the first
-anybody learns of the drift is when they disagree. See
+## The eighty-four quality requirements
+
+They are accounted for in `infra/scripts/verify-quality.ts` rather than here:
+fifty-two checked by something that runs, fifteen read off the repository,
+seventeen enforced by nothing with what each would take written down. They are
+not duplicated into this table on purpose — two registers of the same thing
+drift, and the first anybody learns of the drift is when they disagree. See
 [the non-functional requirements](02-non-functional-requirements.md).

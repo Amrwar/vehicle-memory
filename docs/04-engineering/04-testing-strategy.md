@@ -103,6 +103,7 @@ verify:<name>`.
 | trace          | One press, followed through the record, the queue, the message and the note                                                          |
 | launch         | Every setting says what a workshop would feel without it; one command judges a deployment                                            |
 | alerts         | Something goes wrong and a person is told, once, with the first thing to do                                                          |
+| traceability   | Every requirement has a row, and every test and function a row names exists                                                          |
 | quality        | Every non-functional requirement says what enforces it, or what it would take                                                        |
 | engines        | The lived-in screens and the customer's links in Chromium, WebKit and Firefox                                                        |
 | throughout     | The four promises the roadmap makes about every phase: the checks run, every screen is measured, every list has a bound              |

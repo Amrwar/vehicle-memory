@@ -157,16 +157,23 @@ Each is one of three things.
 
 | Kind        | Count | What it means                                                                                             |
 | ----------- | ----- | --------------------------------------------------------------------------------------------------------- |
-| **checked** | 52    | Something runs and would fail. The thing that runs is named, has to exist, and has to be in the workflow. |
+| **checked** | 49    | Something runs and would fail. The thing that runs is named, has to exist, and has to be in the workflow. |
 | **read**    | 15    | True of the repository as it stands, and asserted there and then rather than by a script somewhere else.  |
-| **not yet** | 17    | Enforced by nothing. What it would take is written down, because "not yet" without that is a wish.        |
+| **not yet** | 20    | Enforced by nothing. What it would take is written down, because "not yet" without that is a wish.        |
 
-The seventeen are not an oversight and are not going to become checks by being
+The twenty are not an oversight and are not going to become checks by being
 looked at harder. They need a person, a production deployment, or a month of
 real traffic: a penetration test, a new service advisor taking a booking
 unaided, a month of uptime, two thousand tenants, a technician in nitrile
-gloves. `npm run verify:quality` lists all seventeen with the reason each time
+gloves. `npm run verify:quality` lists all twenty with the reason each time
 it runs, so the number is visible rather than implied.
+
+Three of them were marked as checked and were not. NFR-502, NFR-503 and
+NFR-903 — export and erasure — named `verify-retention.ts`, which tests
+reviews, points and referrals and has never touched personal data. Phase 61
+found it while tracing FR-209 and put all three back to _not yet_. The register
+exists to stop an enforcement nobody can name; naming the wrong one is worse
+than naming none, because it reads as covered.
 
 Until Phase 56 exactly one of these eighty-four appeared in the
 [traceability matrix](04-traceability-matrix.md). Several were in fact enforced

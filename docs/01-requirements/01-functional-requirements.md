@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9600 - The rows that were never there
+
+| Ref     | Requirement                                                                                                          | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9601 | Every functional requirement MUST have a row of its own in the traceability matrix, and a check MUST fail otherwise. | 61    |
+| FR-9602 | Every test a row names MUST exist, and every function a row names MUST exist in the source.                          | 61    |
+| FR-9603 | A row for a requirement nothing implements MUST say so, and MUST NOT claim a test.                                   | 61    |
+| FR-9604 | A row that is not Done MUST say which kind of not-done it is.                                                        | 61    |
+| FR-9605 | The coverage summary MUST be counted from the table rather than maintained beside it.                                | 61    |
+
 ## FR-9500 - What the screen does while somebody waits
 
 | Ref     | Requirement                                                                                                         | Phase |

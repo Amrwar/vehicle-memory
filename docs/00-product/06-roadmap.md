@@ -3689,6 +3689,73 @@ which means the pilot; it stays written down as enforced by nothing rather than
 quietly folded in here, because a number from an emulator wearing a field
 metric's name is worse than no number at all.
 
+## Phase 61 — The rows that were never there
+
+**Scope.** The eighty-four Phase 1 and 2 requirements traced by section rather
+than by requirement, named at the foot of the traceability matrix for months as
+a gap somebody would close one day.
+
+**Exit.** Every requirement has a row of its own, and the rows are checked
+rather than believed.
+
+**Status.** Built, and it was not paperwork.
+
+A traceability matrix is the easiest document in a project to write and the
+easiest to write falsely. Every row is a claim — this requirement is met by
+that code and held there by that test — and nothing about a table makes any of
+those claims so. A row naming a function renamed two years ago reads exactly
+like a row naming one that exists.
+
+So the eighty-four were not written; they were **read against the source, one
+at a time**. That turned up rather more than a gap in a document.
+
+**Five requirements the product does not meet.** Each now has a row that says
+so, in bold, rather than being covered by a section heading:
+
+- **FR-108** — a user belonging to more than one organisation and switching
+  between them. The schema allows it and nothing switches: `currentUser()`
+  takes `memberships[0]` and there is no way to reach the second.
+- **FR-209** — exporting and permanently erasing a customer's personal data.
+  Nothing exports and nothing erases. This is the one that matters: the
+  security model has a whole section specifying, column by column, what
+  erasure should keep and what it should remove, and no code does any of it.
+- **FR-303** — a vehicle's fleet number. The registration expiry is there; the
+  fleet number is not a column.
+- **FR-512** — courtesy vehicle allocation. There is a free-text note on a
+  booking and nothing that knows whether a car is free.
+- **FR-617** — follow-up flags on a job. The table exists and nothing reads or
+  writes it.
+
+Two more are SHOULDs decided against with a reason (single sign-on,
+voice-to-text), and one is superseded: FR-510 asks for a booking request held
+for staff confirmation, and the product deliberately books straight into
+genuine capacity instead. The reason is in `booking.ts` and the row now says so
+rather than the requirement and the product quietly disagreeing.
+
+**Thirty-four rows named test files that do not exist.** `vin.test.ts`,
+`ledger.test.ts`, `session.test.ts`, `job-completion.test.ts` and twenty more:
+early tests consolidated as the domain settled, with nobody coming back to the
+matrix. Every one now points at the file that actually holds that coverage,
+found by reading what each of those files tests.
+
+**And sixteen rows were the old way itself** — `FR-201–203`, `FR-306–308`, one
+row per section — which is how the eighty-four came to be untraced in the first
+place. They are gone, replaced by the rows they were standing in for.
+
+**Three claims of my own, wrong.** Phase 56 built a register so that every
+quality requirement would name what enforces it. Three of its entries —
+NFR-502, NFR-503 and NFR-903, all about export and erasure — named
+`verify-retention.ts`, which tests reviews, points and referrals and has never
+touched personal data. The register exists precisely to stop an enforcement
+nobody can name, and naming the wrong one is worse than naming none, because it
+reads as covered. All three are back to _not yet_, which is the truth.
+
+`npm run verify:traceability` keeps it honest from here: every requirement has
+a row, every test a row names exists, every function a row names exists in the
+source, and the coverage summary is recounted rather than remembered. What it
+cannot check is whether a row is _right_ about what a test covers — which is
+why the eighty-four were read one at a time rather than generated.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

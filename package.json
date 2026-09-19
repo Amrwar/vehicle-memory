@@ -92,6 +92,7 @@
     "verify:screens": "tsx infra/scripts/verify-screens.ts",
     "verify:engines": "tsx infra/scripts/verify-engines.ts",
     "verify:quality": "tsx infra/scripts/verify-quality.ts",
+    "verify:traceability": "tsx infra/scripts/verify-traceability.ts",
     "verify:passports": "tsx infra/scripts/verify-passports.ts",
     "verify:credentials": "tsx infra/scripts/verify-credentials.ts",
     "verify:deliverability": "tsx infra/scripts/verify-deliverability.ts",

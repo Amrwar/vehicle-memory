@@ -93,7 +93,7 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ## Status
 
-Sixty phases have shipped, the last on 19 September 2026, and the pilot
+Sixty-one phases have shipped, the last on 19 September 2026, and the pilot
 itself — Phase 54 — is ready to run: the workshop core,
 inventory and procurement, the ledger, people and multi-site, automation and
 CRM, the customer's own side, the money cycle, payables and payroll, answers in
@@ -142,9 +142,9 @@ and coupons: a code a customer arrives holding, refused with the promise it
 did not meet, and booked as what the offer cost rather than as money in.
 The
 [roadmap](00-product/06-roadmap.md) carries a status paragraph under each
-phase, the [feature map](00-product/09-feature-map.md) counts 360 capabilities
+phase, the [feature map](00-product/09-feature-map.md) counts 365 capabilities
 built, 1 partial and nothing missing, and the
-[traceability matrix](01-requirements/04-traceability-matrix.md) traces 671
+[traceability matrix](01-requirements/04-traceability-matrix.md) traces 744
 requirements to code and tests. Every phase ends with the same checks, listed
 in the [testing strategy](04-engineering/04-testing-strategy.md).
 
@@ -266,3 +266,16 @@ times, three runs a screen and the middle one counting. Everything came in,
 paint between 1.1 and 1.5 seconds against a budget of two, and layout shift of
 exactly zero — which is the sort of number worth being suspicious of, so the
 measurement is made to prove it can see a shift before its zeroes are believed.
+
+Phase 61 closes the oldest gap in this documentation: eighty-four requirements
+from the first two phases traced by section rather than by requirement, named
+at the foot of the matrix for months. Closing it meant reading each one against
+the source, and that turned up five requirements the product does not meet —
+including exporting and erasing a customer's personal data, which the security
+model specifies column by column and no code does — thirty-four rows naming
+test files renamed years earlier, and three entries in the quality register
+that claimed an enforcement which tests something else entirely. Every
+requirement now has a row of its own, and `npm run verify:traceability` checks
+that the rows are true: every test a row names exists, every function a row
+names exists in the source, and the coverage summary is counted from the table
+rather than remembered.

@@ -1642,6 +1642,44 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BN - The rows that were never there (Phase 61)
+
+### BN1 - A matrix that is true
+
+**As** the operator **I want** every requirement to have a row that has been
+read against the code **so that** the document can be relied on rather than
+admired.
+**Size** 13 - **Satisfies** FR-9601, FR-9602
+
+- **Given** the requirements document, **when** the check runs, **then** every
+  requirement has a row of its own.
+- **Given** a row naming a test, **when** that file does not exist, **then**
+  the check fails and names it.
+- **Given** a row naming a function, **when** nothing in the source has that
+  name, **then** the check fails and names it.
+
+### BN2 - What is admitted rather than claimed
+
+**As** the operator **I want** a requirement nothing implements to say so **so
+that** the gap is a decision rather than a discovery during the pilot.
+**Size** 5 - **Satisfies** FR-9603, FR-9604
+
+- **Given** a requirement nothing implements, **when** I read its row, **then**
+  it says Missing and claims no test.
+- **Given** any row that is not Done, **when** I read it, **then** it says
+  which kind of not-done, and why.
+
+### BN3 - A summary that cannot drift
+
+**As** an engineer **I want** the coverage figures counted from the table **so
+that** a percentage is never arithmetic about a table that no longer exists.
+**Size** 3 - **Satisfies** FR-9605
+
+- **Given** the table, **when** rows are added or removed, **then** the summary
+  is recounted and the check compares it.
+
+---
+
 ## Epic BM - What the screen does while somebody waits (Phase 60)
 
 ### BM1 - I can see what I came for

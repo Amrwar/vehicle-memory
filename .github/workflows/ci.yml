@@ -575,6 +575,14 @@ jobs:
       - name: The four things that are not features
         run: npx tsx infra/scripts/verify-throughout.ts
 
+      # Whether the traceability matrix is true: every requirement has a row,
+      # every test a row names exists, and every function a row names exists
+      # in the source. A matrix is the easiest document in a project to write
+      # falsely, because a row naming something that was renamed two years ago
+      # reads exactly like a row naming something that is there.
+      - name: The matrix says what is true
+        run: npx tsx infra/scripts/verify-traceability.ts
+
       # And the other half of the requirements: eighty-four quality budgets,
       # each accounted for as checked, read off the repository, or not yet —
       # with what it would take written down.

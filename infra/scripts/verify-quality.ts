@@ -25,7 +25,7 @@
  *   not yet   Not enforced by anything. What it would take is written down,
  *             because "not yet" without that is a wish.
  *
- * The last kind is the point of the exercise. Seventeen of the eighty-four need
+ * The last kind is the point of the exercise. Twenty of the eighty-four need
  * a person, a production deployment, or a month of real traffic, and saying so
  * out loud is worth more than a green tick that means somebody once looked.
  */
@@ -297,14 +297,12 @@ const REGISTER: Record<string, Account> = {
     note: 'data collected only where a purpose requires it. A judgement about each field, recorded in the data model, not a thing a script can decide.',
   },
   'NFR-502': {
-    how: 'checked',
-    by: 'infra/scripts/verify-retention.ts',
-    note: "a customer's data comes out in a machine-readable form",
+    how: 'not yet',
+    note: "a customer's data, exported on request within thirty days. Nothing exports it. This said verify-retention.ts until Phase 61, which tests reviews and points and has never touched personal data — the register naming the wrong thing, which is worse than naming nothing.",
   },
   'NFR-503': {
-    how: 'checked',
-    by: 'infra/scripts/verify-retention.ts',
-    note: 'erasure removes the person and keeps the vehicle, which is the subtle one',
+    how: 'not yet',
+    note: 'erasure removes the person and keeps the vehicle. The security model §10 specifies exactly how, column by column, and no code does any of it. FR-209 says the same thing and is marked Missing.',
   },
   'NFR-504': {
     how: 'read',
@@ -471,9 +469,8 @@ const REGISTER: Record<string, Account> = {
     note: 'numbering sequential and gapless per organisation, tried against on purpose',
   },
   'NFR-903': {
-    how: 'checked',
-    by: 'infra/scripts/verify-retention.ts',
-    note: 'financial records survive an erasure that removes the person',
+    how: 'not yet',
+    note: 'financial records retained for seven years through an erasure. Nothing erases, so nothing has been made to survive it. The retention period itself is not enforced anywhere either.',
   },
   'NFR-904': {
     how: 'checked',

@@ -636,6 +636,16 @@ The second sweep: things connected at one end only.
 | Zero means something    | Built  | A control shifts a real page and proves the measurement sees it (Phase 60) |
 | Broken is not slow      | Built  | A page that fell over is reported as broken, never timed (Phase 60)        |
 
+## 21.27 The rows that were never there
+
+| Item                     | Status | Where                                                                     |
+| ------------------------ | ------ | ------------------------------------------------------------------------- |
+| Every requirement traced | Built  | 739 rows, each read against the source rather than generated (Phase 61)   |
+| Named tests exist        | Built  | 34 rows pointed at files renamed years earlier; now corrected (Phase 61)  |
+| Named functions exist    | Built  | Checked against the source, which is how a matrix usually dies (Phase 61) |
+| What is missing says so  | Built  | Five requirements the product does not meet, named in bold (Phase 61)     |
+| The summary cannot drift | Built  | Counted from the table and compared with it on every build (Phase 61)     |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -714,7 +724,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 360          |
+| Built    | 365          |
 | Partial  | 1            |
 | Deferred | 1            |
 
