@@ -640,11 +640,24 @@ The second sweep: things connected at one end only.
 
 | Item                     | Status | Where                                                                     |
 | ------------------------ | ------ | ------------------------------------------------------------------------- |
-| Every requirement traced | Built  | 739 rows, each read against the source rather than generated (Phase 61)   |
+| Every requirement traced | Built  | 751 rows, each read against the source rather than generated (Phase 61)   |
 | Named tests exist        | Built  | 34 rows pointed at files renamed years earlier; now corrected (Phase 61)  |
 | Named functions exist    | Built  | Checked against the source, which is how a matrix usually dies (Phase 61) |
 | What is missing says so  | Built  | Five requirements the product does not meet, named in bold (Phase 61)     |
 | The summary cannot drift | Built  | Counted from the table and compared with it on every build (Phase 61)     |
+
+## 21.28 Being forgotten
+
+| Item                            | Status | Where                                                                                                     |
+| ------------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| The register of what we hold    | Built  | 14 holdings: table, what of theirs is in it, what happens, and why (Phase 62)                             |
+| Take everything                 | Built  | Machine-readable, including the kinds we hold none of, on the customer (Phase 62)                         |
+| Be forgotten                    | Built  | Name, address, login and signature gone; checked by searching every text column of every table (Phase 62) |
+| The books survive it            | Built  | Totalled before and after and compared; invoices kept seven years (Phase 62)                              |
+| The passport survives it        | Built  | Chain valid and exactly as long; it carries a keeper number, never a name (Phase 62)                      |
+| The audit log gives up the copy | Built  | One permitted mutation: emptying the copy of the values, nothing else (Phase 62)                          |
+| No name in the chain            | Built  | ADR-0014, checked over every name the database holds; the seed was breaking it (Phase 62)                 |
+| Every sentence answered         | Built  | `i18n-scan --answers`: 3,877 sentences on the pages, in French and Arabic (Phase 62)                      |
 
 ## 22. The three connected experiences
 
@@ -724,7 +737,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 365          |
+| Built    | 373          |
 | Partial  | 1            |
 | Deferred | 1            |
 

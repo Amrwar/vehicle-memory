@@ -139,7 +139,7 @@ xDrive30d M Sport                            [Share history]  [New job]
 |                                           |  | Peter Vasquez           |
 |  o OWNERSHIP 2 Jul 2025  74,800 km        |  | 18/05/2023 - 02/07/2025 |
 |    Ownership transferred                  |  | Northgate Leasing Ltd   |
-|    From Peter Vasquez to Maria Okonkwo    |  | 03/03/2020 - 18/05/2023 |
+|    Changed hands. The 3rd keeper.         |  | 03/03/2020 - 18/05/2023 |
 |    [Owner]                                |  +-------------------------+
 | 2024                                      |
 |  o RECALL 4 Oct 2024                      |
@@ -147,6 +147,12 @@ xDrive30d M Sport                            [Share history]  [New job]
 |    [Official]                             |
 +------------------------------------------+
 ```
+
+The ownership event says how many keepers, never who. The names beside
+it are ownership rows, which an erasure request can reach; the event is in
+the hash chain, which nothing can (ADR-0014). This wireframe read "From
+Peter Vasquez to Maria Okonkwo" until Phase 62, and so, therefore, did the
+seed.
 
 The dot colour on each entry encodes its verification level, and the badge
 states it in words. Note the third-party attribution: **Kirkstall Autocentre**

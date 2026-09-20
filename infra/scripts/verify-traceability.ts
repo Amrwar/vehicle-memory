@@ -28,6 +28,11 @@
  * And the count of what is admitted rather than claimed is reported rather
  * than buried, because the number that matters about a matrix like this is how
  * many rows say "Missing".
+ *
+ * Phase 62 added the fourth. The summary's total was recounted from the table
+ * and the figure beside it — how many are done — was not, which is the half
+ * anybody actually reads. It was wrong by two, and had been since this script
+ * was written to stop exactly that.
  */
 
 import 'dotenv/config';
@@ -232,12 +237,24 @@ function main() {
   /* --- the summary is recounted rather than remembered ---------------------- */
 
   const summary = read(MATRIX).split('## Coverage summary')[1] ?? '';
-  const total = /\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*/.exec(summary);
+  const total = /\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)/.exec(summary);
 
   check(
     Number(total?.[1] ?? 0) === all.length,
     'the coverage summary counts what is actually in the table',
     `summary says ${total?.[1]}, the table holds ${all.length}`,
+  );
+
+  // And how many of them are done, which until Phase 62 nothing compared. The
+  // total was checked and the figure beside it was not, so the interesting
+  // half of the summary — the one that says how much of the product exists —
+  // was the half free to drift. It had: by two.
+  const finished = all.length - admitted.length;
+
+  check(
+    Number(total?.[2] ?? 0) === finished,
+    'and how many of them are done',
+    `summary says ${total?.[2]}, the table holds ${finished}`,
   );
 
   if (failures > 0) {

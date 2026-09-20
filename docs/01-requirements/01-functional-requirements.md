@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9700 - Being forgotten
+
+| Ref     | Requirement                                                                                                                      | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9701 | Every place the product holds something personal MUST be written down, with what happens to it on erasure and why.               | 62    |
+| FR-9702 | A customer's data MUST be exportable in a machine-readable form, including the kinds of which the product holds nothing.         | 62    |
+| FR-9703 | After an erasure, the person's name, address and contact details MUST appear in no column of any table.                          | 62    |
+| FR-9704 | An erasure MUST leave the books able to be totalled to the same figures as before it.                                            | 62    |
+| FR-9705 | An erasure MUST leave the vehicle's passport chain valid and no shorter, and the passport MUST carry no personal name to remove. | 62    |
+| FR-9706 | The audit log MUST permit exactly one mutation for erasure — emptying the copy of the values — and refuse every other change.    | 62    |
+| FR-9707 | An erasure MUST record who asked, when, and why, and a second erasure of the same person MUST be refused.                        | 62    |
+
 ## FR-9600 - The rows that were never there
 
 | Ref     | Requirement                                                                                                          | Phase |

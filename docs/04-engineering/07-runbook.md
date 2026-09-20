@@ -203,17 +203,35 @@ not restored with it; it must be the same value or step 2 fails everywhere.
 
 ## A customer asks to be erased
 
-Do not run a delete. Follow
-[security model](../02-design/05-security-model.md) section 9.
+Do not run a delete, and do not write SQL. There is a procedure, and since
+Phase 62 it is in the product: the customer's page has a card headed **What
+they can ask for**. The reasoning is in
+[security model](../02-design/05-security-model.md) section 10 and the register
+it is built from is `packages/core/src/privacy/erasure.ts`.
 
 1. Confirm the request is genuine and from the data subject.
-2. Run the erasure procedure, which anonymises personal identifiers and
-   supersedes passport events carrying them with redacted versions.
-3. **Vehicle events are retained.** The service history belongs to the vehicle,
-   not the person, and the chain is append-only.
-4. Photographs of components are retained. Photographs incidentally containing
+2. **Offer the export first.** "Everything we hold about them" gives them a
+   machine-readable copy of their own record. A product that erases first and
+   offers the export afterwards is offering nothing.
+3. Erase, giving the reason and who asked. Both go into the audit log, which
+   is the only remaining evidence the request was handled — everything else
+   about them has gone. An empty reason is refused.
+4. The screen then says what went and what stayed, and the workshop should
+   tell the customer the same. "Your data has been deleted" is not an honest
+   answer where a good deal has deliberately been kept.
+5. **Vehicle events are retained**, and carry no name to remove (ADR-0014).
+   The service history belongs to the vehicle and the chain is append-only.
+6. **Invoices, payments and jobs are retained.** Seven years, by law. The
+   customer row stays behind, anonymised, because every invoice points at it;
+   that is what an erasure looks like here and it is not a failure.
+7. Photographs of components are retained. Photographs incidentally containing
    a person are reviewed and removed.
-5. Record completion. Confirm within 30 days.
+8. Record completion. Confirm within 30 days.
+
+A second erasure of the same person is refused, saying so. If the erasure
+reports passport events that still carry a name, they were written before
+Phase 62 and there is no honest way to remove them: say so to the customer
+rather than letting the report go unread.
 
 ## Suspected credential compromise
 

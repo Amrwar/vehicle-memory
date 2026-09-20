@@ -203,11 +203,47 @@ function buildWorkSummary(job: CompletedJobInput): string | null {
   return pieces.length > 0 ? pieces.join(' ') : null;
 }
 
+/**
+ * A car changed hands.
+ *
+ * No name, anywhere in it — not in the summary and not in the payload. That
+ * is a deliberate change made in Phase 62, and the reason is a conflict
+ * between two of this product's own promises that only became visible when
+ * somebody tried to honour the second:
+ *
+ *   The passport is append-only and hash-chained. Nothing in it can ever be
+ *   edited. That refusal is the product's central claim.
+ *
+ *   A person may ask to be forgotten, and their name must go.
+ *
+ * A name inside a hashed chain cannot be removed. Superseding an event does
+ * not help: superseding *preserves* the original, which is the entire point of
+ * it. Rewriting the event and recomputing the hash would remove the name and
+ * destroy the only thing that makes the chain worth having.
+ *
+ * So the resolution is the one the security model already implies — *passport
+ * events describe the vehicle, not the person*. That a car changed hands on a
+ * date, and how long each keeper had it, is the vehicle's record and the next
+ * buyer's business. Who they were is not, and lives in `vehicle_ownerships`,
+ * which can be anonymised.
+ *
+ * Events written before this change still carry names and always will. There
+ * is no honest way to remove them, and `eraseCustomer` reports any it finds
+ * rather than pretending otherwise.
+ */
+
+/** First, second, third — for a sentence rather than a figure. */
+function ordinal(n: number): string {
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return `${n}${({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th'}`;
+}
+
 export function ownershipTransferEvent(input: {
   vehicleId: string;
   occurredAt: Date;
-  fromOwnerName: string | null;
-  toOwnerName: string;
+  /** How many keepers before this one, which is the vehicle's business. */
+  keeperNumber?: number | null;
   odometerKm?: number | null;
   recordedByOrgId?: string | null;
   transferId: string;
@@ -220,16 +256,16 @@ export function ownershipTransferEvent(input: {
     recordedByOrgId: input.recordedByOrgId ?? null,
     supersedesId: null,
     title: 'Ownership transferred',
-    summary: input.fromOwnerName
-      ? `From ${input.fromOwnerName} to ${input.toOwnerName}`
-      : `To ${input.toOwnerName}`,
+    summary: input.keeperNumber
+      ? `Changed hands. The ${ordinal(input.keeperNumber)} keeper on record.`
+      : 'Changed hands.',
     // The owner asserts the transfer. It becomes AUTHORITY only when a
     // registry confirms it, which we do not have a feed for yet.
     verification: 'SELF_REPORTED',
     idempotencyKey: `transfer:${input.transferId}`,
     payload: {
-      from: input.fromOwnerName,
-      to: input.toOwnerName,
+      // No name. See above: a name in a hashed chain cannot ever be taken out.
+      keeperNumber: input.keeperNumber ?? null,
       transferId: input.transferId,
     },
   };

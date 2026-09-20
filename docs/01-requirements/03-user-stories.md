@@ -1642,6 +1642,54 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BO - Being forgotten (Phase 62)
+
+### BO1 - I can take my record with me
+
+**As** Maria **I want** everything the workshop holds about me, in a form I can
+keep **so that** asking to be forgotten is not the same as losing my own
+history.
+**Size** 8 - **Satisfies** FR-9701, FR-9702
+
+- **Given** a customer, **when** the workshop takes an export, **then** it
+  contains every kind of record the product holds about them.
+- **Given** a kind of record the product holds none of for them, **when** I
+  read the export, **then** that kind appears and is empty, so that having
+  looked is distinguishable from not having looked.
+
+### BO2 - I can be forgotten
+
+**As** Maria **I want** my name, my address and my signature gone **so that**
+selling the car ends my relationship with the workshop rather than filing it.
+**Size** 13 - **Satisfies** FR-9703, FR-9707
+
+- **Given** an erasure, **when** every text column of every table is searched
+  for my name, my email address and where I live, **then** nothing comes back.
+- **Given** an erasure, **when** somebody tries to sign in as me, **then**
+  there is no account to sign in to: the login is removed, not emptied.
+- **Given** a person already erased, **when** somebody asks again, **then** it
+  is refused and says why.
+- **Given** any erasure, **when** the audit log is read, **then** it says who
+  asked, when, and the reason given.
+
+### BO3 - And the workshop keeps its books
+
+**As** the workshop owner **I want** my accounts and the cars' histories to
+survive somebody being forgotten **so that** a request from one customer is not
+a hole in seven years of records.
+**Size** 8 - **Satisfies** FR-9704, FR-9705, FR-9706
+
+- **Given** the books totalled before an erasure, **when** they are totalled
+  after it, **then** the figures agree exactly.
+- **Given** a vehicle whose owner has been forgotten, **when** its passport is
+  verified, **then** the chain is valid and exactly as long as it was.
+- **Given** the passport, **when** any event is read, **then** it names no
+  person: it says the car changed hands and which keeper this is.
+- **Given** the audit log, **when** anything but the copy of the values is
+  changed, **then** the database refuses it.
+
+---
+
 ## Epic BN - The rows that were never there (Phase 61)
 
 ### BN1 - A matrix that is true

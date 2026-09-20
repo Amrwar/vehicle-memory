@@ -85,7 +85,13 @@ async function main() {
 
   console.info('\n--- attempting to edit the audit log ---');
   const audit = await prisma.auditLog.create({
-    data: { action: 'integrity-check', entityType: 'Test', entityId: 'x' },
+    data: {
+      action: 'integrity-check',
+      entityType: 'Test',
+      entityId: 'x',
+      before: { name: 'A name nobody should be able to rewrite' },
+      after: { name: 'Nor this one' },
+    },
   });
 
   try {
@@ -94,6 +100,47 @@ async function main() {
     console.error('  FAIL   audit log deletion succeeded.');
   } catch (error) {
     console.info(`  ok     DELETE refused: ${reason(error, 'immutable')}`);
+  }
+
+  // The trigger has two permitted mutations and this probe knew about neither
+  // until Phase 62, which is how a version of it that dropped the first got as
+  // far as being applied. What is permitted needs checking as much as what is
+  // refused: a rule that only ever says no is indistinguishable from a rule
+  // that says no to everything, including the thing the product depends on.
+
+  try {
+    await prisma.$executeRaw`UPDATE audit_logs SET "action" = 'rewritten' WHERE id = ${audit.id}`;
+    failures += 1;
+    console.error('  FAIL   the audit log was rewritten.');
+  } catch (error) {
+    console.info(`  ok     rewriting what happened refused: ${reason(error, 'immutable')}`);
+  }
+
+  try {
+    await prisma.$executeRaw`UPDATE audit_logs SET "before" = NULL, "after" = NULL WHERE id = ${audit.id}`;
+    const redacted = await prisma.auditLog.findUnique({ where: { id: audit.id } });
+    if (redacted && redacted.before === null && redacted.action === 'integrity-check') {
+      console.info('  ok     a redaction permitted: the copy of the name goes, the account stays');
+    } else {
+      failures += 1;
+      console.error('  FAIL   the redaction took more than the name with it.');
+    }
+  } catch (error) {
+    failures += 1;
+    console.error(
+      `  FAIL   a person asking to be forgotten would be refused: ${reason(error, '')}`,
+    );
+  }
+
+  try {
+    // What a SET NULL cascade does when an audited user is deleted. Refusing
+    // this is what made every audited organisation permanently undeletable
+    // before 20260909230000, and what a careless Phase 62 nearly restored.
+    await prisma.$executeRaw`UPDATE audit_logs SET "orgId" = NULL, "actorUserId" = NULL WHERE id = ${audit.id}`;
+    console.info('  ok     a deleted party’s reference may still be cleared');
+  } catch (error) {
+    failures += 1;
+    console.error(`  FAIL   nothing audited could ever be deleted: ${reason(error, '')}`);
   }
 
   console.info('\n--- attempting an unbalanced journal entry ---');

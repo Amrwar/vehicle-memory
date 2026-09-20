@@ -341,19 +341,45 @@ When Maria sells her car and asks to be forgotten, two things are true at once:
 her personal data must go, and the fact that the brake discs were replaced at
 82,430 km must remain, because that belongs to the vehicle.
 
+Built in Phase 62, and the register that does it is in
+`packages/core/src/privacy/erasure.ts`: fourteen holdings, each naming the
+table, what of the person's is in it, what happens to it, and why. This section
+had specified it column by column since the first month with nothing carrying
+it out; what follows is now what the code does, and
+`infra/scripts/verify-erasure.ts` proves it by looking rather than by reading
+the register back to itself.
+
 | Data                                         | On erasure                                                       |
 | -------------------------------------------- | ---------------------------------------------------------------- |
 | Name, email, phone, address                  | Removed                                                          |
 | Customer record                              | Anonymised, commercial history retained for the statutory period |
-| `VehicleOwnership.ownerName`                 | Replaced with "Previous owner"                                   |
+| Portal login, and every session              | Removed outright. An anonymised login is still a login.          |
+| Signature                                    | Removed. It is their hand, not a record about them.              |
+| `VehicleOwnership.ownerName`                 | Replaced with "Erased at their request"                          |
 | `VehicleOwnership` dates                     | Retained. Ownership duration is the vehicle's record.            |
-| Passport events                              | Retained in full. They describe the vehicle, not the person.     |
+| Passport events                              | Retained in full, and carry no name to remove. See below.        |
+| Audit log                                    | Retained; the copy of the values it kept is emptied              |
+| Invoices, payments, credit notes             | Retained. Seven years, by law (NFR-903).                         |
 | Photographs of components                    | Retained                                                         |
 | Photographs incidentally containing a person | Reviewed and removed on request                                  |
 
-The passport ledger is append-only, so erasure cannot delete events. It
-supersedes those carrying personal identifiers with redacted versions, which
-keeps the chain intact and the fact preserved.
+### 10.0 A name in a hashed chain cannot be taken out
+
+The passport ledger is append-only and hash-chained, and until Phase 62 this
+section said erasure would supersede events carrying personal identifiers with
+redacted versions. That does not work, and the reason it does not is the reason
+the ledger is worth having: superseding **preserves** the original — that is
+the point of it — and rewriting the hash destroys the only thing the chain is
+for. A name written into it can never come out.
+
+So it is never written in. An ownership transfer records that the car changed
+hands and which keeper this is ("Changed hands. The third keeper on record."),
+which is the vehicle's record; who they were lives in the ownership row, which
+can be anonymised. That is what the sentence above the table always implied:
+passport events describe the vehicle, not the person.
+
+Events written before Phase 62 may still carry a name. `eraseCustomer` reports
+each one it finds rather than reporting a clean erasure it did not perform.
 
 ### 10.1 What the audit log does not record (Phase 54)
 
@@ -400,6 +426,29 @@ The list is deliberately about the four things NFR-802 names rather than about
 personal data in general. A log with no customer in it cannot answer "which
 one", and a log that cannot answer "which one" is a log nobody uses.
 
+### 10.3 The audit log's two permitted mutations (Phase 62)
+
+`audit_logs` refuses every UPDATE and every DELETE, and that refusal is most of
+what makes it worth having. It also keeps a copy of the values that were
+written, and for a customer that copy is their name, their email address and
+their telephone number. Erasure has to be able to let go of the copy without
+letting go of the account, so the trigger permits exactly two changes and
+refuses everything else:
+
+- a foreign key cleared because the party was deleted, which is what an
+  `ON DELETE SET NULL` cascade performs (September 2026, without which nothing
+  audited could ever be deleted — and everything is audited on creation);
+- a redaction: `before` and `after` emptied, in that direction only, with every
+  other column identical.
+
+What survives a redaction is the whole of the audit trail's purpose — the
+action, the actor, the record it touched, the moment, the address it came from
+and the trace it belonged to. What goes is the copy of somebody's name. Both
+permissions, and the refusal, are tried against the database on every push by
+`verify-integrity.ts`, which until Phase 62 checked only that DELETE was
+refused: a rule that only ever says no is indistinguishable from one that says
+no to everything, including the thing the product depends on.
+
 ## 11. Before general availability
 
 - [x] Every address tried with another workshop's identifier, reads and writes
@@ -407,6 +456,7 @@ one", and a log that cannot answer "which one" is a log nobody uses.
 - [ ] Penetration test, high findings resolved (NFR-413)
 - [x] Dependency scanning blocking on critical (NFR-409): `npm audit --audit-level=critical` in CI
 - [x] Secret scanning in CI: the committed-secrets check in the audit job
+- [x] A customer exported and erased, and their name searched for afterwards in every text column of every table (Phase 62): `verify-erasure.ts`
 - [ ] Security review of `lib/auth.ts` by someone who did not write it
 - [x] Backup restoration tested end to end: `verify-backup.ts`, on every push (Phase 21)
 - [ ] Incident response runbook exercised

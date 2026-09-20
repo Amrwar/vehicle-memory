@@ -18,17 +18,41 @@ nothing ([ADR-0003](../03-adr/0003-monorepo-structure.md)).
 
 ## 2. What is tested where
 
-| Layer      | Tool                                               | Tests                                                                                               |
-| ---------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Domain     | Vitest                                             | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion      |
-| Data       | Vitest + Postgres                                  | Tenant isolation per entity, invariants, ledger append concurrency                                  |
-| Routes     | Vitest + fetch                                     | Auth, permissions, redirects, rendered content                                                      |
-| Journeys   | Playwright                                         | Book to invoice, inspection to approval, passport share                                             |
-| Integrity  | `verify-integrity.ts`                              | Actively tries to violate every database guarantee                                                  |
-| Acceptance | `verify-*.ts`                                      | One script per phase, against a seeded database, asserting the phase's promise (below)              |
-| Crawls     | `verify-controls`, `verify-empty`, `verify-access` | Every page for every role: every control resolves, every page works empty, mechanical accessibility |
-| Languages  | `i18n-scan.ts`, `verify-languages`                 | No text outside the translator; every sentence and refusal in French and Arabic (Phase 40.5)        |
-| Usability  | Humans                                             | The four criteria in section 7                                                                      |
+| Layer      | Tool                                               | Tests                                                                                                                                            |
+| ---------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Domain     | Vitest                                             | Money, job lifecycle, hash chain, VIN, mileage, totals, roles, capacity, inspection conversion                                                   |
+| Data       | Vitest + Postgres                                  | Tenant isolation per entity, invariants, ledger append concurrency                                                                               |
+| Routes     | Vitest + fetch                                     | Auth, permissions, redirects, rendered content                                                                                                   |
+| Journeys   | Playwright                                         | Book to invoice, inspection to approval, passport share                                                                                          |
+| Integrity  | `verify-integrity.ts`                              | Actively tries to violate every database guarantee                                                                                               |
+| Acceptance | `verify-*.ts`                                      | One script per phase, against a seeded database, asserting the phase's promise (below)                                                           |
+| Crawls     | `verify-controls`, `verify-empty`, `verify-access` | Every page for every role: every control resolves, every page works empty, mechanical accessibility                                              |
+| Languages  | `i18n-scan.ts`, `verify-languages`                 | No text outside the translator; every sentence and refusal answered in French and Arabic, and the pages read in all three (Phase 40.5, Phase 62) |
+| Usability  | Humans                                             | The four criteria in section 7                                                                                                                   |
+
+### Three questions about one sentence
+
+`i18n-scan.ts` runs in three modes and they are not the same question, which
+took until Phase 62 to notice:
+
+- the default asks whether a sentence on a page went **through** the
+  translator, by parsing the source rather than by matching patterns;
+- `--messages` asks whether a sentence a library **throws** has an answer, so
+  a refusal reaches the person in their own language;
+- `--answers` asks whether the sentences on the pages have answers — which
+  neither of the first two did. A sentence with no entry in the dictionary is
+  shown in English and nothing complains, which is the right behaviour at
+  runtime and the wrong way to find out.
+
+The third was written expecting a backlog and found none: 3,877 sentences, all
+answered. Then it was made to fail on purpose, because a zero that could never
+have been anything else proves nothing.
+
+A fourth question is out of reach of all three: `t(someVariable)`. A list of
+sentences held in code and translated through a variable is invisible to a
+scanner that collects literals, so each such list carries its own check where
+it is defined — the erasure register in `verify-erasure.ts`, and the same
+pattern in Phases 57 and 59.
 
 ### The verification scripts
 

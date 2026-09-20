@@ -25,6 +25,7 @@ import * as stock from './stock';
 import * as business from './business';
 import * as coreMessages from './core-messages';
 import * as messages from './messages';
+import * as privacy from './privacy';
 
 export const AREAS = [
   publicSite,
@@ -48,4 +49,5 @@ export const AREAS = [
   health,
   clock,
   pilot,
+  privacy,
 ] as const;

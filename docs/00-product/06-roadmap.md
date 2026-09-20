@@ -3719,6 +3719,7 @@ so, in bold, rather than being covered by a section heading:
   Nothing exports and nothing erases. This is the one that matters: the
   security model has a whole section specifying, column by column, what
   erasure should keep and what it should remove, and no code does any of it.
+  _Closed in Phase 62._
 - **FR-303** — a vehicle's fleet number. The registration expiry is there; the
   fleet number is not a column.
 - **FR-512** — courtesy vehicle allocation. There is a free-text note on a
@@ -3755,6 +3756,119 @@ a row, every test a row names exists, every function a row names exists in the
 source, and the coverage summary is recounted rather than remembered. What it
 cannot check is whether a row is _right_ about what a test covers — which is
 why the eighty-four were read one at a time rather than generated.
+
+## Phase 62 — Being forgotten
+
+**Scope.** FR-209, the clearest Missing on the traceability matrix, and the
+three quality requirements that go with it: exporting everything the product
+holds about a person, and erasing them without erasing the workshop.
+
+**Exit.** A customer can be taken out of the database entirely, and afterwards
+their name appears in no column of any table — checked by looking rather than
+by trusting a list.
+
+**Status.** Built, and the hardest question in it was one the product had
+already answered in the wrong direction.
+
+The security model has specified this since the first month, column by column:
+what erasure removes, what it anonymises, what it keeps and why. No code did
+any of it. Worse, the quality register claimed otherwise for five phases — it
+named `verify-retention.ts`, which tests reviews and loyalty points and has
+never touched personal data — which Phase 61 found while tracing the very
+requirement that says erasure must exist.
+
+**The register is the specification made executable.** Fourteen holdings, each
+naming the table, what of the person's is in it, what happens to it, and why —
+and the why is the interesting column. The customer record is anonymised rather
+than deleted because every invoice points at it and the books must survive
+seven years. The portal login is removed rather than anonymised, because an
+anonymised login is still a login. The signature is removed outright: it is
+their hand, not a record about them. Three tables are marked _kept_ with
+nothing personal in them, so that "we looked and there was nothing" stays
+distinguishable from "we did not look".
+
+**The conflict, and how it resolved.** Two promises collided. The vehicle
+passport is append-only and hash-chained, and that is most of what it is worth:
+an event supersedes rather than replaces, so the original survives. The right
+to be forgotten says a name must come out. A name written into a hashed chain
+cannot come out — superseding preserves it, and rewriting the hash destroys the
+only thing the chain is for.
+
+The probe found this by proving erasure _could not_ remove a name from
+`vehicle_events`, which was correct behaviour and the wrong question. The fix
+was upstream. An ownership transfer now records that the car changed hands and
+which keeper this is — "Changed hands. The third keeper on record." — and no
+name at all. Who they were lives in the ownership row, which can be anonymised.
+That is what the security model always implied: a passport event describes the
+vehicle, not the person. Events written before this change still carry names,
+and `eraseCustomer` reports each one it finds rather than pretending otherwise.
+
+**The audit log's second permitted mutation.** `audit_logs` has refused every
+UPDATE and DELETE since the first month, and must: it is the product's account
+of itself. But it also keeps a copy of the values written, and for a customer
+that copy is their name and address. So the trigger now permits exactly one
+further change — emptying `before` and `after`, in that direction only, with
+every other column identical — in the same shape as the one `vehicle_events`
+has always allowed. Writing it took two attempts, and the second is the point:
+the first version permitted the redaction and dropped the permission added in
+September, which lets a deleted party's foreign key be cleared. Without that,
+every audited organisation and user is permanently undeletable, which is the
+exact fault that migration was written to fix. `verify-erasure` refused it.
+
+**What the check actually does.** Not "the fourteen statements were carried
+out". It reads `information_schema.columns` for every text, varchar and JSON
+column of every table in the database, and counts matches for the person's own
+name, their email address and where they lived. Nothing may come back. Then it
+requires the things that must survive: the books totalled to exactly the same
+figures, the passport chain still valid and _exactly as long as it was_, how
+long they held the car still on the vehicle's record, the conversation thread
+still there with nothing in it of theirs, and a second erasure refused with a
+reason. Eighteen checks.
+
+**And three more faults found on the way.** `verify-integrity` tested that the
+audit log refuses a DELETE and knew nothing about either permitted mutation —
+a rule that only ever says no is indistinguishable from one that says no to
+everything, including the thing the product depends on; it now tries all four.
+The trigger never learned about `traceId` when Phase 59 added the column, so
+the one row of the audit log that could be changed could have been made to
+point at somebody else's request. And the check that recounts the traceability
+summary compared the total and not the figure beside it — the half anybody
+reads — which had drifted by two.
+
+**Then the decision was checked over the whole database, and it failed.** The
+register says the passport carries no name. That is a claim about every event
+ever written, so the check takes every name the database actually holds —
+owners and customers, read out of the tables rather than typed into the
+script — and looks for each one in every passport event. It found "From Peter
+Vasquez to Maria Okonkwo", summary and payload both, in an OWNERSHIP_TRANSFER
+event written by **the seed**: the demonstration data every workshop sees
+first, putting two people's names into a hash chain nobody can edit. The two
+live paths that record a transfer had composed the event without names for
+months, which is precisely why the third one went unnoticed — and the
+wireframe that gave the seed its wording said the same thing, so the fault had
+been sitting in the design book the whole time. Both are fixed.
+
+Two things sit outside that check on purpose. A NOTE is free text somebody
+typed, and a workshop writing "collected by her sister" is not the product
+choosing to store a name — it is the case the register calls unerasable and
+reports. And an event the product did not record, seeded or imported from
+elsewhere, arrived with whatever it arrived with. Both are counted and named
+rather than checked, because a check that fails on somebody else's data
+teaches nobody anything.
+
+**And a fourth, in the language gates.** The erasure card's fourteen lines are
+rendered through a variable rather than a literal, which no scanner collecting
+literals can see — the third time that gap has appeared, after Phases 57 and
+59, so the register now carries its own check. Asking why it keeps appearing
+turned up the larger hole: `i18n-scan` proved a sentence went _through_ the
+translator and that a _refusal_ had an answer, and nothing asked whether the
+sentences on the pages could be answered at all. One with no dictionary entry
+is shown in English, silently. The new `--answers` mode asks, across every page
+in the app and the component library, and was written expecting a backlog: it
+found 3,877 sentences and none missing. It was then made to fail on purpose
+before the zero was believed.
+
+`npm run verify:erasure` keeps it honest from here.
 
 ## Running throughout — the four things that are not features
 

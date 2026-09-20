@@ -3,6 +3,7 @@
  *
  *   npx tsx infra/scripts/i18n-scan.ts [paths...]        text on the pages
  *   npx tsx infra/scripts/i18n-scan.ts --messages        sentences the libraries throw
+ *   npx tsx infra/scripts/i18n-scan.ts --answers         and whether each has an answer
  *
  * Reads the source with the TypeScript parser, not with patterns, and names
  * every piece of English that reaches a page without passing through t():
@@ -24,6 +25,19 @@
  * those with no French or Arabic translation. The translator matches a
  * thrown sentence against these keys, so a refusal reaches the page in the
  * person's language.
+ *
+ * With --answers it takes every English sentence handed to t() in the web app
+ * and the component library and requires a French and an Arabic answer for
+ * each. Phase 62, and it closes the last way a sentence could reach a person
+ * in the wrong language: the default scan proves a sentence went through the
+ * translator, and --messages proves a refusal has an answer, but neither asked
+ * whether the translator could answer the sentences on the pages themselves.
+ * An unanswered one is shown in English, silently — which is the right
+ * behaviour at runtime and the wrong thing to find out from a customer.
+ *
+ * It was written expecting to find a backlog and found none: 4,843 sentences,
+ * all answered. That is worth keeping rather than rediscovering, which is the
+ * whole case for a check over an invariant that already holds.
  *
  * Exits 1 when anything is found, so it can gate a phase.
  */
@@ -438,6 +452,49 @@ async function main() {
     }
     console.info(`\n  ${sentences.size} thrown sentences, ${missing} translations missing.\n`);
     process.exit(missing === 0 ? 0 : 1);
+  }
+
+  if (args.includes('--answers')) {
+    const { hasTranslation } = await import('@carnet/core');
+    const within = args.find((arg) => arg.startsWith('--in='))?.slice(5);
+
+    // Derived from the tree rather than from a list somebody keeps: a list
+    // somebody keeps falls behind, and a page nobody added to it is exactly
+    // the page this would have caught.
+    const sources = [
+      ...walkFiles(join(ROOT, 'apps', 'web', 'src')),
+      ...walkFiles(join(ROOT, 'packages', 'ui', 'src')),
+    ].filter((file) => !within || relative(ROOT, file).replace(/\\/g, '/').startsWith(within));
+
+    // Only a literal. `t(something)` is invisible here by nature, which is why
+    // the lists behind those — the erasure register, the launch settings, the
+    // alert kinds — carry their own checks where they are defined.
+    const asked = new Map<string, string>();
+    for (const file of sources) {
+      const source = readFileSync(file, 'utf8');
+      for (const match of source.matchAll(/\bt\(\s*'([^'\\]*)'\s*[,)]/g)) {
+        if (!asked.has(match[1]!)) asked.set(match[1]!, relative(ROOT, file).replace(/\\/g, '/'));
+      }
+      for (const match of source.matchAll(/\bt\(\s*"([^"\\]*)"\s*[,)]/g)) {
+        if (!asked.has(match[1]!)) asked.set(match[1]!, relative(ROOT, file).replace(/\\/g, '/'));
+      }
+    }
+
+    let unanswered = 0;
+    for (const [text, file] of asked) {
+      for (const language of ['fr', 'ar'] as const) {
+        if (!hasTranslation(language, text)) {
+          unanswered += 1;
+          if (!args.includes('--quiet'))
+            console.info(`  ${language}  ${file}  ${JSON.stringify(text)}`);
+        }
+      }
+    }
+
+    console.info(
+      `\n  ${asked.size} sentences on the pages, ${unanswered} with no answer in French or Arabic.\n`,
+    );
+    process.exit(unanswered === 0 ? 0 : 1);
   }
 
   const targets = args.filter((arg) => !arg.startsWith('--'));

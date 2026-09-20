@@ -1,4 +1,12 @@
-import { humanise, toneFor, type JobStatus } from '@carnet/core';
+import {
+  describeErasure,
+  describeExport,
+  FORGOTTEN,
+  humanise,
+  toneFor,
+  whatWasDone,
+  type JobStatus,
+} from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
   Alert,
@@ -22,6 +30,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { CustomerError, setPreferredTechnician } from '@/lib/customers';
+import { eraseCustomer, ErasureError, exportCustomer } from '@/lib/erasure';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { setCustomerExemption, TaxError } from '@/lib/tax';
@@ -79,6 +88,60 @@ async function prefer(formData: FormData) {
   }
 
   redirect(`/customers/${customerId}?saved=preference`);
+}
+
+/**
+ * Everything the workshop holds about one person, handed over. NFR-502.
+ *
+ * Offered beside erasure rather than after it. Somebody asking to be forgotten
+ * should be able to take their record with them first, and a product that
+ * erases and then offers an export is offering nothing.
+ *
+ * The law allows thirty days. The product holds it all in one database and
+ * answers while they are still on the telephone.
+ */
+async function takeEverything(formData: FormData) {
+  'use server';
+
+  const { orgId } = await requireSession('customer:read');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  const taken = await exportCustomer(orgId, customerId);
+
+  redirect(`/customers/${customerId}?exported=${encodeURIComponent(describeExport(taken))}`);
+}
+
+/**
+ * Being forgotten. FR-209, NFR-503.
+ *
+ * Not reversible, and it does not pretend to be: no undo, no soft delete, no
+ * thirty-day grace. A request to be forgotten that leaves the data behind a
+ * flag has not been honoured.
+ *
+ * The reason is required because this is a thing the workshop did on somebody
+ * else's instruction, and the audit record of it should say whose.
+ */
+async function forget(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('customer:write');
+  const customerId = String(formData.get('customerId') ?? '');
+
+  try {
+    const done = await eraseCustomer({
+      orgId,
+      userId: user.userId,
+      customerId,
+      reason: String(formData.get('reason') ?? ''),
+    });
+
+    redirect(`/customers/${customerId}?erased=${encodeURIComponent(describeErasure(done))}`);
+  } catch (error) {
+    if (error instanceof ErasureError) {
+      redirect(`/customers/${customerId}?problem=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
 }
 
 /** Exempt from tax on the strength of a certificate, or charged as usual. Phase 41. */
@@ -1104,6 +1167,72 @@ export default async function CustomerPage({
               </li>
             ))}
           </ul>
+        </Card>
+      ) : null}
+      {mayEditCustomer ? (
+        <Card className="mt-5 overflow-hidden border-(--danger)">
+          <CardHeader
+            title={t('What they can ask for')}
+            description={t(
+              'A person may take everything the workshop holds about them, and may ask to be forgotten. Both are theirs by right.',
+            )}
+          />
+          <CardBody className="flex flex-col gap-5">
+            <form action={takeEverything} className="flex flex-wrap items-center gap-3">
+              <input type="hidden" name="customerId" value={customer.id} />
+              <Button type="submit" variant="secondary">
+                {t('Everything we hold about them')}
+              </Button>
+              <span className="text-[12px] text-(--text-soft)">
+                {t('Machine-readable, and complete. Give it to them before anything else.')}
+              </span>
+            </form>
+
+            {customer.displayName === FORGOTTEN ? (
+              <p className="text-[13px] text-(--text-soft)">
+                {t('This person has been forgotten. What is left is the workshop’s own record.')}
+              </p>
+            ) : (
+              <div className="border-t border-(--line) pt-4">
+                <p className="text-[13px] font-medium">{t('Forget this person')}</p>
+
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-[12px] font-medium text-(--danger)">{t('What goes')}</p>
+                    <ul className="mt-1 text-[12px] text-(--text-soft)">
+                      {whatWasDone().gone.map((one) => (
+                        <li key={one}>{t(one)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-medium">{t('What stays')}</p>
+                    <ul className="mt-1 text-[12px] text-(--text-soft)">
+                      {whatWasDone().kept.map((one) => (
+                        <li key={one}>{t(one)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <p className="mt-3 text-[12px] text-(--text-soft)">
+                  {t(
+                    'This cannot be undone. The invoices stay, because the law says seven years, and the car’s history stays, because it belongs to the car.',
+                  )}
+                </p>
+
+                <form action={forget} className="mt-3 flex flex-wrap items-end gap-3">
+                  <input type="hidden" name="customerId" value={customer.id} />
+                  <Field label={t('Why, and who asked')} className="min-w-[18rem] flex-1">
+                    <Input name="reason" required placeholder={t('Asked by email on 3 March')} />
+                  </Field>
+                  <Button type="submit" variant="danger">
+                    {t('Forget them')}
+                  </Button>
+                </form>
+              </div>
+            )}
+          </CardBody>
         </Card>
       ) : null}
     </>

@@ -568,13 +568,19 @@ async function main() {
       type: 'OWNERSHIP_TRANSFER',
       occurredAt: yearsAgo(1, 6, 2),
       title: 'Ownership transferred',
-      summary: 'From Peter Vasquez to Maria Okonkwo',
+      // No names, here or in the payload (ADR-0014). The passport describes
+      // the vehicle; who owned it is in the ownership rows, where a request to
+      // be forgotten can reach it. This event said "From Peter Vasquez to
+      // Maria Okonkwo" until Phase 62, which put two people's names into a
+      // hash chain nobody can edit — in the demonstration data every workshop
+      // sees first.
+      summary: 'Changed hands. The third keeper on record.',
       verification: 'SELF_REPORTED',
       odometerKm: 74_800,
       recordedByOrgId: null,
       supersedesId: null,
       idempotencyKey: 'legacy:transfer:1',
-      payload: { from: 'Peter Vasquez', to: 'Maria Okonkwo' },
+      payload: { keeperNumber: 3 },
     },
     {
       type: 'TIRE',

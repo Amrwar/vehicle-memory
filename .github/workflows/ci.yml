@@ -61,6 +61,14 @@ jobs:
       - name: Every refusal translated
         run: npx tsx infra/scripts/i18n-scan.ts --messages
 
+      # And every sentence on a page has something to be translated into.
+      # The two above prove a sentence went through the translator and that a
+      # refusal has an answer; until Phase 62 nothing asked whether the
+      # translator could answer the sentences on the pages themselves. An
+      # unanswered one is shown in English, silently.
+      - name: Every sentence answered in French and Arabic
+        run: npx tsx infra/scripts/i18n-scan.ts --answers
+
       # Colour is not a matter of taste here. This resolves the design tokens
       # through their var() chains and measures every pair a component puts
       # together, in both themes, against WCAG AA.
@@ -246,6 +254,16 @@ jobs:
       # real rows.
       - name: Verify asking, points, referrals and the inbox
         run: npx tsx infra/scripts/verify-retention.ts
+
+      # Erasure is the one feature whose failure is invisible from the outside:
+      # a product that says "forgotten" and keeps the name looks exactly like
+      # one that does not. So this searches every text column of every table
+      # for the person's own name afterwards, and requires nothing back — and
+      # then checks the books still balance and the passport still verifies,
+      # because taking a person out must not take the workshop's records with
+      # them.
+      - name: Verify being forgotten, and what must survive it
+        run: npx tsx infra/scripts/verify-erasure.ts
 
       # Every mistake this feature makes is a quiet one: a link alive after
       # use, an old link left live when a new one is issued, a form that says

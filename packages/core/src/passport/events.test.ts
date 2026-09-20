@@ -124,31 +124,64 @@ describe('events from a completed job', () => {
 });
 
 describe('ownership transfer', () => {
-  it('records both parties and stays self-reported until an authority confirms', () => {
+  it('records that the car changed hands, and stays self-reported', () => {
     const event = ownershipTransferEvent({
       vehicleId: 'veh_1',
       occurredAt: new Date(Date.UTC(2026, 8, 9)),
-      fromOwnerName: 'Ahmed Hassan',
-      toOwnerName: 'David Okafor',
+      keeperNumber: 3,
       transferId: 'tr_1',
       odometerKm: 82_430,
     });
 
     expect(event.type).toBe('OWNERSHIP_TRANSFER');
-    expect(event.summary).toBe('From Ahmed Hassan to David Okafor');
+    expect(event.summary).toBe('Changed hands. The 3rd keeper on record.');
     expect(event.verification).toBe('SELF_REPORTED');
     expect(event.idempotencyKey).toBe('transfer:tr_1');
   });
 
-  it('handles a first registration with no prior owner', () => {
+  it('handles a first registration with nobody before', () => {
     const event = ownershipTransferEvent({
       vehicleId: 'veh_1',
       occurredAt: new Date(),
-      fromOwnerName: null,
-      toOwnerName: 'Ahmed Hassan',
       transferId: 'tr_0',
     });
-    expect(event.summary).toBe('To Ahmed Hassan');
+
+    expect(event.summary).toBe('Changed hands.');
+  });
+
+  /**
+   * The point of the change made in Phase 62, and the reason it is a test
+   * rather than a comment: a name written into a hashed chain can never be
+   * taken out again, and somebody will one day ask for theirs to be.
+   */
+  it('carries no name anywhere, because a hashed chain cannot be edited', () => {
+    const event = ownershipTransferEvent({
+      vehicleId: 'veh_1',
+      occurredAt: new Date(),
+      keeperNumber: 2,
+      transferId: 'tr_2',
+    });
+
+    const everything = JSON.stringify(event);
+
+    expect(everything).not.toContain('Ahmed');
+    expect(everything).not.toContain('ownerName');
+    expect(Object.keys(event.payload as object)).toEqual(['keeperNumber', 'transferId']);
+  });
+
+  it('counts the keeper the way a person would say it', () => {
+    const say = (n: number) =>
+      ownershipTransferEvent({
+        vehicleId: 'v',
+        occurredAt: new Date(),
+        keeperNumber: n,
+        transferId: 't',
+      }).summary;
+
+    expect(say(1)).toContain('1st');
+    expect(say(2)).toContain('2nd');
+    expect(say(11)).toContain('11th');
+    expect(say(21)).toContain('21st');
   });
 });
 

@@ -279,3 +279,23 @@ requirement now has a row of its own, and `npm run verify:traceability` checks
 that the rows are true: every test a row names exists, every function a row
 names exists in the source, and the coverage summary is counted from the table
 rather than remembered.
+
+Phase 62 builds the one of those five that mattered most. A customer can now be
+taken out of the database entirely — name, address, telephone, portal login and
+signature — while the workshop keeps its books for the seven years the law asks
+and the car keeps its history, which belongs to the car rather than to whoever
+owned it. `npm run verify:erasure` does not read the register back to itself:
+it searches every text column of every table for the person's own name, email
+address and address afterwards and requires nothing back, then totals the books
+and verifies the passport chain to prove that taking a person out did not take
+the workshop's records with them.
+
+The hard question in it was a conflict between two promises the product had
+already made. The passport is append-only and hash-chained, so an event
+supersedes rather than replaces and the original survives — which is the point
+of it, and which means a name written into that chain can never come out. The
+answer was not a cleverer erasure but to stop writing names in: a transfer says
+the car changed hands and which keeper this is, and who they were lives in the
+ownership row, where it can be anonymised. The security model had implied that
+from the first month — passport events describe the vehicle, not the person —
+and the code had been doing something else.

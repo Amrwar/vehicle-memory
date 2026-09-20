@@ -511,6 +511,13 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9701 | BO1   | `ERASURE` in `core/privacy/erasure.ts` | 14 holdings, each with its treatment and why                                   | `erasure.test.ts`, `verify-erasure.ts`        | Done   |
+| FR-9702 | BO1   | —                                      | `exportCustomer()`, including the holdings that are empty                      | `verify-erasure.ts`                           | Done   |
+| FR-9703 | BO2   | —                                      | `eraseCustomer()`; `stillMentions()` searches every text column of every table | `verify-erasure.ts`                           | Done   |
+| FR-9704 | BO3   | —                                      | the books totalled by `auditBooks()` before and after, and compared            | `verify-erasure.ts`                           | Done   |
+| FR-9705 | BO3   | `VehicleEvent` payloads carry no name  | `ownershipTransferEvent()` takes a keeper number rather than two names         | `events.test.ts`, `verify-erasure.ts`         | Done   |
+| FR-9706 | BO3   | `carnet_audit_logs_immutable()`        | the redaction clause, and `redactAudit()` that uses it                         | `verify-integrity.ts`, `verify-erasure.ts`    | Done   |
+| FR-9707 | BO2   | `AuditLog` action `customer.erased`    | the reason field on the page, and the refusal of a second erasure              | `verify-erasure.ts`                           | Done   |
 | FR-9601 | BN1   | —                                      | the requirement list read off the document and compared with the rows          | `verify-traceability.ts`                      | Done   |
 | FR-9602 | BN1   | —                                      | the test and function checks in `verify-traceability.ts`                       | `verify-traceability.ts`                      | Done   |
 | FR-9603 | BN2   | —                                      | the Missing rows, and the check that none of them claims a test                | `verify-traceability.ts`                      | Done   |
@@ -953,7 +960,7 @@ were written rather than verified is worse than a gap that is admitted.
 | FR-203  | B1    | `Customer.sourceOfBusiness`              | `CustomerFields`; `bySource()` reports on it                                                                                                       | `verify-owner.ts`                                  | Done       |
 | FR-207  | B1    | `Invoice.billToCustomerId`               | `issueInvoice()`, and the fleet agreement that sets it                                                                                             | `verify-erp.ts`, `verify-money.ts`                 | Done       |
 | FR-208  | B1    | `ConsentChange`                          | `setConsent()`, and the consent gate in `sendMessageNow()`                                                                                         | `messaging.test.ts`, `verify-messaging.ts`         | Done       |
-| FR-209  | —     | —                                        | **nothing exports or erases a customer's personal data.** The security model §10 specifies how it should behave; no code does it                   | —                                                  | Missing    |
+| FR-209  | BO1   | `ERASURE`, the register of 14 holdings   | `exportCustomer()` and `eraseCustomer()` in `lib/erasure.ts`, and the card on the customer page                                                    | `erasure.test.ts`, `verify-erasure.ts`             | Done       |
 | FR-302  | C1    | `Vehicle` columns                        | the vehicle form and `registerVehicle()`                                                                                                           | `vehicle.test.ts`, `verify-records.ts`             | Done       |
 | FR-303  | —     | `Vehicle.registrationExpiresAt`          | the expiry is there; **`fleetNumber` is not a column and nothing records one**                                                                     | —                                                  | Partial    |
 | FR-306  | C2    | `OdometerReading`                        | `checkIn()` in `lib/arrival.ts`, and the same on a job and an import                                                                               | `arrival.test.ts`, `verify-arrival.ts`             | Done       |
@@ -1043,7 +1050,7 @@ ago reads exactly like a row naming one that is there.
 | Area                                               | Traced individually | With an automated test |
 | -------------------------------------------------- | ------------------- | ---------------------- |
 | Foundation                                         | 10                  | 9                      |
-| Customers and vehicles                             | 8                   | 8                      |
+| Customers and vehicles                             | 8                   | 6                      |
 | Vehicle passport                                   | 12                  | 11                     |
 | Booking, job, inspection, estimate                 | 11                  | 11                     |
 | Invoicing, portal, reporting                       | 4                   | 4                      |
@@ -1065,7 +1072,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 176                 | 175                    |
+| Later phases, newest first                         | 183                 | 182                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1082,25 +1089,33 @@ ago reads exactly like a row naming one that is there.
 | Counter sales and business reporting               | 10                  | 10                     |
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
-| The first two phases, traced one by one (Phase 61) | 84                  | 77                     |
-| **Total**                                          | **744**             | **733 (99%)**          |
+| The first two phases, traced one by one (Phase 61) | 84                  | 78                     |
+| **Total**                                          | **751**             | **739 (98%)**          |
 
-Every one of the 744 requirements now has a row of its own. Until Phase 61,
+Every one of the 751 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does
 not meet, and thirty-four rows naming test files that had been renamed or
 consolidated years earlier and never corrected here.
 
-Nine rows are something other than Done, and they say which kind:
+Twelve rows are something other than Done, and they say which kind:
 
 | Kind           | What it means                                                                |
 | -------------- | ---------------------------------------------------------------------------- |
-| **Missing**    | Nothing implements it. Three: FR-108, FR-209, FR-617.                        |
+| **Missing**    | Nothing implements it. Two: FR-108, FR-617.                                  |
 | **Partial**    | Some of it is there. FR-303, FR-305, FR-311, FR-512.                         |
 | **Deferred**   | A SHOULD, decided against for now, with the reason. FR-112, FR-710.          |
 | **Superseded** | The product deliberately does something else, and the row says what. FR-510. |
 | **Planned**    | Named for a later phase. FR-111, FR-414, FR-1010.                            |
+
+Phase 62 closed FR-209, which had been the clearest Missing on this page: the
+security model specified erasure column by column from the first month and no
+code did any of it. Adding the row also found a quieter fault. The check that
+recounts this summary compared the total and not the figure beside it, so the
+half anybody actually reads was the half free to drift — and had, by two:
+_Customers and vehicles_ claimed eight done over a section holding two Partials.
+Both figures are now counted from the table.
 
 A row that says Missing is this table working. What would not be working is a
 requirement nothing implements beside a row that says Done, and that is the one
