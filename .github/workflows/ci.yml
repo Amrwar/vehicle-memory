@@ -51,6 +51,14 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # `tsc --build` follows project references, and apps/web is not one: it
+      # sets `composite: false`, so the root build skipped the largest package
+      # in the repository. Next does not type-check during `next build` either.
+      # From Phase 62 to Phase 63 the web app had no type gate at all, which
+      # was found by writing eight type errors into it and watching both green.
+      - name: Types, in the web app
+        run: npm run typecheck:web
+
       # Every sentence in the product goes through the translator, and every
       # sentence the translator is given has an answer in French and in Arabic.
       # The requirement has been in place since Phase 37.5 and this scanner
@@ -529,6 +537,16 @@ jobs:
       # that had been measured by nobody since the day they were written.
       - name: Every screen at every size
         run: npx tsx infra/scripts/verify-screens.ts http://localhost:3000
+
+      # A person on two workshops' teams is two tenants meeting in one account,
+      # which is where this product's worst defect would live. Nobody is placed
+      # in a workshop silently, nothing the request carries decides which one,
+      # the role and the records move together, and one workshop's decisions
+      # stop at its own boundary. Given an address it also renders the chooser,
+      # which `verify-screens` cannot: its people are on one team, so the page
+      # correctly redirects rather than asking.
+      - name: Verify working at two workshops
+        run: npx tsx infra/scripts/verify-belonging.ts http://localhost:3000
 
       # Everything else here is measured in Chromium because that is what
       # Playwright installs by default. A workshop's customers open a shared

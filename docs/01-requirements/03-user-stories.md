@@ -1642,6 +1642,68 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BP - Two workshops, one person (Phase 63)
+
+### BP1 - I work at two garages
+
+**As** a contractor servicing two garages on alternate days **I want** to say
+which one I am in **so that** the customer I am typing goes into the right
+workshop's records.
+**Size** 13 - **Satisfies** FR-9801, FR-9802, FR-9804
+
+- **Given** I am on two teams, **when** I sign in, **then** I am asked which
+  workshop, and put in neither until I say.
+- **Given** I am on one team, **when** I sign in, **then** I am not asked,
+  because that is not a choice.
+- **Given** I am a manager at one and a technician at the other, **when** I
+  move between them, **then** what I may do changes with the workshop.
+- **Given** I have chosen, **when** I load any page, **then** I stay where I
+  am: a page load is not a decision.
+
+### BP2 - And the two stay apart
+
+**As** a workshop owner **I want** somebody else's second job to be invisible
+here **so that** having a contractor in common with the garage down the road
+costs me nothing.
+**Size** 8 - **Satisfies** FR-9803, FR-9807
+
+- **Given** a workshop I am not on the team of, **when** I try to enter it,
+  **then** I am refused.
+- **Given** an organisation that does not exist, **when** I try to enter it,
+  **then** I am refused in the same words, so the refusal confirms nothing.
+- **Given** somebody entering my workshop, **when** I read the audit log,
+  **then** I can see who came in and when.
+
+### BP3 - Letting somebody go ends here
+
+**As** a workshop owner **I want** taking somebody off my team to affect my
+workshop only **so that** I cannot reach into a business I have nothing to do
+with.
+**Size** 8 - **Satisfies** FR-9805, FR-9806
+
+- **Given** I take somebody off my team, **when** they are signed in here,
+  **then** that session ends at once.
+- **Given** the same person is signed in at another workshop, **when** I take
+  them off mine, **then** that session is untouched.
+- **Given** a session naming a workshop I have been taken off, **when** I load
+  a page, **then** I no longer act in it — at the next request, not the next
+  sign-in.
+
+### BP4 - The invitation is not a password
+
+**As** anybody with a Carnet account **I want** an invitation to my address to
+need my password **so that** a forwarded email is not a way into everything I
+already have.
+**Size** 5 - **Satisfies** FR-9809
+
+- **Given** an invitation to an address that already has an account, **when**
+  somebody opens the link without the password, **then** it is refused and no
+  workshop is attached.
+- **Given** the account's own password, **when** I accept, **then** the
+  workshop is attached and I start in the one I have just joined.
+
+---
+
 ## Epic BO - Being forgotten (Phase 62)
 
 ### BO1 - I can take my record with me

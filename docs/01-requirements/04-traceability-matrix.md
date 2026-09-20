@@ -511,6 +511,15 @@ first six rows and of nothing since.
 
 | Req     | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | ------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-9801 | BP1   | `Session.orgId`                        | `orgOnSignIn()`, and the chooser at `/choose`                                  | `belonging.test.ts`, `verify-belonging.ts`    | Done   |
+| FR-9802 | BP1   | `Session.orgId`                        | `currentUser()` reads the session row; nothing reads the request               | `verify-belonging.ts`                         | Done   |
+| FR-9803 | BP2   | `Membership.isActive`                  | `enterWorkshop()`, and `NOT_YOURS` — one sentence for every reason             | `belonging.test.ts`, `verify-belonging.ts`    | Done   |
+| FR-9804 | BP1   | `Membership.role`                      | `actingAs()`; the role comes from the membership being acted under             | `belonging.test.ts`, `verify-belonging.ts`    | Done   |
+| FR-9805 | BP3   | `Session.orgId`                        | `deactivateMember()` scopes the revocation to its own organisation             | `belonging.test.ts`, `verify-belonging.ts`    | Done   |
+| FR-9806 | BP3   | `Membership.isActive`                  | `actingAs()` over active memberships only, read on every request               | `verify-belonging.ts`                         | Done   |
+| FR-9807 | BP2   | `AuditLog` action `session.entered`    | the audit call in `enterWorkshop()`                                            | `verify-belonging.ts`                         | Done   |
+| FR-9808 | BP1   | `Session`                              | the organisation is on the session row, not on the user                        | `verify-belonging.ts`                         | Done   |
+| FR-9809 | BP4   | `User.passwordHash`                    | the password check in `acceptInvitation()`                                     | `verify-belonging.ts`                         | Done   |
 | FR-9701 | BO1   | `ERASURE` in `core/privacy/erasure.ts` | 14 holdings, each with its treatment and why                                   | `erasure.test.ts`, `verify-erasure.ts`        | Done   |
 | FR-9702 | BO1   | —                                      | `exportCustomer()`, including the holdings that are empty                      | `verify-erasure.ts`                           | Done   |
 | FR-9703 | BO2   | —                                      | `eraseCustomer()`; `stillMentions()` searches every text column of every table | `verify-erasure.ts`                           | Done   |
@@ -953,7 +962,7 @@ were written rather than verified is worse than a gap that is admitted.
 
 | Req     | Story | Schema                                   | Implementation                                                                                                                                     | Test                                               | Status     |
 | ------- | ----- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------- |
-| FR-108  | —     | `Membership`                             | the schema allows it; **nothing switches between them** — `currentUser()` takes `memberships[0]`                                                   | —                                                  | Missing    |
+| FR-108  | BP1   | `Membership`, `Session.orgId`            | `enterWorkshop()` in `lib/belonging.ts`, the chooser at `/choose`, and the workshop's name in the nav                                              | `belonging.test.ts`, `verify-belonging.ts`         | Done       |
 | FR-112  | —     | —                                        | single sign-on is not built. A SHOULD, and the decision is to wait for somebody who wants it                                                       | —                                                  | Deferred   |
 | FR-201  | B1    | `Customer.kind`                          | `createCustomer()`, `CustomerFields`                                                                                                               | `customer.test.ts`, `verify-wiring.ts`             | Done       |
 | FR-202  | B1    | `Customer` address columns               | `CustomerFields`, `createCustomer()`                                                                                                               | `verify-wiring.ts`, `verify-empty.ts`              | Done       |
@@ -1072,7 +1081,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 183                 | 182                    |
+| Later phases, newest first                         | 192                 | 191                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1089,21 +1098,21 @@ ago reads exactly like a row naming one that is there.
 | Counter sales and business reporting               | 10                  | 10                     |
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
-| The first two phases, traced one by one (Phase 61) | 84                  | 78                     |
-| **Total**                                          | **751**             | **739 (98%)**          |
+| The first two phases, traced one by one (Phase 61) | 84                  | 79                     |
+| **Total**                                          | **760**             | **749 (99%)**          |
 
-Every one of the 751 requirements now has a row of its own. Until Phase 61,
+Every one of the 760 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does
 not meet, and thirty-four rows naming test files that had been renamed or
 consolidated years earlier and never corrected here.
 
-Twelve rows are something other than Done, and they say which kind:
+Eleven rows are something other than Done, and they say which kind:
 
 | Kind           | What it means                                                                |
 | -------------- | ---------------------------------------------------------------------------- |
-| **Missing**    | Nothing implements it. Two: FR-108, FR-617.                                  |
+| **Missing**    | Nothing implements it. One: FR-617.                                          |
 | **Partial**    | Some of it is there. FR-303, FR-305, FR-311, FR-512.                         |
 | **Deferred**   | A SHOULD, decided against for now, with the reason. FR-112, FR-710.          |
 | **Superseded** | The product deliberately does something else, and the row says what. FR-510. |

@@ -129,7 +129,14 @@ export async function inviteColleague(input: {
         `${inviter?.name ?? 'Somebody'} has invited you to join ${workshop} on Carnet as ${describeRole(input.role)}.`,
         ...(input.message?.trim() ? ['', `They wrote: ${input.message.trim()}`] : []),
         '',
-        'Open this link and set your own password. Nobody else, here included, ever sees it:',
+        // Two different sentences, because two different things are being
+        // asked for. Somebody new sets a password; somebody who already has a
+        // Carnet account types the one they have, and is told why — a person
+        // asked for a password on a page they arrived at from an email will
+        // otherwise reasonably think they are being asked to invent one.
+        existing
+          ? 'Open this link and enter your existing Carnet password. We ask for it because a link on its own should never sign anybody in as you:'
+          : 'Open this link and set your own password. Nobody else, here included, ever sees it:',
         '',
         `${siteUrl()}/invite/${token}`,
         '',
@@ -217,6 +224,14 @@ export interface AcceptResult {
   ok: boolean;
   error?: string;
   userId?: string;
+  /**
+   * The workshop they have just joined, for the session to start in.
+   *
+   * Somebody accepting an invitation has said which workshop they mean by
+   * pressing a button that names it, so asking them again on the chooser
+   * would be asking a question they have answered. Phase 63.
+   */
+  orgId?: string;
 }
 
 /**
@@ -225,6 +240,25 @@ export interface AcceptResult {
  * Creates the person if they are new, or attaches an existing account. Both
  * paths end in one membership and one employee record, in one transaction, so
  * a failure halfway does not leave somebody who can sign in to nothing.
+ *
+ * The two paths need different proof, which is what Phase 63 put right.
+ *
+ * For somebody new, the link is the whole credential: it was sent to an
+ * address, and holding it is evidence of reaching that address. There is no
+ * account to impersonate, and the password they type becomes theirs.
+ *
+ * For an account that already exists, the link is not enough, and treating it
+ * as enough was an account takeover. `startSession` follows this call, so
+ * whoever opened the link — a forwarded email, a shared inbox, an address
+ * typed slightly wrong by whoever sent the invitation — was signed in as that
+ * person, with everything their account could already reach. FR-108 makes it
+ * worse rather than creating it: an existing account may be on another
+ * workshop's team, so one workshop inviting an address reached into a tenant
+ * it has no relationship with.
+ *
+ * So an existing account must prove it is the account. The link proves the
+ * workshop invited this address; the password proves you are the person whose
+ * address it is. Both, or nothing.
  */
 export async function acceptInvitation(input: {
   token: string;
@@ -243,11 +277,31 @@ export async function acceptInvitation(input: {
     return { ok: false, error: (error as InvitationError).message };
   }
 
-  const { hashPassword } = await import('./auth');
+  const { hashPassword, verifyPassword } = await import('./auth');
   const existing = await prisma.user.findUnique({ where: { email: invitation.email } });
 
   if (!existing && input.password.length < 10) {
     return { ok: false, error: 'Choose a password of at least 10 characters.' };
+  }
+
+  // An account that already exists proves it is the account. See above: this
+  // call is followed by a session, so accepting without it signed the holder
+  // of the link in as somebody else.
+  if (existing && !(await verifyPassword(input.password, existing.passwordHash))) {
+    return {
+      ok: false,
+      error:
+        'That is not the password for this email address. This invitation is for an account that already exists.',
+    };
+  }
+
+  // A deactivated account is not one to attach a workshop to, and not one to
+  // issue a session for either.
+  if (existing && !existing.isActive) {
+    return {
+      ok: false,
+      error: 'That account is closed. Ask whoever invited you to use another address.',
+    };
   }
 
   if (!existing && input.name.trim().length < 2) {
@@ -316,7 +370,7 @@ export async function acceptInvitation(input: {
     after: { email: invitation.email, role: invitation.role } as never,
   });
 
-  return { ok: true, userId };
+  return { ok: true, userId, orgId: invitation.orgId };
 }
 
 /* ---------------------------------------------------------------------------
@@ -424,9 +478,20 @@ export async function deactivateMember(input: {
       data: { isActive: false, endedOn: new Date() },
     });
 
-    // Their sessions end now, not when they happen to expire.
+    // Their sessions in this workshop end now, not when they happen to expire
+    // (FR-1906) — and only the ones in this workshop (FR-9805).
+    //
+    // This revoked every session the person had, anywhere. With one membership
+    // each that is indistinguishable from correct. With two it is one workshop
+    // reaching into another and signing somebody out of a team they are still
+    // on: a side effect on a tenant the actor has no relationship with, which
+    // is the most serious category of defect this product has. Found in Phase
+    // 63 by asking what the feature would do to code written before it.
+    //
+    // A session with no organisation is somebody sitting on the chooser. It
+    // belongs to nobody's workshop, so it is not this workshop's to end.
     await tx.session.updateMany({
-      where: { userId: input.targetUserId, revokedAt: null },
+      where: { userId: input.targetUserId, orgId: input.orgId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
   });

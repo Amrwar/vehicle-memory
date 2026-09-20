@@ -562,6 +562,10 @@ export async function removeDemonstration(input: { userId: string; orgId: string
   });
 
   // Anybody looking at the demonstration is sent back to their own workshop.
+  // Null, and then the chooser: until Phase 63 a null organisation meant
+  // `memberships[0]`, so "their own workshop" was whichever row came back
+  // first. Somebody on one team lands straight back in it; somebody on two is
+  // asked, which is the point of the phase.
   await prisma.session.updateMany({ where: { orgId: org.id }, data: { orgId: null } });
 
   // Consent rows go first, while the workshop is still there to be recognised
@@ -592,34 +596,11 @@ export async function removeDemonstration(input: { userId: string; orgId: string
   });
 }
 
-/** Moves this session into one of the workshops this person belongs to. */
-export async function switchWorkshop(input: {
-  userId: string;
-  sessionId: string;
-  orgId: string;
-}): Promise<void> {
-  const membership = await prisma.membership.findFirst({
-    where: { userId: input.userId, orgId: input.orgId, isActive: true },
-    select: { id: true },
-  });
-
-  if (!membership) throw new Error('You are not a member of that workshop.');
-
-  await prisma.session.update({
-    where: { id: input.sessionId },
-    data: { orgId: input.orgId },
-  });
-}
-
-/** The workshops this person can move between. */
-export async function workshopsFor(userId: string) {
-  const memberships = await prisma.membership.findMany({
-    where: { userId, isActive: true },
-    orderBy: { createdAt: 'asc' },
-    select: {
-      org: { select: { id: true, name: true, slug: true, isDemonstration: true } },
-    },
-  });
-
-  return memberships.map((membership) => membership.org);
-}
+/*
+ * Moving between workshops used to live here, because the demonstration is a
+ * second organisation and entering it is the same movement. It is now in
+ * `belonging.ts` with the rest of FR-108: a tenant boundary crossing is not a
+ * detail of the demonstration feature, and it needed an audit record and a
+ * refusal somebody could read. `switchWorkshop` and `workshopsFor` are
+ * `enterWorkshop` and `workshopsFor` there.
+ */

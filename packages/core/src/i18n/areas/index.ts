@@ -26,6 +26,7 @@ import * as business from './business';
 import * as coreMessages from './core-messages';
 import * as messages from './messages';
 import * as privacy from './privacy';
+import * as belonging from './belonging';
 
 export const AREAS = [
   publicSite,
@@ -50,4 +51,5 @@ export const AREAS = [
   clock,
   pilot,
   privacy,
+  belonging,
 ] as const;

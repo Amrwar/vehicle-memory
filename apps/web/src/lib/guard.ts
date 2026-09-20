@@ -53,6 +53,14 @@ export async function requireSession(permission?: Permission): Promise<Session> 
   }
 
   if (!user.orgId) {
+    // Two different people arrive here and they need different answers.
+    //
+    // Somebody on a workshop's team who has not said which one: sent to
+    // choose. Their role reads as CUSTOMER at this point, because a role is a
+    // property of a membership and they are acting under none, so sending
+    // them by role would put a technician in the customer portal (FR-9801).
+    if (user.belongings.length > 0) redirect('/choose');
+
     // A portal-only customer has no organisation membership.
     redirect(landingPathFor(user.role));
   }
@@ -123,7 +131,11 @@ export async function requireUser(): Promise<CurrentUser> {
  */
 export async function redirectToSurface(): Promise<never> {
   const user = await currentUser();
-  redirect(user ? landingPathFor(user.role) : '/login');
+  if (!user) redirect('/login');
+  // As above: somebody on a team but in no workshop is not a customer, they
+  // are somebody who has not chosen yet.
+  if (!user.orgId && user.belongings.length > 0) redirect('/choose');
+  redirect(landingPathFor(user.role));
 }
 
 export function can(role: Role, permission: Permission): boolean {

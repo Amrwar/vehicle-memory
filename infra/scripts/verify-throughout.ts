@@ -240,6 +240,8 @@ const NO_BOUNDARY: Record<string, string> = {
   '/signup': 'a form, as above',
   '/signup/customer': 'a form, as above',
   '/confirm-email': 'one sentence and a button to send the message again',
+  '/choose':
+    'the memberships of one person, and the page is the question. A boundary here would flush a shell before the count is known, and the answer for somebody on one team is a redirect into it rather than a page at all — which a committed 200 cannot perform.',
   '/reset/[token]':
     'drawn identically whether the token is real or not, on purpose, so it reads nothing before it is sent',
   '/invite/[token]': 'one row, by its own token, and the page is a yes or a no',

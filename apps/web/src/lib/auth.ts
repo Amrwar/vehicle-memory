@@ -1,5 +1,10 @@
 import {
+  actingAs,
+  type Belonging,
   DEFAULT_REGION,
+  mayEnter,
+  mustChoose,
+  orgOnSignIn,
   type Region,
   type Role,
   safeLocale,
@@ -91,7 +96,14 @@ export async function recordAttempt(
 /* --- sign in and out ------------------------------------------------------ */
 
 export type SignInResult =
-  { ok: true; role: Role; orgId: string | null } | { ok: false; error: string };
+  | {
+      ok: true;
+      role: Role;
+      orgId: string | null;
+      /** They are on more than one team and have been put in none. FR-9801. */
+      mustChoose: boolean;
+    }
+  | { ok: false; error: string };
 
 export async function signIn(email: string, password: string): Promise<SignInResult> {
   const headerList = await headers();
@@ -125,15 +137,26 @@ export async function signIn(email: string, password: string): Promise<SignInRes
     return { ok: false, error: 'That email and password do not match.' };
   }
 
-  const membership = user.memberships[0];
-
   await startSession(user.id, { ip, userAgent });
   await recordAttempt(email, ip, true);
 
+  // Same rule as the session: one workshop is not a choice, and more than one
+  // is. Null here sends the caller to the chooser rather than into a workshop
+  // nobody picked.
+  const theirs: Belonging[] = user.memberships.map((m) => ({
+    orgId: m.orgId,
+    orgName: '',
+    role: m.role as Role,
+    isActive: true,
+  }));
+
+  const only = orgOnSignIn(theirs);
+
   return {
     ok: true,
-    role: (membership?.role ?? 'CUSTOMER') as Role,
-    orgId: membership?.orgId ?? null,
+    role: (only ? theirs.find((one) => one.orgId === only)!.role : 'CUSTOMER') as Role,
+    orgId: only,
+    mustChoose: mustChoose(theirs),
   };
 }
 
@@ -147,12 +170,37 @@ export async function signIn(email: string, password: string): Promise<SignInRes
  */
 export async function startSession(
   userId: string,
-  context: { ip?: string | null; userAgent?: string | null } = {},
+  context: {
+    ip?: string | null;
+    userAgent?: string | null;
+    /**
+     * The organisation to start in, where the person has just said which one.
+     * Accepting an invitation is the case: they pressed a button naming a
+     * workshop, which is as explicit as a choice gets, and sending them to a
+     * chooser afterwards would be asking a question they have just answered.
+     * Verified against their memberships like any other entry.
+     */
+    orgId?: string | null;
+  } = {},
 ): Promise<void> {
-  const membership = await prisma.membership.findFirst({
+  // Which organisation the session starts in: the only one, when there is only
+  // one, and none at all when there is more than one — the person is then sent
+  // to choose (FR-9801). This was `findFirst` with no ordering, so somebody on
+  // two teams signed in to whichever row came back first.
+  const belongings = await prisma.membership.findMany({
     where: { userId, isActive: true },
-    select: { orgId: true },
+    select: { orgId: true, role: true, org: { select: { name: true } } },
   });
+
+  const theirs: Belonging[] = belongings.map((one) => ({
+    orgId: one.orgId,
+    orgName: one.org.name,
+    role: one.role as Role,
+    isActive: true,
+  }));
+
+  const startIn =
+    context.orgId && mayEnter(theirs, context.orgId) ? context.orgId : orgOnSignIn(theirs);
 
   const { token, tokenHash } = issueToken();
   const expiresAt = new Date(Date.now() + env().SESSION_TTL_HOURS * 3_600_000);
@@ -161,7 +209,7 @@ export async function startSession(
     data: {
       tokenHash,
       userId,
-      orgId: membership?.orgId ?? null,
+      orgId: startIn,
       expiresAt,
       ip: context.ip ?? null,
       userAgent: context.userAgent ?? null,
@@ -218,6 +266,15 @@ export interface CurrentUser {
   region: Region;
   /** Where the workshop stands with us. Null for a portal-only person. */
   subscription: Subscription | null;
+  /**
+   * Every workshop this person is on the team of. Phase 63, FR-108.
+   *
+   * Free: `currentUser` already loads the memberships with their organisations
+   * to work out which one is current. Carrying them lets the nav offer a
+   * switch, and lets the guard tell "has not chosen yet" apart from "is not on
+   * anybody's team", without a second query.
+   */
+  belongings: Belonging[];
 }
 
 /**
@@ -265,8 +322,27 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
   if (!session || session.revokedAt || session.expiresAt < new Date()) return null;
   if (!session.user.isActive) return null;
 
-  const membership =
-    session.user.memberships.find((m) => m.orgId === session.orgId) ?? session.user.memberships[0];
+  // No fallback. This read `?? memberships[0]` until Phase 63, which put a
+  // person into whichever organisation Postgres happened to return first when
+  // the session named none — an arbitrary row presented as a decision. FR-108
+  // says a person switches between organisations explicitly, and a fallback
+  // here is the one thing that cannot be explicit.
+  //
+  // The query above asks only for active memberships, so everything here is
+  // one the person may act in right now. A membership ended while they were
+  // signed in therefore stops working at the next request rather than the
+  // next sign-in (FR-9806).
+  const belongings: Belonging[] = session.user.memberships.map((m) => ({
+    orgId: m.orgId,
+    orgName: m.org.name,
+    role: m.role as Role,
+    isActive: true,
+  }));
+
+  const acting = actingAs(belongings, session.orgId);
+  const membership = acting
+    ? (session.user.memberships.find((m) => m.orgId === acting.orgId) ?? null)
+    : null;
 
   return {
     userId: session.user.id,
@@ -288,6 +364,7 @@ export const currentUser = cache(async (): Promise<CurrentUser | null> => {
         }
       : DEFAULT_REGION,
     subscription: membership ? subscriptionStateOf(subscriptionDatesOf(membership.org)) : null,
+    belongings,
   };
 });
 

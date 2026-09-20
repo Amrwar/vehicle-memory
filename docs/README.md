@@ -299,3 +299,21 @@ the car changed hands and which keeper this is, and who they were lives in the
 ownership row, where it can be anonymised. The security model had implied that
 from the first month — passport events describe the vehicle, not the person —
 and the code had been doing something else.
+
+Phase 63 closes FR-108, the other requirement Phase 61 found the product did not
+meet: a person may work at more than one workshop and must say which one they
+are in. The schema always allowed it — an invitation to an address that already
+has an account attaches a second workshop — so people on two teams were
+possible, supported and unsteerable, with `memberships[0]` deciding where they
+landed. The organisation now lives on the session row, written in one place and
+verified against the person's own memberships, and a page load is never treated
+as a decision.
+
+Building it found two faults that were already there. Taking somebody off one
+workshop's team revoked every session they had anywhere, which with two
+memberships is one business signing a person out of another. And accepting an
+invitation for an address that already had an account required no password at
+all, while issuing a session immediately afterwards — so whoever opened the link
+was signed in as that person. Neither could have been caught by a test written
+before this phase, because with one membership each both look exactly like
+working code.

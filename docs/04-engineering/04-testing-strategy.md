@@ -30,6 +30,19 @@ nothing ([ADR-0003](../03-adr/0003-monorepo-structure.md)).
 | Languages  | `i18n-scan.ts`, `verify-languages`                 | No text outside the translator; every sentence and refusal answered in French and Arabic, and the pages read in all three (Phase 40.5, Phase 62) |
 | Usability  | Humans                                             | The four criteria in section 7                                                                                                                   |
 
+### The gate that did not cover the product
+
+`npm run typecheck` ran `tsc --build`, which follows project references. The
+four packages are references; `apps/web` is not, because it sets
+`composite: false` for Next. `next build` does not type-check either. So from
+whenever that was true until Phase 63, the largest package in the repository —
+every page, every server action, every lib — had no type gate at all.
+
+It was found by writing eight type errors into it and watching both `typecheck`
+and `build` stay green. `npm run typecheck:web` now runs beside them in CI, and
+the lesson generalises past types: a gate named after the thing it checks will
+be believed to check all of it.
+
 ### Three questions about one sentence
 
 `i18n-scan.ts` runs in three modes and they are not the same question, which

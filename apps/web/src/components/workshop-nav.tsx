@@ -251,9 +251,60 @@ const GROUPS: Group[] = [
   },
 ];
 
+/**
+ * The workshop's name at the top of the navigation, and — for somebody on
+ * more than one team — the way to the chooser.
+ *
+ * A link rather than a menu on purpose. A menu here would have to hold the
+ * list, which means loading every workshop into every page's navigation for
+ * the sake of the few people who have two; the chooser already exists, knows
+ * how to ask, and is one press away.
+ */
+function Identity({
+  as,
+  initials,
+  orgName,
+  subtitle,
+}: {
+  as: 'link' | 'plain';
+  initials: string;
+  orgName: string;
+  subtitle: string;
+}) {
+  const inside = (
+    <>
+      <span
+        aria-hidden
+        className={cn(
+          'grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md)',
+          'bg-(--brand-solid) font-display text-[13px] font-bold tracking-tight',
+          'text-(--on-brand-solid) shadow-sm',
+        )}
+      >
+        {initials}
+      </span>
+      <div className="min-w-0">
+        <p className="truncate font-display text-[14px] font-semibold leading-tight">{orgName}</p>
+        <p className="truncate text-[11px] text-(--text-faint)">{subtitle}</p>
+      </div>
+    </>
+  );
+
+  const frame = 'flex items-center gap-3 border-b border-(--border) px-4 py-4 ps-16 lg:ps-4';
+
+  if (as === 'plain') return <div className={frame}>{inside}</div>;
+
+  return (
+    <Link href="/choose" className={cn(frame, 'w-full text-start hover:bg-(--surface-sunken)')}>
+      {inside}
+    </Link>
+  );
+}
+
 export function WorkshopNav({
   role,
   orgName,
+  belongings = 1,
   userName,
   approvalsWaiting = 0,
   language,
@@ -263,6 +314,15 @@ export function WorkshopNav({
   unreadNotifications?: number;
   role: Role;
   orgName: string;
+  /**
+   * How many workshops this person is on the team of. Phase 63, FR-108.
+   *
+   * A count rather than the list: the nav only needs to know whether there is
+   * anywhere to go, and the chooser is the page that names them. One workshop
+   * shows a name, as it always has; more than one makes that name the way
+   * out, which is where somebody looks for it.
+   */
+  belongings?: number;
   userName: string;
   approvalsWaiting?: number;
   /** The person's language; labels are translated on the way out. Phase 37.5. */
@@ -322,25 +382,15 @@ export function WorkshopNav({
         aria-label={t('Workshop')}
       >
         {/* Identity. The mark is the workshop's initials rather than a stock
-            glyph, so somebody with two tabs open knows which is which. */}
-        <div className="flex items-center gap-3 border-b border-(--border) px-4 py-4 ps-16 lg:ps-4">
-          <span
-            aria-hidden
-            className={cn(
-              'grid h-9 w-9 shrink-0 place-items-center rounded-(--radius-md)',
-              'bg-(--brand-solid) font-display text-[13px] font-bold tracking-tight',
-              'text-(--on-brand-solid) shadow-sm',
-            )}
-          >
-            {initials}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate font-display text-[14px] font-semibold leading-tight">
-              {orgName}
-            </p>
-            <p className="truncate text-[11px] text-(--text-faint)">{t('Carnet Workshop')}</p>
-          </div>
-        </div>
+            glyph, so somebody with two tabs open knows which is which — and
+            for somebody on two teams it is also the way between them, because
+            the name of where you are is where you look to leave (Phase 63). */}
+        <Identity
+          as={belongings > 1 ? 'link' : 'plain'}
+          initials={initials}
+          orgName={orgName}
+          subtitle={belongings > 1 ? t('Switch workshop') : t('Carnet Workshop')}
+        />
 
         {/* One box for anything: a plate, a VIN, a phone number, a job,
             an invoice, a part. Phase 39. */}

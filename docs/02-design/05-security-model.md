@@ -112,6 +112,53 @@ is not its own, and the refusal says the part is not on any of your shelves
 rather than that you may not touch it — the second sentence confirms the shelf
 exists, which is the leak this section is about.
 
+### One person, two tenants (Phase 63)
+
+Everything above assumes a person belongs to one organisation. FR-108 says they
+may belong to several, the schema has allowed it since the first month, and
+`acceptInvitation` produces it whenever an invitation goes to an address that
+already has an account. So the assumption was never true; it was only untested.
+
+Three rules hold the boundary where one account touches two tenants:
+
+- **The organisation is on the session row.** `currentUser()` reads it from the
+  database and nothing else may set it — not a query parameter, not a cookie,
+  not a header. If the acting tenant could be influenced by the request, every
+  guarantee in this section would be worth exactly as much as that one input.
+- **Nobody is placed in a tenant silently.** A person on two teams is in
+  neither until they say which. The fallback to `memberships[0]` that used to
+  fill the gap is gone, and nothing replaced it: a silent switch is how one
+  workshop's customer ends up in another workshop's records.
+- **A refusal to enter says nothing.** Not yours, ended, never existed — one
+  sentence for all three, for the same reason this section insists on 404
+  elsewhere.
+
+And one that had been quietly broken. **Removing somebody from a team revoked
+every session they had, anywhere.** With one membership each that is
+indistinguishable from correct. With two it is one organisation signing a person
+out of another — a side effect inside a tenant the actor has no relationship
+with, reached through an ordinary product action rather than an attack. The
+revocation is now scoped to the organisation performing it.
+
+Entering an organisation is written to that organisation's audit log
+(`session.entered`), which is the one movement in this product most worth being
+able to read afterwards. Where the person came from is not written there: that
+is the other workshop's business, and recording it would put one tenant's name
+in another tenant's log.
+
+### An invitation is not a password (Phase 63)
+
+Accepting an invitation for an address that already has a Carnet account used to
+require nothing but the link, and a session was issued immediately afterwards.
+Whoever opened the link was therefore signed in as the owner of that address,
+with everything their account already reached — which, with FR-108, means every
+organisation they are on the team of.
+
+The link and the password answer different questions. The link proves this
+workshop invited this address. The password proves you are the person whose
+address it is. A new account has no second question to answer and the link is
+enough; an existing one is refused without both.
+
 ### How a refusal is checked
 
 Not by status code. A page under a loading boundary has already flushed its

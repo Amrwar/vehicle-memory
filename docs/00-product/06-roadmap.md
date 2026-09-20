@@ -3715,6 +3715,7 @@ so, in bold, rather than being covered by a section heading:
 - **FR-108** — a user belonging to more than one organisation and switching
   between them. The schema allows it and nothing switches: `currentUser()`
   takes `memberships[0]` and there is no way to reach the second.
+  _Closed in Phase 63._
 - **FR-209** — exporting and permanently erasing a customer's personal data.
   Nothing exports and nothing erases. This is the one that matters: the
   security model has a whole section specifying, column by column, what
@@ -3869,6 +3870,78 @@ found 3,877 sentences and none missing. It was then made to fail on purpose
 before the zero was believed.
 
 `npm run verify:erasure` keeps it honest from here.
+
+## Phase 63 — Two workshops, one person
+
+**Scope.** FR-108, which has been on the list since the first month and marked
+Missing since Phase 61: a person may belong to more than one organisation and
+must switch between them explicitly.
+
+**Exit.** A contractor who services two garages can say which one they are in,
+and everything — what they may do, what they can see, what happens when one of
+them lets them go — follows that answer and stops at its boundary.
+
+**Status.** Built, and it found two defects that were already there.
+
+The first half of the requirement was never missing. `acceptInvitation`
+attaches an existing account to a second workshop and always has, so people on
+two teams were possible, supported, and unsteerable. What was missing was any
+way to say which one you were in: `currentUser()` read the organisation off the
+session and, when that named none, fell back to `memberships[0]` — an arbitrary
+row, in whatever order Postgres returned it, presented as a decision.
+
+**Explicit is the hard word.** A silent switch is worse than an error message.
+A technician who types a customer's telephone number into the wrong workshop
+has not lost data; they have put one workshop's customer into another
+workshop's records, which is the thing this product must never do. So the
+fallback is gone and nothing replaced it. The organisation lives on the session
+row, written in one place, verified against the person's own memberships; no
+query parameter, cookie or header decides which tenant anybody is in. Signing in
+with one membership puts you in it, because one workshop is not a choice and
+asking would be ceremony. Signing in with two asks, once. After that a page load
+is not a decision and is never treated as one.
+
+**The switch already existed, in the wrong place.** `switchWorkshop` and
+`workshopsFor` were written in Phase 45 for the demonstration workshop, which is
+a second organisation and moving into it is the same movement. They were correct
+as far as they went: a membership check, and a session update. They went no
+further — no audit record, no refusal anybody could read, and reachable only
+from the page that builds a demonstration. Crossing a tenant boundary is not a
+detail of a demonstration feature. It is the boundary the whole product is built
+around, so it lives in `belonging.ts` now, and it says so in the log of the
+workshop being entered.
+
+**A workshop reaching into another workshop.** Taking somebody off your team
+revoked every session that person had, anywhere. With one membership each that
+is indistinguishable from correct, which is why it survived: no test written
+before this phase could have failed. With two it is one tenant signing a person
+out of a workshop it has no relationship with — the worst category of defect in
+the security model, arrived at by an ordinary product action. The revocation is
+now scoped to the organisation doing it, and a session sitting on the chooser,
+which belongs to nobody's workshop, is nobody's to end.
+
+**And the invitation was a password.** Accepting an invitation for an address
+that already had a Carnet account attached the workshop without asking for
+anything, and `startSession` follows that call — so whoever opened the link was
+signed in as that person. A forwarded email, a shared inbox, an address typed
+slightly wrong by whoever sent it. What it reached was not one workshop but
+everything that account already had, which after this phase means every workshop
+they are on the team of. The invitation page's own copy had said "use the same
+password" for months; the code never checked it. It does now: the link proves the
+workshop invited this address, the password proves you are the person whose
+address it is, and one without the other is refused.
+
+**A type gate that covered everything except the product.** Eight type errors
+were written into `apps/web` during this phase and both `npm run typecheck` and
+`npm run build` stayed green. `tsc --build` follows project references and
+`apps/web` is not one — it sets `composite: false` — and `next build` does not
+type-check either. The largest package in the repository had no type gate at
+all, and the way to find that out was to break it and watch nothing happen.
+`npm run typecheck:web` now runs in CI beside the others.
+
+`npm run verify:belonging` keeps all of it honest: twenty-nine checks, of which
+the two that matter were each made to fail on purpose before the green was
+believed.
 
 ## Running throughout — the four things that are not features
 

@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9800 - Two workshops, one person
+
+| Ref     | Requirement                                                                                                                                  | Phase |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-9801 | A person on more than one organisation's team MUST choose which one they are working in, and MUST never be placed in one silently.           | 63    |
+| FR-9802 | The organisation a person is acting in MUST be held on the session in the database, and MUST NOT be taken from anything the request carries. | 63    |
+| FR-9803 | Entering an organisation MUST verify an active membership, and a refusal MUST NOT reveal whether that organisation exists.                   | 63    |
+| FR-9804 | Permissions MUST follow the membership of the organisation being acted in, not the highest role the person holds anywhere.                   | 63    |
+| FR-9805 | Removing somebody from one organisation MUST NOT end their sessions in another.                                                              | 63    |
+| FR-9806 | A session whose membership has ended MUST lose access at the next request rather than at the next sign-in.                                   | 63    |
+| FR-9807 | Entering an organisation MUST be recorded in that organisation's audit log.                                                                  | 63    |
+| FR-9808 | Two sessions of the same person MAY be in different organisations at once.                                                                   | 63    |
+| FR-9809 | Accepting an invitation for an address that already has an account MUST require that account's password.                                     | 63    |
+
 ## FR-9700 - Being forgotten
 
 | Ref     | Requirement                                                                                                                      | Phase |

@@ -306,6 +306,16 @@ const PLAN: Record<string, Plan> = {
   '/confirm-email': { who: 'nobody' },
   '/offline': { who: 'nobody' },
 
+  // The chooser asks which workshop somebody is in, and only ever appears for
+  // a person on more than one team (Phase 63). This probe's people are on one,
+  // so the page correctly enters it and redirects: what would be measured here
+  // is the dashboard, wearing another address's name. Held by
+  // `verify-belonging.ts` instead, where a person with two memberships exists.
+  '/choose': {
+    unmeasured:
+      'only rendered for somebody on more than one workshop’s team; this probe’s people are on one, so it redirects',
+  },
+
   // The one place an invented token measures the real thing. This page is
   // built to render identically whether the token is live or not, because mail
   // scanners follow every link in a message before a person sees it; so the

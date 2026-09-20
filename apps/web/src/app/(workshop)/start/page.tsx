@@ -4,13 +4,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
-import {
-  createDemonstration,
-  demonstrationFor,
-  removeDemonstration,
-  switchWorkshop,
-  workshopsFor,
-} from '@/lib/demonstration';
+import { enterWorkshop, workshopsFor } from '@/lib/belonging';
+import { createDemonstration, demonstrationFor, removeDemonstration } from '@/lib/demonstration';
 import { tFor } from '@/lib/i18n';
 import { setSetupHidden, setupFor } from '@/lib/onboarding';
 
@@ -57,7 +52,7 @@ async function buildDemonstration() {
   // itself, so it asks for the permission that settings ask for.
   const { user } = await requireSession('settings:write');
   const { orgId } = await createDemonstration({ userId: user.userId });
-  await switchWorkshop({ userId: user.userId, sessionId: user.sessionId, orgId });
+  await enterWorkshop({ userId: user.userId, sessionId: user.sessionId, orgId });
   redirect('/dashboard?demonstration=1');
 }
 
@@ -65,7 +60,7 @@ async function moveTo(formData: FormData) {
   'use server';
 
   const { user } = await requireSession();
-  await switchWorkshop({
+  await enterWorkshop({
     userId: user.userId,
     sessionId: user.sessionId,
     orgId: String(formData.get('orgId') ?? ''),
@@ -98,7 +93,7 @@ export default async function StartPage({
   ]);
 
   const mayConfigure = can(user.role, 'settings:write');
-  const inDemonstration = workshops.find((shop) => shop.id === orgId)?.isDemonstration ?? false;
+  const inDemonstration = workshops.find((shop) => shop.orgId === orgId)?.isDemonstration ?? false;
   const own = workshops.find((shop) => !shop.isDemonstration);
 
   return (
@@ -198,9 +193,9 @@ export default async function StartPage({
                   <p className="font-medium">{t('You are in the demonstration now.')}</p>
                   {own ? (
                     <form action={moveTo}>
-                      <input type="hidden" name="orgId" value={own.id} />
+                      <input type="hidden" name="orgId" value={own.orgId} />
                       <Button type="submit" variant="primary" size="sm">
-                        {t('Back to {name}', { name: own.name })}
+                        {t('Back to {name}', { name: own.orgName })}
                       </Button>
                     </form>
                   ) : null}
@@ -249,22 +244,22 @@ export default async function StartPage({
               <ul className="divide-y divide-(--border)">
                 {workshops.map((shop) => (
                   <li
-                    key={shop.id}
+                    key={shop.orgId}
                     className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-[13px]"
                   >
-                    <bdi className="font-medium">{shop.name}</bdi>
+                    <bdi className="font-medium">{shop.orgName}</bdi>
                     {shop.isDemonstration ? (
                       <Badge tone="warning" size="sm">
                         {t('demonstration')}
                       </Badge>
                     ) : null}
-                    {shop.id === orgId ? (
+                    {shop.orgId === orgId ? (
                       <span className="ms-auto text-[12px] text-(--text-faint)">
                         {t('you are here')}
                       </span>
                     ) : (
                       <form action={moveTo} className="ms-auto">
-                        <input type="hidden" name="orgId" value={shop.id} />
+                        <input type="hidden" name="orgId" value={shop.orgId} />
                         <Button type="submit" size="sm" variant="ghost">
                           {t('Move here')}
                         </Button>

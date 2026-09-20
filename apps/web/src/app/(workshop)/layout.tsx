@@ -52,6 +52,7 @@ export default async function WorkshopLayout({ children }: { children: React.Rea
       <WorkshopNav
         role={user.role}
         orgName={user.orgName ?? t('Workshop')}
+        belongings={user.belongings.length}
         userName={user.name}
         approvalsWaiting={approvalsWaiting}
         language={language}

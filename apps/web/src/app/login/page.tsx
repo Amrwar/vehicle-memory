@@ -45,6 +45,14 @@ async function attemptSignIn(formData: FormData) {
     return;
   }
 
+  // Somebody on two workshops' teams is in neither until they say which
+  // (FR-9801). Their role reads as CUSTOMER here for the same reason — a role
+  // belongs to a membership — so routing by role would land a manager in the
+  // customer portal. Where they were going is carried across the question.
+  if (result.mustChoose) {
+    redirect(next ? `/choose?next=${encodeURIComponent(next)}` : '/choose');
+  }
+
   redirect(next ?? landingPathFor(result.role));
 }
 
@@ -58,6 +66,7 @@ export default async function LoginPage({
   const onwards = safeNext(next);
 
   const user = await currentUser();
+  if (user && !user.orgId && user.belongings.length > 0) redirect('/choose');
   if (user) redirect(onwards ?? landingPathFor(user.role));
 
   return (

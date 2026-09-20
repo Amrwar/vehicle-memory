@@ -26,13 +26,14 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { HELP_ARTICLES, setupSteps } from '@carnet/core';
 import { prisma } from '@carnet/db';
+
+import { enterWorkshop } from '../../apps/web/src/lib/belonging';
 import { AREAS } from '../../packages/core/src/i18n/areas/index';
 
 import {
   createDemonstration,
   demonstrationFor,
   removeDemonstration,
-  switchWorkshop,
 } from '../../apps/web/src/lib/demonstration';
 import { createWorkshop, setSetupHidden, setupFor } from '../../apps/web/src/lib/onboarding';
 import { saveLabourRate } from '../../apps/web/src/lib/pricing';
@@ -254,7 +255,7 @@ async function main() {
   check('and nothing it wrote is waiting to be sent', [queued, suppressed > 40], [0, true]);
 
   const demoCookie = await sessionFor(owner.id, org.id);
-  await switchWorkshop({
+  await enterWorkshop({
     userId: owner.id,
     sessionId: (
       await prisma.session.findFirstOrThrow({

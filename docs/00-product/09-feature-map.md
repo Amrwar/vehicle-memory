@@ -659,6 +659,19 @@ The second sweep: things connected at one end only.
 | No name in the chain            | Built  | ADR-0014, checked over every name the database holds; the seed was breaking it (Phase 62)                 |
 | Every sentence answered         | Built  | `i18n-scan --answers`: 3,877 sentences on the pages, in French and Arabic (Phase 62)                      |
 
+## 21.29 Two workshops, one person
+
+| Item                            | Status | Where                                                                                              |
+| ------------------------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| Belonging to two workshops      | Built  | Always possible in the schema; steerable since Phase 63                                            |
+| Choosing which one              | Built  | `/choose` at sign-in when there is more than one; one workshop is not a choice (Phase 63)          |
+| Switching                       | Built  | The workshop's name in the navigation, when there is somewhere to go (Phase 63)                    |
+| Held on the session             | Built  | Nothing the request carries decides which tenant anybody is in (Phase 63)                          |
+| The role follows the workshop   | Built  | Manager at one, technician at the other, and the permissions move with them (Phase 63)             |
+| Leaving one is leaving one      | Built  | Removal ends sessions in that workshop only — it ended all of them before (Phase 63)               |
+| Entering is on the record       | Built  | `session.entered` in the audit log of the workshop entered (Phase 63)                              |
+| The invitation needs a password | Built  | For an address that already has an account: the link alone signed you in as them before (Phase 63) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -737,7 +750,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 373          |
+| Built    | 381          |
 | Partial  | 1            |
 | Deferred | 1            |
 

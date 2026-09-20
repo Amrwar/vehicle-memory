@@ -44,7 +44,10 @@ async function accept(formData: FormData) {
     redirect(`/invite/${token}?error=${encodeURIComponent(result.error ?? 'That did not work.')}`);
   }
 
-  await startSession(result.userId!);
+  // Into the workshop they have just joined, rather than wherever a session
+  // would otherwise start. Somebody on two teams who accepts an invitation to
+  // a third has said which one they mean (Phase 63).
+  await startSession(result.userId!, { orgId: result.orgId });
   redirect('/dashboard');
 }
 
@@ -179,7 +182,7 @@ export default async function InvitePage({
 
             <p className="text-center text-[12px] leading-relaxed text-(--text-faint)">
               {t(
-                'Already have a Carnet account on this address? Use the same password and this invitation attaches the workshop to it.',
+                'Already have a Carnet account on this address? Enter that account’s password and this invitation attaches the workshop to it. We ask because the link alone should never sign anybody in as you.',
               )}
             </p>
           </form>
