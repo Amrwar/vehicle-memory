@@ -672,6 +672,16 @@ The second sweep: things connected at one end only.
 | Entering is on the record       | Built  | `session.entered` in the audit log of the workshop entered (Phase 63)                              |
 | The invitation needs a password | Built  | For an address that already has an account: the link alone signed you in as them before (Phase 63) |
 
+## 21.30 The list somebody typed
+
+| Item                          | Status | Where                                                                                  |
+| ----------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| The tenant set, generated     | Built  | From `schema.prisma`; CI fails when the two disagree (Phase 64)                        |
+| Every model decided about     | Built  | Scoped, global with a reason, or a child named with its parent — no default (Phase 64) |
+| Children name their parent    | Built  | A scan by file and line over every read of a model with no organisation (Phase 64)     |
+| The filter proved, not stated | Built  | A row written as one workshop and asked for as another (Phase 64)                      |
+| The report that was leaking   | Fixed  | `/reports` showed every technician on Carnet, by name, with cost rates (Phase 64)      |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -750,7 +760,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 381          |
+| Built    | 385          |
 | Partial  | 1            |
 | Deferred | 1            |
 

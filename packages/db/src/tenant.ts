@@ -1,5 +1,6 @@
 import { prisma } from './client';
 import type { PrismaClient } from './generated/client/index';
+import { CHILD_OF, GLOBAL_MODELS, TENANT_SCOPED_MODELS } from './tenant-models';
 
 /**
  * Tenant isolation.
@@ -13,37 +14,18 @@ import type { PrismaClient } from './generated/client/index';
  * automatically filtered on reads and stamped on writes. Passport models are
  * deliberately absent from that list: a vehicle is global (ADR-0004), and
  * access to it is mediated by VehicleAccessGrant instead.
+ *
+ * That list was twenty-six model names typed into this file by hand, and the
+ * schema had eighty-three models carrying an `orgId`. Fifty-eight of them went
+ * through this extension untouched: reads unfiltered, writes unstamped, in the
+ * one mechanism the product's isolation rests on. `/reports` was reading
+ * `db.membership.findMany({ where: { role: 'TECHNICIAN' } })` and rendering
+ * every technician at every workshop on Carnet, by name, with their cost rate.
+ *
+ * The list is now generated from `schema.prisma` (`tenant-models.ts`), and CI
+ * fails when the two disagree. A model added without a decision about its
+ * tenancy cannot reach production quietly. Phase 64.
  */
-
-/** Models carrying a non-null `orgId` column. */
-const TENANT_SCOPED_MODELS = new Set([
-  'Location',
-  'Customer',
-  'Booking',
-  'Job',
-  'JobType',
-  'Tag',
-  'ServiceItem',
-  'InspectionTemplate',
-  'Estimate',
-  'Invoice',
-  'Payment',
-  'CreditNote',
-  'TaxRate',
-  'DocumentSequence',
-  'MessageLog',
-  'ProductCategory',
-  'Product',
-  'Warehouse',
-  'StockMovement',
-  'Supplier',
-  'PurchaseRequest',
-  'PurchaseOrder',
-  'SupplierBill',
-  'Account',
-  'FiscalPeriod',
-  'JournalEntry',
-]);
 
 /** Operations whose arguments carry a `where` we must narrow. */
 const READ_OPERATIONS = new Set([
@@ -144,23 +126,4 @@ function lowerFirst(value: string): string {
   return value.charAt(0).toLowerCase() + value.slice(1);
 }
 
-/** Models that are intentionally global. Exported so tests can assert the set. */
-export const GLOBAL_MODELS = [
-  'User',
-  'Session',
-  'LoginAttempt',
-  'OutboxEvent',
-  'Organization',
-  'Vehicle',
-  'VehicleEvent',
-  'VehicleEventAttachment',
-  'VehicleOwnership',
-  'OdometerReading',
-  'VehicleAccessGrant',
-  'PassportShare',
-  'PassportShareAccess',
-  'Recall',
-  'VehicleRecall',
-] as const;
-
-export { TENANT_SCOPED_MODELS };
+export { CHILD_OF, GLOBAL_MODELS, TENANT_SCOPED_MODELS };

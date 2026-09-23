@@ -317,3 +317,19 @@ all, while issuing a session immediately afterwards — so whoever opened the li
 was signed in as that person. Neither could have been caught by a test written
 before this phase, because with one membership each both look exactly like
 working code.
+
+Phase 64 was meant to be five minutes of groundwork for the next one. Reading
+the follow-up table showed it carries no organisation, which raised an ordinary
+question about how the tenant filter treats such a table — and the answer was
+that the filter worked from a list of twenty-six model names somebody had typed,
+against a schema with eighty-three models carrying one. Fifty-seven models were
+passing through unfiltered, in the mechanism the whole product's isolation rests
+on, and one of them was reaching a screen: the owner's own report was rendering
+every technician at every workshop on Carnet, by name, with their cost rate.
+
+The tenancy probe could not have found it. It asks for another workshop's record
+by id and expects not found, which is the right question about a record somebody
+names and the wrong shape for a list that quietly includes rows nobody asked for.
+The list is now generated from the schema, every model is scoped or globally
+declared with a reason or named as a child of something scoped, and a model added
+without that decision fails the build rather than defaulting to unfiltered.

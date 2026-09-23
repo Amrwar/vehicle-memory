@@ -52,3 +52,36 @@ carry their own access checks.
   and adding a model without a test is a review failure.
 - Some overhead per query, which is not measurable against the cost of the
   alternative.
+
+## The set it works from (Phase 64)
+
+This ADR said the mechanism was a list of tenant-scoped models and an extension
+that filters them. It did not say where the list came from, and the answer was
+that somebody typed it. Twenty-six names, against a schema that had grown to
+eighty-three models carrying an `orgId`. The other fifty-seven went through the
+extension untouched — reads unfiltered, writes unstamped — in the one mechanism
+this decision exists to provide.
+
+`/reports` was reading `db.membership.findMany({ where: { role: 'TECHNICIAN' }
+})` through the scoped client and rendering the result: every technician at
+every workshop on Carnet, by name, with their cost rate.
+
+The decision stands and gains a sentence: **the set is derived from the schema,
+never maintained beside it.** `infra/scripts/generate-tenant-models.ts` writes
+`packages/db/src/tenant-models.ts`, and CI fails when the two disagree. Every
+model is now one of three things, and a model that is none of them fails the
+build rather than defaulting to unfiltered:
+
+- **scoped** — carries an `orgId`, filtered and stamped;
+- **global** — declared by hand with a reason, because "no `orgId` column" and
+  "may be read by anybody" are different statements and only a person can make
+  the second one;
+- **child** — no `orgId`, named with the model it hangs off. The extension has
+  nothing to narrow these by, so a read of one must name its parent itself,
+  and a check finds any that does not.
+
+The general lesson is one this repository has now learned three times. A list of
+"every X" written by a person falls behind on the day somebody adds an X, and
+the failure is silent: the screens probe measured fifty-two of a hundred and
+twenty-eight screens, the traceability matrix counted itself wrong by two, and
+here the isolation mechanism covered a third of what it claimed to.

@@ -78,7 +78,9 @@ The most severe defect this system could have.
 [ADR-0010](../03-adr/0010-tenant-isolation-in-data-layer.md) covers the
 mechanism. Summary:
 
-- `forOrg(orgId)` adds the tenant predicate to reads and stamps it on creates.
+- `forOrg(orgId)` adds the tenant predicate to reads and stamps it on creates,
+  for every model the schema says carries an organisation. **That set is
+  generated from `schema.prisma`, not maintained beside it** — see below.
 - `findUnique` is rewritten to `findFirst` with the predicate, so an id lookup
   cannot escape the tenant.
 - The route guard hands back the scoped client, so there is no ergonomic path
@@ -158,6 +160,46 @@ The link and the password answer different questions. The link proves this
 workshop invited this address. The password proves you are the person whose
 address it is. A new account has no second question to answer and the link is
 enough; an existing one is refused without both.
+
+### The set the filter worked from (Phase 64)
+
+Everything in this section assumed the filter covered the models it should.
+It covered twenty-six of them, because the set was a list of model names typed
+into `tenant.ts`, and the schema had grown to eighty-three carrying an `orgId`.
+Fifty-seven models went through the extension untouched: reads unfiltered,
+writes unstamped.
+
+It was not theoretical, and the page it showed on was the owner's own report.
+`/reports` read `db.membership.findMany({ where: { role: 'TECHNICIAN' } })`
+through the scoped client and rendered the answer — every technician at every
+workshop on Carnet, by name, with their cost rate. A second read on the same
+page took every workshop's clocked hours, because `TimeEntry` hangs off a job
+and carries no organisation of its own for any filter to use.
+
+Neither could have been found by the tenancy probe. That probe asks for another
+workshop's record **by id** at every address and expects not found, which is
+the right question for a record somebody names and the wrong shape entirely for
+a list that quietly includes rows nobody asked for. A leak like that answers
+200 and looks ordinary.
+
+What changed:
+
+- The set is **generated from the schema** and CI fails when the file and the
+  schema disagree, so a model added without a decision about its tenancy fails
+  the build rather than defaulting to unfiltered.
+- Every model is scoped, **global with a written reason**, or **a child named
+  with its parent**. There is no fourth state and no default.
+- A read of a child model must name the record it hangs off, and a scan finds
+  any that does not, by file and line.
+- The filter is proved rather than declared: a row is written as one workshop
+  and asked for as another, through the real client (`verify-scoping.ts`).
+
+The lesson generalises past tenancy. A hand-written list of "every X" falls
+behind the day somebody adds an X, and it does so silently — the same fault had
+already been found in the screens probe, which was measuring fifty-two of a
+hundred and twenty-eight screens, and in the traceability summary, which had
+counted itself wrong by two. Here it was the mechanism the whole product's
+isolation rests on.
 
 ### How a refusal is checked
 

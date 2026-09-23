@@ -1642,6 +1642,37 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BQ - The list somebody typed (Phase 64)
+
+### BQ1 - My records are mine
+
+**As** a workshop owner **I want** the isolation between workshops to be a
+mechanism rather than a habit **so that** nobody else's staff appear on my
+reports and mine appear on nobody else's.
+**Size** 13 - **Satisfies** FR-9901, FR-9902, FR-9905
+
+- **Given** a record written by another workshop, **when** any list is drawn
+  here, **then** it is not in it.
+- **Given** the set of models the filter covers, **when** the schema changes,
+  **then** the set changes with it rather than being remembered.
+- **Given** the claim that the filter works, **when** it is checked, **then**
+  it is checked by writing a row as one workshop and failing to read it as
+  another.
+
+### BQ2 - A new table cannot be forgotten
+
+**As** an engineer **I want** a model added without a tenancy decision to fail
+**so that** the mistake is caught on the day it is cheap.
+**Size** 8 - **Satisfies** FR-9903, FR-9904
+
+- **Given** a new model carrying an organisation, **when** the list is not
+  regenerated, **then** the build fails and says so.
+- **Given** a model with no organisation of its own, **when** it is read
+  through the scoped client without naming its parent, **then** a check fails
+  and names the file and line.
+
+---
+
 ## Epic BP - Two workshops, one person (Phase 63)
 
 ### BP1 - I work at two garages

@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-9900 - The list somebody typed
+
+| Ref     | Requirement                                                                                                                    | Phase |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-9901 | The set of models the tenant filter covers MUST be derived from the schema, not maintained beside it.                          | 64    |
+| FR-9902 | Every model MUST be scoped, declared global with a reason, or named as a child of a model that carries an organisation.        | 64    |
+| FR-9903 | A model added without such a decision MUST fail a check rather than default to unfiltered.                                     | 64    |
+| FR-9904 | A read of a model with no organisation of its own MUST name the record it hangs off.                                           | 64    |
+| FR-9905 | The filter MUST be proved by writing a row as one organisation and failing to read it as another, not by reading the set back. | 64    |
+
 ## FR-9800 - Two workshops, one person
 
 | Ref     | Requirement                                                                                                                                  | Phase |

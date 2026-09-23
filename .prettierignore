@@ -9,3 +9,8 @@ package-lock.json
 # Generated from the registry beside the API handlers; formatted by JSON.stringify so the check can compare bytes.
 docs/02-design/openapi.json
 docs/assets/architecture/schema.json
+
+# Generated from schema.prisma by infra/scripts/generate-tenant-models.ts, and
+# compared byte for byte by its --check. Formatting it behind the generator's
+# back makes the check fail on a file nobody edited.
+packages/db/src/tenant-models.ts

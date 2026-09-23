@@ -117,8 +117,16 @@ async function ids() {
     orderBy: { events: { _count: 'desc' } },
     select: { id: true },
   });
+  // The customer has to be one of this workshop's, and one who actually holds
+  // a car: "the first customer anywhere with a portal login" picked up a probe
+  // leftover the moment the database held more than the seed, and failed on
+  // the ownership lookup rather than on the thing that was wrong.
   const driver = await prisma.customer.findFirstOrThrow({
-    where: { portalUserId: { not: null } },
+    where: {
+      orgId: org.id,
+      portalUserId: { not: null },
+      portalUser: { is: { ownedVehicles: { some: { endedAt: null } } } },
+    },
     select: { portalUserId: true, portalUser: { select: { email: true } } },
   });
   const owned = await prisma.vehicleOwnership.findFirstOrThrow({

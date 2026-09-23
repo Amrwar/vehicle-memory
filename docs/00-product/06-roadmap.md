@@ -3943,6 +3943,88 @@ all, and the way to find that out was to break it and watch nothing happen.
 the two that matter were each made to fail on purpose before the green was
 believed.
 
+## Phase 64 — The list somebody typed
+
+**Scope.** Not a feature. The set of models the tenant filter works from, which
+turned out to be a third of the models that need it.
+
+**Exit.** Every model in the schema is scoped, declared global with a reason, or
+named as a child of something that carries an organisation — and a model added
+tomorrow without that decision fails the build.
+
+**Status.** Built. It began as five minutes of groundwork for the next phase.
+
+FR-617 is the last requirement the matrix admits nothing implements, so the next
+phase was going to be follow-up flags on a job. Reading the table showed
+`JobFollowUp` has no `orgId`, which raised an ordinary question — how does the
+tenant filter handle a table with no organisation on it — and the answer was in
+`packages/db/src/tenant.ts`:
+
+```ts
+/** Models carrying a non-null `orgId` column. */
+const TENANT_SCOPED_MODELS = new Set([/* twenty-six names */]);
+```
+
+The schema has eighty-three models carrying an `orgId`. Fifty-seven of them were
+not in that set, and a model not in the set passes through the extension
+untouched: reads unfiltered, writes unstamped. This is the mechanism ADR-0010
+exists to provide and FR-102 requires — "enforced at the data-access layer
+rather than by every caller remembering" — and for fifty-seven models it was
+enforcing nothing at all.
+
+**It was live, on the owner's own report.** `/reports` read
+`db.membership.findMany({ where: { role: 'TECHNICIAN', isActive: true } })`
+through the scoped client and rendered the result: every technician at every
+workshop on Carnet, by name, with their cost rate, on any workshop's screen. A
+second read on the same page took every workshop's clocked hours, because
+`TimeEntry` hangs off a job and has no organisation of its own for any filter to
+use. In the security model's own table, cross-tenant data is the row that reads
+"Reportable breach. Ends the business."
+
+**Why the tenancy probe could not have found it.** `verify-tenancy` (Phase 48)
+asks for another workshop's record **by id** at every address the application
+answers on, and expects not found. That is the right question about a record
+somebody names, and the wrong shape entirely for a list that quietly includes
+rows nobody asked for. A leak of that kind answers 200 and looks like an
+ordinary page. Eighty-five checks, all passing, all beside the point.
+
+**The fix is where the list comes from.** `tenant-models.ts` is generated from
+`schema.prisma`, and CI fails when the file and the schema disagree. Every model
+is now exactly one of three things — scoped, global with a written reason, or a
+child named with its parent — and there is no fourth state and no default. The
+scoped set went from 26 to 87. Nineteen models are declared global, each saying
+why, and "the tenant itself, which cannot be scoped to one of its own kind" is a
+sentence somebody had to write rather than a gap somebody left.
+
+For the forty-eight models with no organisation of their own, the extension has
+nothing to narrow a query by and never will. So a read of one must name the job,
+invoice or estimate it hangs off, and a scan finds any that does not, by file and
+line. That scan reported clean the first time it ran, and was wrong: it read
+everything after the word `where` as the filter, so a `select` naming `jobId`
+counted as one. It had to be made to fail on a known-bad line before its zero
+meant anything — which is now the third time in three phases that the probe was
+at fault before the product was.
+
+**What it cost to be sure.** Scoping sixty-one more models changes what a great
+deal of existing code can see, so every verification script was run against a
+real database afterwards. Two failed, and both fail the same way on the
+unchanged code: a local database that has had probes run against it for days,
+rather than the fresh seed CI gives them.
+
+`npm run verify:scoping` keeps it honest, and one of its twelve checks is the
+exact read `/reports` was doing — kept as a check because a defect found once
+should not have to be found twice.
+
+**And one more gate that covers nothing**, found on the way out and left for the
+next phase rather than folded into this one. `infra/scripts` is not in any
+tsconfig: ninety verification scripts, several thousand lines, type-checked by
+nothing. Pointing a compiler at them reports thirty-one errors, and the first
+one read is real — `postedLines(orgId, range)` takes a required range, whose
+own comment says "bounded: by the range, which is no longer optional", and four
+probes call it with one argument. The bound is not being applied and the type
+that says so was never read. Phase 63 found the same shape in `apps/web`; this
+is the other half of it.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

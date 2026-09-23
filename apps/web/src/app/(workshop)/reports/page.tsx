@@ -63,8 +63,11 @@ export default async function ReportsPage({
       where: { role: 'TECHNICIAN', isActive: true },
       include: { user: { select: { id: true, name: true } } },
     }),
+    // `TimeEntry` hangs off a job and carries no `orgId` of its own, so the
+    // tenant extension has nothing to narrow it by: the job has to be named
+    // here. Without it this read every workshop's clocked hours (Phase 64).
     db.timeEntry.findMany({
-      where: { startedAt: { gte: since }, endedAt: { not: null } },
+      where: { startedAt: { gte: since }, endedAt: { not: null }, job: { orgId } },
       select: { userId: true, minutes: true, jobId: true },
     }),
     db.job.findMany({
