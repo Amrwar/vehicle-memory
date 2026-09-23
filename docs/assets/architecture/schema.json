@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-23",
   "counts": {
-    "models": 154,
+    "models": 156,
     "enums": 74,
-    "fields": 2463
+    "fields": 2511
   },
   "enums": [
     "OrgPlan",
@@ -706,6 +706,32 @@
             "Supplier",
             "JobPartLine",
             "SupplierBill"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CourtesyVehicle",
+          "comment": "A car this workshop lends out while it has somebody's own. Phase 67, FR-512. The vehicle stays global (ADR-0004); this is one organisation saying \"we lend this one\", the same shape as a VehicleAccessGrant, rather than a second place a vehicle can belong.",
+          "fields": 9,
+          "relations": [
+            "Organization",
+            "Vehicle"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CourtesyLoan",
+          "comment": "One of those cars, promised to somebody between two moments. Phase 67. Two loans of the same car over the same days are refused by the database, not by code remembering to look: `courtesy_loans_no_overlap`. A bay can be squeezed; a second car cannot be conjured.",
+          "fields": 19,
+          "relations": [
+            "Organization",
+            "CourtesyVehicle",
+            "Vehicle",
+            "Customer",
+            "Job",
+            "Booking",
+            "User",
+            "User"
           ],
           "scope": "organisation"
         }

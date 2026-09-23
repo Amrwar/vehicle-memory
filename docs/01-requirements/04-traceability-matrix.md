@@ -511,6 +511,13 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-10201 | BT3   | `CourtesyVehicle`                      | `addToFleet()`, `retireFromFleet()`, and the page in settings                  | `verify-courtesy.ts`                          | Done   |
+| FR-10202 | BT1   | `CourtesyLoan`                         | `lend()`, and the card on the job                                              | `verify-courtesy.ts`                          | Done   |
+| FR-10203 | BT1   | `courtesy_loans_no_overlap`            | an exclusion constraint over the vehicle and the period                        | `verify-courtesy.ts`                          | Done   |
+| FR-10204 | BT1   | —                                      | `freeBetween()`, over `overlaps()` from the capacity module                    | `courtesy.test.ts`, `verify-courtesy.ts`      | Done   |
+| FR-10205 | BT2   | `VehicleDocument.expiresAt`            | `lapsesDuring()`, over the MOT and insurance already on file                   | `courtesy.test.ts`, `verify-courtesy.ts`      | Done   |
+| FR-10206 | BT3   | `CourtesyLoan.returnedAt`              | `takeBack()`, with who and the odometer                                        | `verify-courtesy.ts`                          | Done   |
+| FR-10207 | BT3   | —                                      | `describeLoan()`: "4 days overdue", in words rather than a colour              | `courtesy.test.ts`, `verify-courtesy.ts`      | Done   |
 | FR-10101 | BS1   | `JobFollowUp`                          | `setFollowUp()`; the note, the date and who it is for                          | `verify-followups.ts`                         | Done   |
 | FR-10102 | BS2   | —                                      | `standingOf()` and `describeFollowUp()`: late says how late                    | `followups.test.ts`, `verify-followups.ts`    | Done   |
 | FR-10103 | BS2   | —                                      | the dashboard card and tile, and the shop floor's own list                     | `verify-followups.ts`                         | Done   |
@@ -1002,7 +1009,7 @@ were written rather than verified is worse than a gap that is admitted.
 | FR-509  | E2    | `Location.dailyCapacityHours`            | set on `/settings/site`, read by `slotsFor()`                                                                                                      | `capacity.test.ts`, `verify-settings.ts`           | Done       |
 | FR-510  | —     | `BookingSource.ONLINE`                   | the product **books straight in** rather than holding a request for confirmation — a decision, written in `booking.ts`, and FR-511 is what it does | `verify-workflow.ts`                               | Superseded |
 | FR-511  | E3    | `Booking.source`                         | `slotsFor()` offers only genuine capacity; `requestBooking()` schedules it                                                                         | `accept.test.ts`, `verify-workflow.ts`             | Done       |
-| FR-512  | —     | `Booking.courtesyVehicleNote`            | a free-text note only. **Nothing allocates a courtesy vehicle or knows whether one is free**                                                       | —                                                  | Partial    |
+| FR-512  | BT1   | `CourtesyVehicle`, `CourtesyLoan`        | `lend()` and `takeBack()` in `lib/courtesy.ts`; `courtesy_loans_no_overlap` refuses a second promise                                               | `courtesy.test.ts`, `verify-courtesy.ts`           | Done       |
 | FR-602  | F1    | `Job.status`                             | `allowedTransitions()`, `moveJob()`                                                                                                                | `lifecycle.test.ts`, `verify-workflow.ts`          | Done       |
 | FR-603  | F1    | `JobStatus`                              | the enum, and the board that draws it                                                                                                              | `lifecycle.test.ts`, `verify-workflow.ts`          | Done       |
 | FR-606  | F2    | `JobAttachment`                          | attachments from arrival and from the job page                                                                                                     | `verify-storage.ts`, `verify-arrival.ts`           | Done       |
@@ -1094,7 +1101,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 205                 | 204                    |
+| Later phases, newest first                         | 212                 | 211                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1112,21 +1119,21 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **773**             | **763 (99%)**          |
+| **Total**                                          | **780**             | **771 (99%)**          |
 
-Every one of the 773 requirements now has a row of its own. Until Phase 61,
+Every one of the 780 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does
 not meet, and thirty-four rows naming test files that had been renamed or
 consolidated years earlier and never corrected here.
 
-Ten rows are something other than Done, and they say which kind:
+Nine rows are something other than Done, and they say which kind:
 
 | Kind           | What it means                                                                |
 | -------------- | ---------------------------------------------------------------------------- |
 | **Missing**    | Nothing implements it. None, since Phase 66.                                 |
-| **Partial**    | Some of it is there. FR-303, FR-305, FR-311, FR-512.                         |
+| **Partial**    | Some of it is there. FR-303, FR-305, FR-311.                                 |
 | **Deferred**   | A SHOULD, decided against for now, with the reason. FR-112, FR-710.          |
 | **Superseded** | The product deliberately does something else, and the row says what. FR-510. |
 | **Planned**    | Named for a later phase. FR-111, FR-414, FR-1010.                            |

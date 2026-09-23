@@ -3724,7 +3724,8 @@ so, in bold, rather than being covered by a section heading:
 - **FR-303** — a vehicle's fleet number. The registration expiry is there; the
   fleet number is not a column.
 - **FR-512** — courtesy vehicle allocation. There is a free-text note on a
-  booking and nothing that knows whether a car is free.
+  booking and nothing that knows whether a car is free. _The note is on the job, not
+  the booking. Closed in Phase 67._
 - **FR-617** — follow-up flags on a job. The table exists and nothing reads or
   writes it. _Closed in Phase 66, which was the last of the five._
 
@@ -4158,6 +4159,102 @@ being written: the fifteen holdings are handed to `t()` as a variable, so
 Arabic for "A note to ring them later" until there was.
 
 `npm run verify:followups` holds it: twenty-four checks.
+
+## Phase 67 — The courtesy car
+
+**Scope.** FR-512, Partial since the beginning: courtesy vehicle allocation
+against bookings.
+
+**Exit.** A workshop can say which cars it lends, promise one to somebody for a
+period, and be stopped — by the database — from promising it to anybody else
+over the same days.
+
+**Status.** Built. One constraint is the whole phase.
+
+What existed was `Job.courtesyVehicleNote`: a free-text column, present since
+the first migration, that nothing has ever read or written. Somewhere to type
+"gave them the Fiesta", and no way to know whether the Fiesta was already
+promised to somebody else that Tuesday. (The matrix and the roadmap both said
+the note was on the _booking_; it is on the job. Corrected.)
+
+**The failure that matters happens at a counter.** A customer arrives on
+Tuesday morning and the car they were promised is in Leeds with somebody else.
+Nothing recovers from that. The work cannot start, the workshop finds out from
+the customer, and no amount of apology puts a second car in the yard.
+
+The scheduling module treats a bay clash as **advisory** on purpose, and says
+why: "workshops genuinely do squeeze a job in, and software that forbids it
+gets worked around." That reasoning is right and it does not carry here. A bay
+can be squeezed. A second car cannot be conjured. So this one is refused.
+
+**And refused by the table, not by the code.** An application check reads,
+decides, and writes; two people booking at the same moment both read before
+either writes, and both pass. The only way to state "never, whatever the
+timing" is a constraint:
+
+```sql
+EXCLUDE USING gist (
+  "vehicleId" WITH =,
+  tsrange("startAt", COALESCE("returnedAt", "dueBackAt"), '[)') WITH &&
+) WHERE ("cancelledAt" IS NULL)
+```
+
+The same shape as `pay_rates_no_overlap` from September, for the same reason
+written down there. The probe proves it by writing straight past the
+application, which is what a race actually looks like.
+
+Three details in that one expression, each of which had to be got right:
+
+`tsrange`, not `tstzrange` — these columns are `timestamp without time zone`,
+so a timestamptz range depends on the session's TimeZone setting and Postgres
+refuses to index a function that is not immutable. The migration failed once
+on exactly that and said so.
+
+`COALESCE(returnedAt, dueBackAt)` — the period a car is actually gone for.
+Brought back early, it shrinks and the afternoon is free; brought back late, it
+stretches, which is precisely what the next customer needs.
+
+`WHERE cancelledAt IS NULL` — a cancelled promise is not a promise.
+
+**The second failure is one nobody thinks of.** The MOT runs out on Thursday
+and the loan runs to Friday. The customer is driving it, the offence is the
+workshop's, and the insurer's position afterwards is not one anybody wants to
+discover. The product already knows the date, because somebody uploaded the
+certificate, and the one moment worth saying so is before the keys move. What
+it will not do is invent a rule it cannot keep: a car whose papers nobody has
+uploaded is not called illegal, because nothing is known, and a refusal there
+would be clicked past within a week — and then the real one goes past too.
+
+**Where "one of our cars" lives.** Not a new kind of vehicle. `fleet.ts`
+settled that argument already — "inventing a separate entity would mean two
+places a vehicle can belong and an eventual argument about which one is right"
+— so a courtesy car is a vehicle the workshop already works on, with an
+org-scoped record saying it is one we lend. The vehicle stays global
+(ADR-0004).
+
+**Three of the probe's own assumptions were wrong before the product was.**
+Three cars written in parallel have no reliable creation order to be listed in;
+a loan that has not started yet is not "out"; and a loan returned five days
+late is not an early return, so its period correctly grew rather than shrank.
+Each read as a product failure and was not.
+
+**And a finding larger than this phase.** The check that every sentence has a
+French and Arabic answer — built in Phase 65 — passed for this feature before a
+single translation had been written. The dictionary is one flat map shared by
+every page, so `describeLoan` returning "Out" found the **ledger's** "Out"
+(`Déséquilibré`, as in out of balance) and "Back" found the **navigation's**
+(`Précédent`, as in previous). A French reader would have been shown
+"Unbalanced" on a page about cars, and no check could have failed, because both
+had answers.
+
+The sentences here are now phrases nobody else will want — "With a customer",
+"In the yard" — and the probe demands that no English survive rather than that
+some answer exist. But the underlying fault is general: **271 keys in the
+dictionary are translated two different ways in two different areas**, and
+whichever file merges last silently wins. For long sentences that is a wording
+wobble. For short ones it is the wrong meaning. Left for the next phase.
+
+`npm run verify:courtesy` holds this one: twenty-five checks.
 
 ## Running throughout — the four things that are not features
 

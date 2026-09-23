@@ -77,6 +77,22 @@ The third was written expecting a backlog and found none: 3,877 sentences, all
 answered. Then it was made to fail on purpose, because a zero that could never
 have been anything else proves nothing.
 
+A fifth question is out of reach of all of them, and Phase 67 found it the
+expensive way: **is the answer the right answer?** The dictionary is one flat
+map from English to each language, shared by every page, so a key belongs to
+whoever wrote it first. A courtesy car described as "Out" collected the
+ledger's `Out: 'Déséquilibré'` — out of balance — and one described as "Back"
+collected the navigation's `Back: 'Précédent'`. Both had answers, so every
+check above passed, and a French reader would have been shown "Unbalanced" on a
+page about cars.
+
+271 keys are translated two different ways in two different areas; whichever
+file merges last silently wins. For a long sentence that is a wording wobble
+between two correct renderings. For a one-word key it is the wrong meaning. The
+partial defence is to write phrases nobody else will want rather than words —
+"With a customer", "In the yard" — and to test that no English survives rather
+than that some answer exists. The rest is not yet fixed.
+
 A fourth question is out of reach of all three: `t(someVariable)`. A list of
 sentences held in code and translated through a variable is invisible to a
 scanner that collects literals, so each such list carries its own check where

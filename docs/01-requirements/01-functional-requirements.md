@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10200 - The courtesy car
+
+| Ref      | Requirement                                                                                                                       | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10201 | A workshop MUST be able to record which vehicles it lends, separately from the vehicles it works on.                              | 67    |
+| FR-10202 | A courtesy vehicle MUST be lent against a job for a period, with who has it and when it is due back.                              | 67    |
+| FR-10203 | Two loans of the same vehicle MUST NOT overlap in time, and the database MUST refuse it rather than the code remembering to look. | 67    |
+| FR-10204 | The system MUST show which vehicles are free over a period before one is promised.                                                | 67    |
+| FR-10205 | Lending a vehicle whose MOT or insurance is known to expire during the loan MUST be refused, saying which.                        | 67    |
+| FR-10206 | Returning a vehicle MUST record when it came back, who took it back, and what was on the odometer.                                | 67    |
+| FR-10207 | A vehicle that is out MUST show who has it and how overdue it is, in words.                                                       | 67    |
+
 ## FR-10100 - Chasing something later
 
 | Ref      | Requirement                                                                                                           | Phase |

@@ -120,6 +120,9 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'ServicePackageLine',
       'ServicePackageCheck',
       'JobSublet',
+      // A car lent out while the workshop has theirs. Phase 67.
+      'CourtesyVehicle',
+      'CourtesyLoan',
     ],
   },
   {

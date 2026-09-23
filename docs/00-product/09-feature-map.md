@@ -703,6 +703,18 @@ The second sweep: things connected at one end only.
 | Who did it                   | Built  | The question asked when a customer says nobody rang (Phase 66)                       |
 | Gone when they are forgotten | Built  | A note naming somebody is removed, not anonymised (Phase 66, register from Phase 62) |
 
+## 21.33 The courtesy car
+
+| Item                      | Status | Where                                                                                |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------ |
+| The cars we lend          | Built  | Declared in settings; a vehicle the workshop already works on (Phase 67)             |
+| Promised for a period     | Built  | On the job, where the keys change hands (Phase 67)                                   |
+| Never to two people       | Built  | An exclusion constraint, not a check the code has to remember (Phase 67)             |
+| Which are free            | Built  | Over the same `overlaps()` the diary uses for bays (Phase 67)                        |
+| Not if it is not legal    | Built  | MOT or insurance expiring mid-loan, from the certificates already on file (Phase 67) |
+| What is out, and how late | Built  | "4 days overdue", in words rather than a colour (Phase 67)                           |
+| Back, with the odometer   | Built  | When, who took it, and what was on the clock (Phase 67)                              |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -781,7 +793,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 396          |
+| Built    | 403          |
 | Partial  | 1            |
 | Deferred | 1            |
 

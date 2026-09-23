@@ -1642,6 +1642,54 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BT - The courtesy car (Phase 67)
+
+### BT1 - The car we promised is there
+
+**As** a service advisor **I want** the same car never to be promised to two
+people **so that** nobody is standing at my counter on Tuesday morning while
+their car is in Leeds.
+**Size** 13 - **Satisfies** FR-10202, FR-10203, FR-10204
+
+- **Given** a car promised over some days, **when** I try to promise it again
+  over days that touch those, **then** I am refused.
+- **Given** two people booking at the same moment, **when** both pass the
+  check, **then** the database refuses the second, because a check that reads
+  before it writes cannot stop that on its own.
+- **Given** a period, **when** I am choosing, **then** I can see which cars
+  are free over it.
+- **Given** a car brought back early, **when** somebody else wants it,
+  **then** the days it would have been out are free.
+
+### BT2 - And it is legal to lend
+
+**As** the workshop owner **I want** to be stopped from lending a car whose
+MOT runs out mid-loan **so that** the offence is not mine and the insurer has
+nothing to say afterwards.
+**Size** 5 - **Satisfies** FR-10205
+
+- **Given** a car whose MOT expires during the period, **when** I try to lend
+  it, **then** I am refused and told which certificate and when.
+- **Given** the same car and a shorter loan that ends first, **when** I lend
+  it, **then** it is allowed.
+- **Given** a car whose papers nobody has uploaded, **when** I lend it,
+  **then** nothing is claimed, because nothing is known.
+
+### BT3 - We know where they are
+
+**As** the workshop owner **I want** to see what is out and how late it is
+**so that** a car nobody has asked after for a fortnight is not how I find out.
+**Size** 8 - **Satisfies** FR-10201, FR-10206, FR-10207
+
+- **Given** cars out with customers, **when** I look, **then** I see who has
+  each one and how overdue it is, in words.
+- **Given** one coming back, **when** I take it back, **then** when, who took
+  it and the odometer are recorded.
+- **Given** a car that is out, **when** I try to stop lending it, **then** I
+  am refused until it is back.
+
+---
+
 ## Epic BS - Chasing something later (Phase 66)
 
 ### BS1 - I can write down what we said we would do

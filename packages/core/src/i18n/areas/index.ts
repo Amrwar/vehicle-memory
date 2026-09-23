@@ -28,6 +28,7 @@ import * as messages from './messages';
 import * as privacy from './privacy';
 import * as belonging from './belonging';
 import * as followups from './followups';
+import * as courtesy from './courtesy';
 
 export const AREAS = [
   publicSite,
@@ -54,4 +55,5 @@ export const AREAS = [
   privacy,
   belonging,
   followups,
+  courtesy,
 ] as const;

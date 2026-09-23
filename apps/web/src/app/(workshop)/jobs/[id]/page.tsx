@@ -79,6 +79,15 @@ import {
   followUpsForJob,
   setFollowUp,
 } from '@/lib/followups';
+import {
+  CourtesyError,
+  describeLoan,
+  fleetFor,
+  lend,
+  loansForJob,
+  loanStanding,
+  takeBack,
+} from '@/lib/courtesy';
 import { clearComeback, ComebackError, comebackFor, markComeback } from '@/lib/owner';
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
@@ -273,6 +282,54 @@ async function sublet(formData: FormData) {
     redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#sublet`);
   }
   redirect(`/jobs/${jobId}#sublet`);
+}
+
+/** A car to be going on with, while we have theirs. Phase 67, FR-512. */
+async function lendCourtesy(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await lend({
+      orgId,
+      userId: user.userId,
+      jobId,
+      courtesyVehicleId: String(formData.get('courtesyVehicleId') ?? ''),
+      customerId: String(formData.get('customerId') ?? ''),
+      startAt: new Date(String(formData.get('startAt') ?? '')),
+      dueBackAt: new Date(String(formData.get('dueBackAt') ?? '')),
+      odometerOutKm: Number(formData.get('odometerOutKm')) || null,
+    });
+  } catch (error) {
+    if (!(error instanceof CourtesyError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#courtesy`);
+  }
+
+  redirect(`/jobs/${jobId}#courtesy`);
+}
+
+/** And back again, with what was on the clock. Phase 67. */
+async function returnCourtesy(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await takeBack({
+      orgId,
+      userId: user.userId,
+      loanId: String(formData.get('loanId') ?? ''),
+      odometerInKm: Number(formData.get('odometerInKm')) || null,
+    });
+  } catch (error) {
+    if (!(error instanceof CourtesyError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#courtesy`);
+  }
+
+  redirect(`/jobs/${jobId}#courtesy`);
 }
 
 /** Something to do after the car has gone: ring them, chase the part. Phase 66. */
@@ -659,6 +716,11 @@ export default async function JobPage({
     comebackFor(orgId, job.id),
     followUpsForJob(orgId, job.id),
     couldFollowUp(orgId),
+  ]);
+
+  const [courtesyLoans, courtesyFleet] = await Promise.all([
+    loansForJob(orgId, job.id),
+    fleetFor(orgId),
   ]);
   const subletLineIds = new Set(sublets.map((entry) => entry.partLineId));
 
@@ -1958,6 +2020,116 @@ export default async function JobPage({
                     {t('PDF')}
                   </a>
                 </span>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          <Card id="courtesy">
+            <CardHeader
+              title={t('Courtesy car')}
+              description={t('A car to be going on with, while the workshop has theirs.')}
+            />
+
+            <CardBody className="grid gap-3 text-[13px]">
+              {courtesyLoans.length > 0 ? (
+                <ul className="grid gap-2">
+                  {courtesyLoans.map((one) => (
+                    <li
+                      key={one.id}
+                      className="flex flex-wrap items-center gap-2 border-b border-(--border) pb-2 last:border-0 last:pb-0"
+                    >
+                      <Badge
+                        tone={
+                          loanStanding(one) === 'OVERDUE'
+                            ? 'danger'
+                            : loanStanding(one) === 'BACK'
+                              ? 'success'
+                              : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {t(describeLoan(one))}
+                      </Badge>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium">
+                          <bdi>{one.name ?? one.description}</bdi>
+                          {one.registration ? (
+                            <span className="text-(--text-faint)"> · {one.registration}</span>
+                          ) : null}
+                        </p>
+                        <p className="text-[12px] text-(--text-faint)">
+                          {t('Due back {when}', { when: formatDate(one.dueBackAt, region) })}
+                        </p>
+                      </div>
+
+                      {mayWrite && !one.returnedAt ? (
+                        <form action={returnCourtesy} className="flex items-end gap-2">
+                          <input type="hidden" name="jobId" value={job.id} />
+                          <input type="hidden" name="loanId" value={one.id} />
+                          <Field label={t('On the clock')}>
+                            <Input name="odometerInKm" type="number" inputMode="numeric" min={0} />
+                          </Field>
+                          <Button type="submit" size="sm" variant="secondary">
+                            {t('Take it back')}
+                          </Button>
+                        </form>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-(--text-faint)">
+                  {t('Nobody has been lent a car for this job.')}
+                </p>
+              )}
+
+              {mayWrite &&
+              courtesyFleet.length > 0 &&
+              !courtesyLoans.some((one) => !one.returnedAt) ? (
+                <form action={lendCourtesy} className="grid gap-2 sm:grid-cols-2">
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <input type="hidden" name="customerId" value={job.customerId} />
+
+                  <Field label={t('Which car')} className="sm:col-span-2">
+                    <Select name="courtesyVehicleId" required defaultValue="">
+                      <option value="" disabled>
+                        {t('Choose')}
+                      </option>
+                      {courtesyFleet.map((car) => (
+                        <option key={car.id} value={car.id}>
+                          {[car.name ?? car.description, car.registration]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+
+                  <Field label={t('From')}>
+                    <Input name="startAt" type="date" required />
+                  </Field>
+
+                  <Field label={t('Back by')}>
+                    <Input name="dueBackAt" type="date" required />
+                  </Field>
+
+                  <Field label={t('On the clock')} hint={t('Optional')}>
+                    <Input name="odometerOutKm" type="number" inputMode="numeric" min={0} />
+                  </Field>
+
+                  <div className="sm:col-span-2">
+                    <Button type="submit" size="sm" variant="secondary">
+                      {t('Lend a car')}
+                    </Button>
+                  </div>
+                </form>
+              ) : null}
+
+              {courtesyFleet.length === 0 ? (
+                <p className="text-[12px] text-(--text-faint)">
+                  {t('This workshop lends no cars yet.')}
+                </p>
               ) : null}
             </CardBody>
           </Card>

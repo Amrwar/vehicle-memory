@@ -359,3 +359,21 @@ and an instruction to telephone her at once, so it is removed on erasure rather
 than anonymised. And Phase 65's type gate caught two mistakes in the new
 verification script before it was ever run, in code that until a week ago
 nothing type-checked at all.
+
+Phase 67 closes FR-512, and the whole phase is one line of SQL. A workshop can
+say which cars it lends and promise one to a customer for a period; promising
+the same car to somebody else over the same days is refused by an exclusion
+constraint rather than by code remembering to look, because two people booking
+at the same moment both read before either writes. The scheduling module treats
+a clashing bay as advisory on purpose — a bay can be squeezed — and that
+reasoning does not carry to a car, which cannot be conjured. Lending one whose
+MOT or insurance is known to expire mid-loan is refused too, naming which and
+when; a car whose papers nobody uploaded is not called illegal, because nothing
+is known.
+
+It also turned up something larger. The check that every sentence has a French
+and Arabic answer passed for this feature before a single translation existed:
+the dictionary is one flat map shared by every page, so a courtesy car described
+as "Out" found the ledger's "out of balance" and one described as "Back" found
+the navigation's "previous". Two hundred and seventy-one keys are translated two
+different ways in two different areas, and whichever file merges last wins.

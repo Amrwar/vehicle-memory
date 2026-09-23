@@ -290,6 +290,13 @@ jobs:
       - name: Verify chasing something later
         run: npx tsx infra/scripts/verify-followups.ts
 
+      # A courtesy car promised to two people is a customer standing at the
+      # counter while the car is in Leeds. Nothing recovers from it, so unlike
+      # a bay clash it is refused outright -- and refused by the table, since
+      # two people booking at once both read before either writes.
+      - name: Verify the courtesy car
+        run: npx tsx infra/scripts/verify-courtesy.ts
+
       # And that the generated list is in step with the schema: a model added
       # without a decision about its tenancy fails here rather than shipping.
       - name: The tenant list matches the schema
