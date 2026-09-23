@@ -24,7 +24,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { ACCOUNT, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { createPurchaseOrder } from '../../apps/web/src/lib/catalogue';
 import { defaultWarehouseFor, receiveGoods } from '../../apps/web/src/lib/inventory';
 import { createJob } from '../../apps/web/src/lib/jobs';
@@ -466,7 +466,7 @@ async function main() {
 
   /* --- the books ----------------------------------------------------- */
 
-  const lines = await postedLines(org.id);
+  const lines = await postedLines(org.id, ALL_TIME);
   const balance = trialBalance(lines);
   check('the trial balance balances', balance.balanced, true);
 

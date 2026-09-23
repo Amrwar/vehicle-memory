@@ -113,8 +113,8 @@ async function main() {
   });
 
   check('an email was queued to the person invited', Boolean(invitationEmail));
-  check('it carries the link they need', invitationEmail?.body.includes(invite.token!) ?? false);
-  check('and it names the workshop', invitationEmail?.subject.includes(org.name) ?? false);
+  check('it carries the link they need', invitationEmail?.body?.includes(invite.token!) ?? false);
+  check('and it names the workshop', invitationEmail?.subject?.includes(org.name) ?? false);
 
   const duplicate = await inviteColleague({
     orgId: org.id,

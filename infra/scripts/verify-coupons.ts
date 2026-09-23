@@ -25,7 +25,7 @@ import 'dotenv/config';
 import { CouponError, money, toDecimalString, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import {
   coupons,
   couponHistory,
@@ -133,7 +133,7 @@ async function main() {
 
   await forget(org.id);
 
-  const opening = trialBalance(await postedLines(org.id));
+  const opening = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', opening.balanced);
 
   /* --- what a code may promise -------------------------------------------- */
@@ -321,7 +321,7 @@ async function main() {
   check('no money reached the bank', !bank, bank?.debit);
   check('and none reached the drawer', !drawer, drawer?.debit);
 
-  const balanced = trialBalance(await postedLines(org.id));
+  const balanced = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the books still balance', balanced.balanced, toDecimalString(balanced.difference));
 
   await refuses('the same code twice on one bill', 'ALREADY_USED', () =>
@@ -458,7 +458,7 @@ async function main() {
     Number(saleOffers?.debit),
   );
 
-  const afterSale = trialBalance(await postedLines(org.id));
+  const afterSale = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the books balance after the counter too', afterSale.balanced);
 
   check('the code at the counter was spent', (await one(counterCode)).redeemed === 1);
@@ -506,7 +506,7 @@ async function main() {
 
   await forget(org.id);
 
-  const closing = trialBalance(await postedLines(org.id));
+  const closing = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the probe left the books as it found them', closing.balanced);
   check(
     'and left no codes behind',

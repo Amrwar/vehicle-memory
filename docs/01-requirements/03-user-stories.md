@@ -1642,6 +1642,32 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BR - The scripts nobody type-checked (Phase 65)
+
+### BR1 - The gate covers the code
+
+**As** an engineer **I want** every file in the repository to be type-checked
+**so that** a gate named after the thing it checks checks all of it.
+**Size** 8 - **Satisfies** FR-10001, FR-10002
+
+- **Given** a TypeScript file, **when** the checks run, **then** some tsconfig
+  includes it.
+- **Given** a file outside every tsconfig, **when** the checks run, **then**
+  one fails and names it.
+
+### BR2 - A read with no bounds says so
+
+**As** an engineer **I want** an unbounded read to be spelled out **so that**
+one that happened by omission can be told from one somebody meant.
+**Size** 3 - **Satisfies** FR-10003
+
+- **Given** a call that wants every row, **when** I read it, **then** it names
+  the range it is asking for.
+- **Given** a call that forgot the range, **when** it is compiled, **then** it
+  fails rather than silently reading everything.
+
+---
+
 ## Epic BQ - The list somebody typed (Phase 64)
 
 ### BQ1 - My records are mine

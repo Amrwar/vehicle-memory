@@ -333,3 +333,13 @@ names and the wrong shape for a list that quietly includes rows nobody asked for
 The list is now generated from the schema, every model is scoped or globally
 declared with a reason or named as a child of something scoped, and a model added
 without that decision fails the build rather than defaulting to unfiltered.
+
+Phase 65 closes the other half of a fault Phase 63 began. `infra/scripts` was in
+no tsconfig — ninety verification scripts, the things that decide whether a
+phase is finished, type-checked by nothing — and neither was the seed. The
+compiler's first complaint was a real defect several phases old: a function
+whose range argument was made required precisely so that nobody would read every
+journal line by accident, called with one argument by twenty-three probes, all
+of which were therefore doing exactly that. Rather than fix the same shape a
+fourth time, a check now asks whether every TypeScript file in the repository is
+inside some tsconfig at all, and fails by name when one is not.

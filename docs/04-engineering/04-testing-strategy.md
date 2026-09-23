@@ -43,6 +43,22 @@ and `build` stay green. `npm run typecheck:web` now runs beside them in CI, and
 the lesson generalises past types: a gate named after the thing it checks will
 be believed to check all of it.
 
+Phase 65 found the same fault twice more. `infra/scripts` — ninety verification
+scripts, several thousand lines — was in no tsconfig at all, and neither was
+`packages/db/prisma/seed.ts`, which sits outside the `rootDir` its own package
+is built from. A compiler pointed at the scripts reported thirty-one errors, of
+which the first was real and had been for several phases: `postedLines(orgId,
+range)` takes a required range whose docblock says the bound is the whole point,
+and twenty-three probes called it with one argument, so every one of them read
+every journal line the workshop had ever posted.
+
+Rather than fix the same shape a fourth time in a fourth place,
+`verify-throughout` now asks the general question: **every TypeScript file in
+the repository must be inside some tsconfig's `include`**, which is exactly
+what a compiler uses to seed its program. A stray file fails by name. `npm run
+typecheck` runs four compilers — the project references, the web app, the
+scripts and the seed — named separately in CI so a failure says where it is.
+
 ### Three questions about one sentence
 
 `i18n-scan.ts` runs in three modes and they are not the same question, which

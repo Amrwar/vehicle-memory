@@ -27,7 +27,7 @@ import { money, repeatKey, toDecimalString, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import { claimMessages, claimOutbox } from '@carnet/jobs';
 
-import { postEntry, postedLines } from '../../apps/web/src/lib/accounting';
+import { postEntry, ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { catchUpConsequences } from '../../apps/web/src/lib/afterwards';
 import { completeSale } from '../../apps/web/src/lib/counter';
 import { createJob } from '../../apps/web/src/lib/jobs';
@@ -100,7 +100,7 @@ async function main() {
   });
 
   await forget(org.id);
-  const opening = trialBalance(await postedLines(org.id));
+  const opening = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', opening.balanced);
 
   /* --- the button pressed twice -------------------------------------------- */
@@ -465,7 +465,7 @@ async function main() {
 
   /* --- and the books --------------------------------------------------------- */
 
-  const closing = trialBalance(await postedLines(org.id));
+  const closing = trialBalance(await postedLines(org.id, ALL_TIME));
   check(
     'the books balance through all of it',
     closing.balanced,

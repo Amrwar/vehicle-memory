@@ -20,7 +20,12 @@ import {
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { openPayables, openReceivables, postedLines } from '../../apps/web/src/lib/accounting';
+import {
+  openPayables,
+  openReceivables,
+  ALL_TIME,
+  postedLines,
+} from '../../apps/web/src/lib/accounting';
 
 let failures = 0;
 
@@ -40,7 +45,7 @@ async function main() {
 
   console.info(`\n  Ledger integrity, ${org.name}\n`);
 
-  const lines = await postedLines(org.id);
+  const lines = await postedLines(org.id, ALL_TIME);
   const balance = trialBalance(lines);
   const pl = profitAndLoss(lines);
   const sheet = balanceSheet(lines);

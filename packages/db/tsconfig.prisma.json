@@ -1,0 +1,19 @@
+{
+  // The seed and the Prisma config sit outside `src`, which the package's own
+  // tsconfig is rooted at, so `tsc --build` never saw them: two files that run
+  // against a real database, type-checked by nothing until Phase 65. They get
+  // their own config rather than a widened `rootDir`, which would put the seed
+  // in the published build output.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noUnusedLocals": false,
+    "types": ["node"]
+  },
+  "include": ["prisma/**/*.ts", "prisma.config.ts"],
+  "exclude": ["node_modules"]
+}

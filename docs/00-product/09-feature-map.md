@@ -682,6 +682,15 @@ The second sweep: things connected at one end only.
 | The filter proved, not stated | Built  | A row written as one workshop and asked for as another (Phase 64)                      |
 | The report that was leaking   | Fixed  | `/reports` showed every technician on Carnet, by name, with cost rates (Phase 64)      |
 
+## 21.31 The scripts nobody type-checked
+
+| Item                         | Status | Where                                                                         |
+| ---------------------------- | ------ | ----------------------------------------------------------------------------- |
+| Every file inside a tsconfig | Built  | 709 files; a stray one fails a check by name (Phase 65)                       |
+| The scripts type-checked     | Built  | `typecheck:scripts`; the compiler found 31 errors on its first run (Phase 65) |
+| The seed type-checked        | Built  | `typecheck:prisma`; it sits outside the db package's rootDir (Phase 65)       |
+| Unbounded reads named        | Built  | `ALL_TIME`, so a deliberate one can be told from a forgotten one (Phase 65)   |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -760,7 +769,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 385          |
+| Built    | 389          |
 | Partial  | 1            |
 | Deferred | 1            |
 

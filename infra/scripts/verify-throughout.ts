@@ -24,7 +24,7 @@
 import 'dotenv/config';
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 
 import { APP, everyRoute, visible } from './lib/routes';
 
@@ -277,6 +277,65 @@ function nothingWaitsOnBlank() {
 
     naked.push(visible(route));
   }
+
+  /* --- and every line of it is type-checked by something -------------------- */
+
+  // Three phases running, a gate turned out to cover less than its name said.
+  // `npm run typecheck` runs `tsc --build`, which follows project references,
+  // and `apps/web` is not one — so the largest package in the repository had
+  // no type gate at all until Phase 63. `infra/scripts` had none until Phase
+  // 65, and pointing a compiler at it found thirty-one errors, the first of
+  // which was real: `postedLines(orgId, range)` takes a required range whose
+  // own comment says the bound is the point, and twenty-three probes were
+  // calling it with one argument.
+  //
+  // So rather than a fourth fix of the same shape: every TypeScript file in
+  // the repository must fall inside some tsconfig's `include`. That is what a
+  // compiler uses to seed its program, so matching those globs asks the same
+  // question as "does anything check this file".
+
+  const INCLUDED: Readonly<Record<string, readonly string[]>> = {
+    'packages/core': ['src/**/*.ts'],
+    'packages/db': ['src/**/*.ts', 'prisma/**/*.ts', 'prisma.config.ts'],
+    'packages/jobs': ['src/**/*.ts'],
+    'packages/ui': ['src/**/*.ts', 'src/**/*.tsx'],
+    'apps/worker': ['src/**/*.ts'],
+    'apps/web': ['**/*.ts', '**/*.tsx'],
+    infra: ['scripts/**/*.ts'],
+  };
+
+  // Every glob above is `<somewhere>**/*<extension>`: a place to start and an
+  // ending. Written as a prefix and a suffix rather than turned into a regular
+  // expression, because those are the only two shapes in use and a regular
+  // expression here would be harder to read than the thing it matches.
+  const insideSomeConfig = (file: string): boolean =>
+    Object.entries(INCLUDED).some(([root, globs]) =>
+      globs.some((glob) => {
+        const [prefix, ending] = glob.split('**/*');
+        return file.startsWith(`${root}/${prefix ?? ''}`) && file.endsWith(ending ?? '');
+      }),
+    );
+
+  const sources: string[] = [];
+  const walkSources = (at: string) => {
+    for (const entry of readdirSync(at)) {
+      if (['node_modules', '.next', 'generated', 'dist', '.git'].includes(entry)) continue;
+      const full = join(at, entry);
+      if (statSync(full).isDirectory()) walkSources(full);
+      else if (/[.]tsx?$/.test(entry) && !/[.]d[.]ts$/.test(entry)) {
+        sources.push(relative(process.cwd(), full).split(sep).join('/'));
+      }
+    }
+  };
+  walkSources(process.cwd());
+
+  const unchecked = sources.filter((file) => !insideSomeConfig(file));
+
+  check(
+    unchecked.length === 0,
+    `all ${sources.length} TypeScript files are inside some tsconfig, so something type-checks them`,
+    unchecked.slice(0, 10).join(', '),
+  );
 
   check(
     naked.length === 0,

@@ -51,13 +51,24 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      # `tsc --build` follows project references, and apps/web is not one: it
-      # sets `composite: false`, so the root build skipped the largest package
-      # in the repository. Next does not type-check during `next build` either.
-      # From Phase 62 to Phase 63 the web app had no type gate at all, which
-      # was found by writing eight type errors into it and watching both green.
+      # `tsc --build` follows project references, and three parts of this
+      # repository are not references: apps/web sets `composite: false`, the
+      # verification scripts were in no tsconfig at all, and the seed sits
+      # outside the db package's rootDir. Each was found the same way — by
+      # pointing a compiler at it and reading what came back. The web app had
+      # no type gate until Phase 63; the scripts had none until Phase 65, and
+      # the compiler found thirty-one errors in them.
+      #
+      # `npm run typecheck` runs all four now. These are named separately so a
+      # failure says which part of the repository it is in.
       - name: Types, in the web app
         run: npm run typecheck:web
+
+      - name: Types, in the verification scripts
+        run: npm run typecheck:scripts
+
+      - name: Types, in the seed
+        run: npm run typecheck:prisma
 
       # Every sentence in the product goes through the translator, and every
       # sentence the translator is given has an answer in French and in Arabic.

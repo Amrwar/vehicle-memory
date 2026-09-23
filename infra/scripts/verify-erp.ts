@@ -18,7 +18,7 @@ import 'dotenv/config';
 import { FleetError, money, PayablesError, PayrollError, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { createPurchaseOrder } from '../../apps/web/src/lib/catalogue';
 import { consolidateMonth, saveFleetAgreement } from '../../apps/web/src/lib/fleet';
 import { createJob } from '../../apps/web/src/lib/jobs';
@@ -75,7 +75,7 @@ async function main() {
 
   await forget(org.id);
 
-  const before = trialBalance(await postedLines(org.id));
+  const before = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', before.balanced, true);
 
   /* ------------------------------------------------------------------------
@@ -571,7 +571,7 @@ async function main() {
 
   console.info('\nThe ledger, afterwards');
 
-  const after = trialBalance(await postedLines(org.id));
+  const after = trialBalance(await postedLines(org.id, ALL_TIME));
   check('still balances', after.balanced, true);
 
   console.info('\nThe database, underneath it');

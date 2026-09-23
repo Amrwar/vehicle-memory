@@ -24,7 +24,7 @@ import 'dotenv/config';
 import { ACCOUNT, LoyaltyError, money, MoneyCycleError, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { createJob } from '../../apps/web/src/lib/jobs';
 import {
   awardByHand,
@@ -90,7 +90,7 @@ async function main() {
 
   await forget(org.id, customerId);
 
-  const opening = trialBalance(await postedLines(org.id));
+  const opening = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', opening.balanced, true);
 
   console.info('\nPoints given by hand');
@@ -291,7 +291,7 @@ async function main() {
   const unspent = await loyaltyCardFor(org.id, customerId);
   check('and nothing was spent', unspent.balance, still.balance);
 
-  const closing = trialBalance(await postedLines(org.id));
+  const closing = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger still balances', closing.balanced, true);
 
   await forget(org.id, customerId);

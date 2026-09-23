@@ -250,8 +250,27 @@ export async function postedTotals(
  *
  * The range is not optional. It was, and every caller left it out, which meant
  * four pages read every line a workshop had ever posted. Anything that only
- * wants the totals should call `postedTotals` instead.
+ * wants the totals should call `postedTotals` instead; anything that genuinely
+ * wants all of them passes `ALL_TIME` and says so.
+ *
+ * Making it required fixed the four pages and missed twenty-three calls in the
+ * verification scripts, because nothing type-checked those. Phase 65.
  */
+/**
+ * Every line there has ever been, said out loud.
+ *
+ * A trial balance is cumulative by definition: it is the sum of everything
+ * posted, and a bounded one is a different report. So there are callers that
+ * genuinely want no bounds, and the point of making `range` required was never
+ * to forbid that — it was to stop it happening by omission, which is what four
+ * pages were doing.
+ *
+ * Passing this says the unbounded read is the intended one. Grep for it to see
+ * every place that claims so, which is the property a default could not have.
+ * Phase 65.
+ */
+export const ALL_TIME: { from?: Date; to?: Date } = {};
+
 export async function postedLines(
   orgId: string,
   range: { from?: Date; to?: Date },

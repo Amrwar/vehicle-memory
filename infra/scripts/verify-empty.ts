@@ -170,14 +170,12 @@ async function main() {
     held.status >= 300 &&
       held.status < 400 &&
       (held.headers.get('location') ?? '').includes('/confirm-email'),
-    true,
   );
 
   const holding = await fetch(`${BASE}/confirm-email`, { headers: { cookie } });
   check(
     'and the holding page says where the link went',
     (await holding.text()).includes(`empty-${stamp}@probeworkshop.test`),
-    true,
   );
 
   // The link is opened, as far as the database is concerned, and the rest of

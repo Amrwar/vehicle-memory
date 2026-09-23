@@ -16,7 +16,7 @@ import 'dotenv/config';
 import { money, toDecimalString, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { completeSale, openTill } from '../../apps/web/src/lib/counter';
 
 let failures = 0;
@@ -47,7 +47,7 @@ async function main() {
     where: { productId: product.id, warehouseId: warehouse.id },
   });
 
-  const balanceBefore = await trialBalance(await postedLines(org.id));
+  const balanceBefore = await trialBalance(await postedLines(org.id, ALL_TIME));
   const stockBefore = Number(before.onHand);
 
   /* --- the sale ----------------------------------------------------------- */
@@ -102,7 +102,7 @@ async function main() {
 
   /* --- the ledger --------------------------------------------------------- */
 
-  const balanceAfter = trialBalance(await postedLines(org.id));
+  const balanceAfter = trialBalance(await postedLines(org.id, ALL_TIME));
 
   check('the books still balance', balanceAfter.balanced, toDecimalString(balanceAfter.difference));
 

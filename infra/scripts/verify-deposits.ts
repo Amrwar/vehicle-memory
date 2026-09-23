@@ -19,7 +19,7 @@ import 'dotenv/config';
 import { ACCOUNT, DepositError, money, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import {
   applyHeld,
   heldFor,
@@ -84,7 +84,7 @@ async function main() {
 
   await forget(org.id, customerId);
 
-  const opening = trialBalance(await postedLines(org.id));
+  const opening = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', opening.balanced, true);
   const before = await heldInAll(org.id);
 
@@ -237,8 +237,8 @@ async function main() {
     where: { orgId: org.id, relatedType: 'Payment', relatedId: applied.paymentIds[0] },
     select: { subject: true, body: true },
   });
-  check('the customer was sent a receipt', told?.subject.startsWith('Receipt R-') ?? false, true);
-  check('naming the invoice', told?.body.includes(issued.number) ?? false, true);
+  check('the customer was sent a receipt', told?.subject?.startsWith('Receipt R-') ?? false, true);
+  check('naming the invoice', told?.body?.includes(issued.number) ?? false, true);
 
   console.info('\nA refund kept as credit, and spent on the next bill');
 
@@ -345,7 +345,7 @@ async function main() {
   check('nothing held after it went back', afterReturn.heldMinor, 0);
   check('reading as returned', afterReturn.rows.find((r) => r.id === late.id)?.status, 'RETURNED');
 
-  const closing = trialBalance(await postedLines(org.id));
+  const closing = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger still balances', closing.balanced, true);
 
   await forget(org.id, customerId);

@@ -22,7 +22,7 @@ import 'dotenv/config';
 import { JobTransitionError, money, MoneyCycleError, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { createJob } from '../../apps/web/src/lib/jobs';
 import {
   invoiceDetail,
@@ -105,7 +105,7 @@ async function main() {
   // Leftovers from an interrupted run.
   await forget(org.id);
 
-  const balanceBefore = trialBalance(await postedLines(org.id));
+  const balanceBefore = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', balanceBefore.balanced, true);
 
   console.info('\nA job is opened and worked');
@@ -445,7 +445,7 @@ async function main() {
 
   console.info('\nThe ledger, afterwards');
 
-  const balanceAfter = trialBalance(await postedLines(org.id));
+  const balanceAfter = trialBalance(await postedLines(org.id, ALL_TIME));
   check('still balances', balanceAfter.balanced, true);
 
   console.info('\nThe database, underneath it');

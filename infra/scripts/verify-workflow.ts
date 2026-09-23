@@ -212,6 +212,7 @@ async function main() {
   press('Technician opens the inspection', 'tablet', 1);
 
   const loaded = await inspectionFor(org.id, inspectionId);
+  if (!loaded) throw new Error('the inspection just started could not be read back');
   const [first, second] = loaded.items;
   await recordResult({
     orgId: org.id,

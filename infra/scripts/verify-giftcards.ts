@@ -24,7 +24,7 @@ import 'dotenv/config';
 import { ACCOUNT, GiftCardError, money, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import { completeSale } from '../../apps/web/src/lib/counter';
 import {
   adjustGiftCard,
@@ -131,7 +131,7 @@ async function main() {
 
   await forget(org.id);
 
-  const opening = trialBalance(await postedLines(org.id));
+  const opening = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', opening.balanced, true);
   const before = await giftCardsFor(org.id);
 
@@ -582,7 +582,7 @@ async function main() {
     }),
   );
 
-  const closing = trialBalance(await postedLines(org.id));
+  const closing = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger still balances', closing.balanced, true);
 
   await forget(org.id);

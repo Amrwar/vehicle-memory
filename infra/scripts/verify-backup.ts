@@ -84,10 +84,10 @@ async function counts(client: PrismaClient): Promise<Record<string, number>> {
   // reltuples is an estimate; count the tables that matter exactly.
   const exact: Record<string, number> = {};
   for (const row of rows) {
-    const [{ n }] = await client.$queryRawUnsafe<{ n: bigint }[]>(
+    const counted = await client.$queryRawUnsafe<{ n: bigint }[]>(
       `SELECT count(*)::bigint AS n FROM "${row.table}"`,
     );
-    exact[row.table] = Number(n);
+    exact[row.table] = Number(counted[0]?.n ?? 0);
   }
   return exact;
 }

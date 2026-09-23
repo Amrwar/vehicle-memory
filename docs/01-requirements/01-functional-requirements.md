@@ -267,6 +267,14 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10000 - The scripts nobody type-checked
+
+| Ref      | Requirement                                                                                                     | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10001 | Every TypeScript file in the repository MUST be inside some tsconfig, and a file that is not MUST fail a check. | 65    |
+| FR-10002 | The type gate MUST cover the verification scripts and the seed, not only the published packages.                | 65    |
+| FR-10003 | A read with no bounds MUST say so by name, so that every deliberate one can be found.                           | 65    |
+
 ## FR-9900 - The list somebody typed
 
 | Ref     | Requirement                                                                                                                    | Phase |

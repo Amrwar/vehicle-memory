@@ -360,7 +360,7 @@ async function main() {
   });
 
   check(
-    ownership?.startedAt.toISOString().startsWith('2020-01-01'),
+    ownership?.startedAt.toISOString().startsWith('2020-01-01') ?? false,
     'how long they had the car is still the vehicle’s record',
     ownership?.startedAt.toISOString().slice(0, 10),
   );

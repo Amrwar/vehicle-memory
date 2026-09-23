@@ -22,7 +22,7 @@ import 'dotenv/config';
 import { money, PaymentAttemptError, trialBalance } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
-import { postedLines } from '../../apps/web/src/lib/accounting';
+import { ALL_TIME, postedLines } from '../../apps/web/src/lib/accounting';
 import {
   checkAttempt,
   reconcileFor,
@@ -129,7 +129,7 @@ async function main() {
     return { ...invoice, totalMinor: Math.round(Number(invoice.total) * 100) };
   }
 
-  const balanceBefore = trialBalance(await postedLines(org.id));
+  const balanceBefore = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances before anything happens', balanceBefore.balanced, true);
 
   console.info('\nA customer opens a checkout from the portal');
@@ -230,7 +230,11 @@ async function main() {
     where: { orgId: org.id, sourceType: 'Payment', sourceId: payments[0]!.id },
   });
   check('posted once', entries, 1);
-  check('the ledger still balances', trialBalance(await postedLines(org.id)).balanced, true);
+  check(
+    'the ledger still balances',
+    trialBalance(await postedLines(org.id, ALL_TIME)).balanced,
+    true,
+  );
   await refuses('a paid invoice cannot be paid again', PaymentAttemptError, 'NOT_PAYABLE', () =>
     startCardPayment({ userId: maria.id, invoiceId: a.id }),
   );
@@ -415,7 +419,7 @@ async function main() {
   check('and is not found for an attempt that does not exist', nothing.status, 404);
 
   await forget(org.id);
-  const balanceAfter = trialBalance(await postedLines(org.id));
+  const balanceAfter = trialBalance(await postedLines(org.id, ALL_TIME));
   check('the ledger balances after clean-up', balanceAfter.balanced, true);
 
   console.info(

@@ -4015,8 +4015,8 @@ rather than the fresh seed CI gives them.
 exact read `/reports` was doing — kept as a check because a defect found once
 should not have to be found twice.
 
-**And one more gate that covers nothing**, found on the way out and left for the
-next phase rather than folded into this one. `infra/scripts` is not in any
+**And one more gate that covers nothing**, found on the way out and left for
+Phase 65 rather than folded into this one. `infra/scripts` is not in any
 tsconfig: ninety verification scripts, several thousand lines, type-checked by
 nothing. Pointing a compiler at them reports thirty-one errors, and the first
 one read is real — `postedLines(orgId, range)` takes a required range, whose
@@ -4024,6 +4024,59 @@ own comment says "bounded: by the range, which is no longer optional", and four
 probes call it with one argument. The bound is not being applied and the type
 that says so was never read. Phase 63 found the same shape in `apps/web`; this
 is the other half of it.
+
+## Phase 65 — The scripts nobody type-checked
+
+**Scope.** The other half of what Phase 63 found: `infra/scripts` was in no
+tsconfig, and neither was the seed.
+
+**Exit.** Every TypeScript file in the repository is inside some tsconfig, and
+a file that is not fails a check rather than sitting quietly outside the gate.
+
+**Status.** Built. Thirty-three errors, one of them the point.
+
+Phase 63 found that `npm run typecheck` ran `tsc --build`, which follows project
+references, and that `apps/web` is not one — so the largest package in the
+repository had no type gate. This is the same fault in two more places. Ninety
+verification scripts, several thousand lines, checked by nothing. And
+`packages/db/prisma/seed.ts`, which sits outside the `rootDir` its own package
+is built from: the demonstration data every workshop sees, compiled by no one.
+
+**What the compiler found.** Thirty-one errors in the scripts, and the first one
+read was real. `postedLines(orgId, range)` takes a **required** range, and its
+docblock says exactly why:
+
+> The range is not optional. It was, and every caller left it out, which meant
+> four pages read every line a workshop had ever posted.
+
+Making it required fixed the four pages. Twenty-three calls in the verification
+scripts still passed one argument, so `range` arrived as `undefined`, the
+optional chaining inside quietly skipped the date predicate, and every one of
+those probes read every journal line the workshop had ever posted. The bound the
+comment promises was not being applied anywhere it was checked, and the type
+that would have said so was never read by anything.
+
+The fix is a name rather than a default. `ALL_TIME` is an exported empty range,
+and a caller that genuinely wants every line — a trial balance is cumulative, so
+some do — passes it and says so. Grep for it to see every deliberate unbounded
+read, which is the property a default could never have had.
+
+The other ten were smaller and each was a real hole: a count query that assumed
+it had a row, four reads of a nullable `subject` as though it were a string, a
+cast asserting two warehouses the query never promised, an inspection read back
+without checking it was there, and — from Phase 62, mine — an `undefined` handed
+to a check that takes a boolean, which meant that check could never have failed.
+
+**Three phases, one shape.** Rather than fix it a fourth time somewhere else,
+`verify-throughout` now asks the general question: every TypeScript file in the
+repository must fall inside some tsconfig's `include`, which is what a compiler
+uses to seed its program. Seven hundred and nine files, all covered, and a
+stray one fails the check by name — which was tried on purpose before the zero
+was believed.
+
+`npm run typecheck` now runs four compilers: the project references, the web
+app, the scripts, and the seed. They are named separately in CI so a failure
+says which part of the repository it is in.
 
 ## Running throughout — the four things that are not features
 

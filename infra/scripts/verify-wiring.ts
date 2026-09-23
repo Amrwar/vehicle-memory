@@ -169,7 +169,8 @@ async function main() {
     return;
   }
 
-  const [from, to] = warehouses as [{ id: string }, { id: string }];
+  const [from, to] = warehouses;
+  if (!from || !to) throw new Error('two warehouses were counted and then not found');
 
   const product = await prisma.product.findFirstOrThrow({
     where: { orgId: org.id, partNumber: '87139-0D070' },
