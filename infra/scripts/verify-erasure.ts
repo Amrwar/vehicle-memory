@@ -258,6 +258,41 @@ async function main() {
 
   console.info('  What they can take with them');
 
+  // A job of their own, and a note somebody typed about them on it: their name
+  // in free text and an instruction to telephone them, at the same time. Added
+  // in Phase 66, when `job_follow_ups` stopped being an empty table — the
+  // search below reads every text column of every table, so a new place to put
+  // a name that nobody thought about would fail this probe rather than slip
+  // past it.
+  // Any job of this workshop's, only for a site and a car to hang a new one
+  // off. Not the job above: that one is claimed by whichever probe run got to
+  // it first, and a check that quietly skips itself is not a check.
+  const theirJob = await prisma.job.findFirst({
+    where: { orgId: org.id },
+    select: { locationId: true, vehicleId: true },
+  });
+
+  const chase = theirJob
+    ? await prisma.jobFollowUp.create({
+        data: {
+          job: {
+            create: {
+              orgId: org.id,
+              locationId: theirJob.locationId,
+              customerId: customer.id,
+              vehicleId: theirJob.vehicleId,
+              number: 880_000 + Math.floor(Math.random() * 9_000),
+              shortDescription: 'Rear discs, declined',
+              status: 'COMPLETED',
+            },
+          },
+          note: `Ring ${name} about the rear discs they turned down`,
+          dueAt: new Date(),
+        },
+        select: { id: true, jobId: true },
+      })
+    : null;
+
   const taken = await exportCustomer(org.id, customer.id);
   const asJson = JSON.stringify(taken);
 
@@ -386,6 +421,15 @@ async function main() {
   check(again.includes('already been erased'), 'and asking twice is refused, saying why', again);
 
   /* --- the register is complete ---------------------------------------------- */
+
+  const chasedStill = chase
+    ? await prisma.jobFollowUp.findFirst({ where: { id: chase.id }, select: { id: true } })
+    : null;
+
+  check(
+    chase !== null && chasedStill === null,
+    'the note telling somebody to ring them is gone, not merely anonymised',
+  );
 
   check(
     ERASURE.every((one) => one.because.length > 40),

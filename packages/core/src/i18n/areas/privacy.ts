@@ -38,6 +38,7 @@ export const fr: Readonly<Record<string, string>> = {
     'Dites pourquoi, afin que le registre montre que cela a été demandé.',
 
   // The holdings, reached through a variable
+  'A note to ring them later': 'Une note pour les rappeler plus tard',
   'The customer record': 'La fiche client',
   'Their portal login': 'Leur accès à l’espace client',
   'Their signature': 'Leur signature',
@@ -76,6 +77,7 @@ export const ar: Readonly<Record<string, string>> = {
   'That person has already been erased.': 'لقد مُحي هذا الشخص من قبل.',
   'Say why, so the record shows this was asked for.': 'اذكر السبب، ليُظهر السجلّ أن هذا قد طُلب.',
 
+  'A note to ring them later': 'ملاحظة للاتصال بهم لاحقًا',
   'The customer record': 'سجلّ العميل',
   'Their portal login': 'حسابهم في بوابة العملاء',
   'Their signature': 'توقيعهم',

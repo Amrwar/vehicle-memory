@@ -691,6 +691,18 @@ The second sweep: things connected at one end only.
 | The seed type-checked        | Built  | `typecheck:prisma`; it sits outside the db package's rootDir (Phase 65)       |
 | Unbounded reads named        | Built  | `ALL_TIME`, so a deliberate one can be told from a forgotten one (Phase 65)   |
 
+## 21.32 Chasing something later
+
+| Item                         | Status | Where                                                                                |
+| ---------------------------- | ------ | ------------------------------------------------------------------------------------ |
+| A follow-up on a job         | Built  | A note, a date, and who it is for if anybody (Phase 66)                              |
+| Late says how late           | Built  | "9 days late", in words rather than a colour; worst first (Phase 66)                 |
+| Where the day starts         | Built  | On the dashboard beside what else needs doing today (Phase 66)                       |
+| And on the technician's own  | Built  | What was given to them, on the shop floor screen (Phase 66)                          |
+| Told once, by name           | Built  | `notifyOne`, rather than the broadcast that suits "a part is needed" (Phase 66)      |
+| Who did it                   | Built  | The question asked when a customer says nobody rang (Phase 66)                       |
+| Gone when they are forgotten | Built  | A note naming somebody is removed, not anonymised (Phase 66, register from Phase 62) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -769,7 +781,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 389          |
+| Built    | 396          |
 | Partial  | 1            |
 | Deferred | 1            |
 

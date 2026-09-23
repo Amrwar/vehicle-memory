@@ -284,6 +284,12 @@ jobs:
       - name: Verify the tenant filter covers what it claims to
         run: npx tsx infra/scripts/verify-scoping.ts
 
+      # What a workshop said it would do later, and whether anybody will ever
+      # see it again. A follow-up nobody does is worse than no follow-up: the
+      # workshop believes it is handled and the customer knows it is not.
+      - name: Verify chasing something later
+        run: npx tsx infra/scripts/verify-followups.ts
+
       # And that the generated list is in step with the schema: a model added
       # without a decision about its tenancy fails here rather than shipping.
       - name: The tenant list matches the schema

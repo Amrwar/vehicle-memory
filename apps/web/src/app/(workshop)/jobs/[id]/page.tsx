@@ -56,7 +56,7 @@ import {
 } from '@/lib/arrival';
 import { coverWorthChecking } from '@/lib/condition';
 import { ConversationError, conversationForJob, sendReply } from '@/lib/conversations';
-import { type Channel, channelLabel } from '@carnet/core';
+import { type Channel, channelLabel, describeFollowUp, formatDate, standingOf } from '@carnet/core';
 import {
   approveInPerson,
   QuoteError,
@@ -72,6 +72,13 @@ import { TAX_RATE, taxContextFor } from '@/lib/tax';
 import { fitmentWarningsForJob } from '@/lib/provenance';
 import { applyPackage, PackageError, packagesFor } from '@/lib/packages';
 import { addSublet, billSublet, markSubletDone, ReturnError, subletsForJob } from '@/lib/returns';
+import {
+  completeFollowUp,
+  couldFollowUp,
+  FollowUpError,
+  followUpsForJob,
+  setFollowUp,
+} from '@/lib/followups';
 import { clearComeback, ComebackError, comebackFor, markComeback } from '@/lib/owner';
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
@@ -266,6 +273,51 @@ async function sublet(formData: FormData) {
     redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#sublet`);
   }
   redirect(`/jobs/${jobId}#sublet`);
+}
+
+/** Something to do after the car has gone: ring them, chase the part. Phase 66. */
+async function addFollowUp(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await setFollowUp({
+      orgId,
+      userId: user.userId,
+      jobId,
+      note: String(formData.get('note') ?? ''),
+      dueAt: new Date(String(formData.get('dueAt') ?? '')),
+      assignedToUserId: String(formData.get('assignedToUserId') ?? '') || null,
+    });
+  } catch (error) {
+    if (!(error instanceof FollowUpError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#followup`);
+  }
+
+  redirect(`/jobs/${jobId}#followup`);
+}
+
+/** It has been done. Who did it is recorded, because that is the question asked afterwards. Phase 66. */
+async function markFollowUpDone(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await completeFollowUp({
+      orgId,
+      userId: user.userId,
+      followUpId: String(formData.get('followUpId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof FollowUpError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#followup`);
+  }
+
+  redirect(`/jobs/${jobId}#followup`);
 }
 
 /** This job is earlier work on the same car coming back, or it was recorded so by mistake. Phase 40. */
@@ -601,10 +653,12 @@ export default async function JobPage({
   const packages = ['INVOICED', 'PAID', 'CANCELLED'].includes(job.status)
     ? []
     : await packagesFor(orgId, { activeOnly: true });
-  const [sublets, vendors, returned] = await Promise.all([
+  const [sublets, vendors, returned, followUps, team] = await Promise.all([
     subletsForJob(orgId, job.id),
     db.supplier.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
     comebackFor(orgId, job.id),
+    followUpsForJob(orgId, job.id),
+    couldFollowUp(orgId),
   ]);
   const subletLineIds = new Set(sublets.map((entry) => entry.partLineId));
 
@@ -1904,6 +1958,119 @@ export default async function JobPage({
                     {t('PDF')}
                   </a>
                 </span>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          <Card
+            id="followup"
+            className={
+              followUps.some((one) => standingOf(one) === 'OVERDUE')
+                ? 'border-(--warning)'
+                : undefined
+            }
+          >
+            <CardHeader
+              title={t('Follow up')}
+              description={t(
+                'Something to do after the car has gone: ring them about the work they turned down, chase a part, check a noise did not come back.',
+              )}
+            />
+
+            <CardBody className="grid gap-3 text-[13px]">
+              {followUps.length > 0 ? (
+                <ul className="grid gap-2">
+                  {followUps.map((one) => {
+                    const standing = standingOf(one);
+
+                    return (
+                      <li
+                        key={one.id}
+                        className="flex flex-wrap items-start gap-2 border-b border-(--border) pb-2 last:border-0 last:pb-0"
+                      >
+                        <Badge
+                          tone={
+                            standing === 'DONE'
+                              ? 'success'
+                              : standing === 'OVERDUE'
+                                ? 'danger'
+                                : standing === 'TODAY'
+                                  ? 'warning'
+                                  : 'neutral'
+                          }
+                          size="sm"
+                        >
+                          {t(describeFollowUp(one))}
+                        </Badge>
+
+                        <div className="min-w-0 flex-1">
+                          <p className={standing === 'DONE' ? 'text-(--text-faint)' : undefined}>
+                            {one.note}
+                          </p>
+                          <p className="text-[12px] text-(--text-faint)">
+                            {one.assignedTo
+                              ? t('{who}, by {when}', {
+                                  who: one.assignedTo.name,
+                                  when: formatDate(one.dueAt, region),
+                                })
+                              : t('Anybody, by {when}', { when: formatDate(one.dueAt, region) })}
+                            {one.completedBy
+                              ? ` · ${t('done by {who}', { who: one.completedBy.name })}`
+                              : ''}
+                          </p>
+                        </div>
+
+                        {mayWrite && !one.completedAt ? (
+                          <form action={markFollowUpDone}>
+                            <input type="hidden" name="jobId" value={job.id} />
+                            <input type="hidden" name="followUpId" value={one.id} />
+                            <Button type="submit" size="sm" variant="ghost">
+                              {t('Done')}
+                            </Button>
+                          </form>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-(--text-faint)">{t('Nothing to chase on this job.')}</p>
+              )}
+
+              {mayWrite ? (
+                <form action={addFollowUp} className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                  <input type="hidden" name="jobId" value={job.id} />
+
+                  <Field label={t('What needs doing')}>
+                    <Input
+                      name="note"
+                      required
+                      minLength={3}
+                      placeholder={t('Ring about the rear discs they turned down')}
+                    />
+                  </Field>
+
+                  <Field label={t('By when')}>
+                    <Input name="dueAt" type="date" required />
+                  </Field>
+
+                  <Field label={t('Who')}>
+                    <Select name="assignedToUserId" defaultValue="">
+                      <option value="">{t('Anybody')}</option>
+                      {team.map((person) => (
+                        <option key={person.id} value={person.id}>
+                          {person.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+
+                  <div className="sm:col-span-3">
+                    <Button type="submit" size="sm" variant="secondary">
+                      {t('Add a follow-up')}
+                    </Button>
+                  </div>
+                </form>
               ) : null}
             </CardBody>
           </Card>

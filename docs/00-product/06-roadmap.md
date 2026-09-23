@@ -3726,7 +3726,7 @@ so, in bold, rather than being covered by a section heading:
 - **FR-512** — courtesy vehicle allocation. There is a free-text note on a
   booking and nothing that knows whether a car is free.
 - **FR-617** — follow-up flags on a job. The table exists and nothing reads or
-  writes it.
+  writes it. _Closed in Phase 66, which was the last of the five._
 
 Two more are SHOULDs decided against with a reason (single sign-on,
 voice-to-text), and one is superseded: FR-510 asks for a booking request held
@@ -4077,6 +4077,87 @@ was believed.
 `npm run typecheck` now runs four compilers: the project references, the web
 app, the scripts, and the seed. They are named separately in CI so a failure
 says which part of the repository it is in.
+
+## Phase 66 — Chasing something later
+
+**Scope.** FR-617, the last requirement the traceability matrix admitted
+nothing implements.
+
+**Exit.** A workshop can write down what it said it would do after the car has
+gone, and somebody sees it again.
+
+**Status.** Built. The matrix now has no Missing rows at all.
+
+`job_follow_ups` has been in the schema since the first migration, with no code
+reading from it or writing to it. That was the honest kind of gap — named in
+the matrix, admitted in the roadmap, sitting there for a year — and it is the
+last of the five Phase 61 found by reading every requirement against the source.
+
+**A follow-up is not a task, and the difference is the feature.** A `JobTask` is
+work on the car, now, ticked off with the bonnet up. A follow-up is something
+to do **after** the car has gone: Maria declined the rear discs, ring her in
+three months; the turbo hose is on back order, chase the supplier Tuesday; the
+noise might come back, call in a week. Almost all the money a workshop leaves on
+the table is in the first kind, and almost all the goodwill it loses is in the
+last.
+
+**The design problem is not the table.** A follow-up nobody does is _worse than
+no follow-up at all_, because the workshop believes it has been handled and the
+customer knows it has not. So the standing of one matters more than its
+existence, and three things follow from that:
+
+Late is not the same as due today, and it says **how** late — "9 days late", in
+words rather than a colour, because a badge that is only a colour says nothing
+to somebody who cannot tell the two reds apart and nothing at all when the page
+is read aloud. The worst is first, because somebody opening this at half past
+seven has ten minutes and they should go to the three-week-old one rather than
+to whichever was typed first.
+
+It is where people already look. On the job, on the dashboard beside what else
+needs doing today, and — for one given to a particular person — on that
+person's own screen, because a technician's whole surface is the shop floor
+page and a follow-up they never see is the failure this feature exists to
+avoid. They are told once, by name, rather than the whole workshop being told:
+`notifyStaff` broadcasts to everybody holding a permission, which is right for
+"a part is needed" and wrong for work that has been given to somebody, so
+`notifyOne` was added beside it.
+
+And who did it is recorded. The table had `completedAt` and no
+`completedByUserId`, which is an assertion with nobody behind it, and the one
+question a workshop is asked afterwards is who rang. A constraint now refuses
+half a record in either direction.
+
+**A date in the past is allowed, on purpose.** "We should have rung them last
+week" is the most common follow-up there is, and refusing it would mean
+back-dating by a day or lying about the date. It appears as overdue, which is
+what it is. A year in the past is refused, because that is a typed year rather
+than an intention.
+
+**Three things the table needed first.** An index on the job — every other
+child of a job has one, and this one had an index on the due date and nothing
+else, so "give me this job's follow-ups" was a sequential scan that has never
+been slow because there have never been any. An index on the assignee, which is
+the second question anybody asks of this feature. And the column for who
+completed it.
+
+**And the register caught it.** Phase 62 built a register of every place the
+product holds something personal, and `verify-erasure` searches every text
+column of every table for an erased person's name. A follow-up note is free
+text about a person — "ring Maria about the rear discs" — and an instruction to
+telephone them, at the same time. Both halves point the same way, so a
+follow-up on their job is **removed** on erasure rather than anonymised:
+anonymising it would leave the workshop a note telling it to ring somebody it
+can no longer name, and keeping it would leave a reminder to call somebody who
+has asked never to be called again. The register is only worth anything if a
+new place to put a name is added to it on the day it is built, so the entry and
+the check went in with the feature.
+
+The same phase's language check caught the new entry within a minute of its
+being written: the fifteen holdings are handed to `t()` as a variable, so
+`verify-erasure` asks the translator for each one, and it had no French or
+Arabic for "A note to ring them later" until there was.
+
+`npm run verify:followups` holds it: twenty-four checks.
 
 ## Running throughout — the four things that are not features
 

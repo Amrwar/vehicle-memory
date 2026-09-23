@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10100 - Chasing something later
+
+| Ref      | Requirement                                                                                                           | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10101 | A job MUST be able to carry a follow-up with a note, a due date and, optionally, the person it is for.                | 66    |
+| FR-10102 | A follow-up that is late MUST be shown as late, and MUST say how late rather than only changing colour.               | 66    |
+| FR-10103 | What is late or due today MUST appear where the day starts, and what was given to one person on that person's screen. | 66    |
+| FR-10104 | Completing a follow-up MUST record who completed it.                                                                  | 66    |
+| FR-10105 | Giving a follow-up to somebody MUST tell that person, and MUST NOT tell everybody else.                               | 66    |
+
 ## FR-10000 - The scripts nobody type-checked
 
 | Ref      | Requirement                                                                                                     | Phase |

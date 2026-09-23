@@ -270,6 +270,61 @@ export async function notifyStaff(input: {
   }
 }
 
+/**
+ * Tells one person, by name.
+ *
+ * `notifyStaff` above tells everybody who holds the permission a kind of event
+ * belongs to, which is right for "a part is needed" — anybody who can order it
+ * should see it. It is wrong for work that has been given to somebody: a
+ * follow-up assigned to Ahmed is Ahmed's, and telling the other five that it
+ * exists is how a notification list stops being read.
+ *
+ * The membership is checked rather than assumed. Notifying a user who is not
+ * on this workshop's team would put a row carrying this workshop's job number
+ * into somebody else's notification list, which is a tenant boundary crossed
+ * by a typo. Phase 66.
+ *
+ * Never throws, for the same reason as `notifyStaff`: whether somebody is told
+ * must not decide whether the thing they are being told about happened.
+ */
+export async function notifyOne(input: {
+  orgId: string;
+  userId: string;
+  kind: NotificationKind;
+  title: string;
+  body?: string | null;
+  href: string;
+  entityType?: string | null;
+  entityId?: string | null;
+}): Promise<boolean> {
+  try {
+    const member = await prisma.membership.findFirst({
+      where: { userId: input.userId, orgId: input.orgId, isActive: true },
+      select: { id: true },
+    });
+
+    if (!member) return false;
+
+    await prisma.staffNotification.create({
+      data: {
+        traceId: await traceId(),
+        orgId: input.orgId,
+        userId: input.userId,
+        kind: input.kind,
+        title: input.title.slice(0, 200),
+        body: input.body?.slice(0, 500) ?? null,
+        href: input.href,
+        entityType: input.entityType ?? null,
+        entityId: input.entityId ?? null,
+      },
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function notificationsFor(orgId: string, userId: string, limit = 60) {
   return prisma.staffNotification.findMany({
     where: { orgId, userId },

@@ -1642,6 +1642,46 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BS - Chasing something later (Phase 66)
+
+### BS1 - I can write down what we said we would do
+
+**As** a service advisor **I want** to note that we should ring somebody in
+three months **so that** the work they turned down is not simply lost.
+**Size** 8 - **Satisfies** FR-10101, FR-10104
+
+- **Given** a job, **when** I add a follow-up, **then** it carries what needs
+  doing, when, and who it is for if anybody.
+- **Given** a follow-up with no note, **when** I try to save it, **then** it
+  is refused: a list of "follow up" entries is a list nobody reads.
+- **Given** one that has been done, **when** I look at it, **then** it says
+  who did it, which is the question asked when a customer says nobody rang.
+
+### BS2 - And somebody actually sees it
+
+**As** the workshop owner **I want** what is late to be in front of me
+**so that** a follow-up nobody does stops being worse than no follow-up at all.
+**Size** 8 - **Satisfies** FR-10102, FR-10103
+
+- **Given** something three weeks late, **when** I open the dashboard,
+  **then** it is there and it says how late.
+- **Given** something due today and something due in two months, **when** I
+  read the list, **then** only the first is on it.
+- **Given** several, **when** I read them, **then** the worst is first.
+
+### BS3 - Mine finds me
+
+**As** a technician **I want** what was given to me to appear on my own screen
+**so that** I am not relying on somebody remembering to tell me.
+**Size** 5 - **Satisfies** FR-10105
+
+- **Given** a follow-up given to me, **when** it is created, **then** I am
+  told, and nobody else is.
+- **Given** the shop floor screen, **when** something of mine is late or due
+  today, **then** it is at the top of it.
+
+---
+
 ## Epic BR - The scripts nobody type-checked (Phase 65)
 
 ### BR1 - The gate covers the code

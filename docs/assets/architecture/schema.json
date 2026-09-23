@@ -3,7 +3,7 @@
   "counts": {
     "models": 154,
     "enums": 74,
-    "fields": 2460
+    "fields": 2463
   },
   "enums": [
     "OrgPlan",
@@ -624,10 +624,11 @@
         },
         {
           "name": "JobFollowUp",
-          "comment": "",
-          "fields": 7,
+          "comment": "Something to do after the car has gone: ring them about the discs they declined, chase the part, check the noise did not come back. Not a `JobTask`, which is work on the car now. Phase 66, FR-617.",
+          "fields": 8,
           "relations": [
             "Job",
+            "User",
             "User"
           ],
           "scope": "through Job"

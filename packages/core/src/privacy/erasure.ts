@@ -145,6 +145,14 @@ export const ERASURE: readonly Holding[] = [
       'Seven years, by law (NFR-903). They carry no name once the customer record is anonymised, and they are the workshop’s books rather than anything of hers.',
   },
   {
+    what: 'A note to ring them later',
+    table: 'job_follow_ups',
+    holds: 'whatever somebody typed, which is usually their name and what to say to them',
+    treatment: 'removed',
+    because:
+      'A follow-up is free text about a person — "ring Maria about the rear discs" — and it is also an instruction to telephone them. Both halves point the same way. Anonymising it would leave the workshop a note telling it to ring somebody it can no longer name, which is worse than useless, and keeping it would leave a reminder to call somebody who has asked never to be called again. Added in Phase 66, when the table stopped being empty: the register is only worth anything if a new place to put somebody’s name is added to it on the day it is built.',
+  },
+  {
     what: 'Their jobs and bookings',
     table: 'jobs',
     holds: 'nothing of their own once the customer record is anonymised',

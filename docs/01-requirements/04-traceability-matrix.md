@@ -511,6 +511,11 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-10101 | BS1   | `JobFollowUp`                          | `setFollowUp()`; the note, the date and who it is for                          | `verify-followups.ts`                         | Done   |
+| FR-10102 | BS2   | —                                      | `standingOf()` and `describeFollowUp()`: late says how late                    | `followups.test.ts`, `verify-followups.ts`    | Done   |
+| FR-10103 | BS2   | —                                      | the dashboard card and tile, and the shop floor's own list                     | `verify-followups.ts`                         | Done   |
+| FR-10104 | BS1   | `JobFollowUp.completedByUserId`        | `completeFollowUp()`, and the constraint that done is whole                    | `verify-followups.ts`                         | Done   |
+| FR-10105 | BS3   | —                                      | `notifyOne()` in `lib/search.ts`, to the person it was given to                | `verify-followups.ts`                         | Done   |
 | FR-10001 | BR1   | —                                      | the tsconfig coverage check in `verify-throughout.ts`                          | `verify-throughout.ts`                        | Done   |
 | FR-10002 | BR1   | —                                      | `typecheck:scripts` and `typecheck:prisma`, both in CI                         | `verify-throughout.ts`                        | Done   |
 | FR-10003 | BR2   | —                                      | `ALL_TIME` in `lib/accounting.ts`, and the required range on `postedLines()`   | `verify-throughout.ts`                        | Done   |
@@ -1006,7 +1011,7 @@ were written rather than verified is worse than a gap that is admitted.
 | FR-609  | F2    | `JobPartLine`                            | part lines, with the price held on the line                                                                                                        | `totals.test.ts`, `verify-awkward.ts`              | Done       |
 | FR-615  | F3    | `ServicePackage`                         | `applyPackage()` fills tasks, labour and parts                                                                                                     | `packages.test.ts`, `verify-packages.ts`           | Done       |
 | FR-616  | F3    | `Invoice.billToCustomerId`               | the third party is billed; the vehicle keeps its owner                                                                                             | `verify-erp.ts`                                    | Done       |
-| FR-617  | —     | `JobFollowUp`                            | **the table exists and nothing writes to or reads from it.** No follow-up can be set                                                               | —                                                  | Missing    |
+| FR-617  | BS1   | `JobFollowUp`                            | `setFollowUp()` and `completeFollowUp()` in `lib/followups.ts`; the card on the job, the dashboard and the shop floor                              | `followups.test.ts`, `verify-followups.ts`         | Done       |
 | FR-701  | G1    | `InspectionTemplate`                     | `templatesFor()`, `startInspection()`                                                                                                              | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
 | FR-702  | G1    | `Severity`                               | `recordResult()`; four severities and no fifth                                                                                                     | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
 | FR-703  | G1    | `InspectionResult.measurementValue`      | note, photographs, a measured value with its type, and a wheel position                                                                            | `carry-out.test.ts`, `verify-inspection.ts`        | Done       |
@@ -1089,7 +1094,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 200                 | 199                    |
+| Later phases, newest first                         | 205                 | 204                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1106,21 +1111,21 @@ ago reads exactly like a row naming one that is there.
 | Counter sales and business reporting               | 10                  | 10                     |
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
-| The first two phases, traced one by one (Phase 61) | 84                  | 79                     |
-| **Total**                                          | **768**             | **757 (99%)**          |
+| The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
+| **Total**                                          | **773**             | **763 (99%)**          |
 
-Every one of the 768 requirements now has a row of its own. Until Phase 61,
+Every one of the 773 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does
 not meet, and thirty-four rows naming test files that had been renamed or
 consolidated years earlier and never corrected here.
 
-Eleven rows are something other than Done, and they say which kind:
+Ten rows are something other than Done, and they say which kind:
 
 | Kind           | What it means                                                                |
 | -------------- | ---------------------------------------------------------------------------- |
-| **Missing**    | Nothing implements it. One: FR-617.                                          |
+| **Missing**    | Nothing implements it. None, since Phase 66.                                 |
 | **Partial**    | Some of it is there. FR-303, FR-305, FR-311, FR-512.                         |
 | **Deferred**   | A SHOULD, decided against for now, with the reason. FR-112, FR-710.          |
 | **Superseded** | The product deliberately does something else, and the row says what. FR-510. |

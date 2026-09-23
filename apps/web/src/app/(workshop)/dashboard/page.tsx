@@ -1,4 +1,4 @@
-import { humanise, IN_SHOP_STATUSES, toneFor } from '@carnet/core';
+import { describeFollowUp, humanise, IN_SHOP_STATUSES, standingOf, toneFor } from '@carnet/core';
 import { prisma } from '@carnet/db';
 import {
   Badge,
@@ -23,6 +23,7 @@ import Link from 'next/link';
 
 import { VerifyBanner } from '@/components/verify-banner';
 import { revenueObservations } from '@/lib/answers';
+import { followUpsDue } from '@/lib/followups';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
 import { ownerDay } from '@/lib/owner';
@@ -83,6 +84,7 @@ export default async function DashboardPage({
     activity,
     observations,
     day,
+    chasing,
   ] = await Promise.all([
     db.job.count({ where: { createdAt: { gte: startOfDay, lt: endOfDay } } }),
     db.job.count({ where: { status: { in: [...IN_SHOP_STATUSES] } } }),
@@ -157,6 +159,9 @@ export default async function DashboardPage({
     // same figures the reports page shows.
     seesBusiness ? revenueObservations(orgId) : Promise.resolve([] as string[]),
     seesBusiness || seesInventory ? ownerDay(orgId) : Promise.resolve(null),
+    // Late, or due today. Everything further out lives on the job it belongs
+    // to, where somebody sees it when they are looking at that car.
+    followUpsDue(orgId, { limit: 8 }),
   ]);
 
   const revenueToday = Number(paymentsToday._sum.amount ?? 0);
@@ -547,6 +552,20 @@ export default async function DashboardPage({
                 note={t('Past the day the supplier promised')}
               />
             </Link>
+            <Link href="#chasing" className="group">
+              <StatTile
+                label={t('To chase')}
+                value={chasing.length}
+                tone={
+                  chasing.some((one) => standingOf(one) === 'OVERDUE')
+                    ? 'danger'
+                    : chasing.length > 0
+                      ? 'warning'
+                      : 'neutral'
+                }
+                note={t('Late, or due today')}
+              />
+            </Link>
             <Link href="/purchasing" className="group">
               <StatTile
                 label={t('Waiting for parts')}
@@ -563,6 +582,38 @@ export default async function DashboardPage({
               />
             </Link>
           </StatRow>
+
+          {/* The whole point of a follow-up is that somebody does it. A flag
+              on a job nobody opens again is a note in a drawer, so what is
+              late or due today is listed here, where the day starts. Phase 66. */}
+          {chasing.length > 0 ? (
+            <Card id="chasing" className="mb-3 border-(--warning)">
+              <CardHeader
+                title={t('To chase')}
+                description={t('Work that was put off until later, and later is now.')}
+              />
+              <CardBody className="grid gap-2 text-[13px]">
+                {chasing.map((one) => (
+                  <Link
+                    key={one.id}
+                    href={`/jobs/${one.job.id}#followup`}
+                    className="flex flex-wrap items-center gap-2 rounded-(--radius-sm) px-1 py-1 hover:bg-(--surface-sunken)"
+                  >
+                    <Badge tone={standingOf(one) === 'OVERDUE' ? 'danger' : 'warning'} size="sm">
+                      {t(describeFollowUp(one))}
+                    </Badge>
+                    <span className="min-w-0 flex-1 truncate">{one.note}</span>
+                    <span className="text-[12px] text-(--text-faint)">
+                      {one.job.registration
+                        ? `${one.job.registration} · #${one.job.number}`
+                        : `#${one.job.number}`}
+                      {one.assignedTo ? ` · ${one.assignedTo.name}` : ''}
+                    </span>
+                  </Link>
+                ))}
+              </CardBody>
+            </Card>
+          ) : null}
 
           {day.short.length > 0 ? (
             <Card className="mb-6 overflow-hidden">

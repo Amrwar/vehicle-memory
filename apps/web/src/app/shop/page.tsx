@@ -1,4 +1,4 @@
-import { humanise, msg, toneFor, type JobStatus } from '@carnet/core';
+import { describeFollowUp, humanise, msg, toneFor, type JobStatus } from '@carnet/core';
 import { forOrg } from '@carnet/db';
 import { Badge, Button, EmptyState, Mileage, Registration } from '@carnet/ui';
 import type { Metadata } from 'next';
@@ -11,6 +11,7 @@ import { ArrivalError, moveKeys } from '@/lib/arrival';
 import { keyState } from '@carnet/core';
 import { OutboxStatus } from '@/components/outbox';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { followUpsDue } from '@/lib/followups';
 import { tFor } from '@/lib/i18n';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -175,6 +176,11 @@ export default async function ShopFloorPage({
 
   const openEntry = jobs.flatMap((job) => job.timeEntries)[0];
 
+  // What has been given to this person to chase, and is late or due today.
+  // A follow-up assigned to somebody who never sees it is the failure this
+  // feature exists to avoid, and a technician's whole surface is this page.
+  const chasing = await followUpsDue(user.orgId, { userId: user.userId, limit: 5 });
+
   return (
     <div className="min-h-dvh bg-(--ground)">
       <header className="sticky top-0 z-20 border-b border-(--border) bg-(--surface) px-4 py-3">
@@ -216,6 +222,29 @@ export default async function ShopFloorPage({
 
       <main id="main" className="mx-auto max-w-3xl px-4 py-4">
         <OutboxStatus />
+
+        {chasing.length > 0 ? (
+          <section
+            aria-labelledby="chasing-heading"
+            className="mb-4 rounded-(--radius-lg) border border-(--warning) bg-(--warning-soft) px-4 py-3"
+          >
+            <h2 id="chasing-heading" className="text-[14px] font-semibold">
+              {t('For you to chase')}
+            </h2>
+            <ul className="mt-2 grid gap-1.5">
+              {chasing.map((one) => (
+                <li key={one.id} className="text-[14px]">
+                  <span className="font-medium">{t(describeFollowUp(one))}</span>
+                  {' · '}
+                  {one.note}
+                  <span className="text-(--text-faint)">
+                    {one.job.registration ? ` · ${one.job.registration}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {notice.error ? (
           <div className="mb-4 rounded-(--radius-lg) border border-(--danger) bg-(--danger-soft) px-4 py-3">

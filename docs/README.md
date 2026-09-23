@@ -343,3 +343,19 @@ journal line by accident, called with one argument by twenty-three probes, all
 of which were therefore doing exactly that. Rather than fix the same shape a
 fourth time, a check now asks whether every TypeScript file in the repository is
 inside some tsconfig at all, and fails by name when one is not.
+
+Phase 66 closes FR-617 and with it the last row the traceability matrix admitted
+nothing implements. A workshop can now write down what it said it would do after
+the car has gone — ring them about the work they turned down, chase the part,
+check the noise did not come back — and what is late or due today appears where
+the day starts rather than only on a job nobody opens again. A follow-up nobody
+does is worse than no follow-up: the workshop believes it is handled and the
+customer knows it is not.
+
+Two earlier phases did their work here without being asked. Phase 62's erasure
+register meant a new place to store somebody's name had to be accounted for on
+the day it was built — a note saying "ring Maria about the discs" is her name
+and an instruction to telephone her at once, so it is removed on erasure rather
+than anonymised. And Phase 65's type gate caught two mistakes in the new
+verification script before it was ever run, in code that until a week ago
+nothing type-checked at all.

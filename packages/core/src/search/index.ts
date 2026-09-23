@@ -126,7 +126,8 @@ export type NotificationKind =
   | 'MESSAGE_RECEIVED'
   | 'BOOKING_REQUESTED'
   | 'PAYMENT_RECEIVED'
-  | 'PART_REQUESTED';
+  | 'PART_REQUESTED'
+  | 'FOLLOW_UP_ASSIGNED';
 
 /** Who a kind of notification goes to, by the permission that would act on it. */
 export const NOTIFY_PERMISSION: Record<NotificationKind, string> = {
@@ -135,6 +136,11 @@ export const NOTIFY_PERMISSION: Record<NotificationKind, string> = {
   BOOKING_REQUESTED: 'diary:write',
   PAYMENT_RECEIVED: 'invoice:write',
   PART_REQUESTED: 'purchase:approve',
+  // Unused for this one: a follow-up goes to the person it was given to,
+  // by name, rather than to everybody who could act on it. Present because
+  // the record is exhaustive over the kinds, and a kind with no permission
+  // beside it would be a gap in a table that is read as complete.
+  FOLLOW_UP_ASSIGNED: 'job:write',
 };
 
 /** A notification a person need not see: the one they caused themselves. */

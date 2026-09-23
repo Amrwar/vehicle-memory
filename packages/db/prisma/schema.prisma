@@ -284,6 +284,7 @@ model User {
   jobAttachments           JobAttachment[]
   jobTasksDone             JobTask[]
   jobFollowUps             JobFollowUp[]
+  followUpsCompleted       JobFollowUp[]            @relation("FollowUpCompletedBy")
   timeEntries              TimeEntry[]
   qualityChecks            QualityCheck[]
   inspections              Inspection[]
@@ -1581,19 +1582,26 @@ model QualityCheck {
   @@map("quality_checks")
 }
 
+/// Something to do after the car has gone: ring them about the discs they
+/// declined, chase the part, check the noise did not come back. Not a
+/// `JobTask`, which is work on the car now. Phase 66, FR-617.
 model JobFollowUp {
-  id               String    @id @default(cuid())
-  jobId            String
-  dueAt            DateTime
-  assignedToUserId String?
-  note             String
-  completedAt      DateTime?
-  createdAt        DateTime  @default(now())
+  id                String    @id @default(cuid())
+  jobId             String
+  dueAt             DateTime
+  assignedToUserId  String?
+  note              String
+  completedAt       DateTime?
+  completedByUserId String?
+  createdAt         DateTime  @default(now())
 
-  job        Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  assignedTo User? @relation(fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  job         Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  assignedTo  User? @relation(fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  completedBy User? @relation("FollowUpCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
 
+  @@index([jobId])
   @@index([dueAt, completedAt])
+  @@index([assignedToUserId, completedAt])
   @@map("job_follow_ups")
 }
 

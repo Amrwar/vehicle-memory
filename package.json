@@ -49,6 +49,7 @@
     "verify:erasure": "tsx infra/scripts/verify-erasure.ts",
     "verify:belonging": "tsx infra/scripts/verify-belonging.ts http://localhost:3000",
     "verify:scoping": "tsx infra/scripts/verify-scoping.ts",
+    "verify:followups": "tsx infra/scripts/verify-followups.ts",
     "db:tenant-models": "tsx infra/scripts/generate-tenant-models.ts",
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
     "verify:paint": "tsx infra/scripts/verify-paint.ts",

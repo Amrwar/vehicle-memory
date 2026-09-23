@@ -448,6 +448,7 @@ the register back to itself.
 | `VehicleOwnership` dates                     | Retained. Ownership duration is the vehicle's record.            |
 | Passport events                              | Retained in full, and carry no name to remove. See below.        |
 | Audit log                                    | Retained; the copy of the values it kept is emptied              |
+| A note to ring them later                    | Removed. Their name, and an instruction to telephone them.       |
 | Invoices, payments, credit notes             | Retained. Seven years, by law (NFR-903).                         |
 | Photographs of components                    | Retained                                                         |
 | Photographs incidentally containing a person | Reviewed and removed on request                                  |

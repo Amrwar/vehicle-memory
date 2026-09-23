@@ -229,6 +229,18 @@ export async function eraseCustomer(input: {
   const unerasable = await nameStillInThePassport(input.orgId, customer.displayName);
 
   await prisma.$transaction(async (tx) => {
+    // A note saying to ring somebody who has asked never to be rung again is
+    // the one thing here that must not survive: it is their name in free text
+    // and an instruction to telephone them, both at once (Phase 66).
+    count(
+      'job_follow_ups',
+      (
+        await tx.jobFollowUp.deleteMany({
+          where: { job: { orgId: input.orgId, customerId: customer.id } },
+        })
+      ).count,
+    );
+
     // Their signature: their hand, not a record about them.
     count(
       'signatures',
