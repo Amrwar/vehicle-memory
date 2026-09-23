@@ -51,6 +51,7 @@
     "verify:scoping": "tsx infra/scripts/verify-scoping.ts",
     "verify:followups": "tsx infra/scripts/verify-followups.ts",
     "verify:courtesy": "tsx infra/scripts/verify-courtesy.ts",
+    "verify:dictionary": "tsx infra/scripts/verify-dictionary.ts",
     "db:tenant-models": "tsx infra/scripts/generate-tenant-models.ts",
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
     "verify:paint": "tsx infra/scripts/verify-paint.ts",

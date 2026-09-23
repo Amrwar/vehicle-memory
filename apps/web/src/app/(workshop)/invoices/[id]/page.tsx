@@ -674,7 +674,7 @@ export default async function InvoicePage({
                   <thead>
                     <tr>
                       <Th>{t('When')}</Th>
-                      <Th>{t('How')}</Th>
+                      <Th>{t('How paid')}</Th>
                       <Th>{t('Reference')}</Th>
                       <Th>{t('Taken by')}</Th>
                       <Th numeric>{t('Amount')}</Th>
@@ -829,7 +829,7 @@ export default async function InvoicePage({
                       required
                     />
                   </Field>
-                  <Field label={t('How')}>
+                  <Field label={t('How paid')}>
                     <Select name="method" defaultValue="CARD">
                       {METHODS.map((m) => (
                         <option key={m.value} value={m.value}>
@@ -1095,7 +1095,7 @@ export default async function InvoicePage({
                     />
                   </Field>
                   <Field
-                    label={t('How')}
+                    label={t('How paid')}
                     hint={
                       paidWithCard
                         ? t('This bill was paid with a gift card; the money can go back onto it.')

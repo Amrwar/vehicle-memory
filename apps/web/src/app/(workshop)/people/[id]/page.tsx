@@ -371,7 +371,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   { label: t('Reference'), value: employee.reference },
                   { label: t('Type'), value: t(employee.employment.toLowerCase()) },
                   {
-                    label: t('Started'),
+                    label: t('Joined'),
                     value: employee.startedOn.toLocaleDateString(region.locale, {
                       day: 'numeric',
                       month: 'short',

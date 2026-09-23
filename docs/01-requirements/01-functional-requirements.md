@@ -267,6 +267,14 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10300 - One English sentence, one meaning
+
+| Ref      | Requirement                                                                                                                 | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10301 | An English sentence MUST have one translation per language across the whole product.                                        | 68    |
+| FR-10302 | A key answered two different ways by two areas MUST fail a check rather than be resolved silently by merge order.           | 68    |
+| FR-10303 | Where one English word carries two meanings, the English MUST be changed rather than one translation chosen over the other. | 68    |
+
 ## FR-10200 - The courtesy car
 
 | Ref      | Requirement                                                                                                                       | Phase |

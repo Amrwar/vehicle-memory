@@ -86,8 +86,11 @@ collected the navigation's `Back: 'Précédent'`. Both had answers, so every
 check above passed, and a French reader would have been shown "Unbalanced" on a
 page about cars.
 
-271 keys are translated two different ways in two different areas; whichever
-file merges last silently wins. For a long sentence that is a wording wobble
+272 keys were translated two different ways in two different areas; whichever
+file merged last silently won. Phase 68 mended the seven where the two areas
+meant genuinely different things — by changing the English, since a word
+needing two translations is ambiguous in English as well — and froze the
+remaining 259 in a baseline that `verify-dictionary.ts` will not let grow. For a long sentence that is a wording wobble
 between two correct renderings. For a one-word key it is the wrong meaning. The
 partial defence is to write phrases nobody else will want rather than words —
 "With a customer", "In the yard" — and to test that no English survives rather

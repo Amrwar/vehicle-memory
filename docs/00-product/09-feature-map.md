@@ -715,6 +715,14 @@ The second sweep: things connected at one end only.
 | What is out, and how late | Built  | "4 days overdue", in words rather than a colour (Phase 67)                           |
 | Back, with the odometer   | Built  | When, who took it, and what was on the clock (Phase 67)                              |
 
+## 21.34 One English sentence, one meaning
+
+| Item                        | Status  | Where                                                                             |
+| --------------------------- | ------- | --------------------------------------------------------------------------------- |
+| Two pages, one word         | Fixed   | Seven English words that meant two things, mended in English (Phase 68)           |
+| A new clash fails the build | Built   | `verify-dictionary.ts`, over the area files rather than the merged map (Phase 68) |
+| The rest, counted           | Partial | 259 remain, frozen so the number can only fall (Phase 68)                         |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -793,8 +801,8 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 403          |
-| Partial  | 1            |
+| Built    | 404          |
+| Partial  | 2            |
 | Deferred | 1            |
 
 <!-- counts:end -->

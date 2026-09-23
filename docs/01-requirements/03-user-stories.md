@@ -1642,6 +1642,36 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BU - One English sentence, one meaning (Phase 68)
+
+### BU1 - The French page says what the English page says
+
+**As** a French-reading service advisor **I want** a word on one page not to
+have been borrowed from another **so that** a courtesy car is not described to
+me as "unbalanced".
+**Size** 8 - **Satisfies** FR-10301, FR-10303
+
+- **Given** an English word two pages mean differently, **when** it is found,
+  **then** the English is changed on one of them rather than a translation
+  picked.
+- **Given** a gift card balance, **when** I read it, **then** it says
+  Remaining, which has one meaning.
+
+### BU2 - And it cannot happen again quietly
+
+**As** an engineer **I want** a new clash to fail the build **so that** the
+next one is found on the day it is written rather than two phases later by
+accident.
+**Size** 5 - **Satisfies** FR-10302
+
+- **Given** two areas defining one key differently, **when** the checks run,
+  **then** one fails and names the key.
+- **Given** the clashes that already exist, **when** the checks run, **then**
+  they are counted and do not fail, because a baseline that stops the bleeding
+  is worth more than a promise to fix them all at once.
+
+---
+
 ## Epic BT - The courtesy car (Phase 67)
 
 ### BT1 - The car we promised is there

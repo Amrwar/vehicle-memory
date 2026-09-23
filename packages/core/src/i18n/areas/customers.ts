@@ -128,7 +128,6 @@ export const fr: Readonly<Record<string, string>> = {
   'A deposit before the work, or credit kept from a refund':
     'Un acompte avant les travaux, ou un avoir conservé après un remboursement',
   Held: 'Détenu',
-  Credit: 'Avoir',
   Deposit: 'Acompte',
   'for job #{number}': 'pour le travail n° {number}',
   'Amount to return': 'Montant à restituer',
@@ -1026,7 +1025,6 @@ export const ar: Readonly<Record<string, string>> = {
   'A deposit before the work, or credit kept from a refund':
     'عربون قبل العمل، أو رصيد محتفظ به من استرداد',
   Held: 'محتفظ به',
-  Credit: 'رصيد دائن',
   Deposit: 'عربون',
   'for job #{number}': 'للعمل رقم {number}',
   'Amount to return': 'المبلغ المُعاد',

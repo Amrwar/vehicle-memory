@@ -209,9 +209,9 @@ export default async function GiftCardsPage({
                     <Th>{t('Number')}</Th>
                     <Th>{t('Sold')}</Th>
                     <Th>{t('For')}</Th>
-                    <Th>{t('Good')}</Th>
+                    <Th>{t('Valid until')}</Th>
                     <Th numeric>{t('Loaded')}</Th>
-                    <Th numeric>{t('Left')}</Th>
+                    <Th numeric>{t('Remaining')}</Th>
                     <Th>{t('Status')}</Th>
                   </tr>
                 </thead>

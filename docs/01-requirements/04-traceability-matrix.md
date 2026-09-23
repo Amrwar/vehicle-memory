@@ -511,6 +511,9 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                 | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- | ------ |
+| FR-10301 | BU1   | —                                      | seven ambiguous English words mended at the call site                          | `verify-dictionary.ts`                        | Done   |
+| FR-10302 | BU2   | —                                      | `verify-dictionary.ts`, over the area files rather than the merged map         | `verify-dictionary.ts`                        | Done   |
+| FR-10303 | BU1   | —                                      | Remaining, How paid, Joined, Valid until: the English carries the meaning      | `verify-dictionary.ts`                        | Done   |
 | FR-10201 | BT3   | `CourtesyVehicle`                      | `addToFleet()`, `retireFromFleet()`, and the page in settings                  | `verify-courtesy.ts`                          | Done   |
 | FR-10202 | BT1   | `CourtesyLoan`                         | `lend()`, and the card on the job                                              | `verify-courtesy.ts`                          | Done   |
 | FR-10203 | BT1   | `courtesy_loans_no_overlap`            | an exclusion constraint over the vehicle and the period                        | `verify-courtesy.ts`                          | Done   |
@@ -1101,7 +1104,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 212                 | 211                    |
+| Later phases, newest first                         | 215                 | 214                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1119,9 +1122,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **780**             | **771 (99%)**          |
+| **Total**                                          | **783**             | **774 (99%)**          |
 
-Every one of the 780 requirements now has a row of its own. Until Phase 61,
+Every one of the 783 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

@@ -436,7 +436,6 @@ export const fr: Readonly<Record<string, string>> = {
   '{from} to {to}': 'Du {from} au {to}',
   'Week of {date}': 'Semaine du {date}',
   'Cards cannot be moved in this view.': 'Les cartes ne peuvent pas être déplacées dans cette vue.',
-  Back: 'Précédent',
   Forward: 'Suivant',
   'Take a booking': 'Prendre un rendez-vous',
   'How to look at the diary': 'Comment afficher l’agenda',

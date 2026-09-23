@@ -4256,6 +4256,68 @@ wobble. For short ones it is the wrong meaning. Left for the next phase.
 
 `npm run verify:courtesy` holds this one: twenty-five checks.
 
+## Phase 68 — One English sentence, one meaning
+
+**Scope.** The fault Phase 67 found by accident: the dictionary is one flat map
+shared by every page, two areas can define the same key, and the merge keeps
+whichever file comes last.
+
+**Exit.** No page can quietly take another page's words without a check saying
+so, and the seven that were actually wrong are mended.
+
+**Status.** Built, and deliberately not finished.
+
+A courtesy car described as "Out" collected the ledger's `Out: 'Déséquilibré'`
+— out of balance. One described as "Back" collected the navigation's
+`Précédent`, meaning previous. A French reader would have been shown
+"Unbalanced" on a page about cars, and **every language check in the product
+passed**, because all three of them ask whether an answer exists rather than
+whether it is the right one. That is the shape of this fault: it is invisible
+to anybody who does not read the other language.
+
+**Two hundred and seventy-two keys were answered two different ways.** Reading
+them apart matters more than counting them, because they are three different
+problems wearing one shape:
+
+**The same word, inflected.** "Annulé" on a job and "Annulée" on an invoice
+are one translation agreeing with two nouns. French requires it; a flat
+dictionary cannot express it. Sixteen of these, and they are not defects.
+
+**Two renderings of one meaning.** "Entreprise" and "Société" for Company;
+"Photo" and "Photographie". A reader sees a different word on two pages —
+untidy rather than wrong, and the reason the number is large.
+
+**Two meanings.** "Left" is "Parti" on one page and "Restant" on another:
+departed, and remaining. One of those pages is simply wrong, and no amount of
+translating fixes it, because the fault is in the English. Seven of these, and
+they are what this phase mended.
+
+**The English was changed, not the French.** A gift card has a balance
+**Remaining**, not Left. A payment has a method — **How paid** — where a
+customer has a source. A person **Joined** where an inspection Started. A gift
+card is **Valid until** a date where an inspection item is Good. Each of those
+reads better in English too, which is the usual sign: a word that needs two
+translations was ambiguous to the English reader as well, and nobody noticed
+because they could guess from the page. The remaining three were dictionary
+entries for meanings nothing used — a Credit that meant a credit note, a
+Credited that meant the same, a Back that meant Previous — and those were
+simply removed.
+
+**And the rest are frozen rather than fixed.** Two hundred and fifty-nine
+remain, listed beside the check, and a key not on that list fails the build. A
+baseline is a poor substitute for a clean sheet and a good substitute for
+nothing: the fault stops spreading on the day the check lands, which is the day
+it costs least. Working the list down is editorial judgement in two languages,
+a few at a time, and pretending otherwise would mean two hundred and
+fifty-nine decisions made carelessly in an afternoon.
+
+What the check cannot do is tell a right answer from a wrong one. Nothing
+automatic can: `Out: 'Déséquilibré'` is a correct translation of a different
+sentence. It can only say that two pages disagree, and ask a person which is
+which — which is exactly the question that had never been asked.
+
+`npm run verify:dictionary` keeps it from growing.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

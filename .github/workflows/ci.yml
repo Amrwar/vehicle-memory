@@ -88,6 +88,13 @@ jobs:
       - name: Every sentence answered in French and Arabic
         run: npx tsx infra/scripts/i18n-scan.ts --answers
 
+      # And answered once. The dictionary is one flat map shared by every
+      # page, so two areas defining the same key means the merge silently
+      # keeps whichever file comes last -- which is how a courtesy car came to
+      # be described to a French reader as "out of balance".
+      - name: No page takes another page's words
+        run: npx tsx infra/scripts/verify-dictionary.ts
+
       # Colour is not a matter of taste here. This resolves the design tokens
       # through their var() chains and measures every pair a component puts
       # together, in both themes, against WCAG AA.

@@ -377,3 +377,21 @@ the dictionary is one flat map shared by every page, so a courtesy car described
 as "Out" found the ledger's "out of balance" and one described as "Back" found
 the navigation's "previous". Two hundred and seventy-one keys are translated two
 different ways in two different areas, and whichever file merges last wins.
+
+Phase 68 answers the fault Phase 67 stumbled into. The dictionary is one flat
+map from an English sentence to its French and Arabic, shared by every page, and
+two areas defining the same key meant the merge silently kept whichever file
+came last. Two hundred and seventy-two keys were answered two different ways.
+
+They are three problems wearing one shape. Sixteen are the same word agreeing
+with two different nouns, which French requires and a flat dictionary cannot
+express. Most of the rest are two renderings of one meaning — untidy rather than
+wrong. Seven were two meanings: "Left" was "departed" on one page and
+"remaining" on another, and one of those pages was simply wrong. Those seven
+were fixed by changing the English rather than the French, because a word that
+needs two translations was ambiguous to the English reader too — a gift card has
+a balance Remaining, a payment has a method, a person Joined.
+
+The other two hundred and fifty-nine are frozen rather than fixed: a new one
+fails the build, and the count can only fall. Working the list down is editorial
+judgement in two languages and does not belong in an afternoon.

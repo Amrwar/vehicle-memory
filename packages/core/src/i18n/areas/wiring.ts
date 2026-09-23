@@ -160,7 +160,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Credit kept back': 'Avoir conservé',
   'It comes off your next bill with them. It is not counted in what is shown as still to pay above.':
     'Il sera déduit de votre prochaine facture chez eux. Il n’est pas compris dans le montant restant dû affiché ci-dessus.',
-  Credited: 'Avoir',
   'That entry is not on this vehicle.': 'Cette entrée ne figure pas sur ce véhicule.',
   'That entry has already been corrected.': 'Cette entrée a déjà été corrigée.',
   'Only the workshop that recorded an entry can correct it. Add your own entry instead.':
@@ -316,7 +315,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Credit kept back': 'رصيد مُحتفظ به',
   'It comes off your next bill with them. It is not counted in what is shown as still to pay above.':
     'ُيخصم من فاتورتك التالية لديهم. وهو غير محتسب ضمن المبلغ المستحق المعروض أعلاه.',
-  Credited: 'إشعار دائن',
   'That entry is not on this vehicle.': 'هذه المُدخلة ليست على هذه المركبة.',
   'That entry has already been corrected.': 'سبق تصحيح هذه المُدخلة.',
   'Only the workshop that recorded an entry can correct it. Add your own entry instead.':
