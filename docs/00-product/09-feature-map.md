@@ -723,6 +723,15 @@ The second sweep: things connected at one end only.
 | A new clash fails the build | Built   | `verify-dictionary.ts`, over the area files rather than the merged map (Phase 68) |
 | The rest, counted           | Partial | 259 remain, frozen so the number can only fall (Phase 68)                         |
 
+## 21.35 What the fleet calls it
+
+| Item                      | Status | Where                                                                  |
+| ------------------------- | ------ | ---------------------------------------------------------------------- |
+| A fleet's own number      | Built  | On the customer's relationship with the van, not on the van (Phase 69) |
+| Found from the search box | Built  | Matched whole, so "17" does not drag back 170 and 178 (Phase 69)       |
+| One number, one van       | Built  | Refused by the database, case and spacing ignored (Phase 69)           |
+| Freed when the van goes   | Built  | Available again for whichever van replaces it (Phase 69)               |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -801,7 +810,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 404          |
+| Built    | 408          |
 | Partial  | 2            |
 | Deferred | 1            |
 

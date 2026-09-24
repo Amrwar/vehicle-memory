@@ -34,7 +34,7 @@ export async function searchEverything(orgId: string, input: string): Promise<Se
   const like = `%${q.raw}%`;
   const compactLike = `%${q.compact}%`;
 
-  const [customers, vehicles, jobs, invoices, parts, suppliers] = await Promise.all([
+  const [customers, vehicles, fleetVans, jobs, invoices, parts, suppliers] = await Promise.all([
     prisma.$queryRaw<
       {
         id: string;
@@ -84,6 +84,35 @@ export async function searchEverything(orgId: string, input: string): Promise<Se
               )
             )
           ORDER BY v."registration" NULLS LAST
+          LIMIT ${LIMIT}
+        `
+      : Promise.resolve([]),
+    // What a fleet calls its own vans. The driver who rings has never looked
+    // at the registration: he says "van 17", and this is the only way the
+    // counter finds it. Matched on the whole number rather than a prefix,
+    // because "17" must not drag back 17, 170 and 178 while somebody waits
+    // (FR-303, Phase 69).
+    q.raw.trim().length >= 1
+      ? prisma.$queryRaw<
+          {
+            id: string;
+            vin: string;
+            registration: string | null;
+            make: string | null;
+            model: string | null;
+            year: number | null;
+            number: string;
+            customer: string;
+          }[]
+        >`
+          SELECT v."id", v."vin", v."registration", v."make", v."model", v."year",
+                 f."number", c."displayName" AS customer
+          FROM "fleet_numbers" f
+          JOIN "vehicles" v ON v."id" = f."vehicleId"
+          JOIN "customers" c ON c."id" = f."customerId"
+          WHERE f."orgId" = ${orgId}
+            AND upper(btrim(f."number")) = ${q.raw.trim().toUpperCase()}
+          ORDER BY c."displayName"
           LIMIT ${LIMIT}
         `
       : Promise.resolve([]),
@@ -141,16 +170,30 @@ export async function searchEverything(orgId: string, input: string): Promise<Se
   const digitsOf = (value: string | null) => (value ?? '').replace(/\D/g, '');
 
   const hits: SearchHit[] = [
-    ...vehicles.map((v) => ({
+    // The fleet's own number first: somebody typing "17" into the box has been
+    // told "van 17" on the telephone and means exactly that one van.
+    ...fleetVans.map((v) => ({
       kind: 'vehicle' as const,
       id: v.id,
-      title: v.registration ?? v.vin,
-      subtitle: [v.year, v.make, v.model].filter(Boolean).join(' ') || v.vin,
+      title: `${v.number} · ${v.registration ?? v.vin}`,
+      subtitle: [v.customer, [v.year, v.make, v.model].filter(Boolean).join(' ')]
+        .filter(Boolean)
+        .join(' · '),
       href: `/vehicles/${v.id}`,
-      exact:
-        (v.registration ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase() === q.compact ||
-        v.vin.toUpperCase() === q.compact,
+      exact: true,
     })),
+    ...vehicles
+      .filter((v) => !fleetVans.some((van) => van.id === v.id))
+      .map((v) => ({
+        kind: 'vehicle' as const,
+        id: v.id,
+        title: v.registration ?? v.vin,
+        subtitle: [v.year, v.make, v.model].filter(Boolean).join(' ') || v.vin,
+        href: `/vehicles/${v.id}`,
+        exact:
+          (v.registration ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase() === q.compact ||
+          v.vin.toUpperCase() === q.compact,
+      })),
     ...jobs.map((j) => ({
       kind: 'job' as const,
       id: j.id,

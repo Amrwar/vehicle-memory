@@ -395,3 +395,18 @@ a balance Remaining, a payment has a method, a person Joined.
 The other two hundred and fifty-nine are frozen rather than fixed: a new one
 fails the build, and the count can only fall. Working the list down is editorial
 judgement in two languages and does not belong in an afternoon.
+
+Phase 69 closes FR-303's second half and puts it somewhere the requirement did
+not ask for. A company running forty vans paints a number on each door, and the
+driver who rings says "van 17 is making a noise" — he has never looked at the
+registration. So the feature is the searching, not the column: a number that can
+be typed in and not looked up is a column somebody filled in once, and this
+repository has already found three of those.
+
+The requirement says a _vehicle record_ must capture the fleet number, and it is
+not on the vehicle record. A vehicle is global — one row shared by every workshop
+and every owner it will ever have — and "Van 17" is Northgate Leasing's name for
+a Transit rather than a fact about it. On the vehicle it would follow the van
+when Northgate sold it and show to every workshop that ever touched it. The
+passport made the identical mistake with owners' names until Phase 62; the fact
+belongs where the relationship is.

@@ -304,6 +304,13 @@ jobs:
       - name: Verify the courtesy car
         run: npx tsx infra/scripts/verify-courtesy.ts
 
+      # A fleet paints a number on each van and the driver who rings knows
+      # nothing else. Most of these checks go through the search box rather
+      # than the table, because a number nobody can look up is a column
+      # somebody typed into -- and this repository has found three of those.
+      - name: Verify what the fleet calls it
+        run: npx tsx infra/scripts/verify-fleet-numbers.ts
+
       # And that the generated list is in step with the schema: a model added
       # without a decision about its tenancy fails here rather than shipping.
       - name: The tenant list matches the schema

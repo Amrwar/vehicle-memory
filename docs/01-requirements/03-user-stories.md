@@ -1642,6 +1642,37 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BV - What the fleet calls it (Phase 69)
+
+### BV1 - The driver says "van 17"
+
+**As** a service advisor **I want** to find a van by the number painted on its
+door **so that** a driver who has never read the registration can still be
+helped.
+**Size** 8 - **Satisfies** FR-10401, FR-10402
+
+- **Given** a van a fleet calls Van 17, **when** I type that into the search
+  box, **then** it is the first answer, with the fleet's name beside it.
+- **Given** I type it in lower case with stray spaces, **when** I search,
+  **then** it still finds it.
+- **Given** two fleets that each call a van Van 17, **when** I search,
+  **then** I am offered both, named by fleet, rather than one being guessed.
+
+### BV2 - And the number means one van
+
+**As** a workshop owner **I want** a fleet unable to give two vans one number
+**so that** the number stays something a van can be rung about.
+**Size** 5 - **Satisfies** FR-10403, FR-10404
+
+- **Given** a number already used, **when** I give it to another van, **then**
+  it is refused.
+- **Given** a van that leaves the fleet, **when** its number is cleared,
+  **then** the number is free for the van that replaces it.
+- **Given** a van sold to another company, **when** they bring it in, **then**
+  the previous owner's number is not on it.
+
+---
+
 ## Epic BU - One English sentence, one meaning (Phase 68)
 
 ### BU1 - The French page says what the English page says

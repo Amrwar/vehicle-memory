@@ -3722,7 +3722,8 @@ so, in bold, rather than being covered by a section heading:
   erasure should keep and what it should remove, and no code does any of it.
   _Closed in Phase 62._
 - **FR-303** — a vehicle's fleet number. The registration expiry is there; the
-  fleet number is not a column.
+  fleet number is not a column. _Closed in Phase 69, on the
+  customer's relationship with the van rather than on the van._
 - **FR-512** — courtesy vehicle allocation. There is a free-text note on a
   booking and nothing that knows whether a car is free. _The note is on the job, not
   the booking. Closed in Phase 67._
@@ -4317,6 +4318,58 @@ sentence. It can only say that two pages disagree, and ask a person which is
 which — which is exactly the question that had never been asked.
 
 `npm run verify:dictionary` keeps it from growing.
+
+## Phase 69 — What the fleet calls it
+
+**Scope.** FR-303's second half: the fleet number. Partial since the first
+phase — "the registration expiry is there; `fleetNumber` is not a column".
+
+**Exit.** A company can say what it calls each of its vans, and the counter can
+find one from that name alone.
+
+**Status.** Built, and put somewhere the requirement did not ask for.
+
+A company running forty vans paints a number on each door. When their driver
+rings, he says **"van 17 is making a noise"**. He has never looked at the
+registration and is not going to walk round the front to read it. The workshop
+has to find the van from the only name he knows.
+
+**Which makes the searching the feature, not the column.** A number that can be
+typed in and not looked up is a column somebody filled in once, and this
+repository has now found three of those: a follow-up table nothing read
+(Phase 66), a courtesy note nothing wrote (Phase 67), a quality register naming
+a check that tested something else (Phase 61). A fourth would be carelessness
+rather than bad luck. So the number goes into the one search box, matched whole
+rather than by prefix — "17" must not drag back 17, 170 and 178 while somebody
+waits — and most of the probe asks the box rather than the table.
+
+**FR-303 says "a vehicle record MUST capture fleet number", and this is not on
+the vehicle record.** A vehicle is global: one row shared by every workshop and
+every owner it will ever have (ADR-0004). "Van 17" is not a fact about a
+Transit — it is Northgate Leasing's name for it. On the vehicle, the number
+would follow the van when Northgate sold it and show to every other workshop
+that ever touched it, which is both wrong and a small leak of one company's
+internal numbering. The requirement predates that reasoning being worked all
+the way through, and the passport made the identical mistake with owners' names
+until Phase 62. The fact belongs where the relationship is.
+
+So: one organisation, one customer, one vehicle, one number, and deliberately
+no other column. A fleet's vehicles are still the distinct ones it has brought
+in, read off the job history exactly as `fleet.ts` has always done — this is not
+a register of who owns what, and the codebase already declined to invent one.
+
+**Two things the database refuses.** One number per van, and — the interesting
+one — one van per number. A fleet with two Van 17s cannot be rung about, which
+is the entire point of the number, so the constraint refuses rather than
+letting the search return two answers and the counter pick one. It is
+case-insensitive and ignores spacing, because "van 17" and "Van 17" are the
+same van and the person typing is on the telephone.
+
+And a number freed when a van leaves is free again for the van that replaced
+it, which is what fleets actually do with them.
+
+`npm run verify:fleet-numbers` holds it: seventeen checks, most of them through
+the search box.
 
 ## Running throughout — the four things that are not features
 

@@ -6,6 +6,12 @@
  */
 
 export const fr: Readonly<Record<string, string>> = {
+  'What they call it': 'Comment ils l’appellent',
+  'Say what they call it.': 'Indiquez comment ils l’appellent.',
+  'That van has not been in here yet.': 'Cette camionnette n’est pas encore passée ici.',
+  'They already call another van that. Two vans with one number cannot be rung about.':
+    'Ils appellent déjà une autre camionnette ainsi. Deux camionnettes portant le même numéro ne peuvent pas être signalées par téléphone.',
+  'Van 17': 'Camionnette 17',
   'integration updated': 'intégration mise à jour',
   'integrity-check': 'contrôle d’intégrité',
   'job note updated': 'note du travail modifiée',
@@ -1215,6 +1221,12 @@ export const fr: Readonly<Record<string, string>> = {
 };
 
 export const ar: Readonly<Record<string, string>> = {
+  'What they call it': 'ما يسمّونها به',
+  'Say what they call it.': 'اذكر ما يسمّونها به.',
+  'That van has not been in here yet.': 'لم تدخل هذه الشاحنة إلى هنا بعد.',
+  'They already call another van that. Two vans with one number cannot be rung about.':
+    'يطلقون هذا الاسم على شاحنة أخرى بالفعل. لا يمكن الاتصال بشأن شاحنتين تحملان الرقم نفسه.',
+  'Van 17': 'الشاحنة 17',
   'integration updated': 'حدّث تكاملاً',
   'integrity-check': 'فحص السلامة',
   'job note updated': 'عدّل ملاحظة عمل',

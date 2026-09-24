@@ -180,6 +180,7 @@ model Organization {
   keyEvents           KeyEvent[]
   courtesyVehicles    CourtesyVehicle[]
   courtesyLoans       CourtesyLoan[]
+  fleetNumbers        FleetNumber[]
 
   @@index([isActive])
   @@index([billingCustomerRef])
@@ -561,6 +562,7 @@ model Vehicle {
   handovers        HandoverInvitation[]
   courtesyVehicles CourtesyVehicle[]
   courtesyLoans    CourtesyLoan[]
+  fleetNumbers     FleetNumber[]
 
   @@index([registration])
   @@index([make, model, year])
@@ -1063,6 +1065,7 @@ model Customer {
   paymentAttempts     PaymentAttempt[]
   couponRedemptions   CouponRedemption[]
   courtesyLoans       CourtesyLoan[]
+  fleetNumbers        FleetNumber[]
 
   @@index([orgId, isActive])
   @@index([orgId, mobile])
@@ -1681,6 +1684,28 @@ model CourtesyLoan {
   @@index([customerId])
   @@index([jobId])
   @@map("courtesy_loans")
+}
+
+/// What a fleet calls one of its own vehicles: "Van 17", painted on the door.
+/// Not on the vehicle, which is global and outlives this customer's ownership
+/// of it — this is one customer's name for it at one workshop. Phase 69,
+/// FR-303.
+model FleetNumber {
+  id         String   @id @default(cuid())
+  orgId      String
+  customerId String
+  vehicleId  String
+  number     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  org      Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, customerId, vehicleId], map: "fleet_numbers_one_per_vehicle")
+  @@index([vehicleId])
+  @@map("fleet_numbers")
 }
 
 /// What a signature was given for. The record it belongs to says the rest. Phase 35.

@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10400 - What the fleet calls it
+
+| Ref      | Requirement                                                                                                   | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10401 | A customer MUST be able to record what it calls each of its own vehicles, at one workshop.                    | 69    |
+| FR-10402 | That name MUST be findable from the search box, matched whole rather than by prefix.                          | 69    |
+| FR-10403 | One customer MUST NOT be able to give two vehicles the same name, whatever the case or spacing.               | 69    |
+| FR-10404 | The name MUST NOT be a property of the vehicle, which is global and outlives this customer's ownership of it. | 69    |
+
 ## FR-10300 - One English sentence, one meaning
 
 | Ref      | Requirement                                                                                                                 | Phase |

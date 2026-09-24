@@ -28,8 +28,53 @@ import {
   FleetError,
   saveFleetAgreement,
 } from '@/lib/fleet';
+import {
+  clearFleetNumber,
+  FleetNumberError,
+  fleetNumbersFor,
+  setFleetNumber,
+} from '@/lib/fleet-numbers';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
+
+/**
+ * What this company calls one of its own vans. Phase 69, FR-303.
+ *
+ * On the fleet rather than on the vehicle, because the number belongs to the
+ * relationship: "Van 17" is Northgate's name for a Transit, not a fact about
+ * the Transit, and the van will outlive their ownership of it.
+ */
+async function nameVan(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('vehicle:write');
+  const customerId = String(formData.get('customerId') ?? '');
+  const number = String(formData.get('number') ?? '');
+
+  try {
+    if (number.trim().length === 0) {
+      await clearFleetNumber({
+        orgId,
+        userId: user.userId,
+        customerId,
+        vehicleId: String(formData.get('vehicleId') ?? ''),
+      });
+    } else {
+      await setFleetNumber({
+        orgId,
+        userId: user.userId,
+        customerId,
+        vehicleId: String(formData.get('vehicleId') ?? ''),
+        number,
+      });
+    }
+  } catch (error) {
+    if (!(error instanceof FleetNumberError)) throw error;
+    redirect(`/fleet/${customerId}?problem=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/fleet/${customerId}`);
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await tFor();
@@ -120,8 +165,9 @@ export default async function FleetDetailPage({
   const notice = await searchParams;
   const t = await tFor();
 
-  const [fleet, agreement] = await Promise.all([
+  const [fleet, numbers, agreement] = await Promise.all([
     fleetDetail(orgId, id),
+    fleetNumbersFor(orgId, id),
     fleetAgreementFor(orgId, id),
   ]);
   if (!fleet) notFound();
@@ -225,7 +271,31 @@ export default async function FleetDetailPage({
                     {row.vehicle.registration ? (
                       <Registration value={row.vehicle.registration} />
                     ) : null}
+                    {numbers.get(row.vehicle.id) ? (
+                      <Badge tone="neutral" size="sm">
+                        {numbers.get(row.vehicle.id)}
+                      </Badge>
+                    ) : null}
                   </div>
+
+                  {/* What the driver says on the telephone. Typed here, found
+                      from the search box. Phase 69. */}
+                  {can(user.role, 'vehicle:write') ? (
+                    <form action={nameVan} className="mt-1.5 flex items-end gap-2">
+                      <input type="hidden" name="customerId" value={id} />
+                      <input type="hidden" name="vehicleId" value={row.vehicle.id} />
+                      <Field label={t('What they call it')} hint={t('Optional')}>
+                        <Input
+                          name="number"
+                          defaultValue={numbers.get(row.vehicle.id) ?? ''}
+                          placeholder={t('Van 17')}
+                        />
+                      </Field>
+                      <Button type="submit" size="sm" variant="ghost">
+                        {t('Save')}
+                      </Button>
+                    </form>
+                  ) : null}
                   <p className="mt-1 text-[12px] text-(--text-faint)">
                     <Mileage t={t} locale={region.locale} km={row.vehicle.lastOdometerKm} /> ·{' '}
                     {t('last in {date}', { date: date(row.lastVisit, region.locale) })}

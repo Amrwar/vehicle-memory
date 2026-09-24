@@ -23,6 +23,7 @@ export const TENANT_SCOPED_MODELS: ReadonlySet<string> = new Set([
   'Job',
   'CourtesyVehicle',
   'CourtesyLoan',
+  'FleetNumber',
   'Signature',
   'VehicleCheck',
   'KeyEvent',

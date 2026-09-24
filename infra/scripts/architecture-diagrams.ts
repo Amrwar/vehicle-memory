@@ -92,6 +92,8 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'ServiceItem',
       'ServiceSchedule',
       'FleetAgreement',
+      // What a fleet calls its own vans. Phase 69.
+      'FleetNumber',
       'ConsentChange',
     ],
   },
