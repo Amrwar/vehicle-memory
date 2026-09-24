@@ -618,7 +618,12 @@ model VehicleEvent {
   jobRef           String?
 
   /// Hash chain. hash = H(salt | vehicleId | sequence | type | occurredAt |
-  /// canonical(payload) | prevHash). FR-403.
+  /// canonical(payload) | odometerKm | recordedByOrgId | supersedesId |
+  /// prevHash). FR-403.
+  ///
+  /// Every field named there is immutable, enforced by the append-only
+  /// trigger, and none of them may be nulled by a cascade -- which is why
+  /// recordedByOrg restricts deletion and recordedByUser does not. FR-10601.
   hash     String
   prevHash String?
 
@@ -626,9 +631,9 @@ model VehicleEvent {
   supersededById String? @unique
 
   vehicle        Vehicle                  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  recordedByOrg  Organization?            @relation(fields: [recordedByOrgId], references: [id], onDelete: SetNull)
+  recordedByOrg  Organization?            @relation(fields: [recordedByOrgId], references: [id], onDelete: Restrict)
   recordedByUser User?                    @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
-  supersedes     VehicleEvent?            @relation("EventSupersession", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersedes     VehicleEvent?            @relation("EventSupersession", fields: [supersedesId], references: [id], onDelete: NoAction)
   supersededBy   VehicleEvent?            @relation("EventSupersession")
   attachments    VehicleEventAttachment[]
 

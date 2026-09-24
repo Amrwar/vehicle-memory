@@ -437,3 +437,28 @@ word needing two translations is ambiguous to the English reader as well. The
 largest group left is French agreement, where one word must take two endings
 because it describes two different nouns; a flat dictionary cannot express that,
 and choosing between them would make one page wrong.
+
+Phase 72 is one defect, in the one mechanism the whole product rests on. CI had
+been red since 15 September — forty-odd runs — failing on the single sentence
+that matters: a passport no longer verifies. It was right, and it had been right
+for a week, and nobody had looked.
+
+A passport entry's hash covers the id of the workshop that recorded it, because
+"who did this work" is half of what the entry claims. The foreign key said
+`ON DELETE SET NULL`, and the append-only trigger — which lists every column of
+an event that may not change — did not list that one. The one column the hash
+covers was the one column nothing defended. Deleting a workshop rewrote every
+entry it had ever written to a value the stored hashes were not computed over,
+so every car it had ever touched lost its history, permanently and silently.
+
+Both halves are closed: the key restricts deletion, so a workshop that has
+written to a passport is retired rather than deleted — which is what the
+product has always said happens — and the column joins the list the trigger
+refuses to let anything change. `recordedByUserId` deliberately stays nullable
+and deliberately stays out of the hash, because a person leaving the trade must
+not break the history of every car they ever worked on.
+
+The lesson is not the foreign key. It is that this repository has an invariant
+stated in three places — a comment, an ADR, and a hash function — and in none of
+them was it something the database could enforce. `npm run verify:survival`
+asks the database rather than the code; before the fix it fails five checks.

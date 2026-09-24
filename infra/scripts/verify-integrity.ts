@@ -48,8 +48,21 @@ async function main() {
         `  ok    ${vehicle.make} ${vehicle.model} (${vehicle.vin}) — ${events.length} entries`,
       );
     } else {
+      // One cause is worth naming, because it looks identical to tampering
+      // and is not: an entry recorded by a workshop, whose recordedByOrgId --
+      // which the hash covers -- has since become null. Until Phase 72,
+      // deleting a workshop did exactly that. Saying so turns an hour of
+      // suspicion into a sentence.
+      const orphan = events.find(
+        (event) => event.recordedByOrgId === null && event.jobRef?.startsWith('job:'),
+      );
+
       inherited.push(
-        `${vehicle.make} ${vehicle.model} (${vehicle.vin}) at entry ${result.failedAt.sequence}: ${result.failedAt.reason}`,
+        `${vehicle.make} ${vehicle.model} (${vehicle.vin}) at entry ${result.failedAt.sequence}: ${result.failedAt.reason}` +
+          (orphan
+            ? `\n      entry ${orphan.sequence} was recorded by a workshop and names none now,` +
+              `\n      so the workshop was deleted while its entries pointed at it (Phase 72)`
+            : ''),
       );
     }
   }
@@ -67,7 +80,8 @@ async function main() {
         inherited.map((one) => `    ${one}`).join('\n') +
         '\n\n  These were written before this run. If this is a working database,\n' +
         '  reseed it (`npm run db:seed`). If it is production, that is a real\n' +
-        '  breach of the passport and the vehicle above is where to start.\n',
+        '  breach of the passport and the vehicle above is where to start.\n' +
+        '  `npm run verify:survival` checks the one way it has been broken before.\n',
     );
     failures += inherited.length;
   }

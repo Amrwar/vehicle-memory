@@ -1642,6 +1642,49 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BX - The passport outlives the workshop (Phase 72)
+
+### BX1 - The history survives the business
+
+**As** David, standing in a driveway **I want** the service history to still
+verify after the garage that wrote it has closed **so that** the record means
+something years later, which is the only time anybody needs it.
+
+**Size** 8 - **Satisfies** FR-10601, FR-10602
+
+- **Given** a workshop that has recorded an entry, **when** anything tries to
+  delete it, **then** the database refuses and the entry still names it.
+- **Given** that same workshop, **when** anything tries to null the column by
+  hand, **then** the append-only trigger refuses.
+- **Given** the workshop is retired instead, **when** the passport is
+  verified, **then** it verifies, and the entry still says who did the work.
+
+### BX2 - Made-up history can still be taken away
+
+**As** a workshop trying the demonstration **I want** to remove it completely
+**so that** nothing invented is left in my books.
+
+**Size** 3 - **Satisfies** FR-10603
+
+- **Given** a demonstration workshop, **when** it is removed, **then** its
+  vehicles and their entries go first and the workshop goes with them.
+- **Given** a demonstration workshop that booked in somebody's real car,
+  **when** it is removed, **then** that entry stays and the workshop is
+  retired rather than deleted.
+
+### BX3 - A break that says what broke it
+
+**As** an engineer **I want** a chain that fails to tell me why **so that** I
+do not spend an hour deciding whether the database has been tampered with.
+
+**Size** 2 - **Satisfies** FR-10604
+
+- **Given** an entry recorded by a workshop that names none now, **when** the
+  integrity check reports the chain, **then** it says the workshop was deleted
+  while its entries pointed at it.
+
+---
+
 ## Epic BW - A red that tells you what to do (Phase 70)
 
 ### BW1 - A failure I can act on

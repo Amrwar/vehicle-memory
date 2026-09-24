@@ -578,21 +578,39 @@ export async function removeDemonstration(input: { userId: string; orgId: string
   // entries first, so the cascade is not asked to guess the order.
   await prisma.journalEntry.deleteMany({ where: { orgId: org.id } });
 
-  await prisma.organization.delete({ where: { id: org.id } });
-
   // The events go before the vehicles, not with them: the database decides
   // whether an event may be deleted by reading its vehicle, and a vehicle
   // deleted in the same statement is one it can no longer read.
+  //
+  // And both go before the workshop, not after it. A passport entry's hash
+  // covers the id of the workshop that wrote it, so a workshop with entries
+  // still pointing at it cannot be deleted -- the database refuses, since
+  // Phase 72. Made-up history is the one exception, and this is it.
   const ids = vehicles.map((row) => row.id);
   await prisma.vehicleEvent.deleteMany({ where: { vehicleId: { in: ids } } });
   await prisma.vehicle.deleteMany({ where: { id: { in: ids } } });
+
+  // Unless the demonstration workshop wrote to a real car. Somebody who books
+  // their own vehicle into the demonstration to see how it feels leaves an
+  // entry in a passport that is evidence, and that entry stays. The workshop
+  // is then retired rather than deleted, exactly as a closing workshop is.
+  const written = await prisma.vehicleEvent.count({ where: { recordedByOrgId: org.id } });
+
+  if (written > 0) {
+    await prisma.organization.update({
+      where: { id: org.id },
+      data: { name: `${org.name} (closed)`, isActive: false, isDemonstration: false },
+    });
+  } else {
+    await prisma.organization.delete({ where: { id: org.id } });
+  }
 
   await audit({
     actorUserId: input.userId,
     action: 'demonstration.removed',
     entityType: 'Organization',
     entityId: org.id,
-    after: { vehicles: vehicles.length },
+    after: { vehicles: vehicles.length, retained: written },
   });
 }
 

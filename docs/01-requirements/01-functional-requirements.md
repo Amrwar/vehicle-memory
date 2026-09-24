@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10600 - The passport outlives the workshop
+
+| Ref      | Requirement                                                                                                                                                   | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10601 | Every field the event hash covers MUST be immutable once written, including by cascade from another table.                                                    | 72    |
+| FR-10602 | An organisation that has recorded a passport entry MUST NOT be deletable. It is retired: renamed and deactivated.                                             | 72    |
+| FR-10603 | Removing a demonstration workshop MUST remove its made-up history first, and MUST retire rather than delete it if it ever wrote to a real vehicle's passport. | 72    |
+| FR-10604 | A chain that fails because the workshop that recorded an entry was removed MUST be reported as that, rather than as tampering.                                | 72    |
+
 ## FR-10500 - A red that tells you what to do
 
 | Ref      | Requirement                                                                                                            | Phase |

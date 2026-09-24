@@ -750,6 +750,16 @@ The second sweep: things connected at one end only.
 | Two meanings split    | Built   | Journal entries, Source of business — mended in English (Phase 71)                |
 | The rest              | Partial | 231 remain, mostly French agreement, frozen so the count can only fall (Phase 71) |
 
+## 21.38 The passport outlives the workshop
+
+| Item                                | Status | Where                                                                                 |
+| ----------------------------------- | ------ | ------------------------------------------------------------------------------------- |
+| A workshop with entries is retired  | Fixed  | `ON DELETE RESTRICT`; deleting one used to break every car it touched (Phase 72)      |
+| Every hashed column is immutable    | Fixed  | `recordedByOrgId` joins the append-only trigger's list (Phase 72)                     |
+| Taking the demonstration away       | Built  | Its cars go first; a real car's entry keeps the workshop alive, retired (Phase 72)    |
+| A break that says what broke it     | Built  | `verify-integrity` names a deleted workshop rather than implying tampering (Phase 72) |
+| Asked of the database, not the code | Built  | `npm run verify:survival` (Phase 72)                                                  |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -828,7 +838,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 413          |
+| Built    | 416          |
 | Partial  | 3            |
 | Deferred | 1            |
 

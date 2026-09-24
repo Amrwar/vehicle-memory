@@ -120,15 +120,16 @@ transaction; everything outside is eventually consistent.
 **Root:** `Vehicle` · **Contains:** `VehicleEvent`, `VehicleOwnership`,
 `OdometerReading`
 
-| #   | Invariant                                                       | Enforced by                                       |
-| --- | --------------------------------------------------------------- | ------------------------------------------------- |
-| V1  | VIN is globally unique                                          | Database unique index                             |
-| V2  | Events are append-only. No update, no delete, ever.             | Repository refuses; no update path exists in code |
-| V3  | Each event's hash covers its content and its predecessor's hash | `chain.ts`, verified in tests                     |
-| V4  | Events are totally ordered per vehicle by sequence number       | Unique index on (vehicleId, sequence)             |
-| V5  | At most one open ownership at a time                            | Partial unique index where `endedAt is null`      |
-| V6  | A correction is a new event referencing the superseded one      | `supersede()` is the only correction path         |
-| V7  | An odometer decrease is recorded and flagged, never rejected    | `mileage.ts`                                      |
+| #   | Invariant                                                       | Enforced by                                             |
+| --- | --------------------------------------------------------------- | ------------------------------------------------------- |
+| V1  | VIN is globally unique                                          | Database unique index                                   |
+| V2  | Events are append-only. No update, no delete, ever.             | Repository refuses; no update path exists in code       |
+| V3  | Each event's hash covers its content and its predecessor's hash | `chain.ts`, verified in tests                           |
+| V3a | Every field that hash covers is immutable, cascades included    | Append-only trigger; `recordedByOrg` restricts deletion |
+| V4  | Events are totally ordered per vehicle by sequence number       | Unique index on (vehicleId, sequence)                   |
+| V5  | At most one open ownership at a time                            | Partial unique index where `endedAt is null`            |
+| V6  | A correction is a new event referencing the superseded one      | `supersede()` is the only correction path               |
+| V7  | An odometer decrease is recorded and flagged, never rejected    | `mileage.ts`                                            |
 
 V7 deserves a note. The intuitive design rejects impossible readings. That is
 wrong: an odometer that goes backwards is either a clerical error or **odometer

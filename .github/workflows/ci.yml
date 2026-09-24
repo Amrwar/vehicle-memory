@@ -173,6 +173,14 @@ jobs:
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 
+      # A passport entry's hash covers the id of the workshop that wrote it,
+      # so nothing may change that column afterwards. A foreign key said
+      # ON DELETE SET NULL and the append-only trigger did not list it, so
+      # closing a workshop quietly broke the history of every car it had ever
+      # touched. This asks the database, not the code.
+      - name: The passport outlives the workshop
+        run: npx tsx infra/scripts/verify-survival.ts
+
       # The runbook says untested backups are not backups. Dump the seeded
       # database with the server's own tools, restore into a fresh one, and
       # check every row came back and every chain still verifies in the copy.

@@ -82,6 +82,7 @@
     "verify:referrals": "tsx infra/scripts/verify-referrals.ts",
     "verify:giftcards": "tsx infra/scripts/verify-giftcards.ts",
     "verify:region": "tsx infra/scripts/verify-region.ts",
+    "verify:survival": "tsx infra/scripts/verify-survival.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",

@@ -4483,6 +4483,63 @@ largest group left and none of them is fixable by choosing: the English would
 have to differ wherever the French must, which means knowing which noun each
 call site is about. That is a phase of its own and it is not this one.
 
+## Phase 72 — The passport outlives the workshop
+
+**Scope.** One defect, in the one mechanism the whole product rests on.
+
+**Exit.** Nothing anywhere can change a field the event hash covers, and the
+database is what says so.
+
+**Status.** Found, reproduced, fixed, and checked.
+
+CI had been red since 15 September — forty-odd runs — failing in
+`verify-recovery` on the one sentence that matters: **a passport no longer
+verifies**. It was right, and it had been right for a week.
+
+A passport entry's hash covers, among other fields, `recordedByOrgId`: the id
+of the workshop that recorded it. That is deliberate. "Who did this work" is
+half of what the entry claims, and an entry whose author can be changed
+afterwards is not evidence of anything.
+
+Two things had to be true for the break, and both were:
+
+1. The foreign key from `vehicle_events.recordedByOrgId` to `organizations`
+   said `ON DELETE SET NULL`.
+2. The append-only trigger, which lists every column of an event that may not
+   change — id, vehicleId, sequence, type, occurredAt, recordedAt,
+   verification, title, summary, payload, odometerKm, hash, prevHash,
+   supersedesId — did not list `recordedByOrgId`.
+
+**The one column the hash covers was the one column nothing defended.** So
+deleting a workshop rewrote every passport entry it had ever written to a
+value the stored hash was not computed over. The rows kept their hashes.
+Verification recomputed them from the rewritten rows, and reported the
+difference. Every car that workshop had ever touched lost its history,
+permanently, and nothing anywhere said a word.
+
+Both are closed. The foreign key is `ON DELETE RESTRICT`: a workshop that has
+written to a passport cannot be deleted, it is retired — which is what the
+product has always said happens, in a comment in `verify-region` and an
+assumption in ADR-0014, and is now what the database says. And the column
+joins the list the trigger refuses to let anything change, so a future
+cascade, migration or hand-typed `UPDATE` is refused rather than believed.
+
+`recordedByUserId` deliberately stays `ON DELETE SET NULL` and deliberately
+stays out of the hash: a person who leaves the trade must not be able to break
+the history of every car they ever worked on. ADR-0014 — the passport carries
+no name.
+
+`npm run verify:survival` asks the database rather than the code. Before the
+fix it fails five checks; after it, a workshop cannot be deleted, cannot be
+nulled out by hand, is retired instead, and the passport holds through all of
+it. Made-up history can still be taken away: a demonstration workshop's
+vehicles go first, and if it ever wrote to a real car's passport it is retired
+rather than deleted, because that entry is evidence.
+
+And `verify-integrity` now names this cause when it sees it, because a chain
+broken this way is indistinguishable in its output from somebody tampering
+with the database — an hour of suspicion that should have been a sentence.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four
