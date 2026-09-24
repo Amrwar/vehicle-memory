@@ -1642,6 +1642,37 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BW - A red that tells you what to do (Phase 70)
+
+### BW1 - A failure I can act on
+
+**As** an engineer **I want** a failing check to tell me whether the code or
+the database is at fault **so that** I do not spend an hour proving the code
+innocent.
+**Size** 8 - **Satisfies** FR-10501, FR-10502
+
+- **Given** a probe that needs a freshly seeded database, **when** the database
+  is not fresh, **then** it says so once and names the remedy.
+- **Given** a probe that has run before, **when** it runs again, **then** it
+  measures what it did rather than what it and every previous run did.
+- **Given** a chain broken before this run, **when** the integrity check runs,
+  **then** it says the chain was already broken and which vehicle.
+
+### BW2 - The same answer CI gets
+
+**As** an engineer **I want** to run the checks the way CI runs them **so that**
+a green locally means something.
+**Size** 5 - **Satisfies** FR-10503, FR-10504
+
+- **Given** the workflow, **when** I run one command, **then** the probes run
+  in its order with its reseeds.
+- **Given** a probe added to the workflow, **when** I run that command,
+  **then** it runs too, because the order is read rather than remembered.
+- **Given** no application running, **when** I ask for the checks that need
+  one, **then** I am told that once rather than twenty-nine times.
+
+---
+
 ## Epic BV - What the fleet calls it (Phase 69)
 
 ### BV1 - The driver says "van 17"

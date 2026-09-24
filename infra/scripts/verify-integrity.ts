@@ -29,6 +29,7 @@ async function main() {
   let failures = 0;
 
   console.info('--- chain verification ---');
+  const inherited: string[] = [];
   const vehicles = await prisma.vehicle.findMany({
     where: { eventCount: { gt: 0 } },
     select: { id: true, vin: true, make: true, model: true },
@@ -47,11 +48,28 @@ async function main() {
         `  ok    ${vehicle.make} ${vehicle.model} (${vehicle.vin}) — ${events.length} entries`,
       );
     } else {
-      failures += 1;
-      console.error(
-        `  BROKEN ${vehicle.make} ${vehicle.model} at entry ${result.failedAt.sequence}: ${result.failedAt.reason}`,
+      inherited.push(
+        `${vehicle.make} ${vehicle.model} (${vehicle.vin}) at entry ${result.failedAt.sequence}: ${result.failedAt.reason}`,
       );
     }
+  }
+
+  // A chain this run did not write is a fact about the database, not about the
+  // code. On a working database there are none; on one that probes have been
+  // run against for weeks there may be a vehicle left behind by something that
+  // wrote events under a different LEDGER_CHAIN_SALT or an older hash. Either
+  // way the useful output is the vehicle's name and what to do, rather than a
+  // failure indistinguishable from the passport being broken — which is the
+  // one thing this file exists to detect.
+  if (inherited.length > 0) {
+    console.error(
+      `\n  ${inherited.length} chain(s) already in this database do not verify:\n` +
+        inherited.map((one) => `    ${one}`).join('\n') +
+        '\n\n  These were written before this run. If this is a working database,\n' +
+        '  reseed it (`npm run db:seed`). If it is production, that is a real\n' +
+        '  breach of the passport and the vehicle above is where to start.\n',
+    );
+    failures += inherited.length;
   }
 
   const target = vehicles[0];

@@ -400,7 +400,7 @@ async function main() {
     }),
   );
 
-  await recordRefund({
+  const refundId = await recordRefund({
     orgId: org.id,
     userId: staff.id,
     invoiceId,
@@ -424,8 +424,13 @@ async function main() {
   const afterRefund = await invoiceDetail(org.id, invoiceId);
   check('nothing is owed back any more', afterRefund?.money.owedBack.minor, 0);
 
+  // This run's refund, by id. `findFirst` on sourceType returned whichever
+  // refund the database happened to hand back, which on a database this probe
+  // had already run against was a previous run's — and passed, because every
+  // run refunds the same 24. A check that would pass without the code under
+  // it having run is not checking anything.
   const refundPosting = await prisma.journalEntry.findFirst({
-    where: { orgId: org.id, sourceType: 'Refund' },
+    where: { orgId: org.id, sourceType: 'Refund', sourceId: refundId },
     include: { lines: { include: { account: { select: { code: true } } } } },
   });
   check(
@@ -434,11 +439,17 @@ async function main() {
     24,
   );
 
+  // About *this* credit and *this* refund. Counting every message ever sent to
+  // that address meant the answer grew by two on every run: two on the first,
+  // four on the second, and a red probe that said nothing about the code.
   const toldTwice = await prisma.messageLog.count({
     where: {
       orgId: org.id,
       toAddress: previous.customer.email!,
-      relatedType: { in: ['CreditNote', 'Refund'] },
+      OR: [
+        { relatedType: 'CreditNote', relatedId: creditNoteId },
+        { relatedType: 'Refund', relatedId: refundId },
+      ],
     },
   });
   check('the customer was told about the credit and the refund', toldTwice, 2);

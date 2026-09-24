@@ -410,3 +410,20 @@ a Transit rather than a fact about it. On the vehicle it would follow the van
 when Northgate sold it and show to every workshop that ever touched it. The
 passport made the identical mistake with owners' names until Phase 62; the fact
 belongs where the relationship is.
+
+Phase 70 is about the checks rather than the product. Three times in one week a
+red probe cost an investigation before somebody noticed the database was simply
+dirty: `verify-inventory` asserts the seed's exact opening stock and then books
+more in, so the second run on one database measures the first and reports seven
+failures that each read like a product defect. A check that fails for the wrong
+reason is worse than no check, because it is believed.
+
+Those are mended, and `npm run checks` now runs the probes in the order CI runs
+them — reseeding where CI reseeds, reading both out of the workflow rather than
+a list somebody maintains beside it. Its first run found three things nobody
+could have seen before: the seed writes three expenses and no counter for them,
+so the first expense anybody recorded in a seeded workshop failed on a unique
+constraint; twenty-three audited actions belonged to no capability and so
+counted as nothing on the report that tells an operator what a pilot workshop
+actually used; and the new tool itself reported twenty-nine failures that were
+one failure, because the application was not running.

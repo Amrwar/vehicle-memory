@@ -732,6 +732,16 @@ The second sweep: things connected at one end only.
 | One number, one van       | Built  | Refused by the database, case and spacing ignored (Phase 69)           |
 | Freed when the van goes   | Built  | Available again for whichever van replaces it (Phase 69)               |
 
+## 21.36 A red that tells you what to do
+
+| Item                            | Status | Where                                                                          |
+| ------------------------------- | ------ | ------------------------------------------------------------------------------ |
+| The checks, in CI's order       | Built  | `npm run checks`, read out of the workflow rather than a typed list (Phase 70) |
+| Preconditions said once         | Built  | A dirty database is one sentence, not seven failures (Phase 70)                |
+| Probes measure their own effect | Built  | `verify-money` counts this run's messages, by id (Phase 70)                    |
+| The expense counter             | Fixed  | The seed wrote three expenses and no counter for them (Phase 70)               |
+| Uptake counts everything        | Fixed  | 23 audited actions belonged to no capability and counted as nothing (Phase 70) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -810,7 +820,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 408          |
+| Built    | 411          |
 | Partial  | 2            |
 | Deferred | 1            |
 

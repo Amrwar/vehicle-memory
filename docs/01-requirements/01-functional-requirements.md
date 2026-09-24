@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10500 - A red that tells you what to do
+
+| Ref      | Requirement                                                                                                            | Phase |
+| -------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10501 | A check whose precondition is unmet MUST say so in one sentence, rather than failing as though the code were at fault. | 70    |
+| FR-10502 | A check MUST assert its own effect rather than the state of shared data it did not create.                             | 70    |
+| FR-10503 | The checks MUST be runnable locally in the order CI runs them, from one command, with the same reseeds.                | 70    |
+| FR-10504 | That order MUST be read from the workflow rather than maintained beside it.                                            | 70    |
+
 ## FR-10400 - What the fleet calls it
 
 | Ref      | Requirement                                                                                                   | Phase |

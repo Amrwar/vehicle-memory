@@ -2873,6 +2873,20 @@ async function seedBanking(orgId: string, ownerUserId: string) {
       },
     ],
   });
+
+  // And the counter those three came off, which the seed did not write.
+  //
+  // Without it `nextExpenseReference` takes its `create` branch and hands out
+  // EXP-0001, which is one of the three above: the first expense anybody
+  // recorded in a seeded workshop failed on a unique constraint. Found in
+  // Phase 70 by running the checks in the order CI runs them — verify-banking
+  // passed alone and failed after a reseed, which is exactly the shape of a
+  // fault nobody sees until it is somebody's first day.
+  await prisma.documentSequence.upsert({
+    where: { orgId_kind: { orgId, kind: 'EXPENSE' } },
+    create: { orgId, kind: 'EXPENSE', prefix: 'EXP-', next: 4 },
+    update: { next: 4 },
+  });
 }
 
 async function appendChain(

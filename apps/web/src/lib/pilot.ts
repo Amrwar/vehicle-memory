@@ -21,6 +21,23 @@ import { prisma } from '@carnet/db';
  * that is a finding rather than a preference.
  */
 
+/*
+ * Twenty-four of these were added in Phase 70, all at once, because nothing
+ * had ever asked the question they answer.
+ *
+ * `unmapped()` below names every audited action belonging to no capability,
+ * and `verify-pilot` fails when the list is not empty — but only over actions
+ * a workshop has actually performed since the pilot began. On a database where
+ * nobody had approved a warranty claim, retired a bay, signed somebody off on
+ * a skill or created an API key, those actions were absent and the check was
+ * quiet. Running the probes in the order CI runs them exercised them, and
+ * twenty-three appeared at once.
+ *
+ * What they had been doing in the meantime was counting as nothing on
+ * `/reports/uptake`: the page that tells the operator which parts of the
+ * product a pilot workshop actually used. A capability nobody is recorded as
+ * using looks like a capability nobody wants.
+ */
 const CAPABILITIES: Capability[] = [
   // --- the day, which a workshop cannot not use ---------------------------
   {
@@ -40,6 +57,7 @@ const CAPABILITIES: Capability[] = [
       'job.cancelled',
       'job.clock.started',
       'job.clock.stopped',
+      'job.note.updated',
     ],
   },
   {
@@ -67,7 +85,13 @@ const CAPABILITIES: Capability[] = [
     name: 'Warranty',
     area: 'Finding work',
     expected: false,
-    actions: ['warranty.recorded', 'warranty.claim.raised', 'warranty.claim.settled'],
+    actions: [
+      'warranty.recorded',
+      'warranty.claim.raised',
+      'warranty.claim.settled',
+      'vehicle.claim.approved',
+      'vehicle.claim.refused',
+    ],
   },
   {
     name: 'Recalls and fitments',
@@ -119,6 +143,8 @@ const CAPABILITIES: Capability[] = [
       'referral.issued',
       'referral.used',
       'referral.credited',
+      'coupon.created',
+      'coupon.retired',
     ],
   },
 
@@ -148,7 +174,7 @@ const CAPABILITIES: Capability[] = [
     name: 'Ordering parts',
     area: 'Parts',
     expected: true,
-    actions: ['purchase.requested', 'supplier.created'],
+    actions: ['purchase.requested', 'supplier.created', 'purchase_order.created'],
   },
   {
     name: 'Sublet work',
@@ -170,13 +196,28 @@ const CAPABILITIES: Capability[] = [
     name: 'Customers',
     area: 'The customer',
     expected: true,
-    actions: ['customer.created', 'customer.updated', 'customer.registered', 'consent.withdrawn'],
+    actions: [
+      'customer.created',
+      'customer.updated',
+      'customer.registered',
+      'consent.withdrawn',
+      'customer.preferred_technician',
+      'customer.erased',
+    ],
   },
   {
     name: 'Talking to customers',
     area: 'The customer',
     expected: true,
-    actions: ['conversation.replied', 'conversation.assigned', 'template.saved'],
+    actions: [
+      'conversation.replied',
+      'conversation.assigned',
+      'template.saved',
+      'address.suppressed',
+      'address.unsuppressed',
+      'inbox.filed',
+      'assistant.draft_sent',
+    ],
   },
   {
     name: 'Asking for reviews',
@@ -241,6 +282,9 @@ const CAPABILITIES: Capability[] = [
       'payroll.paid',
       'payroll.exported',
       'skill.added',
+      'skill.signed-off',
+      'skill.withdrawn',
+      'working-pattern.set',
     ],
   },
   {
@@ -259,6 +303,14 @@ const CAPABILITIES: Capability[] = [
       'settings.labour_rate_retired',
       'settings.site_price_set',
       'settings.site_price_cleared',
+      'settings.assistant_budget',
+      'settings.bay.retired',
+      'settings.bay.restored',
+      'settings.jobtype.retired',
+      'settings.taxrate.retired',
+      'integration.updated',
+      'apikey.created',
+      'apikey.revoked',
     ],
   },
   {
@@ -270,6 +322,7 @@ const CAPABILITIES: Capability[] = [
       'invitation.accepted',
       'invitation.revoked',
       'membership.deactivated',
+      'membership.role_changed',
     ],
   },
   {

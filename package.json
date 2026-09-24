@@ -53,6 +53,7 @@
     "verify:courtesy": "tsx infra/scripts/verify-courtesy.ts",
     "verify:dictionary": "tsx infra/scripts/verify-dictionary.ts",
     "verify:fleet-numbers": "tsx infra/scripts/verify-fleet-numbers.ts",
+    "checks": "tsx infra/scripts/run-checks.ts",
     "db:tenant-models": "tsx infra/scripts/generate-tenant-models.ts",
     "verify:performance": "tsx infra/scripts/verify-performance.ts",
     "verify:paint": "tsx infra/scripts/verify-paint.ts",

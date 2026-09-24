@@ -96,6 +96,13 @@ async function main() {
     before.summary.missingReceipts > 0,
   );
 
+  // Anything a previous run left behind, before taking a number. `db:seed`
+  // resets the expense counter and does not remove rows written after the last
+  // seed, so a probe that died before its own cleanup leaves an EXP-0004 that
+  // the next run collides with — a unique-constraint error that reads like a
+  // product defect and is not one.
+  await prisma.expense.deleteMany({ where: { orgId: org.id, supplier: 'Probe printers' } });
+
   const noReceipt = await recordExpense({
     orgId: org.id,
     userId: owner.userId,

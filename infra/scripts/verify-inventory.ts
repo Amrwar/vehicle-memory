@@ -8,7 +8,19 @@
  * and reservation are the two places where a quiet error would corrupt job
  * costing for months before anyone noticed.
  *
- * Run against a freshly seeded database; it mutates stock.
+ * Run against a freshly seeded database. It asserts exact opening balances and
+ * it mutates stock, so the second run on one database measures the first run's
+ * leavings rather than the code.
+ *
+ * That contract was written down and not enforced, which turned out to be most
+ * of the problem. On a database this had already run against it produced seven
+ * assertion failures, each of which reads exactly like a product defect — and
+ * three times in one week somebody chased one before noticing the database was
+ * simply dirty. A red that does not tell you what to do costs more than no red
+ * at all, because it is believed.
+ *
+ * So the opening state is checked first, and an unmet precondition says so in
+ * one sentence and stops.
  */
 
 import 'dotenv/config';
@@ -73,6 +85,22 @@ async function main() {
   console.info('--- booking in a delivery at a different price ---');
 
   const before = await levelFor('34116864059', warehouse.id); // BMW discs: 1 on hand at 61.50
+
+  // The precondition, before anything that depends on it. Everything below is
+  // arithmetic about a known opening balance, so a different opening balance
+  // makes every figure wrong in a way that looks like broken code.
+  if (before.onHand !== 1 || Math.abs(before.avgCost - 61.5) > 0.005) {
+    console.error(
+      '\n  This check needs a freshly seeded database.\n\n' +
+        `  It expects 1 BMW disc on hand at 61.50 and found ${before.onHand} at ${before.avgCost}.\n` +
+        '  Nothing is wrong with the code: this probe books stock in and does not\n' +
+        '  put it back, so a second run measures the first run.\n\n' +
+        '  Run `npm run db:seed` and try again.\n',
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   check('discs on hand before', before.onHand, 1);
   near('discs average cost before', before.avgCost, 61.5);
 

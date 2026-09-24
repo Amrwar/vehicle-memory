@@ -4371,6 +4371,78 @@ it, which is what fleets actually do with them.
 `npm run verify:fleet-numbers` holds it: seventeen checks, most of them through
 the search box.
 
+## Phase 70 — A red that tells you what to do
+
+**Scope.** Not a feature. The eighty-eight verification scripts, and what they
+say when they fail for a reason that has nothing to do with the code.
+
+**Exit.** Every check passes in the order CI runs them, locally, from one
+command — and a check that fails for want of a seeded database or a running
+app says so in one sentence instead of impersonating a defect.
+
+**Status.** Built, and it found four things on its first run.
+
+Three times in one week a red probe cost an investigation before somebody
+noticed the database was simply dirty. `verify-inventory` asserts the seed's
+exact opening stock and then books more in; the second run on one database
+measures the first run, and reports seven assertion failures each of which
+reads exactly like a product defect. Its docblock said "run against a freshly
+seeded database" and CI honours that with a reseed. Nothing enforced it, and
+nothing said so when it was not met.
+
+**A check that fails for the wrong reason is worse than no check**, because it
+is believed. So the three that misled me were mended first:
+
+`verify-money` counted every message ever sent to a seeded customer and
+expected two — so it passed once and failed for ever after, by two each run. It
+now counts the messages about _this_ run's credit note and refund, by id. In
+passing, the same probe was reading "the refund posting" with `findFirst` on a
+type rather than an id, which on a used database returned a previous run's and
+passed because every run refunds the same amount. A check that would pass
+without the code under it having run is not checking anything.
+
+`verify-inventory` now checks its precondition before the arithmetic that
+depends on it, and says what to do.
+
+`verify-integrity` verifies every chain in the database. One vehicle left
+behind by an earlier run failed, which is indistinguishable in its output from
+the passport itself being broken — the one thing that file exists to detect. A
+chain this run did not write is now reported as what it is, with the vehicle's
+name, and what to do about it in either case.
+
+**And then the thing that made the rest visible.** `npm run checks` runs the
+probes in the order CI runs them, reseeding where CI reseeds, reading both out
+of `.github/workflows/ci.yml` rather than a list somebody types. This
+repository has found four hand-written "every X" lists that had fallen behind;
+the workflow is the one place that already has to be right.
+
+Its first run found three failures nobody could have seen before:
+
+**The seed never wrote the expense counter.** It creates EXP-0001 to EXP-0003
+and no `DocumentSequence` row for them, so `nextExpenseReference` takes its
+`create` branch and hands out EXP-0001 — which already exists. The first
+expense anybody recorded in a seeded workshop failed on a unique constraint.
+It passed when run twice in a row, because the second run inherited the counter
+the first had created, which is why this had never been seen.
+
+**Twenty-three audited actions belonged to no capability.** `/reports/uptake`
+tells the operator which parts of the product a pilot workshop actually used,
+and approving a warranty claim, retiring a bay, signing somebody off on a skill,
+creating an API key and nineteen others counted as nothing. The check for this
+already existed and was quiet, because it only looks at actions somebody has
+performed — and on a database where nobody had done those things, there was
+nothing to find. Running the probes in CI's order performed them.
+
+**And one in the new tool itself**, twice over. `verify-locally.ts` was named
+into the `verify-*` namespace, so `verify-throughout` insisted CI run it —
+which would have run all eighty-eight a second time, inside the first. The
+check was right and the name was wrong; it is `run-checks.ts` now. Then it
+printed the last six lines of a failing probe, which is that probe's own
+summary — "1 of 15 checks failed" — and hid the cause behind it. And on its
+first full run it reported twenty-nine failures that were one failure: the app
+was not running, and every probe said so in the language of whatever it
+checks. It now looks before it starts, and says that once.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four
