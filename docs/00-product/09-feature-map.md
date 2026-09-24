@@ -742,6 +742,14 @@ The second sweep: things connected at one end only.
 | The expense counter             | Fixed  | The seed wrote three expenses and no counter for them (Phase 70)               |
 | Uptake counts everything        | Fixed  | 23 audited actions belonged to no capability and counted as nothing (Phase 70) |
 
+## 21.37 Working the dictionary down
+
+| Item                  | Status  | Where                                                                             |
+| --------------------- | ------- | --------------------------------------------------------------------------------- |
+| Near-synonyms unified | Built   | 16 keys, 38 entries; the owning area keeps the word (Phase 71)                    |
+| Two meanings split    | Built   | Journal entries, Source of business — mended in English (Phase 71)                |
+| The rest              | Partial | 231 remain, mostly French agreement, frozen so the count can only fall (Phase 71) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -820,8 +828,8 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 411          |
-| Partial  | 2            |
+| Built    | 413          |
+| Partial  | 3            |
 | Deferred | 1            |
 
 <!-- counts:end -->

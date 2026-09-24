@@ -95,7 +95,7 @@ export default async function CustomersPage({
                   <Th>{t('Type')}</Th>
                   <Th>{t('Mobile')}</Th>
                   <Th>{t('Email')}</Th>
-                  <Th>{t('Source')}</Th>
+                  <Th>{t('Source of business')}</Th>
                   <Th numeric>{t('Jobs')}</Th>
                 </tr>
               </thead>

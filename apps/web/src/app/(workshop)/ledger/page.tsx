@@ -129,7 +129,11 @@ export default async function LedgerPage({
           tone={balance.balanced ? 'success' : 'danger'}
           note={balance.balanced ? t('The books balance') : t('Stop and investigate')}
         />
-        <StatTile label={t('Entries')} value={entries.length} note={t('Posted journal entries')} />
+        <StatTile
+          label={t('Journal entries')}
+          value={entries.length}
+          note={t('Posted journal entries')}
+        />
       </StatRow>
 
       {!balance.balanced ? (

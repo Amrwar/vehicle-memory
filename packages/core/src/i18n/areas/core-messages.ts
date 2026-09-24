@@ -466,7 +466,6 @@ export const fr: Readonly<Record<string, string>> = {
     'Abonnement résilié. Jours d’ouverture restants : {v1}. L’atelier passe ensuite en lecture seule. Rien n’est supprimé.',
   'The last payment did not go through. Update the card on the billing page; the provider will try again.':
     'Le dernier paiement n’a pas abouti. Mettez à jour la carte sur la page de facturation ; le prestataire réessaiera.',
-  'On a plan.': 'Abonné à une offre.',
   'Add a card to start the {v1}-day free trial. Nothing is charged until the trial ends, and cancelling before then costs nothing.':
     'Ajoutez une carte pour démarrer l’essai gratuit de {v1} jours. Rien n’est prélevé avant la fin de l’essai, et résilier avant ne coûte rien.',
   'The trial ends today. The card on file is charged for the first month unless you cancel.':
@@ -1028,7 +1027,6 @@ export const ar: Readonly<Record<string, string>> = {
     'أُلغي الاشتراك. الأيام المتبقية قبل أن تصبح الورشة للقراءة فقط: {v1}. لا يُحذف شيء.',
   'The last payment did not go through. Update the card on the billing page; the provider will try again.':
     'لم تنجح الدفعة الأخيرة. حدّث البطاقة في صفحة الفوترة؛ وسيعيد مزوّد الدفع المحاولة.',
-  'On a plan.': 'مشترك في خطة.',
   'Add a card to start the {v1}-day free trial. Nothing is charged until the trial ends, and cancelling before then costs nothing.':
     'أضف بطاقة لبدء التجربة المجانية لمدة {v1} يومًا. لا يُخصم أي مبلغ حتى نهاية التجربة، والإلغاء قبل ذلك لا يكلف شيئًا.',
   'The trial ends today. The card on file is charged for the first month unless you cancel.':

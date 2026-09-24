@@ -297,7 +297,7 @@ export const fr: Readonly<Record<string, string>> = {
   Difference: 'Écart',
   'The books balance': 'La comptabilité est équilibrée',
   'Stop and investigate': 'Arrêtez-vous et vérifiez',
-  Entries: 'Écritures',
+  'Journal entries': 'Écritures',
   'Posted journal entries': 'Écritures de journal passées',
   'Debits and credits do not agree. Every figure on the financial statements is derived from these postings, so none of them is meaningful until this is resolved.':
     'Les débits et les crédits ne concordent pas. Chaque chiffre des états financiers découle de ces écritures : aucun n’a de sens tant que ce n’est pas résolu.',
@@ -1090,7 +1090,7 @@ export const ar: Readonly<Record<string, string>> = {
   Difference: 'الفرق',
   'The books balance': 'الدفاتر متوازنة',
   'Stop and investigate': 'توقف وتحقق',
-  Entries: 'القيود',
+  'Journal entries': 'القيود',
   'Posted journal entries': 'قيود اليومية المُرحّلة',
   'Debits and credits do not agree. Every figure on the financial statements is derived from these postings, so none of them is meaningful until this is resolved.':
     'المدين والدائن غير متطابقين. كل رقم في القوائم المالية مستمد من هذه القيود، لذا لا معنى لأي منها حتى تُحل هذه المشكلة.',

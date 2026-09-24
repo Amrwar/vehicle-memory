@@ -419,7 +419,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Choose a plan': 'Choisir une formule',
   'Per bay, per month.': 'Par poste, par mois.',
   current: 'actuelle',
-  Keep: 'Garder',
   Choose: 'Choisir',
   'The trial ends now and the card is never charged. Everything is kept, readable and exportable, and choosing a plan reopens it.':
     'L’essai prend fin maintenant et la carte n’est jamais prélevée. Tout est conservé, consultable et exportable, et choisir une formule rouvre l’atelier.',
@@ -465,7 +464,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Role decides which screens they see': 'Le rôle détermine les écrans visibles',
   Site: 'Site',
   'All sites': 'Tous les sites',
-  Remove: 'Retirer',
   'Waiting to be accepted': 'En attente d’acceptation',
   'Open invitations': 'Invitations en attente',
   'sent by {name}': 'envoyée par {name}',
@@ -533,7 +531,6 @@ export const fr: Readonly<Record<string, string>> = {
     'Un client par ligne, particulier ou société, avec ses coordonnées.',
   'First name': 'Prénom',
   'Last name': 'Nom',
-  Company: 'Société',
   Notes: 'Notes',
   'One vehicle each, on your books, with its passport started as migrated history.':
     'Un véhicule par ligne, dans vos fiches, avec son passeport ouvert comme historique repris.',
@@ -550,7 +547,6 @@ export const fr: Readonly<Record<string, string>> = {
     'Rattache la voiture à un client déjà dans vos fiches, ou importé le même après-midi.',
   'One part each in the catalogue, with opening stock at your main store.':
     'Une pièce par ligne dans le catalogue, avec le stock d’ouverture dans votre magasin principal.',
-  'Part number': 'Référence',
   Brand: 'Marque',
   'Cost price': 'Prix de revient',
   'Sell price': 'Prix de vente',
@@ -568,7 +564,6 @@ export const fr: Readonly<Record<string, string>> = {
   Debit: 'Débit',
   Credit: 'Crédit',
   Memo: 'Libellé',
-  Import: 'Import',
   '{count} rows.': '{count} lignes.',
   Imported: 'Importé',
   'Ready to import': 'Prêt à importer',
@@ -655,7 +650,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Waiting for a delay to pass': 'En attente de la fin d’un délai',
   'Past due': 'En retard',
   'Should already have gone': 'Aurait déjà dû partir',
-  'Held back': 'Retenues',
   'Fired, then a condition stopped it': 'Déclenchées, puis bloquées par une condition',
   'Every rule is switched off.': 'Toutes les règles sont désactivées.',
   'Nothing on this page will happen. A rule that is written but inactive looks identical, from the dashboard, to one that is quietly working.':
@@ -1410,7 +1404,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Choose a plan': 'اختر خطة',
   'Per bay, per month.': 'لكل منصة، شهرياً.',
   current: 'الحالية',
-  Keep: 'الإبقاء',
   Choose: 'اختيار',
   'The trial ends now and the card is never charged. Everything is kept, readable and exportable, and choosing a plan reopens it.':
     'تنتهي الفترة التجريبية الآن ولن يُخصم من البطاقة شيء. يُحتفظ بكل شيء قابلاً للاطلاع والتصدير، واختيار خطة يعيد فتح الورشة.',
@@ -1456,7 +1449,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Role decides which screens they see': 'يحدّد الدور الشاشات التي يراها',
   Site: 'الموقع',
   'All sites': 'كل المواقع',
-  Remove: 'إزالة',
   'Waiting to be accepted': 'بانتظار القبول',
   'Open invitations': 'الدعوات المفتوحة',
   'sent by {name}': 'أرسلها {name}',
@@ -1524,7 +1516,6 @@ export const ar: Readonly<Record<string, string>> = {
     'عميل واحد لكل صف، فرداً كان أو شركة، مع طريقة التواصل معه.',
   'First name': 'الاسم الأول',
   'Last name': 'اسم العائلة',
-  Company: 'الشركة',
   Notes: 'ملاحظات',
   'One vehicle each, on your books, with its passport started as migrated history.':
     'مركبة واحدة لكل صف، في سجلاتك، مع بدء جوازها كسجل منقول.',
@@ -1541,7 +1532,6 @@ export const ar: Readonly<Record<string, string>> = {
     'يربط السيارة بعميل مسجَّل لديك أصلاً، أو مستورد في الجلسة نفسها.',
   'One part each in the catalogue, with opening stock at your main store.':
     'قطعة واحدة لكل صف في الكتالوج، مع المخزون الافتتاحي في مستودعك الرئيسي.',
-  'Part number': 'رقم القطعة',
   Brand: 'العلامة التجارية',
   'Cost price': 'سعر التكلفة',
   'Sell price': 'سعر البيع',
@@ -1559,7 +1549,6 @@ export const ar: Readonly<Record<string, string>> = {
   Debit: 'مدين',
   Credit: 'دائن',
   Memo: 'البيان',
-  Import: 'استيراد',
   '{count} rows.': '{count} صفوف.',
   Imported: 'تم الاستيراد',
   'Ready to import': 'جاهز للاستيراد',
@@ -1643,7 +1632,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Waiting for a delay to pass': 'بانتظار انقضاء مهلة',
   'Past due': 'متأخرة',
   'Should already have gone': 'كان يجب أن تُنفَّذ بالفعل',
-  'Held back': 'مُعلَّقة',
   'Fired, then a condition stopped it': 'أُطلقت ثم أوقفها شرط',
   'Every rule is switched off.': 'كل القواعد متوقفة.',
   'Nothing on this page will happen. A rule that is written but inactive looks identical, from the dashboard, to one that is quietly working.':

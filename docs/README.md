@@ -427,3 +427,13 @@ constraint; twenty-three audited actions belonged to no capability and so
 counted as nothing on the report that tells an operator what a pilot workshop
 actually used; and the new tool itself reported twenty-nine failures that were
 one failure, because the application was not running.
+
+Phase 71 is the first instalment of the dictionary clean-up Phase 68 froze: 259
+clashes become 231. Sixteen were two renderings of one meaning and were unified
+on whichever part of the product owns the term. Two were two meanings wearing
+one word — "Entries" is écritures on the ledger and entrées on a passport — and
+those were mended in English rather than by choosing a translation, because a
+word needing two translations is ambiguous to the English reader as well. The
+largest group left is French agreement, where one word must take two endings
+because it describes two different nouns; a flat dictionary cannot express that,
+and choosing between them would make one page wrong.

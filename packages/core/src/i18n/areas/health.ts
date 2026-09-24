@@ -19,7 +19,6 @@ export const fr: Readonly<Record<string, string>> = {
   '{count} things came of that press, oldest first.':
     '{count} éléments découlent de cette action, du plus ancien au plus récent.',
   recorded: 'enregistré',
-  queued: 'mis en file',
   told: 'notifié',
   sent: 'envoyé',
   'Check the mail provider’s dashboard for the reason it is refusing.':
@@ -125,7 +124,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Events waiting': 'Événements en attente',
   'Messages due and not gone': 'Messages dus et non partis',
   'Messages that failed today': 'Messages en échec aujourd’hui',
-  Email: 'Courriel',
   'Text messages': 'SMS',
   'Card payments': 'Paiements par carte',
   'File store': 'Stockage des fichiers',
@@ -228,7 +226,6 @@ export const ar: Readonly<Record<string, string>> = {
   '{count} things came of that press, oldest first.':
     'نتج عن تلك الضغطة {count} من الأمور، من الأقدم إلى الأحدث.',
   recorded: 'مسجَّل',
-  queued: 'في الطابور',
   told: 'أُبلغ',
   sent: 'أُرسل',
   'Check the mail provider’s dashboard for the reason it is refusing.':
@@ -332,7 +329,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Events waiting': 'أحداث منتظرة',
   'Messages due and not gone': 'رسائل حان وقتها ولم تُرسل',
   'Messages that failed today': 'رسائل أخفقت اليوم',
-  Email: 'البريد الإلكتروني',
   'Text messages': 'الرسائل النصية',
   'Card payments': 'المدفوعات بالبطاقة',
   'File store': 'مخزن الملفات',

@@ -4443,6 +4443,46 @@ first full run it reported twenty-nine failures that were one failure: the app
 was not running, and every probe said so in the language of whatever it
 checks. It now looks before it starts, and says that once.
 
+## Phase 71 — Twenty-eight of the two hundred and fifty-nine
+
+**Scope.** The dictionary clashes Phase 68 froze rather than fixed, worked down
+a batch at a time.
+
+**Exit.** 259 becomes 231, and the ones removed were removed for a reason that
+can be stated.
+
+**Status.** Built. Deliberately partial, again.
+
+Phase 68 found 272 English keys answered two different ways by two areas, mended
+the seven that meant genuinely different things, and froze the rest so the
+number could only fall. This is the first instalment of the falling.
+
+Reading them apart is most of the work, because three different problems wear
+one shape:
+
+**Two renderings of one meaning.** "Conserver" and "Garder" for Keep;
+"Entreprise" and "Société" for Company; "Photo" and "Photographie". Either is
+correct and a reader sees a different word on two pages. Sixteen of these were
+unified by keeping the word belonging to whichever part of the product owns the
+term — Company to the customers area, Part number to jobs, How they paid to
+money — and deleting the duplicates. Thirty-eight entries went; nothing lost a
+translation, which the answers scan confirms.
+
+**Two meanings.** "Entries" is _écritures_ on the ledger, an accounting term,
+and _entrées_ on a passport, a list of things that happened. "Source" is where
+an audit line came from and how a customer found us. One English word, two
+trades, and whichever area merged last decided what both pages said. Fixed in
+English, as Phase 68 established: the ledger counts **Journal entries** and a
+customer has a **Source of business**. Both read better in English too, which
+is the usual sign that the ambiguity was never only a translation problem.
+
+**French agreement.** "Annulé" on a job, "Annulée" on an invoice; _payé_ and
+_payée_; _ouvert_ and _ouverte_. These are one translation agreeing with two
+nouns, French requires it, and a flat dictionary cannot say it. They are the
+largest group left and none of them is fixable by choosing: the English would
+have to differ wherever the French must, which means knowing which noun each
+call site is about. That is a phase of its own and it is not this one.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four
