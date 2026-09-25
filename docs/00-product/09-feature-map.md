@@ -777,6 +777,13 @@ The second sweep: things connected at one end only.
 | The engines, installed first | Fixed  | Chromium was never installed at all; three checks launch it (Phase 74) |
 | Asserted, not assumed        | Built  | `verify-throughout` reads each check's Playwright import (Phase 74)    |
 
+## 21.41 A button that would not wrap
+
+| Item                       | Status | Where                                                                               |
+| -------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| Labels wrap when they must | Fixed  | Every button carried `whitespace-nowrap`; one label widened a whole form (Phase 75) |
+| Nothing wider than 320px   | Held   | Measured on every route, on the platform CI runs (Phase 75)                         |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases

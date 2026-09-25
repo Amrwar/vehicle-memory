@@ -267,6 +267,13 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10900 - A button that would not wrap
+
+| Ref      | Requirement                                                                           | Phase |
+| -------- | ------------------------------------------------------------------------------------- | ----- |
+| FR-10901 | A control's label MUST wrap rather than make the page wider than the screen.          | 75    |
+| FR-10902 | No screen may exceed the narrowest supported width, measured on the platform CI runs. | 75    |
+
 ## FR-10800 - The browser nobody installed
 
 | Ref      | Requirement                                                                                               | Phase |

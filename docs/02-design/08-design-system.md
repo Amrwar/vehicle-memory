@@ -140,6 +140,12 @@ phone must see the same thing.
 **Primitives:** Button (6 variants, 6 sizes), Badge, Card, Input, Textarea,
 Select, Field, Alert, EmptyState, PageHeader, Divider.
 
+**A button wraps its label rather than making the page wider than the screen.**
+`whitespace-nowrap` was on every button until Phase 75, and one thirty-four
+character label set the width of every field on the sign-up form, because a
+grid track is sized by the widest thing in it. A label wraps only when there is
+no room for it, which is the moment wrapping is the right answer.
+
 **Buttons read as buttons before they are read at all.** Every variant has a
 pointer cursor (Tailwind 4 removed the browser default), a weight above body
 text, a visible focus ring, and a one-pixel press. Primary is the filled

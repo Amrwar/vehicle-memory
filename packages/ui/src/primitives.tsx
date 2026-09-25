@@ -15,7 +15,13 @@ import { cn } from './cn';
  * it like an input. One primary per screen, for the thing the page is for.
  */
 const button = cva(
-  'inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap ' +
+  // Not whitespace-nowrap, which every button carried until Phase 75. A button
+  // that refuses to wrap is a button that makes the page wider than the screen
+  // when its words do not fit -- and because a grid track is sized by the
+  // widest thing in it, one long label pushed every field on the sign-up form
+  // past the edge of a 320px screen. A label wraps only when there is no room
+  // for it, which is the moment wrapping is the right answer.
+  'inline-flex items-center justify-center gap-2 font-semibold text-balance ' +
     'cursor-pointer select-none transition-[background-color,border-color,box-shadow,transform] ' +
     'duration-150 active:translate-y-px ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--brand) ' +

@@ -4627,6 +4627,45 @@ One install step, before the first check that launches anything. And
 which engines its import line names, and asks the workflow whether each was
 installed before that file is run. It fails without the fix.
 
+## Phase 75 — A button that would not wrap
+
+**Scope.** One class on one primitive, and the seven pixels that made it
+invisible on this machine.
+
+**Exit.** No screen is wider than the screen at 320 pixels, on the platform
+that decides.
+
+**Status.** Done.
+
+With the browsers installed, CI reached the responsiveness check and reported
+the sign-up form seven pixels wider than a 320-pixel screen — and the same
+check passed locally, on the same commit, against the same build. Seven pixels
+is the width of a font difference: Chromium on Linux draws the same string a
+little wider than Chromium on Windows.
+
+The seven pixels were not the defect, they were the margin. **The defect was
+that the form only ever fitted by luck.** Every button in the product carried
+`whitespace-nowrap`, and the sign-up form's primary action — "Create the
+workshop and add a card" — is thirty-four characters that cannot fit 280
+pixels. A grid track is sized by the widest thing in it, so that one label set
+the width of every field above it: the workshop name, the email, the password,
+all pushed past the edge by a button four rows below them.
+
+Measured rather than guessed: the button's min-content was 292.9 pixels inside
+a 280-pixel form, and every field was exactly 292.9 wide. Locally that landed
+at 312.9 of 320 and passed. On Linux it did not.
+
+`whitespace-nowrap` is right for a badge and for a button in a toolbar. It is
+wrong as a rule for every button everywhere, because a label that cannot fit
+has to do something, and making the page scroll sideways is the worst of the
+options. The base class is `text-balance` now: a label wraps only when there
+is no room for it, which is the moment wrapping is the right answer.
+
+**And the thing worth remembering.** The check that found this had been
+passing locally all along. The gate is the platform CI runs on, not the one the
+work is done on, and "it passes on my machine" was exactly true and exactly
+useless.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

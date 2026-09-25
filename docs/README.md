@@ -505,3 +505,23 @@ default — true of `playwright install` with no arguments and of nothing else.
 So the screens check had been failing on a missing executable rather than on a
 screen. `verify-throughout` now reads every check's Playwright import and asks
 the workflow whether each engine it names was installed before that check runs.
+
+Phase 75 is one class on one primitive. With the browsers installed, CI reached
+the responsiveness check and reported the sign-up form seven pixels wider than a
+320-pixel screen — while the same check passed locally, on the same commit,
+against the same build. Seven pixels is the width of a font difference between
+Chromium on Linux and Chromium on Windows.
+
+The seven pixels were the margin, not the defect. Every button in the product
+carried `whitespace-nowrap`, and the sign-up form's primary action — "Create the
+workshop and add a card" — cannot fit 280 pixels. A grid track is sized by the
+widest thing in it, so that one label set the width of every field above it: the
+workshop name, the email, the password, each pushed past the edge by a button
+four rows below. Measured: the button's min-content was 292.9 pixels inside a
+280-pixel form, and every field was exactly 292.9 wide.
+
+A label that cannot fit has to do something, and making the page scroll sideways
+is the worst of the options. Buttons wrap now, which happens only when there is
+no room — the moment wrapping is the right answer. And the thing worth keeping:
+the check that found this had been green locally all along. The gate is the
+platform CI runs on.

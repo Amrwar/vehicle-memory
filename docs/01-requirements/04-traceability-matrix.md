@@ -511,6 +511,8 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-10901 | CA1   | -                                      | the button base wraps instead of `whitespace-nowrap`                                | `verify-screens.ts`                           | Done   |
+| FR-10902 | CA1   | -                                      | every route at 320px, measured in CI                                                | `verify-screens.ts`                           | Done   |
 | FR-10801 | BZ1   | -                                      | one install step before the first check that launches a browser                     | `verify-throughout.ts`                        | Done   |
 | FR-10802 | BZ1   | -                                      | read from each check's `from 'playwright'` import line                              | `verify-throughout.ts`                        | Done   |
 | FR-10701 | BY1   | -                                      | the gates in `p/[token]`, `handover/[token]`, `r/[token]`, and two portal routes    | `smoke.ts`, `verify-status.ts`                | Done   |
@@ -1122,7 +1124,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 233                 | 232                    |
+| Later phases, newest first                         | 235                 | 234                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1140,9 +1142,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **801**             | **793 (99%)**          |
+| **Total**                                          | **803**             | **795 (99%)**          |
 
-Every one of the 801 requirements now has a row of its own. Until Phase 61,
+Every one of the 803 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

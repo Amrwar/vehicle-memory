@@ -1642,6 +1642,22 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CA - A button that would not wrap (Phase 75)
+
+### CA1 - Nothing wider than the screen
+
+**As** somebody signing up on a small telephone **I want** the form to fit
+**so that** I am not dragging the page sideways to read a field.
+
+**Size** 2 - **Satisfies** FR-10901, FR-10902
+
+- **Given** a button whose label is longer than the screen, **when** the page
+  is drawn at 320 pixels, **then** the label wraps and nothing overflows.
+- **Given** a grid of fields above that button, **when** it is measured,
+  **then** none of them is widened by it.
+
+---
+
 ## Epic BZ - The browser nobody installed (Phase 74)
 
 ### BZ1 - A check that can run
