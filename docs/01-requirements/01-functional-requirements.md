@@ -276,10 +276,10 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 
 ## FR-10800 - The browser nobody installed
 
-| Ref      | Requirement                                                                                               | Phase |
-| -------- | --------------------------------------------------------------------------------------------------------- | ----- |
-| FR-10801 | Every browser engine a check launches MUST be installed by the workflow before that check runs.           | 74    |
-| FR-10802 | That MUST be derived from the checks' own imports rather than from a list maintained beside the workflow. | 74    |
+| Ref      | Requirement                                                                                                                 | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-10801 | Every browser engine a check launches MUST be installed by the workflow, with its system libraries, before that check runs. | 74    |
+| FR-10802 | That MUST be derived from the checks' own imports rather than from a list maintained beside the workflow.                   | 74    |
 
 ## FR-10700 - A page that is not there says so
 

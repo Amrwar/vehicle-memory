@@ -154,6 +154,21 @@ function theChecksRun() {
     'and every browser a check launches is installed before it runs',
     uninstalled.join(', '),
   );
+
+  // With its libraries. Chromium runs on a bare runner; WebKit and Firefox
+  // do not -- they want thirty-odd shared objects that are not on the image,
+  // and `playwright install` without `--with-deps` downloads the browser and
+  // stops there. The failure arrives as a wall of .so names, which reads as
+  // an infrastructure problem rather than a missing flag.
+  const bare = [...ci.matchAll(/playwright install([^\n]*)/g)].filter(
+    (match) => !match[1]!.includes('--with-deps'),
+  );
+
+  check(
+    bare.length === 0,
+    'and with the system libraries it needs, not only its own files',
+    bare.map((match) => `playwright install${match[1]}`).join(', '),
+  );
 }
 
 /* ---------------------------------------------------------------------------

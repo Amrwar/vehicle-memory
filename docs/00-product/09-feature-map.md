@@ -772,10 +772,11 @@ The second sweep: things connected at one end only.
 
 ## 21.40 The browser nobody installed
 
-| Item                         | Status | Where                                                                  |
-| ---------------------------- | ------ | ---------------------------------------------------------------------- |
-| The engines, installed first | Fixed  | Chromium was never installed at all; three checks launch it (Phase 74) |
-| Asserted, not assumed        | Built  | `verify-throughout` reads each check's Playwright import (Phase 74)    |
+| Item                         | Status | Where                                                                                              |
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| The engines, installed first | Fixed  | Chromium was never installed at all; three checks launch it (Phase 74)                             |
+| With their libraries         | Fixed  | `--with-deps`: WebKit and Firefox need thirty-odd shared objects the runner has not got (Phase 74) |
+| Asserted, not assumed        | Built  | `verify-throughout` reads each check's Playwright import (Phase 74)                                |
 
 ## 21.41 A button that would not wrap
 

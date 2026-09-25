@@ -610,7 +610,7 @@ jobs:
       # ran after the checks that needed Chromium. The screens check had been
       # failing on a missing browser.
       - name: The browsers the checks launch
-        run: npx playwright install chromium webkit firefox
+        run: npx playwright install --with-deps chromium webkit firefox
 
       - name: Every screen at every size
         run: npx tsx infra/scripts/verify-screens.ts http://localhost:3000

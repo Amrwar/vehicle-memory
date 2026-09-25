@@ -4622,10 +4622,17 @@ checks that needed Chromium. So the screens check had been failing on a missing
 executable rather than on a screen, and the message it produced was about a
 browser rather than about the product, which is why it read as noise.
 
-One install step, before the first check that launches anything. And
+One install step, before the first check that launches anything — with
+`--with-deps`, because a browser is not only its own files. Chromium runs on a
+bare runner; WebKit and Firefox want thirty-odd shared objects that are not on
+the image, and `playwright install` without that flag downloads the browser and
+stops. The failure arrives as a wall of `.so` names, which reads as an
+infrastructure problem rather than as a missing flag.
+
 `verify-throughout` now reads every `verify-*.ts` that imports Playwright, sees
-which engines its import line names, and asks the workflow whether each was
-installed before that file is run. It fails without the fix.
+which engines its import line names, asks the workflow whether each was
+installed before that file is run, and whether the install brought the
+libraries with it. It fails without either.
 
 ## Phase 75 — A button that would not wrap
 
