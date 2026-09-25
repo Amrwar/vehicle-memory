@@ -23,6 +23,7 @@ changing more than one module, or migrating data?
 | [0012](0012-photographs-as-the-trust-mechanism.md) | Photographs are the trust mechanism                  | Accepted |
 | [0013](0013-generated-text-inside-the-workflow.md) | Generated text inside the workflow, never deciding   | Accepted |
 | [0014](0014-the-passport-carries-no-name.md)       | **The passport carries no personal name**            | Accepted |
+| [0015](0015-the-status-and-the-loading-screen.md)  | **The status line and the loading screen**           | Accepted |
 
 The three in bold are the ones the product could not survive losing.
 ADR-0004 makes portable history possible at all; ADR-0005 is what makes anyone

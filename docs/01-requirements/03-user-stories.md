@@ -1642,6 +1642,51 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BY - A page that is not there says so (Phase 73)
+
+### BY1 - A dead link that admits it
+
+**As** somebody who followed a link that has expired **I want** the answer to
+be honest to whatever is reading it **so that** a link checker, a crawler and a
+person are all told the same thing.
+
+**Size** 8 - **Satisfies** FR-10701, FR-10702
+
+- **Given** a revoked or expired passport share link, **when** it is opened,
+  **then** the response is 404 and the page explains why links expire.
+- **Given** a handover or review link already used, **when** it is opened,
+  **then** the response is 404.
+- **Given** a car or a quote that is not yours, **when** the portal is asked
+  for it, **then** the response is 404 and nothing about it is shown.
+- **Given** any of those, **when** the page is slow, **then** the reader still
+  sees the loading screen the segment used to draw.
+
+### BY2 - A rule that cannot be forgotten
+
+**As** an engineer **I want** the route tree checked **so that** the next
+public route to be added cannot quietly answer 200 for something absent.
+
+**Size** 3 - **Satisfies** FR-10702, FR-10703
+
+- **Given** a page that calls notFound() under a loading boundary, **when** the
+  check runs, **then** it names the route and what to do.
+- **Given** a segment that should be exempt, **when** it is added to ADR-0015,
+  **then** the check accepts it — and not otherwise.
+
+### BY3 - One place for one number
+
+**As** a reader of the front door **I want** the trial length on the page to be
+the trial length in the code **so that** a published figure is never a guess.
+
+**Size** 2 - **Satisfies** FR-10704
+
+- **Given** TRIAL_DAYS, **when** the front door renders its call to action,
+  **then** the number comes from the constant in all three languages.
+- **Given** the same constant, **when** the route checks run, **then** they
+  assert against it rather than a number typed beside it.
+
+---
+
 ## Epic BX - The passport outlives the workshop (Phase 72)
 
 ### BX1 - The history survives the business

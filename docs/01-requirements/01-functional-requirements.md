@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-10700 - A page that is not there says so
+
+| Ref      | Requirement                                                                                                              | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-10701 | A route that can report a record as absent MUST answer 404, in the status line as well as the page.                      | 73    |
+| FR-10702 | Such a route MUST NOT sit beneath a loading boundary, which flushes the response before the route has decided.           | 73    |
+| FR-10703 | Segments exempted from FR-10702 MUST be named in an ADR with the reason, and the check MUST read that list from the ADR. | 73    |
+| FR-10704 | A published figure that exists as a constant MUST be rendered from the constant, not typed beside it.                    | 73    |
+
 ## FR-10600 - The passport outlives the workshop
 
 | Ref      | Requirement                                                                                                                                                   | Phase |

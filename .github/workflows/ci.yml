@@ -170,6 +170,12 @@ jobs:
       - name: Seed
         run: npm run db:seed
 
+      # A loading boundary flushes the response, so a page under one has
+      # already answered 200 by the time it decides there is nothing there.
+      # Reads the route tree; needs no database and no running application.
+      - name: A page that is not there says so
+        run: npx tsx infra/scripts/verify-status.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

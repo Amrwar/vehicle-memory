@@ -4540,6 +4540,65 @@ And `verify-integrity` now names this cause when it sees it, because a chain
 broken this way is indistinguishable in its output from somebody tampering
 with the database — an hour of suspicion that should have been a sentence.
 
+## Phase 73 — A 404 that says 200
+
+**Scope.** Five failing route checks in CI, which turned out to be four stale
+sentences and one thing the product had been getting wrong on every public link
+it has.
+
+**Exit.** A page that is not there says so in the status line as well as the
+words, and the rule is structural rather than remembered.
+
+**Status.** Done, and the check found two routes nobody had looked at.
+
+`loading.tsx` draws a Suspense boundary over every route beneath it, and a
+boundary flushes: the status line, the headers and the loading screen go out as
+soon as the page underneath suspends, which an async page does on its first
+`await`. By the time that page calls `notFound()` the 200 has gone. Next still
+swaps the body for the not-found page — which is why nobody noticed, because
+every screen looked right — but the only thing a machine reads was already
+wrong.
+
+**A revoked passport share link answered 200.** So did a used handover link, a
+review link already answered, a quote that was not yours, and a car that was
+not yours. The one carefully-written page in the product for somebody standing
+in a driveway with a dead link — "This link has run out of road" — rendered
+under a status that said the record was there.
+
+`notFound()` in `generateMetadata` does not help: metadata streams too. There is
+no way to hold the status open once the shell has gone, so the fix is
+structural. A page that has to be able to say "there is nothing here" asks its
+cheap question first — one indexed read, in the page, outside any boundary —
+and draws its own `<Suspense>` around the slow half. The reader sees the same
+loading screen; everything else sees the right status.
+
+`portal/loading.tsx` was one boundary over twelve pages, three of which have to
+be able to 404. It became a shared component re-exported by the nine that do
+not, plus a route group for the customer's home page so its address did not
+change. `p/`, `handover/` and `r/` each had a boundary over a single route, and
+each route now decides first.
+
+**Inside the signed-in shell the status has no audience**, and one loading
+screen over a hundred screens is worth more than a status code nobody reads.
+ADR-0015 writes that down, names the three sheltered segments, and
+`verify-status.ts` reads that list out of the ADR — so widening the exception
+means writing down why, where the reason can be argued with.
+
+The check reads the route tree, needs neither a database nor a running
+application, and found two routes this phase had not been looking for: the
+review link, which is public and is now fixed, and the technician's phone view,
+which is shelter.
+
+**And the four stale sentences**, which are the same lesson in a smaller key.
+The smoke test asked the front door for "Start a 30-day trial". The trial has
+been fourteen days for a long time; the page said "Start a 14-day trial", typed
+out, twice, next to `TRIAL_DAYS` which already held the number. Three copies of
+one fact, and the two that were not the constant had drifted. The page now
+takes the number from the constant, and so does the check. The other three were
+copy that had been improved without the check being told: the customer's home
+page says "My cars" and "Needs you", and a purchase order's column is "Still to
+arrive".
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

@@ -33,7 +33,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { openAlerts, sweepAlerts, withoutAnAction } from '../../apps/web/src/lib/alerts';
-import { ar, fr } from '../../packages/core/src/i18n/areas/health';
+import { hasTranslation } from '@carnet/core';
 
 let failures = 0;
 let checked = 0;
@@ -111,8 +111,10 @@ async function main() {
   // operator's page would quietly be English inside a French session and
   // nothing anywhere would say so.
   const untranslated = RUNBOOK.flatMap((entry) => [
-    ...(fr[entry.first] ? [] : [`fr: ${entry.signal}`]),
-    ...(ar[entry.first] ? [] : [`ar: ${entry.signal}`]),
+    // The merged dictionary, not one area of it: that is what `t()` reads,
+    // and a word can move between areas without moving out of the product.
+    ...(hasTranslation('fr', entry.first) ? [] : [`fr: ${entry.signal}`]),
+    ...(hasTranslation('ar', entry.first) ? [] : [`ar: ${entry.signal}`]),
   ]);
 
   check(

@@ -2,7 +2,9 @@ import { prisma } from '@carnet/db';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
+import PortalLoading from '@/components/portal-loading';
 import { PortalShell } from '@/components/portal-shell';
 import { VehiclePassport } from '@/components/vehicle-passport';
 import { ownsVehicle } from '@/lib/documents';
@@ -26,13 +28,32 @@ export const dynamic = 'force-dynamic';
  * what they are handing over before they hand it over. The one difference is
  * the wording of the observations page, which speaks to the owner.
  */
+/**
+ * The status comes first. Phase 73.
+ *
+ * A Suspense boundary flushes the response, and with it the 200, before the
+ * page underneath has looked anything up. While the whole customer side sat
+ * under one, a car that was not yours answered 200 with a not-found page
+ * inside it. The cheap question -- is this yours -- is asked here, where the
+ * answer can still be the status line, and the rest streams behind a
+ * fallback.
+ */
 export default async function PortalPassportPage({ params }: { params: Promise<{ id: string }> }) {
-  const t = await tFor();
   const user = await requireUser();
-  const region = await regionForUser(user.userId);
   const { id } = await params;
 
   if (!(await ownsVehicle(user.userId, id))) notFound();
+
+  return (
+    <Suspense fallback={<PortalLoading />}>
+      <OwnersPassport userId={user.userId} id={id} />
+    </Suspense>
+  );
+}
+
+async function OwnersPassport({ userId, id }: { userId: string; id: string }) {
+  const t = await tFor();
+  const region = await regionForUser(userId);
 
   const vehicle = await prisma.vehicle.findUnique({
     where: { id },

@@ -13,6 +13,7 @@ import 'dotenv/config';
 
 import { createHash, randomBytes } from 'node:crypto';
 
+import { TRIAL_DAYS } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 const BASE = process.argv[2] ?? 'http://localhost:3000';
@@ -93,7 +94,7 @@ async function main() {
       expect: [
         'The history should belong to the car',
         'A record the vehicle keeps',
-        'Start a 30-day trial',
+        `Start a ${TRIAL_DAYS}-day trial`,
         'Priced per bay',
       ],
     },
@@ -113,7 +114,7 @@ async function main() {
       expect: ['Open your workshop', 'You are opening a workshop, not an account', 'Workshop name'],
     },
     // The plan carries through from the pricing page.
-    { path: '/signup?plan=group', as: 'anon', expect: ['30 days on Group'] },
+    { path: '/signup?plan=group', as: 'anon', expect: [`${TRIAL_DAYS} days free on Group`] },
     // Signed in, the front door offers the workshop rather than a trial.
     { path: '/', as: 'owner', expect: ['Open workshop'] },
     {
@@ -173,7 +174,7 @@ async function main() {
     {
       path: '/portal',
       as: 'customer',
-      expect: ['My vehicles', 'Needs your approval', 'Review and decide'],
+      expect: ['My cars', 'Needs you', 'Review and decide'],
     },
     // Phase 2: inventory and procurement.
     {
@@ -194,7 +195,7 @@ async function main() {
     {
       path: `/purchasing/${order.id}`,
       as: 'owner',
-      expect: ['PO-2041', 'Book in delivery', 'Outstanding', 'Pennine Motor Factors'],
+      expect: ['PO-2041', 'Book in delivery', 'Still to arrive', 'Pennine Motor Factors'],
     },
     { path: '/suppliers', as: 'owner', expect: ['Suppliers', 'Pennine Motor Factors', 'disputed'] },
     // A technician may request a part but must not reach purchasing approval.
@@ -353,6 +354,13 @@ async function main() {
       expect: [],
       status: 404,
     },
+    // And a link that has expired, been revoked or never existed says so in
+    // the status as well as the words. Until Phase 73 each of these answered
+    // 200, because a loading boundary had already flushed the response.
+    { path: '/p/not-a-real-token', as: 'anon', expect: [], status: 404 },
+    { path: '/handover/not-a-real-token', as: 'anon', expect: [], status: 404 },
+    { path: '/r/not-a-real-token', as: 'anon', expect: [], status: 404 },
+    { path: '/portal/estimates/not-a-real-estimate', as: 'customer', expect: [], status: 404 },
     {
       path: '/portal/updates',
       as: 'customer',

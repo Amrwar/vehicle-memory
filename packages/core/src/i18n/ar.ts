@@ -59,7 +59,7 @@ export const AR: Readonly<Record<string, string>> = {
   'Workshop management · Vehicle passport': 'إدارة الورش · جواز السيارة',
   'Carnet runs the diary, the job, the inspection, the parts and the books. Every completed job also writes to a permanent record the vehicle keeps, verifiable by whoever owns it next.':
     'Carnet يدير الأجندة وأمر العمل والفحص وقطع الغيار والحسابات. وكل عمل مكتمل يُكتب أيضاً في سجل دائم تحتفظ به السيارة، ويمكن لمالكها التالي التحقق منه.',
-  'Start a 14-day trial': 'ابدأ تجربة 14 يوماً',
+  'Start a {days}-day trial': 'ابدأ تجربة {days} يوماً',
   'See a real passport': 'شاهد جوازاً حقيقياً',
   'Fourteen days free, then billed monthly per bay. Cancel before the trial ends and nothing is charged.':
     'أربعة عشر يوماً مجاناً، ثم فوترة شهرية لكل مكان عمل. ألغِ قبل انتهاء التجربة ولن يُخصم شيء.',

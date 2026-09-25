@@ -511,6 +511,10 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-10701 | BY1   | -                                      | the gates in `p/[token]`, `handover/[token]`, `r/[token]`, and two portal routes    | `smoke.ts`, `verify-status.ts`                | Done   |
+| FR-10702 | BY1   | -                                      | `portal/loading.tsx` became nine per-route boundaries and a route group             | `verify-status.ts`                            | Done   |
+| FR-10703 | BY2   | -                                      | ADR-0015 names the shelters; the check reads the list out of it                     | `verify-status.ts`                            | Done   |
+| FR-10704 | BY3   | `TRIAL_DAYS`                           | the front door renders `Start a {days}-day trial` from the constant                 | `smoke.ts`                                    | Done   |
 | FR-10601 | BX1   | `VehicleEvent.recordedByOrgId`         | the append-only trigger lists every hashed column                                   | `verify-survival.ts`, `verify-integrity.ts`   | Done   |
 | FR-10602 | BX1   | `vehicle_events_recordedByOrgId_fkey`  | `ON DELETE RESTRICT`; a workshop with entries is retired, not deleted               | `verify-survival.ts`, `verify-region.ts`      | Done   |
 | FR-10603 | BX2   | `Organization.isDemonstration`         | `removeDemonstration()` takes the cars first, and retires if one was real           | `verify-survival.ts`, `verify-first-day.ts`   | Done   |
@@ -1116,7 +1120,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 227                 | 226                    |
+| Later phases, newest first                         | 231                 | 230                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1134,9 +1138,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **795**             | **787 (99%)**          |
+| **Total**                                          | **799**             | **791 (99%)**          |
 
-Every one of the 795 requirements now has a row of its own. Until Phase 61,
+Every one of the 799 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

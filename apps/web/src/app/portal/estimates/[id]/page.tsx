@@ -52,6 +52,16 @@ async function answer(formData: FormData) {
   redirect('/portal?answered=1');
 }
 
+/**
+ * The status comes first. Phase 73.
+ *
+ * A Suspense boundary flushes the response, and with it the 200, before the
+ * page underneath has looked anything up. While the whole customer side sat
+ * under one, a car that was not yours answered 200 with a not-found page
+ * inside it. The cheap question -- is this yours -- is asked here, where the
+ * answer can still be the status line, and the rest streams behind a
+ * fallback.
+ */
 export default async function PortalEstimatePage({
   params,
   searchParams,

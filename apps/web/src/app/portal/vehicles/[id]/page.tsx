@@ -16,11 +16,13 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { DocumentRemove, DocumentUpload } from '@/components/document-upload';
+import PortalLoading from '@/components/portal-loading';
 import { PortalShell } from '@/components/portal-shell';
 import { PassportCover } from '@carnet/ui';
-import { documentsFor, paperworkFor } from '@/lib/documents';
+import { documentsFor, ownsVehicle, paperworkFor } from '@/lib/documents';
 import { requireUser } from '@/lib/guard';
 import { cancelHandover, inviteHandover, OwnershipError, pendingHandover } from '@/lib/handover';
 import { revokeShare, shareVehicle, sharesFor, vehicleHistory } from '@/lib/portal';
@@ -140,7 +142,45 @@ function date(value: Date | null, locale: string): string {
     : '—';
 }
 
+/**
+ * The status comes first. Phase 73.
+ *
+ * A Suspense boundary flushes the response, and with it the 200, before the
+ * page underneath has looked anything up. While the whole customer side sat
+ * under one, a car that was not yours answered 200 with a not-found page
+ * inside it. The cheap question -- is this yours -- is asked here, where the
+ * answer can still be the status line, and the rest streams behind a
+ * fallback.
+ */
 export default async function PortalVehiclePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{
+    link?: string;
+    withdrawn?: string;
+    handover?: string;
+    problem?: string;
+    calledOff?: string;
+  }>;
+}) {
+  const user = await requireUser();
+  const { id } = await params;
+
+  // A vehicle somebody no longer owns is not theirs to read. Sold cars stop
+  // being visible to the previous owner the day the ownership ends, which is
+  // the promise the passport makes to whoever bought it.
+  if (!(await ownsVehicle(user.userId, id))) notFound();
+
+  return (
+    <Suspense fallback={<PortalLoading />}>
+      <VehicleHistory params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function VehicleHistory({
   params,
   searchParams,
 }: {

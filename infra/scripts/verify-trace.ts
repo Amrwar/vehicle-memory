@@ -30,7 +30,7 @@ import { currentTrace, withTrace } from '@carnet/jobs';
 
 import { follow, type Step } from '../../apps/web/src/lib/followed';
 import { looksLikeTrace, mintTrace, TRACE_HEADER } from '../../apps/web/src/lib/trace';
-import { ar, fr } from '../../packages/core/src/i18n/areas/health';
+import { hasTranslation } from '@carnet/core';
 
 const BASE = process.argv[2] ?? 'http://localhost:3000';
 
@@ -144,9 +144,15 @@ const STEPS: Step[] = ['recorded', 'queued', 'told', 'sent'];
 function theStepsAreTranslated() {
   console.info('\n  The words, including the ones no scanner can see\n');
 
+  // Asked of the merged dictionary rather than of one area file, because the
+  // merged dictionary is what `t()` reads. This probe used to import
+  // `areas/health` directly and passed for months; Phase 71 moved `queued` to
+  // the area the word belongs to, the merged dictionary still answered it,
+  // and the probe reported a translation missing that was not. A check that
+  // reads a different thing from the product is checking a different product.
   const missing = STEPS.flatMap((step) => [
-    ...(fr[step] ? [] : [`fr: ${step}`]),
-    ...(ar[step] ? [] : [`ar: ${step}`]),
+    ...(hasTranslation('fr', step) ? [] : [`fr: ${step}`]),
+    ...(hasTranslation('ar', step) ? [] : [`ar: ${step}`]),
   ]);
 
   check(

@@ -60,7 +60,7 @@ export const FR: Readonly<Record<string, string>> = {
   'Workshop management · Vehicle passport': 'Gestion d’atelier · Passeport du véhicule',
   'Carnet runs the diary, the job, the inspection, the parts and the books. Every completed job also writes to a permanent record the vehicle keeps, verifiable by whoever owns it next.':
     'Carnet tient l’agenda, l’ordre de réparation, le contrôle, les pièces et la comptabilité. Chaque travail terminé s’inscrit aussi dans un registre permanent que le véhicule conserve, vérifiable par son prochain propriétaire.',
-  'Start a 14-day trial': 'Commencer un essai de 14 jours',
+  'Start a {days}-day trial': 'Commencer un essai de {days} jours',
   'See a real passport': 'Voir un vrai passeport',
   'Fourteen days free, then billed monthly per bay. Cancel before the trial ends and nothing is charged.':
     'Quatorze jours gratuits, puis facturé chaque mois par poste. Résiliez avant la fin de l’essai et rien n’est prélevé.',

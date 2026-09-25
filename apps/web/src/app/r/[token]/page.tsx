@@ -44,6 +44,14 @@ async function answer(formData: FormData) {
   redirect(`/r/${token}?done=1`);
 }
 
+/**
+ * No loading boundary over this segment, deliberately. Phase 73, ADR-0015.
+ *
+ * A review link that has been answered, withdrawn or never existed has to be
+ * able to say so in the status line, and a boundary would have sent the 200
+ * before this page had looked the token up. There is nothing slow here to
+ * cover anyway: one indexed read on a hash, then five buttons.
+ */
 export default async function ReviewPage({
   params,
   searchParams,

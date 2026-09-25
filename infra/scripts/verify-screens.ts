@@ -356,7 +356,7 @@ const PLAN: Record<string, Plan> = {
   },
 
   /* --- the customer's own side -------------------------------------------- */
-  '/portal': { who: 'driver', everySize: true, alsoArabic: true },
+  '/portal/(home)': { who: 'driver', everySize: true, alsoArabic: true },
   '/portal/book': { who: 'driver' },
   '/portal/claim': { who: 'driver' },
   '/portal/invoices': { who: 'driver' },

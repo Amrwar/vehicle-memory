@@ -462,3 +462,35 @@ The lesson is not the foreign key. It is that this repository has an invariant
 stated in three places — a comment, an ADR, and a hash function — and in none of
 them was it something the database could enforce. `npm run verify:survival`
 asks the database rather than the code; before the fix it fails five checks.
+
+Phase 73 started as five failing route checks and became one thing the product
+had been getting wrong on every public link it has. `loading.tsx` draws a
+Suspense boundary over the routes beneath it, and a boundary flushes: the status
+line goes out as soon as the page suspends, which an async page does on its
+first await. By the time it calls `notFound()` the 200 has gone. Next still
+swaps the body for the not-found page — which is why nobody noticed, every
+screen looked right — but the only thing a machine reads was already wrong.
+
+A revoked passport share link answered 200. So did a used handover link, a
+review link already answered, a quote that was not yours and a car that was not
+yours. The one carefully-written page in the product for somebody standing in a
+driveway with a dead link rendered under a status that said the record was
+there.
+
+There is no way to hold the status open once the shell has gone, so the fix is
+structural: a page that has to be able to say "there is nothing here" asks its
+cheap question first, outside any boundary, and draws its own fallback around
+the slow half. The reader sees the same loading screen. Inside the signed-in
+shell the boundary stays, because there the audience for the status is a person
+who is looking at the page — ADR-0015 says so, names the three sheltered
+segments, and `verify-status.ts` reads that list out of the ADR rather than
+holding its own copy. The check reads the route tree, needs no database and no
+running application, and immediately found two routes this phase had not gone
+looking for.
+
+The four stale sentences were the same lesson in a smaller key. The check asked
+the front door for "Start a 30-day trial"; the trial has been fourteen days for
+a long time, and the page said so in a typed-out English sentence, twice, next
+to the constant that already held the number. Three copies of one fact, and the
+two that were not the constant had drifted apart. The page renders the constant
+now, and so does the check.

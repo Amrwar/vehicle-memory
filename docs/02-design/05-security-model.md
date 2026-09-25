@@ -210,6 +210,17 @@ streaming rather than about tenancy: insisting on a 404 fails pages behaving
 perfectly, and would pass one quietly returning somebody else's invoice with a
 redirect stapled to it. The body is what is read.
 
+That stays true of the refusal check. What Phase 73 changed is the premise —
+outside the signed-in shell, the boundary is gone. A status of 200 on a dead
+share link was not only a wrong number; it was the wrong answer to the only
+question a link checker, a crawler or another system can ask. Those routes now
+ask their cheap question before anything streams, and answer 404 in the status
+line as well as the page. Inside the shell the boundary remains, because there
+the reader is a person who has already signed in and the body is genuinely all
+that is read. [ADR-0015](../03-adr/0015-the-status-and-the-loading-screen.md)
+names the three sheltered segments and `verify-status.ts` reads that list out
+of it, so the exception cannot widen without the reason being written down.
+
 And a refusal only means something if the same address answers for the asker's
 own record. The probe reads one of its own first, at the same route, for
 exactly this reason: an unconfirmed email address sends a workshop to

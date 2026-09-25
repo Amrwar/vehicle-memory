@@ -760,6 +760,16 @@ The second sweep: things connected at one end only.
 | A break that says what broke it     | Built  | `verify-integrity` names a deleted workshop rather than implying tampering (Phase 72) |
 | Asked of the database, not the code | Built  | `npm run verify:survival` (Phase 72)                                                  |
 
+## 21.39 A page that is not there says so
+
+| Item                           | Status | Where                                                                           |
+| ------------------------------ | ------ | ------------------------------------------------------------------------------- |
+| Dead links answer 404          | Fixed  | Share, handover and review links; every one answered 200 before (Phase 73)      |
+| A car that is not yours        | Fixed  | The portal decides before it streams (Phase 73)                                 |
+| The loading screen stays       | Built  | Drawn per route now, and inside the pages that have to decide first (Phase 73)  |
+| The rule, enforced             | Built  | `npm run verify:status` reads the route tree and ADR-0015 (Phase 73)            |
+| One place for the trial length | Fixed  | The front door renders `TRIAL_DAYS`; three copies had drifted to two (Phase 73) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -838,7 +848,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 416          |
+| Built    | 418          |
 | Partial  | 3            |
 | Deferred | 1            |
 

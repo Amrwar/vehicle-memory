@@ -250,12 +250,26 @@ const NO_BOUNDARY: Record<string, string> = {
   '/pay/[id]':
     'one row, looked up by its own identifier, and the page is drawn. A boundary here bought nothing and cost something real: the shell is sent before the lookup, so an attempt that does not exist answered 200 with the not-found screen inside it instead of 404. This is a public address that a link checker and a search engine will both read.',
   '/pay/subscribe/[orgId]': 'one workshop and its subscription, as above',
+  '/portal/estimates/[id]':
+    'one quote, by its own identifier, and the page is the quote. The lookup is the gate as well as the content, and a boundary above it would send the 200 before it ran — which is how a quote that was not yours answered 200 until Phase 73. ADR-0015.',
+  '/r/[token]':
+    'one indexed read on a hash, then five buttons. There is nothing slow here to cover, and a boundary would have answered 200 for a review link already used. ADR-0015.',
 };
 
 function nothingWaitsOnBlank() {
   console.info('\n  Nothing waits on a blank screen\n');
 
+  // A boundary above the page, or one the page draws itself.
+  //
+  // Phase 73 moved several pages out from under a segment's loading.tsx,
+  // because a boundary flushes the response and a page that has to be able to
+  // answer 404 cannot have its status spoken for before it has looked
+  // anything up. Those pages still show the car: they ask the cheap question
+  // first and wrap the slow half in a <Suspense> of their own. That is the
+  // same promise kept in a different place, so it counts the same.
   const covered = (file: string): boolean => {
+    if (/<Suspense fallback=/.test(read(file))) return true;
+
     let dir = dirname(file);
     while (dir.length >= APP.length) {
       if (existsSync(join(dir, 'loading.tsx'))) return true;
@@ -368,7 +382,20 @@ function nothingWaitsOnBlank() {
       return found;
     });
 
-  const spinners = [...new Set(boundaries)].filter((file) => !read(file).includes('LoadingCar'));
+  // Following a re-export, because nine of the portal's boundaries are one
+  // shared component named in nine one-line files. Phase 73 drew them per
+  // route rather than one over the segment; what they draw did not change.
+  const draws = (file: string): boolean => {
+    const source = read(file);
+    if (source.includes('LoadingCar')) return true;
+
+    const reexport = /from '@\/components\/([\w-]+)'/.exec(source);
+    if (!reexport) return false;
+
+    return read(`apps/web/src/components/${reexport[1]}.tsx`).includes('LoadingCar');
+  };
+
+  const spinners = [...new Set(boundaries)].filter((file) => !draws(file));
 
   check(
     spinners.length === 0,

@@ -2,9 +2,11 @@ import { prisma } from '@carnet/db';
 import { PassportEmblem } from '@carnet/ui';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 
 import { BackToOrigin } from '@/components/back-to-origin';
+import { LoadingCar } from '@/components/loading-car';
 import { VehiclePassport } from '@/components/vehicle-passport';
 import { hashShareToken } from '@/lib/auth';
 import { tFor } from '@/lib/i18n';
@@ -24,6 +26,46 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
+ * The status comes first. Phase 73.
+ *
+ * `loading.tsx` in this segment used to wrap the page in a Suspense boundary,
+ * so the response -- and its 200 -- was already on the wire before the token
+ * had been looked up at all. `notFound()` could still swap the page for the
+ * one next door, but not the status line, which had gone. A share link that
+ * had expired or been revoked answered 200 and told every link checker and
+ * crawler that the record was there.
+ *
+ * So the cheap half of the lookup happens here, outside any boundary, and the
+ * page waits for it: one indexed read on a hash. Everything slow streams
+ * behind a fallback this page owns, which is the same one the segment used
+ * to show, so nobody standing in a driveway on mobile data sees a blank
+ * screen either.
+ */
+export default async function PublicPassportPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  const t = await tFor();
+  const { token } = await params;
+
+  const share = await prisma.passportShare.findUnique({
+    where: { tokenHash: hashShareToken(token) },
+    select: { revokedAt: true, expiresAt: true },
+  });
+
+  if (!share || share.revokedAt || share.expiresAt < new Date()) {
+    notFound();
+  }
+
+  return (
+    <Suspense fallback={<LoadingCar label={t('Opening this vehicle’s history')} />}>
+      <Passport token={token} />
+    </Suspense>
+  );
+}
+
+/**
  * The public vehicle passport, as a passport. Phase 23.
  *
  * David (persona P5) is standing in a stranger's driveway with fourteen
@@ -37,13 +79,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * why should I believe it. No personal details of any owner appear, and every
  * open of the link is logged for the owner to see (FR-410).
  */
-export default async function PublicPassportPage({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+async function Passport({ token }: { token: string }) {
   const t = await tFor();
-  const { token } = await params;
 
   const share = await prisma.passportShare.findUnique({
     where: { tokenHash: hashShareToken(token) },

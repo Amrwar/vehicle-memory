@@ -2,7 +2,9 @@ import { Alert, Button, Card, CardBody, CardHeader, KeyValue, Registration } fro
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { Suspense } from 'react';
 
+import { LoadingCar } from '@/components/loading-car';
 import { currentUser } from '@/lib/auth';
 import { acceptHandover, declineHandover, handoverByToken, OwnershipError } from '@/lib/handover';
 import { tFor } from '@/lib/i18n';
@@ -65,6 +67,16 @@ async function decline(formData: FormData) {
   redirect(`/handover/${token}?done=declined`);
 }
 
+/**
+ * The status comes first, and so does the question of whether this link is
+ * real. Phase 73.
+ *
+ * `loading.tsx` in this segment wrapped the page in a Suspense boundary, so
+ * the 200 had gone out before the token was looked up. A handover link that
+ * had been used, withdrawn or never existed answered 200 all the same. The
+ * gate is a single indexed read on a hash, and the page waits for it; the
+ * rest streams behind this page's own fallback.
+ */
 export default async function HandoverPage({
   params,
   searchParams,
@@ -74,6 +86,25 @@ export default async function HandoverPage({
 }) {
   const t = await tFor();
   const { token } = await params;
+
+  const handover = await handoverByToken(token);
+  if (!handover) notFound();
+
+  return (
+    <Suspense fallback={<LoadingCar label={t('Opening this vehicle’s history')} />}>
+      <Handover token={token} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function Handover({
+  token,
+  searchParams,
+}: {
+  token: string;
+  searchParams: Promise<{ problem?: string; done?: string }>;
+}) {
+  const t = await tFor();
   const { problem, done } = await searchParams;
 
   const handover = await handoverByToken(token);
