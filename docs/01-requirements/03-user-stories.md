@@ -1642,6 +1642,32 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CB - A check that skipped itself (Phase 76)
+
+### CB1 - Money arriving, checked
+
+**As** a workshop **I want** a payment the provider confirms to be recorded
+once **so that** my books match the money.
+
+**Size** 3 - **Satisfies** FR-11001
+
+- **Given** a correctly signed webhook, **when** CI runs, **then** it is
+  applied and the invoice is paid.
+- **Given** the same event again, **when** it arrives, **then** nothing
+  changes and there is still one payment.
+
+### CB2 - A check that admits it cannot run
+
+**As** an engineer **I want** a check with a missing precondition to fail
+**so that** green means checked.
+
+**Size** 2 - **Satisfies** FR-11002
+
+- **Given** no webhook secret, **when** the payments or billing check runs,
+  **then** it fails and names where to set it.
+
+---
+
 ## Epic CA - A button that would not wrap (Phase 75)
 
 ### CA1 - Nothing wider than the screen

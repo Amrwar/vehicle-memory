@@ -525,3 +525,24 @@ is the worst of the options. Buttons wrap now, which happens only when there is
 no room — the moment wrapping is the right answer. And the thing worth keeping:
 the check that found this had been green locally all along. The gate is the
 platform CI runs on.
+
+Phase 76 is one environment variable the workflow never set. With the browsers
+installed and their libraries with them, CI reached `verify-payments` and failed
+on a page assertion: the stub checkout page did not show a finished attempt. The
+attempt was not finished, because what finishes it is a signed webhook, and the
+signed webhook had been skipped.
+
+`PAYMENT_WEBHOOK_SECRET` was not set in CI. Both the payments and the billing
+check branch on it, and without it each printed one grey line — `skip
+PAYMENT_WEBHOOK_SECRET is not set` — and carried on green. So from the day those
+sections were written, nothing anywhere had checked that a correctly signed
+webhook is applied, or that a replay of it changes nothing. That is money
+arriving from the provider, covered by a check that was covering nothing.
+
+The workflow sets it now, and neither probe treats it as optional. A check that
+tried to enforce the general rule — no probe may skip for want of a setting the
+workflow does not give it — was written and then removed: it passed only because
+both such skips had just become failures, and a check that cannot fail is the
+thing this repository keeps finding in other people's work. What is left is five
+probes that still skip for want of seed data rather than configuration, and
+that is the next phase.

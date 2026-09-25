@@ -20,6 +20,11 @@ env:
   # which is correct behaviour and would leave the health probe unable to prove
   # that its refusals mean anything.
   OPERATOR_EMAIL: operator@carnet.test
+  # The stub provider signs its webhook with this. Without it verify-payments
+  # skipped the signed path entirely -- so until Phase 76 nothing had ever
+  # checked, anywhere, that a correctly signed webhook is applied or that a
+  # replay of it changes nothing. That is money arriving.
+  PAYMENT_WEBHOOK_SECRET: ci-payment-webhook-secret-value
 
 jobs:
   # -------------------------------------------------------------------------

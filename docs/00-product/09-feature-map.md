@@ -785,6 +785,13 @@ The second sweep: things connected at one end only.
 | Labels wrap when they must | Fixed  | Every button carried `whitespace-nowrap`; one label widened a whole form (Phase 75) |
 | Nothing wider than 320px   | Held   | Measured on every route, on the platform CI runs (Phase 75)                         |
 
+## 21.42 A check that skipped itself
+
+| Item                          | Status | Where                                                                             |
+| ----------------------------- | ------ | --------------------------------------------------------------------------------- |
+| The signed webhook, exercised | Fixed  | `PAYMENT_WEBHOOK_SECRET` in the workflow; the path had never run in CI (Phase 76) |
+| No quiet skip                 | Fixed  | Both probes fail and name the remedy (Phase 76)                                   |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases

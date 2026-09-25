@@ -226,8 +226,16 @@ async function main() {
         [200, 'recorded'],
       );
     } else {
+      // Applied directly, so the rest of the section still runs -- but the
+      // signed path is what a provider actually uses, and skipping it quietly
+      // is how it went unchecked in CI until Phase 76.
       await applyBillingEvent(JSON.parse(body));
-      console.info('  skip   PAYMENT_WEBHOOK_SECRET is not set; the event was applied directly');
+      failures += 1;
+      console.error(
+        '  FAIL   PAYMENT_WEBHOOK_SECRET is not set, so the signed subscription\n' +
+          '         webhook was not tried. The event was applied directly to keep the\n' +
+          '         rest of this section meaningful. Set it in .env or the workflow.',
+      );
     }
     await syncBillingFromProvider(org.id);
     const active = await subscriptionFor(org.id);

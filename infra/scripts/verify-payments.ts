@@ -352,7 +352,23 @@ async function main() {
     amountMinor: c.totalMinor,
     currency: c.currency,
   });
+  // Required, not optional. This section is the webhook, and the signed path
+  // is the whole of what it verifies: that money the provider says arrived is
+  // recorded once, and that a replay changes nothing. Without the secret the
+  // probe used to print one grey "skip" line and carry on green, which is how
+  // that went unchecked in CI from the day it was written -- and then a later
+  // assertion, on a page that shows a finished attempt, failed because the
+  // thing that finishes it had been skipped.
   const secret = process.env.PAYMENT_WEBHOOK_SECRET;
+
+  if (!secret) {
+    console.error(
+      '  FAIL   PAYMENT_WEBHOOK_SECRET is not set, so the signed webhook -- which is\n' +
+        '         what this section exists to check -- cannot be tried. Set it in\n' +
+        '         .env (see .env.example) or in the workflow.',
+    );
+    failures += 1;
+  }
   const post = (headers: Record<string, string>) =>
     fetch(`${BASE}/api/payments/webhook`, {
       method: 'POST',
@@ -383,8 +399,6 @@ async function main() {
       await prisma.payment.count({ where: { invoiceId: c.id } }),
       1,
     );
-  } else {
-    console.info('  skip   PAYMENT_WEBHOOK_SECRET is not set; the signed path was not tried');
   }
   const unknown = JSON.stringify({
     providerRef: 'stub_nothing',

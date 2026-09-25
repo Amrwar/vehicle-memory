@@ -4673,6 +4673,46 @@ passing locally all along. The gate is the platform CI runs on, not the one the
 work is done on, and "it passes on my machine" was exactly true and exactly
 useless.
 
+## Phase 76 — A check that skipped itself
+
+**Scope.** One environment variable the workflow never set, and the two checks
+that went quiet without it.
+
+**Exit.** The signed payment webhook is exercised in CI, and a check that
+cannot do its job says so instead of passing.
+
+**Status.** Done.
+
+With the browsers installed and their libraries with them, CI reached
+`verify-payments` and failed on a page assertion: the stub checkout page did
+not show a finished attempt. The attempt was not finished, because the thing
+that finishes it is a signed webhook, and the signed webhook had been skipped.
+
+`PAYMENT_WEBHOOK_SECRET` was not set in the workflow. Both `verify-payments`
+and `verify-billing` branch on it, and without it each printed one grey line —
+`skip   PAYMENT_WEBHOOK_SECRET is not set` — and carried on green. So from the
+day those sections were written, **nothing anywhere had checked that a
+correctly signed webhook is applied, or that a replay of it changes nothing.**
+That is money arriving from the provider, recorded once. It was covered by a
+check that was covering nothing.
+
+The workflow sets the secret now, and neither probe treats it as optional: the
+signed path is what those sections exist to verify, so its absence is a
+failure with the remedy named, not a skip.
+
+**What was tried and removed.** A check in `verify-throughout` that no probe
+may skip for want of a setting the workflow does not give it. It passes — and
+it passes because both such skips had just been turned into failures, so there
+is nothing left for it to find. A check that cannot fail is the thing this
+repository keeps finding in other people's work, so it went.
+
+**What is left, and is the next phase.** Five probes still skip for want of
+seed data rather than configuration: no completed job with lines, nobody seeded
+with consent and an address, not enough vehicles to reach a limit. Each is a
+section of a check that may or may not have run, and nothing says which.
+`verify-tenancy` shows the answer — its docblock says that rather than skip a
+missing kind, it makes one — and the others should do the same.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

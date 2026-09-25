@@ -267,6 +267,13 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11000 - A check that skipped itself
+
+| Ref      | Requirement                                                                                                              | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11001 | A correctly signed payment webhook MUST be applied exactly once, and a replay of it MUST change nothing — checked in CI. | 76    |
+| FR-11002 | A check that cannot exercise its subject MUST fail and name the remedy, not pass quietly.                                | 76    |
+
 ## FR-10900 - A button that would not wrap
 
 | Ref      | Requirement                                                                           | Phase |
