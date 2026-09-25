@@ -801,6 +801,13 @@ The second sweep: things connected at one end only.
 | No quiet skip anywhere             | Fixed  | Four probes fail and name the remedy (Phase 77)                              |
 | And a guard against the next one   | Built  | `verify-throughout` names any probe that prints a skip (Phase 77)            |
 
+## 21.44 A figure that happened to fit
+
+| Item                          | Status | Where                                                                          |
+| ----------------------------- | ------ | ------------------------------------------------------------------------------ |
+| A credit bigger than the bill | Held   | Applied as far as the bill owes, the rest held against the supplier (Phase 78) |
+| The check asserts the rule    | Fixed  | Not one instance of it that depended on a shelf it did not own (Phase 78)      |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases

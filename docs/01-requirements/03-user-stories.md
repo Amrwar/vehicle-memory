@@ -1642,6 +1642,32 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CD - A figure that happened to fit (Phase 78)
+
+### CD1 - A credit larger than the bill
+
+**As** a workshop **I want** a supplier credit bigger than the bill to be held
+rather than lost **so that** the money is still mine when the next bill comes.
+
+**Size** 2 - **Satisfies** FR-11201
+
+- **Given** a credit worth more than the bill owes, **when** it is applied,
+  **then** the bill is settled and the remainder is held against the supplier.
+- **Given** a credit worth less, **when** it is applied, **then** it comes off
+  in full and nothing is held.
+
+### CD2 - The same answer on any database
+
+**As** an engineer **I want** the returns check to give one answer **so that**
+a red means something changed in the code.
+
+**Size** 2 - **Satisfies** FR-11202
+
+- **Given** a shelf whose average cost another check has moved, **when** the
+  returns check runs, **then** it passes for the same reason it passed before.
+
+---
+
 ## Epic CC - The section that never ran (Phase 77)
 
 ### CC1 - The books of a workshop built by the product

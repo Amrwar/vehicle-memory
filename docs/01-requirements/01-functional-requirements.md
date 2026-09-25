@@ -267,6 +267,13 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11200 - A figure that happened to fit
+
+| Ref      | Requirement                                                                                                            | Phase |
+| -------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-11201 | A supplier credit MUST come off the bill as far as the bill owes, and the remainder MUST be held against the supplier. | 78    |
+| FR-11202 | A check MUST assert that rule rather than one arithmetic instance of it that depends on shared state.                  | 78    |
+
 ## FR-11100 - The section that never ran
 
 | Ref      | Requirement                                                                                                   | Phase |

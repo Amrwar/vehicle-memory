@@ -563,3 +563,15 @@ longer holds: it can fail now, and both directions are demonstrated. It reads
 code rather than the whole file, because the first version tripped on its own
 comment quoting the phrases it was meant to let through, and a guard that prose
 can trip is one somebody works around by rewording.
+
+Phase 78 is one check that measured shared state it did not create. The suite
+failed on `verify-returns` having passed the run before, on unchanged code —
+the worst kind of red, because it teaches everybody to run it again. Parts go
+back to a supplier at weighted average cost, and a shelf's average is whatever
+every delivery before it has made it. On a seeded database two parts hold
+£18.10 and the credit fits inside a £60 bill; after `verify-controls` has
+pressed its way around the product the same shelf averages nearly £39, the
+credit is £93.38, and the bill can only take £60. The product was right both
+times — it applies what the bill owes and holds the rest — and the check was
+asserting one arithmetic instance instead of the rule. It asserts the rule now,
+and gives the same answer on a clean database and a dirty one.

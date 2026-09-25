@@ -217,10 +217,29 @@ async function main() {
     select: { amountPaid: true, total: true },
   });
   const gross = Math.round(faulty.held * 1.2 * 100) / 100;
+
+  // What the credit is worth against what the bill still owes, rather than a
+  // figure that happens to fit.
+  //
+  // This assumed the credit would always be smaller than the bill, which is
+  // an assumption about the shelf. The parts go back at weighted average
+  // cost, and the shelf's average is whatever every previous delivery has
+  // made it -- the seed leaves five at PS8.10, so five more at PS10 average
+  // PS9.05 and two of them credit PS21.72 against a PS60 bill. After
+  // verify-controls has pressed its way around the product the same shelf
+  // averages nearly PS39, the credit is PS93.38, and the bill can only take
+  // PS60. The product was right both times: it applies what it can and holds
+  // the rest, which is what heldCreditBySupplier is for. The check was
+  // measuring shared state it did not create, and it passed one full run and
+  // failed the next on unchanged code. Phase 78, and the same rule as
+  // Phase 70.
+  const billTotal = Number(bill.total);
+  const applied = Math.min(gross, billTotal);
+
   check(
-    'the credit comes off the bill',
+    'the credit comes off the bill, as far as the bill owes',
     [Number(bill.amountPaid), credited.unappliedMinor],
-    [gross, 0],
+    [applied, Math.round((gross - applied) * 100)],
   );
   await refuses('a return is credited once', 'NOT_OPEN', () =>
     creditReturn({
@@ -304,7 +323,10 @@ async function main() {
     net: 80,
     tax: 0,
   });
-  const remaining = Math.round((60 - gross) * 100);
+  // Whatever the first credit left on the bill, the core charge pays off and
+  // the remainder is held -- which is PS80 in full when the first credit
+  // already covered the bill.
+  const remaining = Math.round((billTotal - applied) * 100);
   check(
     'the core credit pays off the bill and the rest is held',
     coreCredit.unappliedMinor,

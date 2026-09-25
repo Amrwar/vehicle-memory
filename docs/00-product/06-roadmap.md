@@ -4754,6 +4754,41 @@ the file. It reads code rather than the whole file: the first version tripped on
 its own comment, which quoted the two phrases it was meant to let through, and a
 guard that prose can trip is a guard somebody works around by rewording.
 
+## Phase 78 — A figure that happened to fit
+
+**Scope.** One check that measured shared state it did not create.
+
+**Exit.** `verify-returns` gives the same answer on a seeded database and on
+one twenty probes have already run against.
+
+**Status.** Done.
+
+The full suite failed on `verify-returns` having passed the run before, on
+unchanged code. That is the worst kind of red: it teaches everybody to run it
+again.
+
+The probe books five parts in at £10 and sends two back. Parts go back at
+**weighted average cost**, and a shelf's average is whatever every delivery
+before it has made it. The seed leaves five on that shelf at £8.10, so five
+more at £10 average £9.05, two of them hold £18.10, and the credit of £21.72
+fits comfortably inside a bill fixed at £60. The check asserted that: the whole
+credit applies and nothing is left over.
+
+`verify-controls` presses its way around the whole product, and some of what it
+presses books stock in. After it has run, the same shelf averages nearly £39.
+Two parts now hold £77.82, the credit is £93.38, and a £60 bill can only take
+£60 — so £33.38 is held against the supplier instead.
+
+**The product was right both times.** It applies what the bill owes and holds
+the rest, which is what `heldCreditBySupplier` exists for. The check was
+asserting one arithmetic instance rather than the rule, and the instance
+depended on a shelf it did not own.
+
+It asserts the rule now: the credit comes off the bill as far as the bill owes,
+and whatever is left over is held. That is true on a clean database and on a
+dirty one — both checked — and it is the same rule Phase 70 settled after
+`verify-inventory` asserted the seed's opening stock and then added to it.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four
