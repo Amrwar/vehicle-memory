@@ -111,6 +111,49 @@ function theChecksRun() {
     'and every verification on disk has a name somebody can type',
     unnamed.join(', '),
   );
+
+  // And a check that launches a browser needs the browser.
+  //
+  // `npx playwright install webkit firefox` names a set rather than adding to
+  // one, and it ran after the three checks that launch Chromium. Chromium was
+  // never installed at all: the comment beside it said Chromium is "what
+  // Playwright installs by default", which is true of `playwright install`
+  // with no arguments and of nothing else. The screens check had been failing
+  // on a missing executable rather than on a screen.
+  const ENGINES = ['chromium', 'webkit', 'firefox'] as const;
+
+  const uninstalled: string[] = [];
+
+  for (const file of readdirSync(join('infra', 'scripts')).filter((name) =>
+    /^verify-[a-z-]+\.ts$/.test(name),
+  )) {
+    const source = read(join('infra', 'scripts', file));
+
+    // An import statement on a line of its own, rather than those words
+    // anywhere in the file -- this script names them too, in the check you
+    // are reading, and would otherwise report itself.
+    const imports = /^import [^\n]* from 'playwright';$/m.exec(source);
+    if (!imports) continue;
+
+    const runsAt = ci.indexOf(file);
+    if (runsAt < 0) continue;
+
+    for (const engine of ENGINES) {
+      if (!new RegExp(`\\b${engine}\\b`).test(imports[0])) continue;
+
+      const installed = [...ci.matchAll(/playwright install([^\n]*)/g)].some(
+        (match) => match.index! < runsAt && match[1]!.includes(engine),
+      );
+
+      if (!installed) uninstalled.push(`${file} launches ${engine}`);
+    }
+  }
+
+  check(
+    uninstalled.length === 0,
+    'and every browser a check launches is installed before it runs',
+    uninstalled.join(', '),
+  );
 }
 
 /* ---------------------------------------------------------------------------

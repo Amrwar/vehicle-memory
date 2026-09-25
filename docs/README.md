@@ -494,3 +494,14 @@ a long time, and the page said so in a typed-out English sentence, twice, next
 to the constant that already held the number. Three copies of one fact, and the
 two that were not the constant had drifted apart. The page renders the constant
 now, and so does the check.
+
+Phase 74 is one line in the workflow. With the passport fixed and the routes
+answering properly, CI got further than it had in six weeks and stopped on a
+browser that was never installed. Three checks launch Chromium; the only
+install line in the file named webkit and firefox, which replaces the default
+set rather than adding to it, and ran three steps after the checks that needed
+Chromium. The comment beside it said Chromium is what Playwright installs by
+default — true of `playwright install` with no arguments and of nothing else.
+So the screens check had been failing on a missing executable rather than on a
+screen. `verify-throughout` now reads every check's Playwright import and asks
+the workflow whether each engine it names was installed before that check runs.

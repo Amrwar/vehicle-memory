@@ -4599,6 +4599,34 @@ copy that had been improved without the check being told: the customer's home
 page says "My cars" and "Needs you", and a purchase order's column is "Still to
 arrive".
 
+## Phase 74 — The browser nobody installed
+
+**Scope.** One line in the workflow, and the check that would have found it.
+
+**Exit.** Every engine a check launches is installed before the check runs, and
+that is asserted rather than assumed.
+
+**Status.** Done.
+
+With the passport fixed and the routes answering properly, CI got further than
+it had in six weeks and stopped on this: `browserType.launch: Executable
+doesn't exist at .../chrome-headless-shell`. Three checks launch Chromium —
+the screens at every size, the paint, and the engines check itself — and
+nothing in the workflow had ever installed it.
+
+The comment beside the one install line said Chromium is "what Playwright
+installs by default", which is true of `playwright install` with no arguments
+and of nothing else. The line read `npx playwright install webkit firefox`,
+which names a set rather than adding to one, and it ran three steps _after_ the
+checks that needed Chromium. So the screens check had been failing on a missing
+executable rather than on a screen, and the message it produced was about a
+browser rather than about the product, which is why it read as noise.
+
+One install step, before the first check that launches anything. And
+`verify-throughout` now reads every `verify-*.ts` that imports Playwright, sees
+which engines its import line names, and asks the workflow whether each was
+installed before that file is run. It fails without the fix.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

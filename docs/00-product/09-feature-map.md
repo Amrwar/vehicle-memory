@@ -770,6 +770,13 @@ The second sweep: things connected at one end only.
 | The rule, enforced             | Built  | `npm run verify:status` reads the route tree and ADR-0015 (Phase 73)            |
 | One place for the trial length | Fixed  | The front door renders `TRIAL_DAYS`; three copies had drifted to two (Phase 73) |
 
+## 21.40 The browser nobody installed
+
+| Item                         | Status | Where                                                                  |
+| ---------------------------- | ------ | ---------------------------------------------------------------------- |
+| The engines, installed first | Fixed  | Chromium was never installed at all; three checks launch it (Phase 74) |
+| Asserted, not assumed        | Built  | `verify-throughout` reads each check's Playwright import (Phase 74)    |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -848,7 +855,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 418          |
+| Built    | 419          |
 | Partial  | 3            |
 | Deferred | 1            |
 

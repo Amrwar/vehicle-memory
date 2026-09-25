@@ -602,6 +602,16 @@ jobs:
       # Every screen at every size. Built in Phase 46.5, never run by anything
       # until Phase 55, by which time it had twenty faults waiting on pages
       # that had been measured by nobody since the day they were written.
+      # Every engine any check launches, installed once, before the first
+      # of them runs. Chromium was assumed to be there because it is what
+      # Playwright installs by default -- but nothing here had asked it to
+      # install anything, and the only install in this file named webkit and
+      # firefox, which replaces the default set rather than adding to it, and
+      # ran after the checks that needed Chromium. The screens check had been
+      # failing on a missing browser.
+      - name: The browsers the checks launch
+        run: npx playwright install chromium webkit firefox
+
       - name: Every screen at every size
         run: npx tsx infra/scripts/verify-screens.ts http://localhost:3000
 
@@ -620,9 +630,7 @@ jobs:
       # passport on their own telephone, and a great many of those telephones
       # are iPhones, which is WebKit — a different engine, not a different skin.
       - name: The same screens in Safari and Firefox
-        run: |
-          npx playwright install webkit firefox
-          npx tsx infra/scripts/verify-engines.ts http://localhost:3000
+        run: npx tsx infra/scripts/verify-engines.ts http://localhost:3000
 
       # Every sentence in French and in Arabic, and the switch that changes
       # them. This one had been failing since Phase 50 and nothing said so.

@@ -1642,6 +1642,23 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic BZ - The browser nobody installed (Phase 74)
+
+### BZ1 - A check that can run
+
+**As** an engineer **I want** the workflow to install what the checks launch
+**so that** a red step is about the product rather than about the runner.
+
+**Size** 2 - **Satisfies** FR-10801, FR-10802
+
+- **Given** a check that imports Chromium, **when** the workflow runs, **then**
+  Chromium was installed by an earlier step.
+- **Given** an install line naming only some engines, **when**
+  `verify-throughout` runs, **then** it names each check and the engine it
+  launches that nothing installed.
+
+---
+
 ## Epic BY - A page that is not there says so (Phase 73)
 
 ### BY1 - A dead link that admits it
