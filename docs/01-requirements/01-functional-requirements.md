@@ -267,6 +267,14 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11300 - What the shelf lost, and what the supplier owes
+
+| Ref      | Requirement                                                                                                        | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11301 | The credit amount proposed for a return MUST be what was paid for what went back, not the stock value it released. | 79    |
+| FR-11302 | A core MUST be proposed at the core charge agreed for it.                                                          | 79    |
+| FR-11303 | The stock value released MUST still be shown, and still be what comes off the books.                               | 79    |
+
 ## FR-11200 - A figure that happened to fit
 
 | Ref      | Requirement                                                                                                            | Phase |

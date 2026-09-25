@@ -575,3 +575,17 @@ credit is £93.38, and the bill can only take £60. The product was right both
 times — it applies what the bill owes and holds the rest — and the check was
 asserting one arithmetic instance instead of the rule. It asserts the rule now,
 and gives the same answer on a clean database and a dirty one.
+
+Phase 79 is the defect found while reading the code around it. Two figures live
+either side of a supplier return. What the shelf lost is the weighted average —
+five bought last month at £8.10 and five today at £10 are ten parts worth £9.05
+each, and nobody can say which two are in the box. What the supplier owes is
+what the supplier charged: £10 each. The returns screen proposed the first as
+the answer to the second, so on a shelf restocked dearer it offered £77.82 for
+two parts that cost £20 — and for a core charge, known exactly and agreed in
+advance, it offered nothing at all. Wrong in both directions at once.
+
+Nothing was ever posted wrong, because the operator types what the supplier's
+credit note says. A proposal that is systematically wrong is still worse than no
+proposal, because it invites agreement. `creditDue()` is the rule now, in core
+with a test, and the returns check reads what the screen puts in the box.

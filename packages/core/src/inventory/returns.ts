@@ -93,6 +93,49 @@ export function assertReturnable(input: {
   }
 }
 
+/**
+ * What the supplier's credit note should say: what was paid for what went
+ * back.
+ *
+ * Not the same figure as `heldValue`, and the difference is the point.
+ *
+ * A part comes off the shelf at the shelf's weighted average, because that is
+ * what leaving costs the books -- five bought last month at PS8.10 and five
+ * today at PS10 are ten parts worth PS9.05 each, and nobody can say which two
+ * are in the box going back. That is right for the ledger and has nothing to
+ * do with the supplier, who will credit what they charged: PS10 each, because
+ * that is what their invoice said.
+ *
+ * The returns screen proposed the held value as the amount to enter, so on a
+ * shelf averaging PS39 it offered PS77.82 for two parts that cost PS20 -- and
+ * for a core, where the charge is known exactly, it offered nothing at all,
+ * because a core holds no stock value. Both wrong, in opposite directions.
+ * Phase 79.
+ *
+ * A core is credited at the core charge, which is what was agreed for it.
+ * Everything else at the price on the order it came in on.
+ */
+export function creditDue(
+  lines: readonly {
+    reason: ReturnReason;
+    quantity: number;
+    /** What one cost when it went back: the shelf's average, or the core charge. */
+    unitCost: number;
+    /** What one cost when it was bought, from the order line it came in on. */
+    paidUnitCost?: number | null;
+  }[],
+): number {
+  return round2(
+    lines.reduce(
+      (total, line) =>
+        total +
+        line.quantity *
+          (line.reason === 'CORE' ? line.unitCost : (line.paidUnitCost ?? line.unitCost)),
+      0,
+    ),
+  );
+}
+
 /** The value a return takes off the shelf and holds as a credit due. Cores hold nothing. */
 export function heldValue(
   lines: readonly { reason: ReturnReason; quantity: number; unitCost: number }[],

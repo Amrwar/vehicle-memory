@@ -14,6 +14,7 @@ import {
   assertReturnable,
   assertSubletBillable,
   assertSubletSound,
+  creditDue,
   heldValue,
   reasonLabel,
   ReturnError,
@@ -30,6 +31,43 @@ function code(run: () => void): string | null {
 }
 
 const at = new Date(Date.UTC(2026, 8, 15));
+
+describe('what the supplier owes, against what the shelf loses', () => {
+  // Five bought last month at 8.10 and five today at 10 are ten parts worth
+  // 9.05 each on the shelf, and nobody can say which two are in the box going
+  // back. The books lose 9.05 each; the supplier credits the 10 they charged.
+  const back = { reason: 'DEFECTIVE' as const, quantity: 2, unitCost: 9.05, paidUnitCost: 10 };
+
+  it('is what was paid, not what the shelf averaged', () => {
+    expect(creditDue([back])).toBe(20);
+    expect(heldValue([back])).toBe(18.1);
+  });
+
+  it('and the gap widens with the shelf, which is why it cannot be guessed', () => {
+    expect(creditDue([{ ...back, unitCost: 38.91 }])).toBe(20);
+    expect(heldValue([{ ...back, unitCost: 38.91 }])).toBe(77.82);
+  });
+
+  it('credits a core at the charge agreed for it, which the shelf never held', () => {
+    const core = { reason: 'CORE' as const, quantity: 1, unitCost: 80, paidUnitCost: 10 };
+    expect(creditDue([core])).toBe(80);
+    expect(heldValue([core])).toBe(0);
+  });
+
+  it('falls back to what it has when the order line has gone', () => {
+    expect(creditDue([{ ...back, paidUnitCost: null }])).toBe(18.1);
+  });
+
+  it('adds the lines up', () => {
+    expect(
+      creditDue([
+        back,
+        { reason: 'SURPLUS', quantity: 3, unitCost: 4, paidUnitCost: 5 },
+        { reason: 'CORE', quantity: 1, unitCost: 80, paidUnitCost: 10 },
+      ]),
+    ).toBe(115);
+  });
+});
 
 describe('what may go back', () => {
   const pads = { description: 'Brake pads', received: 4, alreadyReturned: 1, onHand: 2 };

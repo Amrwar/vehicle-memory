@@ -462,7 +462,16 @@ export async function returnsFor(orgId: string, options: { orderId?: string } = 
       sentAt: true,
       supplier: { select: { id: true, name: true } },
       order: { select: { id: true, number: true } },
-      lines: { select: { id: true, description: true, quantity: true, unitCost: true } },
+      lines: {
+        select: {
+          id: true,
+          description: true,
+          quantity: true,
+          unitCost: true,
+          // What the supplier charged, which is what they will credit.
+          orderLine: { select: { unitCost: true } },
+        },
+      },
     },
   });
 }

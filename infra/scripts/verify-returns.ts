@@ -507,6 +507,37 @@ async function main() {
   );
   await screenHas('the job page carries the sublet', `/jobs/${job.id}`, cookie, 'Sublet work');
 
+  // One more sent back and left open, so the screen has a credit form to fill
+  // in, and what it proposes can be read.
+  //
+  // It used to propose the held stock value -- what the shelf lost, at its
+  // weighted average -- as the amount to put on the supplier's credit note.
+  // Those are different figures whenever the shelf has been restocked at a
+  // different price, which is always. The operator has the supplier's note in
+  // front of them and types what it says, so nothing was ever posted wrong;
+  // a proposal that is systematically wrong is still worse than none, because
+  // it invites agreement. Phase 79.
+  const open = await sendReturn({
+    orgId: org.id,
+    userId: staff.id,
+    orderId,
+    reason: 'DEFECTIVE',
+    notes: TAG,
+    lines: [{ orderLineId: lineId, quantity: 1 }],
+  });
+
+  const screen = await fetch(`${BASE}/purchasing/returns`, { headers: { cookie } });
+  const markup = (await screen.text()).slice(0, 400_000);
+  const row = markup.slice(markup.indexOf(open.number));
+  const proposed = /name="net"[^>]*?value="([0-9.]+)"/.exec(row)?.[1];
+
+  check(
+    'the screen proposes what the supplier charged, not what the shelf lost',
+    Number(proposed),
+    10,
+  );
+  check('which is not the held value, on this shelf', Number(proposed) !== open.held, true);
+
   await forget(org.id);
   if (shelfBefore) {
     await prisma.stockLevel.update({

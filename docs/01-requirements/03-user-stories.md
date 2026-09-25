@@ -1642,6 +1642,33 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CE - What the shelf lost, and what the supplier owes (Phase 79)
+
+### CE1 - A credit note for what they charged
+
+**As** a parts manager **I want** the credit box to offer what the supplier
+charged **so that** I am not invited to claim a figure their note will not
+match.
+
+**Size** 3 - **Satisfies** FR-11301, FR-11303
+
+- **Given** a shelf whose average has moved since the parts were bought,
+  **when** the return is credited, **then** the box offers the price paid.
+- **Given** the same return, **when** it is listed, **then** the stock value
+  it released is still shown, and still what comes off the books.
+
+### CE2 - A core at the charge agreed
+
+**As** a parts manager **I want** a core charge proposed **so that** the one
+figure known exactly is not the one left blank.
+
+**Size** 2 - **Satisfies** FR-11302
+
+- **Given** a core sent back at an agreed charge, **when** it is credited,
+  **then** the box offers that charge.
+
+---
+
 ## Epic CD - A figure that happened to fit (Phase 78)
 
 ### CD1 - A credit larger than the bill

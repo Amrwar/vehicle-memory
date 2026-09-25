@@ -4789,6 +4789,47 @@ and whatever is left over is held. That is true on a clean database and on a
 dirty one — both checked — and it is the same rule Phase 70 settled after
 `verify-inventory` asserted the seed's opening stock and then added to it.
 
+## Phase 79 — What the shelf lost, and what the supplier owes
+
+**Scope.** One number the returns screen proposed, which was the answer to a
+different question.
+
+**Exit.** The screen offers what the supplier will credit, and a check reads
+what it offers.
+
+**Status.** Done.
+
+Two figures live either side of a supplier return and they are not the same
+number.
+
+**What the shelf lost** is the weighted average. Five parts bought last month at
+£8.10 and five today at £10 are ten parts worth £9.05 each, and nobody can say
+which two are in the box going back. That is what must come off the books, and
+the product gets it right.
+
+**What the supplier owes** is what the supplier charged: £10 each, because that
+is what their invoice said. The credit note they send will say £20 for two.
+
+The returns screen proposed the first as the answer to the second. On a shelf
+that had been restocked dearer — the one `verify-controls` leaves behind, at
+nearly £39 — it offered **£77.82 for two parts that cost £20**. And for a core
+charge, where the figure is known exactly and agreed in advance, it offered
+nothing at all, because a core holds no stock value. Wrong in both directions
+at once.
+
+Nothing has ever been posted wrong: the operator has the supplier's credit note
+in front of them and types what it says, which is why this survived. **A
+proposal that is systematically wrong is still worse than no proposal**, because
+it invites agreement — and the one person most likely to accept it is the one
+with the least reason to doubt it.
+
+`creditDue()` is the rule, in core, with a test: a core at the charge agreed for
+it, everything else at the price on the order it came in on, falling back to
+what it has when the order line has gone. `verify-returns` now sends one more
+part back, leaves it open, reads what the screen puts in the box, and checks it
+against what was paid. Against the old screen that check fails — expected 10,
+got 9.05 — which is the demonstration.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

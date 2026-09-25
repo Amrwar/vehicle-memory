@@ -1,4 +1,4 @@
-import { reasonLabel } from '@carnet/core';
+import { creditDue, reasonLabel } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -55,6 +55,40 @@ async function credit(formData: FormData) {
     }
     throw error;
   }
+}
+
+/**
+ * What to put in the box, which is what the supplier will credit.
+ *
+ * Not the held value, which is what the shelf lost. A part comes off stock at
+ * the shelf's weighted average, because nobody can say which two of ten are
+ * in the box; the supplier credits what they charged on the order. The two
+ * coincide only when nothing has moved the average, and this screen used to
+ * offer the first as the answer to the second -- PS77.82 for two parts that
+ * cost PS20, on a shelf that had been restocked dearer. For a core it offered
+ * nothing at all, because a core holds no stock value, when the core charge
+ * is the one figure on the whole screen that is known exactly. Phase 79.
+ *
+ * It is a proposal either way: the operator has the supplier's credit note in
+ * front of them and types what it says. A proposal that is systematically
+ * wrong is worse than none, because it invites agreement.
+ */
+function due(returned: {
+  reason: string;
+  lines: readonly {
+    quantity: unknown;
+    unitCost: unknown;
+    orderLine: { unitCost: unknown } | null;
+  }[];
+}): number {
+  return creditDue(
+    returned.lines.map((line) => ({
+      reason: returned.reason as never,
+      quantity: Number(line.quantity),
+      unitCost: Number(line.unitCost),
+      paidUnitCost: line.orderLine ? Number(line.orderLine.unitCost) : null,
+    })),
+  );
 }
 
 async function refuse(formData: FormData) {
@@ -189,7 +223,7 @@ export default async function ReturnsPage({
                           step="0.01"
                           min="0.01"
                           required
-                          defaultValue={Number(r.heldCost) > 0 ? Number(r.heldCost) : undefined}
+                          defaultValue={due(r) > 0 ? due(r) : undefined}
                           className="w-28"
                         />
                       </Field>

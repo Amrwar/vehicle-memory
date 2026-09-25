@@ -808,6 +808,14 @@ The second sweep: things connected at one end only.
 | A credit bigger than the bill | Held   | Applied as far as the bill owes, the rest held against the supplier (Phase 78) |
 | The check asserts the rule    | Fixed  | Not one instance of it that depended on a shelf it did not own (Phase 78)      |
 
+## 21.45 What the shelf lost, and what the supplier owes
+
+| Item                                | Status | Where                                                                     |
+| ----------------------------------- | ------ | ------------------------------------------------------------------------- |
+| The credit offered is what was paid | Fixed  | It offered the shelf's average: £77.82 for parts that cost £20 (Phase 79) |
+| A core is offered at its charge     | Fixed  | It offered nothing, because a core holds no stock value (Phase 79)        |
+| The stock value still shown         | Built  | Beside the return, and still what comes off the books (Phase 79)          |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -886,7 +894,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 421          |
+| Built    | 422          |
 | Partial  | 3            |
 | Deferred | 1            |
 
