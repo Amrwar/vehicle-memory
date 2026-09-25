@@ -207,8 +207,14 @@ async function main() {
     select: { id: true, registration: true },
   });
 
+  // Not a skip. A section that may or may not have run is not a check, and
+  // nothing downstream says which it was. Phase 77.
   if (others.length < 2) {
-    console.info('  skip   not enough vehicles seeded to reach the open-request limit');
+    failures += 1;
+    console.error(
+      `  FAIL   ${others.length} vehicles found where 2 are needed, so the open-request\n` +
+        '         limit itself was not exercised. Reseed: npm run db:seed',
+    );
   } else {
     for (const other of others.slice(0, 2)) {
       await claimVehicle({ userId: user.id, identifier: other.registration! });

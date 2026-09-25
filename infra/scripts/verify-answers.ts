@@ -125,8 +125,14 @@ async function main() {
     select: { id: true, number: true },
   });
 
+  // Not a skip. A section that may or may not have run is not a check, and
+  // nothing downstream says which it was. Phase 77.
   if (!completed) {
-    console.info('  skip   no completed job with lines in the seed');
+    failures += 1;
+    console.error(
+      '  FAIL   no completed job with lines in the seed, so nothing below this\n' +
+        '         line was exercised. Reseed: npm run db:seed',
+    );
   } else {
     const facts = await summaryFactsFor(org.id, completed.id);
     const composed = await customerSummaryFor(org.id, completed.id);

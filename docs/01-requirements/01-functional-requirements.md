@@ -267,6 +267,13 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11100 - The section that never ran
+
+| Ref      | Requirement                                                                                                   | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-11101 | A check MUST NOT skip a section of itself and pass; it builds what is missing, or fails and names the remedy. | 77    |
+| FR-11102 | The books of a workshop built entirely through the product's own functions MUST agree with themselves, in CI. | 77    |
+
 ## FR-11000 - A check that skipped itself
 
 | Ref      | Requirement                                                                                                              | Phase |

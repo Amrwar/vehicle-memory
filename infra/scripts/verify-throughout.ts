@@ -169,6 +169,44 @@ function theChecksRun() {
     'and with the system libraries it needs, not only its own files',
     bare.map((match) => `playwright install${match[1]}`).join(', '),
   );
+
+  // And none of them skips a section of itself.
+  //
+  // A check that prints "skip" and carries on green is a check nobody runs,
+  // wearing a tick. Five did. verify-payments and verify-billing skipped the
+  // signed webhook when PAYMENT_WEBHOOK_SECRET was unset -- which it was, in
+  // CI, always -- so money arriving from the provider had never been checked
+  // anywhere. verify-books skipped the demonstration workshop every single
+  // run, because the only thing that builds one removes it again and runs
+  // later in the order; the section its own docblock calls the best evidence
+  // that ordinary use keeps the books straight had never once executed.
+  //
+  // The remedy is one of two: build what is missing, as verify-books and
+  // verify-tenancy now do, or fail and name the remedy. Never carry on.
+  const skipping: string[] = [];
+
+  for (const file of readdirSync(join('infra', 'scripts')).filter((name) =>
+    /^verify-[a-z-]+\.ts$/.test(name),
+  )) {
+    if (!ci.includes(file)) continue;
+
+    // Code only. The first version of this read the whole file and tripped on
+    // its own comment, which quoted the two phrases it was meant to let
+    // through -- and a guard that prose can trip is a guard somebody works
+    // around by rewording. Comments go first, then a string literal that
+    // opens with the word, which is the shape of the line these print.
+    const code = read(join('infra', 'scripts', file))
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+
+    if (/['"`]\s*skip\s/.test(code)) skipping.push(file);
+  }
+
+  check(
+    skipping.length === 0,
+    'and none of them skips a section of itself and passes anyway',
+    skipping.join(', '),
+  );
 }
 
 /* ---------------------------------------------------------------------------

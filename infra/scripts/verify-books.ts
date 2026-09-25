@@ -35,6 +35,7 @@ import { describeAudit, money, unaccountedFor, worstFirst } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
 import { auditBooks } from '../../apps/web/src/lib/books';
+import { createDemonstration, removeDemonstration } from '../../apps/web/src/lib/demonstration';
 import { completeSale } from '../../apps/web/src/lib/counter';
 import { adjustStock } from '../../apps/web/src/lib/inventory';
 import { applyHeld, takeDeposit } from '../../apps/web/src/lib/deposits';
@@ -94,19 +95,46 @@ async function main() {
 
   /* --- the demonstration ---------------------------------------------------- */
 
-  const demonstration = await prisma.organization.findFirst({
+  // Built here when there is not one, rather than skipped.
+  //
+  // The docblock above calls this the best evidence that ordinary use keeps
+  // the books straight -- a workshop where every invoice, payment, part and
+  // posting went through the product's own functions rather than through the
+  // seed. That evidence had never been gathered: `verify-first-day` removes
+  // the demonstration at the end of its run, this file runs before it, and so
+  // the section printed "skipping that one" every time and nobody saw it. A
+  // section that may or may not have run is not a check. Phase 77.
+  console.info('\n  The demonstration workshop');
+
+  const existing = await prisma.organization.findFirst({
     where: { isDemonstration: true },
-    select: { id: true, name: true },
+    select: { id: true },
   });
 
-  if (demonstration) {
-    console.info('\n  The demonstration workshop');
+  const built = existing ? null : await createDemonstration({ userId: staff.id });
+  const demonstrationId = existing?.id ?? built!.orgId;
+
+  console.info(
+    built
+      ? '  built one, because there was none — a year of work through the real functions'
+      : '  using the one already here',
+  );
+
+  check(
+    'a workshop built entirely through the product agrees with itself',
+    await audit('demonstration', demonstrationId),
+  );
+
+  // And taken away again, which is also the only automated exercise the
+  // removal gets outside verify-first-day: its cars and their made-up history
+  // go before the workshop, because a workshop with passport entries pointing
+  // at it cannot be deleted. Phase 72.
+  if (built) {
+    await removeDemonstration({ userId: staff.id, orgId: demonstrationId });
     check(
-      'a workshop built entirely through the product agrees with itself',
-      await audit('demonstration', demonstration.id),
+      'and is taken away again, whole',
+      (await prisma.organization.count({ where: { id: demonstrationId, isActive: true } })) === 0,
     );
-  } else {
-    console.info('\n  No demonstration workshop to check; skipping that one.');
   }
 
   /* --- a month of chaos ----------------------------------------------------- */

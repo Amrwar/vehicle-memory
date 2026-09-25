@@ -511,6 +511,8 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-11101 | CC2   | -                                      | four probes fail and name the remedy; the guard reads every probe CI runs           | `verify-throughout.ts`                        | Done   |
+| FR-11102 | CC1   | `auditBooks()`                         | `verify-books.ts` builds the demonstration, audits it, removes it                   | `verify-books.ts`                             | Done   |
 | FR-11001 | CB1   | `PaymentAttempt`, `Payment`            | the signed webhook path, with `PAYMENT_WEBHOOK_SECRET` set in the workflow          | `verify-payments.ts`, `verify-billing.ts`     | Done   |
 | FR-11002 | CB2   | -                                      | both probes fail and name the remedy instead of skipping                            | `verify-payments.ts`, `verify-billing.ts`     | Done   |
 | FR-10901 | CA1   | -                                      | the button base wraps instead of `whitespace-nowrap`                                | `verify-screens.ts`                           | Done   |
@@ -1126,7 +1128,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 237                 | 236                    |
+| Later phases, newest first                         | 239                 | 238                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1144,9 +1146,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **805**             | **797 (99%)**          |
+| **Total**                                          | **807**             | **799 (99%)**          |
 
-Every one of the 805 requirements now has a row of its own. Until Phase 61,
+Every one of the 807 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

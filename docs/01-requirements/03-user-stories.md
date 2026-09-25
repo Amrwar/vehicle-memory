@@ -1642,6 +1642,35 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CC - The section that never ran (Phase 77)
+
+### CC1 - The books of a workshop built by the product
+
+**As** an operator **I want** the books of a workshop built through the
+product's own functions checked **so that** ordinary use is known to keep them
+straight, rather than assumed to.
+
+**Size** 3 - **Satisfies** FR-11102
+
+- **Given** no demonstration workshop, **when** the books check runs, **then**
+  it builds one, audits it, and takes it away again.
+- **Given** the audit, **when** it runs, **then** every rule holds across the
+  whole workshop.
+
+### CC2 - No section that may or may not have run
+
+**As** an engineer **I want** a check that cannot do its job to say so **so
+that** green means checked.
+
+**Size** 2 - **Satisfies** FR-11101
+
+- **Given** a probe missing what a section needs, **when** it runs, **then**
+  it fails and names the remedy.
+- **Given** a probe that prints a skip, **when** `verify-throughout` runs,
+  **then** it names that file.
+
+---
+
 ## Epic CB - A check that skipped itself (Phase 76)
 
 ### CB1 - Money arriving, checked

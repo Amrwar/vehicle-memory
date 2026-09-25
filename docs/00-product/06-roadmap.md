@@ -4713,6 +4713,47 @@ section of a check that may or may not have run, and nothing says which.
 `verify-tenancy` shows the answer — its docblock says that rather than skip a
 missing kind, it makes one — and the others should do the same.
 
+## Phase 77 — The section that never ran
+
+**Scope.** The five checks that skipped part of themselves, and the guard that
+stops a sixth.
+
+**Exit.** No check carries on green having not done its job.
+
+**Status.** Done, and the one that fired had never run once.
+
+Phase 76 turned two skips into failures and left five written down. Four of the
+remaining ones are dormant — they guard against a seed that does not hold what
+the check needs, and on the seed we have they never fire. One fired every
+single time.
+
+**`verify-books` had never checked the demonstration workshop.** Its own
+docblock names that workshop as the best evidence the product has: a year of
+work where every invoice, payment, part and posting went through the product's
+own functions rather than through the seed, so if ordinary use puts the books
+wrong it shows there and nowhere else. The section looked for a demonstration,
+found none, printed `No demonstration workshop to check; skipping that one`,
+and passed. Every run. The only thing that builds one is `verify-first-day`,
+which removes it again at the end and runs seventy-odd steps later.
+
+It builds one now, checks it, and takes it away: **241 checks on a workshop
+built entirely through the product's own functions, and everything agrees.**
+That is a claim the file has been making since Phase 47 and had never once
+tested. Taking it away again also gives the Phase 72 teardown — cars and
+made-up history first, because a workshop with passport entries pointing at it
+cannot be deleted — its second exercise anywhere.
+
+The other four now fail and name the remedy rather than going quiet, on the
+principle Phase 76 settled: a section that may or may not have run is not a
+check, and nothing downstream says which it was.
+
+**And the guard that was removed in Phase 76 is back**, because the reason for
+removing it no longer holds. Then it could not fail; now it can, and both
+directions are demonstrated — add a skip line to any probe CI runs and it names
+the file. It reads code rather than the whole file: the first version tripped on
+its own comment, which quoted the two phrases it was meant to let through, and a
+guard that prose can trip is a guard somebody works around by rewording.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

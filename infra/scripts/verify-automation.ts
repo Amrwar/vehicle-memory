@@ -332,9 +332,12 @@ async function main() {
 
   let outcome: { sent: number; suppressed: number } | null = null;
 
+  // Not a skip. A section that may or may not have run is not a check, and
+  // nothing downstream says which it was. Phase 77.
   if (reachable.length === 0) {
-    console.info(
-      '  skip  nobody seeded with consent, an address and a visit; the send path is not exercised',
+    fail(
+      'somebody is seeded with consent, an address and a visit',
+      'nobody found, so the send path -- which is the point of a campaign -- was not exercised. Reseed: npm run db:seed',
     );
   } else {
     try {

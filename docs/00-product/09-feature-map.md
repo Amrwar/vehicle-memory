@@ -792,6 +792,15 @@ The second sweep: things connected at one end only.
 | The signed webhook, exercised | Fixed  | `PAYMENT_WEBHOOK_SECRET` in the workflow; the path had never run in CI (Phase 76) |
 | No quiet skip                 | Fixed  | Both probes fail and name the remedy (Phase 76)                                   |
 
+## 21.43 The section that never ran
+
+| Item                               | Status | Where                                                                        |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------------- |
+| The demonstration's books, audited | Fixed  | 241 checks on a workshop built by the product; had never run once (Phase 77) |
+| The teardown, exercised            | Built  | Cars and made-up history before the workshop (Phase 77)                      |
+| No quiet skip anywhere             | Fixed  | Four probes fail and name the remedy (Phase 77)                              |
+| And a guard against the next one   | Built  | `verify-throughout` names any probe that prints a skip (Phase 77)            |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -870,7 +879,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 419          |
+| Built    | 421          |
 | Partial  | 3            |
 | Deferred | 1            |
 

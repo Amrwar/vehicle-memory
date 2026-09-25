@@ -546,3 +546,20 @@ both such skips had just become failures, and a check that cannot fail is the
 thing this repository keeps finding in other people's work. What is left is five
 probes that still skip for want of seed data rather than configuration, and
 that is the next phase.
+
+Phase 77 did those five. Four are dormant — they guard against a seed that does
+not hold what the section needs, and on this seed they never fire — and they now
+fail and name the remedy instead of going quiet. The fifth fired every single
+time: `verify-books` had never checked the demonstration workshop, which its own
+docblock names as the best evidence the product has, because a year of work there
+went through the product's own functions rather than through the seed. The only
+thing that builds one removes it again and runs seventy steps later, so the
+section printed "skipping that one" and passed, every run since Phase 47. It
+builds one now: 241 checks, everything agrees, and then it is taken away again —
+which gives the Phase 72 teardown its second exercise anywhere.
+
+The guard removed in Phase 76 is back, because the reason for removing it no
+longer holds: it can fail now, and both directions are demonstrated. It reads
+code rather than the whole file, because the first version tripped on its own
+comment quoting the phrases it was meant to let through, and a guard that prose
+can trip is one somebody works around by rewording.
