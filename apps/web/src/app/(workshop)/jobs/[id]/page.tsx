@@ -92,6 +92,15 @@ import { clearComeback, ComebackError, comebackFor, markComeback } from '@/lib/o
 import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
+import { JobDiagnosis } from '@/components/job-diagnosis';
+import {
+  catalogueFor,
+  diagnosisFor,
+  DiagnosisError,
+  openDiagnosis,
+  recordVerdict,
+  whatItHasBeen,
+} from '@/lib/diagnosis';
 import { tFor } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -333,6 +342,59 @@ async function returnCourtesy(formData: FormData) {
 }
 
 /** Something to do after the car has gone: ring them, chase the part. Phase 66. */
+/**
+ * Starts a diagnosis: the complaint, and every cause there is to rule on.
+ *
+ * Nothing is decided by opening one. The list that comes back is what to look
+ * at, in the catalogue's order -- not a ranking, because a technician handed a
+ * ranking is being told what to find, and a corpus built from that confirms
+ * itself for ever. Phase 81.
+ */
+async function diagnose(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await openDiagnosis({
+      orgId,
+      userId: user.userId,
+      jobId,
+      symptomId: String(formData.get('symptomId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof DiagnosisError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#diagnosis`);
+  }
+
+  redirect(`/jobs/${jobId}#diagnosis`);
+}
+
+/** Records what the technician found one cause to be. */
+async function rule(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await recordVerdict({
+      orgId,
+      userId: user.userId,
+      diagnosisId: String(formData.get('diagnosisId') ?? ''),
+      causeId: String(formData.get('causeId') ?? ''),
+      outcome: String(formData.get('outcome') ?? '') as never,
+      note: String(formData.get('note') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof DiagnosisError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#diagnosis`);
+  }
+
+  redirect(`/jobs/${jobId}#diagnosis`);
+}
+
 async function addFollowUp(formData: FormData) {
   'use server';
 
@@ -722,6 +784,16 @@ export default async function JobPage({
     loansForJob(orgId, job.id),
     fleetFor(orgId),
   ]);
+
+  // The complaint, what was ruled on, and what this workshop has found the
+  // same complaint to be before -- leaving this job out of its own evidence.
+  const [complaints, diagnosis] = await Promise.all([
+    catalogueFor(orgId),
+    diagnosisFor(orgId, job.id),
+  ]);
+  const beenBefore = diagnosis
+    ? await whatItHasBeen(orgId, diagnosis.symptom.id, { exceptJobId: job.id })
+    : { ranked: [], jobs: 0 };
   const subletLineIds = new Set(sublets.map((entry) => entry.partLineId));
 
   const reached = job.statusEvents.map((event) => event.toStatus as JobStatus);
@@ -2133,6 +2205,17 @@ export default async function JobPage({
               ) : null}
             </CardBody>
           </Card>
+
+          <JobDiagnosis
+            jobId={job.id}
+            catalogue={complaints}
+            diagnosis={diagnosis}
+            evidence={beenBefore.ranked}
+            jobsBehind={beenBefore.jobs}
+            canWrite={can(user.role, 'job:write')}
+            open={diagnose}
+            rule={rule}
+          />
 
           <Card
             id="followup"

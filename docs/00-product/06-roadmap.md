@@ -4895,6 +4895,76 @@ palette, keyboard shortcuts, unread and action badges, collapse and expand, and
 the technician's bottom bar on a telephone. The portal's and `/shop`'s own
 navigation are written in their own vocabulary and get the same treatment.
 
+## Phase 81 — The corpus, not the guess
+
+**Scope.** The second of the four gaps, and the one the feature map called
+**Deferred** for thirty-six phases: fault suggestion.
+
+**Exit.** A workshop is told what a complaint has turned out to be in that
+workshop, with the count, and told nothing at all until it can be.
+
+**Status.** Done. ADR-0016 amends ADR-0013 point 4.
+
+ADR-0013 refused to build this, and gave the reason: "a service adviser that
+proposes where to look needs a corpus of symptoms against confirmed causes.
+That corpus does not exist yet, and a confident wrong suggestion on a braking
+fault is not a small error."
+
+Every word of that is still true. What it never said is what to do about it,
+and the answer sat as one line on the map for thirty-six phases.
+
+**The missing corpus is a thing every workshop produces daily and throws away.**
+A car arrives with a complaint. A technician considers three or four things it
+might be, rules each in or out, and fixes it. The complaint, the candidates and
+the verdicts _are_ the corpus. Carnet was recording the fix and discarding the
+reasoning.
+
+So the reasoning is recorded. A complaint from the workshop's own catalogue, the
+causes that sit under it, and a verdict on each — **confirmed, ruled out, or not
+determined**. Nothing counts until every candidate has an answer, because a
+corpus that only ever hears about the causes somebody found will recommend the
+last thing that worked, for ever.
+
+Then the product reports it, and the strongest sentence it will say is:
+
+> In this workshop, 35 jobs that began with "brake pedal vibration" reached a
+> verdict. These are what they turned out to be.
+>
+> Rotor runout — confirmed 31 times, ruled out 4
+> Uneven pad wear — confirmed 7 times, ruled out 1
+
+Every number is a count of jobs somebody finished and signed off, traceable to
+those jobs. No likelihood for the car on the ramp is stated, because none is
+known.
+
+**Five rules keep it from becoming the thing ADR-0013 refused**, and
+`verify-knowledge.ts` checks each:
+
+- **Silence below the line.** Under three confirmations a cause is an anecdote,
+  and an anecdote beside a brake fault reads as advice. The seeded air
+  conditioning complaint sits at two and shows nothing, which is the state
+  nobody would have thought to look at.
+- **Never confirmed, never listed.** The wheel bearing has been ruled out six
+  times and confirmed none. It is a candidate to rule on and is not in the
+  history, because listing it there would say the opposite of what the record
+  holds.
+- **No confirmation without its refusals.** Confirmed three times out of twelve
+  and confirmed three times out of three are different facts.
+- **A job is not evidence for itself.** The verdict entered here is left out of
+  the counts shown beside it.
+- **The candidates are never ordered by the evidence.** The list a technician
+  rules on is in the catalogue's order. A list sorted by what the workshop
+  usually finds tells somebody what to find, and a corpus built from led answers
+  confirms itself for ever. This was the hardest one to give up, because it is
+  what every product of this kind does.
+
+And one about tenancy that is also about honesty: the claim is "in this
+workshop", so the corpus stops at the workshop boundary.
+
+**The corpus cannot be larger than the work.** A workshop that has done six jobs
+knows what six jobs taught it, and every screen says so. That is the honest cost
+of the decision and it is not a defect.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

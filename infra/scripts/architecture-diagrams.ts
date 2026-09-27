@@ -129,8 +129,14 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
   },
   {
     key: 'inspection',
-    title: 'Inspections and estimates',
+    title: 'Inspections, diagnosis and estimates',
     models: [
+      // The diagnostic corpus. Beside the inspection because they are the two
+      // records of what was found rather than what was done. ADR-0016.
+      'SymptomCode',
+      'CauseCode',
+      'JobDiagnosis',
+      'DiagnosisCause',
       'InspectionTemplate',
       'InspectionTemplateSection',
       'InspectionTemplateItem',

@@ -343,14 +343,14 @@ instead, which is what they wanted and is worth more than the review.
 
 ## 19. AI inside the workflow
 
-| Item                          | Status   | Note                                                                                |
-| ----------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| Customer summary of a job     | Built    | Composed from the job; a model may tidy it, checked against the record (Phase 17)   |
-| Revenue observations          | Built    | Arithmetic with a sentence around it; silent under five jobs (Phase 17)             |
-| A job read back to staff      | Built    | "Where does this job stand?" on the job, what is blocking first (Phase 22)          |
-| Drafted messages to customers | Built    | Progress, decision, ready; no figure the job lacks; a person sends, once (Phase 22) |
-| Every exchange recorded       | Built    | Who, kind, words, tokens, cost; a monthly budget per workshop (Phase 22)            |
-| Fault suggestion              | Deferred | Needs a corpus of symptoms against confirmed causes that does not exist (ADR-0013)  |
+| Item                          | Status | Note                                                                                                                         |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Customer summary of a job     | Built  | Composed from the job; a model may tidy it, checked against the record (Phase 17)                                            |
+| Revenue observations          | Built  | Arithmetic with a sentence around it; silent under five jobs (Phase 17)                                                      |
+| A job read back to staff      | Built  | "Where does this job stand?" on the job, what is blocking first (Phase 22)                                                   |
+| Drafted messages to customers | Built  | Progress, decision, ready; no figure the job lacks; a person sends, once (Phase 22)                                          |
+| Every exchange recorded       | Built  | Who, kind, words, tokens, cost; a monthly budget per workshop (Phase 22)                                                     |
+| Fault suggestion              | Built  | The corpus is built from what technicians confirm, and reported as counts; nothing is shown under three (ADR-0016, Phase 81) |
 
 The rule across the section is the one ADR-0013 states: it composes from the
 record and decides nothing. Nothing it writes changes a record until a person
@@ -901,11 +901,10 @@ the sections given a single verdict:
 
 _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
-| Status   | Capabilities |
-| -------- | ------------ |
-| Built    | 423          |
-| Partial  | 2            |
-| Deferred | 1            |
+| Status  | Capabilities |
+| ------- | ------------ |
+| Built   | 424          |
+| Partial | 2            |
 
 <!-- counts:end -->
 
@@ -913,9 +912,11 @@ Nothing on this map is missing any more. Coupons, the last of it, were built
 in Phase 45.5. The sidebar was the third **Partial** until Phase 80 and is now
 written per role and checked both ways. What is left is the two dictionary
 counts, which are partial by construction — they are frozen numbers that can
-only fall — and one **Deferred**, fault suggestion, which is waiting on a corpus
-of symptoms against confirmed causes that does not exist (ADR-0013) and which
-the plan now answers by building the corpus rather than the guess.
+only fall. The **Deferred** is closed: Phase 81 built the corpus ADR-0013 said
+did not exist, out of what technicians confirm and rule out on their own jobs,
+and reports it as counts with silence below three confirmations (ADR-0016).
+What replaced the deferral is smaller than what was originally asked for, and
+true.
 
 A map with nothing missing on it is not the same as a product that is ready.
 It says the screens exist. The phases after Phase 45.5 in the

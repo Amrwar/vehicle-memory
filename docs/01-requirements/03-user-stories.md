@@ -1642,6 +1642,53 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CG - The corpus, not the guess (Phase 81)
+
+### CG1 - What it has turned out to be here
+
+**As** a technician **I want** to see what this complaint has actually been in
+this workshop **so that** I start where the evidence is rather than where I
+last looked.
+
+**Size** 8 - **Satisfies** FR-11501, FR-11502, FR-11508
+
+- **Given** a complaint with a settled history, **when** I open the job,
+  **then** I am told how many jobs reached a verdict and what they were.
+- **Given** the list of causes to rule on, **when** it is drawn, **then** it is
+  in the catalogue's order and carries no counts.
+- **Given** another workshop's history, **when** I read mine, **then** none of
+  it appears.
+
+### CG2 - Silence when it does not know
+
+**As** a workshop owner **I want** the product to say nothing on thin evidence
+**so that** nobody is given advice dressed as a record.
+
+**Size** 5 - **Satisfies** FR-11505, FR-11506, FR-11507
+
+- **Given** a cause confirmed twice, **when** the job is opened, **then**
+  nothing is shown and the reason is given.
+- **Given** a cause only ever ruled out, **when** the history is drawn, **then**
+  it is absent from it.
+- **Given** a cause confirmed three times and ruled out nine, **when** it is
+  shown, **then** both numbers are on the line.
+- **Given** a verdict I just entered, **when** I read the history beside it,
+  **then** my own verdict is not counted in it.
+
+### CG3 - A finding somebody made
+
+**As** an owner **I want** every verdict to carry who reached it and when
+**so that** the corpus is made of findings rather than of entries.
+
+**Size** 3 - **Satisfies** FR-11503, FR-11504
+
+- **Given** a verdict, **when** it is written, **then** the person and the time
+  go with it, and the database refuses one without them.
+- **Given** a diagnosis with one cause still undecided, **when** the evidence is
+  counted, **then** none of that diagnosis is in it.
+
+---
+
 ## Epic CF - The sidebar somebody can learn (Phase 80)
 
 ### CF1 - My own screen, in my own order

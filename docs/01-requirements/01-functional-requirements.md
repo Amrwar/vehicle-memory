@@ -267,6 +267,19 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11500 - The corpus, not the guess
+
+| Ref      | Requirement                                                                                                               | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-11501 | A workshop MUST keep its own catalogue of complaints and the causes that sit under each.                                  | 81    |
+| FR-11502 | A diagnosis MUST list every cause under its complaint, undecided, and MUST NOT order them by past evidence.               | 81    |
+| FR-11503 | Each cause MUST be recorded confirmed, ruled out or not determined, with who decided and when.                            | 81    |
+| FR-11504 | A diagnosis MUST contribute nothing until every cause on it has a verdict.                                                | 81    |
+| FR-11505 | A cause confirmed fewer than three times, or never confirmed, MUST NOT be shown as what a complaint has turned out to be. | 81    |
+| FR-11506 | A confirmation count MUST always be shown with the number of times that cause was ruled out.                              | 81    |
+| FR-11507 | The job being looked at MUST be excluded from the evidence shown beside it.                                               | 81    |
+| FR-11508 | The corpus MUST be the reading workshop's own, and MUST state only counts of its own settled jobs.                        | 81    |
+
 ## FR-11400 - The sidebar somebody can learn
 
 | Ref      | Requirement                                                                                                                        | Phase |

@@ -184,6 +184,10 @@ model Organization {
 
   @@index([isActive])
   @@index([billingCustomerRef])
+  symptomCodes SymptomCode[]
+  causeCodes   CauseCode[]
+  diagnoses    JobDiagnosis[]
+
   @@map("organizations")
 }
 
@@ -354,6 +358,8 @@ model User {
   importBatches            ImportBatch[]
 
   @@index([isActive])
+  causeVerdicts DiagnosisCause[]
+
   @@map("users")
 }
 
@@ -1363,6 +1369,8 @@ model Job {
   @@index([customerId])
   @@index([locationId, status])
   @@index([comebackOfJobId])
+  diagnoses     JobDiagnosis[]
+
   @@map("jobs")
 }
 
@@ -1887,6 +1895,108 @@ enum WheelPosition {
   REAR_LEFT
   REAR_RIGHT
   SPARE
+}
+
+/// A complaint the workshop recognises, in its own words. Phase 81.
+///
+/// A corpus needs a controlled vocabulary or nothing ever aggregates: "brake
+/// judder", "judder on braking" and "vibrates when I stop" are one symptom
+/// written three ways, and counted separately they teach nothing. The
+/// catalogue is the workshop's own, because a workshop's words are its own.
+model SymptomCode {
+  id        String  @id @default(cuid())
+  orgId     String
+  code      String
+  label     String
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  org         Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  diagnoses   JobDiagnosis[]
+  causes      CauseCode[]
+
+  @@unique([orgId, code])
+  @@map("symptom_codes")
+}
+
+/// Something a symptom turned out to be. Phase 81.
+model CauseCode {
+  id        String  @id @default(cuid())
+  orgId     String
+  /// The symptom this cause belongs under. A cause is only meaningful against
+  /// the complaint it explains: "rotor runout" answers a judder, not a misfire.
+  symptomId String
+  code      String
+  label     String
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  org      Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  symptom  SymptomCode      @relation(fields: [symptomId], references: [id], onDelete: Cascade)
+  verdicts DiagnosisCause[]
+
+  @@unique([orgId, code])
+  @@index([symptomId])
+  @@map("cause_codes")
+}
+
+/// One job's diagnosis: where it started, and what it settled on. Phase 81.
+model JobDiagnosis {
+  id        String    @id @default(cuid())
+  orgId     String
+  jobId     String
+  symptomId String
+  openedAt  DateTime  @default(now())
+  /// Set when every cause considered has a verdict. Until then the diagnosis
+  /// is still running and contributes nothing to the corpus.
+  settledAt DateTime?
+  notes     String?
+
+  org     Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  job     Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  symptom SymptomCode      @relation(fields: [symptomId], references: [id], onDelete: Restrict)
+  causes  DiagnosisCause[]
+
+  /// One diagnosis per complaint, and a car can arrive with two. What cannot
+  /// happen is the same complaint diagnosed twice on one visit.
+  @@unique([jobId, symptomId])
+  @@index([orgId, symptomId])
+  @@map("job_diagnoses")
+}
+
+/// A cause considered on one job, and what the technician found it to be.
+///
+/// This row is the corpus. Everything the product will ever say about what a
+/// symptom has turned out to be is a count of these, made by people who had
+/// the car in front of them. Phase 81.
+model DiagnosisCause {
+  id          String        @id @default(cuid())
+  diagnosisId String
+  causeId     String
+  outcome     CauseOutcome?
+  note        String?
+  decidedByUserId String?
+  decidedAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  diagnosis JobDiagnosis @relation(fields: [diagnosisId], references: [id], onDelete: Cascade)
+  cause     CauseCode    @relation(fields: [causeId], references: [id], onDelete: Restrict)
+  decidedBy User?        @relation(fields: [decidedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([diagnosisId, causeId])
+  @@index([causeId, outcome])
+  @@map("diagnosis_causes")
+}
+
+/// What a technician found a proposed cause to be.
+///
+/// UNDETERMINED is not a failure to record; it is the honest end of a
+/// diagnosis that ran out of road, and a corpus that never hears it will
+/// recommend the last thing that worked for ever.
+enum CauseOutcome {
+  CONFIRMED
+  REJECTED
+  UNDETERMINED
 }
 
 model Inspection {

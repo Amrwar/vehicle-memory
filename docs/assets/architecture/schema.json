@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-27",
   "counts": {
-    "models": 157,
-    "enums": 74,
-    "fields": 2524
+    "models": 161,
+    "enums": 75,
+    "fields": 2570
   },
   "enums": [
     "OrgPlan",
@@ -32,6 +32,7 @@
     "KeyAction",
     "MeasurementType",
     "WheelPosition",
+    "CauseOutcome",
     "InspectionStatus",
     "Severity",
     "EstimateStatus",
@@ -750,8 +751,49 @@
     },
     {
       "key": "inspection",
-      "title": "Inspections and estimates",
+      "title": "Inspections, diagnosis and estimates",
       "models": [
+        {
+          "name": "SymptomCode",
+          "comment": "A complaint the workshop recognises, in its own words. Phase 81. A corpus needs a controlled vocabulary or nothing ever aggregates: \"brake judder\", \"judder on braking\" and \"vibrates when I stop\" are one symptom written three ways, and counted separately they teach nothing. The catalogue is the workshop's own, because a workshop's words are its own.",
+          "fields": 6,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "CauseCode",
+          "comment": "Something a symptom turned out to be. Phase 81.",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "SymptomCode"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JobDiagnosis",
+          "comment": "One job's diagnosis: where it started, and what it settled on. Phase 81.",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "Job",
+            "SymptomCode"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "DiagnosisCause",
+          "comment": "A cause considered on one job, and what the technician found it to be. This row is the corpus. Everything the product will ever say about what a symptom has turned out to be is a count of these, made by people who had the car in front of them. Phase 81.",
+          "fields": 8,
+          "relations": [
+            "JobDiagnosis",
+            "CauseCode",
+            "User"
+          ],
+          "scope": "through JobDiagnosis"
+        },
         {
           "name": "InspectionTemplate",
           "comment": "",

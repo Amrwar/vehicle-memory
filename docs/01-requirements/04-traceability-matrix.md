@@ -511,6 +511,14 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-11501 | CG1   | `SymptomCode`, `CauseCode`             | a workshop's own catalogue, retired rather than deleted                             | `verify-knowledge.ts`                         | Done   |
+| FR-11502 | CG1   | `DiagnosisCause`                       | `openDiagnosis()` lists every cause, in catalogue order                             | `verify-knowledge.ts`                         | Done   |
+| FR-11503 | CG3   | `DiagnosisCause.outcome`               | `recordVerdict()`; the database refuses a verdict with no time                      | `verify-knowledge.ts`                         | Done   |
+| FR-11504 | CG3   | `JobDiagnosis.settledAt`               | `isSettled()` in `core/diagnosis/knowledge.ts`                                      | `knowledge.test.ts`, `verify-knowledge.ts`    | Done   |
+| FR-11505 | CG2   | -                                      | `ENOUGH_TO_SHOW` and `rankCauses()`                                                 | `knowledge.test.ts`, `verify-knowledge.ts`    | Done   |
+| FR-11506 | CG2   | -                                      | `causeSentence()` states both counts                                                | `knowledge.test.ts`                           | Done   |
+| FR-11507 | CG2   | -                                      | `evidenceFor(..., { exceptJobId })`                                                 | `verify-knowledge.ts`                         | Done   |
+| FR-11508 | CG1   | `JobDiagnosis.orgId`                   | every query is org-scoped; the tenant registry classifies all four models           | `verify-knowledge.ts`, `verify-scoping.ts`    | Done   |
 | FR-11401 | CF1   | -                                      | `navigationFor()` in `apps/web/src/lib/navigation.ts`, one list per role            | `verify-navigation.ts`                        | Done   |
 | FR-11402 | CF2   | -                                      | the owner's sections, plus `REACHED_ANOTHER_WAY` with the way in                    | `verify-navigation.ts`                        | Done   |
 | FR-11403 | CF2   | -                                      | `can(role, permission)` over every entry of every role                              | `verify-navigation.ts`                        | Done   |
@@ -1137,7 +1145,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 248                 | 247                    |
+| Later phases, newest first                         | 256                 | 255                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1155,9 +1163,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **816**             | **808 (99%)**          |
+| **Total**                                          | **824**             | **816 (99%)**          |
 
-Every one of the 816 requirements now has a row of its own. Until Phase 61,
+Every one of the 824 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

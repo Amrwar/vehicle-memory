@@ -2003,6 +2003,9 @@ async function main() {
     });
   }
 
+  // Last, because the corpus is made of jobs and every job must exist first.
+  await seedKnowledge(org.id, john!.id);
+
   console.info(`
   Seeded.
 
@@ -3674,6 +3677,163 @@ async function seedSkillsAndPatterns(
  * screens have to read well in both, and the BMW pads carry a claim that
  * excludes the Toyota so the warning itself can be seen doing something.
  */
+/**
+ * The workshop's own diagnostic corpus. Phase 81.
+ *
+ * Three complaints with the causes that sit under each, and one settled
+ * diagnosis per job per complaint -- because that is what the corpus is. It
+ * cannot be larger than the work: a workshop that has done six jobs knows
+ * what six jobs taught it, and the screen says so rather than inventing a
+ * year.
+ *
+ * One diagnosis rules on every cause under its symptom, so six brake-judder
+ * diagnoses produce six verdicts about the rotor and six about the hub face.
+ * The distributions below are deliberately mixed: the rotor is usually it,
+ * the hub face almost never is, and the wheel bearing never has been -- which
+ * is the row the product must be willing to show and to leave off the list.
+ *
+ * Air conditioning is deliberately thin. Two confirmations is under the line,
+ * and the screen says it does not know yet, which is the honest state for a
+ * new workshop and the one nobody would think to look at.
+ */
+async function seedKnowledge(orgId: string, technicianUserId: string) {
+  /** For each cause, the verdict on each successive diagnosis. */
+  const CATALOGUE: {
+    code: string;
+    label: string;
+    causes: {
+      code: string;
+      label: string;
+      verdicts: ('CONFIRMED' | 'REJECTED' | 'UNDETERMINED')[];
+    }[];
+  }[] = [
+    {
+      code: 'BRAKE_JUDDER',
+      label: 'Brake pedal vibration',
+      causes: [
+        {
+          code: 'ROTOR_RUNOUT',
+          label: 'Rotor runout',
+          verdicts: ['CONFIRMED', 'CONFIRMED', 'CONFIRMED', 'REJECTED', 'CONFIRMED', 'CONFIRMED'],
+        },
+        {
+          code: 'PAD_WEAR_UNEVEN',
+          label: 'Uneven pad wear',
+          verdicts: ['CONFIRMED', 'REJECTED', 'CONFIRMED', 'CONFIRMED', 'REJECTED', 'REJECTED'],
+        },
+        {
+          code: 'HUB_FACE',
+          label: 'Hub face contamination',
+          verdicts: ['REJECTED', 'REJECTED', 'CONFIRMED', 'REJECTED', 'REJECTED', 'UNDETERMINED'],
+        },
+        {
+          code: 'WHEEL_BEARING',
+          label: 'Wheel bearing',
+          verdicts: ['REJECTED', 'REJECTED', 'REJECTED', 'REJECTED', 'REJECTED', 'REJECTED'],
+        },
+      ],
+    },
+    {
+      code: 'MISFIRE',
+      label: 'Runs rough under load',
+      causes: [
+        {
+          code: 'COIL_PACK',
+          label: 'Coil pack',
+          verdicts: ['CONFIRMED', 'CONFIRMED', 'CONFIRMED', 'REJECTED', 'CONFIRMED', 'CONFIRMED'],
+        },
+        {
+          code: 'SPARK_PLUGS',
+          label: 'Spark plugs',
+          verdicts: ['REJECTED', 'CONFIRMED', 'CONFIRMED', 'CONFIRMED', 'REJECTED', 'UNDETERMINED'],
+        },
+        {
+          code: 'INJECTOR',
+          label: 'Injector',
+          verdicts: ['REJECTED', 'REJECTED', 'REJECTED', 'CONFIRMED', 'REJECTED', 'REJECTED'],
+        },
+      ],
+    },
+    {
+      code: 'AIRCON_WEAK',
+      label: 'Air conditioning not cold',
+      causes: [
+        { code: 'REFRIGERANT_LOW', label: 'Refrigerant low', verdicts: ['CONFIRMED', 'CONFIRMED'] },
+        { code: 'COMPRESSOR', label: 'Compressor', verdicts: ['REJECTED', 'REJECTED'] },
+      ],
+    },
+  ];
+
+  const jobs = await prisma.job.findMany({
+    where: { orgId },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+  });
+
+  if (jobs.length === 0) return;
+
+  let diagnoses = 0;
+  let verdicts = 0;
+
+  for (const [index, entry] of CATALOGUE.entries()) {
+    const symptom = await prisma.symptomCode.create({
+      data: { orgId, code: entry.code, label: entry.label, sortOrder: index },
+      select: { id: true },
+    });
+
+    const causeIds = new Map<string, string>();
+    for (const [order, cause] of entry.causes.entries()) {
+      const row = await prisma.causeCode.create({
+        data: {
+          orgId,
+          symptomId: symptom.id,
+          code: cause.code,
+          label: cause.label,
+          sortOrder: order,
+        },
+        select: { id: true },
+      });
+      causeIds.set(cause.code, row.id);
+    }
+
+    const rounds = Math.min(
+      jobs.length,
+      Math.max(...entry.causes.map((cause) => cause.verdicts.length)),
+    );
+
+    for (let round = 0; round < rounds; round += 1) {
+      const decided = new Date(Date.now() - (rounds - round) * 14 * 86_400_000);
+
+      await prisma.jobDiagnosis.create({
+        data: {
+          orgId,
+          jobId: jobs[round]!.id,
+          symptomId: symptom.id,
+          openedAt: decided,
+          settledAt: decided,
+          causes: {
+            create: entry.causes
+              .filter((cause) => cause.verdicts[round])
+              .map((cause) => ({
+                causeId: causeIds.get(cause.code)!,
+                outcome: cause.verdicts[round]!,
+                decidedByUserId: technicianUserId,
+                decidedAt: decided,
+              })),
+          },
+        },
+      });
+
+      diagnoses += 1;
+      verdicts += entry.causes.filter((cause) => cause.verdicts[round]).length;
+    }
+  }
+
+  console.info(
+    `  ${CATALOGUE.length} complaints, ${diagnoses} settled diagnoses, ${verdicts} verdicts`,
+  );
+}
+
 async function seedFitment(orgId: string, products: { id: string; partNumber: string }[]) {
   const claims: {
     partNumber: string;

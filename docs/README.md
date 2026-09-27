@@ -608,3 +608,24 @@ including four of the six in the technician's first draft. The sixty words of it
 are asked of the dictionary directly, because a section heading is data and no
 scanner in the product can see one: "Calendar" went in with no French and no
 Arabic and nothing else would have said so.
+
+Phase 81 closes the second gap and the map's one **Deferred**. ADR-0013 refused
+to build fault suggestion and was right to: a service adviser that proposes
+where to look needs a corpus of symptoms against confirmed causes, and a
+confident wrong suggestion on a braking fault is not a small error. What that
+never said is what to do about it, and the line sat on the map for thirty-six
+phases.
+
+The missing corpus is something every workshop produces daily and throws away. A
+car arrives with a complaint; a technician considers three or four things it
+might be, rules each in or out, and fixes it. The complaint, the candidates and
+the verdicts are the corpus — and Carnet was recording the fix and discarding
+the reasoning. Now it records the reasoning and reports it back as a count, and
+the strongest sentence it will say is "in this workshop, 35 jobs that began with
+this complaint reached a verdict; these are what they turned out to be."
+
+Five rules keep it from becoming what ADR-0013 refused, and each is checked:
+silence under three confirmations; a cause never confirmed is never listed; no
+confirmation shown without its refusals; a job is not evidence for itself; and
+the candidate list is never ordered by the evidence, because a list sorted by
+what usually happens tells somebody what to find.

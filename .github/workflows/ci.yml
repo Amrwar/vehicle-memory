@@ -187,6 +187,13 @@ jobs:
       - name: Everything built, and a way to it
         run: npx tsx infra/scripts/verify-navigation.ts
 
+      # Fault suggestion, built as a corpus rather than a guess: nothing is
+      # shown on thin evidence, a cause never confirmed is never listed, a
+      # count never appears without its refusals, and a job is not evidence
+      # for itself. ADR-0016.
+      - name: The corpus, not the guess
+        run: npx tsx infra/scripts/verify-knowledge.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

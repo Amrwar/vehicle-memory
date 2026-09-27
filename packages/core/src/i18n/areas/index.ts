@@ -29,6 +29,7 @@ import * as privacy from './privacy';
 import * as belonging from './belonging';
 import * as followups from './followups';
 import * as courtesy from './courtesy';
+import * as diagnosis from './diagnosis';
 
 export const AREAS = [
   publicSite,
@@ -56,4 +57,5 @@ export const AREAS = [
   belonging,
   followups,
   courtesy,
+  diagnosis,
 ] as const;

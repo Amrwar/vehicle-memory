@@ -39,6 +39,13 @@ the record is a liability wearing the product's name.
    not exist yet, and a confident wrong suggestion on a braking fault is not a
    small error. The interface says so rather than pretending.
 
+   > **Amended by [ADR-0016](0016-the-corpus-not-the-guess.md), Phase 81.** The
+   > reason above still holds and nothing in it is withdrawn. What changed is
+   > the answer to it: the corpus is built, out of what technicians record
+   > about cars they had in front of them, and the product reports counts from
+   > it rather than proposing anything. Point 5 below is unaffected — nothing
+   > generated, and nothing counted, decides anything.
+
 5. **Nothing generated decides anything.** No status changes, no posting, no
    message goes out because a model said so.
 
