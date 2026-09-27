@@ -366,9 +366,18 @@ can be asked. No model is involved.
 
 ## 21. Sidebar organisation
 
-**Partial.** The sidebar is grouped by what somebody is doing and filtered by
-role. The grouping differs from the one proposed, mostly because several
-proposed sections do not exist yet.
+**Built.** Written per role, in the order that role works in: thirteen sections
+for an owner, eight for a service advisor beginning at Today and ending at
+Payments, six for a bookkeeper, none for a technician because their shell is
+`/shop`. Phase 80.
+
+Two rules are checked rather than trusted. Every page in the workshop is in the
+owner's navigation or is recorded with the way it is reached instead — which
+found `/patterns`, somebody's contracted hours, built and reachable from
+nowhere. And no role is shown an entry their permissions would refuse — which
+found ten, four of them the whole of a technician's draft sidebar. Every one of
+the sixty words in it is asked of the dictionary directly, because a section
+heading is data and no scanner in the product could see it.
 
 ## 21.4 On a telephone
 
@@ -894,17 +903,19 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status   | Capabilities |
 | -------- | ------------ |
-| Built    | 422          |
-| Partial  | 3            |
+| Built    | 423          |
+| Partial  | 2            |
 | Deferred | 1            |
 
 <!-- counts:end -->
 
 Nothing on this map is missing any more. Coupons, the last of it, were built
-in Phase 45.5. What is left is one **Partial** — the sidebar grouping, which
-works and could be better — and one **Deferred**, fault suggestion, which is
-waiting on a corpus of symptoms against confirmed causes that does not exist
-(ADR-0013).
+in Phase 45.5. The sidebar was the third **Partial** until Phase 80 and is now
+written per role and checked both ways. What is left is the two dictionary
+counts, which are partial by construction — they are frozen numbers that can
+only fall — and one **Deferred**, fault suggestion, which is waiting on a corpus
+of symptoms against confirmed causes that does not exist (ADR-0013) and which
+the plan now answers by building the corpus rather than the guess.
 
 A map with nothing missing on it is not the same as a product that is ready.
 It says the screens exist. The phases after Phase 45.5 in the

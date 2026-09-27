@@ -4830,6 +4830,238 @@ part back, leaves it open, reads what the screen puts in the box, and checks it
 against what was paid. Against the old screen that check fails — expected 10,
 got 9.05 — which is the demonstration.
 
+## Phase 80 — The sidebar somebody can learn
+
+**Scope.** The first of the four gaps: navigation, written per role.
+
+**Exit.** Every page in the workshop has a way in, nobody is shown a door their
+role would refuse, and both are checked.
+
+**Status.** Done. It found a page nobody could reach and four doors that would
+have refused.
+
+The sidebar had been **Partial** on the feature map since Phase 45, and the
+reason it stayed there is that nothing could say what finished meant. It was one
+list of fifty-two entries in seven groups named after the parts of the system
+they came from — Workshop, Customers, Money, Inventory, Team, Finance, Admin —
+filtered by permission. **Filtering a list is not organising one.** A service
+advisor saw the owner's shape with the owner's words, minus whatever they could
+not reach, and the first day in front of it went on learning where things had
+been put.
+
+It is written per role now, in the order that role works in:
+
+| Role            | Sections                                                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owner           | 13: Dashboard · Workshop · Customers · Vehicles · Jobs · Calendar · Inventory · Purchasing · Financials · Reports · Marketing · Reputation · Settings |
+| Manager         | 13, the same set with Money in place of Financials and no ledger                                                                                      |
+| Service advisor | 8: Today · Calendar · Customers · Vehicles · Jobs · Estimates · Messages · Payments                                                                   |
+| Bookkeeper      | 6: Dashboard · Financials · Reports · Customers · Team · Settings                                                                                     |
+| Technician      | none, and deliberately — their shell is `/shop`                                                                                                       |
+
+An advisor opens on **Today**, because that is the question they open the screen
+to answer; an owner on **Dashboard**, because theirs is a different question.
+The same page sits in a different place for two people, and should: `/estimates`
+is one of several things about a job to an owner, and a section of its own to
+the person who chases them all morning.
+
+**What the check found on its first run.** The judgement above is a judgement
+and `verify-navigation.ts` does not check judgement. It checks two things, and
+both failed immediately:
+
+- **`/patterns` had no way in at all.** Somebody's contracted hours — FR-3302,
+  the page every capacity figure in the product stands on — was built, wired,
+  measured by the screens probe, and reachable from nowhere. It is in **Workshop**
+  now, beside Capacity and Skills.
+- **Four entries out of the technician's six would have refused them.** The
+  first draft gave a technician Jobs, Inspections and Parts. A technician holds
+  `job:read:assigned`, not `job:read`, and cannot read inventory at all. Rather
+  than write a sidebar out of the two permissions left, they have none: every
+  workshop page already sends them to `/shop`.
+- And six entries for other roles the same way — a manager has no `ledger:read`,
+  a bookkeeper no `report:operational`, an advisor no `settings:read`. Ten in
+  total, all of them links to a refusal.
+
+**And one word in three languages.** Section headings are data, not literals in
+a page, so neither `i18n-scan` nor `verify-languages` can see them: one collects
+`t('...')` from source, the other reads what a rendered page says, and a heading
+is neither until it is drawn. "Calendar" went in with no French and no Arabic
+and nothing in the product would have said so. The check reads every word of the
+navigation now — sixty of them — and asks the dictionary directly. That blind
+spot has cost six phases in other places.
+
+**Not in this phase**, and next: favourites, recently visited, a command
+palette, keyboard shortcuts, unread and action badges, collapse and expand, and
+the technician's bottom bar on a telephone. The portal's and `/shop`'s own
+navigation are written in their own vocabulary and get the same treatment.
+
+## What comes next — the thirty-nine, 26 September 2026
+
+Written by the user on 26 September 2026, after Phase 79. It is recorded here
+whole, in their order and their words' sense, because a plan that lives in a
+conversation is a plan that is lost. Phases from Phase 80 onward are taken from
+it.
+
+**The order is stated: the four remaining gaps first.** The feature map counts
+422 built, three partial and one deferred. The three partial are the sidebar
+grouping and the two dictionary-clash counts; the deferred one is fault
+suggestion. Those four come before anything new on this list.
+
+### The four gaps
+
+**A. The sidebar and navigation architecture.** Role-specific and
+workflow-oriented rather than a flat list of pages.
+
+| Role            | What they see                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owner           | Dashboard · Workshop · Customers · Vehicles · Jobs · Calendar · Inventory · Purchasing · Financials · Reports · Marketing · Reputation · Settings |
+| Service advisor | Today · Calendar · Customers · Vehicles · Jobs · Estimates · Messages · Payments                                                                  |
+| Technician      | My work · Inspection · Parts · Clock · Messages · Follow-ups                                                                                      |
+| Customer        | My vehicles · Appointments · Repairs · Estimates · Invoices · Messages · Passport                                                                 |
+
+And with it: favourites, recently visited, a global command and search, keyboard
+shortcuts, a contextual create button, unread and action badges, collapse and
+expand, and a bottom bar on a telephone for technicians.
+
+> "This is not just cosmetic. It reduces the amount of training required."
+
+**B. Fault suggestion, approached as a knowledge base rather than a model.**
+The map defers fault suggestion because no trustworthy corpus links symptoms to
+confirmed causes (ADR-0013). Build the corpus instead:
+
+```
+Symptom              Brake pedal vibration
+  |
+Observed findings    rotor thickness, runout, pad condition, mileage, previous brake work
+  |
+Historical evidence  37 similar jobs
+  |
+Possible causes      rotor runout, uneven pad wear, hub issue
+  |
+Confirmation         confirmed / rejected / not determined
+```
+
+Carnet then accumulates its own dataset, and eventually says: _"Based on 42
+previous confirmed jobs and this vehicle's history, these are the findings that
+commonly appeared together."_
+
+> "That is much safer than pretending an LLM can diagnose cars."
+
+**C and D. The two dictionary-clash counts**, 231 remaining, frozen so the
+number can only fall.
+
+### The thirty-nine, as given
+
+Grouped here for reading; the numbers are the user's and are the way to refer to
+an item.
+
+**The operations layer — 2, 3, 4, 36, 37, 38, 39**
+
+2. **Job command centre.** One operational state per job, from BOOKED through
+   CHECKED IN, INSPECTION, ESTIMATE, WAITING CUSTOMER, APPROVED, PARTS, IN
+   PROGRESS, QUALITY CHECK, READY, CUSTOMER NOTIFIED, PAID, CHECKED OUT, CLOSED
+   — and every state carrying a reason and a next action. _"Waiting for customer
+   — 2h 14m. Last message 11:42. Estimate $843.20. Customer has not opened it.
+   [Send reminder]"_
+3. **Quality control.** Configurable checks after a technician finishes, per job
+   type: engine and brakes and tyres mandatory, an oil change optional. Pass
+   goes to READY; fail returns to the technician.
+4. **Comeback and root cause.** A comeback case linking the original complaint,
+   diagnosis, parts, technician and inspection to the new complaint and a root
+   cause: incorrect diagnosis, defective part, installation, missed finding,
+   customer misuse, unrelated, unknown. Then _"5 vehicles returned after the
+   same repair."_
+5. **A "do not miss" list** each morning, every item with exactly one action.
+6. **End-of-day close**, checking unpaid invoices, open jobs, vehicles still on
+   site, keys, estimates, parts, cash, reconciliation, clocks, follow-ups.
+7. **Start-of-day**, the mirror of it.
+8. **The control tower.** What `/dashboard` becomes: what is in the shop now and
+   what blocks each of it, today's capacity, the money, the customers waiting,
+   the parts blocking today's work, the risk. _"The screen an owner leaves open
+   all day."_
+
+**Parts, vehicles and equipment — 5, 6, 11, 12, 31, 34, 35**
+
+5. **Parts intelligence.** Supplier comparison on price, stock, delivery and
+   warranty; substitution with fitment confidence and an explicit confirmation.
+6. **VIN to a specification sheet.** Engine, oil grade and capacity, coolant,
+   brakes, tyre sizes and pressures, battery, filters, intervals.
+7. **Equipment and tools**, with availability, maintenance, calibration and
+   certification — and a job that requires a machine.
+8. **Inspection template versioning**, so a completed inspection remembers the
+   version it was taken on.
+9. **The full equipment and calibration module**, tied into scheduling.
+10. **Barcode and QR everywhere**: vehicle, job, part, bin, key tag, inspection,
+    passport.
+11. **Barcode receiving**: purchase order, scan, quantity, bin, next.
+
+**The customer — 7, 13, 14, 27, 28**
+
+7. **A unified communication timeline** per job, so every job is reconstructable
+   minute by minute.
+8. **Customer-owned maintenance plans**, with the next service calculated in
+   distance and time, and a booking recommended.
+9. **A pre-purchase inspection product**, built on the passport. _"This could
+   become its own paid product."_
+10. **Self-service, deeper**: book, check in, approve, message, pay, track,
+    review, read the passport, schedule the next one — the whole repair without
+    a telephone call, except where the workshop deliberately wants one.
+11. **One-click next service** when a job closes.
+
+**Fleet — 15**
+
+15. **Fleet rules**: notify before service, refuse a booking on an expired
+    registration, alert on downtime, cost, repeated comebacks, cost per
+    kilometre above the fleet average.
+
+**The platform — 16, 17, 18, 19, 24, 25, 26**
+
+16. **A public API** over customers, vehicles, jobs, appointments, inspections,
+    estimates, invoices, payments, parts, inventory and passports, with keys,
+    OAuth, webhooks, rate limits, scopes, logs and versioning. _"This could turn
+    Carnet from an application into a platform."_
+17. **Webhooks** for the events a workshop would wire something to.
+18. **An integration marketplace**, each integration showing connected state,
+    last sync, last error, records synced and a way to reconnect.
+19. **Synchronisation and reconciliation** for every integration, with an
+    integration-health view. _"This is much more important than adding another
+    dashboard."_
+20. **Feature flags**: globally, per workshop, per plan, per beta tester.
+21. **An internal operations console** — organisations, users, system, billing,
+    support with audited impersonation, global audit.
+22. **Usage-based billing intelligence**, so a limit is approached rather than
+    hit.
+
+**Trust, safety and the record — 20, 21, 22, 23, 33, 32**
+
+20. **Disaster recovery beyond "restore works"**: backup history and age,
+    restore point, RPO, RTO, failed-backup alerts, storage, database, queue and
+    provider health, and a drill that runs rather than a test that exists.
+21. **Retention policies**, configurable per kind, with a preview before
+    anything is deleted.
+22. **A security centre** for the owner: sessions, login history, failures,
+    password changes, invitations, API keys, integrations, permission changes,
+    exports — and sign out everywhere.
+23. **Audit investigation**: _"Who changed invoice #18392?"_ and _"Show every
+    financial change this employee made this week."_
+24. **Push notifications**, distinct from in-app, and traceable.
+25. **The whole product as a progressive web app**, not only the technician's
+    part.
+
+**Scheduling and analysis — 10, 29, 30, 8, 9**
+
+8. **A notification centre that is an action centre** — what requires action,
+   ranked, above what is merely informational.
+9. **A document centre**: type, owner, vehicle, customer, job, issue and expiry,
+   version, who uploaded it, verification — and reminders before expiry.
+10. **Duration prediction** from completed jobs, with a confidence, feeding
+    scheduling alongside skill, bay, equipment, parts and the promised time.
+11. **Analytics that explain**: not another graph but _"gross margin dropped
+    7.4% this month — parts −3.2%, labour −2.1%, warranty −1.4%, discounts
+    −0.7%."_
+12. **A workshop health score** built on measurable signals, where every warning
+    carries why, the evidence, and the recommended action.
+
 ## Running throughout — the four things that are not features
 
 _Checked, since Phase 55, by `npm run verify:throughout`. Each of the four

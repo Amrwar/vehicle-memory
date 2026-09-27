@@ -1642,6 +1642,48 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CF - The sidebar somebody can learn (Phase 80)
+
+### CF1 - My own screen, in my own order
+
+**As** a service advisor **I want** the side of the screen to hold my day
+**so that** my first morning is spent working rather than looking.
+
+**Size** 8 - **Satisfies** FR-11401
+
+- **Given** I am an advisor, **when** I sign in, **then** the first section is
+  Today and the last is Payments, and there are eight.
+- **Given** I am an owner, **when** I sign in, **then** there are thirteen, and
+  the first is the Dashboard.
+- **Given** I am a technician, **when** I open a workshop page, **then** I am
+  taken to my own shell rather than shown a sidebar of two entries.
+
+### CF2 - Nothing built that cannot be found
+
+**As** an engineer **I want** a page with no way in to fail a check **so that**
+the map cannot say a thing exists while nobody can reach it.
+
+**Size** 5 - **Satisfies** FR-11402, FR-11403
+
+- **Given** a page in no section, **when** the check runs, **then** it names
+  the page and asks for a section or a sentence.
+- **Given** a sentence about a page that has been deleted, **when** the check
+  runs, **then** it says the sentence has stopped being true.
+- **Given** an entry a role could not open, **when** the check runs, **then**
+  it names the role, the entry and the permission.
+
+### CF3 - In all three languages, including the headings
+
+**As** a reader in French or Arabic **I want** the section headings translated
+**so that** the one part of the screen that never changes is not in English.
+
+**Size** 2 - **Satisfies** FR-11404
+
+- **Given** a heading with no translation, **when** the check runs, **then** it
+  names the word and the language.
+
+---
+
 ## Epic CE - What the shelf lost, and what the supplier owes (Phase 79)
 
 ### CE1 - A credit note for what they charged

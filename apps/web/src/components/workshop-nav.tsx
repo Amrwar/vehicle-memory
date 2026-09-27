@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  can,
-  humaniseRole,
-  type Language,
-  msg,
-  type Permission,
-  type Role,
-  translator,
-} from '@carnet/core';
+import { can, humaniseRole, type Language, type Role, translator } from '@carnet/core';
 import { cn } from '@carnet/ui';
 import Link from 'next/link';
 import { useLinkStatus } from 'next/link';
@@ -16,34 +8,30 @@ import { usePathname } from 'next/navigation';
 import * as React from 'react';
 
 import { useT } from '@/components/language-provider';
+import { navigationFor } from '@/lib/navigation';
 
-import { NavIcon, type NavIconName } from './nav-icons';
+import { NavIcon } from './nav-icons';
 import { ThemeToggle } from './theme-toggle';
 
 /**
- * Workshop navigation.
+ * Workshop navigation: the drawing of it.
  *
- * Grouped by what a person is doing rather than by which module a feature
- * lives in, and filtered by role: a bookkeeper never sees the diary, a
- * service advisor never sees the ledger. Items the role cannot reach are
- * absent, not greyed out — a disabled control is an invitation to ask why.
+ * What each person is shown lives in `@/lib/navigation`, written per role in
+ * the order that role works in — an advisor opens on **Today** and ends at
+ * **Payments**, an owner on **Dashboard** and ends at **Settings**. This file
+ * renders that and nothing else, so what `verify-navigation.ts` reads is what
+ * a person sees. Phase 80.
+ *
+ * Filtered again here by permission, which is belt and braces: the check
+ * refuses a role an entry they could not open, and this refuses it a second
+ * time at the moment of drawing. Items a role cannot reach are absent, not
+ * greyed out — a disabled control is an invitation to ask why, and the answer
+ * is never satisfying.
  *
  * The active item is marked by a brass rule against the panel edge rather than
  * by a filled pill. A workshop screen is open all day and the sidebar is
  * furniture: it should be legible at a glance and quiet the rest of the time.
  */
-
-interface Item {
-  href: string;
-  label: string;
-  icon: NavIconName;
-  permission: Permission;
-}
-
-interface Group {
-  label: string;
-  items: Item[];
-}
 
 /**
  * Feedback on the item that was clicked, for the interval between the click
@@ -55,201 +43,6 @@ function PendingRule() {
   const { pending } = useLinkStatus();
   return pending ? <span aria-hidden className="nav-pending" /> : null;
 }
-
-const GROUPS: Group[] = [
-  {
-    label: msg('Workshop'),
-    items: [
-      { href: '/dashboard', label: msg('Dashboard'), icon: 'dashboard', permission: 'job:read' },
-      { href: '/start', label: msg('Getting started'), icon: 'start', permission: 'job:read' },
-      { href: '/ask', label: msg('Ask'), icon: 'ask', permission: 'report:operational' },
-      { href: '/diary', label: msg('Diary'), icon: 'diary', permission: 'diary:read' },
-      { href: '/floor', label: msg('The floor'), icon: 'floor', permission: 'diary:read' },
-      { href: '/jobs', label: msg('Jobs'), icon: 'jobs', permission: 'job:read' },
-      {
-        href: '/inspections',
-        label: msg('Inspections'),
-        icon: 'inspections',
-        permission: 'job:read',
-      },
-      { href: '/warranty', label: msg('Warranty'), icon: 'warranty', permission: 'job:read' },
-      { href: '/recalls', label: msg('Recalls'), icon: 'recalls', permission: 'vehicle:read' },
-      { href: '/capacity', label: msg('Capacity'), icon: 'capacity', permission: 'diary:read' },
-      { href: '/plan', label: msg('Plan the day'), icon: 'plan', permission: 'diary:read' },
-      { href: '/skills', label: msg('Skills'), icon: 'skills', permission: 'people:read' },
-      {
-        href: '/customers',
-        label: msg('Customers'),
-        icon: 'customers',
-        permission: 'customer:read',
-      },
-      { href: '/vehicles', label: msg('Vehicles'), icon: 'vehicles', permission: 'vehicle:read' },
-      {
-        href: '/passports',
-        label: msg('Passports'),
-        icon: 'passports',
-        permission: 'vehicle:read',
-      },
-      {
-        href: '/reminders',
-        label: msg('Reminders'),
-        icon: 'reminders',
-        permission: 'customer:read',
-      },
-      { href: '/crm', label: msg('Relationships'), icon: 'crm', permission: 'customer:read' },
-      { href: '/fleet', label: msg('Fleets'), icon: 'fleet', permission: 'customer:read' },
-      {
-        href: '/reputation',
-        label: msg('Reputation'),
-        icon: 'reputation',
-        permission: 'customer:read',
-      },
-      { href: '/coupons', label: msg('Coupons'), icon: 'coupons', permission: 'customer:read' },
-      { href: '/inbox', label: msg('Conversations'), icon: 'inbox', permission: 'customer:read' },
-      {
-        href: '/claims',
-        label: msg('Vehicle requests'),
-        icon: 'claims',
-        permission: 'customer:read',
-      },
-    ],
-  },
-  {
-    label: msg('Money'),
-    items: [
-      {
-        href: '/estimates',
-        label: msg('Estimates'),
-        icon: 'estimates',
-        permission: 'estimate:read',
-      },
-      { href: '/invoices', label: msg('Invoices'), icon: 'invoices', permission: 'invoice:read' },
-      { href: '/payments', label: msg('Payments'), icon: 'payments', permission: 'payment:read' },
-      {
-        href: '/gift-cards',
-        label: msg('Gift cards'),
-        icon: 'giftcards',
-        permission: 'payment:read',
-      },
-      {
-        href: '/payables',
-        label: msg('Suppliers owed'),
-        icon: 'payables',
-        permission: 'ledger:read',
-      },
-      {
-        href: '/reports',
-        label: msg('Reports'),
-        icon: 'reports',
-        permission: 'report:operational',
-      },
-      {
-        href: '/reports/business',
-        label: msg('Business'),
-        icon: 'business',
-        permission: 'report:operational',
-      },
-      {
-        href: '/reports/clock',
-        label: msg('How long things take'),
-        icon: 'capacity',
-        permission: 'report:operational',
-      },
-      {
-        href: '/reports/uptake',
-        label: msg('What you are using'),
-        icon: 'insights',
-        permission: 'report:operational',
-      },
-      {
-        href: '/reports/tax',
-        label: msg('Tax'),
-        icon: 'reports',
-        permission: 'report:financial',
-      },
-      {
-        href: '/insights',
-        label: msg('Insights'),
-        icon: 'insights',
-        permission: 'report:operational',
-      },
-      { href: '/counter', label: msg('Counter'), icon: 'counter', permission: 'invoice:write' },
-    ],
-  },
-  {
-    label: msg('Inventory'),
-    items: [
-      { href: '/parts', label: msg('Parts'), icon: 'parts', permission: 'inventory:read' },
-      {
-        href: '/suppliers',
-        label: msg('Suppliers'),
-        icon: 'suppliers',
-        permission: 'inventory:read',
-      },
-      {
-        href: '/purchasing',
-        label: msg('Purchasing'),
-        icon: 'purchasing',
-        permission: 'purchase:request',
-      },
-      {
-        href: '/transfers',
-        label: msg('Transfers'),
-        icon: 'transfers',
-        permission: 'stock:transfer',
-      },
-    ],
-  },
-  {
-    label: msg('Team'),
-    items: [
-      { href: '/people', label: msg('People'), icon: 'people', permission: 'people:read' },
-      { href: '/payroll', label: msg('Payroll'), icon: 'payroll', permission: 'payroll:read' },
-      { href: '/group', label: msg('Sites'), icon: 'sites', permission: 'report:financial' },
-    ],
-  },
-  {
-    label: msg('Finance'),
-    items: [
-      { href: '/ledger', label: msg('Ledger'), icon: 'ledger', permission: 'ledger:read' },
-      {
-        href: '/books',
-        label: msg('Do the books agree?'),
-        icon: 'books',
-        permission: 'report:financial',
-      },
-      {
-        href: '/expenses',
-        label: msg('Expenses'),
-        icon: 'expenses',
-        permission: 'report:financial',
-      },
-      { href: '/banking', label: msg('Banking'), icon: 'banking', permission: 'ledger:read' },
-      {
-        href: '/financials',
-        label: msg('Statements'),
-        icon: 'statements',
-        permission: 'report:financial',
-      },
-    ],
-  },
-  {
-    label: msg('Admin'),
-    items: [
-      { href: '/settings', label: msg('Settings'), icon: 'settings', permission: 'settings:read' },
-      { href: '/settings/team', label: msg('Team'), icon: 'team', permission: 'settings:read' },
-      {
-        href: '/automation',
-        label: msg('Automation'),
-        icon: 'automation',
-        permission: 'settings:read',
-      },
-      { href: '/messages', label: msg('Messages'), icon: 'messages', permission: 'settings:read' },
-      { href: '/audit', label: msg('Audit log'), icon: 'audit', permission: 'audit:read' },
-      { href: '/help', label: msg('Help'), icon: 'help', permission: 'job:read' },
-    ],
-  },
-];
 
 /**
  * The workshop's name at the top of the navigation, and — for somebody on
@@ -336,10 +129,12 @@ export function WorkshopNav({
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
-  const visible = GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => can(role, item.permission)),
-  })).filter((group) => group.items.length > 0);
+  const visible = navigationFor(role)
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => can(role, item.permission)),
+    }))
+    .filter((section) => section.items.length > 0);
 
   const initials = orgName
     .split(/\s+/)

@@ -329,6 +329,7 @@ export const FR: Readonly<Record<string, string>> = {
   Language: 'Langue',
   'Skip to content': 'Aller au contenu',
   Dashboard: 'Tableau de bord',
+  Calendar: 'Calendrier',
   Diary: 'Agenda',
   Jobs: 'Travaux',
   Customers: 'Clients',

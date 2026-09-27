@@ -324,6 +324,7 @@ export const AR: Readonly<Record<string, string>> = {
   Language: 'اللغة',
   'Skip to content': 'انتقل إلى المحتوى',
   Dashboard: 'لوحة التحكم',
+  Calendar: 'التقويم',
   Diary: 'الأجندة',
   Jobs: 'الأعمال',
   Customers: 'العملاء',

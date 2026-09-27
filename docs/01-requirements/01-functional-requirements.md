@@ -267,6 +267,15 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11400 - The sidebar somebody can learn
+
+| Ref      | Requirement                                                                                                                        | Phase |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-11401 | Navigation MUST be written per role, in the order and vocabulary of that role's work.                                              | 80    |
+| FR-11402 | Every page in the workshop MUST appear in the owner's navigation, or be recorded with the way it is reached instead.               | 80    |
+| FR-11403 | No role may be shown an entry their permissions would refuse.                                                                      | 80    |
+| FR-11404 | Every word of the navigation MUST have an answer in French and Arabic, checked against the dictionary rather than a rendered page. | 80    |
+
 ## FR-11300 - What the shelf lost, and what the supplier owes
 
 | Ref      | Requirement                                                                                                        | Phase |

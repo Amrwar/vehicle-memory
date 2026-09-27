@@ -589,3 +589,22 @@ Nothing was ever posted wrong, because the operator types what the supplier's
 credit note says. A proposal that is systematically wrong is still worse than no
 proposal, because it invites agreement. `creditDue()` is the rule now, in core
 with a test, and the returns check reads what the screen puts in the box.
+
+Phase 80 is the first of the four gaps the user named on 26 September: the
+sidebar, which the feature map had called Partial since Phase 45. It was one
+list of fifty-two entries in seven groups named after the parts of the system
+they came from, filtered by permission — and filtering a list is not organising
+one. It is written per role now, in the order that role works in: thirteen
+sections for an owner, eight for an advisor from Today to Payments, six for a
+bookkeeper, none for a technician because every workshop page sends them to
+their own shell.
+
+The judgement is a judgement; the two rules under it are checked. Every page in
+the workshop is in the owner's navigation or recorded with the way it is reached
+instead, which found `/patterns` — somebody's contracted hours, the page every
+capacity figure stands on — built, measured, and reachable from nowhere. And no
+role is shown an entry their permissions would refuse, which found ten,
+including four of the six in the technician's first draft. The sixty words of it
+are asked of the dictionary directly, because a section heading is data and no
+scanner in the product can see one: "Calendar" went in with no French and no
+Arabic and nothing else would have said so.

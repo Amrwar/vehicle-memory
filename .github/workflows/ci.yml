@@ -181,6 +181,12 @@ jobs:
       - name: A page that is not there says so
         run: npx tsx infra/scripts/verify-status.ts
 
+      # Every page in the workshop has a way in, and nobody is shown a door
+      # their role would refuse. Reads the route tree and the navigation, so
+      # what is checked is what is drawn.
+      - name: Everything built, and a way to it
+        run: npx tsx infra/scripts/verify-navigation.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

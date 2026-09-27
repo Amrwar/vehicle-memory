@@ -84,6 +84,7 @@
     "verify:region": "tsx infra/scripts/verify-region.ts",
     "verify:survival": "tsx infra/scripts/verify-survival.ts",
     "verify:status": "tsx infra/scripts/verify-status.ts",
+    "verify:navigation": "tsx infra/scripts/verify-navigation.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",
