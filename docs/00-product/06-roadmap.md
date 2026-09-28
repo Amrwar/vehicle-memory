@@ -5007,11 +5007,16 @@ repository variable:
 runs-on: ${{ vars.HEAVY_RUNNER || 'ubuntu-latest' }}
 ```
 
-Register a self-hosted runner and set `HEAVY_RUNNER` to `self-hosted`, and that
-job costs nothing on any plan — it is the same work `npm run checks` already
-does locally, so the machine is known to be capable. Leave it unset and nothing
-changes. Neither step needs this file edited again, which is the point: the
-lever is in the repository, and the switch is in the account.
+Every job reads one, not only the expensive one — because a spent allowance does
+not stop the costly job and leave the cheap ones running, it stops all of them.
+Register a self-hosted runner, set `RUNNER` to `self-hosted`, and the whole
+pipeline runs on your own machine at no cost on any plan, with the allowance at
+zero. It is the same work `npm run checks` already does locally, so the machine
+is known to be capable of it. Leave the variable unset and nothing changes.
+
+Neither route needs this file edited again, which is the point: the lever is in
+the repository and the switch is in the account, and the repository half is now
+done.
 
 ## What comes next — the thirty-nine, 26 September 2026
 

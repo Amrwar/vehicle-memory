@@ -52,7 +52,7 @@ jobs:
   # -------------------------------------------------------------------------
   static:
     name: Format, lint, types
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -131,7 +131,7 @@ jobs:
   # -------------------------------------------------------------------------
   unit:
     name: Domain tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -160,7 +160,7 @@ jobs:
   # -------------------------------------------------------------------------
   integrity:
     name: Database invariants
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
 
     services:
@@ -567,7 +567,7 @@ jobs:
       github.event_name == 'pull_request' ||
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch'
-    runs-on: ${{ vars.HEAVY_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.HEAVY_RUNNER || vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 30
     needs: [static, unit]
 
@@ -781,7 +781,7 @@ jobs:
   # -------------------------------------------------------------------------
   audit:
     name: Dependency audit
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

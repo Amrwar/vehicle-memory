@@ -46,13 +46,20 @@ design book — runs nothing at all. It cannot change what the product does.
 
 ## The two ways to stop paying
 
-**1. Register a self-hosted runner. This is the one that makes it free.**
+**1. Register a self-hosted runner. This is the one that makes it free, and it
+unblocks everything rather than only the expensive job.**
 
-Self-hosted minutes are not billed, at all, on any plan. The workflow already
-reads a repository variable, so no file needs editing:
+Self-hosted minutes are not billed, at all, on any plan — and this matters more
+than it first appears. A spent allowance does not stop the expensive job and
+leave the cheap ones running; it stops **every** job. So every job in the
+workflow reads a repository variable, not only the heavy one:
 
 ```yaml
-runs-on: ${{ vars.HEAVY_RUNNER || 'ubuntu-latest' }}
+static     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+unit       runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+integrity  runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+audit      runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+build      runs-on: ${{ vars.HEAVY_RUNNER || vars.RUNNER || 'ubuntu-latest' }}
 ```
 
 To use it:
@@ -61,16 +68,26 @@ To use it:
    and follow the commands it gives. It is a download, a `config` with a token
    the page supplies, and a `run`. Ten minutes.
 2. **Settings → Secrets and variables → Actions → Variables → New variable**,
-   named `HEAVY_RUNNER`, value `self-hosted`.
+   named `RUNNER`, value `self-hosted`.
 
-The browser suite then runs on your own machine and costs nothing. This is the
-same work `npm run checks` already does locally, so the machine is known to be
-capable of it. Leave the runner off and the workflow falls back to the hosted
-one unchanged.
+The whole pipeline then runs on your own machine and costs nothing, on any
+plan, with the allowance at zero. It is the same work `npm run checks` already
+does locally, so the machine is known to be capable of it. Leave the variable
+unset and the workflow falls back to hosted runners, unchanged.
 
-The cost is that the machine must be on for a nightly run, and a self-hosted
-runner on a private repository is a machine that executes whatever the
-repository's workflows say — which is fine when you are the only author.
+`HEAVY_RUNNER` is there if you want the split the other way: the cheap jobs on
+GitHub's runners, the twenty-minute browser suite on yours.
+
+**What it needs.** Docker, for the Postgres service container the database jobs
+start — the same Docker Desktop the local database already runs under. And the
+machine on at 03:00 for the nightly run, or the nightly simply does not happen
+and the pull-request run still covers it.
+
+**What to know before doing it.** A self-hosted runner executes whatever the
+repository's workflows say, on that machine, with that machine's access. On a
+private repository with one author that is a statement about yourself. It is
+not advisable on a public repository, where a pull request from a stranger is a
+script you have agreed to run.
 
 **2. Raise the spending limit.** github.com/settings/billing → Plans and usage
 → Actions spending limit. The default on many accounts is **$0**, which is why
