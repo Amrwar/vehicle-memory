@@ -825,6 +825,15 @@ The second sweep: things connected at one end only.
 | A core is offered at its charge     | Fixed  | It offered nothing, because a core holds no stock value (Phase 79)        |
 | The stock value still shown         | Built  | Beside the return, and still what comes off the books (Phase 79)          |
 
+## 21.46 Whose move it is
+
+| Item                          | Status | Where                                                                       |
+| ----------------------------- | ------ | --------------------------------------------------------------------------- |
+| Every job's position          | Built  | Whose move, how long, why, and one action — `/now` (Phase 84)               |
+| Ranked by what can be changed | Built  | Late first, then ours, then longest waiting (Phase 84)                      |
+| The estimate nobody sent      | Built  | Reported as the workshop's own, not the customer's (Phase 84)               |
+| Derived, never stored         | Built  | A part on order moves it; fitting it moves it back, with no edit (Phase 84) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -903,7 +912,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 424          |
+| Built   | 428          |
 | Partial | 2            |
 
 <!-- counts:end -->

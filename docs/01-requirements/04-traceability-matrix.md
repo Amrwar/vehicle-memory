@@ -511,6 +511,11 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-11701 | CI1   | -                                      | `standingOfJob()` in `core/job/standing.ts`; `/now`                                 | `standing.test.ts`, `verify-standing.ts`      | Done   |
+| FR-11702 | CI3   | -                                      | `whereJobsStand()` reads the records; nothing is written                            | `verify-standing.ts`                          | Done   |
+| FR-11703 | CI2   | `Estimate.sentAt`                      | the AWAITING_APPROVAL branch checks `sentAt` before blaming anybody                 | `standing.test.ts`, `verify-standing.ts`      | Done   |
+| FR-11704 | CI1   | -                                      | `jobsWorstFirst()`: late, then ours, then longest                                   | `standing.test.ts`                            | Done   |
+| FR-11705 | CI3   | -                                      | the band and the board render one derivation                                        | `verify-standing.ts`                          | Done   |
 | FR-11601 | CH1   | -                                      | the qualifier in `core/i18n/index.ts`; `plainKey()`                                 | `qualifier.test.ts`, `verify-dictionary.ts`   | Done   |
 | FR-11602 | CH1   | -                                      | qualified key, then bare key, then English                                          | `qualifier.test.ts`                           | Done   |
 | FR-11603 | CH2   | -                                      | `kindOf()` sorts the remainder from the answers themselves                          | `verify-dictionary.ts`                        | Done   |
@@ -1148,7 +1153,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 259                 | 258                    |
+| Later phases, newest first                         | 264                 | 263                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1166,9 +1171,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **827**             | **819 (99%)**          |
+| **Total**                                          | **832**             | **824 (99%)**          |
 
-Every one of the 827 requirements now has a row of its own. Until Phase 61,
+Every one of the 832 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

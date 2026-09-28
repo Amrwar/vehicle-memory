@@ -5080,6 +5080,54 @@ than from a list somebody keeps:
 Three known methods, three counts, and the counts fall as the work is done.
 That is the difference between a backlog and a number.
 
+## Phase 84 — Whose move it is
+
+**Scope.** Item 2 of the thirty-nine: the job command centre.
+
+**Exit.** Every open job says whose move it is, how long it has been theirs,
+the evidence, and the one thing that moves it — and none of it is stored.
+
+**Status.** Done, and the seeded data turned out to contain the exact case it
+was built to catch.
+
+The product has had fourteen job statuses since Phase 1 and they are the right
+fourteen. What it has never had is the sentence a service manager actually says
+when they look at the board:
+
+> Waiting for the customer — 2h 14m. £843.20 sent, not opened. **[Send a
+> reminder]**
+
+A status is a noun. That is a **position**: whose move it is, how long it has
+been their move, the evidence for saying so, and the single next action.
+
+**Whose move it is** is the question that matters, and it is the one no status
+answers. A workshop cannot make a customer approve an estimate or a supplier
+deliver a part. A board that shows those jobs in the same colour as the ones
+nobody has started teaches the manager to read none of them — so `/now` groups
+by **ours**, **waiting on somebody else**, and **nothing outstanding**, worst
+first, with late above everything.
+
+**Nothing about a position is stored.** It is derived from the job's status,
+its estimate, its parts, its invoice and its clock, every time it is asked for.
+A column saying "waiting for parts" would be a second thing to keep true, and
+it would stop being true the first time somebody booked a part in without
+opening the job — with nothing anywhere to say so. The check proves the
+alternative works: it puts a part on order, watches the job become the
+supplier's, marks the part fitted, and watches it become ours again with no
+edit to the job at all.
+
+**What it found in the seed.** The worst job on the board reads _"Waiting for
+approval, but the estimate has not been sent."_ A job sat in AWAITING_APPROVAL
+whose estimate nobody ever sent — which on every board a workshop has ever had
+reads as the customer being slow, and is in fact the workshop's own omission.
+That is the whole argument for the feature, and it was sitting in the
+demonstration data the entire time.
+
+The band at the top of a job's own page and the line on the board are two
+renderings of one function, so they cannot disagree — which is checked.
+
+This is the first floor of item 39, the control tower.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

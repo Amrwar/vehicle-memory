@@ -214,6 +214,12 @@ jobs:
       - name: The corpus, not the guess
         run: npx tsx infra/scripts/verify-knowledge.ts
 
+      # Whose move it is, derived from the job's own records rather than
+      # stored: a part on order makes it the supplier's, and the moment it
+      # arrives it is ours again with nothing else edited.
+      - name: Where everything stands
+        run: npx tsx infra/scripts/verify-standing.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

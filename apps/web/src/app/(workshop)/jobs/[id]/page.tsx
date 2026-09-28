@@ -93,6 +93,7 @@ import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
 import { JobDiagnosis } from '@/components/job-diagnosis';
+import { JobStandingBand } from '@/components/job-standing';
 import {
   catalogueFor,
   diagnosisFor,
@@ -102,6 +103,7 @@ import {
   whatItHasBeen,
 } from '@/lib/diagnosis';
 import { tFor } from '@/lib/i18n';
+import { whereOneJobStands } from '@/lib/standing';
 
 export const dynamic = 'force-dynamic';
 
@@ -784,6 +786,10 @@ export default async function JobPage({
     loansForJob(orgId, job.id),
     fleetFor(orgId),
   ]);
+
+  // Whose move it is, how long it has been theirs, and the one thing to do.
+  // Derived, never stored: see lib/standing.ts. Phase 84.
+  const stands = await whereOneJobStands(orgId, job.id);
 
   // The complaint, what was ruled on, and what this workshop has found the
   // same complaint to be before -- leaving this job out of its own evidence.
@@ -2205,6 +2211,14 @@ export default async function JobPage({
               ) : null}
             </CardBody>
           </Card>
+
+          {stands ? (
+            <JobStandingBand
+              standing={stands.standing}
+              currency={region.currency}
+              locale={region.locale}
+            />
+          ) : null}
 
           <JobDiagnosis
             jobId={job.id}

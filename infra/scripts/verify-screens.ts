@@ -388,6 +388,7 @@ const PLAN: Record<string, Plan> = {
   /* --- the day ------------------------------------------------------------ */
   '/(workshop)/dashboard': { who: 'owner', everySize: true, alsoArabic: true },
   '/(workshop)/diary': { who: 'owner', everySize: true },
+  '/(workshop)/now': { who: 'owner', everySize: true },
   '/(workshop)/floor': { who: 'owner', everySize: true },
   '/(workshop)/plan': { who: 'owner' },
   '/(workshop)/capacity': { who: 'owner' },

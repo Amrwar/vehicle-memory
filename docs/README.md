@@ -652,3 +652,22 @@ is not a job anybody can pick up; it now sorts them into the three kinds and
 prints how many need a qualifier, how many need one spelling chosen, and how
 many need the English mended — derived from the answers, not from a list
 somebody keeps.
+
+Phase 84 is item 2 of the plan: the job command centre. The product has had
+fourteen job statuses since Phase 1 and they are the right fourteen, but a
+status is a noun and what a service manager needs is a position — whose move it
+is, how long it has been theirs, the evidence, and the one thing that moves it.
+`/now` shows every open job that way, grouped by ours, waiting on somebody else,
+and nothing outstanding, with anything past its promised time above all of it.
+
+None of it is stored. A column saying "waiting for parts" would be a second
+thing to keep true, and would stop being true the first time somebody booked a
+part in without opening the job. The check puts a part on order, watches the job
+become the supplier's, marks it fitted, and watches it become ours again with no
+edit to the job at all.
+
+What it found: the worst job in the seeded data reads "Waiting for approval, but
+the estimate has not been sent" — a job sitting in awaiting-approval that nobody
+ever sent, which on any ordinary board reads as the customer being slow and is
+in fact the workshop's own omission. That is the whole argument for the feature,
+and it was in the demonstration data the entire time.

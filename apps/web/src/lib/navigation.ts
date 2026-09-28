@@ -59,6 +59,12 @@ const P = {
     permission: 'job:read',
   },
   today: { href: '/dashboard', label: msg('Today'), icon: 'dashboard', permission: 'job:read' },
+  now: {
+    href: '/now',
+    label: msg('Where everything stands'),
+    icon: 'dashboard',
+    permission: 'job:read',
+  },
   floor: { href: '/floor', label: msg('The floor'), icon: 'floor', permission: 'diary:read' },
   plan: { href: '/plan', label: msg('Plan the day'), icon: 'plan', permission: 'diary:read' },
   capacity: {
@@ -285,7 +291,7 @@ const P = {
 
 const OWNER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
-  { label: msg('Workshop'), items: [P.floor, P.plan, P.capacity, P.skills, P.patterns] },
+  { label: msg('Workshop'), items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.patterns] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },
@@ -325,7 +331,7 @@ const OWNER: NavSection[] = [
 /** A manager runs the floor and the people, and reads the money without keeping it. */
 const MANAGER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
-  { label: msg('Workshop'), items: [P.floor, P.plan, P.capacity, P.skills, P.patterns] },
+  { label: msg('Workshop'), items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.patterns] },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },
@@ -347,7 +353,7 @@ const MANAGER: NavSection[] = [
  * they have been quoted, what they have said, and what they have paid.
  */
 const SERVICE_ADVISOR: NavSection[] = [
-  { label: msg('Today'), items: [P.today, P.floor] },
+  { label: msg('Today'), items: [P.today, P.now, P.floor] },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },

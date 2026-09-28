@@ -30,6 +30,7 @@ import * as belonging from './belonging';
 import * as followups from './followups';
 import * as courtesy from './courtesy';
 import * as diagnosis from './diagnosis';
+import * as standing from './standing';
 
 export const AREAS = [
   publicSite,
@@ -58,4 +59,5 @@ export const AREAS = [
   followups,
   courtesy,
   diagnosis,
+  standing,
 ] as const;

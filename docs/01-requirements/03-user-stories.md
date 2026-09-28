@@ -1642,6 +1642,50 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CI - Whose move it is (Phase 84)
+
+### CI1 - What is holding things up
+
+**As** a service manager **I want** one screen showing what every job is
+waiting for **so that** I stop walking the floor to find out.
+
+**Size** 8 - **Satisfies** FR-11701, FR-11704
+
+- **Given** the open jobs, **when** I open the board, **then** the ones only we
+  are holding up come first, and anything past its promised time comes above
+  all of it.
+- **Given** any job on it, **when** I read the line, **then** it says whose
+  move it is, how long, why, and one thing to do.
+
+### CI2 - The estimate nobody sent
+
+**As** a service manager **I want** a job awaiting approval of an unsent
+estimate to be shown as ours **so that** our own omission does not read as the
+customer being slow.
+
+**Size** 3 - **Satisfies** FR-11703
+
+- **Given** an estimate not yet sent, **when** the job waits for approval,
+  **then** the position is ours and the action is to send it.
+- **Given** it has been sent, **when** the job waits, **then** the position is
+  the customer's.
+
+### CI3 - Nothing stored, nothing to drift
+
+**As** an engineer **I want** the position derived **so that** there is no
+second field to keep true.
+
+**Size** 5 - **Satisfies** FR-11702, FR-11705
+
+- **Given** a part put on order, **when** the job is read, **then** it is the
+  supplier's, with nothing about the job edited.
+- **Given** that part fitted, **when** the job is read again, **then** it is
+  ours again, with nothing about the job edited.
+- **Given** one job, **when** it is read on the board and on its own page,
+  **then** both say the same thing.
+
+---
+
 ## Epic CH - One word, two endings (Phase 83)
 
 ### CH1 - A word that agrees with its noun

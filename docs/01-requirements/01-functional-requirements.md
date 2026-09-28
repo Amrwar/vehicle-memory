@@ -267,6 +267,16 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11700 - Whose move it is
+
+| Ref      | Requirement                                                                                                  | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11701 | Every open job MUST report whose move it is, how long it has been theirs, why, and the one next action.      | 84    |
+| FR-11702 | A job's position MUST be derived from its records and MUST NOT be stored.                                    | 84    |
+| FR-11703 | A job awaiting approval of an estimate that was never sent MUST be reported as the workshop's own.           | 84    |
+| FR-11704 | Jobs the workshop can move MUST be ranked above jobs waiting on somebody else, and anything late above both. | 84    |
+| FR-11705 | The board and a job's own page MUST give the same position, from the same derivation.                        | 84    |
+
 ## FR-11600 - One word, two endings
 
 | Ref      | Requirement                                                                                            | Phase |
