@@ -1257,7 +1257,7 @@ export const ar: Readonly<Record<string, string>> = {
   Reporting: 'التقارير',
   'Operational reports': 'التقارير التشغيلية',
   'Last {days} days': 'آخر {days} يوماً',
-  '{days}d': '{days} ي',
+  '{days}d': '{days} يوم',
   'Jobs created': 'الأعمال المُنشأة',
   'In the last {days} days': 'خلال آخر {days} يوماً',
   Completed: 'المكتملة',

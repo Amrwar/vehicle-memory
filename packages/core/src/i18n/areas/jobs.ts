@@ -595,7 +595,7 @@ export const fr: Readonly<Record<string, string>> = {
   'This bay already has {count} bookings at that time.':
     'Ce poste a déjà {count} rendez-vous à cette heure-là.',
   'That technician is already assigned to another job at that time.':
-    'Ce technicien est déjà affecté à un autre travail à cette heure-là.',
+    'Ce technicien est déjà affecté à un autre travail à cette heure.',
   'That technician is not available on this day.': 'Ce technicien n’est pas disponible ce jour-là.',
   'This would put the day at {projected} hours against a capacity of {capacity} hours.':
     'La journée passerait à {projected} heures pour une capacité de {capacity} heures.',

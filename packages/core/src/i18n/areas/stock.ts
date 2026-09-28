@@ -798,7 +798,7 @@ export const ar: Readonly<Record<string, string>> = {
   Deliveries: 'الشحنات',
   Delivery: 'شحنة',
   'Payment terms': 'شروط الدفع',
-  '{count} days': '{count} يوم',
+  '{count} days': '{count} يومًا',
   'Book the supplier’s bill': 'سجّل فاتورة المورد',
   'Their invoice number and figures, as printed': 'رقم فاتورتهم ومبالغها، كما هي مطبوعة',
   'Their invoice number': 'رقم فاتورتهم',

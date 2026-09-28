@@ -77,7 +77,7 @@ export const fr: Readonly<Record<string, string>> = {
   'An invoice is created from a completed job, carrying its approved lines.':
     'Une facture est créée à partir d’un travail terminé, avec ses lignes approuvées.',
   'See completed jobs': 'Voir les travaux terminés',
-  Issued: 'Émise',
+  'Issued#invoice': 'Émise',
   Due: 'Échéance',
   Total: 'Total',
   Paid: 'Payé',
@@ -532,9 +532,9 @@ export const fr: Readonly<Record<string, string>> = {
   'Why this matters': 'Pourquoi c’est important',
   'A trial balance that balances proves the arithmetic was consistent. It does not prove it was right. Until the bank agrees, a set of books is a well-formed opinion.':
     'Une balance équilibrée prouve que le calcul était cohérent. Elle ne prouve pas qu’il était juste. Tant que la banque n’est pas d’accord, une comptabilité n’est qu’une opinion bien présentée.',
-  Active: 'Active',
+  'Active#card': 'Active',
   Lapsed: 'Expirée',
-  Cancelled: 'Annulée',
+  'Cancelled#card': 'Annulée',
   'Money taken in advance. Owed as work until it is spent.':
     'Argent encaissé d’avance. Dû sous forme de travail jusqu’à ce qu’il soit dépensé.',
   'What the workshop owes as work': 'Ce que l’atelier doit sous forme de travail',
@@ -875,7 +875,7 @@ export const ar: Readonly<Record<string, string>> = {
   'An invoice is created from a completed job, carrying its approved lines.':
     'تُنشأ الفاتورة من عمل مكتمل، وتحمل بنوده المعتمدة.',
   'See completed jobs': 'عرض الأعمال المكتملة',
-  Issued: 'تاريخ الإصدار',
+  'Issued#invoice': 'تاريخ الإصدار',
   Due: 'الاستحقاق',
   Total: 'الإجمالي',
   Paid: 'المدفوع',
@@ -1320,9 +1320,9 @@ export const ar: Readonly<Record<string, string>> = {
   'Why this matters': 'لماذا يهم هذا',
   'A trial balance that balances proves the arithmetic was consistent. It does not prove it was right. Until the bank agrees, a set of books is a well-formed opinion.':
     'ميزان المراجعة المتوازن يثبت أن الحساب كان متسقاً. لكنه لا يثبت أنه صحيح. وحتى يتطابق البنك، تبقى الدفاتر رأياً حسن الصياغة.',
-  Active: 'نشطة',
+  'Active#card': 'نشطة',
   Lapsed: 'منتهية الصلاحية',
-  Cancelled: 'ملغاة',
+  'Cancelled#card': 'ملغاة',
   'Money taken in advance. Owed as work until it is spent.':
     'مال مُحصَّل مقدماً. يبقى مستحقاً كعمل حتى يُنفق.',
   'What the workshop owes as work': 'ما تدين به الورشة كعمل',

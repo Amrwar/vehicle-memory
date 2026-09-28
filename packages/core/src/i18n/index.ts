@@ -173,6 +173,33 @@ function translateFinished(language: Language, text: string, depth: number): str
   return null;
 }
 
+/**
+ * A qualifier on a key, which English never shows.
+ *
+ * `t('Active#subscription')` reads "Active" in English and « Active » in
+ * French; `t('Active#plan')` reads "Active" and « Actif ». One English word,
+ * two French endings, because *une* souscription and *un* forfait do not
+ * agree the same way — and a flat dictionary of key to string cannot hold
+ * both. Thirty-four of the words this product shows are in that position, and
+ * before Phase 83 the merged dictionary silently kept whichever area was
+ * loaded last, so one of the two pages was always wrong.
+ *
+ * The qualifier names the noun being described rather than the gender,
+ * because the noun is what a translator needs and the gender is what they
+ * work out. It is lower case and at the end, so `Job #41` and `#10482` are
+ * untouched: those are a hash and a digit.
+ *
+ * Resolution is the qualified key, then the bare key, then English. A page
+ * that has not been told which noun it means still gets a translation; it
+ * just gets the general one.
+ */
+const QUALIFIER = /#[a-z][a-z-]*$/;
+
+/** The key as the reader sees it: everything before the qualifier. */
+export function plainKey(text: string): string {
+  return text.replace(QUALIFIER, '');
+}
+
 function translateAt(language: Language, text: string, depth: number): string {
   if (language === 'en' || !/[A-Za-z]{2}/.test(text)) return text;
   const exact = DICTIONARIES[language][text];
@@ -188,11 +215,14 @@ export type Vars = Record<string, string | number>;
  * translation is a missing translation and never a broken page.
  */
 export function translate(language: Language, text: string, vars?: Vars): string {
-  if (language === 'en' && !vars) return text;
+  const plain = plainKey(text);
+  if (language === 'en' && !vars) return plain;
   const found =
     language === 'en'
-      ? text
-      : (DICTIONARIES[language][text] ?? (vars ? text : translateAt(language, text, 0)));
+      ? plain
+      : (DICTIONARIES[language][text] ??
+        DICTIONARIES[language][plain] ??
+        (vars ? plain : translateAt(language, plain, 0)));
   if (!vars) return found;
   return found.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in vars ? String(vars[name]) : match,
@@ -216,7 +246,9 @@ export function msg<T extends string>(text: T): T {
 
 /** Whether a sentence has a translation in a language. For the coverage script. */
 export function hasTranslation(language: Language, text: string): boolean {
-  return language === 'en' || text in DICTIONARIES[language];
+  return (
+    language === 'en' || text in DICTIONARIES[language] || plainKey(text) in DICTIONARIES[language]
+  );
 }
 
 export function dictionaryKeys(language: Language): string[] {

@@ -1642,6 +1642,36 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CH - One word, two endings (Phase 83)
+
+### CH1 - A word that agrees with its noun
+
+**As** a French or Arabic reader **I want** a status to agree with the thing it
+describes **so that** the page reads as written rather than as translated.
+
+**Size** 5 - **Satisfies** FR-11601, FR-11602
+
+- **Given** a gift card, **when** it is active, **then** it reads « Active »,
+  and a plan reads « Actif », from one English word.
+- **Given** a qualified key with no translation of its own, **when** it is
+  shown, **then** the bare key's translation is used.
+- **Given** any qualified key, **when** it is read in English, **then** the
+  qualifier is not shown.
+- **Given** `Job #41`, **when** it is rendered, **then** nothing is stripped.
+
+### CH2 - A backlog rather than a number
+
+**As** whoever picks this up next **I want** the remainder sorted by kind
+**so that** I know which of three methods each one needs.
+
+**Size** 2 - **Satisfies** FR-11603
+
+- **Given** the remaining clashes, **when** the check runs, **then** it prints
+  how many need a qualifier, how many need one spelling chosen, and how many
+  need the English mended.
+
+---
+
 ## Epic CG - The corpus, not the guess (Phase 81)
 
 ### CG1 - What it has turned out to be here

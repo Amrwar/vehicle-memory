@@ -730,7 +730,7 @@ The second sweep: things connected at one end only.
 | --------------------------- | ------- | --------------------------------------------------------------------------------- |
 | Two pages, one word         | Fixed   | Seven English words that meant two things, mended in English (Phase 68)           |
 | A new clash fails the build | Built   | `verify-dictionary.ts`, over the area files rather than the merged map (Phase 68) |
-| The rest, counted           | Partial | 259 remain, frozen so the number can only fall (Phase 68)                         |
+| The rest, counted           | Partial | 221 remain, sorted by kind and frozen so the number can only fall (Phase 83)      |
 
 ## 21.35 What the fleet calls it
 
@@ -757,7 +757,7 @@ The second sweep: things connected at one end only.
 | --------------------- | ------- | --------------------------------------------------------------------------------- |
 | Near-synonyms unified | Built   | 16 keys, 38 entries; the owning area keeps the word (Phase 71)                    |
 | Two meanings split    | Built   | Journal entries, Source of business — mended in English (Phase 71)                |
-| The rest              | Partial | 231 remain, mostly French agreement, frozen so the count can only fall (Phase 71) |
+| The rest              | Partial | 221: 27 need a qualifier, 10 a spelling chosen, 184 the English mended (Phase 83) |
 
 ## 21.38 The passport outlives the workshop
 

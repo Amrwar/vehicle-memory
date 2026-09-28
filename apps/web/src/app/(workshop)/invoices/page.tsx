@@ -193,7 +193,7 @@ export default async function InvoicesPage({
                   <Th>{t('Invoice')}</Th>
                   <Th>{t('Customer')}</Th>
                   <Th>{t('Vehicle')}</Th>
-                  <Th>{t('Issued')}</Th>
+                  <Th>{t('Issued#invoice')}</Th>
                   <Th>{t('Due')}</Th>
                   <Th numeric>{t('Total')}</Th>
                   <Th numeric>{t('Paid')}</Th>

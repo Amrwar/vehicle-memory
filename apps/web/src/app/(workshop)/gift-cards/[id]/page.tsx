@@ -55,10 +55,10 @@ const STATUS: Record<
   GiftCardStatus,
   { label: string; tone: 'success' | 'neutral' | 'warning' | 'danger' }
 > = {
-  ACTIVE: { label: msg('Active'), tone: 'success' },
+  ACTIVE: { label: msg('Active#card'), tone: 'success' },
   DEPLETED: { label: msg('Fully spent'), tone: 'neutral' },
   EXPIRED: { label: msg('Lapsed'), tone: 'warning' },
-  DISABLED: { label: msg('Cancelled'), tone: 'danger' },
+  DISABLED: { label: msg('Cancelled#card'), tone: 'danger' },
 };
 
 /**
@@ -345,7 +345,7 @@ export default async function GiftCardPage({
                   ...(card.disabledAt
                     ? [
                         {
-                          label: t('Cancelled'),
+                          label: t('Cancelled#card'),
                           value: `${card.disabledAt.toLocaleDateString(region.locale, { dateStyle: 'medium' })}: ${card.disabledReason ?? ''}`,
                         },
                       ]

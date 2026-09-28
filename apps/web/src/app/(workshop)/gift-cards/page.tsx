@@ -62,10 +62,10 @@ const STATUS: Record<
   GiftCardStatus,
   { label: string; tone: 'success' | 'neutral' | 'warning' | 'danger' }
 > = {
-  ACTIVE: { label: msg('Active'), tone: 'success' },
+  ACTIVE: { label: msg('Active#card'), tone: 'success' },
   DEPLETED: { label: msg('Spent'), tone: 'neutral' },
   EXPIRED: { label: msg('Lapsed'), tone: 'warning' },
-  DISABLED: { label: msg('Cancelled'), tone: 'danger' },
+  DISABLED: { label: msg('Cancelled#card'), tone: 'danger' },
 };
 
 async function sell(formData: FormData) {

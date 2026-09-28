@@ -116,7 +116,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Quality control': 'Contrôle qualité',
   Completed: 'Terminé',
   Payment: 'Paiement',
-  Cancelled: 'Annulé',
   Preferences: 'Préférences',
   'Preselected on a new job; the diary has the last word':
     'Présélectionné sur un nouveau travail ; l’agenda a le dernier mot',
@@ -1008,7 +1007,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Quality control': 'مراقبة الجودة',
   Completed: 'مكتمل',
   Payment: 'الدفع',
-  Cancelled: 'ملغى',
   Preferences: 'التفضيلات',
   'Preselected on a new job; the diary has the last word':
     'يُختار مسبقاً في العمل الجديد؛ والكلمة الأخيرة للمفكرة',

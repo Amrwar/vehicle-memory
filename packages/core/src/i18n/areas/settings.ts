@@ -360,7 +360,7 @@ export const fr: Readonly<Record<string, string>> = {
   'On a plan': 'Abonné',
   'Payment failed': 'Paiement échoué',
   'Read-only': 'Lecture seule',
-  Cancelled: 'Résilié',
+  'Cancelled#subscription': 'Résilié',
   'That could not be saved': 'Impossible d’enregistrer',
   'Nothing has been lost; reading and exporting still work.':
     'Rien n’est perdu ; la consultation et l’export fonctionnent toujours.',
@@ -1299,7 +1299,7 @@ export const ar: Readonly<Record<string, string>> = {
   'Start with the one you sell most: a full service, an MOT with a check, a brake job.':
     'ابدأ بالباقة الأكثر مبيعاً لديك: صيانة كاملة، أو فحص دوري مع تدقيق، أو إصلاح مكابح.',
   'saves {amount}': 'توفير {amount}',
-  '{hours} h': '{hours} ساعة',
+  '{hours} h': '{hours} س',
   '1 line': 'سطر واحد',
   '{count} lines': '{count} أسطر',
   '1 check': 'فحص واحد',
@@ -1346,7 +1346,7 @@ export const ar: Readonly<Record<string, string>> = {
   'On a plan': 'مشترك في خطة',
   'Payment failed': 'فشل الدفع',
   'Read-only': 'للقراءة فقط',
-  Cancelled: 'مُلغى',
+  'Cancelled#subscription': 'مُلغى',
   'That could not be saved': 'تعذّر الحفظ',
   'Nothing has been lost; reading and exporting still work.':
     'لم يُفقد شيء؛ وما زال الاطلاع والتصدير متاحين.',

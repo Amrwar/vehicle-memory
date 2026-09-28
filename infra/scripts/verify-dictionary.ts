@@ -67,6 +67,41 @@ function check(ok: boolean, what: string, detail?: unknown) {
   }
 }
 
+/**
+ * Which of the three kinds a clash is, decided from the answers themselves.
+ *
+ * The docblock above has named the three since Phase 68, and for fifteen
+ * phases the check counted them as one number. "231 known clashes" is not a
+ * job anybody can pick up: it does not say how many are a wrong word on a
+ * page, how many are untidiness, or how many are French doing what French
+ * does. So the shape is reported, and the shape is derived rather than
+ * typed -- a list of two hundred classifications kept by hand would be wrong
+ * within a week, which is the lesson this repository has learned four times.
+ *
+ * The test for inflection is deliberately crude: two answers that share a
+ * stem and differ by a few characters at the end. It is right far more often
+ * than not, and being wrong here costs an item being read by a person who
+ * will see immediately which kind it is. Nothing is decided by it.
+ */
+type Kind = 'inflection' | 'spelling' | 'meaning';
+
+function kindOf(answers: readonly string[]): Kind {
+  const values = [...new Set(answers)];
+  if (values.length < 2) return 'spelling';
+
+  const bare = (one: string) => one.replace(/[\s\u064B-\u0652\u0640]/g, '');
+  if (new Set(values.map(bare)).size === 1) return 'spelling';
+
+  const sorted = [...values].sort((a, b) => a.length - b.length);
+  const shortest = sorted[0]!;
+  const longest = sorted[sorted.length - 1]!;
+  const stem = shortest.slice(0, Math.max(1, shortest.length - 1));
+
+  if (longest.startsWith(stem) && longest.length - shortest.length <= 3) return 'inflection';
+
+  return 'meaning';
+}
+
 function readBaseline(): string[] {
   try {
     return JSON.parse(readFileSync(BASELINE, 'utf8')) as string[];
@@ -112,6 +147,20 @@ function main() {
         '\n',
     );
   }
+
+  // What is left, by kind, so the remainder is a job rather than a number.
+  const byKind = { inflection: 0, spelling: 0, meaning: 0 };
+  for (const one of found) byKind[kindOf(one.answers.map((a) => a.value))] += 1;
+
+  console.info(
+    '\n  What the remainder is:\n' +
+      `    ${String(byKind.inflection).padStart(3)}  one word agreeing with two nouns -- ` +
+      "qualify the key: t('Active#card')\n" +
+      `    ${String(byKind.spelling).padStart(3)}  two spellings of one meaning -- ` +
+      'keep whichever area owns the term\n' +
+      `    ${String(byKind.meaning).padStart(3)}  two meanings wearing one English word -- ` +
+      'mend the English\n',
+  );
 
   // The dangerous shape, kept visible rather than counted: a key short enough
   // that two areas meaning different things by it is likely rather than

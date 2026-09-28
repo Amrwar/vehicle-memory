@@ -267,6 +267,14 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11600 - One word, two endings
+
+| Ref      | Requirement                                                                                            | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11601 | A key MAY carry a qualifier naming the noun it describes, which MUST NOT appear in the English.        | 83    |
+| FR-11602 | A qualified key MUST fall back to the bare key, and then to English, so no page loses its translation. | 83    |
+| FR-11603 | The remaining clashes MUST be reported by kind, derived from the answers, with the method for each.    | 83    |
+
 ## FR-11500 - The corpus, not the guess
 
 | Ref      | Requirement                                                                                                               | Phase |

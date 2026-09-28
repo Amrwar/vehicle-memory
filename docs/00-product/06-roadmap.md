@@ -5018,6 +5018,68 @@ Neither route needs this file edited again, which is the point: the lever is in
 the repository and the switch is in the account, and the repository half is now
 done.
 
+## Phase 83 — One word, two endings
+
+**Scope.** The third and fourth gaps: the frozen dictionary clashes, and the
+one kind of them a flat dictionary could not hold at all.
+
+**Exit.** A French or Arabic word can agree with the noun it describes, and
+what is left is a job somebody can pick up rather than a number.
+
+**Status.** Done. 231 to 221, and the shape of the rest is now printed by the
+check.
+
+Phase 68 froze 259 clashes and named three kinds. Phase 71 fixed 28 of the
+easiest. What stayed was described in the feature map as "mostly French
+agreement, which needs the English to differ per call site" — and that
+description was both the reason nothing moved and, it turns out, wrong about
+the numbers: of the 231, twenty-seven were agreement, ten were two spellings
+of one word, and a hundred and eighty-four were two meanings wearing one
+English word.
+
+**The agreement kind could not be fixed at all**, by any amount of effort,
+because the dictionary is one flat map from an English sentence to one French
+string. _Une carte_ is **Active**; _un forfait_ is **Actif**. Both pages wrote
+the right word in their own area file, the merge kept whichever loaded last,
+and one of the two pages was always wrong. No amount of care fixes that; the
+data structure cannot hold the answer.
+
+So the key takes a qualifier that English never shows:
+
+```ts
+t('Active#card'); // "Active"  ·  « Active »   ·  نشطة
+t('Active'); // "Active"  ·  « Actif »    ·  نشط
+t('Cancelled#subscription'); // "Cancelled" · « Résilié »
+```
+
+The qualifier names **the noun**, not the gender, because the noun is what a
+translator needs and the gender is what they work out. Resolution is the
+qualified key, then the bare key, then English — so a page that has not been
+told which noun it means still gets a translation, just the general one. It is
+lower case and anchored to the end, so `Job #41` and `#10482` are untouched.
+
+Applied to the three that were clearest: a gift card is _une carte_, a
+subscription is _résiliée_ rather than _annulée_, and an invoice is _émise_
+where a recall is _émis_. Five more were never two meanings at all, only two
+spellings — the Arabic percent sign against the Latin one, a letter used as an
+abbreviation that abbreviates nothing, one sentence written twice with "-là" on
+the end of one.
+
+**And the part that matters more than the ten.** The check has counted its
+remainder as one number for fifteen phases, and "221 known clashes" is not a
+job anybody can pick up. It now sorts them into the three kinds the docblock
+has named since Phase 68 and prints the shape, derived from the answers rather
+than from a list somebody keeps:
+
+```
+ 27  one word agreeing with two nouns -- qualify the key: t('Active#card')
+ 10  two spellings of one meaning -- keep whichever area owns the term
+184  two meanings wearing one English word -- mend the English
+```
+
+Three known methods, three counts, and the counts fall as the work is done.
+That is the difference between a backlog and a number.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

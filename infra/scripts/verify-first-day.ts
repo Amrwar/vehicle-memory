@@ -196,7 +196,12 @@ async function main() {
   // Every sentence the help and the setup list are made of has both
   // translations. They come from core rather than from a page, so the scan
   // over the pages cannot see them.
-  const dictionaries = AREAS.map((area) => ({ fr: area.fr, ar: area.ar }));
+  // Read as plain maps: each area file declares its own literal keys, so the
+  // union of them has no common index signature to look a sentence up by.
+  const dictionaries = AREAS.map((area) => ({
+    fr: area.fr as Record<string, string>,
+    ar: area.ar as Record<string, string>,
+  }));
   const translated = (text: string, language: 'fr' | 'ar') =>
     dictionaries.some((area) => area[language][text] !== undefined);
 

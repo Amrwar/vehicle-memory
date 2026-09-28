@@ -115,7 +115,10 @@ export async function InvoicePrint({
       number={invoice.number}
       watermark={watermarkFor('invoice', invoice.status)}
       meta={[
-        { label: t('Issued'), value: dateOf(invoice.issuedAt ?? invoice.createdAt, reader) },
+        {
+          label: t('Issued#invoice'),
+          value: dateOf(invoice.issuedAt ?? invoice.createdAt, reader),
+        },
         { label: t('Due'), value: dateOf(invoice.dueAt, reader) },
         { label: t('Customer'), value: invoice.customer.displayName },
         ...(invoice.job

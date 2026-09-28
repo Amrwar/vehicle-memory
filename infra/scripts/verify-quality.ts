@@ -639,7 +639,16 @@ function theRepositorySaysSo() {
 
   // NFR-707. A job with no timeout cannot be over budget; it can only hang.
   const workflow = read('.github/workflows/ci.yml');
-  const jobs = [...workflow.matchAll(/^ {2}([a-z-]+):$/gm)].map((m) => m[1]!);
+
+  // From `jobs:` onward, because a two-space key is not a job anywhere else.
+  // This counted seven when Phase 82 added `schedule:` and
+  // `workflow_dispatch:` under `on:` -- both two-space keys, neither a job,
+  // and the check duly reported five timeouts where it wanted six. A pattern
+  // loose enough to match the wrong part of a file is a check that fails for
+  // the wrong reason, which this repository decided in Phase 70 is worse than
+  // no check at all.
+  const jobsBlock = workflow.slice(workflow.indexOf('\njobs:\n'));
+  const jobs = [...jobsBlock.matchAll(/^ {2}([a-z-]+):$/gm)].map((m) => m[1]!);
   const timeouts = [...workflow.matchAll(/timeout-minutes:\s*(\d+)/g)].map((m) => Number(m[1]));
 
   check(

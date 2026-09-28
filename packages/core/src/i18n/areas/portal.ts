@@ -113,7 +113,6 @@ export const fr: Readonly<Record<string, string>> = {
   'Quality control': 'Contrôle qualité',
   Completed: 'Terminé',
   Payment: 'Paiement',
-  Cancelled: 'Annulé',
   'Each car you own has a passport: its history, kept by every garage that worked on it.':
     'Chaque voiture que vous possédez a un passeport : son historique, tenu par chaque garage qui a travaillé dessus.',
   '1 car. One record does not verify; the garage that keeps it has been told.':
@@ -342,7 +341,6 @@ export const ar: Readonly<Record<string, string>> = {
   'Quality control': 'مراقبة الجودة',
   Completed: 'مكتمل',
   Payment: 'الدفع',
-  Cancelled: 'ملغى',
   'Each car you own has a passport: its history, kept by every garage that worked on it.':
     'لكل سيارة تملكها جواز: سجلها، تحفظه كل ورشة عملت عليها.',
   '1 car. One record does not verify; the garage that keeps it has been told.':

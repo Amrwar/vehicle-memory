@@ -59,7 +59,7 @@ const LABEL = {
   ACTIVE: msg('On a plan'),
   PAST_DUE: msg('Payment failed'),
   SUSPENDED: msg('Read-only'),
-  CANCELLED: msg('Cancelled'),
+  CANCELLED: msg('Cancelled#subscription'),
 } as const;
 
 async function choose(formData: FormData) {

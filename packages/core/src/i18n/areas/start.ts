@@ -346,7 +346,7 @@ export const ar: Readonly<Record<string, string>> = {
     'مقروء من ورشتك نفسها، فلا يُعلَّم هنا شيء إلا إذا تحقق فعلًا',
   'The setup list': 'قائمة الإعداد',
   '{done} of {total} done': 'أُنجز {done} من {total}',
-  '{percent}%': '{percent}%',
+  '{percent}%': '{percent}٪',
   'needed first': 'مطلوب أولًا',
   'Do it': 'نفّذه',
   'Show this on the dashboard': 'إظهارها في لوحة المتابعة',

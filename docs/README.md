@@ -630,3 +630,25 @@ silence under three confirmations; a cause never confirmed is never listed; no
 confirmation shown without its refusals; a job is not evidence for itself; and
 the candidate list is never ordered by the evidence, because a list sorted by
 what usually happens tells somebody what to find.
+
+Phase 83 takes the last two gaps: the frozen dictionary clashes. Phase 68 froze
+259 and named three kinds of them; Phase 71 fixed the easiest 28; the feature
+map then described the rest as "mostly French agreement", which was both the
+reason nothing moved and wrong about the numbers. Of the 231, twenty-seven were
+agreement, ten were two spellings of one word, and a hundred and eighty-four
+were two meanings wearing one English word.
+
+The agreement kind could not be fixed by any amount of effort, because the
+dictionary is one flat map from an English sentence to one French string. _Une
+carte_ is Active; _un forfait_ is Actif. Both pages wrote the right word in
+their own area file, the merge kept whichever loaded last, and one page was
+always wrong — the data structure could not hold the answer. So a key can now
+carry a qualifier that English never shows: `t('Active#card')` reads "Active"
+and « Active », `t('Active')` reads "Active" and « Actif ». It names the noun
+rather than the gender, because the noun is what a translator needs.
+
+And the check stopped reporting its remainder as one number. "221 known clashes"
+is not a job anybody can pick up; it now sorts them into the three kinds and
+prints how many need a qualifier, how many need one spelling chosen, and how
+many need the English mended — derived from the answers, not from a list
+somebody keeps.
