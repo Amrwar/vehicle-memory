@@ -66,17 +66,18 @@ options considered, and consequences. Start at [ADR-0001](03-adr/0001-record-arc
 
 ### 4. Engineering — how we build it
 
-| Doc                                                       | Contents                                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [Getting started](04-engineering/01-getting-started.md)   | From clone to running app                                                        |
-| [Coding standards](04-engineering/02-coding-standards.md) | Conventions, layering rules, naming                                              |
-| [Git & branching](04-engineering/03-git-and-branching.md) | Trunk-based flow, commit format, review rules                                    |
-| [Testing strategy](04-engineering/04-testing-strategy.md) | The pyramid, what we test where, coverage gates                                  |
-| [CI/CD](04-engineering/05-ci-cd.md)                       | Pipelines, gates, environments, release process                                  |
-| [Observability](04-engineering/06-observability.md)       | Logs, metrics, traces, alerts, SLOs                                              |
-| [Runbook](04-engineering/07-runbook.md)                   | On-call procedures for the things that break                                     |
-| [Deployment](04-engineering/08-deployment.md)             | Hosting shape, Neon and Vercel setup, the worker, and what must never be rotated |
-| [Doing it twice](04-engineering/09-repeating-a-write.md)  | What a repeat does to every write that moves money or stock, and what stops it   |
+| Doc                                                       | Contents                                                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [Getting started](04-engineering/01-getting-started.md)   | From clone to running app                                                                   |
+| [Coding standards](04-engineering/02-coding-standards.md) | Conventions, layering rules, naming                                                         |
+| [Git & branching](04-engineering/03-git-and-branching.md) | Trunk-based flow, commit format, review rules                                               |
+| [Testing strategy](04-engineering/04-testing-strategy.md) | The pyramid, what we test where, coverage gates                                             |
+| [CI/CD](04-engineering/05-ci-cd.md)                       | Pipelines, gates, environments, release process                                             |
+| [Observability](04-engineering/06-observability.md)       | Logs, metrics, traces, alerts, SLOs                                                         |
+| [Runbook](04-engineering/07-runbook.md)                   | On-call procedures for the things that break                                                |
+| [Deployment](04-engineering/08-deployment.md)             | Hosting shape, Neon and Vercel setup, the worker, and what must never be rotated            |
+| [Doing it twice](04-engineering/09-repeating-a-write.md)  | What a repeat does to every write that moves money or stock, and what stops it              |
+| [What CI costs](04-engineering/10-ci-minutes.md)          | Why the browser suite stopped running on every push, and the two ways to stop paying for it |
 
 ### 5. Project management
 

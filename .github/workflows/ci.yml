@@ -3,8 +3,28 @@ name: CI
 on:
   push:
     branches: [main]
+    # A commit that only rewrites generated documents -- the deck, the design
+    # book, the PDFs -- cannot change what the product does, and running a
+    # browser suite over it costs real money for no information.
+    paths-ignore:
+      - 'docs/**/*.pdf'
+      - 'docs/**/*.docx'
+      - 'docs/**/*.pptx'
+      - 'docs/assets/**'
+      - '**/*.md'
   pull_request:
     branches: [main]
+  # The heavy half runs here rather than on every push. Nightly, so a fault
+  # introduced today is found before tomorrow's work is built on it.
+  schedule:
+    - cron: '0 3 * * *'
+  # And on demand, for the push where you want the whole thing.
+  workflow_dispatch:
+    inputs:
+      everything:
+        description: 'Run the browser suite on this push'
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -524,10 +544,31 @@ jobs:
   # -------------------------------------------------------------------------
   # Production build, then every route rendered against a seeded database.
   # -------------------------------------------------------------------------
+  # The expensive one, and the reason this file was restructured in Phase 82.
+  #
+  # It builds the application and runs sixty-odd checks through three browser
+  # engines: the screens at four sizes, the paint budget, every route for every
+  # role. Ten to twenty minutes of runner time, every push, on a private
+  # repository where those minutes are billed -- and the account's allowance ran
+  # out mid-session, which stops every job including the cheap ones that would
+  # have caught most faults.
+  #
+  # So it runs where it earns its cost: on a pull request, nightly, and on
+  # demand. A push straight to main gets the fast gates, and the browser suite
+  # follows within the day.
+  #
+  # `runs-on` reads a repository variable first: set HEAVY_RUNNER to
+  # `self-hosted` with a runner registered on your own machine and this job
+  # costs nothing at all, because self-hosted minutes are not billed. The
+  # fallback is the hosted runner, so the file works unchanged either way.
   build:
     name: Build and smoke test
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ${{ vars.HEAVY_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 30
     needs: [static, unit]
 
     services:

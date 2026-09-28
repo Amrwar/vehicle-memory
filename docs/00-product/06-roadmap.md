@@ -4965,6 +4965,54 @@ workshop", so the corpus stops at the workshop boundary.
 knows what six jobs taught it, and every screen says so. That is the honest cost
 of the decision and it is not a defect.
 
+## Phase 82 — What the checks cost
+
+**Scope.** Not the product. The bill, and the way a spent allowance stops
+everything rather than the expensive thing.
+
+**Exit.** A push to `main` costs a fraction of what it did, and the expensive
+half can be made free without editing a file.
+
+**Status.** Done.
+
+This repository is private, and private repositories bill Actions minutes. The
+allowance ran out on 25 September, mid-session, and GitHub stopped starting
+**every** job — including the cheap ones that catch most faults:
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+The failure mode is the part worth naming. Running out of minutes does not
+degrade to the important checks; it stops all of them. Eight phases shipped
+after that with no CI at all, verified locally only — and Phase 75 exists
+precisely because a check passed on Windows and failed on Linux by seven
+pixels. A green local run is a weaker claim.
+
+**What the money was going on.** Build and smoke test builds the application and
+then runs sixty-odd checks through three browser engines: every route for every
+role, 130 screens at four sizes, the paint budget, WebKit and Firefox as well as
+Chromium. Ten to twenty minutes of runner time, on every push, most of which
+were documentation.
+
+So it runs where it earns its cost — pull requests, nightly at 03:00, and on
+demand — and the fast gates still run on every push: format, lint, types, unit
+tests, the dependency audit, and the sixty-check database suite against a real
+Postgres. A push that only rewrites a generated PDF runs nothing, because it
+cannot change what the product does.
+
+**And the part that makes it free.** The heavy job's runner is now read from a
+repository variable:
+
+```yaml
+runs-on: ${{ vars.HEAVY_RUNNER || 'ubuntu-latest' }}
+```
+
+Register a self-hosted runner and set `HEAVY_RUNNER` to `self-hosted`, and that
+job costs nothing on any plan — it is the same work `npm run checks` already
+does locally, so the machine is known to be capable. Leave it unset and nothing
+changes. Neither step needs this file edited again, which is the point: the
+lever is in the repository, and the switch is in the account.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

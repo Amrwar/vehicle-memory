@@ -20,6 +20,13 @@
 
 Under ten minutes end to end (NFR-707). A slow pipeline gets bypassed.
 
+> **Since Phase 82 the browser suite no longer runs on every push.** Private
+> repositories bill Actions minutes, the allowance ran out mid-session, and a
+> spent allowance stops every job rather than only the expensive one. The fast
+> gates still run on every push; the browser suite runs on pull requests,
+> nightly and on demand. See [What CI costs](10-ci-minutes.md), which also has
+> the one setting that makes the expensive half free.
+
 ## Gates
 
 Nothing merges to `main` without a green pipeline and one approval. Bypassing
