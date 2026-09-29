@@ -30,6 +30,7 @@ import * as belonging from './belonging';
 import * as followups from './followups';
 import * as courtesy from './courtesy';
 import * as diagnosis from './diagnosis';
+import * as comeback from './comeback';
 import * as signoff from './signoff';
 import * as standing from './standing';
 
@@ -60,6 +61,7 @@ export const AREAS = [
   followups,
   courtesy,
   diagnosis,
+  comeback,
   signoff,
   standing,
 ] as const;

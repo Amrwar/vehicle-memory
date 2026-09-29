@@ -1308,6 +1308,10 @@ model Job {
   /// The earlier job this one is that work coming back, why, and who said so. Phase 40.
   comebackOfJobId        String?
   comebackReason         String?
+  /// Why it came back, from a closed list. Null until somebody has looked:
+  /// a comeback is recorded the moment it is noticed, because the alternative
+  /// is that it is not recorded at all. Phase 86.
+  comebackCause          ComebackCause?
   comebackMarkedAt       DateTime?
   comebackMarkedByUserId String?
   invoicedAt             DateTime?
@@ -1377,6 +1381,20 @@ model Job {
 }
 
 /// FR-603. Transitions enforced in packages/core/src/job/lifecycle.ts.
+/// Why a car came back. Seven categories, because they are the seven
+/// different things a workshop would do about it -- and one of them is
+/// "nothing to do with us", which has to be recordable without implying
+/// otherwise. Phase 86.
+enum ComebackCause {
+  INCORRECT_DIAGNOSIS
+  DEFECTIVE_PART
+  INSTALLATION
+  MISSED_IN_INSPECTION
+  CUSTOMER_MISUSE
+  UNRELATED
+  UNKNOWN
+}
+
 enum JobStatus {
   DRAFT
   BOOKED

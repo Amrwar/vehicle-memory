@@ -226,6 +226,11 @@ jobs:
       - name: The last look before the car goes back
         run: npx tsx infra/scripts/verify-signoff.ts
 
+      # A comeback says why, and a pattern is several cars back after the same
+      # repair rather than one car back several times.
+      - name: Why it came back
+        run: npx tsx infra/scripts/verify-comeback.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

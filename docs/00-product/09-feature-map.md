@@ -844,6 +844,17 @@ The second sweep: things connected at one end only.
 | The outcome follows the answers | Built  | Nothing sends "pass"; an unanswered required line cannot pass (Phase 85)                    |
 | A fail goes back to the bench   | Built  | Naming the lines, rather than into a queue nobody owns (Phase 85)                           |
 
+## 21.48 Why it came back
+
+| Item                        | Status | Where                                                                               |
+| --------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| The case file               | Built  | The whole original job on one screen, in the order somebody asks it (Phase 86)      |
+| Assembled, never re-entered | Built  | Every line read off the original job, so it cannot disagree with it (Phase 86)      |
+| Seven named causes          | Built  | Four the workshop's own, three not, and the line is the point (Phase 86)            |
+| Ours counted apart          | Built  | A rate that blames a workshop for a flood is a rate nobody believes (Phase 86)      |
+| A pattern is cars           | Built  | Three different cars after the same repair, not one car back three times (Phase 86) |
+| A cause needs a comeback    | Built  | Refused by the code and by a database check constraint (Phase 86)                   |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -922,7 +933,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 432          |
+| Built   | 438          |
 | Partial | 2            |
 
 <!-- counts:end -->

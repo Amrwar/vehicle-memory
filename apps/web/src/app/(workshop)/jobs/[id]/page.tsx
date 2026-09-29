@@ -93,6 +93,7 @@ import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
 import { JobDiagnosis } from '@/components/job-diagnosis';
+import { JobCaseFile } from '@/components/job-casefile';
 import { JobQuality } from '@/components/job-quality';
 import { JobStandingBand } from '@/components/job-standing';
 import {
@@ -104,6 +105,7 @@ import {
   whatItHasBeen,
 } from '@/lib/diagnosis';
 import { tFor } from '@/lib/i18n';
+import { caseFileFor, CaseFileError, recordCause } from '@/lib/casefile';
 import { checksFor, QualityError, recordQualityCheck, sheetFor } from '@/lib/quality';
 import { whereOneJobStands } from '@/lib/standing';
 
@@ -451,6 +453,34 @@ async function signOff(formData: FormData) {
     if (!(error instanceof QualityError)) throw error;
     redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#quality`);
   }
+}
+
+/**
+ * Records why the car came back.
+ *
+ * The one thing on the case file that is not already written down somewhere,
+ * because it is a judgement rather than a record. Everything above it on the
+ * screen is the evidence for making it. Phase 86.
+ */
+async function sayWhy(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await recordCause({
+      orgId,
+      userId: user.userId,
+      jobId,
+      cause: String(formData.get('cause') ?? '') as never,
+    });
+  } catch (error) {
+    if (!(error instanceof CaseFileError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#casefile`);
+  }
+
+  redirect(`/jobs/${jobId}#casefile`);
 }
 
 async function addFollowUp(formData: FormData) {
@@ -842,6 +872,9 @@ export default async function JobPage({
     loansForJob(orgId, job.id),
     fleetFor(orgId),
   ]);
+
+  // The whole story of the job this one came back from, if it did. Phase 86.
+  const caseFile = await caseFileFor(orgId, job.id);
 
   // The sign-off sheet, and what has been signed. Phase 85.
   const [qualitySheet, qualityChecks] = await Promise.all([
@@ -2279,6 +2312,15 @@ export default async function JobPage({
               standing={stands.standing}
               currency={region.currency}
               locale={region.locale}
+            />
+          ) : null}
+
+          {caseFile ? (
+            <JobCaseFile
+              jobId={job.id}
+              file={caseFile}
+              canWrite={can(user.role, 'job:write')}
+              setCause={sayWhy}
             />
           ) : null}
 

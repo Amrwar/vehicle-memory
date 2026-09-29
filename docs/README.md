@@ -691,3 +691,34 @@ so a required line left blank cannot be passed by anybody, by any route. A
 required line answered _no_ and one _not answered_ are recorded as different
 failures, because they need different things done about them. And a fail goes
 back to the bench rather than into a checking queue nobody owns.
+
+Phase 86 is item 4, comeback management, and it starts from a number that has
+been right and useless since Phase 26. A comeback rate is what an owner quotes.
+Twelve comebacks tells nobody what to do; four of them being the same part tells
+them everything — and the product could not tell the difference, because it
+recorded that a car came back and never why.
+
+Marking a comeback was a link and a sentence. Answering the question the link
+raises meant opening the original job, its diagnosis, its parts, its inspection
+and its sign-off in four places and holding them together in your head, which is
+why it was mostly not done. Now it is one screen in the order somebody asks it —
+what they came in with, what we decided, what we fitted, who did it, what the
+inspection found, whether it was signed off, and what they have come back with.
+Not one line of it is re-entered: it is all read off the original job, which is
+what makes it worth reading. A case file that could disagree with the job it
+describes is a second record of the same repair, and the first anybody hears of
+the disagreement is an argument with a customer.
+
+The cause is the one judgement on the screen, from seven: the diagnosis was
+wrong, the part was faulty, it was not fitted right, the inspection missed it,
+nothing to do with the work, a different fault, not established. The first four
+are the workshop's own and the last three are not, and that line is the whole
+point — a rate that blames a workshop for a customer driving through a flood is
+a rate nobody in the workshop believes, and a number nobody believes changes
+nothing. Comebacks nobody has looked at yet are shown beside both, because an
+unexamined comeback is not a clean one.
+
+And a pattern is cars, not visits. One car back four times is one unhappy
+customer and a job that was not finished. Three different cars back after the
+same repair is a procedure fault, and it is the only thing here worth
+interrupting an owner's day for.

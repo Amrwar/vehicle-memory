@@ -2,8 +2,8 @@
   "builtOn": "2026-09-29",
   "counts": {
     "models": 163,
-    "enums": 76,
-    "fields": 2588
+    "enums": 77,
+    "fields": 2589
   },
   "enums": [
     "OrgPlan",
@@ -25,6 +25,7 @@
     "CustomerKind",
     "BookingStatus",
     "BookingSource",
+    "ComebackCause",
     "JobStatus",
     "PartLineStatus",
     "QualityItemKind",
@@ -498,7 +499,7 @@
         {
           "name": "Job",
           "comment": "The central aggregate. Everything in the workshop hangs off the Job.",
-          "fields": 35,
+          "fields": 36,
           "relations": [
             "Organization",
             "Location",

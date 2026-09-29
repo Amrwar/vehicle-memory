@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11900 - Why it came back
+
+| Ref      | Requirement                                                                                                        | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11901 | A comeback MUST present the job it came back from as one case file: complaint, diagnosis, parts, people, checks.   | 86    |
+| FR-11902 | The case file MUST be assembled from existing records and MUST NOT hold any field re-entered for it.               | 86    |
+| FR-11903 | A cause MUST be recordable against a comeback, from a fixed set naming who it belongs to.                          | 86    |
+| FR-11904 | A cause MUST NOT be recordable on a job that is not a comeback, enforced in the database as well as the code.      | 86    |
+| FR-11905 | Comebacks caused by the workshop's own work MUST be counted apart from those that were not.                        | 86    |
+| FR-11906 | Comebacks with no cause recorded MUST be reported as such, not counted as clean.                                   | 86    |
+| FR-11907 | A pattern MUST be several distinct vehicles returning after the same work, never one vehicle returning repeatedly. | 86    |
+
 ## FR-11800 - The gate gets a key
 
 | Ref      | Requirement                                                                                                        | Phase |

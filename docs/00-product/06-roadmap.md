@@ -5185,6 +5185,72 @@ past it.
 Phase 84's board already knew about this: _"Finished, but the quality check has
 not been done."_ It could say so and nobody could act on it. Now they can.
 
+## Phase 86 — Why it came back
+
+**Scope.** Item 4 of the thirty-nine: comeback management. The product has
+counted comebacks since Phase 26 and never asked why one happened.
+
+**Exit.** A returned car opens one screen holding the whole of the job it came
+back from, the cause is recorded against seven named causes, the workshop's own
+are counted apart from the ones that are not, and several different cars back
+after the same repair is called out as a pattern.
+
+**Status.** Done.
+
+A comeback rate is the number an owner quotes and the least useful thing about
+it. Twelve comebacks tells nobody what to do. Four of them being the same part
+tells them everything — and the product could not tell the difference, because
+it recorded that a car came back and never why.
+
+**The case file.** Marking a comeback has been possible since Phase 26: a link
+and a sentence. What was never possible was answering the question the link
+raises. Somebody standing in front of a returned car had to open the original
+job, its diagnosis, its parts, its inspection and its sign-off in four places
+and hold them together in their head, which is why it was mostly not done.
+
+So the story is on one screen in the order somebody would ask it: what they
+came in with, what we decided it was, what the technician confirmed, what we
+fitted, who did it, what the inspection found, whether it was signed off — and
+then what they have come back with, and what was said at the time. **Not one
+line of it is new data.** Every line is read off the original job, which is
+what makes it trustworthy: a case file that could disagree with the job it
+describes would be a second record of the same repair, and the first anybody
+would learn of the disagreement is an argument with a customer.
+
+**The seven causes**, and the line through the middle of them:
+
+| Cause                       | Ours |
+| --------------------------- | ---- |
+| The diagnosis was wrong     | yes  |
+| The part was faulty         | yes  |
+| It was not fitted right     | yes  |
+| The inspection missed it    | yes  |
+| Nothing to do with the work | no   |
+| A different fault           | no   |
+| Not established             | no   |
+
+A rate that blames a workshop for a customer driving through a flood is a rate
+nobody in the workshop believes, and a number nobody believes changes nothing.
+So the four that are the workshop's own are counted apart from the three that
+are not, and the count of comebacks nobody has looked at yet is shown beside
+both — an unexamined comeback is not a clean one.
+
+**A pattern is cars, not visits.** One car back four times is one unhappy
+customer and a job that was not finished. Three different cars back after the
+same repair is a procedure fault, and it is the only thing here worth
+interrupting an owner's day for. `patternsIn` counts distinct vehicles for
+exactly that reason, and the check proves both halves: four visits by one car
+is not a pattern, three cars once each is.
+
+**Two refusals.** A cause cannot be recorded on a job that is not a comeback —
+there is nothing for it to be the cause of — and the database says so as well
+as the code, through `jobs_comeback_cause_needs_a_comeback`. A rule enforced in
+one place is a rule until somebody writes a script.
+
+The cause is the one judgement on the screen. Everything above it is the
+evidence for making it, which is the whole design: the workshop is not being
+asked to remember, it is being asked to decide.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

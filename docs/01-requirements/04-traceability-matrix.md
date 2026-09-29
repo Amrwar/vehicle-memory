@@ -511,6 +511,13 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-11901 | CK1   | `Job.comebackOfJobId`                  | `caseFileFor()` in `web/lib/casefile.ts`; `<JobCaseFile>`                           | `verify-comeback.ts`                          | Done   |
+| FR-11902 | CK1   | -                                      | every line read off the original job; the file stores nothing                       | `verify-comeback.ts`                          | Done   |
+| FR-11903 | CK2   | `Job.comebackCause`                    | `recordCause()`; seven values in `ComebackCause`                                    | `comeback.test.ts`, `verify-comeback.ts`      | Done   |
+| FR-11904 | CK2   | `jobs_comeback_cause_needs_a_comeback` | refused by `recordCause()` and by the check constraint                              | `verify-comeback.ts`                          | Done   |
+| FR-11905 | CK2   | -                                      | `isOurs()`; the business report counts ours apart                                   | `comeback.test.ts`, `verify-comeback.ts`      | Done   |
+| FR-11906 | CK2   | -                                      | `comebacksByCause()` reports `unclassified` beside the tally                        | `verify-comeback.ts`                          | Done   |
+| FR-11907 | CK3   | -                                      | `patternsIn()` counts distinct vehicles, not visits                                 | `comeback.test.ts`, `verify-comeback.ts`      | Done   |
 | FR-11801 | CJ1   | `QualityCheck`                         | `recordQualityCheck()`, the first thing ever to write one                           | `verify-signoff.ts`                           | Done   |
 | FR-11802 | CJ1   | `QualityCheckItem`                     | the workshop's own sheet, seeded from `DEFAULT_QUALITY_SHEET`                       | `verify-signoff.ts`                           | Done   |
 | FR-11803 | CJ2   | `QualityCheckAnswer`                   | `quality_check_answers_is_one_or_the_other` in the database                         | `verify-signoff.ts`                           | Done   |
@@ -1160,7 +1167,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 271                 | 270                    |
+| Later phases, newest first                         | 278                 | 277                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1178,9 +1185,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **839**             | **831 (99%)**          |
+| **Total**                                          | **846**             | **838 (99%)**          |
 
-Every one of the 839 requirements now has a row of its own. Until Phase 61,
+Every one of the 846 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

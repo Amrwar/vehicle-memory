@@ -252,6 +252,13 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 86 adds a fifth, `comebackCause`, over a `ComebackCause` enum of seven
+values — four of which name the workshop's own work and three of which do not.
+A second check constraint, `jobs_comeback_cause_needs_a_comeback`, refuses a
+cause on a job that is not a comeback: there is nothing for it to be the cause
+of. Nothing else is added, because the case file the cause sits on is assembled
+entirely from records the schema already holds.
+
 Phase 41 adds `TaxComponent` (a rate's taxes: name, percentage, whether
 compound, order), `TaxEntry` (what each tax came to on an issued document:
 source, reference, site, name, rate, net, tax, currency, when; unique per

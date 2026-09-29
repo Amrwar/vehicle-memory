@@ -1642,6 +1642,49 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CK - Why it came back (Phase 86)
+
+### CK1 - The whole story in one place
+
+**As** a service advisor **I want** the job a car came back from on one screen
+**so that** I can see what we did without opening four records.
+
+**Size** 8 - **Satisfies** FR-11901, FR-11902
+
+- **Given** a job marked as a comeback, **when** it is opened, **then** the
+  original complaint, diagnosis, confirmed causes, parts, technicians,
+  inspection and sign-off are all on it.
+- **Given** the original job changes, **when** the file is read again, **then**
+  it agrees with the job, because nothing on it was copied.
+
+### CK2 - Saying why
+
+**As** an owner **I want** the cause recorded **so that** I can tell the ones
+we caused from the ones we did not.
+
+**Size** 5 - **Satisfies** FR-11903, FR-11904, FR-11905, FR-11906
+
+- **Given** a comeback with no cause, **when** the file is read, **then** it
+  says the cause is still to fill in.
+- **Given** a job that is not a comeback, **when** a cause is recorded against
+  it, **then** it is refused, and refused again by hand in the database.
+- **Given** a month of comebacks, **when** the report is read, **then** it says
+  how many were the workshop's own and how many nobody has looked at yet.
+
+### CK3 - A pattern, not a count
+
+**As** an owner **I want** to be told when several cars come back after the
+same repair **so that** I can fix the procedure rather than the car.
+
+**Size** 3 - **Satisfies** FR-11907
+
+- **Given** one car back four times after the same work, **when** patterns are
+  computed, **then** there is no pattern.
+- **Given** three different cars back once each after the same work, **when**
+  patterns are computed, **then** it is called out on the report.
+
+---
+
 ## Epic CJ - The gate gets a key (Phase 85)
 
 ### CJ1 - Finishing a service at all

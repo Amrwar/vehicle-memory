@@ -22,6 +22,7 @@ import { describeRate, type GroupRate, type Translator } from '@carnet/core';
 
 import { requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
+import { comebacksByCause } from '@/lib/casefile';
 import { comebackPicture } from '@/lib/owner';
 import {
   bySource,
@@ -61,12 +62,13 @@ export default async function BusinessReportsPage({
   const key = range === 'month' || range === 'quarter' ? range : 'year';
   const period = periodFor(key);
 
-  const [serviceTypes, parts, customers, sources, comebacks] = await Promise.all([
+  const [serviceTypes, parts, customers, sources, comebacks, why] = await Promise.all([
     revenueByServiceType(orgId, period),
     partsProfitability(orgId, period),
     retention(orgId, 25),
     bySource(orgId, period),
     comebackPicture(orgId, { days: key === 'month' ? 30 : key === 'quarter' ? 90 : 365 }),
+    comebacksByCause(orgId, { days: key === 'month' ? 30 : key === 'quarter' ? 90 : 365 }),
   ]);
 
   const losing = parts.filter((row) => row.marginPct !== null && row.marginPct < 0);
@@ -256,8 +258,47 @@ export default async function BusinessReportsPage({
               </Badge>
             }
           />
-          <CardBody className="border-b border-(--border) text-[13px]">
-            {t(describeRate(comebacks.overall))}
+          <CardBody className="grid gap-3 border-b border-(--border) text-[13px]">
+            <p>{t(describeRate(comebacks.overall))}</p>
+
+            {/* Why, not only how many. Twelve comebacks is a number an owner
+                quotes; four of them being the same part is the thing they can
+                do something about this week. Phase 86. */}
+            {why.tally.length > 0 ? (
+              <div className="grid gap-1">
+                <p className="eyebrow">{t('Why they came back')}</p>
+                <ul className="grid gap-0.5">
+                  {why.tally.map((row) => (
+                    <li key={row.cause} className="flex flex-wrap justify-between gap-2">
+                      <span className={row.ours ? 'font-medium' : undefined}>{t(row.label)}</span>
+                      <span className="text-(--text-faint)">{row.count}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[12px] text-(--text-faint)">
+                  {t('{ours} of {all} were something we did.', {
+                    ours: why.ours.ours,
+                    all: why.ours.all,
+                  })}
+                  {why.unclassified > 0
+                    ? ` ${t('{count} have not been looked at.', { count: why.unclassified })}`
+                    : ''}
+                </p>
+              </div>
+            ) : null}
+
+            {/* The one worth interrupting somebody for. */}
+            {why.patterns.map((pattern) => (
+              <p
+                key={pattern.work}
+                className="rounded-(--radius-md) border border-(--warning) bg-(--warning-soft) p-2.5"
+              >
+                {t('{count} different cars have come back after “{work}”.', {
+                  count: pattern.vehicles,
+                  work: pattern.work,
+                })}
+              </p>
+            ))}
           </CardBody>
           <div className="grid lg:grid-cols-3 lg:divide-x lg:divide-(--border)">
             <RateList title={t('By site')} rows={comebacks.bySite} t={t} />

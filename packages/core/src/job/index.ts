@@ -1,4 +1,5 @@
 export * from './lifecycle';
+export * from './comeback';
 export * from './quality';
 export * from './standing';
 export * from './quote';

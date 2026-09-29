@@ -88,6 +88,7 @@
     "verify:knowledge": "tsx infra/scripts/verify-knowledge.ts",
     "verify:standing": "tsx infra/scripts/verify-standing.ts",
     "verify:signoff": "tsx infra/scripts/verify-signoff.ts",
+    "verify:comeback": "tsx infra/scripts/verify-comeback.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",
