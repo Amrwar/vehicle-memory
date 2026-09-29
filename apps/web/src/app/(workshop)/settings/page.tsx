@@ -337,6 +337,25 @@ export default async function SettingsPage({
           </TableWrap>
         </Card>
 
+        {/* The excuse in navigation.ts says this is reached from Settings, so
+            Settings has to actually carry it. Phase 88. */}
+        <Card>
+          <CardHeader
+            title={t('What each model takes')}
+            description={t(
+              'Oil, coolant, tyres, battery and intervals, written once for a model and inherited by every car that decodes to it.',
+            )}
+            action={
+              <Link
+                href="/settings/specifications"
+                className="text-[13px] text-(--brand-text) hover:underline"
+              >
+                {mayWrite ? t('Edit') : t('Open')}
+              </Link>
+            }
+          />
+        </Card>
+
         <Card>
           <CardHeader
             title={t('Tax rates')}

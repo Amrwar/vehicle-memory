@@ -237,6 +237,12 @@ jobs:
       - name: Where to buy it
         run: npx tsx infra/scripts/verify-sourcing.ts
 
+      # A specification sheet that fills in a plausible oil grade is worse
+      # than one that says nothing: a blank sends somebody to look it up and
+      # a wrong number does not.
+      - name: What the car takes
+        run: npx tsx infra/scripts/verify-specification.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

@@ -43,6 +43,14 @@ import { networkStatementFor } from '@/lib/network';
 import { correctEvent, orgCanReadVehicle, verifyVehicleChain } from '@/lib/passport';
 import { SubmitOnce } from '@/components/submit-once';
 import { conditionOf } from '@/lib/condition';
+import { VehicleSpecification } from '@/components/vehicle-specification';
+import {
+  partsThatFit,
+  recordCarSheet,
+  SpecificationError,
+  whatTheCarTakes,
+  whatWentIn,
+} from '@/lib/specification';
 import { coverForVehicle } from '@/lib/warranty';
 
 import {
@@ -115,6 +123,37 @@ async function correct(formData: FormData) {
   redirect(`/vehicles/${vehicleId}?corrected=1`);
 }
 
+/**
+ * What this car takes, for this car only. Phase 88.
+ *
+ * Every box is optional and an empty one clears the line rather than writing
+ * nought, because a part of the sheet nobody knows and a coolant capacity of
+ * zero litres are different things and only one of them is true of any car.
+ * A figure that is not a figure is refused rather than quietly becoming zero:
+ * nought bar is a real pressure and a real thing to be wrong about.
+ */
+async function saveSpecification(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('vehicle:write');
+  const vehicleId = String(formData.get('vehicleId') ?? '');
+
+  const values: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (key === 'vehicleId') continue;
+    values[key] = String(value);
+  }
+
+  try {
+    await recordCarSheet({ orgId, userId: user.userId, vehicleId, values });
+  } catch (error) {
+    if (!(error instanceof SpecificationError)) throw error;
+    redirect(`/vehicles/${vehicleId}?warning=${encodeURIComponent(error.message)}#specification`);
+  }
+
+  redirect(`/vehicles/${vehicleId}#specification`);
+}
+
 export default async function VehiclePage({
   params,
   searchParams,
@@ -141,6 +180,15 @@ export default async function VehiclePage({
   const network = await networkStatementFor(orgId, id);
   const actor = { orgId, userId: user.userId, ownsVehicle: false };
   const [documents, paperwork] = await Promise.all([documentsFor(id, actor), paperworkFor(id)]);
+
+  // What the car takes, and the two blocks beside it that are read off
+  // records this database already held: the parts a fitment row says belong
+  // on it, and what has actually gone in on past jobs. Phase 88.
+  const [specification, fits, wentIn] = await Promise.all([
+    whatTheCarTakes(orgId, id).catch(() => null),
+    partsThatFit(orgId, id).catch(() => []),
+    whatWentIn(orgId, id).catch(() => []),
+  ]);
   const mayAddDocuments = can(user.role, 'vehicle:write');
 
   const vehicle = await prisma.vehicle.findUnique({
@@ -370,6 +418,17 @@ export default async function VehiclePage({
               ) : null}
             </CardBody>
           </Card>
+
+          {specification ? (
+            <VehicleSpecification
+              sheet={specification}
+              fits={fits}
+              wentIn={wentIn}
+              canWrite={can(user.role, 'vehicle:write')}
+              vehicleId={id}
+              save={saveSpecification}
+            />
+          ) : null}
 
           <Card>
             <CardHeader

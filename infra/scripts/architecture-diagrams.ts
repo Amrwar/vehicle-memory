@@ -78,6 +78,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'VehicleDocument',
       'VehicleClaim',
       'PartFitment',
+      'VehicleSpecification',
       'ProductSitePrice',
     ],
   },

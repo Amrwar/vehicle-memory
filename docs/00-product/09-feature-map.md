@@ -870,6 +870,19 @@ The second sweep: things connected at one end only.
 | The list grows itself          | Built  | One confirmed swap is the strongest evidence for the next one (Phase 87)               |
 | An explicit confirmation       | Built  | Part, replacement, evidence and person together, or the database refuses it (Phase 87) |
 
+## 21.50 What the car takes
+
+| Item                            | Status | Where                                                                                      |
+| ------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| A sheet per model               | Built  | Fourteen lines keyed by make, model, years and engine (Phase 88)                           |
+| Inherited from the VIN          | Built  | Phase 43 decodes to exactly that key, so every matching car holds it (Phase 88)            |
+| A car that differs              | Built  | Its own sheet overrides the model's, for the retrofit or the heavier oil (Phase 88)        |
+| A blank is a blank              | Built  | Never defaulted, never inferred; a count of fourteen, never a percentage (Phase 88)        |
+| A disagreement is shown         | Built  | Both answers and both sources, rather than silently taking the nearer one (Phase 88)       |
+| A typo is not a pressure        | Built  | A figure that is not one is refused, never turned into nought (Phase 88)                   |
+| Read off what was already there | Built  | Fitment rows for what fits; past jobs for what went in — neither parsed (Phase 88)         |
+| Sheets that match nothing       | Built  | Refused by the database: neither-nor, both, backwards years, impossible figures (Phase 88) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -948,7 +961,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 447          |
+| Built   | 455          |
 | Partial | 2            |
 
 <!-- counts:end -->

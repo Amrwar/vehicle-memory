@@ -500,6 +500,7 @@ const PLAN: Record<string, Plan> = {
   '/(workshop)/settings/site': { who: 'owner' },
   '/(workshop)/settings/organisation': { who: 'owner' },
   '/(workshop)/settings/catalogue': { who: 'owner' },
+  '/(workshop)/settings/specifications': { who: 'owner' },
   '/(workshop)/settings/packages': { who: 'owner' },
   '/(workshop)/settings/courtesy': { who: 'owner' },
   '/(workshop)/settings/team': { who: 'owner' },

@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12100 - What the car takes
+
+| Ref      | Requirement                                                                                                    | Phase |
+| -------- | -------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12101 | A workshop MUST be able to record a specification sheet against a make, model, year range and engine code.     | 88    |
+| FR-12102 | A vehicle MUST inherit every line of a model sheet whose key its own decoded details match.                    | 88    |
+| FR-12103 | A vehicle MAY carry its own sheet, and its lines MUST override the model sheet's.                              | 88    |
+| FR-12104 | A line nobody has answered MUST be absent, and MUST NOT be defaulted or inferred.                              | 88    |
+| FR-12105 | Every line shown MUST name the source it came from.                                                            | 88    |
+| FR-12106 | Where two sources give different values for a line, both MUST be shown and the disagreement stated.            | 88    |
+| FR-12107 | A figure that cannot be read as a number MUST be refused, and MUST NOT be stored as zero.                      | 88    |
+| FR-12108 | A sheet MUST be for one vehicle or for a model, never both and never neither, enforced by the database.        | 88    |
+| FR-12109 | A sheet whose year range runs backwards MUST be refused by the database.                                       | 88    |
+| FR-12110 | Parts that fit and parts already fitted MUST be read from existing records, and MUST NOT be parsed from names. | 88    |
+
 ## FR-12000 - Where to buy it
 
 | Ref      | Requirement                                                                                                            | Phase |

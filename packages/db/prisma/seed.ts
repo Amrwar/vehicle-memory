@@ -2123,6 +2123,83 @@ async function main() {
     },
   });
 
+  // What each model takes. Phase 88.
+  //
+  // Two sheets, because one sheet demonstrates nothing. The X5 sheet is the
+  // ordinary case: fourteen numbers typed once, inherited by every X5 that
+  // decodes to it. The Corolla sheet is deliberately half-written -- a
+  // workshop that has never needed a coolant capacity should not be made to
+  // invent one, and the screen has to look right with gaps in it, because
+  // gaps are the normal state and a demonstration that hides them is a
+  // demonstration of a different product.
+  await prisma.vehicleSpecification.createMany({
+    data: [
+      {
+        orgId: org.id,
+        make: 'BMW',
+        model: 'X5',
+        yearFrom: 2018,
+        yearTo: 2023,
+        engineCode: 'B57D30A',
+        oilGrade: '0W-30',
+        oilCapacityL: 8.5,
+        coolantType: 'BMW G48 long-life',
+        coolantCapacityL: 10.5,
+        brakeFluid: 'DOT 4 LV',
+        tyreFront: '265/50 R19',
+        tyreRear: '265/50 R19',
+        tyrePressureFrontBar: 2.4,
+        tyrePressureRearBar: 2.8,
+        batteryType: '90Ah AGM',
+        batteryAh: 90,
+        batteryCca: 800,
+        serviceIntervalMonths: 24,
+        serviceIntervalKm: 30000,
+        recordedByUserId: john!.id,
+      },
+      {
+        orgId: org.id,
+        make: 'Toyota',
+        model: 'Corolla',
+        // Wide enough to cover the Corolla this seed actually contains. The
+        // first draft started at 2019 and the seeded car is a 2018, so the
+        // sheet was correct, applied to nothing, and demonstrated nothing --
+        // which is exactly the silent failure the years constraint exists to
+        // make loud.
+        yearFrom: 2015,
+        yearTo: 2024,
+        oilGrade: '0W-20',
+        oilCapacityL: 4.2,
+        serviceIntervalMonths: 12,
+        serviceIntervalKm: 15000,
+        recordedByUserId: john!.id,
+      },
+    ],
+  });
+
+  // And one car that disagrees with its own model sheet, which is the single
+  // most useful thing this screen can say. The owner of the X5 asked for a
+  // heavier oil after a track day; the technician wrote it against the car
+  // rather than changing the sheet for every X5 the workshop sees. Both
+  // numbers are true of something, and the screen shows both rather than
+  // quietly picking.
+  const theX5 = await prisma.vehicle.findFirst({
+    where: { make: 'BMW', model: 'X5', jobs: { some: { orgId: org.id } } },
+    select: { id: true },
+  });
+
+  if (theX5) {
+    await prisma.vehicleSpecification.create({
+      data: {
+        orgId: org.id,
+        vehicleId: theX5.id,
+        oilGrade: '5W-40',
+        note: 'Owner asked for a heavier oil after a track day. Confirmed with BMW technical.',
+        recordedByUserId: john!.id,
+      },
+    });
+  }
+
   // Last, because the corpus is made of jobs and every job must exist first.
   await seedKnowledge(org.id, john!.id);
 
@@ -2138,6 +2215,7 @@ async function main() {
     Parts          ${productSpecs.length} across 3 categories, 2 below reorder point
     Suppliers      2, with one part-received order and one disputed bill
     Buying         4 supplier prices, one of them deliberately months old
+    Specification  2 model sheets and one car that disagrees with its own
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}

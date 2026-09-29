@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-29",
   "counts": {
-    "models": 164,
+    "models": 165,
     "enums": 78,
-    "fields": 2621
+    "fields": 2655
   },
   "enums": [
     "OrgPlan",
@@ -376,6 +376,17 @@
           "relations": [
             "Organization",
             "Product",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "VehicleSpecification",
+          "comment": "What a car takes: oil, coolant, brake fluid, tyres, battery, intervals. A sheet is for one vehicle or for a model -- never both, enforced by `vehicle_specifications_is_a_car_or_a_model`. The model form is the useful one: a car added from its VIN decodes to make, model, year and engine, which is this key, and inherits every number the workshop has already written down. Every field is nullable because a blank is a blank, and a wrong oil grade is an engine. Phase 88.",
+          "fields": 28,
+          "relations": [
+            "Organization",
+            "Vehicle",
             "User"
           ],
           "scope": "organisation"

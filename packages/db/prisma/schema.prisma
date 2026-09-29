@@ -159,6 +159,7 @@ model Organization {
   workingPatterns     WorkingPattern[]
   partFitments        PartFitment[]
   supplierParts       SupplierPart[]
+  vehicleSpecs        VehicleSpecification[]
   syncedActions       SyncedAction[]
   reviewRequests      ReviewRequest[]
   loyaltyEntries      LoyaltyEntry[]
@@ -348,6 +349,7 @@ model User {
   skillAssessments         EmployeeSkill[]
   partFitments             PartFitment[]
   supplierPartsConfirmed   SupplierPart[]
+  vehicleSpecs             VehicleSpecification[]
   substitutionsConfirmed   JobPartLine[]            @relation("SubstitutionConfirmedBy")
   syncedActions            SyncedAction[]
   reviewsResolved          ReviewRequest[]
@@ -567,6 +569,7 @@ model Vehicle {
   bookings         Booking[]
   jobs             Job[]
   serviceSchedules ServiceSchedule[]
+  specifications   VehicleSpecification[]
   warranties       Warranty[]
   claims           VehicleClaim[]
   documents        VehicleDocument[]
@@ -3036,6 +3039,59 @@ model Product {
   @@unique([orgId, partNumber])
   @@index([orgId, isActive])
   @@map("products")
+}
+
+/// What a car takes: oil, coolant, brake fluid, tyres, battery, intervals.
+///
+/// A sheet is for one vehicle or for a model -- never both, enforced by
+/// `vehicle_specifications_is_a_car_or_a_model`. The model form is the useful
+/// one: a car added from its VIN decodes to make, model, year and engine,
+/// which is this key, and inherits every number the workshop has already
+/// written down. Every field is nullable because a blank is a blank, and a
+/// wrong oil grade is an engine. Phase 88.
+model VehicleSpecification {
+  id    String @id @default(cuid())
+  orgId String
+
+  vehicleId  String?
+  make       String?
+  model      String?
+  yearFrom   Int?
+  yearTo     Int?
+  engineCode String?
+
+  oilGrade              String?
+  oilCapacityL          Decimal? @db.Decimal(6, 2)
+  coolantType           String?
+  coolantCapacityL      Decimal? @db.Decimal(6, 2)
+  brakeFluid            String?
+  tyreFront             String?
+  tyreRear              String?
+  tyrePressureFrontBar  Decimal? @db.Decimal(4, 2)
+  tyrePressureRearBar   Decimal? @db.Decimal(4, 2)
+  batteryType           String?
+  batteryAh             Int?
+  batteryCca            Int?
+  serviceIntervalMonths Int?
+  serviceIntervalKm     Int?
+
+  note String?
+
+  /// The feed that wrote this row, so a provider can be wired in later
+  /// without a migration. Null for a row somebody here typed.
+  feedName  String?
+  fetchedAt DateTime?
+
+  recordedByUserId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle?     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  recordedBy User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, make, model])
+  @@map("vehicle_specifications")
 }
 
 model Warehouse {

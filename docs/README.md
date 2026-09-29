@@ -773,3 +773,37 @@ Nothing substitutes itself. The evidence is recomputed from the records when
 the confirmation is made, never taken from the form, and the line then carries
 the part, what it replaced, the evidence and the person together, because the
 database will not accept them apart.
+
+Phase 88 is item 6, VIN to a specification sheet: the fourteen numbers a
+technician needs before touching a car, every one of them in a handbook
+somebody is not holding. The obvious implementation buys a universal
+specification database, and three things rule it out — there is no good cheap
+one, the good ones meter a screen a workshop opens forty times a day, and a
+wrong oil grade is an engine. A database right about ninety-eight per cent of
+models is confidently wrong about the other two, and a workshop cannot tell
+which is which by looking.
+
+So the sheet is the workshop's own and it is written once per model, keyed by
+make, model, a year range and an engine code — which is exactly what Phase 43's
+VIN decoder produces when a car is added. Write it once for a model you see
+weekly and every car that decodes to it arrives holding it. That inheritance is
+what "VIN to a specification sheet" turns out to mean once you refuse to invent
+anything. A car can carry its own sheet on top, for the retrofitted engine or
+the owner who wants a heavier oil after a track day.
+
+The rule the phase is named for: a line nobody has answered is absent. Not
+defaulted, not inferred from a similar model, not a dash that could be read as
+"none" — because a blank sends somebody to look it up and a wrong number does
+not. How full the sheet is shows as a count, four of fourteen, never a
+percentage with a colour that reads as a score a workshop is failing.
+
+And where two sources disagree, both are shown. The seeded X5 says 5W-40
+against its model sheet's 0W-30. That is the most useful line the screen can
+carry: one of them is wrong about an engine, and somebody should find out which
+before the drain plug comes out.
+
+Two blocks sit beside the sheet, both read off records held for years — the
+parts a fitment row says belong on the car, and what has actually gone into it
+on past jobs — and neither is merged into it. Reading "0W-20" out of a product
+called "Engine oil 0W-20, 5L" means a parser against a name a person typed, and
+a parser that is wrong once has put the wrong oil in an engine.

@@ -34,6 +34,7 @@ import * as comeback from './comeback';
 import * as signoff from './signoff';
 import * as standing from './standing';
 import * as sourcing from './sourcing';
+import * as specification from './specification';
 
 export const AREAS = [
   publicSite,
@@ -65,5 +66,6 @@ export const AREAS = [
   comeback,
   signoff,
   sourcing,
+  specification,
   standing,
 ] as const;

@@ -5330,6 +5330,62 @@ then carries the part, what it replaced, the evidence and the person together
 apart. Years later a customer can be told exactly what went on their car and
 who decided it.
 
+## Phase 88 — What the car takes
+
+**Scope.** Item 6 of the thirty-nine: VIN to a specification sheet. Engine oil
+and capacity, coolant, brake fluid, tyre sizes and pressures, battery, filters,
+intervals.
+
+**Exit.** A workshop writes fourteen numbers once for a model and every car
+that decodes to it holds them; a car can carry its own where it differs; a line
+nobody has answered stays blank; and where two sources disagree the screen says
+so rather than picking.
+
+**Status.** Done. [ADR-0018](../03-adr/0018-a-blank-is-a-blank.md).
+
+Fourteen numbers a technician needs before touching a car, every one of them in
+a handbook somebody is not holding. The obvious implementation buys a universal
+specification database, and three things rule it out: there is no good cheap
+one, the good ones meter a screen a workshop opens forty times a day, and — the
+one that decides it — **a wrong oil grade is an engine**. A database that is
+right about ninety-eight per cent of models is confidently wrong about the
+other two, and a workshop cannot tell which is which by looking.
+
+**So the sheet is the workshop's own, written once per model.** Keyed by make,
+model, a year range and an engine code, which is exactly what Phase 43's VIN
+decoder produces when a car is added. Write it once for a model you see weekly
+and every car that decodes to it arrives holding it. _That inheritance is what
+"VIN to a specification sheet" turns out to mean once you refuse to invent
+anything._ A car may also carry its own, for the retrofitted engine or the
+owner who wants a heavier oil — facts about one vehicle that must not leak onto
+every other car of the model.
+
+**A blank is a blank.** A line nobody has answered is absent: not defaulted,
+not inferred from a similar model, not a dash that could be read as "none". The
+reasoning is the name of the decision — a blank sends somebody to look it up,
+and a wrong number does not. How full the sheet is shows as a count, "four of
+fourteen", never a percentage with a colour, because a percentage reads as a
+score a workshop is failing rather than a fact about what is known.
+
+**And where two sources disagree, both are shown.** The seeded X5 says 5W-40
+against its model sheet's 0W-30, because the owner asked for a heavier oil
+after a track day. That is the most useful line this screen can carry: one of
+them is wrong about an engine, and somebody should find out which before the
+drain plug comes out.
+
+Two blocks sit beside the sheet and neither is merged into it: the parts a
+fitment row says belong on the car, and what has actually gone into it on past
+jobs. Reading "0W-20" out of a product called "Engine oil 0W-20, 5L" means a
+parser against a name a person typed, and a parser that is wrong once has put
+the wrong oil in an engine. Verbatim, with the job and the date, claims nothing
+and still lets a technician see that the two disagree.
+
+The database refuses the sheets that would be silently useless: one that is for
+neither a car nor a model, one whose years run backwards and therefore match
+nothing, and an engine that takes nought litres of oil. A sheet that exists,
+looks filled in and never applies is the worst kind of wrong, because nobody
+goes looking for it.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

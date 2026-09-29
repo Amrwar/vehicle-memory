@@ -1642,6 +1642,63 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CM - What the car takes (Phase 88)
+
+### CM1 - Writing it once
+
+**As** a workshop **I want** to record what a model takes **so that** every car
+of it holds the numbers without anybody typing them again.
+
+**Size** 8 - **Satisfies** FR-12101, FR-12102, FR-12103
+
+- **Given** a sheet for a make, model, years and engine, **when** a car
+  decoding to those is opened, **then** it shows every line of it.
+- **Given** a car of a different make, **when** it is opened, **then** it does
+  not inherit that sheet.
+- **Given** a line recorded against one car, **when** its sheet is read,
+  **then** that line wins over the model's.
+
+### CM2 - Being told nothing rather than something wrong
+
+**As** a technician **I want** an unanswered line left blank **so that** I go
+and look it up.
+
+**Size** 5 - **Satisfies** FR-12104, FR-12105, FR-12107
+
+- **Given** a half-written model sheet, **when** a car inherits it, **then**
+  the lines nobody filled in are absent, not dashed or defaulted.
+- **Given** any line shown, **when** it is read, **then** it says where it came
+  from.
+- **Given** a pressure typed as words, **when** it is saved, **then** it is
+  refused rather than stored as nought.
+
+### CM3 - Two answers, and knowing there are two
+
+**As** an owner **I want** to be told when two sources disagree **so that**
+somebody settles it before the drain plug comes out.
+
+**Size** 3 - **Satisfies** FR-12106
+
+- **Given** a car sheet and a model sheet that differ on the oil grade,
+  **when** the sheet is read, **then** both values and both sources are shown
+  and the screen says they do not agree.
+
+### CM4 - Sheets that would match nothing
+
+**As** an owner **I want** an unusable sheet refused **so that** I do not keep
+one that looks filled in and applies to no car.
+
+**Size** 3 - **Satisfies** FR-12108, FR-12109, FR-12110
+
+- **Given** a sheet for neither a car nor a model, **when** it is written by
+  hand, **then** the database refuses it.
+- **Given** a year range that runs backwards, **when** it is written, **then**
+  the database refuses it.
+- **Given** a car with parts fitted on past jobs, **when** its sheet is read,
+  **then** those parts are listed verbatim with no value read out of a name.
+
+---
+
 ## Epic CL - Where to buy it (Phase 87)
 
 ### CL1 - Which supplier, for this car, this week

@@ -453,6 +453,7 @@ export const REACHED_ANOTHER_WAY: Record<string, string> = {
   '/settings/site': 'from Settings',
   '/settings/organisation': 'from Settings',
   '/settings/catalogue': 'from Settings',
+  '/settings/specifications': 'from Settings',
   '/settings/packages': 'from Settings',
   '/settings/courtesy': 'from Settings',
   '/settings/subscription': 'from Settings',

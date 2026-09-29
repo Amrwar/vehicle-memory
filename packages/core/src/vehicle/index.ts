@@ -3,3 +3,4 @@ export * from './mileage';
 export * from './components';
 export * from './health';
 export * from './prediction';
+export * from './specification';

@@ -252,6 +252,17 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 88 adds `VehicleSpecification`: fourteen nullable columns holding what
+a car takes, keyed either by `vehicleId` (that car only) or by make, model, a
+year range and an engine code (every car that decodes to it), with
+`vehicle_specifications_is_a_car_or_a_model` refusing both and neither. Every
+column is nullable because a blank is a blank — a wrong oil grade is an engine,
+and a blank sends somebody to look it up. Two more constraints refuse the
+sheets that would be silently useless: years that run backwards match no car,
+and no engine takes nought litres of oil. `feedName` and `fetchedAt` are
+present from the first migration so a specification provider can be wired in
+later without one, exactly as `PartFitment` did in Phase 43.
+
 Phase 87 joins two tables that were never joined. `SupplierPart` holds one
 row per supplier per part — their number for it, the price, and the three
 things beside the price that decide where to buy: days to deliver, whether it
