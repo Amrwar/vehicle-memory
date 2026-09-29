@@ -27,7 +27,12 @@ concurrency:
 jobs:
   run:
     name: Send what is due
-    runs-on: ubuntu-latest
+    # Reads RUNNER like every job in ci.yml does. This one was left on
+    # ubuntu-latest when the others were changed, which meant the escape
+    # hatch out of a billing stoppage was not actually complete: a
+    # self-hosted runner would have fixed CI and left the thing that sends
+    # customers their reminders still refusing to start.
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Dispatch
         run: |

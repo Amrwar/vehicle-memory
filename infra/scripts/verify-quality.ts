@@ -657,6 +657,33 @@ function theRepositorySaysSo() {
     `${timeouts.length} timeouts`,
   );
 
+  // The way out of a billing stoppage, and whether it is actually a way out.
+  //
+  // GitHub's hosted minutes are metered on a private repository, and when the
+  // allowance runs out every job fails in about three seconds having run
+  // nothing -- which reads on the runs page like a broken build and is not
+  // one. `runs-on: ${vars.RUNNER || 'ubuntu-latest'}` means a self-hosted
+  // runner makes the whole thing free without editing a workflow.
+  //
+  // That only holds if *every* job reads it. dispatch.yml was left on a
+  // hardcoded ubuntu-latest when ci.yml was changed, so the escape hatch
+  // would have brought the checks back and left the thing that sends
+  // customers their reminders still refusing to start. Derived from the
+  // directory rather than a list, because a list is what went stale.
+  const hardcoded: string[] = [];
+  for (const file of filesUnder(join('.github', 'workflows'), /\.ya?ml$/)) {
+    for (const line of read(file).split('\n')) {
+      const on = /^\s*runs-on:\s*(.+)$/.exec(line);
+      if (on && !on[1]!.includes('vars.RUNNER')) hardcoded.push(`${file}: ${on[1]!.trim()}`);
+    }
+  }
+
+  check(
+    hardcoded.length === 0,
+    'every job can be moved to a runner of your own, so a billing stop is not a wall',
+    hardcoded.join(', '),
+  );
+
   // NFR-206 and NFR-207. Nothing is kept in memory between requests, and the
   // background work is somebody else's process.
   check(exists(join('apps', 'worker')), 'NFR-207: background work runs in its own process');
