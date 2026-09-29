@@ -1642,6 +1642,62 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CP - Promises the workshop cannot keep (Phase 91)
+
+### CP1 - Knowing weeks early
+
+**As** an owner **I want** to be told now that a booking three weeks out cannot
+be honoured **so that** moving it is a phone call rather than an apology.
+
+**Size** 8 - **Satisfies** FR-12401, FR-12402, FR-12403
+
+- **Given** a certificate lapsing on the eighteenth and a booking on the
+  twentieth, **when** the plan is opened today, **then** the booking is named
+  along with the machine and the reason.
+- **Given** the same certificate and a booking on the tenth, **when** the plan
+  is opened, **then** nothing is said about it.
+
+### CP2 - One machine, one car
+
+**As** a service advisor **I want** a machine promised twice to be flagged
+**so that** I move the second booking rather than discover it on the day.
+
+**Size** 5 - **Satisfies** FR-12404, FR-12405, FR-12406
+
+- **Given** two overlapping bookings that need one rig, **when** the plan is
+  read, **then** the later one is named, against the earlier.
+- **Given** two bookings where one ends as the other begins, **when** the plan
+  is read, **then** neither is reported.
+- **Given** a machine busy on the bench today, **when** a booking three weeks
+  out is checked, **then** it is not affected.
+
+### CP3 - A diary that does not cry wolf
+
+**As** a service advisor **I want** silence where the product does not know
+**so that** I read the warnings that are there.
+
+**Size** 3 - **Satisfies** FR-12407, FR-12410
+
+- **Given** a booking whose description is free text and whose work is
+  unrecorded, **when** the plan is read, **then** it is not reported.
+- **Given** any clash at all, **when** it is found, **then** nothing is moved
+  or rescheduled by the product.
+
+### CP4 - Booking the engineer instead of cancelling the work
+
+**As** an owner **I want** the certificates running out in the horizon listed
+**so that** I book the calibration rather than the apology.
+
+**Size** 3 - **Satisfies** FR-12408, FR-12409
+
+- **Given** a certificate lapsing inside the horizon with nothing booked
+  against it, **when** the plan is read, **then** it is listed and is not a
+  clash.
+- **Given** an appointment being taken, **when** it is checked before saving,
+  **then** it says whether it can be honoured.
+
+---
+
 ## Epic CO - The sheet it was taken on (Phase 90)
 
 ### CO1 - What the check did not include

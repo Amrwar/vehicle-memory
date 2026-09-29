@@ -14,6 +14,21 @@
  */
 
 export const fr = {
+  // The diary, Phase 91.
+  //
+  // "will not be usable that day" has to keep its tense. The whole value is
+  // that the sentence is about a Tuesday three weeks out, read today; a
+  // translation that slips into the present reads as a machine that is broken
+  // now, which is a different and much less useful thing to be told.
+  '{count} bookings need a machine that will not be free':
+    '{count} rendez-vous exigent un appareil qui ne sera pas disponible',
+  '{machine} will not be usable that day': '{machine} ne sera pas utilisable ce jour-là',
+  '{machine} is already promised to {other}': '{machine} est déjà réservé pour {other}',
+  'Certificates running out in the next {count} days':
+    'Certificats arrivant à expiration dans les {count} prochains jours',
+  'Booked work that needs it': 'Rendez-vous qui en dépendent',
+  'Taking it out of service, or letting its certificate lapse, breaks these promises.':
+    'Le mettre hors service, ou laisser son certificat expirer, rompt ces engagements.',
   // The states.
   Retired: 'Retiré du service',
   'Out of service': 'Hors service',
@@ -103,6 +118,15 @@ export const fr = {
 };
 
 export const ar = {
+  '{count} bookings need a machine that will not be free':
+    '{count} من المواعيد تحتاج معدة لن تكون متاحة',
+  '{machine} will not be usable that day': 'لن تكون {machine} صالحة للاستخدام في ذلك اليوم',
+  '{machine} is already promised to {other}': '{machine} محجوزة بالفعل لـ {other}',
+  'Certificates running out in the next {count} days':
+    'شهادات تنتهي صلاحيتها خلال الأيام {count} القادمة',
+  'Booked work that needs it': 'المواعيد التي تحتاجها',
+  'Taking it out of service, or letting its certificate lapse, breaks these promises.':
+    'إخراجها من الخدمة، أو ترك شهادتها تنتهي، يُخلّ بهذه الالتزامات.',
   Retired: 'مسحوب من الخدمة',
   'Out of service': 'خارج الخدمة',
   'Certificate expired': 'انتهت صلاحية الشهادة',

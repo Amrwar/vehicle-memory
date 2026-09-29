@@ -908,6 +908,18 @@ The second sweep: things connected at one end only.
 | Unknown is said, not guessed | Built  | Inspections from before this phase say "not recorded" (Phase 90)                               |
 | A cited version cannot go    | Built  | `ON DELETE RESTRICT`; a report naming a missing sheet is worse than an honest blank (Phase 90) |
 
+## 21.53 Promises the workshop cannot keep
+
+| Item                        | Status | Where                                                                             |
+| --------------------------- | ------ | --------------------------------------------------------------------------------- |
+| Judged then, not now        | Built  | A booking three weeks out, against a certificate that lapses before it (Phase 91) |
+| Known weeks early           | Built  | On the plan, while moving the booking is a phone call not an apology (Phase 91)   |
+| One machine, one car        | Built  | A rig promised twice at one hour is named, against the later booking (Phase 91)   |
+| Certificates in the horizon | Built  | Thirty days, the same number the equipment screen warns on (Phase 91)             |
+| Asked before promising      | Built  | `couldBook` answers before the customer hangs up (Phase 91)                       |
+| Nothing is moved            | Built  | The clash is named; the workshop decides (Phase 91)                               |
+| Silence where it is honest  | Built  | A booking whose work names no machine is never reported (Phase 91)                |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -986,7 +998,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 470          |
+| Built   | 477          |
 | Partial | 2            |
 
 <!-- counts:end -->

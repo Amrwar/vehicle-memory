@@ -883,3 +883,37 @@ Writing the fingerprint turned up two faults in it. "Brake" + "s" and "Brakes"
   fixed it went in as raw control bytes inside the string literals — which works,
   and is invisible in every editor, leaving the one load-bearing detail of the
   file unreadable. They are named escapes now.
+
+Phase 91 is item 9, the equipment module tied into scheduling, and it is mostly
+a dividend from Phase 89. That phase refused to store whether a machine may be
+used and worked it out from its certificate against the clock every time. So
+asking "will the rig be usable next Tuesday?" is the same function with a
+different date — a stored flag could only ever have answered _now_, and a diary
+needs to answer _then_. A booking taken today for the twentieth is told today
+that the certificate lapses on the eighteenth, while moving it is still a phone
+call rather than an apology.
+
+Two kinds of clash, kept apart. A machine that will not be usable on the day is
+a promise the workshop cannot keep at all. A machine already promised to
+another car at the same hour is a different problem: one alignment rig cannot
+do two cars at once. Quantity is deliberately not modelled — a workshop with
+two rigs records two machines, because that is what it has.
+
+Nothing here moves a booking. The product names the clash and the workshop
+decides, as the supplier recommendation carries the argument against itself. A
+diary that quietly shuffled a customer's appointment to suit a rig would be one
+nobody could explain to the customer on the telephone.
+
+And no new column. A booking's kind of work is already recorded by its job or
+its package; putting a `jobTypeId` on `Booking` would have been a third place
+for the same fact to be wrong. A booking with neither says nothing about
+machines and is never reported, because a clash nobody can act on is one people
+learn to scroll past.
+
+Three things it turned up. The plan page's horizon was a fortnight while the
+equipment screen warns at thirty days, so a certificate expiring in eighteen
+warned on one screen and not the other — the page disagreeing with its own
+argument that booking an engineer takes a fortnight. A second `overlaps` had
+been written when the capacity rules have answered that since Phase 12. And the
+seed had no service package at all, so the feature Phase 37 built had never
+been demonstrable.

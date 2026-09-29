@@ -1,4 +1,4 @@
-import { clock, msg, PlanError } from '@carnet/core';
+import { CERTIFICATE_WARNING_DAYS, clock, msg, PlanError } from '@carnet/core';
 import {
   Alert,
   Badge,
@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { can, requireSession } from '@/lib/guard';
+import { diaryTrouble } from '@/lib/equipment-diary';
 import { tFor } from '@/lib/i18n';
 import { acceptPlan, capacityOn, proposeDay } from '@/lib/planning';
 
@@ -87,9 +88,22 @@ export default async function PlanPage({
   // the previous day for anybody west of London.
   const date = on ? new Date(`${on}T09:00:00`) : new Date();
 
-  const [plan, capacity] = await Promise.all([
+  // Ahead, not the day: a certificate lapsing on the eighteenth is no use to
+  // somebody who only sees it by opening the eighteenth. The point of knowing
+  // is knowing early.
+  //
+  // The horizon is `CERTIFICATE_WARNING_DAYS`, the same thirty the equipment
+  // screen warns on, because the reason for that number -- booking a
+  // calibration engineer takes a fortnight -- is the reason here too. A first
+  // draft used fourteen days and the band rendered empty against a
+  // certificate expiring in eighteen, which was this page disagreeing with
+  // its own stated argument. Phase 91.
+  const horizon = new Date(date.getTime() + CERTIFICATE_WARNING_DAYS * 86_400_000);
+
+  const [plan, capacity, machines] = await Promise.all([
     proposeDay(orgId, user.locationId, date),
     capacityOn(orgId, user.locationId, date),
+    diaryTrouble(orgId, { from: date, to: horizon }),
   ]);
 
   const iso = (value: Date) => value.toISOString().slice(0, 10);
@@ -126,6 +140,55 @@ export default async function PlanPage({
           </>
         }
       />
+
+      {/* Promises the workshop cannot keep, and certificates that run out
+          inside the fortnight ahead. The second is not a clash -- nothing is
+          booked against those machines yet, which is exactly why it is worth
+          saying while there is time to book the engineer rather than cancel
+          the work. Phase 91. */}
+      {machines.clashes.length > 0 ? (
+        <Alert tone="danger" className="mt-4">
+          <p className="font-medium">
+            {t('{count} bookings need a machine that will not be free', {
+              count: new Set(machines.clashes.map((one) => one.bookingId)).size,
+            })}
+          </p>
+          <ul className="mt-1 grid gap-0.5 text-[13px]">
+            {machines.clashes.map((clash) => (
+              <li key={`${clash.bookingId}-${clash.equipmentId}-${clash.kind}`}>
+                <span className="datum">{clash.startAt.toLocaleDateString(region.locale)}</span>{' '}
+                <bdi>{clash.label}</bdi> —{' '}
+                {clash.kind === 'DOUBLE_BOOKED'
+                  ? t('{machine} is already promised to {other}', {
+                      machine: clash.machineName,
+                      other: clash.againstLabel ?? '',
+                    })
+                  : t('{machine} will not be usable that day', { machine: clash.machineName })}
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      ) : null}
+
+      {machines.lapsing.length > 0 ? (
+        <Alert tone="warning" className="mt-4">
+          <p className="font-medium">
+            {t('Certificates running out in the next {count} days', {
+              count: CERTIFICATE_WARNING_DAYS,
+            })}
+          </p>
+          <ul className="mt-1 grid gap-0.5 text-[13px]">
+            {machines.lapsing.map((one) => (
+              <li key={one.equipmentId}>
+                <Link href={`/equipment/${one.equipmentId}`} className="hover:underline">
+                  <bdi>{one.name}</bdi>
+                </Link>{' '}
+                — <span className="datum">{one.on.toLocaleDateString(region.locale)}</span>
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      ) : null}
 
       {accepted ? (
         <Alert tone="success" className="mb-5">

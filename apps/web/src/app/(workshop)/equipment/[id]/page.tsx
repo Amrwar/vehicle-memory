@@ -23,6 +23,7 @@ import {
   setOutOfService,
   setRetired,
 } from '@/lib/equipment';
+import { bookedOn } from '@/lib/equipment-diary';
 import { tFor } from '@/lib/i18n';
 import { prisma } from '@carnet/db';
 
@@ -165,6 +166,12 @@ export default async function MachinePage({
   if (!machine) notFound();
 
   const mayWrite = can(user.role, 'settings:write');
+
+  // What this machine has been promised to, so taking it out of service is a
+  // decision made with the diary in front of you rather than a surprise on
+  // the morning. Phase 91.
+  const promised = await bookedOn(orgId, id);
+
   const jobTypes = await prisma.jobType.findMany({
     where: { orgId, isActive: true },
     orderBy: { name: 'asc' },
@@ -262,6 +269,27 @@ export default async function MachinePage({
           />
         </CardBody>
       </Card>
+
+      {promised.length > 0 ? (
+        <Card className="mt-5">
+          <CardHeader
+            title={t('Booked work that needs it')}
+            description={t(
+              'Taking it out of service, or letting its certificate lapse, breaks these promises.',
+            )}
+          />
+          <CardBody className="grid gap-1 text-[13px]">
+            {promised.map((one) => (
+              <div key={one.bookingId} className="flex flex-wrap items-baseline gap-x-2">
+                <span className="datum text-(--text-faint)">
+                  {one.startAt.toLocaleDateString(region.locale)}
+                </span>
+                <bdi>{one.label}</bdi>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      ) : null}
 
       {mayWrite ? (
         <>

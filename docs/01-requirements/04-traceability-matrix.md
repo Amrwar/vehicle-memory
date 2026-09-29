@@ -511,6 +511,16 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                                    | Implementation                                                                      | Test                                               | Status |
 | -------- | ----- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | ------ |
+| FR-12401 | CP1   | `Booking.jobId`, `Booking.packageId`                      | derived by two existing routes; no new column                                       | `verify-diary.ts`                                  | Done   |
+| FR-12402 | CP1   | -                                                         | `usableOn(machine, when)` -- Phase 89's `stateOf` with the booking's date           | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12403 | CP1   | -                                                         | `clashesAmong()` kind NOT_USABLE, carrying machine and reason                       | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12404 | CP2   | -                                                         | kind DOUBLE_BOOKED, reported against the later booking                              | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12405 | CP2   | -                                                         | `inUseOnJobs` is zeroed for every scheduling question                               | `scheduling.test.ts`                               | Done   |
+| FR-12406 | CP2   | -                                                         | `overlaps()` from the capacity rules; ends are exclusive                            | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12407 | CP3   | -                                                         | a commitment with no machines produces nothing                                      | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12408 | CP4   | `Equipment.certificateExpiresAt`                          | `lapsingBetween()`; listed, never a clash                                           | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12409 | CP4   | -                                                         | `couldPromise()` / `couldBook()` before the booking exists                          | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
+| FR-12410 | CP3   | -                                                         | nothing in the module writes a booking                                              | `verify-diary.ts`                                  | Done   |
 | FR-12301 | CO1   | `Inspection.templateVersionId`                            | `versionInUse()` at the moment an inspection starts                                 | `verify-versions.ts`                               | Done   |
 | FR-12302 | CO2   | `InspectionTemplateVersion.fingerprint`                   | `fingerprintOf()` over the questions, never the ids                                 | `versioning.test.ts`, `verify-versions.ts`         | Done   |
 | FR-12303 | CO2   | -                                                         | the fingerprint sorts its lines, so order is not shape                              | `versioning.test.ts`                               | Done   |
@@ -1209,7 +1219,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 320                 | 319                    |
+| Later phases, newest first                         | 330                 | 329                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1227,9 +1237,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **888**             | **880 (99%)**          |
+| **Total**                                          | **898**             | **890 (99%)**          |
 
-Every one of the 888 requirements now has a row of its own. Until Phase 61,
+Every one of the 898 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

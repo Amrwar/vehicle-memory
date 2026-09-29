@@ -254,6 +254,11 @@ jobs:
       - name: The sheet it was taken on
         run: npx tsx infra/scripts/verify-versions.ts
 
+      # A booking three weeks out, judged against a certificate that lapses
+      # before it, and reported today -- which a stored flag could never do.
+      - name: Promises the workshop cannot keep
+        run: npx tsx infra/scripts/verify-diary.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

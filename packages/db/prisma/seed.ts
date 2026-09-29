@@ -1312,6 +1312,25 @@ async function main() {
     }).map(({ vehicleId: _ignored, ...rest }) => rest),
   );
 
+  /* --- a package, and the booking that cannot be honoured ----------------- */
+
+  // Nothing seeded a service package before this, so the feature Phase 37
+  // built could not be seen. It is also the only route from a booking to a
+  // kind of work when the booking has no job yet -- which is every booking
+  // taken over the telephone for next week.
+  const brakePackage = await prisma.servicePackage.create({
+    data: {
+      orgId: org.id,
+      code: 'BRAKE-FRONT',
+      name: 'Front brake service',
+      description: 'Pads and discs, road test, torque to specification.',
+      jobTypeId: jobTypeByName.get('Brake repair')!.id,
+      durationMinutes: 150,
+      price: 420,
+      bookable: true,
+    },
+  });
+
   /* --- bookings for the week --------------------------------------------- */
 
   await prisma.booking.createMany({
@@ -1344,6 +1363,40 @@ async function main() {
         estimatedHours: 1.5,
         description: 'Interim service',
         source: 'PORTAL',
+      },
+      {
+        // A week out, and a promise the workshop cannot keep: the work needs
+        // the torque wrench, and the wrench's certificate lapsed a fortnight
+        // ago. Nobody has noticed, because until Phase 91 nothing looked.
+        orgId: org.id,
+        locationId: location.id,
+        customerId: mariaCustomer.id,
+        vehicleId: civic.id,
+        bayId: bays[2]!.id,
+        technicianId: john!.id,
+        status: 'SCHEDULED',
+        startAt: day(7, 9, 0),
+        endAt: day(7, 11, 30),
+        estimatedHours: 2.5,
+        description: 'Front brake service',
+        source: 'PHONE',
+        packageId: brakePackage.id,
+      },
+      {
+        // And the same hour promised to a second car, on the same wrench.
+        orgId: org.id,
+        locationId: location.id,
+        customerId: pennine.id,
+        vehicleId: transit.id,
+        bayId: bays[3]!.id,
+        technicianId: mike!.id,
+        status: 'SCHEDULED',
+        startAt: day(7, 10, 0),
+        endAt: day(7, 12, 0),
+        estimatedHours: 2,
+        description: 'Front brake service',
+        source: 'PORTAL',
+        packageId: brakePackage.id,
       },
       {
         orgId: org.id,
@@ -2366,6 +2419,7 @@ async function main() {
     Specification  2 model sheets and one car that disagrees with its own
     Equipment      4 machines: one fine, one lapsed, one expiring, one broken
     Checklist      version 1 of the inspection sheet, frozen as it was used
+    Diary          two bookings next week on a wrench whose certificate lapsed
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}

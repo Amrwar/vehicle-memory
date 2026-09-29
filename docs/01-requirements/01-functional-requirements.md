@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12400 - Promises the workshop cannot keep
+
+| Ref      | Requirement                                                                                                  | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-12401 | A booking's machines MUST be derived from the kinds of work it carries, by its job or its package.           | 91    |
+| FR-12402 | A machine's usability MUST be judged at the booking's own date, not at the present moment.                   | 91    |
+| FR-12403 | A booking whose machine will not be usable that day MUST be reported, with the machine and the reason named. | 91    |
+| FR-12404 | One machine promised to two overlapping bookings MUST be reported against the later of the two.              | 91    |
+| FR-12405 | A machine merely busy on the bench today MUST NOT affect a future booking.                                   | 91    |
+| FR-12406 | Bookings that only abut MUST NOT be reported as clashing.                                                    | 91    |
+| FR-12407 | A booking whose work requires no machine MUST NOT be reported at all.                                        | 91    |
+| FR-12408 | Certificates lapsing inside the planning horizon MUST be listed, and MUST NOT be reported as clashes.        | 91    |
+| FR-12409 | Whether a proposed booking can be honoured MUST be answerable before it is taken.                            | 91    |
+| FR-12410 | The product MUST NOT move or reschedule a booking of its own accord.                                         | 91    |
+
 ## FR-12300 - The sheet it was taken on
 
 | Ref      | Requirement                                                                                              | Phase |

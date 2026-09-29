@@ -5512,6 +5512,59 @@ Writing the fingerprint turned up two faults in it. "Brake" + "s" and "Brakes"
   load-bearing detail of the file unreadable. They are escapes now, named and
   explained.
 
+## Phase 91 — Promises the workshop cannot keep
+
+**Scope.** Item 9 of the thirty-nine: the equipment and calibration module tied
+into scheduling.
+
+**Exit.** The diary knows which machines a booking needs, says weeks early when
+one of them will not be usable that day, refuses to promise a machine to two
+cars at once, and lists the certificates running out inside the horizon it is
+planning over.
+
+**Status.** Done.
+
+Phase 89 refused to store whether a machine may be used, and worked it out from
+its certificate against the clock every time it was asked. **That turned out to
+be the whole of this phase as well.** Asking "will the rig be usable next
+Tuesday?" is the same function with a different date. A stored `isAvailable`
+flag could only ever have answered _now_, and a diary needs to answer _then_ —
+so a booking taken today for the twentieth can be told, today, that the
+certificate lapses on the eighteenth, while moving it is still a phone call
+rather than an apology.
+
+**Two kinds of clash, and they are different.** A machine that will not be
+usable on the day is a promise the workshop cannot keep at all. A machine
+already promised to another car at the same hour is a different problem with
+the same cause: one alignment rig cannot do two cars at once. Quantity is
+deliberately not modelled — a workshop with two rigs records two machines,
+because that is what it has, and a `quantity: 2` column would be one more thing
+somebody has to keep true.
+
+**And nothing here moves a booking.** The product names the clash and the
+workshop decides, exactly as the supplier recommendation of Phase 87 carries
+the argument against itself. A diary that quietly shuffled a customer's
+appointment to suit a rig would be a diary nobody could explain to the customer
+on the telephone.
+
+**No new column.** A booking's kind of work is already recorded by two routes —
+the job it became, or the package it was booked from — and the obvious move,
+putting a `jobTypeId` on `Booking`, would have been a third place for the same
+fact to be wrong. A booking that has neither says nothing about machines and is
+never reported as clashing, because the product does not know what "Look at the
+noise" needs and a clash nobody can act on is one people learn to scroll past.
+
+Three things this turned up. The plan page's horizon was a fortnight while the
+equipment screen warns at thirty days, so a certificate expiring in eighteen
+warned on one screen and not the other — **the page disagreeing with its own
+stated argument**, that booking a calibration engineer takes a fortnight. There
+is now one horizon with one reason. A second `overlaps` had been written here
+when the capacity rules have answered that question with the same meaning since
+Phase 12, and a second definition is a second thing to get right. And the seed
+contained no service package at all, so the feature Phase 37 built had never
+been demonstrable; there is one now, and the two bookings on it next week are
+the promises the diary cannot keep.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here
