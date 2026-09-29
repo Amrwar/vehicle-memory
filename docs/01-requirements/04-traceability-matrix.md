@@ -511,6 +511,17 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                       | Implementation                                                                      | Test                                               | Status |
 | -------- | ----- | -------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | ------ |
+| FR-12201 | CN1   | `Equipment`                                  | name, code, certificate, service interval; retired never deleted                    | `verify-equipment.ts`                              | Done   |
+| FR-12202 | CN1   | -                                            | `stateOf()` derives; no column holds a state                                        | `equipment.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12203 | CN2   | `Equipment.certificateExpiresAt`             | compared against the clock, so nobody presses anything                              | `equipment.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12204 | CN1   | -                                            | a null expiry is no certificate, not a lapsed one                                   | `equipment.test.ts`                                | Done   |
+| FR-12205 | CN2   | -                                            | `certificateDueSoon()`; thirty days, and the state is unchanged                     | `equipment.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12206 | CN3   | `Equipment.serviceEveryMonths`               | `serviceOverdue()` warns; `blocks()` never includes it                              | `equipment.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12207 | CN3   | `JobTypeEquipment`                           | as `JobTypeSkill` names what a person must be                                       | `verify-equipment.ts`                              | Done   |
+| FR-12208 | CN3   | -                                            | `EQUIPMENT_UNAVAILABLE` in `checkTransition`; the message names it                  | `lifecycle.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12209 | CN3   | -                                            | IN_USE is not in `BLOCKING_STATES`; the gate applies only to IN_PROGRESS            | `lifecycle.test.ts`, `verify-equipment.ts`         | Done   |
+| FR-12210 | CN4   | `equipment_out_of_service_says_why`          | refused by the product and by the database                                          | `verify-equipment.ts`                              | Done   |
+| FR-12211 | CN4   | `job_type_equipment_equipmentId_fkey`        | `ON DELETE RESTRICT`; retire it instead                                             | `verify-equipment.ts`                              | Done   |
 | FR-12101 | CM1   | `VehicleSpecification`                       | model sheet keyed by make, model, years, engine                                     | `verify-specification.ts`                          | Done   |
 | FR-12102 | CM1   | -                                            | `sheetsFor()` reads through `fitsVehicle()`, the fitment rule                       | `verify-specification.ts`                          | Done   |
 | FR-12103 | CM1   | `VehicleSpecification.vehicleId`             | `resolveSpec()`: THIS_CAR outranks MODEL_SHEET                                      | `specification.test.ts`, `verify-specification.ts` | Done   |
@@ -1189,7 +1200,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 300                 | 299                    |
+| Later phases, newest first                         | 311                 | 310                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1207,9 +1218,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **868**             | **860 (99%)**          |
+| **Total**                                          | **879**             | **871 (99%)**          |
 
-Every one of the 868 requirements now has a row of its own. Until Phase 61,
+Every one of the 879 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

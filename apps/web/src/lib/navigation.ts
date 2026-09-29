@@ -74,6 +74,12 @@ const P = {
     permission: 'diary:read',
   },
   skills: { href: '/skills', label: msg('Skills'), icon: 'skills', permission: 'people:read' },
+  equipment: {
+    href: '/equipment',
+    label: msg('Equipment'),
+    icon: 'capacity',
+    permission: 'settings:read',
+  },
   patterns: {
     href: '/patterns',
     label: msg('Working hours'),
@@ -291,7 +297,10 @@ const P = {
 
 const OWNER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
-  { label: msg('Workshop'), items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.patterns] },
+  {
+    label: msg('Workshop'),
+    items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.equipment, P.patterns],
+  },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },
@@ -331,7 +340,10 @@ const OWNER: NavSection[] = [
 /** A manager runs the floor and the people, and reads the money without keeping it. */
 const MANAGER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
-  { label: msg('Workshop'), items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.patterns] },
+  {
+    label: msg('Workshop'),
+    items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.equipment, P.patterns],
+  },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },

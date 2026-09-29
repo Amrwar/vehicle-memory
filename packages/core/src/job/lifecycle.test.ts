@@ -218,3 +218,39 @@ describe('presentation helpers', () => {
     expect(toneFor('AWAITING_APPROVAL')).toBe('warning');
   });
 });
+
+describe('the machine the job needs', () => {
+  it('starts when nothing is in the way', () => {
+    expect(checkTransition('APPROVED', 'IN_PROGRESS', { unusableEquipment: [] }).ok).toBe(true);
+  });
+
+  it('starts for a job type that requires no machine at all', () => {
+    // Which is every job in every workshop that has not declared one. This
+    // gate must never be reachable by somebody with no way to satisfy it --
+    // the lesson FR-612 taught over eighty-four phases.
+    expect(checkTransition('APPROVED', 'IN_PROGRESS', {}).ok).toBe(true);
+  });
+
+  it('refuses, and names the machine and the reason', () => {
+    const result = checkTransition('APPROVED', 'IN_PROGRESS', {
+      unusableEquipment: [{ name: 'Torque wrench', why: 'Certificate expired' }],
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe('EQUIPMENT_UNAVAILABLE');
+      expect(result.message).toContain('Torque wrench');
+      expect(result.message).toContain('certificate expired');
+    }
+  });
+
+  it('does not stand in the way of finishing a job already on the bench', () => {
+    // The lift failing its inspection this morning must not strand a car that
+    // is already in pieces on it.
+    expect(
+      checkTransition('IN_PROGRESS', 'QUALITY_CHECK', {
+        unusableEquipment: [{ name: 'Two-post lift', why: 'Out of service' }],
+      }).ok,
+    ).toBe(true);
+  });
+});

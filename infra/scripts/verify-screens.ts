@@ -234,6 +234,7 @@ interface Ids {
   orgId: string;
   booking: string;
   customer: string;
+  equipment: string;
   estimate: string;
   fleet: string;
   giftCard: string;
@@ -501,6 +502,11 @@ const PLAN: Record<string, Plan> = {
   '/(workshop)/settings/organisation': { who: 'owner' },
   '/(workshop)/settings/catalogue': { who: 'owner' },
   '/(workshop)/settings/specifications': { who: 'owner' },
+  '/(workshop)/equipment': { who: 'owner' },
+  '/(workshop)/equipment/[id]': {
+    who: 'owner',
+    path: (r) => `/equipment/${r.equipment}`,
+  },
   '/(workshop)/settings/packages': { who: 'owner' },
   '/(workshop)/settings/courtesy': { who: 'owner' },
   '/(workshop)/settings/team': { who: 'owner' },
@@ -592,6 +598,7 @@ async function identifiersOf(orgId: string): Promise<Ids> {
 
   const [
     booking,
+    equipment,
     estimate,
     fleet,
     giftCard,
@@ -608,6 +615,7 @@ async function identifiersOf(orgId: string): Promise<Ids> {
     access,
   ] = await Promise.all([
     need(prisma.booking.findFirst({ where: { orgId }, select: { id: true } }), 'booking'),
+    need(prisma.equipment.findFirst({ where: { orgId }, select: { id: true } }), 'machine'),
     need(prisma.estimate.findFirst({ where: { orgId }, select: { id: true } }), 'estimate'),
     need(prisma.fleetAgreement.findFirst({ where: { orgId }, select: { id: true } }), 'fleet'),
     need(prisma.giftCard.findFirst({ where: { orgId }, select: { id: true } }), 'gift card'),
@@ -767,6 +775,7 @@ async function identifiersOf(orgId: string): Promise<Ids> {
     orgId,
     booking: booking.id,
     customer: anyCustomer.id,
+    equipment: equipment.id,
     estimate: estimate.id,
     fleet: fleet.id,
     giftCard: giftCard.id,

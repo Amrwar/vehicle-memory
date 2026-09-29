@@ -91,6 +91,15 @@ export interface TransitionContext {
   hasChargeableLines?: boolean;
   /** Whether an odometer reading was captured at check-in. */
   hasOdometerIn?: boolean;
+  /**
+   * Machines this job's type requires that are not usable, with the reason.
+   *
+   * Empty or absent for every job whose type requires no machine, which is
+   * every job in every workshop that has not declared one -- so this gate,
+   * unlike FR-612 before Phase 85, cannot be reached by anybody who has no
+   * way to satisfy it. Phase 89.
+   */
+  unusableEquipment?: readonly { name: string; why: string }[];
 }
 
 export type TransitionResult =
@@ -101,6 +110,7 @@ export type TransitionErrorCode =
   | 'ILLEGAL_TRANSITION'
   | 'TERMINAL_STATUS'
   | 'QUALITY_CHECK_REQUIRED'
+  | 'EQUIPMENT_UNAVAILABLE'
   | 'APPROVAL_REQUIRED'
   | 'NOTHING_TO_INVOICE';
 
@@ -159,6 +169,23 @@ export function checkTransition(
       message:
         `A job cannot move from ${humanise(from)} to ${humanise(to)}. ` +
         `Permitted next steps: ${allowed.map(humanise).join(', ') || 'none'}.`,
+      allowed,
+    };
+  }
+
+  // Phase 89: work does not start on a machine that is not allowed to be
+  // used. Only the three states that mean *not usable at all* reach here --
+  // a machine merely busy on another job never does, because a workshop puts
+  // a car on the ramp knowing the rig is free in an hour and a product that
+  // refused would be wrong about how a workshop runs.
+  if (to === 'IN_PROGRESS' && (context.unusableEquipment?.length ?? 0) > 0) {
+    const named = context
+      .unusableEquipment!.map((one) => `${one.name} (${one.why.toLowerCase()})`)
+      .join(', ');
+    return {
+      ok: false,
+      code: 'EQUIPMENT_UNAVAILABLE',
+      message: `This job needs equipment that cannot be used: ${named}.`,
       allowed,
     };
   }

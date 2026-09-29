@@ -267,6 +267,22 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12200 - The machine the job needs
+
+| Ref      | Requirement                                                                                                 | Phase |
+| -------- | ----------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12201 | A workshop MUST be able to record its equipment, with a certificate and its own service interval.           | 89    |
+| FR-12202 | Whether a machine may be used MUST be derived, and MUST NOT be stored as a flag.                            | 89    |
+| FR-12203 | A machine whose certificate expiry has passed MUST become unusable without any person acting.               | 89    |
+| FR-12204 | A machine with no certificate at all MUST NOT be treated as one whose certificate has lapsed.               | 89    |
+| FR-12205 | A certificate approaching expiry MUST warn, and MUST NOT change the machine's state.                        | 89    |
+| FR-12206 | A machine overdue its own service MUST warn and MUST NOT block any job.                                     | 89    |
+| FR-12207 | A kind of work MUST be able to name the machines it cannot be done without.                                 | 89    |
+| FR-12208 | A job MUST NOT start when a machine its work requires is not usable, and the refusal MUST name the machine. | 89    |
+| FR-12209 | A machine merely in use on another job MUST NOT block, and MUST NOT strand a job already under way.         | 89    |
+| FR-12210 | A machine taken out of service MUST carry a reason, enforced by the database.                               | 89    |
+| FR-12211 | A machine a kind of work depends on MUST NOT be deletable; it is retired instead.                           | 89    |
+
 ## FR-12100 - What the car takes
 
 | Ref      | Requirement                                                                                                    | Phase |

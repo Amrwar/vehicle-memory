@@ -1932,6 +1932,7 @@ async function main() {
     technicianUserId: john!.id,
     advisorUserId: sara!.id,
     firstJobNumber: 10_483,
+    brakeRepairJobTypeId: jobTypeByName.get('Brake repair')?.id,
   });
 
   /* --- the quote link the customer was sent ------------------------------- */
@@ -2123,6 +2124,90 @@ async function main() {
     },
   });
 
+  // The machines. Phase 89.
+  //
+  // Four, because the states only mean anything against each other. A lift
+  // that is fine, a torque wrench whose certificate lapsed a fortnight ago, an
+  // air-conditioning station whose certificate runs out inside the month, and
+  // an alignment rig somebody took out of service with a reason.
+  //
+  // Nothing stores any of those states. The lapsed wrench is unusable because
+  // its expiry is in the past and the clock has passed it, which is the whole
+  // argument of the phase: nobody had to notice.
+  const [, torqueWrench] = await Promise.all([
+    prisma.equipment.create({
+      data: {
+        orgId: org.id,
+        locationId: location.id,
+        name: 'Four-post lift',
+        code: 'LIFT-1',
+        serialNumber: 'SW-4P-118820',
+        certificateRef: 'LOLER/2026/4471',
+        certifiedAt: day(-120),
+        certificateExpiresAt: day(245),
+        certifiedBy: 'Pennine Lifting Services',
+        serviceEveryMonths: 6,
+        servicedAt: day(-40),
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        orgId: org.id,
+        locationId: location.id,
+        name: 'Torque wrench, 40-200 Nm',
+        code: 'TW-200',
+        serialNumber: 'NR-200-4419',
+        certificateRef: 'CAL/2025/8871',
+        certifiedAt: day(-380),
+        // A fortnight ago. Nobody flagged it, nobody had to: the machine
+        // became unusable on the right morning by arithmetic alone.
+        certificateExpiresAt: day(-14),
+        certifiedBy: 'Calibration North',
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        orgId: org.id,
+        locationId: location.id,
+        name: 'Air-conditioning station',
+        code: 'AC-1',
+        serialNumber: 'TX-880-2201',
+        certificateRef: 'FGAS/2026/1180',
+        certifiedAt: day(-340),
+        // Inside the warning window: still usable, still the right answer for
+        // a job today, and worth booking the engineer for now.
+        certificateExpiresAt: day(18),
+        certifiedBy: 'Northern Climate Services',
+        serviceEveryMonths: 12,
+        servicedAt: day(-400),
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        orgId: org.id,
+        locationId: location.id,
+        name: 'Four-wheel alignment rig',
+        code: 'ALIGN-1',
+        serialNumber: 'HD-4W-9930',
+        outOfServiceSince: day(-3),
+        outOfServiceReason: 'Left front target plate cracked; replacement on order.',
+      },
+    }),
+  ]);
+
+  // And a kind of work that cannot be done without the wrench, so the gate is
+  // a real thing somebody meets rather than a rule with nothing behind it.
+  const wheelWork = await prisma.jobType.findFirst({
+    where: { orgId: org.id, name: { contains: 'Repair', mode: 'insensitive' } },
+    select: { id: true },
+  });
+
+  if (wheelWork) {
+    await prisma.jobTypeEquipment.create({
+      data: { jobTypeId: wheelWork.id, equipmentId: torqueWrench.id },
+    });
+  }
+
   // What each model takes. Phase 88.
   //
   // Two sheets, because one sheet demonstrates nothing. The X5 sheet is the
@@ -2216,6 +2301,7 @@ async function main() {
     Suppliers      2, with one part-received order and one disputed bill
     Buying         4 supplier prices, one of them deliberately months old
     Specification  2 model sheets and one car that disagrees with its own
+    Equipment      4 machines: one fine, one lapsed, one expiring, one broken
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}
@@ -3472,6 +3558,7 @@ async function seedFleetAndWarranty(
     technicianUserId: string;
     advisorUserId: string;
     firstJobNumber: number;
+    brakeRepairJobTypeId?: string;
   },
 ) {
   /* --- two more vans, so the company is a fleet --------------------------- */
@@ -3596,6 +3683,14 @@ async function seedFleetAndWarranty(
       promisedAt: day(0, 16, 0),
       createdByUserId: refs.advisorUserId,
       technicians: { create: [{ userId: refs.technicianUserId, isPrimary: true }] },
+      // A kind of work, because a car on the ramp with none is not a job any
+      // workshop would recognise: the kind of work is what drives the quality
+      // check, the skills and the machines. It had none until Phase 89 went
+      // looking for an in-progress job to attach a machine to and found the
+      // only one in the seed carrying nothing.
+      jobTypes: refs.brakeRepairJobTypeId
+        ? { create: [{ jobTypeId: refs.brakeRepairJobTypeId }] }
+        : undefined,
     },
   });
 

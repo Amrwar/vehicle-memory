@@ -31,6 +31,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { postEntry } from './accounting';
+import { machinesFor } from './equipment';
 import { siteUrl } from './credentials';
 import { audit } from './guard';
 import {
@@ -200,7 +201,14 @@ export async function moveJob(input: {
   const lines = priceableLinesOf(job);
   const latestEstimate = job.estimates[0];
 
+  // The machines this job's kinds of work need, and whether each is allowed to
+  // be used. Only asked when the job is starting: a lift failing its
+  // inspection this morning must not strand a car already in pieces on it.
+  // Phase 89.
+  const machines = input.to === 'IN_PROGRESS' ? await machinesFor(input.orgId, job.id) : null;
+
   const context: TransitionContext = {
+    unusableEquipment: machines?.blocking.map((one) => ({ name: one.name, why: one.why })),
     requiresQualityCheck: job.jobTypes.some((entry) => entry.jobType.requiresQualityCheck),
     hasPassedQualityCheck: job.qualityChecks[0]?.passed === true,
     hasApprovedEstimate: latestEstimate

@@ -5,6 +5,7 @@ export * from './vehicle/index';
 export * from './pricing/index';
 export * from './inspection/index';
 export * from './audit/index';
+export * from './equipment/index';
 export * from './inventory/index';
 export * from './offline/index';
 export * from './retention/index';

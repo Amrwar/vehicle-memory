@@ -1642,6 +1642,64 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CN - The machine the job needs (Phase 89)
+
+### CN1 - Knowing which machines cannot be used
+
+**As** an owner **I want** the machines listed worst first **so that** I see
+what has stopped work before I see what has not.
+
+**Size** 5 - **Satisfies** FR-12201, FR-12202, FR-12204
+
+- **Given** a wrench whose certificate has lapsed, **when** the list is read,
+  **then** it is at the top and says why.
+- **Given** a trolley jack that carries no certificate, **when** it is read,
+  **then** it is available, not expired.
+
+### CN2 - Nobody has to notice
+
+**As** an owner **I want** a lapsed certificate to take the machine out by
+itself **so that** it does not depend on somebody remembering.
+
+**Size** 5 - **Satisfies** FR-12203, FR-12205
+
+- **Given** a machine whose certificate expires tonight, **when** tomorrow
+  comes, **then** it is unusable with no record edited.
+- **Given** a certificate expiring inside the month, **when** it is read,
+  **then** it warns and the machine is still usable.
+
+### CN3 - Work that needs a machine
+
+**As** a service advisor **I want** a job refused when its machine cannot be
+used **so that** the work is not started on an uninspected lift.
+
+**Size** 8 - **Satisfies** FR-12206, FR-12207, FR-12208, FR-12209
+
+- **Given** work that needs a wrench whose certificate lapsed, **when** the job
+  is started, **then** it is refused and the wrench is named.
+- **Given** work that needs no machine, **when** the job is started, **then**
+  nothing stands in its way.
+- **Given** a machine busy on another job, **when** a job needing it starts,
+  **then** it starts, and the machine is reported busy rather than blocking.
+- **Given** a machine overdue its own service, **when** a job needing it
+  starts, **then** it starts.
+
+### CN4 - Putting it right, and keeping the record
+
+**As** an owner **I want** one press to record a certificate **so that** a
+grounded machine is back at work without a form of a dozen boxes.
+
+**Size** 3 - **Satisfies** FR-12210, FR-12211
+
+- **Given** a fresh certificate, **when** it is recorded, **then** the machine
+  is usable and the jobs that needed it can start.
+- **Given** a machine taken out of service, **when** no reason is given,
+  **then** it is refused by the product and by the database.
+- **Given** a machine a kind of work depends on, **when** a delete is
+  attempted, **then** the database refuses it.
+
+---
+
 ## Epic CM - What the car takes (Phase 88)
 
 ### CM1 - Writing it once

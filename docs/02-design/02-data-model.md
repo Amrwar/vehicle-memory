@@ -252,6 +252,17 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 89 adds `Equipment` and `JobTypeEquipment`. Nothing on either stores
+whether a machine may be used: that is derived from the certificate expiry
+against the clock, so a lapsed certificate takes the machine out on the right
+morning with nobody acting. `equipment_out_of_service_says_why` requires a
+reason alongside the date — and needs its explicit `IS NOT NULL`, because
+`length(btrim(NULL)) >= 3` is NULL and a check constraint passes on NULL, which
+let through the one state the constraint exists to forbid until
+`verify-equipment` caught it. `job_type_equipment_equipmentId_fkey` is
+`ON DELETE RESTRICT`: deleting a machine a kind of work depends on would
+quietly make that work startable with nothing to do it on.
+
 Phase 88 adds `VehicleSpecification`: fourteen nullable columns holding what
 a car takes, keyed either by `vehicleId` (that car only) or by make, model, a
 year range and an engine code (every car that decodes to it), with

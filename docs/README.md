@@ -807,3 +807,41 @@ parts a fitment row says belong on the car, and what has actually gone into it
 on past jobs — and neither is merged into it. Reading "0W-20" out of a product
 called "Engine oil 0W-20, 5L" means a parser against a name a person typed, and
 a parser that is wrong once has put the wrong oil in an engine.
+
+Phase 89 is item 7, equipment and tools. Until it, the product knew nothing
+about any of them: `Bay.capability` was a free-text hint typed once and read by
+nobody, and job-type skills covered only the people.
+
+Available turns out not to be one flag. A workshop asks three questions and a
+single `isAvailable` column answers none of them — is it here, is it working,
+and _is it allowed to be used_. The third is the one nobody models and the one
+that stops the job: a torque wrench out of calibration and a lift whose
+statutory inspection has lapsed are present and apparently fine, and using
+either is a failed audit, a void insurance claim, or a wheel coming off. So
+there are five states, derived and never stored, each answering the first
+question that is true about the machine.
+
+The point of the phase is that **nobody has to notice**. The expiry is compared
+against the clock, so a machine goes out of service on the right morning even
+though everybody who could have flagged it was away. The check proves it on one
+record: usable the day before, unusable the day after, nothing edited between.
+
+Late for a service warns; a lapsed certificate blocks. Those are different in
+kind and flattening them either grounds a workshop over a missed service or
+keeps it working on an uninspected lift, and the second is how somebody gets
+hurt. Busy is not blocked either — a workshop puts a car on the ramp knowing
+the rig is free in an hour, and a product that refused would be wrong about how
+a workshop runs.
+
+The gate was written with Phase 85 in mind: FR-612 gated completion on a
+quality check for eighty-four phases while nothing could record one. So this
+gate is reached only by a job whose work names a machine, which is no job at
+all until a workshop says otherwise, and a car already in pieces on a lift is
+never stranded by that lift going out.
+
+Two faults surfaced in the writing. The constraint meant to forbid a machine
+out of service with no reason allowed exactly that, because
+`length(btrim(NULL)) >= 3` is NULL rather than false and a check constraint
+passes on NULL. And one section of the check found nothing to test and quietly
+did nothing while the script reported a pass — a check that skips itself is a
+check nobody runs, so it now fails loudly.

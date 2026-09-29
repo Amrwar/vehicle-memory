@@ -883,6 +883,19 @@ The second sweep: things connected at one end only.
 | Read off what was already there | Built  | Fitment rows for what fits; past jobs for what went in — neither parsed (Phase 88)         |
 | Sheets that match nothing       | Built  | Refused by the database: neither-nor, both, backwards years, impossible figures (Phase 88) |
 
+## 21.51 The machine the job needs
+
+| Item                          | Status | Where                                                                                    |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| The machines themselves       | Built  | Lifts, scan tools, wrenches and rigs, with serial numbers and where they live (Phase 89) |
+| Five states, derived          | Built  | Retired, out of service, out of calibration, in use, available — none stored (Phase 89)  |
+| Certificates that expire      | Built  | The machine goes out by arithmetic, with nobody pressing anything (Phase 89)             |
+| A warning in time             | Built  | Thirty days, which is long enough to book the engineer (Phase 89)                        |
+| Maintenance, kept apart       | Built  | Late for a service warns; a lapsed certificate blocks (Phase 89)                         |
+| A job that requires a machine | Built  | A kind of work names what it cannot be done without (Phase 89)                           |
+| Busy is not blocked           | Built  | A rig free in an hour never stops a car going on the ramp (Phase 89)                     |
+| The refusal names it          | Built  | Which machine and why, not "this job cannot start" (Phase 89)                            |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -961,7 +974,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 455          |
+| Built   | 463          |
 | Partial | 2            |
 
 <!-- counts:end -->

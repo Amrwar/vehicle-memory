@@ -5386,6 +5386,70 @@ nothing, and an engine that takes nought litres of oil. A sheet that exists,
 looks filled in and never applies is the worst kind of wrong, because nobody
 goes looking for it.
 
+## Phase 89 — The machine the job needs
+
+**Scope.** Item 7 of the thirty-nine: equipment and tools, with availability,
+maintenance, calibration and certification — and a job that requires a machine.
+
+**Exit.** A workshop records its lifts, scan tools, wrenches and rigs; each
+carries its certificate and its own service interval; a kind of work can say
+which machines it cannot be done without; and a job whose machine is not
+allowed to be used cannot start, with the refusal naming the machine.
+
+**Status.** Done.
+
+Until this phase the product knew nothing about any of it. `Bay.capability`
+was a free-text hint typed once and read by nobody, and `JobTypeSkill` covered
+the people.
+
+**Available is not one flag.** A workshop asks three different questions and a
+single `isAvailable` column answers none of them: is it here, is it working,
+and _is it allowed to be used_. The third is the one nobody models and the one
+that stops the job. A torque wrench out of calibration and a lift whose
+statutory inspection has lapsed are present and apparently fine, and using
+either is a failed audit, a void insurance claim, or a wheel coming off.
+
+So the state is derived, never stored, and in this order: **retired, out of
+service, out of calibration, in use, available**. Each answers the first
+question that is true, so what a person reads is the most important thing
+wrong with the machine rather than whichever flag was checked last.
+
+**An expired certificate takes the machine out by itself.** Nobody has to
+notice and nobody presses anything: the expiry is compared against the clock,
+so the machine becomes unusable on the right morning even though everybody who
+could have flagged it was on holiday. A stored `isCalibrated` boolean would
+have been true until somebody remembered, and the day anybody remembers is not
+the day it expired. The check proves it on one record: usable the day before,
+unusable the day after, nothing edited in between.
+
+**Late for a service warns; an expired certificate blocks.** These are
+different in kind and the product must not conflate them. A lift a month late
+for its service is a risk a workshop may knowingly carry for a week. A lift
+whose inspection has lapsed is one it is not permitted to use at all.
+Flattening the two either grounds a workshop over a missed service or lets it
+keep working on an uninspected lift, and the second is how somebody gets hurt.
+
+**And busy is not blocked.** A workshop puts a car on the ramp knowing the
+alignment rig is free in an hour; a product that refused would be wrong about
+how a workshop runs. Only the three states that mean _not usable at all_ stop
+a job, and the refusal names the machine — "this job cannot start" with no name
+attached is a message somebody works around rather than acts on.
+
+The gate was written with Phase 85 in mind. FR-612 gated completion on a
+quality check for eighty-four phases while nothing in the product could record
+one: a gate with no key. So this one is reached only by a job whose kinds of
+work name a machine, which is no job at all until a workshop says otherwise,
+and a car already in pieces on a lift is never stranded by that lift going out.
+
+Two faults surfaced writing the check. The `CHECK` constraint meant to forbid a
+machine out of service with no reason **allowed exactly that**, because
+`length(btrim(NULL)) >= 3` is NULL rather than false and a check constraint
+passes on NULL. And the "busy is not blocked" section found no in-progress job
+carrying a kind of work, so it silently did nothing and the script still
+reported a pass — a check that skips itself is a check nobody runs, so it now
+fails loudly, and the seed's one in-progress job was given the kind of work any
+real job on a ramp would have.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-29",
   "counts": {
-    "models": 165,
+    "models": 167,
     "enums": 78,
-    "fields": 2655
+    "fields": 2685
   },
   "enums": [
     "OrgPlan",
@@ -115,6 +115,26 @@
             "Location"
           ],
           "scope": "through Location"
+        },
+        {
+          "name": "Equipment",
+          "comment": "A lift, a scan tool, a torque wrench, an alignment rig. Nothing here stores whether it is usable: that is derived from these columns against the clock, so an expired certificate takes the machine out on the right morning even though everybody who could have noticed was on holiday. Phase 89.",
+          "fields": 18,
+          "relations": [
+            "Organization",
+            "Location"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "JobTypeEquipment",
+          "comment": "What a kind of work needs, as `JobTypeSkill` says what it needs from a person. Phase 89.",
+          "fields": 4,
+          "relations": [
+            "JobType",
+            "Equipment"
+          ],
+          "scope": "through JobType"
         },
         {
           "name": "User",

@@ -243,6 +243,12 @@ jobs:
       - name: What the car takes
         run: npx tsx infra/scripts/verify-specification.ts
 
+      # An expired certificate takes a machine out of service by arithmetic,
+      # with nobody pressing anything -- and a job whose work needs no machine
+      # is never touched by the gate.
+      - name: The machine the job needs
+        run: npx tsx infra/scripts/verify-equipment.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

@@ -33,6 +33,7 @@ import * as diagnosis from './diagnosis';
 import * as comeback from './comeback';
 import * as signoff from './signoff';
 import * as standing from './standing';
+import * as equipment from './equipment';
 import * as sourcing from './sourcing';
 import * as specification from './specification';
 
@@ -64,6 +65,7 @@ export const AREAS = [
   courtesy,
   diagnosis,
   comeback,
+  equipment,
   signoff,
   sourcing,
   specification,

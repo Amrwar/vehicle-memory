@@ -45,6 +45,8 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'Organization',
       'Location',
       'Bay',
+      'Equipment',
+      'JobTypeEquipment',
       'User',
       'Membership',
       'Session',
