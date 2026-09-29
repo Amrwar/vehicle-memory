@@ -31,12 +31,14 @@ import { notFound, redirect } from 'next/navigation';
 
 import { BackLink } from '@/components/back-link';
 import { can, requireSession } from '@/lib/guard';
+import { PartSourcing } from '@/components/part-sourcing';
 import { tFor } from '@/lib/i18n';
 import { adjustStock, quantityOnOrder, recordStocktake, usageHistory } from '@/lib/inventory';
 import { once, onceToken, StillGoingError } from '@/lib/once';
 import { SubmitOnce } from '@/components/submit-once';
 import { supplierOptionsFor } from '@/lib/owner';
 import { fitmentsFor, recordFitment, removeFitment } from '@/lib/provenance';
+import { recordOffer, retireOffer, SourcingError, whereToBuy } from '@/lib/sourcing';
 import { PricingError, setSitePrice, sitePricesFor, sitesOf } from '@/lib/pricing';
 import { fetchFeedFitments, fitmentFeed } from '@/lib/providers';
 
@@ -234,6 +236,65 @@ async function priceAtSite(formData: FormData) {
   redirect(`/parts/${productId}#prices`);
 }
 
+/**
+ * What one supplier charges for this part, and the three things beside the
+ * price that decide where to buy it. Phase 87.
+ *
+ * Saving is the confirmation: somebody has just looked at all four figures and
+ * pressed save, and nothing else moves `confirmedAt`, so tidying a note can
+ * never make a two-year-old price look like today's.
+ */
+async function saveOffer(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+
+  const figure = (name: string) => {
+    const raw = String(formData.get(name) ?? '').trim();
+    return raw === '' ? null : Number(raw.replace(',', '.'));
+  };
+  const stock = String(formData.get('inStock') ?? '');
+
+  try {
+    await recordOffer({
+      orgId,
+      userId: user.userId,
+      supplierId: String(formData.get('supplierId') ?? ''),
+      productId,
+      price: figure('price') ?? 0,
+      leadTimeDays: figure('leadTimeDays'),
+      warrantyMonths: figure('warrantyMonths'),
+      // Three states and never two: on their shelf, to order, or nobody has
+      // said. An empty box is the third, not the second.
+      inStock: stock === '' ? null : stock === 'yes',
+    });
+  } catch (error) {
+    const message =
+      error instanceof SourcingError ? error.message : 'That price could not be saved.';
+    redirect(`/parts/${productId}?error=${encodeURIComponent(message)}#sourcing`);
+  }
+
+  redirect(`/parts/${productId}#sourcing`);
+}
+
+async function dropOffer(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('inventory:write');
+  const productId = String(formData.get('productId') ?? '');
+
+  try {
+    await retireOffer({ orgId, userId: user.userId, rowId: String(formData.get('rowId') ?? '') });
+  } catch (error) {
+    const message =
+      error instanceof SourcingError ? error.message : 'That price could not be removed.';
+    redirect(`/parts/${productId}?error=${encodeURIComponent(message)}#sourcing`);
+  }
+
+  redirect(`/parts/${productId}#sourcing`);
+}
+
 async function dropFitment(formData: FormData) {
   'use server';
 
@@ -299,10 +360,11 @@ export default async function PartPage({
   const mayCount = can(user.role, 'inventory:write') && Boolean(level);
   const token = onceToken();
 
-  const [usage, onOrder, suppliers] = await Promise.all([
+  const [usage, onOrder, suppliers, buyFrom] = await Promise.all([
     usageHistory(product.id),
     quantityOnOrder(orgId, product.id),
     supplierOptionsFor(orgId, product.id),
+    whereToBuy(orgId, product.id),
   ]);
 
   // The wait that matters is the quickest supplier who can be measured, not a
@@ -776,6 +838,24 @@ export default async function PartPage({
           )}
         </CardBody>
       </Card>
+
+      {/* Where to buy it. The card above measures how each supplier has
+          behaved on past orders; this one holds what they say they charge,
+          whether they have it, when it would arrive and how long they stand
+          behind it -- the four things a buyer asks that no purchase-order
+          history can answer for a supplier nobody has ordered from yet.
+          Phase 87. */}
+      <div className="mt-5">
+        <PartSourcing
+          where={buyFrom}
+          suppliers={suppliers.map((one) => ({ id: one.id, name: one.name }))}
+          currency={region.currency}
+          canWrite={can(user.role, 'inventory:write')}
+          productId={product.id}
+          save={saveOffer}
+          retire={dropOffer}
+        />
+      </div>
 
       {sites.length > 1 ? (
         <Card id="prices" className="mt-5 overflow-hidden">

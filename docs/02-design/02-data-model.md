@@ -252,6 +252,26 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 87 joins two tables that were never joined. `SupplierPart` holds one
+row per supplier per part — their number for it, the price, and the three
+things beside the price that decide where to buy: days to deliver, whether it
+is on their shelf, and how long they stand behind it. All three are nullable,
+because "nobody has said" is the honest state of most of the list most of the
+time and a zero would read as free, tomorrow, with no warranty. `confirmedAt`
+is deliberately not `updatedAt`: an edit to the note is not a confirmation of
+the price.
+
+The same phase adds four columns to `JobPartLine` — `substitutedForProductId`,
+`substitutionEvidence` over a `FitEvidence` enum of six — two values that say
+two parts are the same thing and four that say only that a part suits a car —
+and the user and
+moment of the confirmation — with
+`job_part_lines_substitution_is_confirmed` requiring the part, the evidence and
+the confirmation together or none of them, and a second constraint refusing a
+part as its own equivalent. The person is outside the constraint on purpose: a
+user row can be erased under the retention rules, and a confirmation that
+vanished with somebody leaving would take the substitution record with it.
+
 Phase 86 adds a fifth, `comebackCause`, over a `ComebackCause` enum of seven
 values — four of which name the workshop's own work and three of which do not.
 A second check constraint, `jobs_comeback_cause_needs_a_comeback`, refuses a

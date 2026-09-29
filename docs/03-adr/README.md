@@ -25,6 +25,7 @@ changing more than one module, or migrating data?
 | [0014](0014-the-passport-carries-no-name.md)       | **The passport carries no personal name**            | Accepted |
 | [0015](0015-the-status-and-the-loading-screen.md)  | **The status line and the loading screen**           | Accepted |
 | [0016](0016-the-corpus-not-the-guess.md)           | **The corpus, not the guess**                        | Accepted |
+| [0017](0017-the-confidence-is-the-evidence.md)     | The confidence is the evidence, not a score          | Accepted |
 
 The three in bold are the ones the product could not survive losing.
 ADR-0004 makes portable history possible at all; ADR-0005 is what makes anyone

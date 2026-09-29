@@ -231,6 +231,12 @@ jobs:
       - name: Why it came back
         run: npx tsx infra/scripts/verify-comeback.ts
 
+      # The cheapest supplier that cannot make the promised date is not the
+      # cheapest; and a substitute part is offered on evidence already in the
+      # records, never on a score somebody invented.
+      - name: Where to buy it
+        run: npx tsx infra/scripts/verify-sourcing.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

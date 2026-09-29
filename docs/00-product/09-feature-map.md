@@ -855,6 +855,21 @@ The second sweep: things connected at one end only.
 | A pattern is cars           | Built  | Three different cars after the same repair, not one car back three times (Phase 86) |
 | A cause needs a comeback    | Built  | Refused by the code and by a database check constraint (Phase 86)                   |
 
+## 21.49 Where to buy it
+
+| Item                           | Status | Where                                                                                  |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| A part joined to its suppliers | Fixed  | `Product` and `Supplier` were not connected by anything before this (Phase 87)         |
+| Four columns, not one          | Built  | Price, stock, delivery and warranty, ranked on arrival before price (Phase 87)         |
+| The argument against the pick  | Built  | The cheaper offer passed over, the saving, and what was wrong with it (Phase 87)       |
+| A price has a date             | Built  | Ninety days, then marked old; saving the row is the confirmation (Phase 87)            |
+| Promise against record         | Built  | Phase 52's measured on-time share, finally beside the quoted lead time (Phase 87)      |
+| Substitution without a score   | Built  | Six kinds of evidence, each a record already held; no percentage anywhere (Phase 87)   |
+| Same thing, not same car       | Built  | Only a confirmed swap or a shared supplier number qualifies a part (Phase 87)          |
+| No qualifying evidence, absent | Built  | Not ranked last, not greyed out — not on the screen (Phase 87)                         |
+| The list grows itself          | Built  | One confirmed swap is the strongest evidence for the next one (Phase 87)               |
+| An explicit confirmation       | Built  | Part, replacement, evidence and person together, or the database refuses it (Phase 87) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -933,7 +948,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 438          |
+| Built   | 447          |
 | Partial | 2            |
 
 <!-- counts:end -->

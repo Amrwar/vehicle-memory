@@ -219,6 +219,7 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
     title: 'Suppliers and purchasing',
     models: [
       'Supplier',
+      'SupplierPart',
       'PurchaseRequest',
       'PurchaseOrder',
       'PurchaseOrderLine',

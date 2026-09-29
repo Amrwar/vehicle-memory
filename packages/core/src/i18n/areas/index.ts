@@ -33,6 +33,7 @@ import * as diagnosis from './diagnosis';
 import * as comeback from './comeback';
 import * as signoff from './signoff';
 import * as standing from './standing';
+import * as sourcing from './sourcing';
 
 export const AREAS = [
   publicSite,
@@ -63,5 +64,6 @@ export const AREAS = [
   diagnosis,
   comeback,
   signoff,
+  sourcing,
   standing,
 ] as const;

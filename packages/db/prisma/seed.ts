@@ -1485,6 +1485,23 @@ async function main() {
       avgCost: 149.5,
     },
     {
+      // The aftermarket equivalent of the BMW disc above. It exists so the
+      // substitution screen has a real case rather than a contrived one: the
+      // OE disc is down to one pair, and this is what a workshop would
+      // actually reach for. Phase 87.
+      partNumber: 'MRD-8841',
+      name: 'Front brake discs (pair), aftermarket',
+      brand: 'Marden',
+      categoryId: brakeCategory!.id,
+      costPrice: 42.0,
+      sellPrice: 78.0,
+      reorderPoint: 2,
+      reorderQty: 4,
+      onHand: 4,
+      reserved: 0,
+      avgCost: 42.0,
+    },
+    {
       partNumber: 'BRK-FLUID-1L',
       name: 'Brake fluid DOT 4, 1L',
       brand: 'Comma',
@@ -2017,6 +2034,95 @@ async function main() {
     })),
   });
 
+  // Where to buy it. Phase 87.
+  //
+  // Two suppliers on the same part with different answers, because one offer
+  // is not a comparison. The BMW disc is the case the feature exists for:
+  // Northern OE are seven pounds cheaper and nine days away, Pennine have a
+  // pair on the shelf, and a car promised on Friday makes that seven pounds
+  // the least important number on the screen.
+  const marden = products.find((product) => product.partNumber === 'MRD-8841')!;
+
+  await prisma.supplierPart.createMany({
+    data: [
+      {
+        orgId: org.id,
+        supplierId: euroCarParts.id,
+        productId: brakeDiscs.id,
+        supplierPartNumber: 'PMF-8841',
+        brand: 'BMW',
+        price: 61.5,
+        leadTimeDays: 1,
+        inStock: true,
+        warrantyMonths: 24,
+        confirmedAt: day(-9),
+        confirmedByUserId: ahmed.id,
+      },
+      {
+        orgId: org.id,
+        supplierId: toyotaFactors.id,
+        productId: brakeDiscs.id,
+        supplierPartNumber: 'NOE-34116864059',
+        brand: 'BMW',
+        price: 54.4,
+        leadTimeDays: 9,
+        inStock: false,
+        warrantyMonths: 12,
+        confirmedAt: day(-16),
+        confirmedByUserId: ahmed.id,
+      },
+      {
+        // Pennine file the aftermarket disc under the number they use for the
+        // OE one, which is Pennine saying the two interchange. That is where
+        // the weakest of the five kinds of evidence comes from, and it is the
+        // only kind this database could not produce before Phase 87.
+        orgId: org.id,
+        supplierId: euroCarParts.id,
+        productId: marden.id,
+        supplierPartNumber: 'PMF-8841',
+        brand: 'Marden',
+        price: 42.0,
+        leadTimeDays: 1,
+        inStock: true,
+        warrantyMonths: 12,
+        confirmedAt: day(-9),
+        confirmedByUserId: ahmed.id,
+      },
+      {
+        // A price nobody has confirmed since the spring, so the screen has
+        // something to mark as old rather than only theory.
+        orgId: org.id,
+        supplierId: euroCarParts.id,
+        productId: brakePads.id,
+        supplierPartNumber: 'PMF-6613',
+        brand: 'BMW',
+        price: 63.0,
+        leadTimeDays: 2,
+        inStock: true,
+        warrantyMonths: 24,
+        confirmedAt: day(-190),
+        confirmedByUserId: ahmed.id,
+      },
+    ],
+  });
+
+  // And a fitment somebody here typed, with the car on the ramp -- the
+  // evidence that outranks any catalogue.
+  await prisma.partFitment.create({
+    data: {
+      orgId: org.id,
+      productId: marden.id,
+      make: 'BMW',
+      model: 'X5',
+      yearFrom: 2018,
+      yearTo: 2023,
+      engineCode: 'B57D30A',
+      source: 'WORKSHOP',
+      note: 'Fitted to the G05 on the ramp; same hub, same thickness.',
+      createdByUserId: john!.id,
+    },
+  });
+
   // Last, because the corpus is made of jobs and every job must exist first.
   await seedKnowledge(org.id, john!.id);
 
@@ -2031,6 +2137,7 @@ async function main() {
     Warranty       4 covers, one claim open and one goodwill claim settled
     Parts          ${productSpecs.length} across 3 categories, 2 below reorder point
     Suppliers      2, with one part-received order and one disputed bill
+    Buying         4 supplier prices, one of them deliberately months old
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}

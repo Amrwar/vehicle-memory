@@ -722,3 +722,54 @@ And a pattern is cars, not visits. One car back four times is one unhappy
 customer and a job that was not finished. Three different cars back after the
 same repair is a procedure fault, and it is the only thing here worth
 interrupting an owner's day for.
+
+Phase 87 is item 5, parts intelligence, and it begins from an absence: until
+this phase **a `Product` and a `Supplier` were not joined by anything at all.**
+A part carried one cost price — whatever it happened to cost the last time
+somebody bought one — and knowing where to get it lived in one person's head.
+That person goes on holiday, and the workshop quotes a customer a figure from
+two years ago.
+
+Both halves of the item have an obvious implementation that is wrong.
+Comparison is obviously a list sorted cheapest first, which is what every parts
+catalogue ships and what orders a disc four pounds cheaper that arrives the day
+after the car was promised. So arrival is ranked before price — and the
+recommendation carries the argument against it: the supplier passed over, the
+saving to the penny, and what was wrong with it. A screen that picks the dearer
+supplier and hides why gets overruled the first time somebody notices, and is
+never trusted again.
+
+Prices are dated, and anything older than a quarter is marked rather than
+hidden, so most of a workshop's list reads as old most of the time. That is the
+point. And Phase 52's measurement of how often each supplier actually delivers
+by the day they promised is finally shown beside the day they promise: a
+next-day quote from somebody who keeps it two thirds of the time is now shown
+as exactly that.
+
+The second half is confidence, and the obvious implementation is a percentage.
+It is easy to compute, it looks authoritative, and it is invented — which is
+how the wrong pads reach a car whose owner is braking. So there is no score:
+six things can be true about a candidate part, every one a record this database
+already holds, each stated as a sentence a person can check.
+
+The first version of that rule was wrong, and one look at the built page said
+so. It offered a brake _disc_ as an alternative to brake _pads_ — both braking
+parts, both fitting the car, both with fitment rows — because the rule could
+not tell "suits this vehicle" from "does the same job". So the six divide in
+two. Two of them say _these parts are the same thing_: we have made this exact
+swap and confirmed it, or a supplier lists both under one number. Only those
+put a part on the screen. The other four say only that a part suits a car, and
+are shown beside a candidate that already qualifies. The strongest is the
+confirmed swap, which is how the list grows — one confirmation teaches the
+product something permanent about two parts, exactly as Phase 81's diagnosis
+corpus is built out of verdicts technicians were making anyway.
+
+Writing it found a second defect: "same part number, different brand" could
+never have fired at all, because a workshop's catalogue is unique on part
+number. Read as a _supplier's_ number it turns into one of the better signals
+there is.
+
+Nothing substitutes itself. The evidence is recomputed from the records when
+the confirmation is made, never taken from the form, and the line then carries
+the part, what it replaced, the evidence and the person together, because the
+database will not accept them apart.

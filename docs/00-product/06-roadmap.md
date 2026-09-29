@@ -5251,6 +5251,85 @@ The cause is the one judgement on the screen. Everything above it is the
 evidence for making it, which is the whole design: the workshop is not being
 asked to remember, it is being asked to decide.
 
+## Phase 87 — Where to buy it
+
+**Scope.** Item 5 of the thirty-nine: parts intelligence. Supplier comparison
+on price, stock, delivery and warranty, and substitution with fitment
+confidence and an explicit confirmation.
+
+**Exit.** A part names every supplier who sells it with the four figures a
+buyer asks for, recommends one, and says in the same breath which cheaper offer
+it passed over and why; and a different part can go on a car only when the
+records say it fits and a person says so, with both written on the line.
+
+**Status.** Done. [ADR-0017](../03-adr/0017-the-confidence-is-the-evidence.md).
+
+Until this phase **a `Product` and a `Supplier` were not joined by anything at
+all.** A part carried one cost price — whatever it happened to cost the last
+time somebody bought one — and knowing where to get it lived in one person's
+head. That person goes on holiday, and the workshop quotes a customer a figure
+from two years ago.
+
+**The cheapest is not the answer.** A sorted list, cheapest first, is what
+every parts catalogue ships and it is what orders a disc four pounds cheaper
+that arrives the day after the car was promised. So the ranking puts arrival
+first and price second, and — the part that makes it usable — **the
+recommendation carries the argument against it**: the supplier passed over,
+the saving to the penny, and what was wrong with it. A screen that picks the
+dearer supplier and hides why gets overruled the first time somebody notices.
+
+Three states and never two, again. An unknown lead time is not "in time"; it
+sits between in time and too late, with the silence shown. Silence read as
+approval is how the wrong thing gets ordered.
+
+**A price is dated.** Ninety days, after which it is marked old — which means
+most of a workshop's list is marked old most of the time, and that is the
+point. Saving the row _is_ the confirmation, so tidying a note cannot make a
+two-year-old price look like today's.
+
+**What they say, beside what they have done.** Phase 52 has measured every
+supplier's deliveries against the day they promised for thirty-five phases,
+and the two numbers had never been on the same screen. Now a next-day promise
+from somebody who keeps it two thirds of the time is shown as exactly that.
+
+**The confidence is the evidence.** The obvious substitution feature computes
+a percentage from string similarity, which is invented, unarguable, and how
+the wrong pads reach a car whose owner is braking. There is no score here. Six
+things can be true about a candidate part, each of them a record already held,
+and the screen says the strongest as a sentence a person can check.
+
+**The first version of it was wrong, and the page said so.** Built and opened,
+the screen offered a brake _disc_ as an alternative to brake _pads_ — both in
+the braking category, both fitting the car, both with fitment rows. The rule
+could not tell "suits this vehicle" from "does the same job", which is
+precisely the failure the design existed to prevent.
+
+So the six divide in two. Two of them say _these parts are the same thing_ —
+somebody here already fitted this in place of that and confirmed it, or a
+supplier lists both under one number — and only those may put a part on the
+screen. The other four say only _this part suits that car_, and are shown
+beside a candidate that already qualifies. A candidate with no qualifying
+evidence is **not shown**: not last, not greyed out, not shown.
+
+The strongest is a swap this workshop has already confirmed, and it is how the
+list grows: one confirmation teaches the product something permanent about two
+parts, the same way Phase 81's diagnosis corpus is built out of verdicts
+technicians were making anyway.
+
+Writing the rule also found a second defect. `SAME_PART_NUMBER` read the
+obvious way — our own part number under a different brand — could never have
+fired at all, because `products` is unique on (org, partNumber). Read as a
+_supplier's_ number it becomes one of the better signals there is: a factor
+listing the OE disc and the aftermarket disc on one line is a factor saying
+they interchange with their own money behind it.
+
+**And nothing substitutes itself.** The evidence is recomputed from the
+records at the moment of confirmation, never taken from the form, and the line
+then carries the part, what it replaced, the evidence and the person together
+— because `job_part_lines_substitution_is_confirmed` will not accept them
+apart. Years later a customer can be told exactly what went on their car and
+who decided it.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

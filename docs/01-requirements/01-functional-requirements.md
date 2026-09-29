@@ -267,6 +267,23 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12000 - Where to buy it
+
+| Ref      | Requirement                                                                                                            | Phase |
+| -------- | ---------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12001 | A part MUST be able to hold one price per supplier, with stock, delivery time and warranty beside it.                  | 87    |
+| FR-12002 | Offers MUST be ranked on whether they arrive in time before price, and an unknown delivery MUST NOT count as in time.  | 87    |
+| FR-12003 | Where a cheaper offer is passed over, the screen MUST name it, the saving and the reason.                              | 87    |
+| FR-12004 | A price MUST carry the date somebody last confirmed it, and MUST be marked once it is older than a quarter.            | 87    |
+| FR-12005 | A supplier's measured on-time record MUST be shown beside the delivery time they quote.                                | 87    |
+| FR-12006 | A substitute MUST be offered only on evidence already held in the records, and never as a score.                       | 87    |
+| FR-12007 | A candidate MUST qualify on a record that two parts are the same thing; fitting the same vehicle MUST NOT qualify one. | 87    |
+| FR-12011 | A candidate with no qualifying evidence MUST NOT be listed at all.                                                     | 87    |
+| FR-12012 | A confirmed substitution MUST itself become evidence for the same swap on a later job.                                 | 87    |
+| FR-12008 | The evidence MUST be recomputed at confirmation and MUST NOT be accepted from the caller.                              | 87    |
+| FR-12009 | A substitution MUST exist only with its evidence and its confirmation, enforced by the database.                       | 87    |
+| FR-12010 | A line that was substituted MUST say what it went on in place of wherever the line is read.                            | 87    |
+
 ## FR-11900 - Why it came back
 
 | Ref      | Requirement                                                                                                        | Phase |

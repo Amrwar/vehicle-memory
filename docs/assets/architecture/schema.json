@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-29",
   "counts": {
-    "models": 163,
-    "enums": 77,
-    "fields": 2589
+    "models": 164,
+    "enums": 78,
+    "fields": 2621
   },
   "enums": [
     "OrgPlan",
@@ -27,6 +27,7 @@
     "BookingSource",
     "ComebackCause",
     "JobStatus",
+    "FitEvidence",
     "PartLineStatus",
     "QualityItemKind",
     "SignaturePurpose",
@@ -577,11 +578,13 @@
         {
           "name": "JobPartLine",
           "comment": "",
-          "fields": 13,
+          "fields": 17,
           "relations": [
             "Job",
             "Product",
-            "TaxRate"
+            "TaxRate",
+            "Product",
+            "User"
           ],
           "scope": "through Job"
         },
@@ -1357,6 +1360,18 @@
           "fields": 12,
           "relations": [
             "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "SupplierPart",
+          "comment": "What one supplier charges for one part, and the three things beside the price that decide whether it is the right place to buy it. Phase 87.",
+          "fields": 16,
+          "relations": [
+            "Organization",
+            "Supplier",
+            "Product",
+            "User"
           ],
           "scope": "organisation"
         },

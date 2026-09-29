@@ -1642,6 +1642,63 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CL - Where to buy it (Phase 87)
+
+### CL1 - Which supplier, for this car, this week
+
+**As** a service advisor **I want** every supplier who sells the part with what
+each would cost, have and take **so that** I am not choosing from memory.
+
+**Size** 8 - **Satisfies** FR-12001, FR-12002, FR-12005
+
+- **Given** two suppliers and a car promised on Friday, **when** the part is
+  opened, **then** the one that can make Friday is recommended.
+- **Given** a supplier who has not said when they could deliver, **when** the
+  list is ranked, **then** they sit between in time and too late, not above.
+- **Given** a supplier with enough orders behind them, **when** their quote is
+  shown, **then** their measured on-time share is shown beside it.
+
+### CL2 - Being told what it cost to be safe
+
+**As** an owner **I want** to see the cheaper offer that was passed over **so
+that** the recommendation is mine to overrule.
+
+**Size** 3 - **Satisfies** FR-12003, FR-12004
+
+- **Given** a cheaper offer that arrives too late, **when** the pick is shown,
+  **then** the supplier, the saving and the reason are named beneath it.
+- **Given** a price nobody has confirmed in three months, **when** it is shown,
+  **then** it is marked old, and it is still there to buy from.
+
+### CL3 - Fitting something else, on the record
+
+**As** a technician **I want** the alternatives with what we know about each
+**so that** I am not guessing from a name.
+
+**Size** 8 - **Satisfies** FR-12006, FR-12007, FR-12008, FR-12011, FR-12012
+
+- **Given** a swap we have made and confirmed before, **when** alternatives
+  are listed, **then** it is first, and the sentence says why.
+- **Given** a brake disc that fits this car, **when** alternatives to a set of
+  brake pads are listed, **then** it does not appear: suiting the same car is
+  not a claim that two parts interchange.
+- **Given** a caller claiming evidence the records do not support, **when** the
+  substitution is confirmed, **then** it is refused.
+
+### CL4 - What the customer is told years later
+
+**As** a customer **I want** the record to say what actually went on my car
+**so that** a different part is not a surprise.
+
+**Size** 5 - **Satisfies** FR-12009, FR-12010
+
+- **Given** a substitution, **when** it is recorded, **then** the part it
+  replaced, the evidence and the person are on the line together.
+- **Given** any two of those three, **when** a script tries to write them
+  without the third, **then** the database refuses it.
+
+---
+
 ## Epic CK - Why it came back (Phase 86)
 
 ### CK1 - The whole story in one place

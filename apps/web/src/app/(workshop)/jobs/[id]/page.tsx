@@ -94,6 +94,7 @@ import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
 import { JobDiagnosis } from '@/components/job-diagnosis';
 import { JobCaseFile } from '@/components/job-casefile';
+import { JobSubstitution, type SubstitutionLine } from '@/components/job-substitution';
 import { JobQuality } from '@/components/job-quality';
 import { JobStandingBand } from '@/components/job-standing';
 import {
@@ -106,6 +107,7 @@ import {
 } from '@/lib/diagnosis';
 import { tFor } from '@/lib/i18n';
 import { caseFileFor, CaseFileError, recordCause } from '@/lib/casefile';
+import { confirmSubstitution, SourcingError, whatElseWouldDo } from '@/lib/sourcing';
 import { checksFor, QualityError, recordQualityCheck, sheetFor } from '@/lib/quality';
 import { whereOneJobStands } from '@/lib/standing';
 
@@ -483,6 +485,37 @@ async function sayWhy(formData: FormData) {
   redirect(`/jobs/${jobId}#casefile`);
 }
 
+/**
+ * A different part goes on the car, and somebody says so. Phase 87.
+ *
+ * The evidence is not taken from the form. A hidden field saying "we fitted
+ * this to this car before" is a claim whoever posts the form can make about
+ * any part at all; the library recomputes it from the records and refuses
+ * anything it cannot find. Nothing here decides -- a person presses the
+ * button, and the line then carries the part, what it replaced, the evidence
+ * and the name, together.
+ */
+async function fitSomethingElse(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('job:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  try {
+    await confirmSubstitution({
+      orgId,
+      userId: user.userId,
+      partLineId: String(formData.get('partLineId') ?? ''),
+      productId: String(formData.get('productId') ?? ''),
+    });
+  } catch (error) {
+    if (!(error instanceof SourcingError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#substitutes`);
+  }
+
+  redirect(`/jobs/${jobId}#substitutes`);
+}
+
 async function addFollowUp(formData: FormData) {
   'use server';
 
@@ -818,7 +851,15 @@ export default async function JobPage({
       },
       tasks: { orderBy: { sortOrder: 'asc' } },
       labourLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
-      partLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
+      partLines: {
+        orderBy: { sortOrder: 'asc' },
+        include: {
+          taxRate: TAX_RATE,
+          // What it went on instead of, and who said so. Phase 87.
+          substitutedFor: { select: { name: true } },
+          substitutionConfirmedBy: { select: { name: true } },
+        },
+      },
       feeLines: { orderBy: { sortOrder: 'asc' }, include: { taxRate: TAX_RATE } },
       notes: { orderBy: { createdAt: 'desc' }, include: { author: { select: { name: true } } } },
       attachments: { orderBy: { createdAt: 'desc' } },
@@ -875,6 +916,31 @@ export default async function JobPage({
 
   // The whole story of the job this one came back from, if it did. Phase 86.
   const caseFile = await caseFileFor(orgId, job.id);
+
+  // What else would do, for each catalogued part on the job that has not been
+  // fitted yet -- and, for one that has been swapped already, what it went on
+  // instead of and who said so. Phase 87.
+  const substitution: SubstitutionLine[] = await Promise.all(
+    job.partLines
+      .filter(
+        (line) => line.productId && (line.status !== 'FITTED' || line.substitutedForProductId),
+      )
+      .map(async (line) => ({
+        partLineId: line.id,
+        description: line.description,
+        partNumber: line.partNumber,
+        found: await whatElseWouldDo(orgId, line.productId!, { vehicleId: job.vehicleId }),
+        already:
+          line.substitutedForProductId && line.substitutionEvidence && line.substitutionConfirmedAt
+            ? {
+                original: line.substitutedFor?.name ?? line.substitutedForProductId,
+                evidence: line.substitutionEvidence,
+                confirmedBy: line.substitutionConfirmedBy?.name ?? null,
+                confirmedAt: line.substitutionConfirmedAt,
+              }
+            : null,
+      })),
+  );
 
   // The sign-off sheet, and what has been signed. Phase 85.
   const [qualitySheet, qualityChecks] = await Promise.all([
@@ -1560,6 +1626,15 @@ export default async function JobPage({
                           {line.partNumber ? (
                             <span className="datum ms-2 text-[11px] text-(--text-faint)">
                               {line.partNumber}
+                            </span>
+                          ) : null}
+                          {/* A different part went on than the one quoted.
+                              That is allowed and ordinary; what is not is it
+                              happening quietly, so the line says so wherever
+                              the line is read. Phase 87. */}
+                          {line.substitutedFor ? (
+                            <span className="block text-[11px] text-(--text-faint)">
+                              {t('Fitted in place of {part}', { part: line.substitutedFor.name })}
                             </span>
                           ) : null}
                         </Td>
@@ -2323,6 +2398,13 @@ export default async function JobPage({
               setCause={sayWhy}
             />
           ) : null}
+
+          <JobSubstitution
+            jobId={job.id}
+            lines={substitution}
+            canWrite={can(user.role, 'job:write')}
+            swap={fitSomethingElse}
+          />
 
           {['IN_PROGRESS', 'QUALITY_CHECK'].includes(job.status) || qualityChecks.length > 0 ? (
             <JobQuality
