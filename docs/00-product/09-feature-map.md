@@ -834,6 +834,16 @@ The second sweep: things connected at one end only.
 | The estimate nobody sent      | Built  | Reported as the workshop's own, not the customer's (Phase 84)               |
 | Derived, never stored         | Built  | A part on order moves it; fitting it moves it back, with no edit (Phase 84) |
 
+## 21.47 The gate gets a key
+
+| Item                            | Status | Where                                                                                       |
+| ------------------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| Recording a quality check       | Fixed  | FR-612 gated completion since Phase 1 and nothing could record one (Phase 85)               |
+| The workshop's own sheet        | Built  | Twelve lines to start, each renameable, optional or retired (Phase 85)                      |
+| Ticks and figures               | Built  | A road test result is not a tick; the database refuses an answer that is neither (Phase 85) |
+| The outcome follows the answers | Built  | Nothing sends "pass"; an unanswered required line cannot pass (Phase 85)                    |
+| A fail goes back to the bench   | Built  | Naming the lines, rather than into a queue nobody owns (Phase 85)                           |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -912,7 +922,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 428          |
+| Built   | 432          |
 | Partial | 2            |
 
 <!-- counts:end -->

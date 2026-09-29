@@ -188,6 +188,8 @@ model Organization {
   causeCodes   CauseCode[]
   diagnoses    JobDiagnosis[]
 
+  qualityItems QualityCheckItem[]
+
   @@map("organizations")
 }
 
@@ -1592,6 +1594,50 @@ model TimeEntry {
   @@map("time_entries")
 }
 
+/// One line of a workshop's final sign-off sheet. Phase 85.
+///
+/// The catalogue, not an answer: what this workshop asks before a car goes
+/// back. Every workshop's is different and every workshop's is short, so it is
+/// theirs to write rather than a fixed list in the code.
+model QualityCheckItem {
+  id        String           @id @default(cuid())
+  orgId     String
+  label     String
+  kind      QualityItemKind  @default(CONFIRM)
+  /// Whether the check can pass without this one answered.
+  required  Boolean          @default(true)
+  sortOrder Int              @default(0)
+  isActive  Boolean          @default(true)
+
+  org     Organization         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  answers QualityCheckAnswer[]
+
+  @@unique([orgId, label])
+  @@map("quality_check_items")
+}
+
+/// A tick, or a figure. A road test result and a final mileage are not ticks.
+enum QualityItemKind {
+  CONFIRM
+  VALUE
+}
+
+/// What one person answered to one line, on one check. Phase 85.
+model QualityCheckAnswer {
+  id        String   @id @default(cuid())
+  checkId   String
+  itemId    String
+  confirmed Boolean?
+  value     String?
+
+  check QualityCheck     @relation(fields: [checkId], references: [id], onDelete: Cascade)
+  item  QualityCheckItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([checkId, itemId])
+  @@index([itemId])
+  @@map("quality_check_answers")
+}
+
 model QualityCheck {
   id              String   @id @default(cuid())
   jobId           String
@@ -1602,6 +1648,8 @@ model QualityCheck {
 
   job       Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   checkedBy User @relation(fields: [checkedByUserId], references: [id], onDelete: Cascade)
+
+  answers QualityCheckAnswer[]
 
   @@index([jobId])
   @@map("quality_checks")

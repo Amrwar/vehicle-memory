@@ -5128,6 +5128,63 @@ renderings of one function, so they cannot disagree — which is checked.
 
 This is the first floor of item 39, the control tower.
 
+## Phase 85 — The gate gets a key
+
+**Scope.** Item 3 of the thirty-nine: quality control. It turned out to be a
+fix before it was a feature.
+
+**Exit.** A workshop can record a sign-off, a car does not go back until
+somebody has said each line is true, and a failed sheet goes back to the bench
+naming the lines.
+
+**Status.** Done.
+
+`assertTransition` has refused to complete a job since Phase 1 when its job
+type asks for a quality check and none has passed:
+
+> FR-612: completion is gated on quality control where the job type wants it.
+
+That is a good rule, and the message it gives is correct and complete: _"This
+job type requires a passed quality check before it can be completed."_
+
+**Nothing in the product has ever written a quality check.** The job page
+renders them; no code path anywhere creates one. And the default job types a
+new workshop is given — Major Service, Repair, Service — all ask for a check.
+
+So a workshop that signed up, booked in a service and finished the work could
+not finish the job. It was told, correctly, what it needed, and given no way to
+comply. Proved rather than reasoned about: setting a seeded job to Major
+Service and asking to complete it is refused, and `qualityCheck.create` appears
+nowhere in the repository. **A gate with no key, for eighty-four phases, behind
+a rule that reads as careful.** This is the fourth thing this product has built
+and not wired, and the first that made a whole job type unusable.
+
+**What the key is.** A sheet the workshop writes — twelve lines to start with,
+from the plan, each renameable, reorderable, optional or retired. Ticks where a
+tick is the truth, and figures where it is not: a road test result and a final
+mileage are not ticks, and a sheet that made them ticks would be a sheet
+somebody ticked.
+
+Three decisions worth stating:
+
+- **The outcome is computed, never claimed.** Nothing sends "pass". The answers
+  are recorded and the outcome falls out of them, so a sheet with a required
+  line unanswered cannot be passed by anybody, by any route.
+- **A required line answered _no_ and a required line _not answered_ are
+  different failures**, and the record says which. "You have not said whether
+  the fluids were checked" and "you have said they were not" need different
+  things done about them.
+- **A fail goes back to the bench**, not back to the checking queue. A job
+  nobody is working on and nobody has finished falls between two people.
+
+The strict reading is on purpose: a required line left blank fails. The
+alternative is a sheet that can be signed without being read, and the only
+thing a sign-off is worth is that somebody had to look at each line to get
+past it.
+
+Phase 84's board already knew about this: _"Finished, but the quality check has
+not been done."_ It could say so and nobody could act on it. Now they can.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

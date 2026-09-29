@@ -511,6 +511,13 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                 | Implementation                                                                      | Test                                          | Status |
 | -------- | ----- | -------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| FR-11801 | CJ1   | `QualityCheck`                         | `recordQualityCheck()`, the first thing ever to write one                           | `verify-signoff.ts`                           | Done   |
+| FR-11802 | CJ1   | `QualityCheckItem`                     | the workshop's own sheet, seeded from `DEFAULT_QUALITY_SHEET`                       | `verify-signoff.ts`                           | Done   |
+| FR-11803 | CJ2   | `QualityCheckAnswer`                   | `quality_check_answers_is_one_or_the_other` in the database                         | `verify-signoff.ts`                           | Done   |
+| FR-11804 | CJ2   | -                                      | `outcomeOf()` in `core/job/quality.ts`; the caller never states it                  | `quality.test.ts`, `verify-signoff.ts`        | Done   |
+| FR-11805 | CJ2   | -                                      | `gapsIn()` reports unanswered and refused separately                                | `quality.test.ts`, `verify-signoff.ts`        | Done   |
+| FR-11806 | CJ3   | `JobStatus`                            | `afterCheck()`: pass completes, fail returns to IN_PROGRESS                         | `quality.test.ts`, `verify-signoff.ts`        | Done   |
+| FR-11807 | CJ2   | `quality_check_answers_itemId_fkey`    | `ON DELETE RESTRICT`; a line is retired, never deleted                              | `verify-signoff.ts`                           | Done   |
 | FR-11701 | CI1   | -                                      | `standingOfJob()` in `core/job/standing.ts`; `/now`                                 | `standing.test.ts`, `verify-standing.ts`      | Done   |
 | FR-11702 | CI3   | -                                      | `whereJobsStand()` reads the records; nothing is written                            | `verify-standing.ts`                          | Done   |
 | FR-11703 | CI2   | `Estimate.sentAt`                      | the AWAITING_APPROVAL branch checks `sentAt` before blaming anybody                 | `standing.test.ts`, `verify-standing.ts`      | Done   |
@@ -1153,7 +1160,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 264                 | 263                    |
+| Later phases, newest first                         | 271                 | 270                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1171,9 +1178,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **832**             | **824 (99%)**          |
+| **Total**                                          | **839**             | **831 (99%)**          |
 
-Every one of the 832 requirements now has a row of its own. Until Phase 61,
+Every one of the 839 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

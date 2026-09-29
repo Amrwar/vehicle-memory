@@ -220,6 +220,12 @@ jobs:
       - name: Where everything stands
         run: npx tsx infra/scripts/verify-standing.ts
 
+      # FR-612 has refused to complete a job without a quality check since
+      # Phase 1, and nothing could record one until Phase 85. The gate and
+      # its key, end to end.
+      - name: The last look before the car goes back
+        run: npx tsx infra/scripts/verify-signoff.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

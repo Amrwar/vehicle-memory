@@ -1,17 +1,18 @@
 import {
-  describeSetup,
-  type PlanId,
-  planFor,
-  type SignupInput,
-  type SignupProblem,
-  trialEndsOn,
-  slugify,
-  uniqueSlug,
-  validateSignup,
   countryFor,
+  DEFAULT_QUALITY_SHEET,
+  describeSetup,
+  planFor,
+  type PlanId,
   regionForCountry,
   type SetupFacts,
   setupProgress,
+  type SignupInput,
+  type SignupProblem,
+  slugify,
+  trialEndsOn,
+  uniqueSlug,
+  validateSignup,
 } from '@carnet/core';
 import { prisma } from '@carnet/db';
 
@@ -176,6 +177,17 @@ export async function createWorkshop(
           ],
         },
         jobTypes: { create: DEFAULT_JOB_TYPES },
+        // Every one of those job types asks for a quality check, and until
+        // Phase 85 nothing could record one -- so a new workshop could book a
+        // service in and never finish it. The sheet comes with the workshop.
+        qualityItems: {
+          create: DEFAULT_QUALITY_SHEET.map((item, index) => ({
+            label: item.label,
+            kind: item.kind,
+            required: item.required,
+            sortOrder: index,
+          })),
+        },
         sequences: {
           create: [
             { kind: 'JOB', next: 1 },

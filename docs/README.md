@@ -671,3 +671,23 @@ the estimate has not been sent" — a job sitting in awaiting-approval that nobo
 ever sent, which on any ordinary board reads as the customer being slow and is
 in fact the workshop's own omission. That is the whole argument for the feature,
 and it was in the demonstration data the entire time.
+
+Phase 85 is item 3, quality control, and it turned out to be a fix before it was
+a feature. `assertTransition` has refused to complete a job since Phase 1 when
+its job type asks for a quality check and none has passed — FR-612, a good rule,
+with a correct and complete message. Nothing in the product has ever written a
+quality check. The job page renders them; no code path creates one. And the
+default job types a new workshop is given all ask for one.
+
+So a workshop that signed up, booked in a service and finished the work could
+not finish the job: told exactly what it needed, and given no way to comply. A
+gate with no key, for eighty-four phases, behind a rule that reads as careful.
+
+The key is a sheet the workshop writes — ticks where a tick is the truth, and
+figures where it is not, because a road test result and a final mileage are not
+ticks and a sheet that made them ticks would be a sheet somebody ticked. The
+outcome is computed from the answers and never supplied: nothing sends "pass",
+so a required line left blank cannot be passed by anybody, by any route. A
+required line answered _no_ and one _not answered_ are recorded as different
+failures, because they need different things done about them. And a fail goes
+back to the bench rather than into a checking queue nobody owns.

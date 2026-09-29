@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import {
   ACCOUNT,
   chainEvent,
+  DEFAULT_QUALITY_SHEET,
   type DraftEvent,
   eventsForCompletedJob,
   type JournalEntryDraft,
@@ -2002,6 +2003,19 @@ async function main() {
       },
     });
   }
+
+  // The sign-off sheet, the same twelve a workshop signing up is given.
+  // Until Phase 85 nothing could record a quality check at all, so a seeded
+  // Major Service could not be completed through the product's own path.
+  await prisma.qualityCheckItem.createMany({
+    data: DEFAULT_QUALITY_SHEET.map((item, index) => ({
+      orgId: org.id,
+      label: item.label,
+      kind: item.kind,
+      required: item.required,
+      sortOrder: index,
+    })),
+  });
 
   // Last, because the corpus is made of jobs and every job must exist first.
   await seedKnowledge(org.id, john!.id);

@@ -1642,6 +1642,48 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CJ - The gate gets a key (Phase 85)
+
+### CJ1 - Finishing a service at all
+
+**As** a workshop **I want** to record the check my job type demands **so
+that** I can finish the job.
+
+**Size** 8 - **Satisfies** FR-11801, FR-11802
+
+- **Given** a job type that requires a check, **when** the work is done,
+  **then** there is a sheet to fill in and a way to record it.
+- **Given** a new workshop, **when** it signs up, **then** it has a sheet
+  without writing one.
+
+### CJ2 - A sheet that cannot be signed unread
+
+**As** an owner **I want** the outcome to follow the answers **so that** a
+sign-off means somebody looked.
+
+**Size** 5 - **Satisfies** FR-11803, FR-11804, FR-11805
+
+- **Given** a required line left blank, **when** the sheet is recorded,
+  **then** it does not pass, and the line is named as unanswered.
+- **Given** a required line answered no, **when** it is recorded, **then** it
+  does not pass, and the line is named as refused.
+- **Given** an answer, **when** it is stored, **then** it is a tick or a
+  figure, and the database refuses one that is neither.
+
+### CJ3 - Where a failed job goes
+
+**As** a technician **I want** a failed check to come back to me **so that** it
+is not sitting in a queue nobody owns.
+
+**Size** 3 - **Satisfies** FR-11806
+
+- **Given** a failed sheet, **when** it is recorded, **then** the job is on the
+  bench and the reasons are on the record.
+- **Given** a passed sheet, **when** it is recorded, **then** the job is
+  finished.
+
+---
+
 ## Epic CI - Whose move it is (Phase 84)
 
 ### CI1 - What is holding things up

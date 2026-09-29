@@ -1,9 +1,9 @@
 {
-  "builtOn": "2026-09-28",
+  "builtOn": "2026-09-29",
   "counts": {
-    "models": 161,
-    "enums": 75,
-    "fields": 2570
+    "models": 163,
+    "enums": 76,
+    "fields": 2588
   },
   "enums": [
     "OrgPlan",
@@ -27,6 +27,7 @@
     "BookingSource",
     "JobStatus",
     "PartLineStatus",
+    "QualityItemKind",
     "SignaturePurpose",
     "CheckKind",
     "KeyAction",
@@ -793,6 +794,25 @@
             "User"
           ],
           "scope": "through JobDiagnosis"
+        },
+        {
+          "name": "QualityCheckItem",
+          "comment": "One line of a workshop's final sign-off sheet. Phase 85. The catalogue, not an answer: what this workshop asks before a car goes back. Every workshop's is different and every workshop's is short, so it is theirs to write rather than a fixed list in the code.",
+          "fields": 7,
+          "relations": [
+            "Organization"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "QualityCheckAnswer",
+          "comment": "What one person answered to one line, on one check. Phase 85.",
+          "fields": 5,
+          "relations": [
+            "QualityCheck",
+            "QualityCheckItem"
+          ],
+          "scope": "through QualityCheckItem"
         },
         {
           "name": "InspectionTemplate",

@@ -267,6 +267,18 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-11800 - The gate gets a key
+
+| Ref      | Requirement                                                                                                        | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| FR-11801 | A workshop MUST be able to record a quality check against a job, so FR-612 can be satisfied.                       | 85    |
+| FR-11802 | The sign-off sheet MUST be the workshop's own: lines renameable, reorderable, optional or retired.                 | 85    |
+| FR-11803 | A line MUST be a confirmation or a figure, and an answer MUST be one or the other, never neither.                  | 85    |
+| FR-11804 | The outcome MUST be computed from the answers and MUST NOT be supplied by the caller.                              | 85    |
+| FR-11805 | A required line unanswered and a required line answered no MUST both fail the sheet, and be recorded as different. | 85    |
+| FR-11806 | A passed check MUST complete the job; a failed one MUST return it to the bench, naming the lines.                  | 85    |
+| FR-11807 | A line that has been answered MUST NOT be deletable, only retired.                                                 | 85    |
+
 ## FR-11700 - Whose move it is
 
 | Ref      | Requirement                                                                                                  | Phase |

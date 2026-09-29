@@ -137,6 +137,10 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'CauseCode',
       'JobDiagnosis',
       'DiagnosisCause',
+      // The sign-off sheet and its answers, beside the inspection: both are
+      // records of what somebody looked at rather than what they did.
+      'QualityCheckItem',
+      'QualityCheckAnswer',
       'InspectionTemplate',
       'InspectionTemplateSection',
       'InspectionTemplateItem',

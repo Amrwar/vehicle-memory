@@ -93,6 +93,7 @@ import { SignaturePad } from '@/components/signature-pad';
 import { fuelLabel } from '@carnet/core';
 import { can, requireSession } from '@/lib/guard';
 import { JobDiagnosis } from '@/components/job-diagnosis';
+import { JobQuality } from '@/components/job-quality';
 import { JobStandingBand } from '@/components/job-standing';
 import {
   catalogueFor,
@@ -103,6 +104,7 @@ import {
   whatItHasBeen,
 } from '@/lib/diagnosis';
 import { tFor } from '@/lib/i18n';
+import { checksFor, QualityError, recordQualityCheck, sheetFor } from '@/lib/quality';
 import { whereOneJobStands } from '@/lib/standing';
 
 export const dynamic = 'force-dynamic';
@@ -395,6 +397,60 @@ async function rule(formData: FormData) {
   }
 
   redirect(`/jobs/${jobId}#diagnosis`);
+}
+
+/**
+ * Records the sign-off and lets the outcome fall out of the answers.
+ *
+ * The outcome is not in the form. A sheet with a required line unanswered
+ * fails, and the failure names the lines -- so the only way to pass one is to
+ * answer it, which is the entire point of having it. Phase 85.
+ */
+async function signOff(formData: FormData) {
+  'use server';
+
+  const { orgId, user } = await requireSession('qualitycheck:write');
+  const jobId = String(formData.get('jobId') ?? '');
+
+  const answers = [...formData.entries()]
+    .filter(([name]) => name.startsWith('confirm:') || name.startsWith('value:'))
+    .map(([name, raw]) => {
+      const [kind, itemId] = name.split(':');
+      return kind === 'confirm'
+        ? { itemId: itemId!, confirmed: true }
+        : { itemId: itemId!, value: String(raw) };
+    });
+
+  // A tick that was not ticked sends nothing at all, so the unticked lines
+  // have to be added back as answered-no rather than left out -- otherwise an
+  // untouched sheet would read as unanswered rather than as refused, and the
+  // difference is the whole of what the person reading it needs.
+  const sheet = await sheetFor(orgId);
+  const answered = new Set(answers.map((one) => one.itemId));
+  for (const item of sheet) {
+    if (item.kind === 'CONFIRM' && !answered.has(item.id)) {
+      answers.push({ itemId: item.id, confirmed: false });
+    }
+  }
+
+  try {
+    const { outcome, gaps } = await recordQualityCheck({
+      orgId,
+      userId: user.userId,
+      jobId,
+      answers,
+      notes: String(formData.get('notes') ?? ''),
+    });
+
+    redirect(
+      outcome === 'PASS'
+        ? `/jobs/${jobId}?signed=1#quality`
+        : `/jobs/${jobId}?heldback=${encodeURIComponent(String(gaps.length))}#quality`,
+    );
+  } catch (error) {
+    if (!(error instanceof QualityError)) throw error;
+    redirect(`/jobs/${jobId}?problem=${encodeURIComponent(error.message)}#quality`);
+  }
 }
 
 async function addFollowUp(formData: FormData) {
@@ -785,6 +841,12 @@ export default async function JobPage({
   const [courtesyLoans, courtesyFleet] = await Promise.all([
     loansForJob(orgId, job.id),
     fleetFor(orgId),
+  ]);
+
+  // The sign-off sheet, and what has been signed. Phase 85.
+  const [qualitySheet, qualityChecks] = await Promise.all([
+    sheetFor(orgId),
+    checksFor(orgId, job.id),
   ]);
 
   // Whose move it is, how long it has been theirs, and the one thing to do.
@@ -2217,6 +2279,16 @@ export default async function JobPage({
               standing={stands.standing}
               currency={region.currency}
               locale={region.locale}
+            />
+          ) : null}
+
+          {['IN_PROGRESS', 'QUALITY_CHECK'].includes(job.status) || qualityChecks.length > 0 ? (
+            <JobQuality
+              jobId={job.id}
+              sheet={qualitySheet}
+              checks={qualityChecks}
+              canWrite={can(user.role, 'qualitycheck:write')}
+              record={signOff}
             />
           ) : null}
 
