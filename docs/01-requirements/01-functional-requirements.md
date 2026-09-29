@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12300 - The sheet it was taken on
+
+| Ref      | Requirement                                                                                              | Phase |
+| -------- | -------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12301 | An inspection MUST record the shape its checklist had when it was started.                               | 90    |
+| FR-12302 | A version MUST be identified by the questions it asks, not by the ids of its items.                      | 90    |
+| FR-12303 | Reordering a checklist MUST NOT produce a new version.                                                   | 90    |
+| FR-12304 | A checklist edited back to a previous shape MUST resolve to the version it already had.                  | 90    |
+| FR-12305 | The questions a version asked MUST NOT change after it is written.                                       | 90    |
+| FR-12306 | A report MUST be able to name the questions its checklist did not ask that the current one does.         | 90    |
+| FR-12307 | An inspection with no recorded version MUST say so, and MUST NOT be shown against the current checklist. | 90    |
+| FR-12308 | A version an inspection cites MUST NOT be deletable.                                                     | 90    |
+| FR-12309 | Two versions of one checklist MUST NOT share a shape, enforced by the database.                          | 90    |
+
 ## FR-12200 - The machine the job needs
 
 | Ref      | Requirement                                                                                                 | Phase |

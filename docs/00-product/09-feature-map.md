@@ -896,6 +896,18 @@ The second sweep: things connected at one end only.
 | Busy is not blocked           | Built  | A rig free in an hour never stops a car going on the ramp (Phase 89)                     |
 | The refusal names it          | Built  | Which machine and why, not "this job cannot start" (Phase 89)                            |
 
+## 21.52 The sheet it was taken on
+
+| Item                         | Status | Where                                                                                          |
+| ---------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| A version per shape          | Built  | Found by fingerprint when an inspection starts, never by a Publish button (Phase 90)           |
+| Frozen against later edits   | Built  | The questions a version asked are copied and never updated (Phase 90)                          |
+| What the sheet did not ask   | Built  | Named on the report, so a silence is never read as a pass (Phase 90)                           |
+| Edited back is the same      | Built  | A sheet returned to its old shape lands on the version it had (Phase 90)                       |
+| Renaming is not a change     | Built  | The version keeps the name it was used under; questions decide the shape (Phase 90)            |
+| Unknown is said, not guessed | Built  | Inspections from before this phase say "not recorded" (Phase 90)                               |
+| A cited version cannot go    | Built  | `ON DELETE RESTRICT`; a report naming a missing sheet is worse than an honest blank (Phase 90) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -974,7 +986,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 463          |
+| Built   | 470          |
 | Partial | 2            |
 
 <!-- counts:end -->

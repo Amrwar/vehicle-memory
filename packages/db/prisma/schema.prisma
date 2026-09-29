@@ -350,6 +350,7 @@ model User {
   warrantyClaims           WarrantyClaim[]
   skillAssessments         EmployeeSkill[]
   partFitments             PartFitment[]
+  inspectionVersions       InspectionTemplateVersion[]
   supplierPartsConfirmed   SupplierPart[]
   vehicleSpecs             VehicleSpecification[]
   substitutionsConfirmed   JobPartLine[]            @relation("SubstitutionConfirmedBy")
@@ -1976,6 +1977,7 @@ model InspectionTemplate {
 
   org         Organization                @relation(fields: [orgId], references: [id], onDelete: Cascade)
   sections    InspectionTemplateSection[]
+  versions    InspectionTemplateVersion[]
   inspections Inspection[]
 
   @@unique([orgId, name])
@@ -2134,10 +2136,60 @@ enum CauseOutcome {
   UNDETERMINED
 }
 
+/// One shape a sheet had, and the inspections taken on it.
+///
+/// Found by fingerprint rather than cut by a button, so versions mark sheets
+/// that were used rather than keystrokes -- and a sheet edited back to what it
+/// was lands on the earlier version again. Nothing in the product edits a
+/// version or its items after they are written. Phase 90.
+model InspectionTemplateVersion {
+  id          String @id @default(cuid())
+  templateId  String
+  version     Int
+  /// The template's name as it stood, so a rename does not rewrite history.
+  name        String
+  /// What makes one sheet a different sheet, over the questions and not the ids.
+  fingerprint String
+  itemCount   Int
+
+  firstUsedAt     DateTime @default(now())
+  createdByUserId String?
+
+  template    InspectionTemplate              @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdBy   User?                           @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  items       InspectionTemplateVersionItem[]
+  inspections Inspection[]
+
+  @@unique([templateId, fingerprint])
+  @@unique([templateId, version])
+  @@map("inspection_template_versions")
+}
+
+/// The questions one version asked, frozen. Phase 90.
+model InspectionTemplateVersionItem {
+  id              String          @id @default(cuid())
+  versionId       String
+  sectionName     String
+  itemName        String
+  guidance        String?
+  measurementType MeasurementType @default(NONE)
+  position        WheelPosition?
+  sortOrder       Int             @default(0)
+
+  version InspectionTemplateVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([versionId, sortOrder])
+  @@map("inspection_template_version_items")
+}
+
 model Inspection {
   id                String           @id @default(cuid())
   jobId             String
   templateId        String?
+  /// The shape the sheet had when this was taken. Null for anything recorded
+  /// before Phase 90: a sheet nobody wrote down, and saying so is truer than
+  /// borrowing today's.
+  templateVersionId String?
   status            InspectionStatus @default(DRAFT)
   performedByUserId String?
   startedAt         DateTime         @default(now())
@@ -2147,8 +2199,12 @@ model Inspection {
   advisoryCount     Int              @default(0)
   criticalCount     Int              @default(0)
 
-  job         Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  template    InspectionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  job      Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  template InspectionTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  /// Restrict: a version an inspection was taken on is part of what the
+  /// inspection means, and a report claiming a sheet nobody can produce is
+  /// worse than one that says plainly it does not know.
+  templateVersion InspectionTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
   performedBy User?               @relation(fields: [performedByUserId], references: [id], onDelete: SetNull)
   results     InspectionResult[]
 

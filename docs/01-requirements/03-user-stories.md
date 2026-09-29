@@ -1642,6 +1642,49 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CO - The sheet it was taken on (Phase 90)
+
+### CO1 - What the check did not include
+
+**As** a customer **I want** an old report to say what its checklist did not
+cover **so that** a missing line is not read as a pass.
+
+**Size** 8 - **Satisfies** FR-12301, FR-12305, FR-12306
+
+- **Given** an inspection taken in March and an item added in June, **when**
+  the report is read, **then** it names that item as one the check did not
+  include.
+- **Given** the checklist is edited, **when** the old report is read again,
+  **then** it still cites the version it was taken on, with the same count.
+
+### CO2 - Versions that mark use, not keystrokes
+
+**As** an owner **I want** a version cut only when a sheet is actually used
+**so that** my history is not a list of my typing.
+
+**Size** 5 - **Satisfies** FR-12302, FR-12303, FR-12304, FR-12309
+
+- **Given** a checklist reordered, **when** an inspection starts, **then** no
+  new version is cut.
+- **Given** an item deleted and retyped identically, **when** an inspection
+  starts, **then** no new version is cut.
+- **Given** an item removed and later put back, **when** an inspection starts,
+  **then** the version it had is used again rather than a third one.
+
+### CO3 - Not knowing, said plainly
+
+**As** a customer **I want** an old inspection to admit it does not know its
+checklist **so that** I am not shown today's sheet as if it were that day's.
+
+**Size** 3 - **Satisfies** FR-12307, FR-12308
+
+- **Given** an inspection recorded before versions existed, **when** it is
+  read, **then** the checklist is reported as not recorded.
+- **Given** a version an inspection cites, **when** a delete is attempted,
+  **then** the database refuses it.
+
+---
+
 ## Epic CN - The machine the job needs (Phase 89)
 
 ### CN1 - Knowing which machines cannot be used

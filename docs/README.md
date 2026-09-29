@@ -845,3 +845,41 @@ out of service with no reason allowed exactly that, because
 passes on NULL. And one section of the check found nothing to test and quietly
 did nothing while the script reported a pass — a check that skips itself is a
 check nobody runs, so it now fails loudly.
+
+Phase 90 is item 8, inspection template versioning. Inspection results have
+snapshotted their section and item names since Phase 1, so a completed
+inspection already kept the words it was written with — but that only preserves
+what was asked and answered, and says nothing about what the sheet asked that
+day, therefore nothing about what it did not ask.
+
+A workshop adds "brake fluid condition" to its checklist in June. A customer
+opens an inspection from March. There is no brake fluid line on it, and every
+reading of that silence is wrong in a different way: an omission, a pass,
+somebody forgetting. The truth — it was not on the sheet in March — was the one
+thing the record could not say. That is the same failure this product refuses
+everywhere else: fitment has three states so silence is never approval, a
+specification leaves a blank rather than guessing, a substitute is absent
+rather than weakly suggested.
+
+A version is cut by what the sheet is, not by somebody pressing Publish. The
+ordered questions reduce to one fingerprint; an inspection starting looks for
+the version with that fingerprint and cuts one only if none matches. So a
+workshop that edits its sheet three times before anybody uses it produces one
+version, and a workshop that removes an item and puts it back lands on the
+earlier version again — because the sheet is once more the sheet it was. The
+fingerprint covers the questions and not the ids, so retyping an item
+identically is not a change, and not the order, because reordering changes the
+route a technician walks the car in rather than a question asked.
+
+What is not known is said plainly. Inspections from before this phase carry no
+version and the report says "not recorded" rather than borrowing today's sheet,
+and a version an inspection cites cannot be deleted — a report naming a sheet
+nobody can produce is worse than one that admits it does not know.
+
+Writing the fingerprint turned up two faults in it. "Brake" + "s" and "Brakes"
+
+- "" are different sheets that produced the same fingerprint, because the
+  fields were concatenated with nothing between them. And the separators that
+  fixed it went in as raw control bytes inside the string literals — which works,
+  and is invisible in every editor, leaving the one load-bearing detail of the
+  file unreadable. They are named escapes now.

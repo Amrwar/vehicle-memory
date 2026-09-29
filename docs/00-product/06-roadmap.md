@@ -5450,6 +5450,68 @@ reported a pass — a check that skips itself is a check nobody runs, so it now
 fails loudly, and the seed's one in-progress job was given the kind of work any
 real job on a ramp would have.
 
+## Phase 90 — The sheet it was taken on
+
+**Scope.** Item 8 of the thirty-nine: inspection template versioning, so a
+completed inspection remembers the version it was taken on.
+
+**Exit.** Every inspection records the shape its checklist had that day, that
+shape is frozen against every later edit, and a report can name what the sheet
+did not ask.
+
+**Status.** Done.
+
+`InspectionResult` has snapshotted the section and item names since Phase 1, so
+a completed inspection already kept the words it was written with. That was
+right and it was not enough: it preserves **what was asked and answered**, and
+says nothing about what the sheet asked that day — therefore nothing about
+what it did not ask.
+
+**The silence that reads as approval.** A workshop adds "brake fluid
+condition" to its sheet in June. A customer opens an inspection from March.
+There is no brake fluid line on it, and every reading of that silence is wrong
+in a different way: an omission, a pass, somebody forgetting. The truth — _it
+was not on the sheet in March_ — was the one thing the record could not say.
+
+That is the same failure this product has refused everywhere else. Fitment has
+three states so silence is never approval. A specification sheet leaves a blank
+rather than guessing. A substitute is absent rather than weakly suggested. An
+inspection should be able to say "this check did not include brake fluid", and
+until a version was recorded it could not.
+
+**A fingerprint, not a Publish button.** A version is cut by what the sheet
+_is_, not by somebody remembering to press something: the ordered questions
+reduce to one string, an inspection starting looks for the version with that
+fingerprint, and a new one is cut only if none matches. Two things follow, both
+wanted. A workshop that edits its sheet three times before anybody uses it
+produces one version rather than three — versions mark _sheets that were used_,
+not keystrokes. And a workshop that removes an item and puts it back lands on
+the earlier version again, because the sheet is once more the sheet it was,
+which is true and which a counter would have got wrong.
+
+The fingerprint covers the questions and deliberately not the ids: a workshop
+that deletes an item and retypes it identically has not changed what it asks,
+and a fingerprint over ids would have told a customer the sheet changed when it
+did not. Nor the order: reordering changes the route a technician walks the car
+in, not a single question asked.
+
+**What is not versioned is said plainly.** Every inspection recorded before
+this phase carries no version, and the report says "not recorded" rather than
+borrowing today's sheet — borrowing it would be claiming to know something
+nobody knows. And `ON DELETE RESTRICT` keeps a version that an inspection cites
+from being deleted: a report naming a sheet nobody can produce is worse than
+one that admits it does not know.
+
+Writing the fingerprint turned up two faults in it. "Brake" + "s" and "Brakes"
+
+- "" are different sheets and produced the same fingerprint, because the fields
+  were concatenated with nothing between them — so a workshop editing one into
+  the other would have gone on using a version that no longer described it. And
+  the separators that fixed it went in as **raw control bytes inside the string
+  literals**, which works and is invisible in every editor, leaving the one
+  load-bearing detail of the file unreadable. They are escapes now, named and
+  explained.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

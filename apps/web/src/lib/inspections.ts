@@ -14,6 +14,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { audit } from './guard';
+import { versionInUse } from './inspection-versions';
 import { readUrlFor } from './storage';
 import { regionFor } from './region';
 import { retotalEstimate } from './estimates';
@@ -120,10 +121,17 @@ export async function startInspection(input: {
         select: { id: true },
       });
 
+  // The shape the sheet has right now, so this inspection can say later what
+  // it was taken on -- and therefore what it did not ask. Found rather than
+  // published: a version is cut only when no existing one has this shape.
+  // Phase 90.
+  const version = await versionInUse({ templateId: template.id, userId: input.userId });
+
   const inspection = await prisma.inspection.create({
     data: {
       jobId: input.jobId,
       templateId: template.id,
+      templateVersionId: version?.id ?? null,
       status: 'DRAFT',
       performedByUserId: input.userId,
     },

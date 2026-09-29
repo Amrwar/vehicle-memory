@@ -252,6 +252,18 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 90 adds `InspectionTemplateVersion` and
+`InspectionTemplateVersionItem`, and `templateVersionId` on `Inspection`. A
+version is one shape a checklist had, identified by a fingerprint over its
+questions rather than over their ids, so retyping an item identically is not a
+change and reordering is not either. Its items are written once and never
+updated: editing the template writes a new version instead. The unique index on
+(templateId, fingerprint) is what makes find-or-cut safe when two inspections
+start in the same second, and `inspections_templateVersionId_fkey` is
+`ON DELETE RESTRICT`, because a report naming a sheet nobody can produce is
+worse than one that says plainly it does not know. `templateVersionId` is
+nullable for every inspection recorded before the phase.
+
 Phase 89 adds `Equipment` and `JobTypeEquipment`. Nothing on either stores
 whether a machine may be used: that is derived from the certificate expiry
 against the clock, so a lapsed certificate takes the machine out on the right

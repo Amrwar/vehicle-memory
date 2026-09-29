@@ -311,7 +311,7 @@ export async function InspectionPrint({
   reader: Reader;
   doc: Doc<typeof inspectionDocument>;
 }) {
-  const { inspection } = doc;
+  const { inspection, sheet } = doc;
   const job = inspection.job;
   const money = formatter(reader.region.locale, reader.region.currency);
   const sections = new Map<string, typeof inspection.results>();
@@ -340,6 +340,17 @@ export async function InspectionPrint({
         },
         { label: t('Inspected by'), value: inspection.performedBy?.name ?? '—' },
         { label: t('Completed'), value: dateOf(inspection.completedAt, reader) },
+        // Which sheet, so a report read years later says what it was. Phase 90.
+        {
+          label: t('Checklist'),
+          value: sheet
+            ? t('{name}, version {version} — {count} checks', {
+                name: sheet.name,
+                version: sheet.version,
+                count: sheet.itemCount,
+              })
+            : t('Not recorded'),
+        },
       ]}
     >
       <p className="mb-4 flex flex-wrap gap-4 text-[13px] font-semibold">
@@ -347,6 +358,19 @@ export async function InspectionPrint({
         <span>! {t('{count} advisory', { count: inspection.advisoryCount })}</span>
         <span>✓ {t('{count} passed', { count: inspection.passCount })}</span>
       </p>
+
+      {/* What the sheet did not ask.
+          A customer reading a March report with no brake-fluid line must be
+          able to see that it was not on the sheet in March. Without this the
+          silence reads as an omission, or as a pass, and both are wrong.
+          Phase 90. */}
+      {sheet && sheet.didNotAsk.length > 0 ? (
+        <p className="print-avoid mb-4 border border-black/20 p-2 text-[12px]">
+          <span className="font-semibold">{t('This check did not include:')}</span>{' '}
+          <bdi>{sheet.didNotAsk.join(' · ')}</bdi>{' '}
+          <span>{t('These were added to the checklist after this inspection was taken.')}</span>
+        </p>
+      ) : null}
 
       {[...sections.entries()].map(([section, results]) => (
         <section key={section} className="print-avoid mb-4">

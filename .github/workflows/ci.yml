@@ -249,6 +249,11 @@ jobs:
       - name: The machine the job needs
         run: npx tsx infra/scripts/verify-equipment.ts
 
+      # An old report must be able to say what its sheet did not ask, or the
+      # silence where a check used not to exist reads as a pass.
+      - name: The sheet it was taken on
+        run: npx tsx infra/scripts/verify-versions.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

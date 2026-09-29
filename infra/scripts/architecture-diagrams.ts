@@ -147,6 +147,8 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'InspectionTemplate',
       'InspectionTemplateSection',
       'InspectionTemplateItem',
+      'InspectionTemplateVersion',
+      'InspectionTemplateVersionItem',
       'Inspection',
       'InspectionResult',
       'InspectionPhoto',

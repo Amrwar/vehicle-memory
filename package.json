@@ -92,6 +92,7 @@
     "verify:sourcing": "tsx infra/scripts/verify-sourcing.ts",
     "verify:specification": "tsx infra/scripts/verify-specification.ts",
     "verify:equipment": "tsx infra/scripts/verify-equipment.ts",
+    "verify:versions": "tsx infra/scripts/verify-versions.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",

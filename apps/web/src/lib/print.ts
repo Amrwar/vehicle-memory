@@ -12,6 +12,7 @@ import {
 import { prisma } from '@carnet/db';
 
 import { currentUser } from './auth';
+import { takenOn } from './inspection-versions';
 import { siteUrl } from './credentials';
 import { currentLanguage } from './i18n';
 import { bandsFor } from './tax';
@@ -269,7 +270,17 @@ export async function inspectionDocument(orgId: string, id: string) {
     },
   });
   if (!inspection) return null;
-  return { inspection, link: `${siteUrl()}/portal/vehicles/${inspection.job.vehicle.id}` };
+
+  // Which sheet it was taken on, and what that sheet did not ask. A customer
+  // reading a report from March must be able to see that brake fluid was not
+  // on the sheet then, rather than a silence that reads as a pass. Phase 90.
+  const sheet = await takenOn(orgId, inspection.id);
+
+  return {
+    inspection,
+    sheet,
+    link: `${siteUrl()}/portal/vehicles/${inspection.job.vehicle.id}`,
+  };
 }
 
 export async function workOrderDocument(orgId: string, id: string) {

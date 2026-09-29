@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-09-29",
   "counts": {
-    "models": 167,
+    "models": 169,
     "enums": 78,
-    "fields": 2685
+    "fields": 2710
   },
   "enums": [
     "OrgPlan",
@@ -877,12 +877,32 @@
           "scope": "through InspectionTemplateSection"
         },
         {
+          "name": "InspectionTemplateVersion",
+          "comment": "One shape a sheet had, and the inspections taken on it. Found by fingerprint rather than cut by a button, so versions mark sheets that were used rather than keystrokes -- and a sheet edited back to what it was lands on the earlier version again. Nothing in the product edits a version or its items after they are written. Phase 90.",
+          "fields": 8,
+          "relations": [
+            "InspectionTemplate",
+            "User"
+          ],
+          "scope": "through InspectionTemplate"
+        },
+        {
+          "name": "InspectionTemplateVersionItem",
+          "comment": "The questions one version asked, frozen. Phase 90.",
+          "fields": 8,
+          "relations": [
+            "InspectionTemplateVersion"
+          ],
+          "scope": "through InspectionTemplateVersion"
+        },
+        {
           "name": "Inspection",
           "comment": "",
-          "fields": 11,
+          "fields": 12,
           "relations": [
             "Job",
             "InspectionTemplate",
+            "InspectionTemplateVersion",
             "User"
           ],
           "scope": "through Job"

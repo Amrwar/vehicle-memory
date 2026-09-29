@@ -3,6 +3,18 @@
  */
 
 export const fr: Readonly<Record<string, string>> = {
+  // What the sheet did not ask. Phase 90.
+  //
+  // The sentence has to read as a fact about the checklist, never as an
+  // apology: "this check did not include brake fluid" is a statement about
+  // the sheet, and a translation that turns it into "we did not check brake
+  // fluid" reads as an omission by the technician -- the exact misreading the
+  // whole phase exists to prevent.
+  'This check did not include:': 'Ce contrôle ne portait pas sur :',
+  'These were added to the checklist after this inspection was taken.':
+    'Ces points ont été ajoutés à la liste de contrôle après ce contrôle.',
+  '{name}, version {version} — {count} checks': '{name}, version {version} — {count} points',
+  'Not recorded': 'Non consigné',
   PDF: 'PDF',
   'Work order': 'Ordre de travail',
   'Key tag': 'Étiquette de clés',
@@ -46,6 +58,11 @@ export const fr: Readonly<Record<string, string>> = {
 };
 
 export const ar: Readonly<Record<string, string>> = {
+  'This check did not include:': 'لم يشمل هذا الفحص:',
+  'These were added to the checklist after this inspection was taken.':
+    'أُضيفت هذه البنود إلى قائمة التحقق بعد إجراء هذا الفحص.',
+  '{name}, version {version} — {count} checks': '{name}، الإصدار {version} — {count} بنداً',
+  'Not recorded': 'غير مسجَّل',
   PDF: 'PDF',
   'Work order': 'أمر العمل',
   'Key tag': 'بطاقة المفاتيح',

@@ -19,6 +19,7 @@ import {
   DEFAULT_QUALITY_SHEET,
   type DraftEvent,
   eventsForCompletedJob,
+  fingerprintOf,
   type JournalEntryDraft,
   money,
   postGoodsReceived,
@@ -411,7 +412,12 @@ async function main() {
   const template = await prisma.inspectionTemplate.create({
     data: {
       orgId: org.id,
-      name: 'Standard 30-point inspection',
+      // Named for what it actually holds. It said "30-point" and had
+      // eighteen, which nobody could see until Phase 90 put the count on the
+      // report beside the name -- and a checklist that overstates itself on a
+      // customer's report is exactly the kind of small lie this product spends
+      // its time refusing.
+      name: 'Standard vehicle inspection',
       description: 'Carried out on every vehicle received.',
       isDefault: true,
       sections: {
@@ -846,10 +852,67 @@ async function main() {
     },
   });
 
+  // The sheet as it stood, frozen, so the inspection below can say later what
+  // it was taken on -- and therefore what it did not ask. Cut here the same
+  // way the product cuts one: by fingerprinting the questions rather than by
+  // anybody pressing publish. Phase 90.
+  const sheetNow = (
+    await prisma.inspectionTemplateSection.findMany({
+      where: { templateId: template.id },
+      orderBy: { sortOrder: 'asc' },
+      select: {
+        name: true,
+        sortOrder: true,
+        items: {
+          orderBy: { sortOrder: 'asc' },
+          select: {
+            name: true,
+            guidance: true,
+            measurementType: true,
+            position: true,
+            sortOrder: true,
+          },
+        },
+      },
+    })
+  ).flatMap((section) =>
+    section.items.map((item) => ({
+      sectionName: section.name,
+      itemName: item.name,
+      guidance: item.guidance,
+      measurementType: item.measurementType,
+      position: item.position,
+      sortOrder: section.sortOrder * 1000 + item.sortOrder,
+    })),
+  );
+
+  const sheetVersion = await prisma.inspectionTemplateVersion.create({
+    data: {
+      templateId: template.id,
+      version: 1,
+      name: template.name,
+      fingerprint: fingerprintOf(sheetNow),
+      itemCount: sheetNow.length,
+      firstUsedAt: day(0, 8, 40),
+      createdByUserId: john!.id,
+      items: {
+        create: sheetNow.map((item) => ({
+          sectionName: item.sectionName,
+          itemName: item.itemName,
+          guidance: item.guidance,
+          measurementType: item.measurementType,
+          position: item.position,
+          sortOrder: item.sortOrder,
+        })),
+      },
+    },
+  });
+
   const inspection = await prisma.inspection.create({
     data: {
       jobId: brakeJob.id,
       templateId: template.id,
+      templateVersionId: sheetVersion.id,
       status: 'COMPLETED',
       performedByUserId: john!.id,
       startedAt: day(0, 8, 40),
@@ -2302,6 +2365,7 @@ async function main() {
     Buying         4 supplier prices, one of them deliberately months old
     Specification  2 model sheets and one car that disagrees with its own
     Equipment      4 machines: one fine, one lapsed, one expiring, one broken
+    Checklist      version 1 of the inspection sheet, frozen as it was used
 
   Public vehicle passport, no account needed:
     /p/${DEMO_SHARE_TOKEN}
