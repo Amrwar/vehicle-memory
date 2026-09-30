@@ -511,6 +511,15 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                                    | Implementation                                                                      | Test                                               | Status |
 | -------- | ----- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | ------ |
+| FR-12601 | CR1   | -                                                         | `scanAgainstOrder()` returns a line; nothing is written                             | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12602 | CR2   | -                                                         | `not-on-this-order`, with what was scanned carried back                             | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12603 | CR2   | -                                                         | `settled`, rather than an ignored scan                                              | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12604 | CR2   | -                                                         | `several` where two lines are open for one part                                     | `receiving.test.ts`                                | Done   |
+| FR-12605 | CR1   | -                                                         | `countAgainst()`; `NOT_A_COUNT` for nought and nonsense                             | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12606 | CR3   | -                                                         | `OVER` at the count, and `validateReceipt` at the submit                            | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12607 | CR1   | `StockLevel.binLocation`                                  | `binFor()`; written in the same act as the receipt                                  | `receiving.test.ts`, `verify-receiving.ts`         | Done   |
+| FR-12608 | CR1   | `GoodsReceipt`                                            | one receipt per count; nothing held on the page                                     | `verify-receiving.ts`                              | Done   |
+| FR-12609 | CR3   | `PurchaseOrderStatus`                                     | CANCELLED and BILLED refuse; a bill must not disagree with the receipt              | `verify-receiving.ts`                              | Done   |
 | FR-12501 | CQ1   | -                                                         | `scanCode()`; key tag, work order and part label carry it                           | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
 | FR-12502 | CQ2   | -                                                         | `decideScan()` returns `several`; the lookups run together, not in turn             | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
 | FR-12503 | CQ2   | -                                                         | matches are made unique on kind and id before deciding                              | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
@@ -1228,7 +1237,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 339                 | 338                    |
+| Later phases, newest first                         | 348                 | 347                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1246,9 +1255,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **907**             | **899 (99%)**          |
+| **Total**                                          | **916**             | **908 (99%)**          |
 
-Every one of the 907 requirements now has a row of its own. Until Phase 61,
+Every one of the 916 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

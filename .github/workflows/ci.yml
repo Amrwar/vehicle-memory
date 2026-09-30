@@ -264,6 +264,11 @@ jobs:
       - name: What was scanned
         run: npx tsx infra/scripts/verify-scanning.ts
 
+      # A box that is not on the order is said out loud, and a scan selects a
+      # line rather than counting one -- which is how eleven of ten get booked.
+      - name: The box in your hands
+        run: npx tsx infra/scripts/verify-receiving.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

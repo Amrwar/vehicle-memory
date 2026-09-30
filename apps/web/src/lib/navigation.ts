@@ -81,6 +81,12 @@ const P = {
     permission: 'settings:read',
   },
   scan: { href: '/scan', label: msg('Scan'), icon: 'parts', permission: 'job:read' },
+  receiving: {
+    href: '/receiving',
+    label: msg('Receiving'),
+    icon: 'purchasing',
+    permission: 'inventory:read',
+  },
   patterns: {
     href: '/patterns',
     label: msg('Working hours'),
@@ -307,7 +313,7 @@ const OWNER: NavSection[] = [
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Inventory'), items: [P.parts, P.transfers] },
-  { label: msg('Purchasing'), items: [P.purchasing, P.suppliers, P.payables] },
+  { label: msg('Purchasing'), items: [P.purchasing, P.suppliers, P.payables, P.receiving] },
   {
     label: msg('Financials'),
     items: [

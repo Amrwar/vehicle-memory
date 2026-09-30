@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12600 - The box in your hands
+
+| Ref      | Requirement                                                                                     | Phase |
+| -------- | ----------------------------------------------------------------------------------------------- | ----- |
+| FR-12601 | A scanned code MUST identify a purchase order line, and MUST NOT change any quantity by itself. | 93    |
+| FR-12602 | A scan that matches nothing on the order MUST be reported, and MUST NOT be ignored.             | 93    |
+| FR-12603 | A scan matching a line already fully received MUST say so.                                      | 93    |
+| FR-12604 | Where an order has two open lines for one part, the choice MUST be presented, not made.         | 93    |
+| FR-12605 | A received quantity MUST be entered by a person, and MUST be greater than nothing.              | 93    |
+| FR-12606 | More than is outstanding MUST be refused, with what remains named.                              | 93    |
+| FR-12607 | The bin MUST default to where the part already lives, and be written as part of the same act.   | 93    |
+| FR-12608 | Each count MUST be recorded when it is made, and MUST NOT be held until a form is submitted.    | 93    |
+| FR-12609 | Nothing MUST be receivable against a cancelled or billed order.                                 | 93    |
+
 ## FR-12500 - What was scanned
 
 | Ref      | Requirement                                                                                                       | Phase |

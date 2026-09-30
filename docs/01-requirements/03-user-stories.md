@@ -1642,6 +1642,50 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CR - The box in your hands (Phase 93)
+
+### CR1 - Booking a pallet in standing up
+
+**As** a parts person **I want** to scan a box and say how many **so that** a
+delivery is booked in without sitting down with the note.
+
+**Size** 8 - **Satisfies** FR-12601, FR-12605, FR-12607, FR-12608
+
+- **Given** a box, **when** it is scanned, **then** its line appears with what
+  is still owed, and nothing is booked yet.
+- **Given** the line, **when** a quantity is entered, **then** it is booked and
+  the part is shelved in the same act.
+- **Given** three scans of one box, **when** nothing is typed, **then** nothing
+  at all has been received.
+
+### CR2 - Stopping when something is wrong
+
+**As** a parts person **I want** to be stopped by a box that is not on the
+order **so that** I do not book in something nobody ordered.
+
+**Size** 5 - **Satisfies** FR-12602, FR-12603, FR-12604
+
+- **Given** a box that is not on this order, **when** it is scanned, **then**
+  the screen says so and names what was scanned.
+- **Given** a line already fully received, **when** it is scanned, **then** the
+  screen says all of them have arrived.
+- **Given** two open lines for one part, **when** it is scanned, **then** both
+  are offered.
+
+### CR3 - Counts that cannot be wrong quietly
+
+**As** an owner **I want** an over-receipt refused at the pallet **so that**
+the stocktake does not find it months later.
+
+**Size** 3 - **Satisfies** FR-12606, FR-12609
+
+- **Given** four still owed, **when** five are entered, **then** it is refused
+  and the four are named.
+- **Given** a billed or cancelled order, **when** anything is booked to it,
+  **then** it is refused.
+
+---
+
 ## Epic CQ - What was scanned (Phase 92)
 
 ### CQ1 - Point it at whatever is in front of you

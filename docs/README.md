@@ -953,3 +953,33 @@ anybody, because the route sits under a loading boundary and the shell has
 streamed by the time the answer is known — the same constraint Phase 73 found
 with `notFound()`. And a message with one long word pushed the job page 172
 pixels wider than a phone.
+
+Phase 93 is item 11, barcode receiving. `validateReceipt` has refused a bad
+receipt since Phase 2, and that is the right place for the last word — but the
+wrong place for the first. By the time a form is submitted the pallet is
+unloaded, the boxes are on the floor, and "3 received but only 2 outstanding"
+is a puzzle about something that happened twenty minutes ago.
+
+The scan identifies; it never counts. A tempting design adds one per scan, and
+it is how a workshop receives eleven of ten: the scanner double-fires, nobody
+is watching, and the count is wrong in a way discovered months later when the
+stocktake disagrees. So a scan selects a line and a person types the number on
+the box — one more keystroke, and the one that makes the figure somebody's
+rather than the scanner's.
+
+What is not on the order is said loudly. A box that scans to a part nobody
+ordered means the supplier sent something unasked, or this is the wrong order
+for this pallet, or the box belongs to another delivery — all three worth
+stopping for, and a system that shrugged would have the receiver shrug too.
+
+Three smaller decisions with the same shape as the rest of the product. A line
+already fully received says "you have had all ten of those" rather than being
+skipped silently. Two open lines for one part is a question, because choosing
+would book the goods against whichever was created first. And the bin defaults
+to where the part already lives, because a delivery that made somebody retype
+the shelf every time is one where a part ends up on two shelves.
+
+The counting lands in the database as it happens, one line at a time. A pallet
+takes twenty minutes, a browser tab does not reliably survive twenty minutes of
+a workshop, and the only thing worse than counting a pallet is counting it
+twice.

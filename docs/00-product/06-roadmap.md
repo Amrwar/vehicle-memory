@@ -5636,6 +5636,54 @@ And a message with one long unbroken word pushed the job page 172 pixels wider
 than a phone, because `whitespace-pre-wrap` keeps a person's newlines and will
 not break a long word. Unrelated to this phase and found by its check.
 
+## Phase 93 — The box in your hands
+
+**Scope.** Item 11 of the thirty-nine: barcode receiving — purchase order,
+scan, quantity, bin, next.
+
+**Exit.** A delivery is booked in standing up with a scanner in one hand: the
+scan finds the line, a person says how many, the part is shelved in the same
+act, and a box that is not on the order stops the process rather than being
+ignored.
+
+**Status.** Done.
+
+`validateReceipt` has refused a bad receipt since Phase 2, and that is the
+right place for the last word. It is the wrong place for the **first** word.
+By the time a form is submitted the pallet is unloaded, the boxes are on the
+floor, and _"3 received but only 2 outstanding"_ is a puzzle about something
+that happened twenty minutes ago.
+
+**The scan identifies; it never counts.** A tempting design adds one per scan.
+It is fast, and it is how a workshop receives eleven of ten: the scanner
+double-fires, nobody is watching the screen, and the count is wrong in a way
+discovered months later when the stocktake disagrees. So a scan selects a line
+and a person types the number on the box. One more keystroke — and the
+keystroke that makes the figure somebody's rather than the scanner's.
+
+**What is not on this order is said loudly.** The most useful thing this can
+do. A box that scans to a part not on the order means the supplier sent
+something nobody ordered, or this is the wrong order for this pallet, or the
+box belongs to another delivery — and all three are worth stopping for. A
+system that ignored the scan would have the receiver shrug and move on.
+
+Three smaller decisions, each with the same shape as the rest of the product.
+
+A line already fully received says **"you have had all ten of those"** rather
+than being silently skipped. Two open lines of one order for the same part —
+a split delivery, two prices, two dates — is a question, because choosing
+would book the goods against whichever was created first. And the bin defaults
+to where the part already lives: a delivery that made somebody retype the shelf
+every time is a delivery where one part ends up on two shelves, and then
+neither count is right.
+
+**The counting lands in the database as it happens**, one line at a time,
+rather than being held on a page until somebody presses save. A pallet takes
+twenty minutes and a browser tab does not reliably survive twenty minutes of a
+workshop — and the only thing worse than counting a pallet is counting it
+twice. Each count is its own goods receipt, which is what the supplier's own
+paperwork looks like anyway.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

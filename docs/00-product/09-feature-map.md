@@ -933,6 +933,19 @@ The second sweep: things connected at one end only.
 | The passport stays out      | Built  | Its token is stored only as a hash, and that is what keeps a shared link safe (Phase 92) |
 | A refusal explains itself   | Built  | "It was looked for as: job, vehicle, machine, part, bin" (Phase 92)                      |
 
+## 21.55 The box in your hands
+
+| Item                       | Status | Where                                                                         |
+| -------------------------- | ------ | ----------------------------------------------------------------------------- |
+| Scan, quantity, bin, next  | Built  | `/receiving/[id]`, focused for a wedge scanner (Phase 93)                     |
+| The scan never counts      | Built  | It selects a line; a person types the number on the box (Phase 93)            |
+| Not on this order, loudly  | Built  | Three causes, all worth stopping for (Phase 93)                               |
+| Already had them all       | Built  | A settled line says so rather than being skipped (Phase 93)                   |
+| Two lines, one part        | Built  | A split delivery asks rather than booking against the older line (Phase 93)   |
+| Shelved in the same act    | Built  | The bin defaults to where the part already lives (Phase 93)                   |
+| Counted as it happens      | Built  | Each count is its own receipt; nothing is held on a page (Phase 93)           |
+| Over-receipt at the pallet | Built  | Said while the driver is still in the yard, not only at the submit (Phase 93) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1011,7 +1024,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 485          |
+| Built   | 493          |
 | Partial | 2            |
 
 <!-- counts:end -->

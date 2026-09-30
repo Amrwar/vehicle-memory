@@ -6,3 +6,4 @@ export * from './catalogue';
 export * from './returns';
 export * from './sourcing';
 export * from './substitution';
+export * from './receiving';
