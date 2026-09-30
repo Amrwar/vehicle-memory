@@ -5565,6 +5565,77 @@ contained no service package at all, so the feature Phase 37 built had never
 been demonstrable; there is one now, and the two bookings on it next week are
 the promises the diary cannot keep.
 
+## Phase 92 — What was scanned
+
+**Scope.** Item 10 of the thirty-nine: barcode and QR everywhere — vehicle,
+job, part, bin, key tag, inspection, passport.
+
+**Exit.** Everything the workshop prints carries a code, one box resolves
+whatever is pointed at it, and a code that could mean two things asks rather
+than choosing.
+
+**Status.** Done.
+
+The obvious reading of "QR everywhere" is: put a QR on each document. Some of
+that already existed — an invoice, an estimate and a vehicle report have
+carried one since Phase 42. What did not exist was the half that makes them
+worth having: **somewhere for a scan to go.**
+
+**The failure worth designing against is not a scan that fails.** It is a scan
+that succeeds at the wrong record. `10482` is a plausible job number, a
+plausible part number and a plausible bin, and a resolver that tries each in
+turn and takes the first hit will one day book a part out against a car that
+is not on the ramp — silently, because from the outside a right answer and a
+wrong one look identical.
+
+So: everything Carnet prints carries a namespaced code, `CNT:job:cku9…`, which
+is unambiguous by construction. Anything else — a supplier's own barcode, a
+registration somebody typed — is looked up against every kind it could be, and
+**two survivors is a question, never a guess**. The lookups run together rather
+than in turn, which is not only faster: a loop that stopped at the first hit is
+precisely the thing that would open the wrong record.
+
+**A customer's QR is a URL; a workshop's is a code.** An invoice and an
+estimate keep their links, because a customer points a phone at them. A key
+tag, a work order and a part label now carry the code instead — so what is in
+somebody's pocket or on a shelf edge means nothing to whoever picks it up in a
+car park, and resolves in the scan box, which a URL does not.
+
+**The passport is not in the scheme at all**, and the reason is worth writing
+down: a `PassportShare` stores only the _hash_ of its token, so the product
+cannot look one up from a scanned token even if it wanted to — and being unable
+to enumerate them is half of what makes a shared link safe to hand out. Its
+label carries a URL, which a phone camera opens without anything here involved.
+
+The code is deliberately readable rather than hashed. Somebody holding a key
+tag whose QR will not scan — a crease, a thumbprint, a dead scanner — can read
+`CNT:job:cku9x2…` off the label and type the tail in. An opaque code would have
+been shorter and would have left that person with nothing.
+
+Four things this turned up, all by running the check or looking at the page.
+
+A registration is `BV19 FLM` and a machine code is `ALIGN-1`; the first draft's
+shapes allowed neither a space nor a hyphen, so **the two things a workshop
+would most obviously point a scanner at — a windscreen and a machine —
+resolved to nothing.** Plates are now matched the way `search.ts` already
+matches them, against the expression index the schema carries for exactly this,
+rather than by a second way of comparing plates.
+
+The scoping check leant on a job belonging to the other seeded workshop, which
+has none — so it reported its own untestedness instead of testing anything. It
+makes a part of theirs now.
+
+`redirect()` from the page render could not move anybody: the route sits under
+a loading boundary, the shell has streamed by the time the answer is known, and
+the status is settled — **the same constraint Phase 73 found** when
+`notFound()` could not turn a 200 into a 404. The page shows what the code
+resolved to instead, which is the better screen anyway, and the form still goes
+straight there because a server action redirects before anything streams.
+
+And a message with one long unbroken word pushed the job page 172 pixels wider
+than a phone, because `whitespace-pre-wrap` keeps a person's newlines and will
+not break a long word. Unrelated to this phase and found by its check.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

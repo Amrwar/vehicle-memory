@@ -920,6 +920,19 @@ The second sweep: things connected at one end only.
 | Nothing is moved            | Built  | The clash is named; the workshop decides (Phase 91)                               |
 | Silence where it is honest  | Built  | A booking whose work names no machine is never reported (Phase 91)                |
 
+## 21.54 What was scanned
+
+| Item                        | Status | Where                                                                                    |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| One box for everything      | Built  | `/scan`: a key tag, a shelf edge, a job sheet, a windscreen (Phase 92)                   |
+| A namespaced code           | Built  | `CNT:job:…` is unambiguous by construction (Phase 92)                                    |
+| Ambiguity is a question     | Built  | Two matches asks which; it never takes the first (Phase 92)                              |
+| Bare values resolved        | Built  | A registration, a VIN, a part number, a supplier barcode, a bin (Phase 92)               |
+| A plate however it is typed | Built  | `BV19 FLM`, `bv19flm`, `BV19-FLM` — matched by the index that already existed (Phase 92) |
+| Workshop labels carry codes | Built  | Key tag, work order and part label; a customer's documents keep URLs (Phase 92)          |
+| The passport stays out      | Built  | Its token is stored only as a hash, and that is what keeps a shared link safe (Phase 92) |
+| A refusal explains itself   | Built  | "It was looked for as: job, vehicle, machine, part, bin" (Phase 92)                      |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -998,7 +1011,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 477          |
+| Built   | 485          |
 | Partial | 2            |
 
 <!-- counts:end -->

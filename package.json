@@ -94,6 +94,7 @@
     "verify:equipment": "tsx infra/scripts/verify-equipment.ts",
     "verify:versions": "tsx infra/scripts/verify-versions.ts",
     "verify:diary": "tsx infra/scripts/verify-diary.ts",
+    "verify:scanning": "tsx infra/scripts/verify-scanning.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",

@@ -917,3 +917,39 @@ argument that booking an engineer takes a fortnight. A second `overlaps` had
 been written when the capacity rules have answered that since Phase 12. And the
 seed had no service package at all, so the feature Phase 37 built had never
 been demonstrable.
+
+Phase 92 is item 10, barcode and QR everywhere. The obvious reading is: put a
+QR on each document, and some of that existed already — an invoice, an estimate
+and a vehicle report have carried one since Phase 42. What did not exist was
+the half that makes them worth having: somewhere for a scan to go.
+
+The failure worth designing against is not a scan that fails. It is a scan that
+succeeds at the wrong record. `10482` is a plausible job number, a plausible
+part number and a plausible bin, and a resolver that tries each in turn and
+takes the first hit will one day book a part out against a car that is not on
+the ramp — silently, because from the outside a right answer and a wrong one
+look identical.
+
+So everything Carnet prints for itself carries a namespaced code, which is
+unambiguous by construction; anything else is looked up against every kind it
+could be, and two survivors is a question rather than a guess. The lookups run
+together rather than in turn, which is not only faster: a loop that stopped at
+the first hit is precisely the thing that would open the wrong record.
+
+A customer's QR is a URL and a workshop's is a code. An invoice keeps its link,
+because a customer points a phone at it; a key tag carries a code, so what is
+in somebody's pocket means nothing to whoever finds it in a car park. The
+passport is not in the scheme at all — a share stores only the hash of its
+token, so the product could not look one up even if it wanted to, and being
+unable to enumerate them is half of what makes a shared link safe to hand out.
+
+Four faults found by running the check and looking at the page. A registration
+is `BV19 FLM` and a machine code is `ALIGN-1`, and the first draft's shapes
+allowed neither a space nor a hyphen — so the two things a workshop would most
+obviously point a scanner at resolved to nothing. The scoping check leant on a
+job belonging to a workshop that has none, so it reported its own untestedness
+rather than testing anything. `redirect()` from the page render could not move
+anybody, because the route sits under a loading boundary and the shell has
+streamed by the time the answer is known — the same constraint Phase 73 found
+with `notFound()`. And a message with one long word pushed the job page 172
+pixels wider than a phone.

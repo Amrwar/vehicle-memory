@@ -2784,13 +2784,21 @@ export default async function JobPage({
                     <div
                       key={entry.id}
                       className={[
-                        'rounded-(--radius-md) px-3 py-2',
+                        // min-w-0 because this sits in a grid, and a grid item
+                        // will not shrink below its content without it -- which
+                        // is how a message with one long word pushed the whole
+                        // job page 172px wider than a phone.
+                        'min-w-0 rounded-(--radius-md) px-3 py-2',
                         entry.direction === 'out'
                           ? 'ms-4 bg-(--brand-soft)'
                           : 'me-4 border border-(--border)',
                       ].join(' ')}
                     >
-                      <p className="line-clamp-3 whitespace-pre-wrap leading-relaxed">
+                      {/* break-words because `whitespace-pre-wrap` keeps the
+                          newlines a person typed and will not break a long
+                          one: an email address or a URL in a message would
+                          otherwise run off the side of the screen. */}
+                      <p className="line-clamp-3 break-words whitespace-pre-wrap leading-relaxed">
                         {entry.body}
                       </p>
                       <p className="mt-1 text-[11px] text-(--text-faint)">

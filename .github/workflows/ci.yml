@@ -259,6 +259,11 @@ jobs:
       - name: Promises the workshop cannot keep
         run: npx tsx infra/scripts/verify-diary.ts
 
+      # A scan that could mean two things asks, and never picks one: opening
+      # the wrong job looks exactly like opening the right one.
+      - name: What was scanned
+        run: npx tsx infra/scripts/verify-scanning.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

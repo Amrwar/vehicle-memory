@@ -80,6 +80,7 @@ const P = {
     icon: 'capacity',
     permission: 'settings:read',
   },
+  scan: { href: '/scan', label: msg('Scan'), icon: 'parts', permission: 'job:read' },
   patterns: {
     href: '/patterns',
     label: msg('Working hours'),
@@ -299,7 +300,7 @@ const OWNER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
   {
     label: msg('Workshop'),
-    items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.equipment, P.patterns],
+    items: [P.now, P.floor, P.plan, P.scan, P.capacity, P.skills, P.equipment, P.patterns],
   },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },
@@ -342,7 +343,7 @@ const MANAGER: NavSection[] = [
   { label: msg('Dashboard'), items: [P.dashboard] },
   {
     label: msg('Workshop'),
-    items: [P.now, P.floor, P.plan, P.capacity, P.skills, P.equipment, P.patterns],
+    items: [P.now, P.floor, P.plan, P.scan, P.capacity, P.skills, P.equipment, P.patterns],
   },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Jobs'), items: [P.jobs, P.estimates, P.inspections, P.warranty] },

@@ -511,6 +511,15 @@ first six rows and of nothing since.
 
 | Req      | Story | Schema                                                    | Implementation                                                                      | Test                                               | Status |
 | -------- | ----- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | ------ |
+| FR-12501 | CQ1   | -                                                         | `scanCode()`; key tag, work order and part label carry it                           | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
+| FR-12502 | CQ2   | -                                                         | `decideScan()` returns `several`; the lookups run together, not in turn             | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
+| FR-12503 | CQ2   | -                                                         | matches are made unique on kind and id before deciding                              | `scanning.test.ts`, `verify-scanning.ts`           | Done   |
+| FR-12504 | CQ1   | the registration expression index                         | matched as `search.ts` matches it, against the index already there                  | `verify-scanning.ts`                               | Done   |
+| FR-12505 | CQ3   | -                                                         | every lookup is scoped; a vehicle through its jobs                                  | `verify-scanning.ts`                               | Done   |
+| FR-12506 | CQ3   | -                                                         | `whyThoseWereTried()` on the scan screen                                            | `scanning.test.ts`                                 | Done   |
+| FR-12507 | CQ1   | -                                                         | `CNT:kind:id`, readable and typeable, not a hash                                    | `scanning.test.ts`                                 | Done   |
+| FR-12508 | CQ4   | `PassportShare.tokenHash`                                 | no `token` column exists to look up; the label carries `passportUrl()`              | `scanning.test.ts`                                 | Done   |
+| FR-12509 | CQ4   | -                                                         | workshop labels carry codes; customer documents keep URLs                           | `verify-scanning.ts`                               | Done   |
 | FR-12401 | CP1   | `Booking.jobId`, `Booking.packageId`                      | derived by two existing routes; no new column                                       | `verify-diary.ts`                                  | Done   |
 | FR-12402 | CP1   | -                                                         | `usableOn(machine, when)` -- Phase 89's `stateOf` with the booking's date           | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
 | FR-12403 | CP1   | -                                                         | `clashesAmong()` kind NOT_USABLE, carrying machine and reason                       | `scheduling.test.ts`, `verify-diary.ts`            | Done   |
@@ -1219,7 +1228,7 @@ ago reads exactly like a row naming one that is there.
 | The owner's day, sharpened                         | 6                   | 6                      |
 | Every word translated                              | 5                   | 5                      |
 | Tax, configurable                                  | 7                   | 7                      |
-| Later phases, newest first                         | 330                 | 329                    |
+| Later phases, newest first                         | 339                 | 338                    |
 | What people say afterwards                         | 14                  | 14                     |
 | The technician's own device                        | 9                   | 9                      |
 | Proof of everything, and parts that fit            | 8                   | 8                      |
@@ -1237,9 +1246,9 @@ ago reads exactly like a row naming one that is there.
 | Administration and the customer's journey          | 7                   | 7                      |
 | Front door and billing                             | 6                   | 6                      |
 | The first two phases, traced one by one (Phase 61) | 84                  | 80                     |
-| **Total**                                          | **898**             | **890 (99%)**          |
+| **Total**                                          | **907**             | **899 (99%)**          |
 
-Every one of the 898 requirements now has a row of its own. Until Phase 61,
+Every one of the 907 requirements now has a row of its own. Until Phase 61,
 84 did not — Phase 1 and 2 work traced by section rather than by requirement,
 named at the foot of this page for months as a gap somebody would close one
 day. Closing it was not paperwork. It found five requirements the product does

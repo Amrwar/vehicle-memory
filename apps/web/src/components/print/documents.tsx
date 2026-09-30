@@ -19,6 +19,8 @@ import type {
   workOrderDocument,
 } from '@/lib/print';
 
+import { scanCode } from '@carnet/core';
+
 import { formatter, PrintQr, PrintSheet } from './sheet';
 
 /**
@@ -489,7 +491,12 @@ export async function WorkOrderPrint({
             </p>
           ) : null}
         </div>
-        <PrintQr text={doc.link} caption={t('Open the job')} size="24mm" />
+        {/* A code, not a URL. This sheet lives on the bench and a key tag
+            lives in a pocket, so what they carry must mean nothing to
+            whoever picks one up in a car park -- and must resolve in the
+            scan box, which a URL does not. A customer's documents keep
+            their URLs, because a customer points a phone at them. Phase 92. */}
+        <PrintQr text={scanCode('job', job.id)} caption={t('Open the job')} size="24mm" />
       </div>
 
       {job.tasks.length > 0 ? (
@@ -652,7 +659,7 @@ export async function KeyTagPrint({
           ) : null}
           <p className="mt-1 text-[9px] text-[#555]">{reader.letterhead.name}</p>
         </div>
-        <PrintQr text={doc.link} size="22mm" />
+        <PrintQr text={scanCode('job', job.id)} size="22mm" />
       </div>
     </PrintSheet>
   );
@@ -683,7 +690,7 @@ export async function LabelsPrint({
           <div className={`label-grid ${index < doc.sheets.length - 1 ? 'print-page-break' : ''}`}>
             {sheet.map((part, cell) => (
               <div key={`${part.id}-${cell}`} className="label-cell">
-                <PrintQr text={doc.link(part.id)} size="18mm" />
+                <PrintQr text={scanCode('part', part.id)} size="18mm" />
                 <div className="min-w-0">
                   <p className="datum truncate text-[13px] font-bold">{part.partNumber}</p>
                   <p className="text-[10px] leading-tight">{fitText(part.name, 42)}</p>

@@ -1642,6 +1642,60 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CQ - What was scanned (Phase 92)
+
+### CQ1 - Point it at whatever is in front of you
+
+**As** a technician **I want** one box that resolves anything **so that** I do
+not type a job number off a key tag.
+
+**Size** 8 - **Satisfies** FR-12501, FR-12504, FR-12507
+
+- **Given** a key tag, **when** its code is scanned, **then** the job opens.
+- **Given** a windscreen, **when** the registration is typed with a space,
+  **then** the car is found.
+- **Given** a QR that will not scan, **when** the printed code is typed by
+  hand, **then** it resolves the same way.
+
+### CQ2 - Never the wrong record
+
+**As** a service advisor **I want** an ambiguous scan to ask **so that** a part
+is not booked out against a car that is not on the ramp.
+
+**Size** 5 - **Satisfies** FR-12502, FR-12503
+
+- **Given** a number that is both a job and a part, **when** it is scanned,
+  **then** both are offered and neither is opened.
+- **Given** a part matched by its own number and its supplier's barcode,
+  **when** it is scanned, **then** it opens: one record found twice is not an
+  ambiguity.
+
+### CQ3 - Nothing that is not ours
+
+**As** an owner **I want** a scan to find only our records **so that** a label
+from elsewhere cannot open anything here.
+
+**Size** 3 - **Satisfies** FR-12505, FR-12506
+
+- **Given** another workshop's code, **when** it is scanned here, **then**
+  nothing is found.
+- **Given** a value nothing matches, **when** it is scanned, **then** the
+  screen says what it was looked for as.
+
+### CQ4 - What a label may safely carry
+
+**As** an owner **I want** a key tag to mean nothing to a stranger **so that**
+losing one is not handing over a record.
+
+**Size** 3 - **Satisfies** FR-12508, FR-12509
+
+- **Given** a key tag in a car park, **when** somebody scans it, **then** they
+  get a code that opens nothing without a login.
+- **Given** a passport label, **when** a customer points a phone at it,
+  **then** it opens the public passport.
+
+---
+
 ## Epic CP - Promises the workshop cannot keep (Phase 91)
 
 ### CP1 - Knowing weeks early

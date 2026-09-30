@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12500 - What was scanned
+
+| Ref      | Requirement                                                                                                       | Phase |
+| -------- | ----------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12501 | Everything the workshop prints for itself MUST carry a namespaced code that cannot be mistaken for anything else. | 92    |
+| FR-12502 | A scanned value that matches more than one record MUST be presented as a choice, never resolved to one.           | 92    |
+| FR-12503 | One record matched by two routes MUST NOT be reported as an ambiguity.                                            | 92    |
+| FR-12504 | A registration MUST resolve however its spacing and punctuation were typed.                                       | 92    |
+| FR-12505 | A scan MUST resolve only records belonging to the workshop scanning it.                                           | 92    |
+| FR-12506 | A scan that matches nothing MUST say what it was looked for as.                                                   | 92    |
+| FR-12507 | A code MUST remain readable, so it can be typed when a scan fails.                                                | 92    |
+| FR-12508 | A passport MUST NOT be resolvable from a scanned token, and its label MUST carry a URL instead.                   | 92    |
+| FR-12509 | A label a workshop keeps MUST NOT carry a URL that opens a record for whoever finds it.                           | 92    |
+
 ## FR-12400 - Promises the workshop cannot keep
 
 | Ref      | Requirement                                                                                                  | Phase |

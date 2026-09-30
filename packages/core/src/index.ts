@@ -24,6 +24,7 @@ export * from './giftcards/index';
 export * from './region/index';
 export * from './deposits/index';
 export * from './accounting/index';
+export * from './scanning/index';
 export * from './scheduling/index';
 export * from './people/index';
 export * from './multisite/index';

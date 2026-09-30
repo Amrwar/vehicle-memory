@@ -503,6 +503,7 @@ const PLAN: Record<string, Plan> = {
   '/(workshop)/settings/catalogue': { who: 'owner' },
   '/(workshop)/settings/specifications': { who: 'owner' },
   '/(workshop)/equipment': { who: 'owner' },
+  '/(workshop)/scan': { who: 'owner' },
   '/(workshop)/equipment/[id]': {
     who: 'owner',
     path: (r) => `/equipment/${r.equipment}`,
