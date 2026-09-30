@@ -363,16 +363,23 @@ export default async function HomePage() {
                 'Put the next job through it. At the end you will have an invoice, a set of accounts that balance, and one vehicle with a history it keeps for the rest of its life.',
               )}
             </p>
+            {/* On a petrol band the primary action is the near-white the band's own
+                text is set in, not brass. Brass is the focus ring and an
+                accent; using it for the one button on a dark teal panel made
+                the most important control on the page look like a warning
+                label, and it appeared nowhere else in the product as an
+                action. Inverted primary is the ordinary answer and it reads
+                as deliberate. Phase 94. */}
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <Link
                 href="/signup"
-                className="rounded-(--radius-md) bg-(--color-brass-400) px-5 py-3 text-[15px] font-medium text-(--color-petrol-950) shadow-sm transition-opacity hover:opacity-90"
+                className="rounded-(--radius-md) bg-(--color-petrol-50) px-5 py-3 text-[15px] font-semibold text-(--color-petrol-950) shadow-sm transition-colors hover:bg-white"
               >
                 {t('Start a {days}-day trial', { days: TRIAL_DAYS })}
               </Link>
               <Link
                 href="/pricing"
-                className="rounded-(--radius-md) border border-(--color-petrol-700) px-5 py-3 text-[15px] transition-colors hover:bg-(--color-petrol-800)"
+                className="rounded-(--radius-md) border border-(--color-petrol-100)/35 px-5 py-3 text-[15px] font-medium text-(--color-petrol-50) transition-colors hover:border-(--color-petrol-100)/70 hover:bg-(--color-petrol-100)/10"
               >
                 {t('See pricing')}
               </Link>

@@ -5684,6 +5684,60 @@ workshop — and the only thing worse than counting a pallet is counting it
 twice. Each count is its own goods receipt, which is what the supplier's own
 paperwork looks like anyway.
 
+## Phase 94 — Six things somebody found by looking
+
+**Scope.** Not a roadmap item. Six faults reported from the running product in
+one sitting, five of them on the pages a prospective customer sees first.
+
+**Status.** Done.
+
+Worth recording as a phase because of what they have in common: every one was
+invisible to the checks. The suite proves a page answers 200, that its lists
+are bounded, that its words are translated and that it fits a phone. None of
+that notices a button that is not a button.
+
+**A control that was not one.** `JobStandingBand` rendered the next action as a
+brand-coloured `<span>`, so every row of "Where everything stands" carried
+something that looks exactly like a button and did nothing. Worse underneath:
+`JobStanding.next.href` had been in the type since Phase 84 with **nothing
+setting it and nothing reading it** — a field that existed only to make the
+shape look finished. All fifteen actions are done on the job, so the screen
+composes the destination from the job it already has, and the dead field is
+gone.
+
+**Every form was a few pixels out.** `Field` is a grid, and a grid item
+stretches to the height of its row. Without `align-content: start` its own rows
+stretched too — so a field with no hint had its label and control pushed apart
+and sat below a neighbour that had one. One line in the design system; every
+form in the product was affected.
+
+**A page with no way out.** `/verify` is in the public navigation and had no
+header, no footer and no link of any kind. Somebody could arrive from the nav
+and leave only with the browser's back button.
+
+**An anchor that landed nowhere.** "The passport" from another page scrolled
+correctly to 1547 — exactly the section top less the sticky header — and was
+then moved to 732 by the client router restoring its own remembered position.
+Measured rather than guessed. A cross-page anchor is a plain `<a>` now, and the
+browser puts the hash where it has always put it.
+
+**A button in a colour nothing else uses.** Both closing bands set their
+primary action in brass on petrol. Brass is the focus ring and an accent; as
+the one button on a dark teal panel it read as a warning label. The inverted
+primary — the near-white the band's own text is set in — is the ordinary
+answer.
+
+**A table that could be read and not used.** Forty rows into the plan
+comparison, nothing said which column was Core and which was Group. The header
+is sticky now, the marks are centred under their headings instead of pushed to
+the far edge, and the column the cards call "Most chosen" is tinted so it can
+be found.
+
+None of this is a check that was missing. A check that could have caught the
+first one — "nothing that looks like a control is inert" — would be worth
+having and is not obviously writable. What is writable, and is the lesson
+recorded here, is that somebody has to open the product.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

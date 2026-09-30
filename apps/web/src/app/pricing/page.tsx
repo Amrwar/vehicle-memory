@@ -249,13 +249,33 @@ export default async function PricingPage({
 
           <div className="scroll-x mt-8 rounded-(--radius-lg) border border-(--border) bg-(--surface)">
             <table className="w-full border-collapse text-[13px]">
-              <thead>
+              {/* The header stays. Forty rows down, at "Single sign-on",
+                  nothing said which column was Core and which was Group, so
+                  the table could be read and not used -- which is the whole of
+                  what a comparison table is for. `top-14` clears the sticky
+                  site header above it. Phase 94. */}
+              <thead className="sticky top-14 z-10">
                 <tr className="border-b border-(--border)">
-                  <th scope="col" className="p-3.5 text-start font-medium">
+                  <th
+                    scope="col"
+                    className="bg-(--surface) p-3.5 text-start font-medium backdrop-blur"
+                  >
                     <span className="eyebrow">{t('Limits')}</span>
                   </th>
                   {PLAN_ORDER.map((id) => (
-                    <th key={id} scope="col" className="p-3.5 text-end font-semibold">
+                    <th
+                      key={id}
+                      scope="col"
+                      className={cn(
+                        'p-3.5 text-center font-semibold backdrop-blur',
+                        // The column the cards above call "Most chosen" is the
+                        // one somebody came to read. It was indistinguishable
+                        // from the other two.
+                        PLANS[id].popular
+                          ? 'bg-(--brand-soft) text-(--brand-text)'
+                          : 'bg-(--surface)',
+                      )}
+                    >
                       {t(PLANS[id].name)}
                     </th>
                   ))}
@@ -264,14 +284,26 @@ export default async function PricingPage({
 
               <tbody>
                 {LIMIT_ROWS.map((row) => (
-                  <tr key={row.key} className="border-b border-(--border)">
+                  <tr
+                    key={row.key}
+                    className="border-b border-(--border) transition-colors hover:bg-(--surface-sunk)"
+                  >
                     <th scope="row" className="p-3.5 text-start font-normal text-(--text-soft)">
                       {t(row.label)}
                     </th>
                     {PLAN_ORDER.map((id) => {
                       const value = PLANS[id].limits[row.key];
                       return (
-                        <td key={id} className="tabular p-3.5 text-end">
+                        <td
+                          key={id}
+                          className={cn(
+                            // Centred under the heading rather than pushed to
+                            // the far edge: the eye had to cross the whole
+                            // column to pair a mark with its plan.
+                            'tabular p-3.5 text-center',
+                            PLANS[id].popular ? 'bg-(--brand-soft)/40' : '',
+                          )}
+                        >
                           {value >= NO_LIMIT ? (
                             <span className="text-(--text-faint)">{t('No limit')}</span>
                           ) : (
@@ -290,14 +322,23 @@ export default async function PricingPage({
                 </tr>
 
                 {COMPARED.map((feature) => (
-                  <tr key={feature} className="border-b border-(--border) last:border-0">
+                  <tr
+                    key={feature}
+                    className="border-b border-(--border) transition-colors last:border-0 hover:bg-(--surface-sunk)"
+                  >
                     <th scope="row" className="p-3.5 text-start font-normal text-(--text-soft)">
                       {t(capitalise(describeFeature(feature)))}
                     </th>
                     {PLAN_ORDER.map((id) => (
-                      <td key={id} className="p-3.5 text-end">
+                      <td
+                        key={id}
+                        className={cn(
+                          'p-3.5 text-center',
+                          PLANS[id].popular ? 'bg-(--brand-soft)/40' : '',
+                        )}
+                      >
                         {PLANS[id].features[feature] ? (
-                          <span className="inline-flex justify-end">
+                          <span className="inline-flex justify-center">
                             <Tick />
                             <span className="sr-only">{t('Included')}</span>
                           </span>
@@ -385,12 +426,27 @@ export default async function PricingPage({
             <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-(--color-petrol-100)">
               {t('Open a passport and see what a car carries. No account, no form.')}
             </p>
-            <Link
-              href="/p/demo-share-token"
-              className="mt-6 inline-block rounded-(--radius-md) bg-(--color-brass-400) px-5 py-3 text-[15px] font-medium text-(--color-petrol-950) transition-opacity hover:opacity-90"
-            >
-              {t('Open a passport')}
-            </Link>
+            {/* On a petrol band the primary action is the near-white the band's own
+                text is set in, not brass. Brass is the focus ring and an
+                accent; using it for the one button on a dark teal panel made
+                the most important control on the page look like a warning
+                label, and it appeared nowhere else in the product as an
+                action. Inverted primary is the ordinary answer and it reads
+                as deliberate. Phase 94. */}
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/p/demo-share-token"
+                className="rounded-(--radius-md) bg-(--color-petrol-50) px-5 py-3 text-[15px] font-semibold text-(--color-petrol-950) shadow-sm transition-colors hover:bg-white"
+              >
+                {t('Open a passport')}
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-(--radius-md) border border-(--color-petrol-100)/35 px-5 py-3 text-[15px] font-medium text-(--color-petrol-50) transition-colors hover:border-(--color-petrol-100)/70 hover:bg-(--color-petrol-100)/10"
+              >
+                {t('Start a {days}-day trial', { days: TRIAL_DAYS })}
+              </Link>
+            </div>
           </div>
         </section>
       </main>

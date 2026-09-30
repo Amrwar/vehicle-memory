@@ -76,12 +76,32 @@ export async function MarketingHeader({
   );
 }
 
+/**
+ * A link in the public navigation.
+ *
+ * A cross-page anchor -- `/#passport` from `/pricing` -- is a plain `<a>`, not
+ * a `Link`. The client router scrolls to the hash and then restores its own
+ * remembered position on top of it, which landed somebody halfway up an empty
+ * stretch of the home page instead of at the passport. Measured rather than
+ * guessed: the scroll arrived at 1547, exactly the section top less the sticky
+ * header, and was then moved to 732.
+ *
+ * A full document navigation lets the browser put the hash where the browser
+ * has always put it. Nothing is lost: this is a marketing header of four
+ * links, and the page it leads to is the page it leads to.
+ */
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="rounded-(--radius-sm) px-2.5 py-1.5 text-[13px] text-(--text-soft) transition-colors hover:bg-(--surface-sunk) hover:text-(--text)"
-    >
+  const className =
+    'rounded-(--radius-sm) px-2.5 py-1.5 text-[13px] text-(--text-soft) transition-colors hover:bg-(--surface-sunk) hover:text-(--text)';
+
+  const crossPageAnchor = href.includes('#') && !href.startsWith('#');
+
+  return crossPageAnchor ? (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={className}>
       {children}
     </Link>
   );

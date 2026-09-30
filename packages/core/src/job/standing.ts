@@ -68,7 +68,17 @@ export interface JobStanding {
   /** What to say: a translation key and its values. */
   reason: { key: string; vars: Record<string, string | number> };
   /** The one thing to do, or nothing when the move is not ours. */
-  next: { key: string; href?: string } | null;
+  /**
+   * The one thing to do, or nothing when the move is not ours.
+   *
+   * No `href`. It carried one from Phase 84 to Phase 94 and nothing ever set
+   * it, which made the band render a control that could not be pressed. Every
+   * one of these fifteen actions is done on the job, so the screen composes
+   * the destination from the job it already has -- and a field that exists to
+   * make a shape look finished is the thing this product keeps finding and
+   * removing.
+   */
+  next: { key: string } | null;
 }
 
 const MINUTE = 60_000;

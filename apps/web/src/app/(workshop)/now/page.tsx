@@ -122,6 +122,7 @@ export default async function NowPage() {
                   </div>
 
                   <JobStandingBand
+                    href={`/jobs/${job.id}`}
                     standing={job.standing}
                     currency={region.currency}
                     locale={region.locale}

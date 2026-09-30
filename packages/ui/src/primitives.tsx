@@ -275,7 +275,15 @@ export function Field({
   className?: string;
 }) {
   return (
-    <div className={cn('grid min-w-0 gap-1.5', className)}>
+    // content-start, and it is load-bearing.
+    //
+    // A Field is a grid item in the row above it, so it stretches to the
+    // height of the tallest field in that row. Without `align-content: start`
+    // its own rows stretch with it -- so a field with no hint has its label and
+    // control pushed apart, and sits a few pixels below a neighbour that has
+    // one. Every form in the product had its controls off the same baseline
+    // wherever one field carried a hint and another did not.
+    <div className={cn('grid min-w-0 content-start gap-1.5', className)}>
       <label htmlFor={htmlFor} className="text-[12px] font-medium text-(--text-soft)">
         {label}
         {required ? (
