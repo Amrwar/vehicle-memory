@@ -40,6 +40,7 @@ import * as sourcing from './sourcing';
 import * as specification from './specification';
 import * as morning from './morning';
 import * as close from './close';
+import * as opening from './opening';
 
 export const AREAS = [
   publicSite,
@@ -78,4 +79,5 @@ export const AREAS = [
   standing,
   morning,
   close,
+  opening,
 ] as const;

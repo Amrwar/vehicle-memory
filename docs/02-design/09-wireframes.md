@@ -493,3 +493,55 @@ Once the day is closed, the form is replaced by the record — who closed it,
 when, their note, and the sentence that it cannot be edited afterwards. That
 last line is a reason, not an apology: it is what makes the record worth
 keeping.
+
+## 14. What happened while we were shut (Phase 97)
+
+```
+WORKSHOP
+Opening up
+What came in while nobody was here, and whether what last night left is
+still true.
+
+1 thing changed overnight that nobody chose.
+Measured against the close Ahmed Bakri took at Tue 23:10.
+
++-------------------------------------------------------------------------+
+| WHILE NOBODY WAS HERE                                                   |
+| Things customers and the clock did without us.                          |
+|-------------------------------------------------------------------------|
+|  1  1 message came in and nobody has answered it.                  ->   |
+|  1  1 booking was made online.                                     ->   |
++-------------------------------------------------------------------------+
+
++-------------------------------------------------------------------------+
+| WHAT LAST NIGHT LEFT                                                    |
+| Each one as the close recorded it, and as it stands now.                |
+|-------------------------------------------------------------------------|
+| (Worse than last night) 3 sets of keys are not on a hook.  2 last night |
+| (Still there)  4 bank lines are unmatched.                         ->   |
+| (Still there)  3 cars are still on site.                           ->   |
+| (Still there)  3 jobs are still open.                              ->   |
+| (Still there)  3 invoices are unpaid.                              ->   |
+| (Still there)  1 estimate is waiting on a customer.                 ->   |
+| (Settled)      No follow-up is due.                                ->   |
+| (Settled)      No order is overdue.                                ->   |
++-------------------------------------------------------------------------+
+
++-------------------------------------------------------------------------+
+| WHO IS IN                                                               |
+| The rota against the clock. Nobody is accused of anything.              |
+|                                                                         |
+| 1 of 2 expected today have clocked on.                                  |
+| Not yet: John Adeyemi                                                   |
++-------------------------------------------------------------------------+
+```
+
+Eight readings, not ten. Who is clocked on and the state of the till are the
+two the close takes that cannot be compared across a night: the first inverts
+its meaning between six in the evening and eight in the morning, and the second
+belongs to one day. Comparing them reported every ordinary morning's arrivals
+as something that had happened in the dark.
+
+The settled lines stay on the screen. "The keys came back" is the only good
+news a morning screen ever gets to deliver, and a list that dropped it would be
+read as a list of complaints.

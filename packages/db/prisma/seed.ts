@@ -2036,6 +2036,18 @@ async function main() {
 
   await seedSkillsAndPatterns(org.id, { employees: employeeRefs, jobTypeByName });
 
+  /* --- four nights of closing up (Phase 96, read by Phase 97) ------------- */
+
+  await seedCloses(org.id, location.id, ahmed!.id);
+
+  /* --- and a night with something in it (Phase 97) ------------------------ */
+
+  await seedOvernight(org.id, {
+    locationId: location.id,
+    customerId: ahmedCustomer.id,
+    vehicleId: corolla.id,
+  });
+
   /* --- a fleet, and the cover the workshop stands behind (Phase 9) -------- */
 
   await seedFleetAndWarranty(org.id, {
@@ -4301,4 +4313,137 @@ async function seedFitment(orgId: string, products: { id: string; partNumber: st
       },
     });
   }
+}
+
+/**
+ * Four nights of closing up.
+ *
+ * Last night deliberately left two sets of keys and an uncounted till, so that
+ * `/opening` has something to compare this morning against and can show what
+ * it is for: a key that came back, a till still out, something new in the
+ * dark. A seed where every night was tidy would demonstrate nothing.
+ *
+ * Written through `prisma.dayClose` rather than through `closeTheDay`, because
+ * the seed is making history rather than taking a reading -- and the readings
+ * are what a workshop saw on those nights, not what today's database says.
+ */
+async function seedCloses(orgId: string, locationId: string, closedByUserId: string) {
+  const nights: { offset: number; note?: string; counts: Partial<Record<string, number>> }[] = [
+    { offset: -4, counts: {} },
+    {
+      offset: -3,
+      counts: { CARS_ON_SITE: 2, OPEN_JOBS: 3, UNPAID_INVOICES: 2 },
+    },
+    {
+      offset: -2,
+      note: 'Wheel aligner playing up again. Engineer booked for Thursday.',
+      counts: { CARS_ON_SITE: 3, OPEN_JOBS: 3, UNPAID_INVOICES: 3, BANK_UNMATCHED: 4 },
+    },
+    {
+      offset: -1,
+      note: 'Keys for the Corolla went home with Mike by mistake. He is bringing them in.',
+      counts: {
+        KEYS: 2,
+        TILL: 1,
+        CARS_ON_SITE: 3,
+        OPEN_JOBS: 3,
+        UNPAID_INVOICES: 3,
+        ESTIMATES_WAITING: 1,
+        BANK_UNMATCHED: 4,
+      },
+    },
+  ];
+
+  const kinds = [
+    'TILL',
+    'CLOCKED_ON',
+    'KEYS',
+    'CARS_ON_SITE',
+    'OPEN_JOBS',
+    'UNPAID_INVOICES',
+    'ESTIMATES_WAITING',
+    'PARTS_LATE',
+    'BANK_UNMATCHED',
+    'FOLLOW_UPS_DUE',
+  ] as const;
+
+  // The three the close calls out separately, which must agree with
+  // SHOULD_NOT_BE_LEFT in core.
+  const notOvernight = new Set(['TILL', 'CLOCKED_ON', 'KEYS']);
+
+  for (const night of nights) {
+    // Ten past six in the workshop's own evening, not the server's. `day()`
+    // sets hours in server-local time, which on a machine west of London
+    // renders a close at eleven at night -- and this is the one seeded
+    // timestamp a reader sees as a time of day. British clocks are an hour
+    // ahead of UTC through October, so 17:10Z is 18:10 in Manchester.
+    const date = day(night.offset);
+    const on = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const closedAt = new Date(
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 17, 10),
+    );
+
+    await prisma.dayClose.create({
+      data: {
+        orgId,
+        locationId,
+        on,
+        closedAt,
+        closedByUserId,
+        note: night.note ?? null,
+        readings: {
+          create: kinds.map((kind) => {
+            const count = night.counts[kind] ?? 0;
+            return { kind, count, leftOvernight: notOvernight.has(kind) && count > 0 };
+          }),
+        },
+      },
+    });
+  }
+}
+
+/**
+ * What a workshop finds waiting on a Tuesday morning.
+ *
+ * Everything here is timed after last night's close, which is what makes it
+ * visible to `/opening` -- and makes the checks over that list prove something
+ * rather than passing over nothing.
+ */
+async function seedOvernight(
+  orgId: string,
+  refs: { locationId: string; customerId: string; vehicleId: string },
+) {
+  // A text at twenty to ten, which nobody has answered.
+  await prisma.inboundMessage.create({
+    data: {
+      orgId,
+      channel: 'SMS',
+      fromAddress: '+447700900661',
+      body: 'Sorry to message late — is the Corolla going to be ready tomorrow? Need it for work Thursday.',
+      receivedAt: day(-1, 21, 40),
+      customerId: refs.customerId,
+      confidence: 'CERTAIN',
+      matchNote: 'Matched on the mobile number held for this customer.',
+      providerRef: 'seed-overnight-sms-1',
+    },
+  });
+
+  // A booking made from a sofa at a quarter past ten. `ONLINE` and not
+  // `PORTAL`: the source records that nobody keyed it in, and `PORTAL` is a
+  // message channel in this schema rather than a booking source.
+  await prisma.booking.create({
+    data: {
+      orgId,
+      locationId: refs.locationId,
+      customerId: refs.customerId,
+      vehicleId: refs.vehicleId,
+      status: 'SCHEDULED',
+      source: 'ONLINE',
+      startAt: day(3, 11, 0),
+      endAt: day(3, 12, 30),
+      estimatedHours: 1.5,
+      description: 'Air conditioning not cold',
+      createdAt: day(-1, 22, 15),
+    },
+  });
 }

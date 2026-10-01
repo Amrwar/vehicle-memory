@@ -587,3 +587,6 @@ export * from './do-not-miss';
 
 /** What was true when the doors shut. Phase 96. */
 export * from './close-of-day';
+
+/** What happened while we were shut. Phase 97. */
+export * from './start-of-day';

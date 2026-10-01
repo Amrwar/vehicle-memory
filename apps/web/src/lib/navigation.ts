@@ -59,6 +59,13 @@ const P = {
     permission: 'job:read',
   },
   today: { href: '/dashboard', label: msg('Today'), icon: 'dashboard', permission: 'job:read' },
+  opening: {
+    href: '/opening',
+    label: msg('Opening up'),
+    icon: 'start',
+    // It writes nothing: this is the one screen in the pair that only reads.
+    permission: 'job:read',
+  },
   morning: {
     href: '/morning',
     label: msg('Do not miss'),
@@ -323,6 +330,7 @@ const OWNER: NavSection[] = [
   {
     label: msg('Workshop'),
     items: [
+      P.opening,
       P.morning,
       P.now,
       P.floor,
@@ -377,6 +385,7 @@ const MANAGER: NavSection[] = [
   {
     label: msg('Workshop'),
     items: [
+      P.opening,
       P.morning,
       P.now,
       P.floor,
@@ -410,7 +419,7 @@ const MANAGER: NavSection[] = [
  * they have been quoted, what they have said, and what they have paid.
  */
 const SERVICE_ADVISOR: NavSection[] = [
-  { label: msg('Today'), items: [P.today, P.now, P.floor, P.close] },
+  { label: msg('Today'), items: [P.today, P.opening, P.now, P.floor, P.close] },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },

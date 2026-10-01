@@ -1642,6 +1642,55 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CU - What happened while we were shut (Phase 97)
+
+### CU1 - Unlocking the door and knowing what the night did
+
+**As** an owner **I want** to see what arrived while nobody was here **so
+that** I am not finding out about a customer's message at eleven o'clock.
+
+**Size** 8 - **Satisfies** FR-12901, FR-12907, FR-12908
+
+- **Given** a text sent at twenty to ten that nobody has answered, **when** I
+  open up, **then** it is on the screen.
+- **Given** a booking made online overnight, **when** I open up, **then** it is
+  counted.
+- **Given** a clock the overnight sweeper closed for somebody, **when** I open
+  up, **then** I am told, because nothing else in the product ever told me.
+
+### CU2 - Finding out whether last night is still true
+
+**As** an owner **I want** last night's close compared with this morning **so
+that** I know whether the keys came back and whether anything happened in the
+dark.
+
+**Size** 8 - **Satisfies** FR-12902, FR-12904, FR-12905, FR-12906
+
+- **Given** a close that left two sets of keys loose and three loose now,
+  **when** I open up, **then** it is reported as something nobody chose.
+- **Given** keys that came back overnight, **when** I open up, **then** it says
+  so rather than going quiet.
+- **Given** an ordinary morning where people have clocked on, **when** I open
+  up, **then** that is not reported as something that happened in the dark.
+
+### CU3 - Who is in, without accusing anybody
+
+**As** a manager **I want** the rota against the clock **so that** I can see
+who is not here yet.
+
+**Size** 5 - **Satisfies** FR-12903, FR-12909, FR-12910
+
+- **Given** two people expected and one clocked on, **when** I open up,
+  **then** the other is named as not yet in.
+- **Given** somebody clocked on who is not on today's rota, **when** I open up,
+  **then** they are named, because it is a swap nobody recorded or a mistake.
+- **Given** no close in the last week, **when** I open up, **then** the screen
+  says so rather than inventing a comparison.
+- **Given** I open the screen twice, **when** anything is counted, **then**
+  nothing in the database has changed.
+
+---
+
 ## Epic CT - What was true when the doors shut (Phase 96)
 
 ### CT1 - Locking up without walking the building twice

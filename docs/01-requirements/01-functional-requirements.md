@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12900 - What happened while we were shut
+
+| Ref      | Requirement                                                                                                     | Phase |
+| -------- | --------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12901 | One screen MUST say what arrived while the workshop was shut, and whether what the close left is still true.    | 97    |
+| FR-12902 | The comparison MUST be against the most recent close for that site, and MUST name who took it.                  | 97    |
+| FR-12903 | Where there is no close within a week, the screen MUST say so rather than compare against an assumed time.      | 97    |
+| FR-12904 | Only readings that mean the same thing at both ends of a day MUST be compared.                                  | 97    |
+| FR-12905 | A reading that was nought at the close and is not now MUST be reported apart from what somebody chose to leave. | 97    |
+| FR-12906 | A reading that has been cleared MUST still be shown, as settled.                                                | 97    |
+| FR-12907 | Arrivals MUST be derived from the source records, never from the per-person notification feed.                  | 97    |
+| FR-12908 | A clock closed automatically overnight MUST be shown to somebody.                                               | 97    |
+| FR-12909 | Who is expected today MUST be the rota less approved absence, and MUST be shown against who has clocked on.     | 97    |
+| FR-12910 | Opening up MUST write nothing.                                                                                  | 97    |
+
 ## FR-12800 - What was true when the doors shut
 
 | Ref      | Requirement                                                                                                         | Phase |

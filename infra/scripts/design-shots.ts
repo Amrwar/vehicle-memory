@@ -225,6 +225,7 @@ async function main() {
     { file: 'now', path: '/now', who: 'owner', fullPage: true },
     { file: 'morning', path: '/morning', who: 'owner', fullPage: true },
     { file: 'close', path: '/close', who: 'owner', fullPage: true },
+    { file: 'opening', path: '/opening', who: 'owner', fullPage: true },
     { file: 'floor', path: '/floor', who: 'owner' },
     { file: 'job', path: `/jobs/${r.job}`, who: 'owner', fullPage: true },
     { file: 'check-in', path: `/jobs/${r.job}/check-in`, who: 'owner', fullPage: true },

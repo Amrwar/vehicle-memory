@@ -95,6 +95,14 @@ export const fr = {
   'No follow-up is due.': 'Aucune relance n’est à faire.',
   '1 follow-up is due.': '1 relance est à faire.',
   '{count} follow-ups are due.': '{count} relances sont à faire.',
+  // What the rules say when they refuse. Keyed with {v1}, {v2} as the scanner
+  // normalises them.
+  'That day was closed at {v1} by {v2}.': 'Cette journée a été fermée à {v1} par {v2}.',
+  'A close must answer all ten readings. Missing: {v1}.':
+    'Une fermeture doit répondre aux dix relevés. Manquant : {v1}.',
+  'A close answers each reading once.': 'Une fermeture répond une seule fois à chaque relevé.',
+  'A reading is a whole count of things, and {v1} was {v2}.':
+    'Un relevé est un décompte entier, et {v1} valait {v2}.',
 };
 
 export const ar = {
@@ -166,4 +174,10 @@ export const ar = {
   'No follow-up is due.': 'لا توجد متابعة مستحقة.',
   '1 follow-up is due.': 'متابعة واحدة مستحقة.',
   '{count} follow-ups are due.': '{count} متابعات مستحقة.',
+  'That day was closed at {v1} by {v2}.': 'أُغلق ذلك اليوم في {v1} بواسطة {v2}.',
+  'A close must answer all ten readings. Missing: {v1}.':
+    'يجب أن يجيب الإغلاق عن القراءات العشر جميعها. الناقص: {v1}.',
+  'A close answers each reading once.': 'يجيب الإغلاق عن كل قراءة مرة واحدة.',
+  'A reading is a whole count of things, and {v1} was {v2}.':
+    'القراءة عدد صحيح من الأشياء، وكانت {v1} تساوي {v2}.',
 };

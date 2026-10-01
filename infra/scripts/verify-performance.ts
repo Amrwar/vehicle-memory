@@ -230,6 +230,23 @@ async function budgetsFor(orgId: string): Promise<Budget[]> {
         }
       : null,
 
+    // The two ends of the day. `/opening` counts seven things over a one-night
+    // window, three of them on columns with no index of their own, so it is
+    // measured rather than assumed -- an index bought on a guess is paid for
+    // by every write for the life of the product.
+    {
+      screen: 'Opening up',
+      path: '/opening',
+      p95: 800,
+      because: `${judged} It compares ten readings with last night's close and counts seven kinds of arrival.`,
+    },
+    {
+      screen: 'Closing the day',
+      path: '/close',
+      p95: 800,
+      because: `${judged} Ten readings at once, each a different table.`,
+    },
+
     // Judged here, and said to be
     {
       screen: 'The dashboard',

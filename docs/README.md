@@ -1060,3 +1060,27 @@ critical remote-code-execution advisory against `next/og`, which this product
 uses for its app icon; a verify script that did not compile under the stricter
 `infra` config, hiding a probe that would have measured nothing on a tidy
 morning; and a duplicate key in a Prisma `where` from Phase 88.
+
+Phase 97 is item 38, which the plan gives six words: "Start-of-day, the mirror
+of it." The lazy reading would be ten more readings and a second record table,
+and it would give the product two morning screens, because `/morning` already
+says what to do today. What this screen owns is a different question: what
+arrived while nobody was here, and is what we left last night still true?
+
+The second half is askable only because Phase 96 stored its figures rather than
+deriving them. A close that recomputed itself could never be compared with
+anything; one that wrote down "two sets of keys were not on a hook" can be
+asked at eight the next morning whether they are now. It is the strongest
+argument ADR-0020 has, and it is why this is item 38 and the close is item 37.
+
+It records nothing. The mirror is in the ritual, not the mechanism: the close
+stores because its subject is a moment that passes, and this screen's subject
+is now.
+
+The first run against real data found the design's one serious fault. The draft
+compared all ten of the close's readings, and reported "clocked on, was 0, is
+1" as something that had happened in the dark — which is somebody arriving for
+work. At the close that reading means a person is still here who should have
+gone home; in the morning it means people have arrived. Same column, opposite
+meanings, and a screen that cries wolf every morning is not read by Friday.
+Eight readings survive a night; the other two are the clock and the till.

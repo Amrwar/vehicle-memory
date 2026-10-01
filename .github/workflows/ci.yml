@@ -283,6 +283,12 @@ jobs:
       - name: What was true when the doors shut
         run: npx tsx infra/scripts/verify-close.ts
 
+      # The morning is measured against a real close, of the eight readings
+      # that mean the same thing at both ends of a day -- and it writes
+      # nothing, which is checked by counting rows before and after.
+      - name: What happened while we were shut
+        run: npx tsx infra/scripts/verify-opening.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

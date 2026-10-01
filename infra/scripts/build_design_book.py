@@ -1076,6 +1076,29 @@ def build() -> None:
         source="docs/00-product/06-roadmap.md, Phase 96; docs/03-adr/0020-a-close-is-testimony.md",
     )
 
+    design(
+        doc,
+        title="The night, answered",
+        when="Phase 97, 1 October 2026.",
+        why="The plan gives this six words — “Start-of-day, the mirror of it” — and the lazy "
+            "reading is ten more readings and a second record, which would give the product two "
+            "morning screens. What this one owns is a different question: what arrived while nobody "
+            "was here, and is what we left last night still true? The second half is askable only "
+            "because the close stored its figures rather than deriving them.",
+        meaning=[
+            "Eight readings, not ten. Who is clocked on inverts between six in the evening and eight in the morning, and a till belongs to one day.",
+            "What nobody chose — new or worse — is read before what somebody deliberately left.",
+            "Settled lines stay on the screen, because “the keys came back” is the only good news a morning ever gets to give.",
+        ],
+        works="It records nothing: the mirror is in the ritual, not the mechanism. The arrivals are "
+              "derived from the source records rather than from the notification feed, whose writer "
+              "swallows its own errors — so a missing notification is not evidence that nothing "
+              "happened, and a morning screen built on it would be wrong on exactly the mornings "
+              "that matter.",
+        shots=[("opening", "Opening up.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 97; docs/01-requirements/01-functional-requirements.md, FR-12900",
+    )
+
     # 19. Refusals
     doc.add_heading("19. What the design refuses to do", level=1)
     para(doc, "Some of the strongest decisions are absences, and a reader of this book should know them.")

@@ -506,6 +506,7 @@ const PLAN: Record<string, Plan> = {
   '/(workshop)/scan': { who: 'owner' },
   '/(workshop)/morning': { who: 'owner' },
   '/(workshop)/close': { who: 'owner' },
+  '/(workshop)/opening': { who: 'owner' },
   '/(workshop)/receiving': { who: 'owner' },
   '/(workshop)/receiving/[id]': {
     who: 'owner',

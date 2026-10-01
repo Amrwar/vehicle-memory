@@ -973,6 +973,20 @@ The second sweep: things connected at one end only.
 | And it never refuses     | Built  | A workshop may close with everything outstanding (Phase 96)                   |
 | The workshop's own day   | Built  | `businessDay()` in the site's zone, with a four-in-the-morning cut (Phase 96) |
 
+## 21.58 What happened while we were shut
+
+| Item                       | Status | Where                                                                              |
+| -------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| One screen for opening up  | Built  | `/opening`, first in the Workshop section (Phase 97)                               |
+| Measured against the close | Built  | This site's most recent close, within a week, named by who took it (Phase 97)      |
+| Only what survives a night | Built  | Eight of the ten; the clock inverts and a till belongs to one day (Phase 97)       |
+| What nobody chose, first   | Built  | New and worse above still-there; settled kept, because the keys coming back counts |
+| What arrived overnight     | Built  | Messages, approvals, online bookings, card payments, claims, reviews (Phase 97)    |
+| Clocks closed for somebody | Built  | The overnight sweeper's flag, which nothing had ever shown anybody (Phase 97)      |
+| The rota against the clock | Built  | Expected today less approved absence, against who has clocked on (Phase 97)        |
+| It records nothing         | Built  | Rows counted before and after by `verify-opening` (Phase 97)                       |
+| No close, said plainly     | Built  | Rather than quietly comparing with this time yesterday (Phase 97)                  |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1051,7 +1065,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 510          |
+| Built   | 519          |
 | Partial | 2            |
 
 <!-- counts:end -->

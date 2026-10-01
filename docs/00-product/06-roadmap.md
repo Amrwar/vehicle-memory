@@ -5986,6 +5986,108 @@ database enum calls it. And `Left` as a badge already meant _departed_ in the
 people area, which is a different word in every language; the pair is Settled
 and Outstanding.
 
+## Phase 97 — What happened while we were shut
+
+**Scope.** Item 38 of the thirty-nine, which the plan gives six words:
+"Start-of-day, the mirror of it."
+
+**Exit.** Somebody unlocking the door reads what arrived overnight, and whether
+what last night's close left is still true, on one screen that records nothing.
+
+**Status.** Done.
+
+Six words is not a specification, and the lazy reading of them is the thing to
+avoid: ten more readings and a second record table, mirroring Phase 96 field
+for field. That would give the product **two morning screens** — `/morning`
+already says what to do today and says it better — and a second ritual nobody
+asked for.
+
+The question this screen owns, and no other screen in the product can answer,
+is: **what arrived while nobody was here, and is what we left last night still
+true?**
+
+The second half is askable only because Phase 96 stored its figures. A close
+that recomputed itself could never be compared with anything; one that wrote
+down "two sets of keys were not on a hook" can be asked at eight the next
+morning whether they are now. That is the whole reason this is item 38 and the
+close is item 37, and it is the strongest argument ADR-0020 has.
+
+**It records nothing.** The mirror is in the ritual, not the mechanism. The
+close stores because its subject is a moment that passes and is otherwise
+unrecoverable; this screen's subject is _now_, and now is derivable. A second
+table added for the symmetry of it would be a shape that looks finished.
+`verify-opening` counts rows before and after reading the morning and fails if
+any moved.
+
+**Three bands, and the middle one is the new work.** What arrived while nobody
+was here — messages nobody has answered, estimates a customer decided, bookings
+made from a sofa, card payments, cars drivers asked to claim, reviews that came
+back, and clocks the overnight sweeper closed for somebody. That last one was
+already being recorded with a comment in `packages/jobs` saying a manager
+should see it, and until now **nothing showed it to anybody**, which is as good
+as not recording it.
+
+Deliberately derived from the source records and not from `StaffNotification`,
+which exists, is per-person and read-marked, and whose writer swallows its own
+errors — so the absence of a notification is not evidence that nothing
+happened, and a morning screen built on it would be quietly wrong on exactly
+the mornings that matter.
+
+**And the rota against the clock.** The product has known who is expected since
+Phase 48 and who has clocked on since Phase 23, and has never put the two side
+by side. Nobody is accused of anything: half past eight is not late for a
+workshop that opens at nine, and the product does not know the difference while
+the person reading it does.
+
+### What the first run against real data found
+
+**Two of the ten readings do not survive a night, and the draft compared all
+ten.** The first run reported:
+
+```
+NEW   clocked-on   was 0 -> is 1
+```
+
+which is somebody arriving for work. At the close, "clocked on" means somebody
+is still here who should have gone home; in the morning it means people have
+arrived. Same column, opposite meanings — so a straight diff reports **every
+ordinary morning** as something that happened in the dark, and a screen that
+cries wolf daily is not read by Friday. The till is the same fault more
+quietly: a till session belongs to one day, so last night's count and this
+morning's absence of a session are not two readings of one thing. It happened
+to report "settled", which is the right word for entirely the wrong reason.
+
+Eight remain, and they are the ones that mean the same thing at both ends of a
+day. The filtering lives in `theHandover` rather than in its caller, because a
+rule about which readings may be compared belongs with the comparison.
+
+None of this was visible from the types, the tests, or the screen. It took
+running the thing against a real database and reading the output.
+
+**And two more that only the rendered page could show.** The demonstration
+workshop was closing at 23:10, because the seed's `day()` helper sets hours in
+the _server's_ local time and this is the first seeded timestamp ever displayed
+to a reader as a time of day rather than a date. And "1 of 2 expected today
+have clocked on" is right for most numbers and wrong for one, with a count that
+varies — reworded so the verb never has to agree with it.
+
+**And CI caught what Phase 96 missed.** Four sentences the close _throws_ when
+it refuses — "That day was closed at {v1} by {v2}", and the three ways a set of
+readings can be unfit to record — shipped with no French or Arabic.
+`i18n-scan` is three gates, not one: text that never reached the translator,
+page sentences with no answer, and sentences a rule throws. Phase 96 ran the
+first two. Passing two proves nothing about the third, and the only reason this
+was a day's miss rather than a year's is that Actions started working again the
+same evening.
+
+**And a check that proved nothing.** "Nothing arrived twice" passed over an
+empty list, because the seeded workshop had no overnight activity at all — the
+self-skipping check of Phase 89 for the third time this month. The honest fix
+was data rather than a weaker assertion: the demonstration workshop now closes
+its days and finds a text and an online booking waiting on a Tuesday morning,
+and the check that the night has something in it comes _first_, so the vacuity
+cannot come back unnoticed.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here
