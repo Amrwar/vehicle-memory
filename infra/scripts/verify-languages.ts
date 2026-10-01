@@ -139,7 +139,7 @@ async function main() {
     { path: '/portal/settings', cookie: driverCookie, sentence: 'Your details' },
     { path: '/dashboard', cookie: ownerCookie, sentence: 'Diary' },
     // The workshop's own pages, translated in Phase 40.5.
-    { path: '/dashboard', cookie: ownerCookie, sentence: 'Jobs today' },
+    { path: '/dashboard', cookie: ownerCookie, sentence: 'Vehicles in shop' },
     { path: '/reputation', cookie: ownerCookie, sentence: 'How it is moving' },
     { path: '/people', cookie: ownerCookie, sentence: 'Productivity' },
     { path: '/settings', cookie: ownerCookie, sentence: 'Subscription' },
