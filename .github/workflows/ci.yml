@@ -296,6 +296,12 @@ jobs:
       - name: The control tower
         run: npx tsx infra/scripts/verify-tower.ts
 
+      # Every record a job carries, in one order, with who did it: the
+      # actor read off the record, or off the audit row for the act, and
+      # never guessed. Checked against a job built with known timings.
+      - name: Minute by minute
+        run: npx tsx infra/scripts/verify-story.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

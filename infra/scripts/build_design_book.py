@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 98.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 99.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -372,6 +372,24 @@ def build() -> None:
         works="Nothing is computed twice: the building is the board's function, the capacity is the planner's, the rota is opening-up's, the morning's list is /morning's. The page re-reads itself while it is looked at and writes nothing, and both are checked.",
         shots=[("dashboard", "The control tower.", 16.4)],
         source="docs/02-design/09-wireframes.md, section 2; docs/00-product/06-roadmap.md, Phase 98",
+    )
+    design(
+        doc,
+        title="Minute by minute: the story of a job",
+        when="Phase 99, 1 October 2026.",
+        why="The job page shows everything that happened in eleven cards, each in its own order. "
+            "Somebody answering why a job took nine days, or reading a comeback's original job back "
+            "from the start, needs the same records in one order: by the workshop's days, with who "
+            "acted and on which side, and the silences drawn between the days they separate.",
+        meaning=[
+            "The badge on each line is the side: the workshop, the customer, or the product on its own. A reminder the sweeper sent is the product's, not a person's.",
+            "A line between two days is a day or more with nothing recorded, and says how long. The phrase is about the record, not the workshop.",
+            "Where a record names its actor the name is shown; where only the audit row does, that name; where neither, nobody. Nothing is guessed.",
+            "Every sentence links to the record it came from.",
+        ],
+        works="Nothing is stored or inferred, and the order is fixed in core and tested: time, then the act before what was said about it, then the id, so the page is the same twice.",
+        shots=[("story", "Minute by minute.", 16.4)],
+        source="docs/02-design/09-wireframes.md, section 2.1; docs/00-product/06-roadmap.md, Phase 99",
     )
 
     # 6. Diary and floor

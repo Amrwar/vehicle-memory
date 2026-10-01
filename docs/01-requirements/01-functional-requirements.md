@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-13100 - Minute by minute
+
+| Ref      | Requirement                                                                                                                                                                                                                                                                | Phase |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-13101 | One page under a job MUST show every timestamped record the job carries in one order: status moves, messages both ways, the estimate and its decisions, clocks, parts, sublets, checks, notes, photos, the invoice and payments, keys, follow-ups, check-in and check-out. | 99    |
+| FR-13102 | Every line MUST name who acted where the record or the audit row for the act says, and MUST name nobody rather than guess where neither does.                                                                                                                              | 99    |
+| FR-13103 | Every line MUST say on which side it happened: the workshop, the customer, or the product on nobody's behalf.                                                                                                                                                              | 99    |
+| FR-13104 | A message the product sent on a schedule MUST be counted as the product's, apart from one a person sent.                                                                                                                                                                   | 99    |
+| FR-13105 | Lines in the same instant MUST be ordered with the act before what was said about it, and the order MUST be the same on every reading.                                                                                                                                     | 99    |
+| FR-13106 | The page MUST break the story into the workshop's own days, in its own zone.                                                                                                                                                                                               | 99    |
+| FR-13107 | A day or more with nothing recorded MUST be drawn between the days it separates, and the longest MUST be shown with the last thing done before it.                                                                                                                         | 99    |
+| FR-13108 | The sentence at the top MUST count the moments, the span, and how many were by the workshop, by the customer and by the product.                                                                                                                                           | 99    |
+| FR-13109 | A status move MUST carry the status itself, so the sentence is translated whole.                                                                                                                                                                                           | 99    |
+| FR-13110 | The story MUST write nothing and MUST be readable only by the job's own workshop.                                                                                                                                                                                          | 99    |
+
 ## FR-13000 - The control tower
 
 | Ref      | Requirement                                                                                                                                                                                  | Phase |

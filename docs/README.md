@@ -1105,3 +1105,18 @@ be late and does not know it yet.
 It refreshes itself every five minutes while it is looked at, says when it
 last did, and writes nothing. "Today" is now the workshop's own day, from
 midnight in the site's zone, which the earlier dashboard took from the server.
+
+Phase 99 begins the customer group of the thirty-nine with the unified
+communication timeline per job: `/jobs/{id}/story`, every record the job
+carries in one order, by the workshop's own days, with who did it and on which
+side. The job page already showed all of it in eleven cards; the story is the
+same rows in the order they happened, for the person answering "why did this
+take nine days" or reading a comeback's original job back from the start.
+
+Nothing is inferred. Where a record names its actor the actor is named; where
+only the audit row for the act does, that name is used; where neither does,
+the line names nobody rather than guessing. A reminder the product sent on a
+schedule is the product's, counted apart from a call a person made. The
+silences — a day or more with nothing recorded — are drawn between the days
+they separate, and the longest is at the top with the last thing done before
+it, because that is what a reader of a complaint is looking for.

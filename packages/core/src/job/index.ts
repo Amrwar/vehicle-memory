@@ -8,3 +8,4 @@ export * from './workflow';
 export * from './arrival';
 export * from './packages';
 export * from './followups';
+export * from './story';

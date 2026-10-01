@@ -1006,6 +1006,21 @@ The second sweep: things connected at one end only.
 | The workshop's own day         | Built  | Local midnight in the site's zone, shared by money, diary and arrivals (Phase 98)         |
 | It records nothing             | Built  | Rows counted before and after by `verify-tower` (Phase 98)                                |
 
+## 21.60 Minute by minute
+
+| Item                       | Status | Where                                                                                          |
+| -------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| One page, one order        | Built  | `/jobs/{id}/story`: every timestamped record the job carries, by day (Phase 99)                |
+| Who acted, never guessed   | Built  | The record's actor, else the audit row for the act, else nobody (Phase 99)                     |
+| Three sides                | Built  | The workshop, the customer, the product on its own; counted apart at the top (Phase 99)        |
+| The product's own sends    | Built  | A reminder the sweeper sent is the product's, not a person's (Phase 99)                        |
+| The same instant, in order | Built  | The act before what was said about it; the id last, so the page is the same twice (Phase 99)   |
+| The workshop's own days    | Built  | Broken by date in the site's zone (Phase 99)                                                   |
+| The silences               | Built  | A day or more with nothing recorded, drawn between the days; the longest at the top (Phase 99) |
+| Whole sentences            | Built  | A status move carries the status, so the line is translated whole (Phase 99)                   |
+| From the job               | Built  | "Minute by minute" beside "Whole thread" on the conversation card (Phase 99)                   |
+| It writes nothing          | Built  | Rows counted before and after by `verify-story` (Phase 99)                                     |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1084,7 +1099,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 533          |
+| Built   | 543          |
 | Partial | 2            |
 
 <!-- counts:end -->

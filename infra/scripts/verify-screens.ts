@@ -409,6 +409,7 @@ const PLAN: Record<string, Plan> = {
   '/(workshop)/jobs/[id]': { who: 'owner', path: (r) => `/jobs/${r.job}` },
   '/(workshop)/jobs/[id]/check-in': { who: 'owner', path: (r) => `/jobs/${r.job}/check-in` },
   '/(workshop)/jobs/[id]/check-out': { who: 'owner', path: (r) => `/jobs/${r.job}/check-out` },
+  '/(workshop)/jobs/[id]/story': { who: 'owner', path: (r) => `/jobs/${r.job}/story` },
   '/(workshop)/bookings/new': { who: 'owner' },
   '/(workshop)/bookings/[id]': { who: 'owner', path: (r) => `/bookings/${r.booking}` },
   '/(workshop)/inspections': { who: 'owner' },

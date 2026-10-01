@@ -103,6 +103,48 @@ component the job's own page shows, from the same function, so the two cannot
 disagree. The page re-reads itself every five minutes while it is visible and
 says at the top when it last did.
 
+## 2.1 Minute by minute — the story of a job (Phase 99)
+
+```
+< Job #10482
+#10482 · MK20 XRT · BMW X5 · Maria Okonkwo
+MINUTE BY MINUTE
+Brake system repair. 14 moments over 4 days: 10 by the workshop, 3 by the
+customer, 1 by the product on its own.
+
++------------------+------------------------+--------------------------+
+| FROM FIRST TO    | MESSAGES               | LONGEST SILENCE          |
+| LAST   4 days    | 1 out, 1 in            | 2 days                   |
+| 25 Sep to 29 Sep | Both ways, people and  | After: Estimate v1 sent  |
+|                  | the product            |                          |
++------------------+------------------------+--------------------------+
+
++--THURSDAY 25 SEPTEMBER 2026 --------------------------- 6 moments --+
+| 09:00  (o) Workshop   Job opened — Ahmed Bakri                      |
+| 09:10  (o) Workshop   Moved to Received — Ahmed Bakri               |
+|                       keys on B7, customer waiting                  |
+| 09:11  (o) Workshop   Car checked in — Ahmed Bakri                  |
+| 09:12  (o) Workshop   Keys hung on hook B7 — Ahmed Bakri            |
+| 09:30  (o) Workshop   Estimate v1 sent  £240.00 — Ahmed Bakri       |
++---------------------------------------------------------------------+
+------------------------ 2 days with nothing recorded ------------------
++--SUNDAY 28 SEPTEMBER 2026 ------------------------------ 3 moments --+
+| 09:00  ( ) The product  The product sent a text message             |
+|                         Your estimate is waiting for a decision…    |
+| 14:00  (*) Customer   The customer sent a text message — Maria O.   |
+|                       Yes go ahead                                  |
+| 14:10  (*) Customer   Estimate v1 approved  £240.00 — Maria Okonkwo |
++---------------------------------------------------------------------+
+```
+
+**One order, three sides, and the silences drawn.** The time column is the
+workshop's clock. The badge is the side — workshop, customer, or the product
+on its own — and it is a scale of three, not a label. A line between two day
+cards is a day or more with nothing recorded, in the warning colour, and says
+how long; the longest is a tile at the top with the last thing done before
+it. Every sentence links to the record it came from. Reached from the
+conversation card on the job page, beside "Whole thread".
+
 ## 3. Job detail — the central screen
 
 ```

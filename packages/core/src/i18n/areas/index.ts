@@ -42,6 +42,7 @@ import * as morning from './morning';
 import * as close from './close';
 import * as opening from './opening';
 import * as tower from './tower';
+import * as story from './story';
 
 export const AREAS = [
   publicSite,
@@ -82,4 +83,5 @@ export const AREAS = [
   close,
   opening,
   tower,
+  story,
 ] as const;

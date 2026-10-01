@@ -76,6 +76,7 @@ way to find that out is to press the button rather than to read the schema.
 | Settings              | Built  | `/settings`: the organisation, the site and its bays and hours, tax rates, kinds of work, document prefixes and API keys, every change audited (Phase 19).                                                                |
 | Ask                   | Built  | `/ask`: a closed vocabulary of questions answered from the records with the working shown; anything else refused (Phase 17).                                                                                              |
 | The control tower     | Built  | `/dashboard`: the building and what blocks each car, today's hours and rota, the customers waiting, the money, the parts in the way, and what will cost something by closing time; re-reads itself while open (Phase 98). |
+| Minute by minute      | Built  | `/jobs/{id}/story`: every record a job carries in one order, by day, with who acted and on which side, and the silences drawn (Phase 99).                                                                                 |
 
 ## ERP and business side
 

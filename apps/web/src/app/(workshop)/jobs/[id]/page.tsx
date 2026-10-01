@@ -2770,11 +2770,16 @@ export default async function JobPage({
                   : undefined
               }
               action={
-                conversation ? (
-                  <Link href={`/inbox?c=${conversation.id}`} className="text-[12px] underline">
-                    {t('Whole thread')}
+                <span className="flex flex-wrap items-center gap-3 text-[12px]">
+                  {conversation ? (
+                    <Link href={`/inbox?c=${conversation.id}`} className="underline">
+                      {t('Whole thread')}
+                    </Link>
+                  ) : null}
+                  <Link href={`/jobs/${job.id}/story`} className="underline">
+                    {t('Minute by minute')}
                   </Link>
-                ) : null
+                </span>
               }
             />
             <CardBody className="grid gap-3 text-[13px]">

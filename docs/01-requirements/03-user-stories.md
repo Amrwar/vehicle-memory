@@ -1642,6 +1642,54 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CW - Minute by minute (Phase 99)
+
+### CW1 - Reading a job back from the start
+
+**As** a service advisor **I want** every record on a job in one order **so
+that** when a customer rings to ask why it took nine days I can answer from
+one page rather than eleven cards.
+
+**Size** 8 - **Satisfies** FR-13101, FR-13105, FR-13106, FR-13109, FR-13110
+
+- **Given** a job with a status move and the note written with it in the same
+  minute, **when** I read the story, **then** the move comes first and the note
+  under it, and the same way every time.
+- **Given** a text sent at ten to midnight in London, **when** I read the
+  story, **then** it is under the day it was sent on the workshop's clock.
+- **Given** another workshop's job, **when** I open its story, **then** it is
+  not found.
+
+### CW2 - Who did what, and who did not
+
+**As** an owner **I want** each line to say who acted and on which side **so
+that** a reminder the product sent is not mistaken for a call somebody made.
+
+**Size** 5 - **Satisfies** FR-13102, FR-13103, FR-13104, FR-13108
+
+- **Given** an estimate whose sending is recorded only in the audit log,
+  **when** I read the story, **then** the line names the person from that row.
+- **Given** a status move with no actor recorded, **when** I read the story,
+  **then** the line names nobody rather than guessing.
+- **Given** a reminder the sweeper sent and a reply the customer wrote,
+  **when** I read the sentence at the top, **then** the first is counted as the
+  product's and the second as the customer's.
+
+### CW3 - The silence
+
+**As** a manager handling a comeback **I want** the stretches with nothing
+recorded drawn on the page **so that** I can see where the job sat.
+
+**Size** 3 - **Satisfies** FR-13107
+
+- **Given** nothing recorded from Friday morning to Tuesday afternoon, **when**
+  I read the story, **then** a line between the two days says how long, and
+  the tile at the top says what was last done before it.
+- **Given** three hours at lunch with nothing recorded, **when** I read the
+  story, **then** no line is drawn.
+
+---
+
 ## Epic CV - The control tower (Phase 98)
 
 ### CV1 - The building at a glance

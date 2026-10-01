@@ -102,6 +102,13 @@ async function ids() {
     orderBy: { startedAt: 'desc' },
     select: { id: true },
   });
+  // The story is only worth photographing on a job that has one: the most
+  // status moves in the seed, rather than the newest car on the ramps.
+  const storied = await prisma.job.findFirstOrThrow({
+    where: { orgId: org.id },
+    orderBy: { statusEvents: { _count: 'desc' } },
+    select: { id: true },
+  });
   const invoice = await prisma.invoice.findFirstOrThrow({
     where: { orgId: org.id, status: { in: ['ISSUED', 'PART_PAID'] } },
     orderBy: { createdAt: 'desc' },
@@ -186,6 +193,7 @@ async function ids() {
 
   return {
     job: job.id,
+    story: storied.id,
     inspection: inspection.id,
     handover: handoverToken,
     handoverVehicle: shown.id,
@@ -229,6 +237,7 @@ async function main() {
     { file: 'floor', path: '/floor', who: 'owner' },
     { file: 'job', path: `/jobs/${r.job}`, who: 'owner', fullPage: true },
     { file: 'check-in', path: `/jobs/${r.job}/check-in`, who: 'owner', fullPage: true },
+    { file: 'story', path: `/jobs/${r.story}/story`, who: 'owner', fullPage: true },
     { file: 'conversations', path: '/inbox', who: 'owner', fullPage: true },
     { file: 'packages', path: '/settings/packages', who: 'owner', fullPage: true },
     { file: 'returns', path: '/purchasing/returns', who: 'owner', fullPage: true },

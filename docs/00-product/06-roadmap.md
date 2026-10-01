@@ -6188,6 +6188,80 @@ with no bound. It has one — `take` is a parameter, passed as the shorthand
 the check had a hole, and the push run had been green only because the build
 job runs on the schedule and not on a push. Fixed in its own commit, first.
 
+## Phase 99 — Minute by minute
+
+**Scope.** The first of the customer items of the thirty-nine: "a unified
+communication timeline per job, so every job is reconstructable minute by
+minute."
+
+**Exit.** Somebody answering "why did this take nine days" or "who told the
+customer what, and when" opens one page under the job and reads every record
+the job carries in one order, by day, with who did it and on which side — and
+the silences drawn between the days they separate.
+
+**Status.** Done.
+
+The job page already shows everything that happened: the status moves in one
+card, the conversation in another, the estimate and what the customer decided
+in a third, then the clock, the parts, the checks, the notes, the photos, the
+bill, the money, the keys, the follow-ups. Eleven cards, each in its own
+order. A reader of a complaint has to hold eleven sets of dates in their head
+to answer the one question they were asked, and a comeback case (Phase 86)
+needs the original job read back from the start. `/jobs/{id}/story` is the
+same records in one order.
+
+**Nothing is stored and nothing is inferred.** Every line is a row with a
+timestamp. Where the record carries its actor — a status move, a note, a
+clock, a check, a key hung on a hook — the actor is named. Where it does not —
+an estimate's `sentAt`, an invoice's `issuedAt`, the check-in, which has no
+record beyond the audit log — the audit row for that act supplies the name.
+Where neither does, the line says what happened and not who. A story that
+guessed who sent the estimate would be worth less than one that said it was
+sent, and `verify-story` checks the unnamed case as carefully as the named
+ones.
+
+**Three sides.** The workshop, the customer, or the product on nobody's
+behalf. A reminder the sweeper sent on a schedule is the product's, not ours,
+because the reader asking "did anybody actually speak to this customer" needs
+it counted apart from the call a person made. A decision taken on the link is
+the customer's; so is one taken in person and keyed in by us, because it is
+still their decision, and the line says in person. The sentence at the top
+counts the three: _"14 moments over 4 days: 10 by the workshop, 3 by the
+customer, 1 by the product on its own."_
+
+**The silences are the point.** A day or more with nothing recorded is drawn
+as a line between the days it separates, and the longest is a tile at the top
+with the last thing anybody did before it went quiet. Three hours at lunch is
+not a silence; Friday to Tuesday is. The phrase is "with nothing recorded",
+not "nothing happened": the page does not know whether it was a weekend, a
+part, or three unanswered calls, and must not say.
+
+**One order, fixed in core and tested.** Time first; in the same instant, the
+act before what was said about it — the status move, then the note written
+with it; the clock stopped, then the quality check — and the id last, so the
+page is the same twice. The sentence for a status move carries the status
+rather than a word, because the status's own name is already in the
+dictionary and a sentence with an English status inside its values would be
+half translated.
+
+### What the first run found
+
+**The route table that fills a job's id is in the screens probe, not in the
+routes library.** Two files looked like the place; the second was. The first
+patch asserted on the wrong one and said so, which is what an assertion is
+for.
+
+**Two keys the dictionary already had.** "Clocked on" and "Nothing recorded"
+were written again with new translations, and the clash check refused them
+on the first run: one English sentence, one meaning. The story now uses the
+words the job page and the money pages already use for the same things.
+
+**And the smoke test was reading a dashboard that no longer exists.** The
+nightly for Phase 98 failed on one line: the route smoke test expected the
+owner's dashboard to say "Awaiting approval", a tile the control tower
+replaced. The page was right and the expectation was a sentence typed in
+September; fixed in its own commit before this phase shipped.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here
