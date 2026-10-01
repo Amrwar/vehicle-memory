@@ -164,7 +164,7 @@
     "postinstall": "npm run db:generate"
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.15.0",
     "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^9.38.0",
