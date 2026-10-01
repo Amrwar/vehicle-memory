@@ -1,6 +1,6 @@
 # ADR-0019 — A sentence is a key and its values
 
-**Status:** Accepted, Phase 95 (30 September 2026).
+**Status:** Accepted, Phase 95 (30 September 2026). Amended in Phase 96 (1 October 2026) — see Consequences.
 **Generalises:** the `JobStanding.reason` shape introduced in Phase 84, from
 one model to every library that produces prose a screen will show.
 
@@ -22,11 +22,24 @@ something that happened. Three faults turned up in it, and all three were
 invisible to every check the product had, on every screen, in English.
 
 **A sentence built out of a number.** `howTheMorningLooks` returned
-`` `${total} things to deal with.` ``. The page wrapped it in `t()`, which looks
-right and cannot work: no dictionary holds a key with 7 baked into it, so a
-French workshop would have read one English sentence in the middle of a French
-screen. The function sat three paragraphs below a comment stating the rule it
-was breaking.
+`` `${total} things to deal with.` `` and the page wrapped it in `t()`. A French
+workshop read one English sentence in the middle of a French screen.
+
+The reason is narrower than it first looks, and the first draft of this ADR got
+it wrong, so it is worth stating precisely. The translator has a second route:
+`translateFinished` reads a finished English sentence back into the slots of a
+key that has them, so `translate('fr', '3 statement lines still unmatched.')`
+really does return « 3 lignes de relevé encore non rapprochées. » A built
+sentence is therefore **not** untranslatable. It is translatable **only if
+somebody remembered to put the slotted key in a dictionary** — and nothing can
+make them remember, because `i18n-scan` reads the pages and a library's
+sentence does not exist until the library runs. There is no gate. The sentence
+falls back to English and the fallback is silent.
+
+So the rule below is about what can be checked, not about what is possible.
+`banking/reconcile.ts#closeChecks` builds its `detail` strings this way, has
+done since Phase 29, has its slotted keys in the money dictionary, and is
+correct. It is not to be rewritten on the strength of this ADR.
 
 **A sentence inside another sentence's slot.** A job's row was
 `'#{number} {vehicle}: {why}'` with `JobStanding.reason.key` passed as `{why}`.
@@ -54,8 +67,16 @@ export interface Say {
 
 The key is the English sentence exactly as the dictionary holds it, with named
 slots. The values are data. The **screen** translates, because the screen is
-where the reader is known. Nothing between the database and the screen may
-concatenate, interpolate, pluralise or format prose.
+where the reader is known.
+
+The point is not that the finished-sentence route fails — it works. The point
+is that a key is a thing a check can hold in its hand. A `Say` can be read out
+of a library's source, looked up in the merged dictionary, and reported missing
+before anybody ships it; a sentence assembled at run time cannot be, and the
+cost of forgetting one is a reader quietly seeing the wrong language.
+
+Where a library already builds finished sentences and its keys are answered,
+that is not a defect to go and fix. New prose uses `Say`.
 
 A count that changes the sentence is two keys, not one built string:
 `'1 thing to deal with.'` and `'{count} things to deal with.'`.
@@ -94,6 +115,12 @@ every page-level scan reported zero missing.
 A library's prose is now as checkable as a page's, and the check is specific to
 the library rather than global — which is the right shape, because what counts
 as data differs by library.
+
+This decision was amended the day after it was accepted. As first written it
+said a built sentence "cannot work", which is not true and would have had
+somebody rewrite `closeChecks` to satisfy it. The amendment is recorded here
+rather than silently edited, because an ADR that quietly changes its reasoning
+is worth less than one that shows where it was wrong.
 
 The cost is a little ceremony: a row that wants to say two things says them in
 two fields. Phase 84 paid that cost first for `JobStanding.reason` and it has

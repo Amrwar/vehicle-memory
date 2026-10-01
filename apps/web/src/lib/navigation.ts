@@ -65,6 +65,16 @@ const P = {
     icon: 'start',
     permission: 'job:read',
   },
+  close: {
+    href: '/close',
+    label: msg('Closing the day'),
+    icon: 'reminders',
+    // Not `job:read`: a technician has that, and a technician must not be able
+    // to write a record of what the workshop left overnight. This is exactly
+    // owner, manager and service advisor -- whoever is senior on shift when
+    // the doors shut.
+    permission: 'close:write',
+  },
   now: {
     href: '/now',
     label: msg('Where everything stands'),
@@ -322,6 +332,7 @@ const OWNER: NavSection[] = [
       P.skills,
       P.equipment,
       P.patterns,
+      P.close,
     ],
   },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.inbox, P.claims] },
@@ -375,6 +386,7 @@ const MANAGER: NavSection[] = [
       P.skills,
       P.equipment,
       P.patterns,
+      P.close,
     ],
   },
   { label: msg('Calendar'), items: [P.diary] },
@@ -398,7 +410,7 @@ const MANAGER: NavSection[] = [
  * they have been quoted, what they have said, and what they have paid.
  */
 const SERVICE_ADVISOR: NavSection[] = [
-  { label: msg('Today'), items: [P.today, P.now, P.floor] },
+  { label: msg('Today'), items: [P.today, P.now, P.floor, P.close] },
   { label: msg('Calendar'), items: [P.diary] },
   { label: msg('Customers'), items: [P.customers, P.crm, P.fleet, P.claims] },
   { label: msg('Vehicles'), items: [P.vehicles, P.passports, P.recalls] },

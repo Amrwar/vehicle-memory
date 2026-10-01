@@ -346,6 +346,12 @@ async function main() {
   // named here so a new one is a decision, not a gap. Opening somebody
   // else's notification is refused in verify-search.ts.
   const OWN_RECORD_ACTIONS = new Set(['/notifications readAll']);
+  // Actions whose call *looks* like a write to the regex above and is not.
+  // `resolveScan` resolves a scanned code to the record it names; `resolve` is
+  // on the verb list because resolving a dispute or a thread really does
+  // write. Named here, with the reason, so this stays a decision rather than a
+  // hole -- and so the next one has to be argued for too.
+  const READS_DESPITE_ITS_VERB = new Set(['/scan look']);
   let actions = 0;
   for (const page of pages) {
     const parts = page.source.split(/(?=async function \w+\()/);
@@ -364,7 +370,9 @@ async function main() {
         continue;
       }
       check(
-        !writes || isWritePermission(permission),
+        !writes ||
+          isWritePermission(permission) ||
+          READS_DESPITE_ITS_VERB.has(`${page.route} ${name}`),
         `${page.route} ${name}() writes behind '${permission}'`,
       );
     }

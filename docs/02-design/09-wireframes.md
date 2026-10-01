@@ -427,3 +427,69 @@ Where there is nothing, the card is replaced rather than emptied:
 
 A screen that showed an empty area would leave somebody wondering whether it
 had loaded. A workshop that has cleared its list should be told so.
+
+## 13. What was true when the doors shut (Phase 96)
+
+```
+WORKSHOP
+Closing the day
+What is being left overnight, and the record that somebody looked.
+Nothing on this screen changes anything.
+
+2 things should not be left overnight.
+
++-------------------------------------------------------------------------+
+| NOT TO BE LEFT OVERNIGHT                                                |
+| Keys, cash and anybody still here. The rest can wait until morning.     |
+|-------------------------------------------------------------------------|
+| (Deal with it now)  3 sets of keys are not on a hook.              ->   |
+| (Deal with it now)  The till is still open and has not been counted. -> |
++-------------------------------------------------------------------------+
+
++-------------------------------------------------------------------------+
+| EVERYTHING THE CLOSE LOOKS AT                                           |
+| All ten, whatever they say. A nought is an answer too.                  |
+|-------------------------------------------------------------------------|
+| (Deal with it now) The till is still open and has not been counted. ->   |
+| (Settled)     Everybody has clocked out.                           ->   |
+| (Deal with it now) 3 sets of keys are not on a hook.                ->   |
+| (Outstanding) 3 cars are still on site.                            ->   |
+| (Outstanding) 3 jobs are still open.                               ->   |
+| (Outstanding) 3 invoices are unpaid.                               ->   |
+| (Outstanding) 1 estimate is waiting on a customer.                 ->   |
+| (Settled)     No order is overdue.                                 ->   |
+| (Outstanding) 4 bank lines are unmatched.                          ->   |
+| (Settled)     No follow-up is due.                                 ->   |
++-------------------------------------------------------------------------+
+
++-------------------------------------------------------------------------+
+| CLOSE THE DAY                                                           |
+| This records what is above, as it stands now, with your name on it.     |
+| It changes nothing else.                                                |
+|                                                                         |
+| Anything worth saying about tonight  [                              ]   |
+| Optional. The night the keys were with the valeter is the night to      |
+| say so.                                                                 |
+|                                   [ Close the day ]                     |
++-------------------------------------------------------------------------+
+
+LATELY
+30/09/2026   Ahmed Hassan                              (Nothing left)
+29/09/2026   Ahmed Hassan                         (2 left overnight)
+```
+
+All ten are shown, including the settled ones, because "the till was counted
+and agrees" is a different fact from "nobody asked about the till" and only a
+screen that shows both can tell them apart. Three states, three words: a badge
+reading "Outstanding" in two colours would have left a colour carrying the
+difference between "deal with this before you leave" and "this keeps until
+morning", which is the one thing this product's design never asks of a
+colour. The three that should not be left
+appear twice on purpose: once at the top where somebody acts on them, and once
+in their place in the ten, because the second list is the record of what was
+asked.
+
+Once the day is closed, the form is replaced by the record — who closed it,
+when, their note, and the sentence that it cannot be edited afterwards. That
+last line is a reason, not an apology: it is what makes the record worth
+keeping.

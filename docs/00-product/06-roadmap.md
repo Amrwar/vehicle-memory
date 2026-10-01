@@ -5799,14 +5799,18 @@ screen lying to look calm.
 
 ### What the checks found
 
-**A sentence that could not be translated, in the function that argues against
-them.** `howTheMorningLooks` built `${total} things to deal with.` by hand. No
-dictionary can hold a key with a number baked into it, so the page wrapped it
-in `t()` — which looks right and cannot work: a French workshop would have
-read one English sentence in the middle of a French screen. `i18n-scan` could
-not see it, because it reads the pages and this literal lived in a library.
+**A sentence nothing could make anybody translate, in the function that argues
+against them.** `howTheMorningLooks` built `${total} things to deal with.` by
+hand and the page wrapped it in `t()`; a French workshop read one English
+sentence in the middle of a French screen. The reason is narrower than it looks
+and Phase 96 had to correct this paragraph: the translator does have a route
+for finished sentences, so a built string is translatable **if somebody
+remembered to put the slotted key in a dictionary** — and nothing can make them
+remember, because `i18n-scan` reads the pages and a library's sentence does not
+exist until it runs. There is no gate, and the fallback to English is silent.
 Three paragraphs above the function, the same file states the rule it was
-breaking. It returns a `{key, vars}` now, like everything else here.
+breaking. It returns a `{key, vars}` now, which is the shape a check can hold
+in its hand.
 
 That is also why `verify-morning` reads the library's `key:` literals out of
 its own source and looks each one up in the merged dictionary. Two actions,
@@ -5846,6 +5850,141 @@ are one rule with three faces: a library produces a key and its values, never a
 sentence; no slot holds prose; and nothing below the screen formats a date, a
 time or a number. Phase 84 paid that cost first for `JobStanding.reason`. This
 records it as the rule rather than one model's habit.
+
+## Phase 96 — What was true when the doors shut
+
+**Scope.** Item 37 of the thirty-nine: the end-of-day close — unpaid invoices,
+open jobs, vehicles still on site, keys, estimates, parts, cash,
+reconciliation, clocks, follow-ups.
+
+**Exit.** Somebody locking up reads ten readings on one screen, presses one
+button, and what they were looking at is written down with their name on it —
+and cannot afterwards be edited by anybody, including them.
+
+**Status.** Done.
+
+Every one of the ten is a question the product could already answer. It knew
+the till was never counted, that somebody is still clocked on, that two sets of
+keys are in a pocket, that four cars are on the forecourt. **Nothing in this
+phase is a new fact about a workshop.** What the product could not say is
+whether anybody looked, and what they saw.
+
+That is a fact about an act rather than a state, and it forces the one decision
+worth arguing about, which is recorded as
+[ADR-0020](../03-adr/0020-a-close-is-testimony.md).
+
+**The figures are stored.** ADR-0011 has said for ninety-five phases that
+totals are derived and never stored, and every screen obeys it. A close does
+not. An invoice paid at twenty to seven must not change what was true at four
+minutes past; a derived close would say something different every time it was
+read and would therefore be evidence of nothing — while still looking exactly
+like evidence, which is the dangerous part. A workshop asked in March what
+happened on 1 October would be shown a reconstruction of March.
+
+**And so nothing may edit one.** Two triggers refuse UPDATE and DELETE, as
+`audit_logs` has since Phase 0.9, because a stored figure that can be tidied
+has ADR-0011's drift problem _and_ a dishonesty problem on top. There is no
+exception for the free-text note: a close written in haste with the wrong note
+is a close with the wrong note, and the remedy is that tonight's close says so,
+not that last night's quietly becomes something else.
+
+**The close changes nothing it reads.** It does not invoice a job, clock
+anybody out or move a penny; every row links to the page where the thing is
+done. A close that could tidy would be used to tidy, and the record of what was
+outstanding would become a record of what somebody made disappear.
+`verify-close` counts all ten before and after and fails if any moved.
+
+**And it never refuses.** Six at night with three cars on the forecourt, the
+workshop locks up anyway; a screen that blocked would be worked around by not
+opening it, and then there is no record at all. The one thing refused is a
+_second_ close for the same site and day, and the refusal names who closed it
+and when.
+
+**Three of the ten are a different kind of thing.** Keys nobody can place, a
+till that disagrees, somebody the product still thinks is in the building.
+Those are said first and separately; the other seven are ordinary business that
+every workshop leaves out overnight. Listing them in one voice would have
+taught people to read the whole screen in that voice.
+
+### What the checks found
+
+This is the phase where CI came back. GitHub Actions had been failing in three
+seconds on billing since roughly 20 September, and the first run that actually
+executed — on Phase 95's commit — turned up four things that had been shipped
+blind.
+
+**Eight models were never declared to the tenant filter**, four of them
+carrying an `orgId`: `SupplierPart` (Phase 87), `VehicleSpecification` (Phase
+88), `Equipment` (Phase 89) and this phase's `DayClose`, plus four children.
+`packages/db/src/tenant-models.ts` is generated from the schema and
+`verify-scoping` fails when the two disagree, which is exactly the check that
+should have caught each one on the day it was written. It was red for ten days
+with nobody watching. Regenerating it put four models that carry a workshop's
+id back under the filter that is supposed to make forgetting difficult.
+
+**A critical remote-code-execution advisory against `next/og`**, which this
+product uses for its app icon. Next 16.3.4 to 16.3.8, within the same minor,
+and `nodemailer` to 10.0.13 for three high-severity advisories alongside it.
+
+**`verify-morning` did not compile under `infra/tsconfig.json`**, which turns
+on `noUncheckedIndexedAccess` where the web app's does not. Five of the six
+were pedantic; the sixth was real — the cap probe spread `list.items[0]` into
+nineteen copies and would have silently measured nothing on a workshop with a
+tidy morning, which is the self-skipping check of Phase 89 again. It fails
+loudly now. The lesson is the plain one: run the command CI runs, not the
+faster subset of it.
+
+**A duplicate key in a Prisma `where`** in `verify-specification` from Phase
+88, where `job:` appeared twice in one object literal so the first clause was
+silently discarded.
+
+**And a page a technician could have closed the day on.** `/close` guarded on
+`job:read`, which a technician has, so the navigation never offering it to them
+was the only thing standing between them and writing a record in the owner's
+name of what the workshop left overnight — and a navigation is not a guard, it
+is a hope. `verify-authz` caught the second half of it from the other
+direction: it reads every server action and refuses one that writes behind a
+reading permission. Nothing in the existing vocabulary honestly named the act.
+`job:write` has exactly the right three roles and would have passed, which is
+the trap — a permission borrowed because its role set happens to match is how a
+guard comes to mean something nobody intended. So `close:write` was added, held
+by owner, manager and service advisor: whoever is senior on shift when the
+doors shut. And because a service advisor may now do it, they are shown it,
+since a page somebody may use and cannot find is the `/verify` fault of Phase 94.
+
+**And a second one found the same way.** Every unsettled row in the ten said
+"Outstanding"; the three that should not be left said it in red and the other
+seven in grey, so the only thing separating two different meanings was a
+colour. The design book's own list of refusals says this product never lets
+colour carry a meaning alone, and no check knows what a badge means. Three
+states have three words now — Settled, Outstanding, and the card above's own
+"Deal with it now" — with the colour reinforcing rather than carrying.
+
+**And one found only by looking at the page.** The design shot showed a close
+dated 01/01/1990 under a heading that says "the last week of closes" — the
+verify script's own probe, written far in the past precisely so it could never
+collide with a real one, walking straight onto the screen because the query
+bounded the number of rows and said nothing about their dates. A workshop that
+closed three times in a year would have seen the same thing. The heading was
+right and the query was wrong; it is bounded by date now, with the count kept
+as a second bound. No check could have caught it, and that is the Phase 94
+lesson again: somebody has to open the product.
+
+**`/scan look()` had been failing that same check for ten days, wrongly.**
+`WRITE_CALL` spots a write by its verb and `resolve` is on the list, because
+resolving a dispute or a thread really does write; `resolveScan` resolves a
+scanned code to the record it names and writes nothing. A check that fails for
+the wrong reason gets silenced rather than read, so the exemption is named with
+its reason beside the one the file already had.
+
+Two more came from the phase's own work. `Reading` was already taken —
+`vehicle/mileage.ts` has meant an odometer reading by it since Phase 5, and
+core's barrel is flat, so declaring a second one did not collide loudly: the
+odometer won, and every literal written against the new type was being checked
+against `{km, readAt}`. It is `CloseReading` now, which is also what the
+database enum calls it. And `Left` as a badge already meant _departed_ in the
+people area, which is a different word in every language; the pair is Settled
+and Outstanding.
 
 ## What comes next — the thirty-nine, 26 September 2026
 

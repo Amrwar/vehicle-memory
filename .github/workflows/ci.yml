@@ -276,6 +276,13 @@ jobs:
       - name: Do not miss
         run: npx tsx infra/scripts/verify-morning.ts
 
+      # A close is testimony about a moment, so it must be impossible to edit
+      # afterwards and impossible to take twice -- and it must change nothing
+      # it reads, or it is tidying rather than recording. This asks the
+      # database, in SQL, rather than asking the code that wrote it.
+      - name: What was true when the doors shut
+        run: npx tsx infra/scripts/verify-close.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

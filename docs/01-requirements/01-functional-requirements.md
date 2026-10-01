@@ -267,6 +267,22 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12800 - What was true when the doors shut
+
+| Ref      | Requirement                                                                                                         | Phase |
+| -------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12801 | One screen MUST answer all ten end-of-day readings, every one derived from records already kept.                    | 96    |
+| FR-12802 | A close MUST record all ten readings or none; a partial close MUST be refused.                                      | 96    |
+| FR-12803 | The figures MUST be stored as they stood, and MUST NOT be recomputed when the record is read.                       | 96    |
+| FR-12804 | A recorded close MUST NOT be editable or deletable, the note included.                                              | 96    |
+| FR-12805 | A second close for one site and business day MUST be refused, naming who closed it and when.                        | 96    |
+| FR-12806 | Closing MUST change nothing it reads: no job, invoice, clock, key or order may move.                                | 96    |
+| FR-12807 | A close MUST be permitted however much is outstanding.                                                              | 96    |
+| FR-12808 | Keys unaccounted for, a till that disagrees and anybody still clocked on MUST be reported apart from the rest.      | 96    |
+| FR-12809 | The business day MUST be the site's own, in its time zone, with a close after midnight filed to the day that ended. | 96    |
+| FR-12810 | A close MUST name the person who took it.                                                                           | 96    |
+| FR-12811 | Closing a day MUST require `close:write`, held by owner, manager and service advisor only.                          | 96    |
+
 ## FR-12700 - Do not miss
 
 | Ref      | Requirement                                                                                              | Phase |

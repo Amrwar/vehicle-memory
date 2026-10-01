@@ -48,6 +48,11 @@ export const PERMISSIONS = [
   'payment:write',
   'report:financial',
   'report:operational',
+  // Declaring the day closed. A write, because it records testimony that
+  // nothing may afterwards edit, and a permission of its own because no other
+  // one names the act -- borrowing a permission whose role set merely happens
+  // to match is how a guard comes to mean something nobody intended.
+  'close:write',
   'ledger:read',
   'ledger:write',
 
@@ -121,6 +126,7 @@ const GRANTS: Readonly<Record<Role, readonly Permission[]>> = {
     'payment:write',
     'report:financial',
     'report:operational',
+    'close:write',
     'inventory:read',
     'inventory:write',
     'purchase:request',
@@ -153,6 +159,7 @@ const GRANTS: Readonly<Record<Role, readonly Permission[]>> = {
     'payment:read',
     'payment:write',
     'report:operational',
+    'close:write',
     'inventory:read',
     'purchase:request',
     'stock:transfer',

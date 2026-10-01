@@ -59,6 +59,10 @@ const DOMAINS: { key: string; title: string; models: string[] }[] = [
       'OnceRequest',
       'SyncedAction',
       'ImportBatch',
+      // A close is a record of an act, signed and immutable -- the audit trail
+      // rather than the till it happens to count. Phase 96.
+      'DayClose',
+      'DayCloseReading',
     ],
   },
   {

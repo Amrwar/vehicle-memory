@@ -2173,7 +2173,7 @@ async function main() {
         inStock: true,
         warrantyMonths: 24,
         confirmedAt: day(-9),
-        confirmedByUserId: ahmed.id,
+        confirmedByUserId: ahmed!.id,
       },
       {
         orgId: org.id,
@@ -2186,7 +2186,7 @@ async function main() {
         inStock: false,
         warrantyMonths: 12,
         confirmedAt: day(-16),
-        confirmedByUserId: ahmed.id,
+        confirmedByUserId: ahmed!.id,
       },
       {
         // Pennine file the aftermarket disc under the number they use for the
@@ -2203,7 +2203,7 @@ async function main() {
         inStock: true,
         warrantyMonths: 12,
         confirmedAt: day(-9),
-        confirmedByUserId: ahmed.id,
+        confirmedByUserId: ahmed!.id,
       },
       {
         // A price nobody has confirmed since the spring, so the screen has
@@ -2218,7 +2218,7 @@ async function main() {
         inStock: true,
         warrantyMonths: 24,
         confirmedAt: day(-190),
-        confirmedByUserId: ahmed.id,
+        confirmedByUserId: ahmed!.id,
       },
     ],
   });

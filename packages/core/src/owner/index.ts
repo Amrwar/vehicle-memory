@@ -584,3 +584,6 @@ export function compareSuppliers(options: readonly SupplierOption[]): ComparedSu
 
 /** The list an owner clears before opening anything else. Phase 95. */
 export * from './do-not-miss';
+
+/** What was true when the doors shut. Phase 96. */
+export * from './close-of-day';

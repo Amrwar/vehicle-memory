@@ -1,9 +1,9 @@
 {
   "builtOn": "2026-10-01",
   "counts": {
-    "models": 169,
-    "enums": 78,
-    "fields": 2710
+    "models": 171,
+    "enums": 79,
+    "fields": 2730
   },
   "enums": [
     "OrgPlan",
@@ -72,6 +72,7 @@
     "TransferStatus",
     "CounterSaleStatus",
     "TenderKind",
+    "CloseReading",
     "ExpenseCategory",
     "ExpenseStatus",
     "PaidFrom",
@@ -244,6 +245,26 @@
             "User"
           ],
           "scope": "organisation"
+        },
+        {
+          "name": "DayClose",
+          "comment": "",
+          "fields": 7,
+          "relations": [
+            "Organization",
+            "Location",
+            "User"
+          ],
+          "scope": "organisation"
+        },
+        {
+          "name": "DayCloseReading",
+          "comment": "",
+          "fields": 5,
+          "relations": [
+            "DayClose"
+          ],
+          "scope": "through DayClose"
         }
       ]
     },

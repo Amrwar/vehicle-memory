@@ -39,6 +39,7 @@ import * as scanning from './scanning';
 import * as sourcing from './sourcing';
 import * as specification from './specification';
 import * as morning from './morning';
+import * as close from './close';
 
 export const AREAS = [
   publicSite,
@@ -76,4 +77,5 @@ export const AREAS = [
   specification,
   standing,
   morning,
+  close,
 ] as const;

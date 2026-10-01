@@ -252,6 +252,21 @@ one is that work coming back), `comebackReason`, `comebackMarkedAt` and
 three characters whenever the link is set, and refuses a job pointing at
 itself. Everything else in the phase is read from records already held.
 
+Phase 96 adds `DayClose` and `DayCloseReading`, and they are the one place in
+this schema that stores a figure it could derive. A close is testimony about a
+moment rather than a description of the present (ADR-0020): if it recomputed
+itself, an invoice paid at twenty to seven would quietly change what was true
+at four minutes past, and the record would be evidence of nothing while still
+looking exactly like evidence. So the ten counts are copied in, and two
+triggers then refuse `UPDATE` and `DELETE` on both tables, exactly as
+`audit_logs` has been refused since Phase 0.9 — the free-text note included,
+with no exception. `leftOvernight` is stored per reading although it is today a
+pure function of the kind, so that changing the judgement later cannot change
+what a workshop was told on a night nobody can revisit. The unique index on
+(orgId, locationId, on) is what makes a day closeable once; `on` is a `DATE` in
+the site's own calendar, which is not the server's, and `closedByUserId` is
+`ON DELETE RESTRICT` because testimony signed by nobody is not testimony.
+
 Phase 90 adds `InspectionTemplateVersion` and
 `InspectionTemplateVersionItem`, and `templateVersionId` on `Inspection`. A
 version is one shape a checklist had, identified by a fingerprint over its

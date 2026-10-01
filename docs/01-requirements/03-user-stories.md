@@ -1642,6 +1642,52 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CT - What was true when the doors shut (Phase 96)
+
+### CT1 - Locking up without walking the building twice
+
+**As** an owner **I want** one screen that answers everything I would check
+before locking up **so that** I am not opening eight pages with my coat on.
+
+**Size** 8 - **Satisfies** FR-12801, FR-12802, FR-12808
+
+- **Given** the end of the day, **when** I open the close, **then** all ten
+  readings are answered, including the ones with nothing to report.
+- **Given** keys in somebody's pocket, **when** the close is drawn, **then**
+  they are reported apart from the four cars on the forecourt.
+- **Given** everything settled, **when** the close is drawn, **then** it says
+  so plainly.
+
+### CT2 - A record somebody can rely on a year later
+
+**As** an owner **I want** the close to say what was true at the moment it was
+taken **so that** it is worth something when somebody asks in March.
+
+**Size** 8 - **Satisfies** FR-12803, FR-12804, FR-12805, FR-12810
+
+- **Given** a close taken at 18:04, **when** an invoice is paid at 18:40,
+  **then** the close still says what was true at 18:04.
+- **Given** a recorded close, **when** anybody tries to change or remove it,
+  **then** the database refuses.
+- **Given** a day already closed, **when** somebody closes it again, **then**
+  it is refused and the refusal names who closed it and when.
+
+### CT3 - Closing up with the world on fire
+
+**As** an owner **I want** to close with things still outstanding **so that**
+the screen is one I actually use.
+
+**Size** 3 - **Satisfies** FR-12806, FR-12807, FR-12809
+
+- **Given** three cars on site and two unpaid invoices, **when** I close,
+  **then** it is recorded rather than refused.
+- **Given** a close, **when** it is recorded, **then** no job, invoice, clock,
+  key or order has moved.
+- **Given** a workshop locking up at one in the morning, **when** it closes,
+  **then** the close is filed against the day that ended.
+
+---
+
 ## Epic CS - Do not miss (Phase 95)
 
 ### CS1 - One list before the first car arrives

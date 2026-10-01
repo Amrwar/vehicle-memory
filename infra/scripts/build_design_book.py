@@ -1054,6 +1054,28 @@ def build() -> None:
         source="docs/00-product/06-roadmap.md, Phase 95; docs/01-requirements/01-functional-requirements.md, FR-12700",
     )
 
+    design(
+        doc,
+        title="The record that somebody looked",
+        when="Phase 96, 1 October 2026.",
+        why="The product could already answer every question an end-of-day close asks: the till was "
+            "never counted, somebody is still clocked on, two sets of keys are in a pocket, four cars "
+            "are on the forecourt. What it could not say is whether anybody looked, and what they saw "
+            "— which is a fact about an act rather than about the workshop, and the only thing this "
+            "screen adds.",
+        meaning=[
+            "All ten readings are shown, settled ones included: “the till was counted and agrees” is a different fact from “nobody asked about the till”.",
+            "Three of them — keys, cash, anybody still clocked on — are said first and separately, because the other seven are ordinary business every workshop leaves out overnight.",
+            "Once closed, the form is replaced by the record: who, when, their note, and the plain sentence that it cannot be edited.",
+        ],
+        works="It is the one place in the product that stores a figure it could derive, and ADR-0020 is "
+              "why: an invoice paid at twenty to seven must not change what was true at four minutes "
+              "past. Two database triggers then refuse any edit, the note included — because a record "
+              "somebody can go back and tidy is a record of what they wished had been true.",
+        shots=[("close", "Closing the day.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 96; docs/03-adr/0020-a-close-is-testimony.md",
+    )
+
     # 19. Refusals
     doc.add_heading("19. What the design refuses to do", level=1)
     para(doc, "Some of the strongest decisions are absences, and a reader of this book should know them.")

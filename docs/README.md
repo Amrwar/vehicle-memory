@@ -1032,3 +1032,31 @@ about. `verify-tenancy` refuses to pass until every address with an identifier
 in it is declared, and `/equipment/[id]` and `/receiving/[id]` had been built
 in Phases 89 and 93 without being added. Both scope their queries; what was
 missing was the proof.
+
+Phase 96 is item 37, the end-of-day close. Every one of its ten readings is a
+question the product could already answer — the till was never counted,
+somebody is still clocked on, two sets of keys are in a pocket, four cars are
+on the forecourt. Nothing in the phase is a new fact about a workshop. What the
+product could not say is whether anybody looked, and what they saw.
+
+That is a fact about an act rather than a state, and it is the one place the
+product stores a figure it could derive. ADR-0020 is the argument: an invoice
+paid at twenty to seven must not change what was true at four minutes past, and
+a close that recomputed itself would say something different every time it was
+read while still looking exactly like evidence. So the figures are copied in,
+and then two triggers refuse UPDATE and DELETE — the free-text note included,
+because a close written in haste with the wrong note is a close with the wrong
+note, and the honest remedy is that tonight's close says so.
+
+The close changes nothing it reads and never refuses. A workshop at six with
+three cars on the forecourt locks up anyway; a screen that blocked would be
+worked around by not opening it. The only refusal is a second close for one day,
+because two closes make the record ambiguous in the worst way.
+
+This is also the phase where CI came back after ten days of billing failures,
+and the first run that executed found four things shipped blind: eight models
+never declared to the tenant filter, four of them carrying a workshop's id; a
+critical remote-code-execution advisory against `next/og`, which this product
+uses for its app icon; a verify script that did not compile under the stricter
+`infra` config, hiding a probe that would have measured nothing on a tidy
+morning; and a duplicate key in a Prisma `where` from Phase 88.

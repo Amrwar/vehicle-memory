@@ -959,6 +959,20 @@ The second sweep: things connected at one end only.
 | Nothing to miss is an answer  | Built  | Said plainly rather than shown as an empty area (Phase 95)                                |
 | Every row goes somewhere real | Built  | Hrefs resolved against the route tree on disk (Phase 95)                                  |
 
+## 21.57 What was true when the doors shut
+
+| Item                     | Status | Where                                                                         |
+| ------------------------ | ------ | ----------------------------------------------------------------------------- |
+| Ten readings, one screen | Built  | `/close`, last in the Workshop section (Phase 96)                             |
+| Nothing new is asked     | Built  | Every reading derived from records the product already keeps (Phase 96)       |
+| Not to be left overnight | Built  | Keys, cash and anybody still clocked on, said first and separately (Phase 96) |
+| The record is a moment   | Built  | Figures stored as they stood; ADR-0020 (Phase 96)                             |
+| And cannot be edited     | Built  | Two triggers refuse UPDATE and DELETE, the note included (Phase 96)           |
+| A day is closed once     | Built  | Unique on site and date; the refusal names who closed it (Phase 96)           |
+| It changes nothing       | Built  | Readings counted before and after by `verify-close` (Phase 96)                |
+| And it never refuses     | Built  | A workshop may close with everything outstanding (Phase 96)                   |
+| The workshop's own day   | Built  | `businessDay()` in the site's zone, with a four-in-the-morning cut (Phase 96) |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1037,7 +1051,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 501          |
+| Built   | 510          |
 | Partial | 2            |
 
 <!-- counts:end -->

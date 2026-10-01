@@ -150,6 +150,7 @@ model Organization {
   invitations         Invitation[]
   counterSales        CounterSale[]
   tillSessions        TillSession[]
+  dayCloses           DayClose[]
   expenses            Expense[]
   bankAccounts        BankAccount[]
   automationRules     AutomationRule[]
@@ -241,6 +242,7 @@ model Location {
   attendance   AttendanceRecord[]
   counterSales CounterSale[]
   tillSessions TillSession[]
+  dayCloses    DayClose[]
   giftCards    GiftCard[]
   expenses     Expense[]
   labourRates  LabourRate[]
@@ -342,6 +344,7 @@ model User {
   invitationsSent          Invitation[]         @relation("InvitationSender")
   counterSales             CounterSale[]        @relation("CounterSaleSeller")
   tillSessions             TillSession[]        @relation("TillOperator")
+  dayCloses                DayClose[]           @relation("DayCloser")
   expensesApproved         Expense[]            @relation("ExpenseApprover")
   timesheetApprovals       Timesheet[]          @relation("TimesheetApprover")
   transfersDispatched      StockTransfer[]      @relation("TransferDispatcher")
@@ -4850,6 +4853,76 @@ model TillSession {
 
   @@index([orgId, openedAt])
   @@map("till_sessions")
+}
+
+/**
+ * ===========================================================================
+ * THE END OF THE DAY — Phase 96
+ * The product can already answer every question a close asks. What it could
+ * not say is whether anybody looked, and what they saw. These two tables are
+ * a record of an act, not a new fact about the workshop — which is why,
+ * uniquely in this schema, they store figures that are derived everywhere
+ * else (ADR-0020), and why nothing may edit them afterwards.
+ * ===========================================================================
+ */
+
+enum CloseReading {
+  TILL
+  CLOCKED_ON
+  KEYS
+  CARS_ON_SITE
+  OPEN_JOBS
+  UNPAID_INVOICES
+  ESTIMATES_WAITING
+  PARTS_LATE
+  BANK_UNMATCHED
+  FOLLOW_UPS_DUE
+}
+
+model DayClose {
+  id         String @id @default(cuid())
+  orgId      String
+  /// Per site. A group closes each workshop separately, and a close covering
+  /// all of them would say nothing true about any of them.
+  locationId String
+  /// The workshop's own calendar date, which is not the server's: a garage in
+  /// Sydney locking up at six is closing a date UTC has already left behind.
+  on         DateTime @db.Date
+
+  /// When somebody pressed it, and who. A close with no name on it is an
+  /// assertion nobody made.
+  closedAt       DateTime
+  closedByUserId String
+  /// What they wanted said about the night. Most nights empty.
+  note           String?
+
+  org      Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  location Location           @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  closedBy User               @relation("DayCloser", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  readings DayCloseReading[]
+
+  @@unique([orgId, locationId, on])
+  @@index([orgId, on])
+  @@map("day_closes")
+}
+
+model DayCloseReading {
+  id      String       @id @default(cuid())
+  closeId String
+  kind    CloseReading
+  /// How many, as the figure stood. Nought is a real answer: "counted and
+  /// balanced" is a different fact from "nobody asked".
+  count   Int
+  /// Whether the workshop was told, that night, that this should not be left.
+  /// Stored rather than derived from the kind, because the judgement may
+  /// change and a close must not change its mind about a night nobody can
+  /// revisit.
+  leftOvernight Boolean
+
+  close DayClose @relation(fields: [closeId], references: [id], onDelete: Cascade)
+
+  @@unique([closeId, kind])
+  @@map("day_close_readings")
 }
 
 /**

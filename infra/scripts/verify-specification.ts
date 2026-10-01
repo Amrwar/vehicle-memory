@@ -341,9 +341,8 @@ async function main() {
 
   const fitted = await prisma.jobPartLine.findFirst({
     where: {
-      job: { orgId: org.id },
       status: 'FITTED',
-      job: { orgId: org.id, vehicleId: { not: undefined } },
+      job: { orgId: org.id },
     },
     select: { description: true, job: { select: { vehicleId: true } } },
   });

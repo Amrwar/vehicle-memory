@@ -101,13 +101,14 @@ function routeSegments(): string[][] {
  * is only to catch an href that was renamed, or never existed.
  */
 function routeExists(href: string, routes: string[][]): boolean {
-  const want = href.split('?')[0].split('#')[0].split('/').filter(Boolean);
+  const want = (href.split('?')[0] ?? '').split('#')[0]?.split('/').filter(Boolean) ?? [];
   return routes.some((route) => {
     let i = 0;
     for (const piece of route) {
       if (piece.startsWith('[...')) return true;
-      if (i >= want.length) return false;
-      if (!piece.startsWith('[') && piece !== want[i]) return false;
+      const segment = want[i];
+      if (segment === undefined) return false;
+      if (!piece.startsWith('[') && piece !== segment) return false;
       i += 1;
     }
     return i === want.length;
@@ -124,7 +125,7 @@ function keysTheLibraryCanSay(): string[] {
   const source = readFileSync(LIB, 'utf8');
   const found = new Set<string>();
   for (const match of source.matchAll(/\bkey: '((?:[^'\\]|\\.)*)'/g)) {
-    found.add(match[1].replace(/\\'/g, "'"));
+    found.add((match[1] ?? '').replace(/\\'/g, "'"));
   }
   return [...found].sort();
 }
@@ -202,7 +203,7 @@ async function main() {
   // fails for the wrong reason is worse than no check.
   const produced = new Set(
     [...source.matchAll(/'([a-z-]+)' as const/g)]
-      .map((match) => match[1])
+      .map((match) => match[1] ?? '')
       .filter((kind) => (MISS_KINDS as readonly string[]).includes(kind)),
   );
   const dead = MISS_KINDS.filter((kind) => !produced.has(kind));
@@ -296,17 +297,25 @@ async function main() {
   const order = list.items.map((one) => COST_ORDER.indexOf(one.cost));
   check(
     'and it is ordered by what it costs to miss',
-    order.every((rank, index) => index === 0 || rank >= order[index - 1]),
+    order.every((rank, index) => index === 0 || rank >= (order[index - 1] ?? -1)),
     true,
   );
 
   /* --- the cap, on the rules' own terms ---------------------------------- */
 
-  const many = Array.from({ length: A_MORNING + 7 }, (_, index) => ({
-    ...list.items[0],
-    id: `probe-${index}`,
-  }));
-  check('a long morning is capped and the rest admitted', theMorning(many).more, 7);
+  const first = list.items[0];
+  if (first) {
+    const many = Array.from({ length: A_MORNING + 7 }, (_, index) => ({
+      ...first,
+      id: `probe-${index}`,
+    }));
+    check('a long morning is capped and the rest admitted', theMorning(many).more, 7);
+  } else {
+    // Said rather than skipped silently. A check that quietly measures nothing
+    // when the seed is tidy is the self-skipping check of Phase 89.
+    failures += 1;
+    console.error('  FAIL   the cap could not be exercised: the morning was empty');
+  }
 
   console.info(
     failures === 0

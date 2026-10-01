@@ -28,6 +28,7 @@ changing more than one module, or migrating data?
 | [0017](0017-the-confidence-is-the-evidence.md)     | The confidence is the evidence, not a score          | Accepted |
 | [0018](0018-a-blank-is-a-blank.md)                 | A blank is a blank, and never a plausible default    | Accepted |
 | [0019](0019-a-sentence-is-a-key-and-its-values.md) | A sentence is a key and its values, never a string   | Accepted |
+| [0020](0020-a-close-is-testimony.md)               | A close is testimony, not a total                    | Accepted |
 
 The three in bold are the ones the product could not survive losing.
 ADR-0004 makes portable history possible at all; ADR-0005 is what makes anyone
