@@ -120,7 +120,7 @@ async function main() {
     {
       path: '/dashboard',
       as: 'owner',
-      expect: ['Awaiting approval', 'Today in the workshop', 'Approvals needed'],
+      expect: ['Before the doors shut', 'In the building', 'Today in the workshop'],
     },
     { path: '/diary', as: 'owner', expect: ['Diary', 'By person', 'By bay', 'Booked in'] },
     { path: '/jobs', as: 'owner', expect: ['Jobs', '10482', 'Brake system repair'] },
