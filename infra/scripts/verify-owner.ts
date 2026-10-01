@@ -391,14 +391,14 @@ async function main() {
     const dashboard = await read('/dashboard');
     check(
       'the dashboard has its business and inventory blocks',
-      ['The business', 'Owed to you', 'Comebacks', 'Stock value', 'Orders late'].every((s) =>
+      ['The money', 'Owed to you', 'Comebacks', 'Stock value', 'Orders late'].every((s) =>
         dashboard.includes(s),
       ),
       true,
     );
     check('no tile shows a word instead of a figure', dashboard.includes('>Open<'), false);
     const french = await read('/dashboard', 'carnet_lang=fr');
-    check('the dashboard in French', french.includes('Travaux du jour'), true);
+    check('the dashboard in French', french.includes('Véhicules à l’atelier'), true);
 
     const prefilled = await read(
       `/purchasing/new?supplierId=${cheap.id}&product=${product.id}&qty=4&cost=8`,

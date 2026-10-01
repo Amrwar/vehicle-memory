@@ -134,7 +134,7 @@ export default async function DashboardPage({
     // Arithmetic with a sentence around it: this month against last, from the
     // same figures the reports page shows.
     seesBusiness ? revenueObservations(orgId) : Promise.resolve([] as string[]),
-    seesInventory ? ownerDay(orgId) : Promise.resolve(null),
+    seesBusiness || seesInventory ? ownerDay(orgId) : Promise.resolve(null),
     // Late, or due today. Everything further out lives on the job it belongs
     // to, where somebody sees it when they are looking at that car.
     followUpsDue(orgId, { limit: 8 }),
@@ -715,6 +715,54 @@ export default async function DashboardPage({
               />
             </Link>
           </StatRow>
+
+          {day ? (
+            <StatRow className="mb-3">
+              <Link href="/reports/business?range=quarter#comebacks" className="group">
+                <StatTile
+                  label={t('Comebacks')}
+                  value={
+                    day.comebacks.value === null
+                      ? String(day.comebacks.part)
+                      : `${day.comebacks.value}%`
+                  }
+                  tone={day.comebacks.part > 0 ? 'warning' : 'neutral'}
+                  note={
+                    day.comebacks.value === null
+                      ? t('Back out of {base} finished in 90 days, too few for a rate', {
+                          base: day.comebacks.base,
+                        })
+                      : t('{part} back out of {base} finished in 90 days', {
+                          part: day.comebacks.part,
+                          base: day.comebacks.base,
+                        })
+                  }
+                />
+              </Link>
+              <Link href="/reputation#trend" className="group">
+                <StatTile
+                  label={t('Satisfaction')}
+                  value={day.satisfaction.current === null ? '—' : String(day.satisfaction.current)}
+                  tone={
+                    day.satisfaction.direction === 'down'
+                      ? 'danger'
+                      : day.satisfaction.direction === 'up'
+                        ? 'success'
+                        : 'neutral'
+                  }
+                  note={
+                    day.satisfaction.direction === 'up'
+                      ? t('Improving on the 90 days before')
+                      : day.satisfaction.direction === 'down'
+                        ? t('Falling on the 90 days before')
+                        : day.satisfaction.direction === 'steady'
+                          ? t('Steady on the 90 days before')
+                          : t('Too few answers to compare')
+                  }
+                />
+              </Link>
+            </StatRow>
+          ) : null}
 
           <Card className="mb-6">
             <CardHeader

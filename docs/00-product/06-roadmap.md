@@ -6188,6 +6188,17 @@ with no bound. It has one — `take` is a parameter, passed as the shorthand
 the check had a hole, and the push run had been green only because the build
 job runs on the schedule and not on a push. Fixed in its own commit, first.
 
+**And what the nightly found after it shipped.** Three runs, one typed
+phrase at a time: the route smoke test expected "Awaiting approval", the
+languages probe expected "Jobs today" in three languages, and the owner's
+probe expected "The business" and the French for "Jobs today" — all tiles the
+tower replaced. The pages were right; the expectations were sentences typed
+in September. Each was fixed in its own commit, and the standing rule is now
+to grep `infra/scripts` for a page's old phrases before a rewrite is pushed.
+The owner's probe also caught a real omission: the comebacks and satisfaction
+tiles Phase 40 put on the dashboard had been dropped from the money band, and
+are back under it.
+
 ## Phase 99 — Minute by minute
 
 **Scope.** The first of the customer items of the thirty-nine: "a unified
