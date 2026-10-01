@@ -267,6 +267,20 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-12700 - Do not miss
+
+| Ref      | Requirement                                                                                              | Phase |
+| -------- | -------------------------------------------------------------------------------------------------------- | ----- |
+| FR-12701 | One screen MUST carry everything worth not missing today, drawn from what the product already knows.     | 95    |
+| FR-12702 | Every row MUST name one action, as a verb, with a page where it is done.                                 | 95    |
+| FR-12703 | A row that names no action, no sentence or no destination MUST be dropped rather than shown.             | 95    |
+| FR-12704 | The list MUST be ordered by what it costs to miss: safety, a promise, money, then an incomplete history. | 95    |
+| FR-12705 | Within one cost, the thing that has been true longest MUST come first.                                   | 95    |
+| FR-12706 | The list MUST be capped, and what is behind the cap MUST be said rather than hidden.                     | 95    |
+| FR-12707 | Nothing MUST be listed where acting today cannot change the outcome.                                     | 95    |
+| FR-12708 | An empty list MUST be reported as a finished morning, not as a blank area.                               | 95    |
+| FR-12709 | Every sentence the list can say MUST travel as a key and its values, so the screen can translate it.     | 95    |
+
 ## FR-12600 - The box in your hands
 
 | Ref      | Requirement                                                                                     | Phase |

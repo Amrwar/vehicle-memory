@@ -38,6 +38,7 @@ import * as receiving from './receiving';
 import * as scanning from './scanning';
 import * as sourcing from './sourcing';
 import * as specification from './specification';
+import * as morning from './morning';
 
 export const AREAS = [
   publicSite,
@@ -74,4 +75,5 @@ export const AREAS = [
   sourcing,
   specification,
   standing,
+  morning,
 ] as const;

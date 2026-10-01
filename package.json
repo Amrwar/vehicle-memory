@@ -96,6 +96,7 @@
     "verify:diary": "tsx infra/scripts/verify-diary.ts",
     "verify:scanning": "tsx infra/scripts/verify-scanning.ts",
     "verify:receiving": "tsx infra/scripts/verify-receiving.ts",
+    "verify:morning": "tsx infra/scripts/verify-morning.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",

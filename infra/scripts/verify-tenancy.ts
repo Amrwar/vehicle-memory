@@ -123,6 +123,11 @@ const CASES: Record<string, Case> = {
   },
   '/(workshop)/people/[id]': { kind: 'scoped', fill: (r) => `/people/${r.employee}` },
   '/(workshop)/purchasing/[id]': { kind: 'scoped', fill: (r) => `/purchasing/${r.purchaseOrder}` },
+  // Phase 89 and Phase 93 built these and neither was declared here, which
+  // is exactly what this list exists to catch: the pages scope their queries
+  // and nothing proved it.
+  '/(workshop)/equipment/[id]': { kind: 'scoped', fill: (r) => `/equipment/${r.equipment}` },
+  '/(workshop)/receiving/[id]': { kind: 'scoped', fill: (r) => `/receiving/${r.purchaseOrder}` },
   '/(workshop)/settings/data/[id]': { kind: 'scoped', fill: (r) => `/settings/data/${r.import}` },
   '/(workshop)/suppliers/[id]': { kind: 'scoped', fill: (r) => `/suppliers/${r.supplier}` },
   '/(workshop)/transfers/[id]': { kind: 'scoped', fill: (r) => `/transfers/${r.transfer}` },
@@ -339,6 +344,7 @@ interface Ids {
   payment: string;
   employee: string;
   purchaseOrder: string;
+  equipment: string;
   import: string;
   supplier: string;
   transfer: string;
@@ -423,6 +429,7 @@ async function identifiersOf(orgId: string, orgName: string): Promise<Ids | null
     payment,
     employee,
     purchaseOrder,
+    equipment,
     imported,
     supplier,
     transfer,
@@ -451,6 +458,7 @@ async function identifiersOf(orgId: string, orgName: string): Promise<Ids | null
       prisma.purchaseOrder.findFirst({ where: { orgId }, select: { id: true } }),
       'purchase order',
     ),
+    one(prisma.equipment.findFirst({ where: { orgId }, select: { id: true } }), 'machine'),
     one(prisma.importBatch.findFirst({ where: { orgId }, select: { id: true } }), 'import'),
     one(prisma.supplier.findFirst({ where: { orgId }, select: { id: true } }), 'supplier'),
     one(prisma.stockTransfer.findFirst({ where: { orgId }, select: { id: true } }), 'transfer'),
@@ -484,6 +492,7 @@ async function identifiersOf(orgId: string, orgName: string): Promise<Ids | null
     !payment ||
     !employee ||
     !purchaseOrder ||
+    !equipment ||
     !supplier ||
     !transfer ||
     !access ||
@@ -508,6 +517,7 @@ async function identifiersOf(orgId: string, orgName: string): Promise<Ids | null
     payment: payment.id,
     employee: employee.id,
     purchaseOrder: purchaseOrder.id,
+    equipment: equipment.id,
     // An import is the one thing a fresh workshop may genuinely not have.
     import: imported?.id ?? 'no-import-to-ask-about',
     supplier: supplier.id,

@@ -983,3 +983,52 @@ The counting lands in the database as it happens, one line at a time. A pallet
 takes twenty minutes, a browser tab does not reliably survive twenty minutes of
 a workshop, and the only thing worse than counting a pallet is counting it
 twice.
+
+Phase 94 is not a roadmap item. Six faults were reported from the running
+product in one sitting, five of them on the pages a prospective customer sees
+first, and every one was invisible to the checks. The suite proves a page
+answers 200, that its lists are bounded, that its words are translated and
+that it fits a phone. None of that notices a button that is not a button —
+and "Where everything stands" carried one on every row, a brand-coloured span
+that looked exactly like a control. Underneath it, `JobStanding.next.href` had
+been in the type since Phase 84 with nothing setting it and nothing reading
+it. The lesson recorded is the one that is not writable as a check: somebody
+has to open the product.
+
+Phase 95 is item 36, the "do not miss" list. Nothing on it is new and nothing
+is stored: `/now` already says whose move every job is, the plan already names
+a booking that cannot be kept, the equipment screen already names a lapsing
+certificate. All of it true, and none of it a morning — because reading eight
+screens is not a morning, and the one thing a workshop does not have at eight
+o'clock is time to go looking. The phase adds one question asked at the right
+time, of data eight other screens already own.
+
+Every row is one action, as a verb, with a page where it is done. "Three
+invoices are overdue" is not an item: it is a number, and a number leaves the
+reader to work out what to do, which they do tomorrow instead. A row that
+cannot name an action is dropped rather than shown badly, because one row that
+says something is wrong and gives nobody anything to press is how a list stops
+being read. The order is an argument: somebody could be hurt, then a promise
+to a customer, then money, then an incomplete history — and within a cost,
+the thing that has been true longest, because the promise sitting since
+Tuesday is the one somebody has already walked past.
+
+And it must be possible to reach the end, so it is capped at twelve and what
+is behind the cap is counted out loud. A workshop with sixty things to not
+miss has a problem this screen cannot solve, and showing eight would be the
+screen lying to look calm.
+
+The checks found the function that argues against untranslatable sentences
+building one by hand: `${total} things to deal with.`, which no dictionary can
+hold a key for, wrapped in `t()` where it looked right and could not work.
+`i18n-scan` reads the pages and this literal lived in a library, so
+`verify-morning` now reads the library's own keys out of its source — which
+immediately turned up two actions with no French or Arabic at all. The rule behind
+all three is recorded as ADR-0019: a library produces a key and its values,
+never a sentence; no slot holds prose; nothing below the screen formats a date.
+
+Running the neighbouring checks turned up two addresses nobody had decided
+about. `verify-tenancy` refuses to pass until every address with an identifier
+in it is declared, and `/equipment/[id]` and `/receiving/[id]` had been built
+in Phases 89 and 93 without being added. Both scope their queries; what was
+missing was the proof.

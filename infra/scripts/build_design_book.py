@@ -1032,6 +1032,28 @@ def build() -> None:
         source="docs/02-design/07-accounting-model.md, section 3.19",
     )
 
+    design(
+        doc,
+        title="One list, ordered by what it costs to miss",
+        when="Phase 95, 30 September 2026.",
+        why="Everything on this screen was already answerable somewhere else. The floor says whose move "
+            "a job is, the plan names a booking that cannot be kept, the equipment screen names a "
+            "lapsing certificate, the dashboard carries the money. All of it true, and none of it a "
+            "morning \u2014 because reading eight screens is not a morning, and the one thing a workshop "
+            "does not have at eight o\u2019clock is time to go looking.",
+        meaning=[
+            "Every row names one action, as a verb, with the page where it is done. \u201cThree invoices are overdue\u201d is a number, and a number leaves the reader to work out what to do.",
+            "The order is an argument: somebody could be hurt, then a promise to a customer, then money, then an incomplete history \u2014 and within a cost, the thing that has been true longest.",
+            "It ends. Twelve rows, and what is behind the cap is counted out loud rather than hidden.",
+        ],
+        works="A row the product cannot name an action for is dropped rather than shown badly: one row that "
+              "says something is wrong and gives nobody anything to press is how a list stops being read. "
+              "And every row\u2019s destination is resolved against the route tree on disk, because a row that "
+              "lands on a page that is not there teaches somebody the screen is not to be trusted.",
+        shots=[("morning", "The morning list.", 16.4)],
+        source="docs/00-product/06-roadmap.md, Phase 95; docs/01-requirements/01-functional-requirements.md, FR-12700",
+    )
+
     # 19. Refusals
     doc.add_heading("19. What the design refuses to do", level=1)
     para(doc, "Some of the strongest decisions are absences, and a reader of this book should know them.")

@@ -223,6 +223,7 @@ async function main() {
     { file: 'dashboard-dark', path: '/dashboard', who: 'owner', dark: true },
     { file: 'diary', path: '/diary', who: 'owner' },
     { file: 'now', path: '/now', who: 'owner', fullPage: true },
+    { file: 'morning', path: '/morning', who: 'owner', fullPage: true },
     { file: 'floor', path: '/floor', who: 'owner' },
     { file: 'job', path: `/jobs/${r.job}`, who: 'owner', fullPage: true },
     { file: 'check-in', path: `/jobs/${r.job}/check-in`, who: 'owner', fullPage: true },

@@ -946,6 +946,19 @@ The second sweep: things connected at one end only.
 | Counted as it happens      | Built  | Each count is its own receipt; nothing is held on a page (Phase 93)           |
 | Over-receipt at the pallet | Built  | Said while the driver is still in the yard, not only at the submit (Phase 93) |
 
+## 21.56 Do not miss
+
+| Item                          | Status | Where                                                                                     |
+| ----------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| One list for the morning      | Built  | `/morning`, first in the Workshop section (Phase 95)                                      |
+| Exactly one action per row    | Built  | A verb and a destination; an unfit row is dropped, not shown badly (Phase 95)             |
+| Ordered by what it costs      | Built  | Safety, a promise, money, an incomplete history — then oldest first (Phase 95)            |
+| Eight sources, one question   | Built  | Equipment, certificates, the diary, jobs, sign-off, invoices, parts, comebacks (Phase 95) |
+| Only what today changes       | Built  | Ninety days on an invoice, sixty on a comeback (Phase 95)                                 |
+| Reaching the end is possible  | Built  | Twelve rows, and "and {count} more behind these" (Phase 95)                               |
+| Nothing to miss is an answer  | Built  | Said plainly rather than shown as an empty area (Phase 95)                                |
+| Every row goes somewhere real | Built  | Hrefs resolved against the route tree on disk (Phase 95)                                  |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1024,7 +1037,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 493          |
+| Built   | 501          |
 | Partial | 2            |
 
 <!-- counts:end -->

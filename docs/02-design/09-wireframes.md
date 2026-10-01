@@ -380,3 +380,50 @@ bottom where a thumb is; seven on a desktop, under the header. "Needs you"
 comes first and each item carries its own button, so the page is done with
 in one press for the person who came to pay. Rewards and the workshop
 directory are pages of their own.
+
+## 12. Do not miss (Phase 95)
+
+```
+WORKSHOP
+Do not miss
+What acting on this morning changes. Ordered by what it costs to miss, and
+short enough to finish.
+
+8 things to deal with.   (2 Somebody could be hurt) (4 A promise) (2 Money)
+
++-------------------------------------------------------------------------+
+| IN THE ORDER THEY COST TO MISS                                          |
+| Each one is a single thing to do.                                       |
+|-------------------------------------------------------------------------|
+| (Somebody could be hurt) Two-post lift cannot be used, and         ->   |
+|                          brake work needs it        12 Sep  Put it right|
+| (Somebody could be hurt) Wheel aligner's certificate runs out      ->   |
+|                          on 2026-10-14      Book the engineer           |
+| (A promise)   #10482 [BV19 FLM]: waiting on the customer           ->   |
+|                                            30 Sep  Tell the customer    |
+| (A promise)   Order #PO-118 from Pennine Motor Factors was due     ->   |
+|                          and has not arrived  28 Sep  Ring the supplier |
+| (Money)       Sara Probe has not paid #INV-2041   14 Sep  Chase it ->   |
++-------------------------------------------------------------------------+
+
+And 0 more behind these.
+```
+
+Every row is one action, as a verb, at the end where the eye finishes — and
+the whole row is the link, because a row that says something is wrong and
+gives nobody anything to press is how a list stops being read. The badge is
+what it costs to miss, not a status: safety is the only thing above a promise
+to a customer.
+
+Where there is nothing, the card is replaced rather than emptied:
+
+```
++-------------------------------------------------------------------------+
+|                    Nothing to miss this morning.                        |
+|   Nothing is late, nothing is unusable, and nothing is waiting on        |
+|                        somebody here.                                   |
++-------------------------------------------------------------------------+
+```
+
+A screen that showed an empty area would leave somebody wondering whether it
+had loaded. A workshop that has cleared its list should be told so.

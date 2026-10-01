@@ -99,6 +99,10 @@ export async function whereJobsStand(
       vehicle: job.vehicle ? `${job.vehicle.make} ${job.vehicle.model}`.trim() : null,
       registration: job.vehicle?.registration ?? null,
       status: job.status as JobStatus,
+      // Already queried for the standing itself; returned too, so a caller
+      // can tell "late" from "due before the end of today" without asking
+      // the database the same question again. Phase 95.
+      promisedAt: job.promisedAt,
       standing: standingOfJob({
         status: job.status as JobStatus,
         since,

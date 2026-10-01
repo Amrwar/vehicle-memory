@@ -1642,6 +1642,53 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CS - Do not miss (Phase 95)
+
+### CS1 - One list before the first car arrives
+
+**As** an owner **I want** one screen that carries everything worth not
+missing today **so that** I do not read eight screens to find out what is on
+fire.
+
+**Size** 8 - **Satisfies** FR-12701, FR-12704, FR-12705
+
+- **Given** a late job, a lapsing certificate and an overdue invoice, **when**
+  I open the morning list, **then** all three are on it.
+- **Given** a safety item and a money item, **when** the list is drawn,
+  **then** the safety item is above it.
+- **Given** two promises about to be broken, **when** the list is drawn,
+  **then** the one that has been true longest is first.
+
+### CS2 - Every row is something to do
+
+**As** an owner **I want** every row to name one thing to do **so that**
+reading the list is the same as working through it.
+
+**Size** 5 - **Satisfies** FR-12702, FR-12703, FR-12709
+
+- **Given** a row, **when** I read it, **then** it names a verb and goes to the
+  page where that verb is done.
+- **Given** something the product cannot name an action for, **when** the list
+  is drawn, **then** it is left off rather than shown without one.
+- **Given** a reader in French or Arabic, **when** the list is drawn, **then**
+  every sentence on it is in their language.
+
+### CS3 - A list it is possible to finish
+
+**As** an owner **I want** the list to end **so that** I open it again
+tomorrow.
+
+**Size** 3 - **Satisfies** FR-12706, FR-12707, FR-12708
+
+- **Given** sixty things, **when** the list is drawn, **then** twelve are shown
+  and the other forty-eight are counted out loud.
+- **Given** an invoice six months overdue, **when** the list is drawn, **then**
+  it is not on it.
+- **Given** nothing to miss, **when** I open the list, **then** it says so
+  plainly.
+
+---
+
 ## Epic CR - The box in your hands (Phase 93)
 
 ### CR1 - Booking a pallet in standing up

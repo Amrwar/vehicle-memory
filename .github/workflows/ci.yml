@@ -269,6 +269,13 @@ jobs:
       - name: The box in your hands
         run: npx tsx infra/scripts/verify-receiving.ts
 
+      # Every row on the morning list is one action that goes somewhere that
+      # exists, and every sentence it can say is answered in three languages --
+      # which i18n-scan cannot see, because the library says them from inside
+      # functions rather than on a page.
+      - name: Do not miss
+        run: npx tsx infra/scripts/verify-morning.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

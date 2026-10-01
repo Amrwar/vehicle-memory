@@ -5738,6 +5738,115 @@ first one — "nothing that looks like a control is inert" — would be worth
 having and is not obviously writable. What is writable, and is the lesson
 recorded here, is that somebody has to open the product.
 
+## Phase 95 — Do not miss
+
+**Scope.** Item 36 of the thirty-nine: the "do not miss" list — one screen,
+ordered by what it costs to miss, that a workshop clears before the first car
+arrives.
+
+**Exit.** An owner opens one screen in the morning, reads at most twelve rows,
+and every row is one thing to do with somewhere to do it. Nothing on it is
+new: everything was already answerable somewhere in the product.
+
+**Status.** Done.
+
+Nothing here is stored and nothing is computed that the product could not
+already answer. `/now` says whose move every job is, the plan names a booking
+that cannot be kept, the equipment screen names a lapsing certificate, the
+dashboard carries the money. All of it true, and none of it a morning —
+because reading eight screens is not a morning, and the one thing a workshop
+does not have at eight o'clock is time to go looking.
+
+So this phase adds no new facts. It adds **one question asked at the right
+time**, of data eight other screens already own.
+
+**Exactly one action per row.** The constraint the whole thing turns on, and
+the reason it is a list rather than another dashboard. _"Three invoices are
+overdue"_ is not an item: it is a number, and a number leaves the reader to
+work out what to do, which they do tomorrow instead. Every row names a verb
+— Chase it, Ring the supplier, Sign it off, Move the booking — and
+goes to the page where that verb happens. `isOneAction` refuses a row with no
+action, no sentence, no destination, or an action ending in a digit, and an
+unfit row is **dropped rather than shown badly**: one row that says something
+is wrong and gives nobody anything to press is how a list stops being read.
+
+Phase 84 is why most of it was possible at all. `JobStanding.next` has named
+the single next thing for every open job since then, so jobs arrive already fit
+for a list whose rule is one action each. Where it names nothing the job is
+dropped rather than given an invented action — inventing one here would be
+smuggling a row past the rule the screen exists to keep.
+
+**Ordered by what it costs to miss, and the order is an argument.** Somebody
+could be hurt, then a promise to a customer, then money, then an incomplete
+history. Safety first because a car leaving on an uninspected lift is not
+recoverable. A promise above money because the money usually is recoverable and
+the customer often is not. The record last — not because it does not
+matter, but because a comeback whose cause is unrecorded will still be
+unrecorded this afternoon, and a car promised at four will not. Within a cost,
+the older thing first: two promises about to be broken are not equal, and the
+one sitting since Tuesday is the one somebody has already walked past.
+
+**Only what acting today changes.** An invoice ninety days overdue and already
+with a collector is a fact, not a thing to miss; a comeback from March with no
+cause recorded is worth knowing and is not urgent. Both are excluded by
+window, because a list that carried everything is a list nobody finishes —
+and a list nobody finishes is a list nobody opens.
+
+**It must be possible to reach the end.** Twelve rows, and what is behind the
+cap is said: _"and eleven more behind these"_. A workshop with sixty things to
+not miss has a problem this screen cannot solve, and showing eight would be the
+screen lying to look calm.
+
+### What the checks found
+
+**A sentence that could not be translated, in the function that argues against
+them.** `howTheMorningLooks` built `${total} things to deal with.` by hand. No
+dictionary can hold a key with a number baked into it, so the page wrapped it
+in `t()` — which looks right and cannot work: a French workshop would have
+read one English sentence in the middle of a French screen. `i18n-scan` could
+not see it, because it reads the pages and this literal lived in a library.
+Three paragraphs above the function, the same file states the rule it was
+breaking. It returns a `{key, vars}` now, like everything else here.
+
+That is also why `verify-morning` reads the library's `key:` literals out of
+its own source and looks each one up in the merged dictionary. Two actions,
+**Book the engineer** and **Move the booking**, had no French or Arabic at all
+and every page-level scan reported zero missing.
+
+**A clash worth mending in the English.** The fourth cost was called "The
+record", which the job page has meant as a vehicle's check-in sheet since Phase
+46, and the passport report already owns "What the record says". One English
+sentence has to mean one thing or a translator is left guessing which, so the
+cost names itself outright: **an incomplete history**. The truer sentence
+anyway — what it costs to leave a comeback unexplained is a history that
+cannot be read.
+
+**A check that failed for the wrong reason.** The kind-coverage check matched
+`kind: 'part-late' as const` and reported three kinds as dead that the library
+produces through a ternary. The code was right and the check was wrong, which
+is worse than no check: it would have been silenced rather than read.
+
+**Every row's destination is resolved against the route tree on disk.**
+`isOneAction` only asks that an href starts with a slash. A row reading "Ring
+the supplier" that lands on a 404 is worse than no row — it teaches
+somebody this screen is not to be trusted, which is the one thing a morning
+list cannot survive.
+
+**And two addresses nobody had decided about.** `verify-tenancy` reads the
+route tree for every address with an identifier in it and refuses to pass until
+each one is declared. `/equipment/[id]` from Phase 89 and `/receiving/[id]`
+from Phase 93 were never added. Both pages do scope their queries; what was
+missing was the proof, and an unproved scoping is the one that quietly stops
+being true. Found while running the neighbouring checks for this phase rather
+than this phase's own — which is the argument for running them all.
+
+The three language findings are recorded as
+[ADR-0019](../03-adr/0019-a-sentence-is-a-key-and-its-values.md), because they
+are one rule with three faces: a library produces a key and its values, never a
+sentence; no slot holds prose; and nothing below the screen formats a date, a
+time or a number. Phase 84 paid that cost first for `JobStanding.reason`. This
+records it as the rule rather than one model's habit.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here
@@ -5745,8 +5854,8 @@ whole, in their order and their words' sense, because a plan that lives in a
 conversation is a plan that is lost. Phases from Phase 80 onward are taken from
 it.
 
-**The order is stated: the four remaining gaps first.** The feature map counts
-422 built, three partial and one deferred. The three partial are the sidebar
+**The order is stated: the four remaining gaps first.** The feature map counted
+422 built, three partial and one deferred on the day this was written. The three partial are the sidebar
 grouping and the two dictionary-clash counts; the deferred one is fault
 suggestion. Those four come before anything new on this list.
 
