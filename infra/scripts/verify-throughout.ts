@@ -292,7 +292,8 @@ function listsHaveBounds() {
       const end = block.indexOf('\n  });');
       const body = end > 0 ? block.slice(0, end) : block;
 
-      if (/\btake:\s*\w/.test(body)) return;
+      // `take: n`, or the shorthand `take,` when the bound is a parameter.
+      if (/\btake(:\s*\w|\s*,)/.test(body)) return;
       if (/\bid:\s*\{\s*in:|\bid:\s*[a-zA-Z]|Id:\s*[a-zA-Z]/.test(body)) return;
 
       // A reason, either just above the query or inside it, and up to eight
