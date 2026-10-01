@@ -590,3 +590,4 @@ export * from './close-of-day';
 
 /** What happened while we were shut. Phase 97. */
 export * from './start-of-day';
+export * from './control-tower';

@@ -6088,6 +6088,106 @@ its days and finds a text and an online booking waiting on a Tuesday morning,
 and the check that the night has something in it comes _first_, so the vacuity
 cannot come back unnoticed.
 
+## Phase 98 — The screen an owner leaves open all day
+
+**Scope.** Item 39 of the thirty-nine, the last of the operations layer and the
+plan's stated destination: the control tower. What `/dashboard` becomes — what
+is in the shop now and what blocks each of it, today's capacity, the money, the
+customers waiting, the parts blocking today's work, the risk.
+
+**Exit.** An owner opens `/dashboard` at twenty to eight and leaves it open
+until six, and at any hour it says in one sentence whether anything is already
+costing the workshop something, and in six bands what — without their pressing
+a key.
+
+**Status.** Done.
+
+The product already had three morning screens and did not need a fourth.
+`/morning` says what to do before the first car arrives, one action per line.
+`/opening` says what arrived while nobody was here and whether last night is
+still true. `/now` says whose move every job is. Each owns a question, and
+none of them owns the one an owner asks at eleven, and again at three, and
+again at five: **what is the state of the building right now, and what will
+have cost us something by the time the doors shut?** That is the tower's
+question, and it is a question about _now_, which is why the screen has to be
+left open rather than visited.
+
+**Nothing is computed that the product could not already answer, and nothing
+is computed twice.** The building is read off `whereJobsStand` — the function
+Phase 84 wrote for `/now` and called "the first floor of the control tower" —
+so the tower cannot say a car is waiting on a supplier while the job's own
+band says it is ours. Capacity is `capacityOn`, the planner's. The rota is
+`whoIsInToday`, opening-up's. The morning's list is `doNotMiss`. A tower that
+counted the building its own way would be a second opinion, and a screen left
+open all day has no business holding one. `verify-tower` asserts the building
+equals the board, car for car, rather than assuming it.
+
+**Six bands, in the order a tower answers them.** What is at risk before the
+doors shut; what is in the building and what blocks each of it, with the same
+band under each car that the job's own page shows; what today can hold —
+hours promised against hours the building has, and whether people or bays are
+the limit, the rota against the clock, the diary with a car booked for earlier
+that has not been received marked as such; who is waiting on us — deciding on
+an estimate, waiting for a reply, finished and not collected, each with how
+long the oldest has waited; the money, with finished work that nobody has
+billed as a figure of its own; and the parts holding up cars already on the
+ramps. Phase 40's business and inventory blocks stay, inside the bands they
+belong to.
+
+**The risk band is not a list of everything wrong.** `/morning` is that. This
+is the handful of things that will have cost the workshop something by closing
+time if nobody looks, and the order is fixed in core and tested: what is
+already costing — a promise broken, a day overbooked, a part late for a car on
+the ramps — before what merely will by tonight. The one sentence at the top is
+built from the same list: _"5 in the building, and 2 things are already
+costing you."_
+
+**Parts in the way, matched to the order they are on.** The schema has never
+tied a job's part line to the purchase order it went on; a line says
+`ON_ORDER` and nothing else. The tower finds the order by the product, among
+the orders still open with some of that product still to come, earliest
+expected first — which is the order the stores would look at too — and reads
+late, due today or due later off the supplier's date. A part marked on order
+that no open order carries is called out separately and sorted second, after
+the late ones: it is a part that will be late and does not know it yet.
+
+**It refreshes itself.** A figure that was true at eight is not evidence of
+anything at eleven, and the person reading it is not going to press a key
+every few minutes to find out. The page re-reads every five minutes while it
+is visible, says at the top when it last did, and a tab behind three others
+waits rather than asking the database questions nobody will read the answers
+to — then catches up the moment it is looked at again.
+
+**It records nothing**, which `verify-tower` checks by counting rows before and
+after. A screen left open all day that wrote anything would write it all day.
+
+**The workshop's own day.** The earlier dashboard took midnight from the
+server, which is three hours wrong in Riyadh and an hour wrong in Paris.
+"Taken today", the diary and "not arrived" now share one window, from local
+midnight in the site's zone, and the arithmetic for that is in core with a
+test that names three zones.
+
+### What the first run found
+
+**A link to a page that does not exist.** The capacity tile pointed at
+`/planning`. The planner lives at `/plan` and the capacity view at `/capacity`,
+and the controls crawl would have said so on the first run; it was found by
+reading the app directory first, which is the cheaper order.
+
+**A fixture that proved the wrong thing.** The check that a part marked on
+order with no open order is called out picked "any second product" as the one
+nobody had ordered — and the seed had ordered it. The check failed, correctly,
+about the seed. The fixture now asks the database for a product no open order
+carries, so the sentence under test is about that product and not about
+whatever the demonstration workshop happened to buy.
+
+**And a probe with a hole, found by the nightly.** Before this phase started,
+the scheduled build was red on one line: `recentCloses` was reported as a list
+with no bound. It has one — `take` is a parameter, passed as the shorthand
+`take,` — and the probe only knew the spelling `take: n`. The query was fine;
+the check had a hole, and the push run had been green only because the build
+job runs on the schedule and not on a push. Fixed in its own commit, first.
+
 ## What comes next — the thirty-nine, 26 September 2026
 
 Written by the user on 26 September 2026, after Phase 79. It is recorded here

@@ -41,7 +41,7 @@ PETROL_DEEP = RGBColor(0x12, 0x32, 0x36)
 BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
-BUILT_ON = "15 September 2026"
+BUILT_ON = "1 October 2026"
 
 
 # ----------------------------------------------------------------- helpers
@@ -163,7 +163,7 @@ def build() -> None:
     para(doc, "Every design in the product: when it was made, why, what each part means, and why it "
               "works for the people who use it. Photographed from the running application.",
          size=11, colour=FAINT, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-    para(doc, f"Built on {BUILT_ON}, after Phase 46.", size=9.5, colour=FAINT,
+    para(doc, f"Built on {BUILT_ON}, after Phase 98.", size=9.5, colour=FAINT,
          align=WD_ALIGN_PARAGRAPH.CENTER)
     page_break(doc)
 
@@ -355,19 +355,23 @@ def build() -> None:
     )
     design(
         doc,
-        title="The dashboard: today, then the money",
-        when="Phase 1, 9 September 2026; rebuilt from real figures in Phase 4.9 and Phase 17.",
-        why="An owner opening the product in the morning has six questions: what is booked, what is in, "
-            "what is waiting on a customer, what is waiting on parts, what is past its promise, and what "
-            "was taken. The dashboard answers those in tiles and then shows the floor and the reminders.",
+        title="The dashboard: the control tower",
+        when="Phase 1, 9 September 2026; rebuilt from real figures in Phase 4.9 and Phase 17; "
+             "became the control tower in Phase 98, 1 October 2026.",
+        why="An owner opens this at twenty to eight and leaves it open until six, and what they need from "
+            "it changes by the hour: at eight, who is in and what is booked; at eleven, which estimate "
+            "nobody has answered; at three, which part is late for the car on ramp two; at five, which "
+            "finished car is still here and not paid for. Six bands, in the order a tower answers them, "
+            "and one sentence at the top that says whether anything is already costing the workshop something.",
         meaning=[
+            "The band at the top is the only one with colour on its border: red if something is already costing, amber if something will by tonight.",
+            "Under each blocked car is the same band the job's own page shows, from the same function, so the two cannot disagree.",
             "A tile changes colour only when its figure means somebody must act today.",
-            "The floor is the bays as they stand, with the car and the technician on each.",
-            "The month view is the diary's shape at a glance.",
+            "The header says when the figures were true and that the screen reads itself again every five minutes.",
         ],
-        works="Every figure is derived from the records rather than stored, so the dashboard cannot disagree with the pages behind it, and the same figures answer the questions typed at /ask.",
-        shots=[("dashboard", "The dashboard.", 16.4)],
-        source="docs/02-design/09-wireframes.md, section 2",
+        works="Nothing is computed twice: the building is the board's function, the capacity is the planner's, the rota is opening-up's, the morning's list is /morning's. The page re-reads itself while it is looked at and writes nothing, and both are checked.",
+        shots=[("dashboard", "The control tower.", 16.4)],
+        source="docs/02-design/09-wireframes.md, section 2; docs/00-product/06-roadmap.md, Phase 98",
     )
 
     # 6. Diary and floor

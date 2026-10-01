@@ -35,37 +35,73 @@ lives in. **Items a role cannot reach are absent, not greyed out** — a disable
 control is an invitation to ask why. The badge on Jobs counts approvals
 waiting, because that is the number that blocks work.
 
-## 2. Dashboard
+## 2. Dashboard — the control tower (Phase 98)
 
 ```
-+-------------------+-------------------+-------------------+---------------+
-| JOBS TODAY        | VEHICLES IN SHOP  | AWAITING APPROVAL | TAKEN TODAY   |
-|      2            |        1          |       1           |   £0.00       |
-| Created since     | Physically on site| Work is blocked   | Payments      |
-| midnight          |                   |                   | received      |
-+-------------------+-------------------+-------------------+---------------+
-     ^ every tile is a link to the records behind it (FR-1402)
+Wednesday 1 October 2026
+GOOD MORNING, AHMED                                [Open diary] [New job]
+5 in the building, and 2 things are already costing you.
+As of 09:41; this screen reads itself again every 5 minutes.
 
-+---------------------------------------------------------------[See all]--+
-| APPROVALS NEEDED                                                          |
-| Nothing can proceed on these until the customer decides.                  |
-|                                                                           |
-| BMW X5  [MK20 XRT]  #10482                          £1,509.00  [Review]   |
-| Maria Okonkwo - Brake system repair - waiting 2h                          |
++--BEFORE THE DOORS SHUT------------------------------[The morning's list]--+
+| (*) Costing you now   1 car in the building is past the time it was ...   |
+| (*) Costing you now   1 part for a car on the ramps is late from the ...  |
+| ( ) Will by tonight   2 cars are promised back today and are not finished |
+| ( ) Will by tonight   A customer's message has waited 3 hours for an ...  |
 +---------------------------------------------------------------------------+
 
-+-----------------------------------------------------------------[Diary]---+
-| TODAY IN THE WORKSHOP                    3 bookings scheduled             |
-| TIME  VEHICLE           CUSTOMER      WORK              TECH    BAY  STATUS|
-| 08:00 BMW X5 [MK20 XRT] Maria Okonkwo Brake repair      John    B1   *Appr |
-| 09:00 Honda [LR21 KJD]  Maria Okonkwo Interim service   Mike    B2   Booked|
-| 13:00 Transit [BV19 FLM]Pennine       Diagnostics       John    B4   Booked|
+IN THE BUILDING
++--------------+--------------+--------------+--------------+--------------+
+| VEHICLES IN  | OURS TO MOVE | WAITING ON A | WAITING ON A | PAST THE     |
+| SHOP   5     |      2       | CUSTOMER  1  | SUPPLIER  1  | PROMISE  1   |
++--------------+--------------+--------------+--------------+--------------+
++--WHAT BLOCKS EACH OF THEM----------------------------[The whole board]----+
+| #10482 [MK20 XRT] BMW X5 · Maria Okonkwo · Brake system repair            |
+|   Waiting for the customer — 2h 14m. £843.20 sent, not opened. [Remind]   |
+| #10490 [BV19 FLM] Transit · Pennine · Clutch                              |
+|   Waiting for a part — due yesterday from Northern OE Supply.             |
 +---------------------------------------------------------------------------+
+
+TODAY
++----------------+----------------+----------------+----------------+
+| HOURS PROMISED | IN TODAY       | BOOKED TODAY   | NOT ARRIVED    |
+| 31h of 40h     | 5 of 6         |       7        |       1        |
+| Room to spare  | Not yet in: Jo | Next at 13:00  | Booked earlier |
++----------------+----------------+----------------+----------------+
++--TODAY IN THE WORKSHOP--------------------------------------[Diary]-------+
+| 08:00 BMW X5 [MK20 XRT] Maria Okonkwo Brake repair  John  B1  *Approval  |
+| 09:00 Honda [LR21 KJD]  Maria Okonkwo Interim        Mike  B2  Not arrived|
++---------------------------------------------------------------------------+
+
+CUSTOMERS WAITING
++---------------------+---------------------+---------------------+
+| DECIDING ON AN      | WAITING FOR A REPLY | READY TO COLLECT    |
+| ESTIMATE   2        |         1           |         2           |
+| The longest 2h 14m  | The longest 3h 05m  | 1 not yet paid for  |
++---------------------+---------------------+---------------------+
+
+THE MONEY                              (owner and bookkeeper only)
++--------------+--------------+--------------+--------------+
+| TAKEN TODAY  | TO INVOICE   | OWED TO YOU  | OVERDUE      |
++--------------+--------------+--------------+--------------+
+
+PARTS                                  (inventory:read only)
++--PARTS HOLDING UP CARS IN THE BUILDING---------------[Purchasing]---------+
+| (*) Late       Clutch kit      #10490 [BV19 FLM]  Northern OE, promised 30 Sep |
+| (*) No order   Slave cylinder  #10490 [BV19 FLM]  Marked on order, no open ... |
++---------------------------------------------------------------------------+
+  then Short / Orders late / To chase / Stock value, as before
+
+WHAT'S HAPPENING — the audit log as a feed, as before
 ```
 
-**Action-oriented, not a wall of charts.** Ahmed opens this at 7:40am. The
-approvals block is the first thing under the tiles because it is the only
-thing on the page that is actively blocking money.
+**Six bands, in the order a tower answers them**, and the one at the top is
+the only one with colour on its border: red if anything is already costing,
+amber if anything will by tonight, nothing otherwise. Every tile is a link to
+the records behind it (FR-1402). The band under each blocked car is the same
+component the job's own page shows, from the same function, so the two cannot
+disagree. The page re-reads itself every five minutes while it is visible and
+says at the top when it last did.
 
 ## 3. Job detail — the central screen
 

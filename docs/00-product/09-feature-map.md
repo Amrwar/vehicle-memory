@@ -987,6 +987,25 @@ The second sweep: things connected at one end only.
 | It records nothing         | Built  | Rows counted before and after by `verify-opening` (Phase 97)                       |
 | No close, said plainly     | Built  | Rather than quietly comparing with this time yesterday (Phase 97)                  |
 
+## 21.59 The control tower
+
+| Item                           | Status | Where                                                                                     |
+| ------------------------------ | ------ | ----------------------------------------------------------------------------------------- |
+| One sentence at the top        | Built  | Whether anything is already costing the workshop something, from the risk list (Phase 98) |
+| The building is the board      | Built  | Read off `whereJobsStand`, the same function as `/now` and the job's band (Phase 98)      |
+| What blocks each car           | Built  | Whose move, how long, and the one thing that moves it, under each car (Phase 98)          |
+| Hours promised against hours   | Built  | The planner's capacity, and which of people or bays is the limit today (Phase 98)         |
+| The rota against the clock     | Built  | Opening-up's rota, on the dashboard too; not yet in, named (Phase 98)                     |
+| Not arrived                    | Built  | Booked for earlier today and not received, marked in the diary table (Phase 98)           |
+| Customers waiting              | Built  | Deciding, waiting for a reply, ready to collect, each with the longest wait (Phase 98)    |
+| Finished and not billed        | Built  | A figure of its own in the money band (Phase 98)                                          |
+| Parts in the way               | Built  | Every part on order for a car on the ramps, matched to its order, late first (Phase 98)   |
+| A part nobody actually ordered | Built  | Marked on order, no open order carries it, called out and sorted second (Phase 98)        |
+| Before the doors shut          | Built  | Eight kinds of risk in a fixed order, what is costing before what will (Phase 98)         |
+| It reads itself again          | Built  | Every five minutes while visible; a hidden tab waits and catches up (Phase 98)            |
+| The workshop's own day         | Built  | Local midnight in the site's zone, shared by money, diary and arrivals (Phase 98)         |
+| It records nothing             | Built  | Rows counted before and after by `verify-tower` (Phase 98)                                |
+
 ## 22. The three connected experiences
 
 **This is already the shape of the product**, and it is the reason the phases
@@ -1065,7 +1084,7 @@ _Counted by `infra/scripts/build_deck.py`. Do not edit by hand._
 
 | Status  | Capabilities |
 | ------- | ------------ |
-| Built   | 519          |
+| Built   | 533          |
 | Partial | 2            |
 
 <!-- counts:end -->

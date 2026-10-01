@@ -48,7 +48,7 @@ BRASS = RGBColor(0x9A, 0x6D, 0x24)
 FAINT = RGBColor(0x6B, 0x75, 0x77)
 
 BUILT_ON = "16 September 2026"
-AFTER_PHASE = "Phase 46"
+AFTER_PHASE = "Phase 98"
 
 PORTRAIT_W = 16.6
 LANDSCAPE_W = 25.3
@@ -383,7 +383,7 @@ SHOT_CAPTIONS: list[tuple[str, str, str]] = [
     ("home", "The public front door.", "Public"),
     ("signup", "Sign-up, with the country that sets the currency, locale, timezone and first tax rate.", "Public"),
     ("login", "Sign in.", "Public"),
-    ("dashboard", "The owner's dashboard: today's work, approvals waiting, money in and out.", "Workshop"),
+    ("dashboard", "The control tower: what is in the building and what blocks each car, today's hours and rota, the customers waiting, the money, the parts in the way, and what will cost something by closing time.", "Workshop"),
     ("dashboard-dark", "The same, in the dark theme.", "Workshop"),
     ("diary", "The diary: bookings against bays with the capacity check on the drop.", "Workshop"),
     ("job", "The job: the central record, with lines, time, photographs and the timeline.", "Workshop"),

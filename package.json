@@ -99,6 +99,7 @@
     "verify:morning": "tsx infra/scripts/verify-morning.ts",
     "verify:close": "tsx infra/scripts/verify-close.ts",
     "verify:opening": "tsx infra/scripts/verify-opening.ts",
+    "verify:tower": "tsx infra/scripts/verify-tower.ts",
     "verify:deposits": "tsx infra/scripts/verify-deposits.ts",
     "verify:authz": "tsx infra/scripts/verify-authz.ts",
     "verify:payments": "tsx infra/scripts/verify-payments.ts",

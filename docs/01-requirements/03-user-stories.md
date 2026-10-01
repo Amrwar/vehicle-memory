@@ -1642,6 +1642,62 @@ notes, per site **so that** I can file without adding up invoices.
 
 ---
 
+## Epic CV - The control tower (Phase 98)
+
+### CV1 - The building at a glance
+
+**As** an owner **I want** one screen that says what is in the building and
+what blocks each car **so that** I am not opening the board, the job and the
+purchasing page to find out why ramp two has not moved.
+
+**Size** 8 - **Satisfies** FR-13001, FR-13002, FR-13007, FR-13010
+
+- **Given** five cars in the building and two somebody is waiting on, **when**
+  I open the dashboard, **then** the first sentence says five, and the two are
+  listed with whose move it is and the one thing that moves them.
+- **Given** a car on the ramps waiting on a part the supplier is late with,
+  **when** I look at the parts band, **then** it is first, named with the
+  supplier and the day they promised, and opens the order.
+- **Given** a part marked on order that no open order carries, **when** I look,
+  **then** it is called out as such rather than listed as coming.
+- **Given** I leave the screen open all day, **when** anything is counted,
+  **then** nothing in the database has changed.
+
+### CV2 - What today can hold, and who is waiting on us
+
+**As** a manager **I want** today's hours, the rota and the customers waiting
+on one screen **so that** I know by ten whether the day fits and who I owe an
+answer.
+
+**Size** 5 - **Satisfies** FR-13003, FR-13004, FR-13005, FR-13006
+
+- **Given** more hours promised than the building has, **when** I open the
+  dashboard, **then** the tile says by how many and whether people or bays are
+  the limit.
+- **Given** two people expected and one clocked on, **when** I look, **then**
+  the other is named as not yet in.
+- **Given** a message three hours unanswered and a finished car nobody has
+  collected, **when** I look, **then** both are counted with how long.
+- **Given** a workshop in Riyadh, **when** "taken today" is summed, **then** it
+  is summed from midnight in Riyadh and not on the server.
+
+### CV3 - Before the doors shut
+
+**As** an owner **I want** the handful of things that will have cost me
+something by closing time **so that** I deal with those and not with a list of
+everything.
+
+**Size** 5 - **Satisfies** FR-13008, FR-13009
+
+- **Given** a car past its promise and a message waiting two hours, **when** I
+  read the risk band, **then** the promise comes first, marked as costing now,
+  and the message after, marked as costing by tonight.
+- **Given** nothing at risk, **when** I read it, **then** it says so in words.
+- **Given** the tab has been hidden for an hour, **when** I look at it again,
+  **then** it re-reads at once, and says the time it did.
+
+---
+
 ## Epic CU - What happened while we were shut (Phase 97)
 
 ### CU1 - Unlocking the door and knowing what the night did

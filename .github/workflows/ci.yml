@@ -289,6 +289,13 @@ jobs:
       - name: What happened while we were shut
         run: npx tsx infra/scripts/verify-opening.ts
 
+      # The tower counts the building the way the board does, matches a part
+      # on order to the order it is on, and writes nothing -- checked by
+      # counting rows before and after, since a screen left open all day that
+      # wrote anything would write it all day.
+      - name: The control tower
+        run: npx tsx infra/scripts/verify-tower.ts
+
       - name: Verify chains and invariants
         run: npx tsx infra/scripts/verify-integrity.ts
 

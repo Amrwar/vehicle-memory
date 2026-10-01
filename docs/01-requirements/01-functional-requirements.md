@@ -267,6 +267,21 @@ Phase column: **1** = MVP, **2** = Inventory, **3** = Finance, **4** = Business,
 | FR-3604 | A reading below the last recorded one MUST be refused, naming both figures.                                       | 15    |
 | FR-3605 | Every link in the product MUST resolve for a signed-in person; a redirect to sign-in MUST count as a broken link. | 15    |
 
+## FR-13000 - The control tower
+
+| Ref      | Requirement                                                                                                                                                                                  | Phase |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| FR-13001 | The dashboard MUST say in one sentence whether anything is already costing the workshop something.                                                                                           | 98    |
+| FR-13002 | It MUST show what is in the building and, for every car somebody is waiting on, whose move it is and the one thing that moves it, from the same function as the board and the job.           | 98    |
+| FR-13003 | It MUST show hours promised against hours the building has today, and which of people or bays binds.                                                                                         | 98    |
+| FR-13004 | It MUST show who is expected against who has clocked on, from the same rota as opening up.                                                                                                   | 98    |
+| FR-13005 | It MUST show the customers waiting on the workshop: deciding on an estimate, waiting for a reply, and finished cars not collected, with how long the oldest has waited.                      | 98    |
+| FR-13006 | It MUST show money taken over the workshop's own day, finished work with no bill raised, and what is owed and overdue.                                                                       | 98    |
+| FR-13007 | It MUST list every part on order for a car already in the building, matched to the open order carrying it, late first; a part marked on order that no open order carries MUST be called out. | 98    |
+| FR-13008 | It MUST list what will have cost the workshop something by closing time, with what is already costing before what merely will, in a fixed order.                                             | 98    |
+| FR-13009 | It MUST re-read itself while it is visible, say when it last did, and not while it is hidden.                                                                                                | 98    |
+| FR-13010 | The control tower MUST write nothing.                                                                                                                                                        | 98    |
+
 ## FR-12900 - What happened while we were shut
 
 | Ref      | Requirement                                                                                                     | Phase |

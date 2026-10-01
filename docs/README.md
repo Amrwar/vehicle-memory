@@ -1084,3 +1084,24 @@ work. At the close that reading means a person is still here who should have
 gone home; in the morning it means people have arrived. Same column, opposite
 meanings, and a screen that cries wolf every morning is not read by Friday.
 Eight readings survive a night; the other two are the clock and the till.
+
+Phase 98 is item 39, the last of the operations layer and the plan's stated
+destination: the control tower, "the screen an owner leaves open all day."
+The product already had three morning screens — what to do, what arrived,
+whose move — and none of them owned the question an owner asks at eleven and
+again at three: what is the state of the building right now, and what will
+have cost us something by the time the doors shut?
+
+Nothing in it is computed twice. The building is read off the board's own
+function, the capacity is the planner's, the rota is opening-up's, the
+morning's list is `/morning`'s — and the verify script asserts the building
+equals the board car for car rather than assuming it. The risk band is the
+handful of things that will have cost something by closing time, in a fixed
+order: what is already costing before what merely will. Parts on order for
+cars on the ramps are matched to the order they are on, by product, and a part
+marked on order that no open order carries is called out as a part that will
+be late and does not know it yet.
+
+It refreshes itself every five minutes while it is looked at, says when it
+last did, and writes nothing. "Today" is now the workshop's own day, from
+midnight in the site's zone, which the earlier dashboard took from the server.

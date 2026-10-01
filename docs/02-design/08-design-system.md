@@ -302,6 +302,31 @@ form came to 392 pixels, and because a grid track is as wide as its widest
 item, every other row of that form became 392 pixels too. On a phone it is two
 columns with the description across both.
 
+## 15. A screen that reads itself again (Phase 98)
+
+The control tower is the first screen in the product meant to be left open
+rather than visited, and that changes two things.
+
+**It says when it was true.** Every figure on it is derived at the moment of
+the request, and a reader who has had the tab open since eight has no way of
+knowing that from the figures. So the header carries _"As of 09:41; this
+screen reads itself again every 5 minutes."_ — the time in the workshop's zone,
+in the faint text, after the one sentence that summarises the page. A figure
+without a time is a claim; a figure with one is a reading.
+
+**It re-reads only while it is looked at.** `KeepsCurrent` asks the server
+again on an interval, but only while the document is visible. A tab behind
+three others would otherwise be asking the database questions nobody will read
+the answers to, all day, from every owner's machine. When the tab is looked at
+again after long enough, it re-reads at once rather than waiting for the next
+tick, so the first thing a returning reader sees is current.
+
+Nothing else on the screen is new as a component. The band under each blocked
+car is `JobStandingBand`, the same one the job's own page shows; the tiles are
+`StatTile`; the lists are the product's lists. The risk band's two badges —
+_Costing you now_ in red, _Will by tonight_ in amber — are the only vocabulary
+the tower adds, and they are a scale of two, not a pair of synonyms.
+
 ---
 
 _Next: [Wireframes](09-wireframes.md)._

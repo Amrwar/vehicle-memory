@@ -1,5 +1,4 @@
-import { describeFollowUp, humanise, IN_SHOP_STATUSES, standingOf, toneFor } from '@carnet/core';
-import { prisma } from '@carnet/db';
+import { describeFollowUp, hoursOf, humanise, standingOf, toneFor } from '@carnet/core';
 import {
   Badge,
   Button,
@@ -21,8 +20,11 @@ import {
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { JobStandingBand } from '@/components/job-standing';
+import { KeepsCurrent } from '@/components/keeps-current';
 import { VerifyBanner } from '@/components/verify-banner';
 import { revenueObservations } from '@/lib/answers';
+import { theTower } from '@/lib/control-tower';
 import { followUpsDue } from '@/lib/followups';
 import { can, requireSession } from '@/lib/guard';
 import { tFor } from '@/lib/i18n';
@@ -35,20 +37,35 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = 'force-dynamic';
 
+/** How often the page re-reads itself while somebody is looking. */
+const EVERY_MINUTES = 5;
+
 /**
- * The workshop dashboard.
+ * The control tower. Phase 98, and item 39 of the thirty-nine: "the screen an
+ * owner leaves open all day."
  *
  * Action-oriented, not a wall of charts (persona P1). Ahmed opens this at
- * 7:40am and needs to know what requires him, not how last quarter went.
- * Every figure links to the records behind it (FR-1402).
+ * 7:40am and leaves it open until six, and what he needs from it changes by
+ * the hour: at eight, who is in and what is booked; at eleven, which estimate
+ * nobody has answered; at three, which part is late for the car on ramp two;
+ * at five, which finished car is still here and not paid for.
  *
- * Phase 40 reviewed it against the order an owner runs the business in:
- * today, then the jobs waiting on somebody, then the people, then the money
- * owed and what came back, then the shelf. Two tiles that showed a word
- * instead of a figure ("Open", "Due") were replaced by figures, and the
- * business and inventory blocks were added with the comeback rate, the
- * satisfaction trend, what is owed and overdue, what is short, which orders
- * are late, and what is sitting on the shelf.
+ * Six bands, in the order a tower answers them: what is at risk before the
+ * doors shut, then what is in the building and what blocks each of it, then
+ * what today can hold, then who is waiting on us, then the money, then the
+ * parts holding up cars already on the ramps. Every figure links to the
+ * records behind it (FR-1402).
+ *
+ * Nothing on this page is stored or newly computed. The building is the same
+ * function the `/now` board and every job's own band read, so the tower cannot
+ * disagree with the job. Capacity is the planner's. The rota is opening-up's.
+ * The morning's list is `/morning`'s. The page re-reads itself every five
+ * minutes while it is visible, and says when it last did.
+ *
+ * Phase 40 arranged the earlier dashboard in the order an owner runs the
+ * business in; this keeps that order inside each band and the business and
+ * inventory blocks it added, and puts the building first because that is what
+ * a tower is for.
  */
 export default async function DashboardPage({
   searchParams,
@@ -67,34 +84,16 @@ export default async function DashboardPage({
   const seesBusiness = can(user.role, 'report:operational');
   const seesInventory = can(user.role, 'inventory:read');
 
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(startOfDay.getTime() + 86_400_000);
+  const now = new Date();
 
-  const [
-    todaysJobs,
-    inShop,
-    awaitingApproval,
-    paymentsToday,
-    todaysBookings,
-    approvals,
-    waitingForParts,
-    overdue,
-    clockedOn,
-    activity,
-    observations,
-    day,
-    chasing,
-  ] = await Promise.all([
-    db.job.count({ where: { createdAt: { gte: startOfDay, lt: endOfDay } } }),
-    db.job.count({ where: { status: { in: [...IN_SHOP_STATUSES] } } }),
-    db.job.count({ where: { status: 'AWAITING_APPROVAL' } }),
-    db.payment.aggregate({
-      where: { receivedAt: { gte: startOfDay, lt: endOfDay } },
-      _sum: { amount: true },
-    }),
+  // The tower first, because its window -- the workshop's own day, on its own
+  // clock -- is what "today" means for everything else on the page. The old
+  // page took midnight from the server, which is three hours out in Riyadh.
+  const tower = await theTower(orgId, user.locationId, region.timezone, now);
+
+  const [todaysBookings, approvals, activity, observations, day, chasing] = await Promise.all([
     db.booking.findMany({
-      where: { startAt: { gte: startOfDay, lt: endOfDay } },
+      where: { startAt: { gte: tower.window.from, lt: tower.window.to } },
       orderBy: { startAt: 'asc' },
       take: 12,
       include: {
@@ -119,29 +118,6 @@ export default async function DashboardPage({
         },
       },
     }),
-    // Work that cannot proceed because something is on order. A job blocked
-    // on a part looks identical, on every other screen, to one somebody has
-    // simply not started.
-    db.job.count({
-      where: {
-        status: { in: ['APPROVED', 'IN_PROGRESS'] },
-        partLines: { some: { product: { stockLevels: { some: { onHand: { lte: 0 } } } } } },
-      },
-    }),
-    // Past the day it was promised for and still not finished. The figure
-    // nobody keeps and every customer remembers.
-    db.job.count({
-      where: {
-        promisedAt: { lt: new Date() },
-        status: { notIn: ['COMPLETED', 'INVOICED', 'PAID', 'CANCELLED'] },
-      },
-    }),
-    // The people: who is clocked on to a job right now.
-    prisma.timeEntry.findMany({
-      where: { endedAt: null, job: { orgId } },
-      distinct: ['userId'],
-      select: { userId: true },
-    }),
     // The audit log already records everything a feed would show, and
     // nothing has ever read it that way.
     db.auditLog.findMany({
@@ -158,14 +134,22 @@ export default async function DashboardPage({
     // Arithmetic with a sentence around it: this month against last, from the
     // same figures the reports page shows.
     seesBusiness ? revenueObservations(orgId) : Promise.resolve([] as string[]),
-    seesBusiness || seesInventory ? ownerDay(orgId) : Promise.resolve(null),
+    seesInventory ? ownerDay(orgId) : Promise.resolve(null),
     // Late, or due today. Everything further out lives on the job it belongs
     // to, where somebody sees it when they are looking at that car.
     followUpsDue(orgId, { limit: 8 }),
   ]);
 
-  const revenueToday = Number(paymentsToday._sum.amount ?? 0);
-  const hour = new Date().getHours();
+  // The workshop's hour, not the server's: "good afternoon" at seven in the
+  // evening was the first thing the design shot showed.
+  const hour =
+    Number(
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone: region.timezone,
+        hour: 'numeric',
+        hour12: false,
+      }).format(now),
+    ) % 24;
   const firstName = user.name.split(' ')[0] ?? user.name;
   const greeting =
     hour < 12
@@ -177,19 +161,49 @@ export default async function DashboardPage({
   const money = (amount: number) => (
     <Money currency={region.currency} locale={region.locale} amount={amount} />
   );
+  const clock = (at: Date) =>
+    at.toLocaleTimeString(region.locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: region.timezone,
+    });
+  const hoursAndMinutes = (minutes: number) =>
+    minutes >= 60
+      ? t('{hours}h {minutes}m', { hours: Math.floor(minutes / 60), minutes: minutes % 60 })
+      : t('{minutes}m', { minutes });
+
+  const { building, day: today, customers, parts, risk } = tower;
+
+  const section = (title: string) => (
+    <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-(--text-faint)">
+      {title}
+    </h2>
+  );
 
   return (
     <>
+      <KeepsCurrent everyMinutes={EVERY_MINUTES} />
       <VerifyBanner sent={notice.verification === 'sent'} />
 
       <PageHeader
-        eyebrow={new Date().toLocaleDateString(region.locale, {
+        eyebrow={now.toLocaleDateString(region.locale, {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
           year: 'numeric',
         })}
         title={greeting}
+        description={
+          <>
+            {t(tower.headline.key, tower.headline.vars)}{' '}
+            <span className="text-(--text-faint)">
+              {t('As of {time}; this screen reads itself again every {minutes} minutes.', {
+                time: clock(tower.asOf),
+                minutes: EVERY_MINUTES,
+              })}
+            </span>
+          </>
+        }
         actions={
           <>
             <Link href="/diary">
@@ -227,117 +241,217 @@ export default async function DashboardPage({
         </Card>
       ) : null}
 
-      {/* ---------------- today ---------------- */}
-      <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-(--text-faint)">
-        {t('Today')}
-      </h2>
+      {/* ---------------- at risk before closing ---------------- */}
+      <Card
+        id="risk"
+        className={`mb-6 ${
+          risk.some((one) => one.tone === 'danger')
+            ? 'border-(--danger)'
+            : risk.length > 0
+              ? 'border-(--warning)'
+              : ''
+        }`}
+      >
+        <CardHeader
+          title={t('Before the doors shut')}
+          description={t(
+            'What will have cost the workshop something by closing time if nobody looks. The one already costing comes first.',
+          )}
+          action={
+            <Link href="/morning">
+              <Button size="sm">{t('The morning’s list')}</Button>
+            </Link>
+          }
+        />
+        {risk.length === 0 ? (
+          <CardBody>
+            <p className="text-[14px] text-(--success)">{t('Nothing is at risk today.')}</p>
+          </CardBody>
+        ) : (
+          <ul className="divide-y divide-(--border)">
+            {risk.map((one) => (
+              <li key={one.kind}>
+                <Link
+                  href={one.href}
+                  className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-[14px] hover:bg-(--surface-sunken)"
+                >
+                  <Badge tone={one.tone} size="sm" dot>
+                    {one.tone === 'danger' ? t('Costing you now') : t('Will by tonight')}
+                  </Badge>
+                  <span className="min-w-0 flex-1">{t(one.what.key, one.what.vars)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      {/* ---------------- in the building ---------------- */}
+      {section(t('In the building'))}
       <StatRow className="mb-3">
-        <Link href="/jobs" className="group">
-          <StatTile label={t('Jobs today')} value={todaysJobs} note={t('Created since midnight')} />
-        </Link>
         <Link href="/jobs?status=in-shop" className="group">
-          <StatTile label={t('Vehicles in shop')} value={inShop} note={t('Physically on site')} />
-        </Link>
-        <Link href="/jobs?status=AWAITING_APPROVAL" className="group">
           <StatTile
-            label={t('Awaiting approval')}
-            value={awaitingApproval}
-            tone={awaitingApproval > 0 ? 'warning' : 'neutral'}
-            note={awaitingApproval > 0 ? t('Work is blocked') : t('Nothing waiting')}
+            label={t('Vehicles in shop')}
+            value={building.inShop}
+            note={t('Physically on site')}
           />
         </Link>
-        <Link href="/payments" className="group">
+        <Link href="/now" className="group">
           <StatTile
-            label={t('Taken today')}
-            value={money(revenueToday)}
-            tone={revenueToday > 0 ? 'success' : 'neutral'}
-            note={t('Payments received')}
+            label={t('Ours to move')}
+            value={building.ours}
+            tone={building.ours > 0 ? 'brand' : 'neutral'}
+            note={t('Nothing is stopping these but us')}
+          />
+        </Link>
+        <Link href="/now" className="group">
+          <StatTile
+            label={t('Waiting on a customer')}
+            value={building.customer}
+            tone={building.customer > 0 ? 'warning' : 'neutral'}
+            note={t('A decision we cannot make for them')}
+          />
+        </Link>
+        <Link href="/now" className="group">
+          <StatTile
+            label={t('Waiting on a supplier')}
+            value={building.supplier}
+            tone={building.supplier > 0 ? 'warning' : 'neutral'}
+            note={t('A part that is not here yet')}
+          />
+        </Link>
+        <Link href="/now" className="group">
+          <StatTile
+            label={t('Past the promise')}
+            value={building.late}
+            tone={building.late > 0 ? 'danger' : 'neutral'}
+            note={t('Due back and not finished')}
           />
         </Link>
       </StatRow>
-      <StatRow className="mb-6">
-        <Link href="/jobs" className="group">
+
+      <Card className="mb-6">
+        <CardHeader
+          title={t('What blocks each of them')}
+          description={t(
+            'Every car in the building that somebody is waiting on, hardest first, with the one thing that moves it.',
+          )}
+          action={
+            <Link href="/now">
+              <Button size="sm">{t('The whole board')}</Button>
+            </Link>
+          }
+        />
+        {building.inShop === 0 ? (
+          <EmptyState
+            title={t('Nothing in the building')}
+            description={t('Every car has been collected, or none has arrived yet.')}
+          />
+        ) : building.blocked.length === 0 ? (
+          <CardBody>
+            <p className="text-[14px] text-(--text-soft)">
+              {t('Nothing in the building is waiting on anybody.')}
+            </p>
+          </CardBody>
+        ) : (
+          <CardBody className="grid gap-2">
+            {building.blocked.map((job) => (
+              <div key={job.id} className="grid gap-1.5">
+                <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                  <Link
+                    href={`/jobs/${job.id}`}
+                    className="font-medium text-(--brand-text) hover:underline"
+                  >
+                    #{job.number}
+                  </Link>
+                  {job.registration ? <Registration value={job.registration} /> : null}
+                  <span className="min-w-0 truncate">{job.vehicle}</span>
+                  {job.who ? (
+                    <span className="truncate text-(--text-faint)">· {job.who}</span>
+                  ) : null}
+                  <Badge tone="neutral">{job.what}</Badge>
+                </div>
+                <JobStandingBand
+                  href={`/jobs/${job.id}`}
+                  standing={job.standing}
+                  currency={region.currency}
+                  locale={region.locale}
+                />
+              </div>
+            ))}
+            {building.more > 0 ? (
+              <Link href="/now" className="text-[13px] text-(--brand-text) hover:underline">
+                {building.more === 1
+                  ? t('And 1 more on the board')
+                  : t('And {count} more on the board', { count: building.more })}
+              </Link>
+            ) : null}
+          </CardBody>
+        )}
+      </Card>
+
+      {/* ---------------- today ---------------- */}
+      {section(t('Today'))}
+      <StatRow className="mb-3">
+        <Link href="/capacity" className="group">
           <StatTile
-            label={t('Past the promise')}
-            value={overdue}
-            tone={overdue > 0 ? 'danger' : 'neutral'}
-            note={t('Due back and not finished')}
+            label={t('Hours promised')}
+            value={t('{booked}h of {available}h', {
+              booked: hoursOf(today.bookedMinutes),
+              available: hoursOf(today.effectiveMinutes),
+            })}
+            tone={
+              today.overbookedMinutes > 0
+                ? 'danger'
+                : today.bookedMinutes >= today.effectiveMinutes * 0.9
+                  ? 'warning'
+                  : 'neutral'
+            }
+            note={
+              today.overbookedMinutes > 0
+                ? t('{hours}h more than the building can do', {
+                    hours: hoursOf(today.overbookedMinutes),
+                  })
+                : today.constrainedBy === 'BAYS'
+                  ? t('The bays are the limit today')
+                  : today.constrainedBy === 'PEOPLE'
+                    ? t('The people are the limit today')
+                    : t('Room to spare')
+            }
+          />
+        </Link>
+        <Link href="/opening" className="group">
+          <StatTile
+            label={t('In today')}
+            value={t('{here} of {expected}', { here: today.here, expected: today.expected })}
+            tone={today.notIn.length > 0 ? 'warning' : 'neutral'}
+            note={
+              today.notIn.length === 0
+                ? t('Everybody expected has clocked on')
+                : t('Not yet in: {names}', { names: today.notIn.join(', ') })
+            }
           />
         </Link>
         <Link href="/diary" className="group">
           <StatTile
             label={t('Booked today')}
-            value={todaysBookings.length}
-            note={t('Appointments in the diary')}
+            value={today.booked}
+            note={
+              today.nextAt
+                ? t('Next at {time}', { time: clock(today.nextAt) })
+                : t('Nothing more due in today')
+            }
           />
         </Link>
-        <Link href="/people" className="group">
+        <Link href="/diary" className="group">
           <StatTile
-            label={t('On the clock')}
-            value={clockedOn.length}
-            note={t('Clocked on to a job now')}
+            label={t('Not arrived')}
+            value={today.notArrived.length}
+            tone={today.notArrived.length > 0 ? 'warning' : 'neutral'}
+            note={t('Booked for earlier today and not received')}
           />
         </Link>
       </StatRow>
-
-      {approvals.length > 0 ? (
-        <Card className="mb-6 border-(--warning)">
-          <CardHeader
-            title={t('Approvals needed')}
-            description={t('Nothing can proceed on these until the customer decides.')}
-            action={
-              <Link href="/jobs?status=AWAITING_APPROVAL">
-                <Button size="sm">{t('See all')}</Button>
-              </Link>
-            }
-          />
-          <ul className="divide-y divide-(--border)">
-            {approvals.map((job) => {
-              const estimate = job.estimates[0];
-              const waitingHours = estimate?.sentAt
-                ? Math.floor((Date.now() - estimate.sentAt.getTime()) / 3_600_000)
-                : null;
-
-              return (
-                <li key={job.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/jobs/${job.id}`}
-                        className="text-[14px] font-medium hover:underline"
-                      >
-                        {job.vehicle.make} {job.vehicle.model}
-                      </Link>
-                      {job.vehicle.registration ? (
-                        <Registration value={job.vehicle.registration} />
-                      ) : null}
-                      <span className="datum text-[11px] text-(--text-faint)">#{job.number}</span>
-                    </div>
-                    <p className="mt-0.5 truncate text-[12px] text-(--text-faint)">
-                      {job.customer.displayName} &middot; {job.shortDescription}
-                      {waitingHours !== null
-                        ? ` · ${t('waiting {hours}h', { hours: waitingHours })}`
-                        : ''}
-                    </p>
-                  </div>
-
-                  {estimate ? (
-                    <span className="font-display text-[16px] font-semibold tabular">
-                      <Money amount={Number(estimate.total)} currency={estimate.currency} />
-                    </span>
-                  ) : null}
-
-                  <Link href={`/jobs/${job.id}`}>
-                    <Button size="sm" variant="primary">
-                      {t('Review')}
-                    </Button>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
-      ) : null}
 
       <Card className="mb-6">
         <CardHeader
@@ -379,126 +493,224 @@ export default async function DashboardPage({
                 </tr>
               </thead>
               <tbody>
-                {todaysBookings.map((booking) => (
-                  <Tr key={booking.id}>
-                    <Td className="datum whitespace-nowrap">
-                      {booking.startAt.toLocaleTimeString(region.locale, {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </Td>
-                    <Td>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Link
-                          href={`/vehicles/${booking.vehicle.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {booking.vehicle.make} {booking.vehicle.model}
-                        </Link>
-                        {booking.vehicle.registration ? (
-                          <Registration value={booking.vehicle.registration} />
-                        ) : null}
-                      </div>
-                    </Td>
-                    <Td className="text-(--text-soft)">{booking.customer.displayName}</Td>
-                    <Td className="max-w-[18rem] truncate text-(--text-soft)">
-                      {booking.description}
-                    </Td>
-                    <Td className="text-(--text-soft)">
-                      {booking.technician?.name ?? (
-                        <span className="text-(--text-faint)">{t('Unassigned')}</span>
-                      )}
-                    </Td>
-                    <Td className="text-(--text-soft)">{booking.bay?.name ?? '—'}</Td>
-                    <Td>
-                      {booking.job ? (
-                        <Link href={`/jobs/${booking.job.id}`}>
-                          <Badge tone={toneFor(booking.job.status)} dot>
-                            {t(humanise(booking.job.status))}
+                {todaysBookings.map((booking) => {
+                  const missed = today.notArrived.some((one) => one.id === booking.id);
+                  return (
+                    <Tr key={booking.id}>
+                      <Td className="datum whitespace-nowrap">{clock(booking.startAt)}</Td>
+                      <Td>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Link
+                            href={`/vehicles/${booking.vehicle.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {booking.vehicle.make} {booking.vehicle.model}
+                          </Link>
+                          {booking.vehicle.registration ? (
+                            <Registration value={booking.vehicle.registration} />
+                          ) : null}
+                        </div>
+                      </Td>
+                      <Td className="text-(--text-soft)">{booking.customer.displayName}</Td>
+                      <Td className="max-w-[18rem] truncate text-(--text-soft)">
+                        {booking.description}
+                      </Td>
+                      <Td className="text-(--text-soft)">
+                        {booking.technician?.name ?? (
+                          <span className="text-(--text-faint)">{t('Unassigned')}</span>
+                        )}
+                      </Td>
+                      <Td className="text-(--text-soft)">{booking.bay?.name ?? '—'}</Td>
+                      <Td>
+                        {booking.job ? (
+                          <Link href={`/jobs/${booking.job.id}`}>
+                            <Badge tone={toneFor(booking.job.status)} dot>
+                              {t(humanise(booking.job.status))}
+                            </Badge>
+                          </Link>
+                        ) : missed ? (
+                          <Badge tone="warning" dot>
+                            {t('Not arrived')}
                           </Badge>
-                        </Link>
-                      ) : (
-                        <Badge tone="neutral" dot>
-                          {t('Booked')}
-                        </Badge>
-                      )}
-                    </Td>
-                  </Tr>
-                ))}
+                        ) : (
+                          <Badge tone="neutral" dot>
+                            {t('Booked')}
+                          </Badge>
+                        )}
+                      </Td>
+                    </Tr>
+                  );
+                })}
               </tbody>
             </Table>
           </TableWrap>
         )}
       </Card>
 
-      {/* ---------------- the business ---------------- */}
-      {seesBusiness && day ? (
+      {/* ---------------- the customers waiting ---------------- */}
+      {section(t('Customers waiting'))}
+      <StatRow className="mb-3">
+        <Link href="/jobs?status=AWAITING_APPROVAL" className="group">
+          <StatTile
+            label={t('Deciding on an estimate')}
+            value={customers.deciding}
+            tone={customers.deciding > 0 ? 'warning' : 'neutral'}
+            note={
+              customers.decidingLongestMinutes === null
+                ? t('Nothing waiting')
+                : t('The longest for {time}', {
+                    time: hoursAndMinutes(customers.decidingLongestMinutes),
+                  })
+            }
+          />
+        </Link>
+        <Link href="/inbox" className="group">
+          <StatTile
+            label={t('Waiting for a reply')}
+            value={customers.unanswered}
+            tone={
+              customers.unansweredLongestMinutes !== null &&
+              customers.unansweredLongestMinutes >= 120
+                ? 'danger'
+                : customers.unanswered > 0
+                  ? 'warning'
+                  : 'neutral'
+            }
+            note={
+              customers.unansweredLongestMinutes === null
+                ? t('Every message has been answered')
+                : t('The longest for {time}', {
+                    time: hoursAndMinutes(customers.unansweredLongestMinutes),
+                  })
+            }
+          />
+        </Link>
+        <Link href="/jobs?status=COMPLETED" className="group">
+          <StatTile
+            label={t('Ready to collect')}
+            value={customers.readyToCollect}
+            tone={customers.readyAndUnpaid > 0 ? 'warning' : 'neutral'}
+            note={
+              customers.readyAndUnpaid === 0
+                ? t('Finished, and paid for')
+                : customers.readyAndUnpaid === 1
+                  ? t('1 not yet paid for')
+                  : t('{count} not yet paid for', { count: customers.readyAndUnpaid })
+            }
+          />
+        </Link>
+      </StatRow>
+
+      {approvals.length > 0 ? (
+        <Card className="mb-6 border-(--warning)">
+          <CardHeader
+            title={t('Approvals needed')}
+            description={t('Nothing can proceed on these until the customer decides.')}
+            action={
+              <Link href="/jobs?status=AWAITING_APPROVAL">
+                <Button size="sm">{t('See all')}</Button>
+              </Link>
+            }
+          />
+          <ul className="divide-y divide-(--border)">
+            {approvals.map((job) => {
+              const estimate = job.estimates[0];
+              const waitingHours = estimate?.sentAt
+                ? Math.floor((now.getTime() - estimate.sentAt.getTime()) / 3_600_000)
+                : null;
+
+              return (
+                <li key={job.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/jobs/${job.id}`}
+                        className="text-[14px] font-medium hover:underline"
+                      >
+                        {job.vehicle.make} {job.vehicle.model}
+                      </Link>
+                      {job.vehicle.registration ? (
+                        <Registration value={job.vehicle.registration} />
+                      ) : null}
+                      <span className="datum text-[11px] text-(--text-faint)">#{job.number}</span>
+                    </div>
+                    <p className="mt-0.5 truncate text-[12px] text-(--text-faint)">
+                      {job.customer.displayName} &middot; {job.shortDescription}
+                      {waitingHours !== null
+                        ? ` · ${t('waiting {hours}h', { hours: waitingHours })}`
+                        : ''}
+                    </p>
+                  </div>
+
+                  {estimate ? (
+                    <span className="font-display text-[16px] font-semibold tabular">
+                      <Money amount={Number(estimate.total)} currency={estimate.currency} />
+                    </span>
+                  ) : null}
+
+                  <Link href={`/jobs/${job.id}`}>
+                    <Button size="sm" variant="primary">
+                      {t('Review')}
+                    </Button>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      ) : (
+        <div className="mb-3" />
+      )}
+
+      {/* ---------------- the money ---------------- */}
+      {seesBusiness ? (
         <>
-          <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-(--text-faint)">
-            {t('The business')}
-          </h2>
+          {section(t('The money'))}
           <StatRow className="mb-3">
             <Link href="/payments" className="group">
               <StatTile
+                label={t('Taken today')}
+                value={money(tower.money.takenToday)}
+                tone={tower.money.takenToday > 0 ? 'success' : 'neutral'}
+                note={t('Payments received')}
+              />
+            </Link>
+            <Link href="/jobs?status=COMPLETED" className="group">
+              <StatTile
+                label={t('To invoice')}
+                value={money(tower.money.toInvoice)}
+                tone={tower.money.toInvoiceCount > 0 ? 'warning' : 'neutral'}
+                note={
+                  tower.money.toInvoiceCount === 0
+                    ? t('Every finished job is billed')
+                    : tower.money.toInvoiceCount === 1
+                      ? t('1 finished job with no bill raised')
+                      : t('{count} finished jobs with no bill raised', {
+                          count: tower.money.toInvoiceCount,
+                        })
+                }
+              />
+            </Link>
+            <Link href="/payments" className="group">
+              <StatTile
                 label={t('Owed to you')}
-                value={money(day.owed)}
+                value={money(tower.money.owed)}
                 note={t('Issued and not yet paid')}
               />
             </Link>
             <Link href="/financials" className="group">
               <StatTile
                 label={t('Overdue')}
-                value={money(day.overdue)}
-                tone={day.overdue > 0 ? 'danger' : 'neutral'}
+                value={money(tower.money.overdue)}
+                tone={tower.money.overdue > 0 ? 'danger' : 'neutral'}
                 note={
-                  day.overdueCount === 0
+                  tower.money.overdueCount === 0
                     ? t('Nothing past its due date')
-                    : day.overdueCount === 1
+                    : tower.money.overdueCount === 1
                       ? t('1 invoice past its due date')
-                      : t('{count} invoices past their due date', { count: day.overdueCount })
-                }
-              />
-            </Link>
-            <Link href="/reports/business?range=quarter#comebacks" className="group">
-              <StatTile
-                label={t('Comebacks')}
-                value={
-                  day.comebacks.value === null
-                    ? String(day.comebacks.part)
-                    : `${day.comebacks.value}%`
-                }
-                tone={day.comebacks.part > 0 ? 'warning' : 'neutral'}
-                note={
-                  day.comebacks.value === null
-                    ? t('Back out of {base} finished in 90 days, too few for a rate', {
-                        base: day.comebacks.base,
-                      })
-                    : t('{part} back out of {base} finished in 90 days', {
-                        part: day.comebacks.part,
-                        base: day.comebacks.base,
-                      })
-                }
-              />
-            </Link>
-            <Link href="/reputation#trend" className="group">
-              <StatTile
-                label={t('Satisfaction')}
-                value={day.satisfaction.current === null ? '—' : String(day.satisfaction.current)}
-                tone={
-                  day.satisfaction.direction === 'down'
-                    ? 'danger'
-                    : day.satisfaction.direction === 'up'
-                      ? 'success'
-                      : 'neutral'
-                }
-                note={
-                  day.satisfaction.direction === 'up'
-                    ? t('Improving on the 90 days before')
-                    : day.satisfaction.direction === 'down'
-                      ? t('Falling on the 90 days before')
-                      : day.satisfaction.direction === 'steady'
-                        ? t('Steady on the 90 days before')
-                        : t('Too few answers to compare')
+                      : t('{count} invoices past their due date', {
+                          count: tower.money.overdueCount,
+                        })
                 }
               />
             </Link>
@@ -529,12 +741,86 @@ export default async function DashboardPage({
         </>
       ) : null}
 
-      {/* ---------------- inventory ---------------- */}
+      {/* ---------------- parts in the way ---------------- */}
       {seesInventory && day ? (
         <>
-          <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-(--text-faint)">
-            {t('Inventory')}
-          </h2>
+          {section(t('Parts'))}
+          <Card id="parts" className="mb-3">
+            <CardHeader
+              title={t('Parts holding up cars in the building')}
+              description={t(
+                'Every part on order for a car already on the ramps, with the day the supplier promised. Late first.',
+              )}
+              action={
+                <Link href="/purchasing">
+                  <Button size="sm">{t('Purchasing')}</Button>
+                </Link>
+              }
+            />
+            {parts.length === 0 ? (
+              <CardBody>
+                <p className="text-[14px] text-(--text-soft)">
+                  {t('No car in the building is waiting on a part.')}
+                </p>
+              </CardBody>
+            ) : (
+              <ul className="divide-y divide-(--border)">
+                {parts.map((part) => (
+                  <li
+                    key={`${part.jobId}:${part.part}`}
+                    className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-[13px]"
+                  >
+                    <Badge
+                      tone={
+                        part.standing === 'LATE'
+                          ? 'danger'
+                          : part.standing === 'NOT_ORDERED'
+                            ? 'danger'
+                            : part.standing === 'TODAY'
+                              ? 'warning'
+                              : 'neutral'
+                      }
+                      size="sm"
+                      dot
+                    >
+                      {part.standing === 'LATE'
+                        ? t('Late')
+                        : part.standing === 'NOT_ORDERED'
+                          ? t('No order found')
+                          : part.standing === 'TODAY'
+                            ? t('Due today')
+                            : t('Due later')}
+                    </Badge>
+                    <span className="min-w-0 flex-1 truncate font-medium">{part.part}</span>
+                    <Link href={`/jobs/${part.jobId}`} className="flex items-center gap-1.5">
+                      <span className="datum text-(--text-faint)">#{part.number}</span>
+                      {part.registration ? <Registration value={part.registration} /> : null}
+                      <span className="text-(--text-soft)">{part.vehicle}</span>
+                    </Link>
+                    <span className="text-[12px] text-(--text-faint)">
+                      {part.orderId ? (
+                        <Link href={`/purchasing/${part.orderId}`} className="hover:underline">
+                          {part.expectedAt
+                            ? t('{supplier}, promised {date}', {
+                                supplier: part.supplier ?? '',
+                                date: part.expectedAt.toLocaleDateString(region.locale, {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  timeZone: region.timezone,
+                                }),
+                              })
+                            : t('{supplier}, no date promised', { supplier: part.supplier ?? '' })}
+                        </Link>
+                      ) : (
+                        t('Marked on order, and no open order has it')
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
           <StatRow className="mb-3">
             <Link href="/parts" className="group">
               <StatTile
@@ -564,14 +850,6 @@ export default async function DashboardPage({
                       : 'neutral'
                 }
                 note={t('Late, or due today')}
-              />
-            </Link>
-            <Link href="/purchasing" className="group">
-              <StatTile
-                label={t('Waiting for parts')}
-                value={waitingForParts}
-                tone={waitingForParts > 0 ? 'warning' : 'neutral'}
-                note={t('Approved, and nothing on the shelf')}
               />
             </Link>
             <Link href="/parts" className="group">
@@ -679,10 +957,7 @@ export default async function DashboardPage({
                     </span>
                   </span>
                   <span className="text-[11px] tabular-nums text-(--text-faint)">
-                    {entry.createdAt.toLocaleTimeString(region.locale, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {clock(entry.createdAt)}
                   </span>
                 </li>
               ))}
